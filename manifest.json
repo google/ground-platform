@@ -1,0 +1,6 @@
+{
+  "name": "gnd",
+  "short_name": "gnd",
+  "start_url": "/",
+  "display": "standalone"
+}

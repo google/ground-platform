@@ -1,0 +1,31 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "build/default",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/oauthcallback",
+        "function": "oauthcallback"
+      },
+      {
+        "source": "/authgoogleapi",
+        "function": "authgoogleapi"
+      }
+    ]      
+  },
+  "functions": {
+    "source": "src/functions"
+  }
+}

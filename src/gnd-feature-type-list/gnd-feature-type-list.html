@@ -1,0 +1,24 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../gnd-shared-styles/gnd-shared-styles.html">
+<link rel="import" href="../gnd-feature-type-list-item/gnd-feature-type-list-item.html">
+<dom-module id="gnd-feature-type-list">
+  <template>
+    <style include="gnd-shared-styles">
+    </style>
+    <div class="panel-list-heading">
+      Feições
+    </div>
+    <div>
+      <template is="dom-repeat" items="[[featureTypes]]">
+        <gnd-feature-type-list-item
+          base-path="[[basePath]]"
+          feature-type-id="[[item.pathKey]]"
+          icon="[[item.iconId]]">
+          [[item.listHeading.pt]]
+        </gnd-feature-type-list-item>
+      </template>
+    </div>
+  </template>
+</dom-module>
+<script src="gnd-feature-type-list.js"></script>

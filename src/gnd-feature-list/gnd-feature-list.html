@@ -1,0 +1,19 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../gnd-shared-styles/gnd-shared-styles.html">
+<link rel="import" href="../gnd-icons/gnd-icons.html">
+<dom-module id="gnd-feature-list">
+  <template>
+    <style include="gnd-shared-styles">
+      .feature-type {
+        vertical-align: middle;
+        display: inline-block;
+      }
+    </style>
+    <div class="panel-list-heading" style="left:-8px; position:relative">
+      <a href$="[[basePath]]"><iron-icon icon="gnd-icons:chevron-left"></iron-icon></a>
+      <div class="feature-type">[[featureType.listHeading.pt]]</div>
+    </div>          
+  </template>
+</dom-module>
+<script src="gnd-feature-list.js"></script>

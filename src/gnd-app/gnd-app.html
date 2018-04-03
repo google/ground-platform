@@ -1,0 +1,28 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../gnd-app-routes/gnd-app-routes.html">
+<link rel="import" href="../gnd-map/gnd-map.html">
+<link rel="import" href="../gnd-panel-overlay/gnd-panel-overlay.html">
+<link rel="import" href="../gnd-icons/gnd-icons.html">
+<dom-module id="gnd-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <gnd-app-routes
+      project-id= "[[projectId]]"
+      feature-type="[[featureType]]"></gnd-app-routes>
+    <gnd-icons></gnd-icons>
+    <gnd-map id="map"></gnd-map>
+    <gnd-panel-overlay id="panel" base-path="[[getBasePath_(projectId)]]"></gnd-panel-overlay>
+  </template>
+</script>
+  <script src="deferred.js"></script>
+  <script src="feature-cache.js"></script>
+  <script src="gnd-datastore.js"></script>
+  <script src="gnd-model.js"></script>
+  <script src="gnd-view.js"></script>
+  <script src="gnd-presenter.js"></script>
+  <script src="gnd-app.js"></script>
+</dom-module>

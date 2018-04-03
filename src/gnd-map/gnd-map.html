@@ -1,0 +1,22 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/google-map/google-map.html">
+<dom-module id="gnd-map">
+  <template>
+    <style>
+      google-map {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+    <google-map
+      map="{{map}}"
+      api-key="[[apiKey]]"      
+      latitude="-10.1445577"
+      longitude="-64.4329902"
+      zoom="14"
+      disable-default-ui="true"
+      additional-map-options='{"mapTypeId":"hybrid"}'
+      ></google-map>
+  </template>
+  <script src="gnd-map.js"></script>
+</dom-module>

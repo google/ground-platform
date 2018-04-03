@@ -1,0 +1,37 @@
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-firestore.js"></script>
+<script>
+/**
+ * Abstracts datasource (in this case Firebase) from Polymer.
+ * No framework-specific semantics should be exposed by this class.
+ */
+class GndDatasource {
+  constructor() {
+    // Initialize Cloud Firestore through Firebase.
+    firebase.initializeApp({
+      apiKey: "AIzaSyBPlVtIRvfW1NqYlrR-X1odIhLHb_9zUSs",
+      authDomain: "gnddemo1.firebaseapp.com",
+      databaseURL: "https://gnddemo1.firebaseio.com",
+      projectId: "gnddemo1",
+      storageBucket: "gnddemo1.appspot.com",
+      messagingSenderId: "718973915686"
+    });
+    this.db_ = firebase.firestore();
+    this.unsubscribeFromFeatureChanges_ = null;
+  }
+
+  subscribeToFeatureChanges(projectId, callback) {
+    if (this.unsubscribeFromFeatureChanges_) {
+      this.unsubscribeFromFeatureChanges_();
+    }
+    const featuresCollection =
+      this.db_.collection('projects/' + projectId + '/features');
+    this.unsubscribeFromFeatureChanges_ =
+      featuresCollection.onSnapshot((snapshot) => {
+        snapshot.docChanges.forEach((change) => {
+          callback(change.type, change.doc.id, change.doc.data());
+        });
+      });
+  }
+}
+</script>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">    
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>Ground</title>
+    <meta name="description" content="gnd description">
+
+    <!-- See https://goo.gl/OOhYW5 -->
+    <link rel="manifest" href="/manifest.json">
+
+    <script src="/bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+
+    <!-- TODO: Bundle these dependencies into Vulcanized build. -->
+    <script src="/bower_components/firebase/firebase.js"></script>
+    <script src="/bower_components/firebase/firebase-firestore.js"></script>
+    <link rel="import" href="/bower_components/iron-meta/iron-meta.html">
+    <link rel="import" href="../firebase-init.html">
+    <link rel="import" href="../google-maps-api-key.html">
+    <link rel="import" href="/src/gnd-app/gnd-app.html">
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+  </head>
+  <body>
+    <gnd-app></gnd-app>
+  </body>
+</html>
