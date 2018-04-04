@@ -1,10 +1,10 @@
-# Ground Cloud Platform
+# Ground Cloud Components
 
-This project consists of three components:
+This project consists of three cloud-based components:
 
-* The Ground Web Console
-* Cloud Functions used by Ground for syncing with Google Sheets and other data sources
-* Configuration for Ground's Firestore instance
+* The Ground Web UI
+* Firebase Cloud Functions used to sync with Google Sheets and other data sources
+* Configuration for Ground's main Firestore instance
 
 ## Add Firebase credentials
 
@@ -14,12 +14,12 @@ Create a file in the project root called <code>firebase-init.html</code> contain
 <script>
   // Initialize Firebase
   var config = {
-    apiKey: "ALzaSaBdlVtLRvfZ1NtYlrR-X1odIhLdEd_D24d",
-    authDomain: "myproject.firebaseapp.com",
-    databaseURL: "https://myproject.firebaseio.com",
-    projectId: "myproject",
-    storageBucket: "myproject.appspot.com",
-    messagingSenderId: "673489732974"
+    apiKey: "ABcdEfGhIjKLmnOpQrS_tuVw",
+    authDomain: "your-project.firebaseapp.com",
+    databaseURL: "https://your-project.firebaseio.com",
+    projectId: "your-project",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "1234567890"
   };
   firebase.initializeApp(config);
 </script>
@@ -81,5 +81,5 @@ Then to deploy the web app, Cloud Functions, and Firestore config:
 $ firebase deploy --project <projectId>
 ```
 
-Replacing <code>projectId</code> with the ID shown in the Firebase Console under "Project settings".
+<code>projectId</code> should be replaced with the ID shown in the Firebase Console under "Project settings".
 
