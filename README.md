@@ -1,12 +1,14 @@
 # Ground Cloud Components
 
-This project consists of three cloud-based components:
+This project consists of three cloud-based components, each in their own respective subdirectories:
 
-* The Ground Web UI
-* Firebase Cloud Functions used to sync with Google Sheets and other data sources
-* Configuration for Ground's main Firestore instance
+* web: The Ground web UI
+* functions: Firebase Cloud Functions used to sync with Google Sheets and other data sources
+* firestore: Configuration for Ground's main Firestore instance
 
-## Add Firebase credentials
+## Initial setup
+
+### Add Firebase credentials
 
 Create a file in the project root called <code>firebase-init.html</code> containing the second <code>&lt;script&gt;</code> block shown in: Firebase Console > Overview > Add another app > Add Firebase to web app. For example:
 
@@ -31,7 +33,7 @@ Create a file in the project root called <code>firebase-init.html</code> contain
 <script src="https://www.gstatic.com/firebasejs/<FIREBASE_VERSION>/firebase.js"></script>
 ```
 
-## Add Google Maps API Key
+### Add Google Maps API Key
 
 Generate a new API key at:
 
@@ -43,19 +45,21 @@ Create <code>google-maps-api-key.html</code> in the project root, substituting <
 <iron-meta key="googleMapsApiKey" value="YOUR_API_KEY"></iron-meta>
 ```
 
-## Install the CLI tools
+## Building, running, deploying
+
+### Install the CLI tools
 
 First, make sure you have [Polymer CLI](https://www.npmjs.com/package/polymer-cli) and [Firebase CLI](https://firebase.google.com/docs/cli/).
 
-## Running Ground Web locally
+### Running Ground web UI locally
 
-To run the web app locally without building:
+To run the web app locally without doing a full build:
 
 ```
 $ cd web && polymer serve & cd ..
 ```
 
-## Build and deploy to Firebase hosting
+### Build and deploy to Firebase hosting
 
 To build the web app, from the project root (gnd-cloud):
 
@@ -75,11 +79,11 @@ Log in using Firebase CLI tools:
 $ firebase login
 ```
 
-Then to deploy the web app, Cloud Functions, and Firestore config:
+Then, deploy the web app, Cloud Functions, and Firestore config using:
 
 ```
 $ firebase deploy --project <projectId>
 ```
 
-<code>projectId</code> should be replaced with the ID shown in the Firebase Console under "Project settings".
+Be sure to replace <code>&lt;projectId&gt;</code> with the ID shown in the Firebase Console under "Project settings".
 
