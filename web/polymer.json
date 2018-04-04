@@ -1,0 +1,18 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/gnd-app/gnd-app.html",  
+	"sources": [
+		"firebase-init.html",
+		"google-maps-api-key.html",
+		"src/**/*",
+		"bower.json"
+	],
+  "extraDependencies": [
+    "manifest.json"
+  ],
+	"lint": {
+		"rules": [
+			"polymer-2"
+		]
+	}
+}

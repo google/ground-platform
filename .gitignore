@@ -1,7 +1,7 @@
+!.gitignore
 .*
-firebase-init.html
-google-maps-api-key.html
+**/firebase-init.html
+**/google-maps-api-key.html
 **/bower_components
 **/node_modules
-firebase-init.html
-!.gitignore
+**/build/

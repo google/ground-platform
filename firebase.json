@@ -1,15 +1,10 @@
 {
   "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    "rules": "firestore/firestore.rules",
+    "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "build/default",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "public": "web/build/default",
     "rewrites": [
       {
         "source": "**",
@@ -26,6 +21,6 @@
     ]      
   },
   "functions": {
-    "source": "src/functions"
+    "source": "functions"
   }
 }

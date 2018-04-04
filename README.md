@@ -1,4 +1,10 @@
-# Ground Web
+# Ground Cloud Platform
+
+This project consists of three components:
+
+* The Ground Web Console
+* Cloud Functions used by Ground for syncing with Google Sheets and other data sources
+* Configuration for Ground's Firestore instance
 
 ## Add Firebase credentials
 
@@ -19,7 +25,7 @@ Create a file in the project root called <code>firebase-init.html</code> contain
 </script>
 ```
 
-**IMPORTANT**: Be sure ***not*** to copy the first script tag that includes <code>firebase.js</code>. It looks like this:
+**IMPORTANT**: Be sure to omit the first line that includes <code>firebase.js</code>:
 
 ```javascript
 <script src="https://www.gstatic.com/firebasejs/<FIREBASE_VERSION>/firebase.js"></script>
@@ -37,38 +43,43 @@ Create <code>google-maps-api-key.html</code> in the project root, substituting <
 <iron-meta key="googleMapsApiKey" value="YOUR_API_KEY"></iron-meta>
 ```
 
-## Install the Polymer-CLI
+## Install the CLI tools
 
-First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. Then run `polymer serve` to serve your application locally.
+First, make sure you have [Polymer CLI](https://www.npmjs.com/package/polymer-cli) and [Firebase CLI](https://firebase.google.com/docs/cli/).
 
-## Viewing Your Application
+## Running Ground Web locally
 
-```
-$ polymer serve
-```
-
-## Building Your Application
+To run the web app locally without building:
 
 ```
-$ polymer build
+$ cd web && polymer serve & cd ..
 ```
 
-This will create builds of your application in the `build/` directory, optimized to be served in production. You can then serve the built versions by giving `polymer serve` a folder to serve from:
+## Build and deploy to Firebase hosting
+
+To build the web app, from the project root (gnd-cloud):
 
 ```
-$ polymer serve build/default
+$ cd web && polymer install && polymer build && cd ..
 ```
 
-## Running Tests
+Download dependencies required by Ground Cloud Functions:
 
 ```
-$ polymer test
+$ cd functions && npm install && cd ..
 ```
 
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
-
-### Deploy to Firebase hosting.
+Log in using Firebase CLI tools:
 
 ```
-firebase deploy --only hosting
+$ firebase login
 ```
+
+Then to deploy the web app, Cloud Functions, and Firestore config:
+
+```
+$ firebase deploy --project <projectId>
+```
+
+Replacing <code>projectId</code> with the ID shown in the Firebase Console under "Project settings".
+
