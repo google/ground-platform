@@ -6,6 +6,8 @@ This project consists of three cloud-based components, each in their own respect
 * functions: Firebase Cloud Functions used to sync with Google Sheets and other data sources
 * firestore: Configuration for Ground's main Firestore instance
 
+Throughout this guide, be sure to replace &lt;projectId&gt; with your Firebase project ID exactly as it appears in the Firebase Console under "Project settings".
+
 ## Initial setup
 
 ### Add Firebase credentials
@@ -45,21 +47,37 @@ Create <code>google-maps-api-key.html</code> in the project root, substituting <
 <iron-meta key="googleMapsApiKey" value="YOUR_API_KEY"></iron-meta>
 ```
 
-## Building, running, deploying
+### Add OAuth 2.0 client ID
 
-### Install the CLI tools
+Add a new API key at:
+
+https://pantheon.corp.google.com/apis/credentials/oauthclient
+
+Be sure the correct project is selected from the drop-down, then select Application type "Web application", and add the following URL to "Authorized redirect URLs":
+
+https://&lt;projectId&gt;.firebaseapp.com/oauthcallback
+
+Once the key is created, click "Download JSON", saving the file to <code>functions/client-secret.json</code> (with a dash, not an underscore).
+
+### Install and configure the CLI tools
 
 First, make sure you have [Polymer CLI](https://www.npmjs.com/package/polymer-cli) and [Firebase CLI](https://firebase.google.com/docs/cli/).
 
-### Running Ground web UI locally
-
-To run the web app locally without doing a full build:
+Log in using Firebase CLI tools:
 
 ```
-$ cd web && polymer serve & cd ..
+$ firebase login
 ```
 
-### Build and deploy to Firebase hosting
+Select your Firebase project with:
+
+```
+$ firebase use --add &lt;projectId&gt;
+```
+
+## Development
+
+### Building
 
 To build the web app, from the project root (gnd-cloud):
 
@@ -73,17 +91,27 @@ Download dependencies required by Ground Cloud Functions:
 $ cd functions && npm install && cd ..
 ```
 
-Log in using Firebase CLI tools:
+### Running web app locally
+
+To run the web app locally without doing a full build:
 
 ```
-$ firebase login
+$ cd web && polymer serve & cd ..
 ```
 
-Then, deploy the web app, Cloud Functions, and Firestore config using:
+### Running Cloud Functions locally
+
+Before running the first time, fetch the database config with:
+```
+$ firebase functions:config:get > .runtimeconfig.json
+```
+
+Then r
+
+## Deploy to Firebase hosting
+You can then deploy the web app, Cloud Functions, and Firestore config to Firebase hosting using:
 
 ```
-$ firebase deploy --project <projectId>
+$ firebase deploy
 ```
-
-Be sure to replace <code>&lt;projectId&gt;</code> with the ID shown in the Firebase Console under "Project settings".
 

@@ -2,6 +2,8 @@
 .*
 **/firebase-init.html
 **/google-maps-api-key.html
+**/client-secret.json
 **/bower_components
 **/node_modules
 **/build/
+**/*.log
