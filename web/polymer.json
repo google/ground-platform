@@ -1,14 +1,17 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/gnd-app/gnd-app.html",  
+  "shell": "src/gnd-app/gnd-app.html",
 	"sources": [
+		"src/**/*",
 		"firebase-init.html",
 		"google-maps-api-key.html",
-		"src/**/*",
 		"bower.json"
 	],
   "extraDependencies": [
-    "manifest.json"
+    "manifest.json",
+    "bower_components/firebase/firebase.js",
+    "bower_components/firebase/firebase-firestore.js",
+    "bower_components/webcomponentsjs/webcomponents-lite.js"
   ],
 	"lint": {
 		"rules": [

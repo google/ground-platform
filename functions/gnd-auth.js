@@ -3,15 +3,10 @@
 const googleAuth = require('google-auth-library');
 const functions = require('firebase-functions');
 const fs = require('fs');
+const url = require('url');
 
-const clientSecret = JSON.parse(
-  fs.readFileSync(__dirname + '/client-secret.json', 'utf8'));
-// TODO: Fail if not found or invalid.
-// Auth with: https://us-central1-gnddemo1.cloudfunctions.net/authgoogleapi
-const CLIENT_ID = clientSecret['web']['client_id'];
-const CLIENT_SECRET = clientSecret['web']['client_secret'];
+const CLIENT_SECRET_JSON_PATH = __dirname + '/client-secret.json';
 const DB_TOKEN_PATH = '/api_tokens';
-const FUNCTIONS_REDIRECT = clientSecret['web']['redirect_uris'][0];
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 class GndAuth {
@@ -19,22 +14,33 @@ class GndAuth {
     this.adminDb_ = adminDb;
     // OAuth token cached locally.
     this.oauthTokens_ = null;
-    const auth = new googleAuth();
-    this.oauthClient_ = new auth.OAuth2(CLIENT_ID, CLIENT_SECRET, FUNCTIONS_REDIRECT);
+    this.oauthClient_ =  null;
+  }
+
+  getOAuthClient_() {
+    if (!this.oauthClient_) {
+      const cfg = JSON.parse(
+        fs.readFileSync(CLIENT_SECRET_JSON_PATH, 'utf8'))['web'];
+      const auth = new googleAuth();
+      this.oauthClient_ =
+        new auth.OAuth2(cfg['client_id'], cfg['client_secret'],
+          cfg['redirect_uris'][0]);
+    }
+    return this.oauthClient_;
   }
 
   // checks if oauthTokens have been loaded into memory, and if not, retrieves them
   getAuthorizedClient() {
     if (this.oauthTokens_) {
       console.log('Reusing token');
-      return Promise.resolve(this.oauthClient_);
+      return Promise.resolve(this.getOAuthClient_());
     }
     console.log('Fetching token');
     return this.adminDb_.ref(DB_TOKEN_PATH).once('value').then(snapshot => {
       console.log('Got token');
       this.oauthTokens_ = snapshot.val();
-      this.oauthClient_.setCredentials(this.oauthTokens_);
-      return this.oauthClient_;
+      this.getOAuthClient_().setCredentials(this.oauthTokens_);
+      return this.getOAuthClient_();
     }).catch(err => {
       console.error('Error fetching auth token from db:', err); 
     });
@@ -44,11 +50,15 @@ class GndAuth {
 // TODO: how do you declare these inside the class?
 GndAuth.prototype.oauthcallback = function(req, res) {
   const code = req.query.code;
-  this.oauthClient_.getToken(code, (err, tokens) => {
+  this.getOAuthClient_().getToken(code, (err, tokens) => {
     if (err) {
-      res.status(400).send(err);
+      console.error(err);
+      res.status(400).json(err);
       return;
     }
+    var parts = url.parse(req.url, true);
+    var query = parts.query;    
+    console.log(JSON.stringify(query));
     // tokens contains an access_token and an optional refresh_token.
     // TODO: Move token to Firestore instead of Firebase.
     this.adminDb_
@@ -69,10 +79,11 @@ GndAuth.prototype.oauthcallback = function(req, res) {
 
 GndAuth.prototype.authgoogleapi = function(req, res) {
   res.redirect(
-    this.oauthClient_.generateAuthUrl({
+    this.getOAuthClient_().generateAuthUrl({
       access_type: "offline",
       scope: SCOPES,
-      prompt: "consent"
+      prompt: "consent",
+      state: "foobar"
     })
   );
 };
