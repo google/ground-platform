@@ -9,11 +9,13 @@ const GndSheets = require('./gnd-sheets');
 const GndAuth = require('./gnd-auth');
 const GndDatastore = require('./gnd-datastore')
 
+// functions.config().firebase is auto-populated with configuration needed to
+// initialize the firebase-admin SDK when deploying via Firebase CLI.
 admin.initializeApp(functions.config().firebase);
 
 // TODO: Use firebase functions:config:set to configure your googleapi object:
 // googleapi.sheet_id = Google Sheet id (long string in middle of sheet URL)
-const CONFIG_SHEET_ID = functions.config().googleapi.sheet_id;
+const CONFIG_SHEET_ID = '12qqPuHs7UYN0HlwfxDl3HtO-8ushkGOqs8_5p6lPwAM';
 
 const auth = new GndAuth(admin.database());
 const db = new GndDatastore(admin.firestore());
@@ -61,29 +63,34 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
 });
 
 // Test:
-// onCreateRecord({featureTypeId: 'aaaaaaaa', formId: '1234567', responses: {'abcxyz0001': ['a','b','c']}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: '4TXn12fhWgHLRDJxghVY', recordId: 'Dgdie0FEDMgdAdHXnGtg'}});
+// onCreateRecord({featureTypeId: 'aaaaaaaa', formId: '1234567', responses: {'abcxyz0001': ['a','b','c']}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: '1GLBhEt2PBrZ6uI1d1pj', recordId: 'D3SCXS5QgHUU1crUgPGV'}});
 exports.onCreateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
-  .onCreate(event => {
-    const {projectId, featureId, recordId} = event.params;
-    const record = event.data.data();
+  .onCreate((change, context) => {
+    const {projectId, featureId, recordId} = context.params;
+    const record = change.after.data();
     const {featureTypeId, formId} = record;
     return sheet.getColumnIds().then(colIds => {
         if (colIds.length == 0) {
           console.log("No columns to update");
           return;
         }
-        return db.fetchFeature(projectId, featureId).then(feature =>  
-          sheet.addRow(feature, recordId, record, colIds));
+        return db.fetchFeature(projectId, featureId).then(feature => {
+          if (!feature) {
+            console.log('Feature not found: ', featureId, ' Project: ', projectId);
+            return;
+          }
+          sheet.addRow(feature, recordId, record, colIds);
+        });
       });
     });
 
 // onUpdateRecord({before: {}, after: {featureTypeId: 'aaaaaaaa', formId: '1234567', responses: {'abcxyz0001': 'Newer place'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: '4TXn12fhWgHLRDJxghVY', recordId: 'Dgdie0FEDMgdAdHXnGtg'}});
 exports.onUpdateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
-  .onUpdate(event => {
-    const {projectId, featureId, recordId} = event.params;
-    const record = event.data.data();
+  .onUpdate((change, context) => {
+    const {projectId, featureId, recordId} = context.params;
+    const record = change.after.data();
     dump(record);
     const {featureTypeId, formId} = record;
     return sheet.getColumnIds().then(colIds => {
@@ -96,6 +103,7 @@ exports.onUpdateRecord = functions.firestore
       });
     });
 
+// TODO: Auth flow can be moved into web app.
 // visit the URL for this Function to request tokens
 exports.authgoogleapi = functions.https.onRequest(auth.authgoogleapi.bind(auth));
 

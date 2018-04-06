@@ -105,13 +105,26 @@ function updateCellsRequest(values) {
       },
       "fields": "userEnteredValue",
       "rows": [{
-        "values": values.map(v => ({
+        "values": values.map(v=> ({
           "userEnteredValue": {
-              "stringValue": v
+            [v.type]: v.value
           }
         }))
       }]
     }
+  };
+}
+function stringValue(value) {
+  return {
+    value: value,
+    type: "stringValue"
+  };
+}
+
+function numberValue(value) {
+  return {
+    value: value,
+    type: "numberValue"
   };
 }
 
@@ -147,7 +160,7 @@ function updateRowRequest(recordId, values) {
         }
       },
       "majorDimension": "ROWS",
-      "values": [values]
+      "values": [values.map(v => v.value)]
     }]
   }
 }
@@ -254,22 +267,23 @@ class GndSheets {
     return colIds.map(
       id => {
         if (id == LAT_COLUMN_ID) {
-          return String(feature.center[GEOPOINT_LAT]);
+          return numberValue(feature.center 
+            && feature.center[GEOPOINT_LAT]);
         }
         if (id == LNG_COLUMN_ID) {
-          return String(feature.center[GEOPOINT_LNG]);
+          return numberValue(feature.center
+            && feature.center[GEOPOINT_LNG]);
         }
         const values = record.responses[id];
         if (!values) {
-          return '';
+          return stringValue('');
         }
         if (Array.isArray(values)) {
-          return values.join(',');
+          return stringValue(values.join(','));
         }
-        return values;
-      }
-    ); 
-  }
+        return stringValue(values);
+      });
+  }  
 
   addRow(feature, recordId, record, colIds) {    
     return this.batchUpdate_([
