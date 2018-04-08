@@ -14,12 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * @author gmiceli@google.com (Gino Miceli)
- */ 
  
- 'use strict';
+'use strict';
 
 const google = require('googleapis');
 const util = require('util');

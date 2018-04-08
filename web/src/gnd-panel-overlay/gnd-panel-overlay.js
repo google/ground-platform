@@ -16,10 +16,6 @@
  */
 
 /**
- * @author gmiceli@google.com (Gino Miceli)
- */ 
-
-/**
  * @customElement
  * @polymer
  */

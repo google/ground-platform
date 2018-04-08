@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-/**
- * @author gmiceli@google.com (Gino Miceli)
- */ 
-
  class FeatureCache {
   constructor() {
     this.featuresByIdByType_ = {};

@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-/**
- * @author gmiceli@google.com (Gino Miceli)
- */ 
-
- class GndView {
+class GndView {
   constructor(appElement) {
     this.appElement_ = appElement;
     this.componentsDeferred_ = new Deferred();

@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-/**
- * @author gmiceli@google.com (Gino Miceli)
- */ 
-
 'use strict';
 
 const functions = require('firebase-functions');

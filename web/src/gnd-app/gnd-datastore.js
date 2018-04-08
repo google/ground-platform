@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-/**
- * @author gmiceli@google.com (Gino Miceli)
- */ 
-
  class GndDatastore {
   constructor() {
     this.db_ = firebase.firestore();
