@@ -43,7 +43,7 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
         res.status(400).send('Form definition not found');
         return;
       }
-      if (!form.elements || form.elements.length ==0) {
+      if (!form.elements || form.elements.length == 0) {
         res.status(500).send('Form definition contains no elements');
         return;
       }
@@ -52,7 +52,7 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
         .updateColumns(existingColumns, form.elements, insertAt)
         .then(cnt => res.send(`${cnt} columns added`));
     });
-  }).then(_ => 'OK');
+  });
 });
 
 // Test:
@@ -75,7 +75,7 @@ exports.onCreateRecord = functions.firestore
           }
           return sheet.addRow(feature, recordId, record, colIds);
         });
-      }).then(_ => 'OK');
+      });
     });
 
 // onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
