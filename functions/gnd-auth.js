@@ -14,9 +14,9 @@ class GndAuth {
   getAuthorizedClient() {
     if (!this.jwtClient_) {
       this.jwtClient_ = new JWT({
-        'email': serviceAccount['client_email'],
-        'key': serviceAccount['private_key'],
-        'scopes': API_SCOPES
+        email: serviceAccount['client_email'],
+        key: serviceAccount['private_key'],
+        scopes: API_SCOPES
       });
     }
     return Promise.resolve(this.jwtClient_);

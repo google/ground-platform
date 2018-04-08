@@ -5,13 +5,13 @@ const util = require('util');
 
 const sheets = google.sheets('v4');
 
-// TODO: Use single quotes everywhere except JSON for consistency.
 const ELEMENT_ID_COLUMN_METADATA_KEY = 'elementId';
 const RECORD_ID_ROW_METADATA_KEY = 'recordId';
 const LAT_COLUMN_ID = '_latColumn';
 const LNG_COLUMN_ID = '_lngColumn';
 const GEOPOINT_LAT = '_latitude';
 const GEOPOINT_LNG = '_longitude';
+const INSPECT_OPTS = {compact: true, depth: 5};
 
 function columnElementIdsRequest() {
   return {
@@ -21,7 +21,7 @@ function columnElementIdsRequest() {
           "locationType": "COLUMN",
           "locationMatchingStrategy":
             "DEVELOPER_METADATA_LOCATION_MATCHING_STRATEGY_UNSPECIFIED",
-          "metadataKey": "ELEMENT_ID_COLUMN_METADATA_KEY"
+          "metadataKey": ELEMENT_ID_COLUMN_METADATA_KEY
         }
       }
     ]
@@ -115,6 +115,7 @@ function updateCellsRequest(values) {
     }
   };
 }
+
 function stringValue(value) {
   return {
     "value": value,
@@ -186,14 +187,14 @@ class GndSheets {
 
   execute_(method, request) {
     return this.authorizeRequest_(request).then(authorizedRequest => {
-      console.log('Sheets API Request:', util.inspect(authorizedRequest));
       return new Promise((resolve, reject) => {
         method(authorizedRequest, (err, response) => {
           if (err) {
-            console.error('Sheets API returned an error:', err);
+            console.error('Sheets API returned an error:', err,
+              'Request:', util.inspect(authorizedRequest, INSPECT_OPTS),
+              'Response: ', util.inspect(response, INSPECT_OPTS));
             reject(err);
           } else {
-            console.log('Sheets API Response:', util.inspect(response));
             resolve(response);
           }
         })
@@ -209,7 +210,7 @@ class GndSheets {
 
   getColumnIds() {
     return this.getColumnsByElementId().then(resp => {
-      const mds = (resp && resp.data && resp.data.matchedDeveloperMetadata);
+      const mds = resp.data && resp.data.matchedDeveloperMetadata;
       if (!mds) return [];
       let cols = [];
       mds.forEach(md => {

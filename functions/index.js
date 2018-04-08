@@ -38,7 +38,7 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
     const insertAt = mds.length == 0 ? 0 : 
       mds[mds.length-1].developerMetadata.location.dimensionRange.endIndex;
     const existingColumns = mds.map(md => md.developerMetadata.metadataValue);
-    db.fetchForm(projectId, featureTypeId, formId).then(form => {
+    return db.fetchForm(projectId, featureTypeId, formId).then(form => {
       if (!form) {
         res.status(400).send('Form definition not found');
         return;
@@ -52,7 +52,7 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
         .updateColumns(existingColumns, form.elements, insertAt)
         .then(cnt => res.send(`${cnt} columns added`));
     });
-  });
+  }).then(_ => 'OK');
 });
 
 // Test:
@@ -75,7 +75,7 @@ exports.onCreateRecord = functions.firestore
           }
           sheet.addRow(feature, recordId, record, colIds);
         });
-      });
+      }).then(_ => 'OK');
     });
 
 // onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
@@ -88,9 +88,9 @@ exports.onUpdateRecord = functions.firestore
     return sheet.getColumnIds().then(colIds => {
         if (colIds.length == 0) {
           console.log('No columns to update');
-          return;
+          return {};
         }
-        return db.fetchFeature(projectId, featureId).then(feature => 
-          sheet.updateRow(feature, recordId, record, colIds));
-      });
+        return db.fetchFeature(projectId, featureId)
+          .then(feature => sheet.updateRow(feature, recordId, record, colIds));
+      }).then(_ => 'OK');
     });
