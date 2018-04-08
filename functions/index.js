@@ -1,10 +1,7 @@
 'use strict';
 
-// The Cloud Functions for Firebase SDK to create Cloud Functions and setup triggers.
-const functions = require('firebase-functions');
-
-// The Firebase Admin SDK to access the Firebase Realtime Database. 
 const admin = require('firebase-admin');
+const functions = require('firebase-functions');
 const GndSheets = require('./gnd-sheets');
 const GndAuth = require('./gnd-auth');
 const GndDatastore = require('./gnd-datastore')
@@ -68,7 +65,7 @@ exports.onCreateRecord = functions.firestore
     const {featureTypeId, formId} = record;
     return sheet.getColumnIds().then(colIds => {
         if (colIds.length == 0) {
-          console.log("No columns to update");
+          console.log('No columns to update');
           return;
         }
         return db.fetchFeature(projectId, featureId).then(feature => {
@@ -90,7 +87,7 @@ exports.onUpdateRecord = functions.firestore
     const {featureTypeId, formId} = record;
     return sheet.getColumnIds().then(colIds => {
         if (colIds.length == 0) {
-          console.log("No columns to update");
+          console.log('No columns to update');
           return;
         }
         return db.fetchFeature(projectId, featureId).then(feature => 

@@ -1,9 +1,9 @@
 'use strict';
 
 const google = require('googleapis');
+const util = require('util');
 
 const sheets = google.sheets('v4');
-const util = require('util');
 
 // TODO: Use single quotes everywhere except JSON for consistency.
 const ELEMENT_ID_COLUMN_METADATA_KEY = 'elementId';
@@ -15,13 +15,13 @@ const GEOPOINT_LNG = '_longitude';
 
 function columnElementIdsRequest() {
   return {
-    dataFilters: [
+    "dataFilters": [
       {
-        developerMetadataLookup: {
-          locationType: "COLUMN",
-          locationMatchingStrategy:
+        "developerMetadataLookup": {
+          "locationType": "COLUMN",
+          "locationMatchingStrategy":
             "DEVELOPER_METADATA_LOCATION_MATCHING_STRATEGY_UNSPECIFIED",
-          metadataKey: ELEMENT_ID_COLUMN_METADATA_KEY
+          "metadataKey": "ELEMENT_ID_COLUMN_METADATA_KEY"
         }
       }
     ]
@@ -117,15 +117,15 @@ function updateCellsRequest(values) {
 }
 function stringValue(value) {
   return {
-    value: value,
-    type: "stringValue"
+    "value": value,
+    "type": "stringValue"
   };
 }
 
 function numberValue(value) {
   return {
-    value: value,
-    type: "numberValue"
+    "value": value,
+    "type": "numberValue"
   };
 }
 
@@ -186,14 +186,14 @@ class GndSheets {
 
   execute_(method, request) {
     return this.authorizeRequest_(request).then(authorizedRequest => {
-      console.log("Sheets API Request:", util.inspect(authorizedRequest));
+      console.log('Sheets API Request:', util.inspect(authorizedRequest));
       return new Promise((resolve, reject) => {
         method(authorizedRequest, (err, response) => {
           if (err) {
             console.error('Sheets API returned an error:', err);
             reject(err);
           } else {
-            console.log("Sheets API Response:", util.inspect(response));
+            console.log('Sheets API Response:', util.inspect(response));
             resolve(response);
           }
         })
@@ -226,7 +226,8 @@ class GndSheets {
   }
 
   batchUpdateByDataFilter_(request) {
-    return this.execute_(sheets.spreadsheets.values.batchUpdateByDataFilter,
+    return this.execute_(
+      sheets.spreadsheets.values.batchUpdateByDataFilter,
       request);
   }
 
