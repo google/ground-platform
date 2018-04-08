@@ -2,7 +2,7 @@
 
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const GndSheets = require('./gnd-sheets');
+const GndSpreadsheet = require('./gnd-spreadsheet');
 const GndAuth = require('./gnd-auth');
 const GndDatastore = require('./gnd-datastore')
 
@@ -18,7 +18,7 @@ const db = new GndDatastore(admin.firestore());
 const auth = new GndAuth();
 
 // TODO: Make dynamic
-const sheet = new GndSheets(auth, CONFIG_SHEET_ID);
+const sheet = new GndSpreadsheet(auth, CONFIG_SHEET_ID);
 
 // Test:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
@@ -73,7 +73,7 @@ exports.onCreateRecord = functions.firestore
             console.log('Feature not found: ', featureId, ' Project: ', projectId);
             return;
           }
-          sheet.addRow(feature, recordId, record, colIds);
+          return sheet.addRow(feature, recordId, record, colIds);
         });
       }).then(_ => 'OK');
     });
