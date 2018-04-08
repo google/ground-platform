@@ -1,0 +1,70 @@
+'use strict';
+
+const GndSpreadsheet = require('./gnd-spreadsheet');
+
+class GndCloudFunctions {
+  constructor(db, auth) {
+    this.db_ = db;
+    this.auth_ = auth;
+  }
+
+  getSheet_(projectId) {
+    return this.db_.fetchSheetsConfig(projectId).then(sheetConfig => 
+      sheetConfig 
+      && sheetConfig.sheetId 
+      && new GndSpreadsheet(this.auth_, sheetConfig.sheetId));
+  }
+
+  updateSpreadsheetColumns(req, res) {
+    const {
+      project: projectId,
+      featureType: featureTypeId,
+      form: formId
+    } = req.query;
+    return this.getSheet_(projectId).then(sheet => {
+      if (!sheet) {
+        return res.status(400).send('Project spreadsheet config not found');
+      }
+      return this.db_.fetchForm(projectId, featureTypeId, formId).then(form => {
+        if (!form) {
+          return res.status(400).send('Form definition not found');
+        }
+        const elements = form.elements || [];
+        if (!elements.length) {
+          return res.status(200).send("Form definition is empty");
+        }
+        return sheet.getColumnMetadata().then(cols => {
+          // Use the end index of the last column as our insertion point.
+          const insertAt = cols.length ?
+            cols[cols.length - 1].location.dimensionRange.endIndex : 0;
+          const existingColumnIds = cols.map(col => col.metadataValue);
+          return sheet
+            .updateColumns(existingColumnIds, form.elements, insertAt)
+            .then(cnt => res.send(`${cnt} columns added`));
+        });
+      });
+    });
+  }
+
+  onCreateRecord(change, context) {
+    const {projectId, featureId, recordId} = context.params;
+    const record = change.data();
+    const {featureTypeId, formId} = record;
+    return this.getSheet_(projectId).then(sheet =>
+      sheet && sheet.getColumnIds().then(colIds => 
+        this.db_.fetchFeature(projectId, featureId).then(feature =>
+          sheet.addRow(feature, recordId, record, colIds))));
+  }
+
+  onUpdateRecord(change, context) {
+    const {projectId, featureId, recordId} = context.params;
+    const record = change.after.data();
+    const {featureTypeId, formId} = record;
+    return this.getSheet_(projectId).then(sheet =>
+      sheet && sheet.getColumnIds().then(colIds =>
+        this.db_.fetchFeature(projectId, featureId).then(feature => 
+          sheet.updateRow(feature, recordId, record, colIds))));
+  }
+}
+
+module.exports = GndCloudFunctions;
