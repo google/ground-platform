@@ -7,14 +7,6 @@
     "public": "web/build/default",
     "rewrites": [
       {
-        "source": "/oauthcallback",
-        "function": "oauthcallback"
-      },
-      {
-        "source": "/authgoogleapi",
-        "function": "authgoogleapi"
-      },
-      {
         "source": "**/!(*.*)",
         "destination": "/index.html"
       }      

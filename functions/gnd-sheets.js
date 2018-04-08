@@ -3,6 +3,7 @@
 const google = require('googleapis');
 
 const sheets = google.sheets('v4');
+const util = require('util');
 
 // TODO: Use single quotes everywhere except JSON for consistency.
 const ELEMENT_ID_COLUMN_METADATA_KEY = 'elementId';
@@ -164,6 +165,7 @@ function updateRowRequest(recordId, values) {
     }]
   }
 }
+
 class GndSheets {
   constructor(auth, sheetId) {
     this.auth_ = auth;
@@ -184,14 +186,14 @@ class GndSheets {
 
   execute_(method, request) {
     return this.authorizeRequest_(request).then(authorizedRequest => {
-      console.log("Sheets request:", JSON.stringify(authorizedRequest));
+      console.log("Sheets API Request:", util.inspect(authorizedRequest));
       return new Promise((resolve, reject) => {
         method(authorizedRequest, (err, response) => {
           if (err) {
-            console.error('The API returned an error:', err);
+            console.error('Sheets API returned an error:', err);
             reject(err);
           } else {
-            console.log("Sheets response:", JSON.stringify(response));
+            console.log("Sheets API Response:", util.inspect(response));
             resolve(response);
           }
         })
@@ -207,9 +209,9 @@ class GndSheets {
 
   getColumnIds() {
     return this.getColumnsByElementId().then(resp => {
-      if (!resp || !resp.matchedDeveloperMetadata) return [];
+      const mds = (resp && resp.data && resp.data.matchedDeveloperMetadata);
+      if (!mds) return [];
       let cols = [];
-      const mds = resp.matchedDeveloperMetadata;
       mds.forEach(md => {
         const dmd = md.developerMetadata;
         cols[dmd.location.dimensionRange.startIndex] = 

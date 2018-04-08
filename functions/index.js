@@ -17,14 +17,11 @@ admin.initializeApp(functions.config().firebase);
 // googleapi.sheet_id = Google Sheet id (long string in middle of sheet URL)
 const CONFIG_SHEET_ID = '12qqPuHs7UYN0HlwfxDl3HtO-8ushkGOqs8_5p6lPwAM';
 
-const auth = new GndAuth(admin.database());
 const db = new GndDatastore(admin.firestore());
-const sheet = new GndSheets(auth, CONFIG_SHEET_ID);
+const auth = new GndAuth();
 
-// Debug function.
-function dump(obj) {
-  console.log(JSON.stringify(obj, null, '\t'));
-}
+// TODO: Make dynamic
+const sheet = new GndSheets(auth, CONFIG_SHEET_ID);
 
 // Test:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
@@ -43,7 +40,6 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
     // TODO: Use actual max startIndex, not len.
     const insertAt = mds.length == 0 ? 0 : 
       mds[mds.length-1].developerMetadata.location.dimensionRange.endIndex;
-      dump(mds);
     const existingColumns = mds.map(md => md.developerMetadata.metadataValue);
     db.fetchForm(projectId, featureTypeId, formId).then(form => {
       if (!form) {
@@ -63,12 +59,12 @@ exports.updateColumns = functions.https.onRequest((req, res) => {
 });
 
 // Test:
-// onCreateRecord({featureTypeId: 'aaaaaaaa', formId: '1234567', responses: {'abcxyz0001': ['a','b','c']}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: '1GLBhEt2PBrZ6uI1d1pj', recordId: 'D3SCXS5QgHUU1crUgPGV'}});
+// onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onCreateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
   .onCreate((change, context) => {
     const {projectId, featureId, recordId} = context.params;
-    const record = change.after.data();
+    const record = change.data();
     const {featureTypeId, formId} = record;
     return sheet.getColumnIds().then(colIds => {
         if (colIds.length == 0) {
@@ -85,13 +81,12 @@ exports.onCreateRecord = functions.firestore
       });
     });
 
-// onUpdateRecord({before: {}, after: {featureTypeId: 'aaaaaaaa', formId: '1234567', responses: {'abcxyz0001': 'Newer place'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: '4TXn12fhWgHLRDJxghVY', recordId: 'Dgdie0FEDMgdAdHXnGtg'}});
+// onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onUpdateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
   .onUpdate((change, context) => {
     const {projectId, featureId, recordId} = context.params;
     const record = change.after.data();
-    dump(record);
     const {featureTypeId, formId} = record;
     return sheet.getColumnIds().then(colIds => {
         if (colIds.length == 0) {
@@ -102,11 +97,3 @@ exports.onUpdateRecord = functions.firestore
           sheet.updateRow(feature, recordId, record, colIds));
       });
     });
-
-// TODO: Auth flow can be moved into web app.
-// visit the URL for this Function to request tokens
-exports.authgoogleapi = functions.https.onRequest(auth.authgoogleapi.bind(auth));
-
-// after you grant access, you will be redirected to the URL for this Function
-// this Function stores the tokens to your Firebase database
-exports.oauthcallback = functions.https.onRequest(auth.oauthcallback.bind(auth));

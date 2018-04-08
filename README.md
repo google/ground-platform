@@ -47,17 +47,23 @@ Create <code>google-maps-api-key.html</code> in the project root, substituting <
 <iron-meta key="googleMapsApiKey" value="YOUR_API_KEY"></iron-meta>
 ```
 
-### Add OAuth 2.0 client ID
+### Set up service account and keys
 
-Add a new API key at:
+In order to synchronize data with Google Sheets, Ground uses a special Google Cloud Service Account. This prevents project creators from needing to authorize Ground to read and write files in their Google Drive files each time a spreadsheet is linked. Instead, project creators can simply grant the service account Edit access to the linked spreadsheet.
 
-https://pantheon.corp.google.com/apis/credentials/oauthclient
+To create a new service account:
 
-Be sure the correct project is selected from the drop-down, then select Application type "Web application", and add the following URL to "Authorized redirect URLs":
+https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating_a_service_account
 
-https://&lt;projectId&gt;.firebaseapp.com/oauthcallback
+Select the "Console" tap for instructions on creating the account through the Google Cloud Console UI.
 
-Once the key is created, click "Download JSON", saving the file to <code>functions/client-secret.json</code> (with a dash, not an underscore).
+Make a note of the email address of the service account. This is the account users will need to allow access to their spreadsheets.
+
+Next, create a new private key:
+
+https://cloud.google.com/iam/docs/creating-managing-service-account-keys#creating_service_account_keys
+
+When prompted for key type, select "JSON". Download and save the resulting key file in <code>functions/service-account-secret.json</code>. As the name implies, this file should be kept secret, and should not be checked into source control. As with other keys, this filename has already been added to this project's .gitignore file.
 
 ### Install and configure the CLI tools
 
@@ -102,14 +108,20 @@ $ cd web && polymer serve & cd ..
 ### Running Cloud Functions locally
 
 Before running the first time, fetch the database config with:
+
 ```
 $ firebase functions:config:get > .runtimeconfig.json
 ```
 
-Then r
+You can the run the local functions emulator with:
+
+```
+firebase functions:shell
+```
 
 ## Deploy to Firebase hosting
-You can then deploy the web app, Cloud Functions, and Firestore config to Firebase hosting using:
+
+To deploy the web app, Cloud Functions, and Firestore config to Firebase:
 
 ```
 $ firebase deploy
