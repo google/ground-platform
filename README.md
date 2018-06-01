@@ -1,6 +1,12 @@
 # Ground Cloud Components
 
-This project consists of three cloud-based components, each in their own respective subdirectories:
+Ground is a free, map-centric data collection platform for occasionally connected devices.
+
+This is not an officially supported Google product; it is currently being developed on a best-effort basis.
+
+The project is currently under development. Please check back periodically for updates.
+
+This repo contains three main components, each in their own respective subdirectories:
 
 * web: The Ground web UI
 * functions: Firebase Cloud Functions used to sync with Google Sheets and other data sources
