@@ -18,6 +18,7 @@
  class GndDatastore {
   constructor() {
     this.db_ = firebase.firestore();
+    this.db_.settings({timestampsInSnapshots: true});
     this.unsubscribeFromFeatureChanges_ = null;
   }
 

@@ -1,5 +1,6 @@
 !.gitignore
 .*
+**/package-lock.json
 **/firebase-init.html
 **/google-maps-api-key.html
 **/*-secret.json
