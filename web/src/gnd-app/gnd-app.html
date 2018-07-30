@@ -16,7 +16,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../gnd-app-routes/gnd-app-routes.html">
 <link rel="import" href="../gnd-map/gnd-map.html">
-<link rel="import" href="../gnd-panel-overlay/gnd-panel-overlay.html">
+<!-- <link rel="import" href="../gnd-panel-overlay/gnd-panel-overlay.html"> -->
+<link rel="import" href="../gnd-ldf-panel/gnd-ldf-panel.html">
 <link rel="import" href="../gnd-icons/gnd-icons.html">
 <dom-module id="gnd-app">
   <template>
@@ -30,7 +31,8 @@
       feature-type="[[featureType]]"></gnd-app-routes>
     <gnd-icons></gnd-icons>
     <gnd-map id="map"></gnd-map>
-    <gnd-panel-overlay id="panel" base-path="[[getBasePath_(projectId)]]"></gnd-panel-overlay>
+    <!-- <gnd-panel-overlay id="panel" base-path="[[getBasePath_(projectId)]]"></gnd-panel-overlay> -->
+    <gnd-ldf-panel id="panel"></gnd-ldf-panel>
   </template>
 </script>
   <script src="deferred.js"></script>

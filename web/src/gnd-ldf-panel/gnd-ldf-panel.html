@@ -20,9 +20,10 @@
 <link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-icons/paper-icon-button.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
-<link rel="import" href="../gnd-feature-type-list/gnd-feature-type-list.html">
-<link rel="import" href="../gnd-feature-list/gnd-feature-list.html">
-<dom-module id="gnd-panel-overlay">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="../../bower_components/iron-input/iron-input.html">
+<dom-module id="gnd-ldf-panel">
   <template>
     <style>
     :host {
@@ -44,7 +45,7 @@
     #header {
       padding: 12px 16px;
       opacity: 1;
-      background-color: white;
+      background-color: blue;
       border-bottom: 1px solid #ddd;
     }
 
@@ -59,28 +60,55 @@
     }
 
     #content {
-      background: white;
+      background: gray;
       opacity: .95;
       height: 100%;
     }
+
+    #bottom {
+    	background: white;
+    }
     </style>
     <div id="header">
-      <div id="title">[[projectDefn.project.title.pt]]</div>
-      <div id="subtitle">[[projectDefn.project.description.pt]]</div>
+      <div id="title">Ecoregion Name</div>
+      <div id="subtitle">Blome Name</div>
       <paper-icon-button icon="favorite"></paper-icon-button>
     </div>
-    <div id="content">
-      <iron-pages id="pages" selected="[[page]]">
-        <div>
-          <gnd-feature-type-list feature-types="[[projectDefn.featureTypes]]" base-path="[[basePath]]">
-          </gnd-feature-type-list>
-        </div>
-        <div>
-          <gnd-feature-list feature-type="[[selectedFeatureTypeDefn]]" base-path="[[basePath]]">
-          </gnd-feature-list>
-        </div>
-      </iron-pages>
+    <div id="content">This is the content
+    	<paper-checkbox id="riverCheckbox" class="styled" checked="[[riverChecked]]" on-checked-changed="onCheckedRiverChanged_">
+  				Conatins a river, stream, or surface water
+  			<span class="subtitle">
+    			Click the ~ icon to view
+  			</span>
+		</paper-checkbox>
+
+		<iron-input id="naturalInput" allowed-pattern="[0-9]">
+  			<input>
+		</iron-input>
+		<p> % Natural </p>
+
+    <iron-input id="semiNaturalInput" allowed-pattern="[0-9]">
+        <input>
+    </iron-input>
+    <p> % Semi-Natural </p>
+
+    <iron-input id="degradedInput" allowed-pattern="[0-9]">
+        <input>
+    </iron-input>
+    <p> % Degraded </p>
+
+    <iron-input id="plantationsInput" allowed-pattern="[0-9]">
+        <input>
+    </iron-input>
+    <p> % Plantations </p>
+
+		<paper-checkbox id="roadCheckbox" class="styled">
+  				Conatins a road or railline
+		</paper-checkbox>
+    </div>
+    <div id="bottom">
+    	<paper-button raised on-click="onButtonClick_" class="indigo">NEXT TILE</paper-button>
     </div>
   </template>
 </dom-module>
-<script src="gnd-panel-overlay.js"></script>
+<script src="gnd-ldf-panel.js"></script>
