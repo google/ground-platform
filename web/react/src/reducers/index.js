@@ -9,5 +9,4 @@ const rootReducer = combineReducers({
   firestore: firestoreReducer
 })
 
-
 export default rootReducer;

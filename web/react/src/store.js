@@ -1,10 +1,12 @@
-import { createStore, compose } from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension';
 import rootReducer from './reducers';
 import { reactReduxFirebase } from 'react-redux-firebase'
 import { reduxFirestore } from 'redux-firestore'
 import firebase from 'firebase'
 import firebaseConfig from './.firebase-config.js'
+import history from './history.js'
+import { applyMiddleware, compose, createStore } from 'redux'
+import { connectRouter, routerMiddleware } from 'connected-react-router'
 
 // react-redux-firebase config
 const rrfConfig = {
@@ -17,6 +19,9 @@ firebase.firestore()
 
 // Add reactReduxFirebase enhancer when making store creator
 const createStoreWithFirebase = compose(
+	applyMiddleware(
+    routerMiddleware(history) // for dispatching history actions
+  ),
   reactReduxFirebase(firebase, rrfConfig),
   reduxFirestore(firebase)
 )(createStore)
@@ -25,6 +30,9 @@ const createStoreWithFirebase = compose(
 const initialState = {
 	activeProject: null
 }
-const store = createStoreWithFirebase(rootReducer, initialState, composeWithDevTools())
+
+// TODO: Move connectRouter into reducers.
+const store = createStoreWithFirebase(
+	connectRouter(history)(rootReducer), initialState, composeWithDevTools())
 
 export default store;

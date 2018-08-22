@@ -1,15 +1,26 @@
+import './index.css';
+import history from './history.js'
+import store from './store.js';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import GroundApp from './components/ground-app';
-import store from './store.js';
 import { Provider } from 'react-redux';
+import { Route, Switch } from 'react-router' // react-router v4
+import { ConnectedRouter } from 'connected-react-router'
 
-// https://www.sitepoint.com/getting-started-redux/
+// https://github.com/supasate/connected-react-router
+// https://medium.com/@notrab/getting-started-with-create-react-app-redux-react-router-redux-thunk-d6a19259f71f
 
 ReactDOM.render(
   <Provider store={store}>
-  	<GroundApp/>
+    <ConnectedRouter history={history}>
+      <div>
+        <Switch>
+          <Route exact path="/p/:projectId" render={() => (<GroundApp/>)} />
+          <Route render={() => (<div>404 Page Not Found</div>)} />
+        </Switch>
+      </div>
+    </ConnectedRouter>  	
   </Provider>,
   document.getElementById('root')
 );
