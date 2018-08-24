@@ -1,10 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ProjectEditor from '../project-editor';
 
-export default class GroundApp extends Component {
-  render() {
-    return (
-      <ProjectEditor open="true"/>
-    );
-  }
-}
+export default ({ match }) => (
+  <ProjectEditor open="true" projectId={match.params.projectId}/>
+)

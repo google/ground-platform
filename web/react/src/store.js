@@ -15,20 +15,19 @@ const rrfConfig = {
 }
 
 firebase.initializeApp(firebaseConfig)
-firebase.firestore()
+firebase.firestore().settings({ timestampsInSnapshots: true })
 
 // Add reactReduxFirebase enhancer when making store creator
 const createStoreWithFirebase = compose(
 	applyMiddleware(
     routerMiddleware(history) // for dispatching history actions
   ),
-  reactReduxFirebase(firebase, rrfConfig),
-  reduxFirestore(firebase)
+  reduxFirestore(firebase),
+  reactReduxFirebase(firebase, rrfConfig)
 )(createStore)
 
 // Create store with reducers and initial state
 const initialState = {
-	activeProject: null
 }
 
 // TODO: Move connectRouter into reducers.

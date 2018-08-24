@@ -1,58 +1,33 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import Modal from '@material-ui/core/Modal';
-import './index.css'
+import React from 'react'
+import { connect } from 'react-redux'
+import { compose } from 'redux'
+import { firestoreConnect, isLoaded, isEmpty } from 'react-redux-firebase'
 
-const styles = theme => ({
-  paper: {
-    width: theme.spacing.unit * 50,
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing.unit * 4
-  },
-});
-
-class ProjectEditor extends React.Component {
-  state = {
-    open: false,
-  };
-
-  handleOpen = () => {
-    this.setState({ open: true });
-  };
-
-  handleClose = () => {
-    this.setState({ open: false });
-  };
-
-  render() {
-    const { classes } = this.props;
-
-    return (
-        <Modal
-          open={this.props.open}
-          onClose={this.handleClose}
-          className="modal"
-        >
-          <div className={classes.paper}>
-            <Typography variant="title">
-              Text in a modal
-            </Typography>
-            <Typography variant="subheading">
-              Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-            </Typography>
-          </div>
-        </Modal>
-    );
+const ProjectEditor = ({ firebase, project, projectId }) => {
+  if (!isLoaded(project)) {
+    return <div>Loading...</div>
   }
+  if (isEmpty(project)) {
+    return <div>Project is empty</div>
+  }
+  return (
+    <div>
+      <h1>ID: {projectId}</h1>
+      <pre>
+        {JSON.stringify(project, null, 2)}
+      </pre>
+    </div>
+  )
 }
 
-ProjectEditor.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-const ProjectEditorWithStyles = withStyles(styles)(ProjectEditor);
-
-export default ProjectEditorWithStyles;
+export default compose(
+  connect((state, props) => ({
+    project: state.firestore.data.activeProject,
+    projectId: props.projectId
+  })),
+  firestoreConnect((props) => [{
+    collection: 'projects',
+    doc: props.projectId,
+    storeAs: 'activeProject'
+  }]),
+)(ProjectEditor)
