@@ -27,7 +27,7 @@ class ProjectEditor extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, children } = this.props;
 
     return (
         <Modal
@@ -35,12 +35,7 @@ class ProjectEditor extends React.Component {
           onClose={this.handleClose}
           className="modal">
           <div className={classes.paper}>
-            <Typography variant="title">
-              Text in a modal
-            </Typography>
-            <Typography variant="subheading">
-              Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-            </Typography>
+            {children}
           </div>
         </Modal>
     );
