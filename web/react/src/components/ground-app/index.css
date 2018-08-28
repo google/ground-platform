@@ -1,0 +1,15 @@
+.top-right-controls {
+  float: right;
+  margin: 12px;
+  display: flex;
+}
+
+.user-thumb {
+	width: 32px;
+	height: 32px;
+	border-radius: 32px;
+}
+
+.top-right-controls button {
+	margin-left: 10px !important;
+}

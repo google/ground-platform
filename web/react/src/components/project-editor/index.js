@@ -2,6 +2,11 @@ import React from 'react'
 import { compose } from 'redux'
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 
@@ -21,16 +26,7 @@ const styles = theme => ({
 });
 
 class ProjectEditor extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      project: {
-        title: {},
-        description: {}
-      },
-      lang: 'en'
-    };
-  }
+  state = {};
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.project === this.state.project) {
@@ -66,17 +62,20 @@ class ProjectEditor extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
-    if (!this.props.project) {
+    const { classes, open } = this.props;
+    const { project, lang } = this.state;
+    if (!project) {
       return <div>Loading...</div>
     }
-
-    const { project, lang } = this.state;
-
     return (
-      <div>       
-       <h1>Edit project</h1>
-       <form noValidate autoComplete="off" onSubmit={this.handleSave()}>
+      <Dialog
+        open={open}
+        onClose={this.handleClose}
+        aria-labelledby="form-dialog-title"
+      >
+      <form noValidate autoComplete="off" onSubmit={this.handleSave()}>
+      <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
+      <DialogContent>
           <TextField
             id="title"
             label="Project name"
@@ -94,16 +93,22 @@ class ProjectEditor extends React.Component {
             margin="normal"
             multiline
             rowsMax="4"
-          />   
-          <Button 
-            variant="contained" 
-            color="primary"
-            className={classes.button}
-            type="submit">
-            Save
-          </Button>
-        </form>
-      </div>
+          />
+      </DialogContent>
+    <DialogActions>
+      <Button onClick={this.handleClose} color="primary">
+        Cancel
+      </Button>
+      <Button 
+        variant="contained" 
+        color="primary"
+        className={classes.button}
+        type="submit">
+        Save
+      </Button>
+    </DialogActions>
+    </form>
+  </Dialog>
     )
   }
 };
