@@ -25,7 +25,7 @@ const styles = theme => ({
   },
 });
 
-class ProjectEditor extends React.Component {
+class GndProjectEditor extends React.Component {
   state = {};
 
   componentWillReceiveProps(nextProps) {
@@ -113,7 +113,7 @@ class ProjectEditor extends React.Component {
   }
 };
 
-ProjectEditor.propTypes = {
+GndProjectEditor.propTypes = {
   projectId: PropTypes.string.isRequired,
   project: PropTypes.object,
   classes: PropTypes.object.isRequired,
@@ -123,4 +123,5 @@ ProjectEditor.propTypes = {
  const enhance = compose(
   withStyles(styles),
 )
-export default enhance(ProjectEditor)
+
+export default enhance(GndProjectEditor)

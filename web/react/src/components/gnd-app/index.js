@@ -1,10 +1,9 @@
 import React from 'react';
-import ProjectEditor from '../project-editor';
+import GndProjectEditor from '../gnd-project-editor';
 import { connect } from 'react-redux'
 import { compose } from 'redux'
 import { firestoreConnect } from 'react-redux-firebase'
 import { withHandlers } from 'recompose'
-import ModalDialog from '../modal-dialog';
 import PropTypes from 'prop-types';
 import './index.css'
 import Button from '@material-ui/core/Button';
@@ -19,7 +18,7 @@ const getFirestoreData = (state, key) =>
 const styles = theme => ({
 });
 
-class GroundApp extends React.Component {
+class GndApp extends React.Component {
   state = {
     projectEditorOpen: false,
   };
@@ -52,7 +51,7 @@ class GroundApp extends React.Component {
           onClick={this.handleSignInClick}>Sign in</Button> )
       : 
       ( <React.Fragment>
-          <img src={auth.photoURL} className="user-thumb"/>
+          <img alt={auth.displayName} src={auth.photoURL} className="user-thumb"/>
           <Button 
             variant="contained"
             size="small" 
@@ -71,7 +70,7 @@ class GroundApp extends React.Component {
         <div className="top-right-controls">
           {AuthWiget}  
         </div>
-        <ProjectEditor
+        <GndProjectEditor
           open={this.state.projectEditorOpen}
           projectId={projectId}
           project={project}
@@ -81,19 +80,11 @@ class GroundApp extends React.Component {
   }
 }
 
-GroundApp.propTypes = {
+GndApp.propTypes = {
   classes: PropTypes.object.isRequired,
   // TODO: Add other props
 };
-/*
-    <ModalDialog
-      open={true}>
-      <ProjectEditor
-        projectId={props.projectId}
-        project={props.project}
-        updateProject={props.updateProject}/>
-    </ModalDialog>
-*/
+
 const enhance = compose(
 	// TODO: Replace with withPropsFromFirebase() once released?
 	// https://github.com/prescottprue/react-redux-firebase/issues/429
@@ -117,4 +108,4 @@ const enhance = compose(
   withStyles(styles),
 );
 
-export default enhance(GroundApp)
+export default enhance(GndApp)
