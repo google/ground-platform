@@ -40,11 +40,16 @@ const withGndDatastore = compose(
 				return <WrappedComponent {...this.props} />;
 			}
 		},
-	firestoreConnect(props => [
+	// https://github.com/prescottprue/redux-firestore#types-of-queries
+	firestoreConnect(({projectId}) => [
 		{
 			collection: "projects",
-			doc: props.projectId,
+			doc: projectId,
 			storeAs: "activeProject"
+		},
+		{
+			collection: `projects/${projectId}/features`,
+			storeAs: "mapFeatures"
 		}
 	])
 );
