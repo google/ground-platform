@@ -51,6 +51,7 @@ class GndProjectEditor extends React.Component {
     }
     this.setState((prevState, prevProps) => ({
       ...prevProps,
+      projectId: nextProps.projectId,
       project: {
         title: nextProps.project.title || {},
         description: nextProps.project.description || {}
@@ -73,8 +74,7 @@ class GndProjectEditor extends React.Component {
   };
 
   handleSave = () => event => {
-    console.log('Handlesave:', this.state.project);
-    this.props.updateProject(this.state.project);
+    this.props.updateProject(this.state.projectId, this.state.project);
     event.preventDefault();
   }
 

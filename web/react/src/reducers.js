@@ -25,18 +25,18 @@ const matchPath = createMatchSelector({ path: '/p/:projectId' });
 
 const pathReducer = (state = {}, action) => {
 	if (action.type === '@@router/LOCATION_CHANGE') {
-		const match = matchPath({router: action.payload});
+		const match = matchPath({router: action.payload})
 		if (match) {
 			return {...state, ...match.params};
 		}
 	}
-	return state;
+	return state
 }
 
 const rootReducer = combineReducers({
+  path: pathReducer,
   firebase: firebaseReducer,
   firestore: firestoreReducer,
-  path: pathReducer
 })
 
 export default connectRouter(history)(rootReducer);

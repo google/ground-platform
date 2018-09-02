@@ -14,38 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import React from 'react';
-import GndMap from '../gnd-map';
-import GndProjectEditor from '../gnd-project-editor';
-import { connect } from 'react-redux'
-import { compose } from 'redux'
-import { firestoreConnect } from 'react-redux-firebase'
-import { withHandlers } from 'recompose'
-import PropTypes from 'prop-types';
-import './index.css'
-import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core/styles';
 
-// Returns {} if key is present but value is undefined (i.e., loaded by 
-// empty, or undefined if key is not present (i.e., still loading,).
-const getFirestoreData = (state, key) => 
-	key in state.firestore.data ? 
-		(state.firestore.data[key] || {}) : undefined;
+import React from "react";
+import GndMap from "../gnd-map";
+import GndProjectEditor from "../gnd-project-editor";
+import { connect } from "react-redux";
+import { compose } from "redux";
+import {
+  withGndDatastore,
+  getAuth,
+  getProfile,
+  getActiveProject,
+  updateProject
+} from "../../datastore.js";
+import { withHandlers } from "recompose";
+import PropTypes from "prop-types";
+import "./index.css";
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
 
-const styles = theme => ({
-});
+const styles = theme => ({});
 
 class GndApp extends React.Component {
   state = {
-    projectEditorOpen: false,
+    projectEditorOpen: false
   };
 
   handleSignInClick = () => {
     this.props.firebase.login({
-      provider: 'google',
-      type: 'popup',
-    })
+      provider: "google",
+      type: "popup"
+    });
   };
 
   handleSignOutClick = () => {
@@ -55,76 +54,82 @@ class GndApp extends React.Component {
   handleEditProjectClick = () => {
     this.setState({
       ...this.state,
-      projectEditorOpen: true,
+      projectEditorOpen: true
     });
   };
 
-  render() { 
+  render() {
     const { auth, projectId, project, updateProject } = this.props;
-    const AuthWiget = auth.isEmpty ?      
-      ( <Button 
-          variant="contained" 
+    const AuthWiget = auth.isEmpty ? (
+      <Button
+        variant="contained"
+        color="primary"
+        className="{classes.button}"
+        onClick={this.handleSignInClick}
+      >
+        Sign in
+      </Button>
+    ) : (
+      <React.Fragment>
+        <img
+          alt={auth.displayName}
+          src={auth.photoURL}
+          className="user-thumb"
+        />
+        <Button
+          variant="contained"
+          size="small"
+          color="secondary"
+          className="edit-project"
+          onClick={this.handleEditProjectClick}
+        >
+          Edit project
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
           color="primary"
-          className="{classes.button}"
-          onClick={this.handleSignInClick}>Sign in</Button> )
-      : 
-      ( <React.Fragment>
-          <img alt={auth.displayName} src={auth.photoURL} className="user-thumb"/>
-          <Button 
-            variant="contained"
-            size="small" 
-            color="secondary"
-            className="edit-project"
-            onClick={this.handleEditProjectClick}>Edit project</Button>
-          <Button 
-            variant="contained"
-            size="small" 
-            color="primary"
-            className="sign-out"
-            onClick={this.handleSignOutClick}>Sign out</Button>
-         </React.Fragment> );
+          className="sign-out"
+          onClick={this.handleSignOutClick}
+        >
+          Sign out
+        </Button>
+      </React.Fragment>
+    );
     return (
       <React.Fragment>
-        <GndMap></GndMap>
-        <div className="top-right-controls">
-          {AuthWiget}  
-        </div>
+        <GndMap />
+        <div className="top-right-controls">{AuthWiget}</div>
         <GndProjectEditor
           open={this.state.projectEditorOpen}
           projectId={projectId}
           project={project}
-          updateProject={updateProject}/>
-      </React.Fragment>  
+          updateProject={updateProject}
+        />
+      </React.Fragment>
     );
   }
 }
 
 GndApp.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
   // TODO: Add other props
 };
 
+// The app acts as a glue for attaching the datastore to the various UI
+// components.
 const enhance = compose(
-	// TODO: Replace with withPropsFromFirebase() once released?
-	// https://github.com/prescottprue/react-redux-firebase/issues/429
-  connect((state, props) => ({
-    projectId: props.projectId,
-    project: getFirestoreData(state, 'activeProject'),
-    auth: state.firebase.auth,
-    profile: state.firebase.profile,
+  connect((store, props) => ({
+    projectId: store.path.projectId,
+    project: getActiveProject(store),
+    auth: getAuth(store),
+    profile: getProfile(store)
   })),
-  firestoreConnect((props) => [{
-    collection: 'projects',
-    doc: props.projectId,
-    storeAs: 'activeProject',
-  }]),
+  withGndDatastore,
   withHandlers({
-    updateProject: props => project =>
-      props.firestore.set(
-				{ collection: 'projects', doc: props.projectId}
-      	,project)
-  }),  
-  withStyles(styles),
+    updateProject
+  }),
+  withStyles(styles)
 );
 
-export default enhance(GndApp)
+export default enhance(GndApp);
