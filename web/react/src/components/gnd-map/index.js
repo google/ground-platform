@@ -16,19 +16,13 @@
  */
  
 import React from "react";
-import GoogleMap from "google-map-react";
+import './index.css'
+import { compose, withProps } from "recompose"
+import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
 import googleMapsConfig from "../../.google-maps-config.js";
 
 class GndMap extends React.Component {
 	// https://github.com/google-map-react/google-map-react/blob/master/API.md
-	static defaultProps = {
-		center: {
-			lat: 0,
-			lng: 0
-		},
-		zoom: 1
-	};
-
 	constructor(props) {
 		super(props);
 		let gndMap = this;
@@ -41,17 +35,13 @@ class GndMap extends React.Component {
 	componentDidMount() {
 	}
 
+	componentWillReceiveProps(nextProps) {
+
+	}
+
 	shouldComponentUpdate(nextProps, nextState) {
 		return false;
 	}
-
-	createMapOptions(maps) {
-    return {      
-      disableDefaultUI: true,
-  		zoomControl: true,
-      mapTypeId: 'hybrid'
-    }
-  }
 
 	onMapLoaded(map, maps) {
 		this.resolveMap(map);
@@ -60,22 +50,37 @@ class GndMap extends React.Component {
 	render() {
 		return (
 			<GoogleMap
-				id="map"
-				style={{
-					width: "100vw",
-					height: "100vh",
-					position: "absolute",
-					zIndex: -1
-				}}
 				bootstrapURLKeys={{ key: googleMapsConfig.apiKey }}
-				options={(maps) => this.createMapOptions(maps)}
 				onGoogleApiLoaded={({map, maps}) => this.onMapLoaded(map, maps)}
 				defaultCenter={this.props.center}
 				defaultZoom={this.props.zoom}
-				yesIWantToUseGoogleMapApiInternals={true}
+	      defaultMapTypeId="hybrid"
+	      defaultOptions={{
+		      disableDefaultUI: true,
+		  		zoomControl: true,
+  		    scrollwheel: true,	
+	      }}
 			/>
 		);
 	}
 }
 
-export default GndMap;
+const mapsApiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing";
+
+const enhance = compose(
+  withProps({
+    googleMapURL: `${mapsApiUrl}&key=${googleMapsConfig.apiKey}`,
+    loadingElement: <div id="loading" />,
+    containerElement: <div id="map-container" />,
+    mapElement: <div id="map" />,
+		center: {
+			lat: 0,
+			lng: 0
+		},
+		zoom: 3
+  }),
+  withScriptjs,
+  withGoogleMap
+);
+
+export default enhance(GndMap);

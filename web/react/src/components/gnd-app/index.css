@@ -24,6 +24,7 @@
 	width: 32px;
 	height: 32px;
 	border-radius: 32px;
+	z-index: 100;
 }
 
 .top-right-controls button {

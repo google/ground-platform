@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-.modal {
-	display: flex;
-  justify-content: center;
-  align-items: center;
+
+#map-container {
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	zIndex: -1;
 }
 
-.modal :focus {
-  outline: none;
+#loading {
+	height: 100vh;
+	zIndex: -1;
 }
+
+#map {
+	height: 100vh;
+	zIndex: -1;
+}
+
