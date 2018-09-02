@@ -29,8 +29,20 @@ class GndMap extends React.Component {
 		zoom: 1
 	};
 
+	constructor(props) {
+		super(props);
+		let gndMap = this;
+		this.map = new Promise(r => {
+			gndMap.resolveMap = r;
+		});
+	}
+
+
 	componentDidMount() {
-		// this.refs.map;
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return false;
 	}
 
 	createMapOptions(maps) {
@@ -42,7 +54,7 @@ class GndMap extends React.Component {
   }
 
 	onMapLoaded(map, maps) {
-		console.log('here');
+		this.resolveMap(map);
 	}
 
 	render() {
@@ -65,4 +77,5 @@ class GndMap extends React.Component {
 		);
 	}
 }
+
 export default GndMap;

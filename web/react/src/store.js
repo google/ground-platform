@@ -23,7 +23,7 @@ import firebase from 'firebase'
 import firebaseConfig from './.firebase-config.js'
 import history from './history.js'
 import { applyMiddleware, compose, createStore } from 'redux'
-import { connectRouter, routerMiddleware } from 'connected-react-router'
+import { routerMiddleware } from 'connected-react-router'
 
 // react-redux-firebase config
 const rrfConfig = {
@@ -43,12 +43,13 @@ const createStoreWithFirebase = compose(
   reactReduxFirebase(firebase, rrfConfig)
 )(createStore)
 
-// Create store with reducers and initial state
 const initialState = {
 }
 
+// TODO: use HOFs like compose() instead.
 // TODO: Move connectRouter into reducers.
+// Create store with reducers and initial state
 const store = createStoreWithFirebase(
-	connectRouter(history)(rootReducer), initialState, composeWithDevTools())
+	rootReducer, initialState, composeWithDevTools())
 
 export default store;

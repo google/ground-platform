@@ -18,10 +18,25 @@
 import { combineReducers } from 'redux';
 import { firebaseReducer } from 'react-redux-firebase'
 import { firestoreReducer } from 'redux-firestore'
+import { connectRouter, createMatchSelector } from 'connected-react-router'
+import history from './history.js'
+
+const matchPath = createMatchSelector({ path: '/p/:projectId' });
+
+const pathReducer = (state = {}, action) => {
+	if (action.type === '@@router/LOCATION_CHANGE') {
+		const match = matchPath({router: action.payload});
+		if (match) {
+			return {...state, ...match.params};
+		}
+	}
+	return state;
+}
 
 const rootReducer = combineReducers({
   firebase: firebaseReducer,
-  firestore: firestoreReducer
+  firestore: firestoreReducer,
+  path: pathReducer
 })
 
-export default rootReducer;
+export default connectRouter(history)(rootReducer);

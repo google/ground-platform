@@ -23,7 +23,7 @@ import ReactDOM from 'react-dom';
 import GndApp from './components/gnd-app';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router' // react-router v4
-import { ConnectedRouter } from 'connected-react-router'
+import { ConnectedRouter, withRouter } from 'connected-react-router'
 
 // Copy router params into component props.
 const withRouteParams = WrappedComponent => props =>
