@@ -31,23 +31,30 @@ class GndMap extends React.Component {
 		});
 	}
 
-
-	componentDidMount() {
-	}
-
-	componentWillReceiveProps(nextProps) {
-
-	}
-
-	shouldComponentUpdate(nextProps, nextState) {
-		return false;
-	}
-
 	onMapLoaded(map, maps) {
 		this.resolveMap(map);
 	}
 
+	renderFeature(markers, key, feature) {
+		if (!feature) {
+			return markers;
+		}
+
+		const pos = feature.center;
+		if (!pos) {
+			return markers;
+		}
+
+
+		markers.push((<Marker 
+			key={key}
+			position={{lat: pos.latitude, lng: pos.longitude}} />));
+		return markers;
+	}
+
 	render() {
+		const {features} = this.props;
+		console.log(features);
 		return (
 			<GoogleMap
 				bootstrapURLKeys={{ key: googleMapsConfig.apiKey }}
@@ -60,7 +67,9 @@ class GndMap extends React.Component {
 		  		zoomControl: true,
   		    scrollwheel: true,	
 	      }}
-			/>
+			>
+			{features && Object.keys(features).reduce((markers, key) => this.renderFeature(markers, key, features[key]), [])}
+			</GoogleMap>
 		);
 	}
 }

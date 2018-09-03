@@ -26,6 +26,8 @@ const getFirestoreData = (store, key) =>
 
 const getActiveProject = store => getFirestoreData(store, "activeProject");
 
+const getMapFeatures = store => getFirestoreData(store, "mapFeatures");
+
 const getAuth = store => store.firebase.auth;
 
 const getProfile = store => store.firebase.profile;
@@ -59,5 +61,6 @@ export {
 	getActiveProject,
 	updateProject,
 	getAuth,
-	getProfile
+	getProfile,
+	getMapFeatures
 };

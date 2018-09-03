@@ -25,7 +25,8 @@ import {
   getAuth,
   getProfile,
   getActiveProject,
-  updateProject
+  updateProject,
+  getMapFeatures
 } from "../../datastore.js";
 import { withHandlers } from "recompose";
 import PropTypes from "prop-types";
@@ -59,7 +60,7 @@ class GndApp extends React.Component {
   };
 
   render() {
-    const { auth, projectId, project, updateProject } = this.props;
+    const { auth, projectId, project, mapFeatures, updateProject } = this.props;
     const AuthWiget = auth.isEmpty ? (
       <Button
         variant="contained"
@@ -98,7 +99,7 @@ class GndApp extends React.Component {
     );
     return (
       <React.Fragment>
-        <GndMap />
+        <GndMap features={mapFeatures} />
         <div className="top-right-controls">{AuthWiget}</div>
         <GndProjectEditor
           open={this.state.projectEditorOpen}
@@ -123,7 +124,8 @@ const enhance = compose(
     projectId: store.path.projectId,
     project: getActiveProject(store),
     auth: getAuth(store),
-    profile: getProfile(store)
+    profile: getProfile(store),
+    mapFeatures: getMapFeatures(store)
   })),
   withGndDatastore,
   withHandlers({
