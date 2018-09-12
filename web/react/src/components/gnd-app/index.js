@@ -17,7 +17,9 @@
 
 import React from "react";
 import GndMap from "../gnd-map";
+import GndHeader from "../gnd-header";
 import GndProjectEditor from "../gnd-project-editor";
+import GndLegend from "../gnd-legend";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import {
@@ -31,25 +33,10 @@ import {
 import { withHandlers } from "recompose";
 import PropTypes from "prop-types";
 import "./index.css";
-import Button from "@material-ui/core/Button";
-import { withStyles } from "@material-ui/core/styles";
-
-const styles = theme => ({});
 
 class GndApp extends React.Component {
   state = {
     projectEditorOpen: false
-  };
-
-  handleSignInClick = () => {
-    this.props.firebase.login({
-      provider: "google",
-      type: "popup"
-    });
-  };
-
-  handleSignOutClick = () => {
-    this.props.firebase.logout();
   };
 
   handleEditProjectClick = () => {
@@ -60,47 +47,12 @@ class GndApp extends React.Component {
   };
 
   render() {
-    const { auth, projectId, project, mapFeatures, updateProject } = this.props;
-    const AuthWiget = auth.isEmpty ? (
-      <Button
-        variant="contained"
-        color="primary"
-        className="{classes.button}"
-        onClick={this.handleSignInClick}
-      >
-        Sign in
-      </Button>
-    ) : (
-      <React.Fragment>
-        <img
-          alt={auth.displayName}
-          src={auth.photoURL}
-          className="user-thumb"
-        />
-        <Button
-          variant="contained"
-          size="small"
-          color="secondary"
-          className="edit-project"
-          onClick={this.handleEditProjectClick}
-        >
-          Edit project
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
-          className="sign-out"
-          onClick={this.handleSignOutClick}
-        >
-          Sign out
-        </Button>
-      </React.Fragment>
-    );
+    const { auth, projectId, project, updateProject } = this.props;
     return (
       <React.Fragment>
-        <GndMap features={mapFeatures} />
-        <div className="top-right-controls">{AuthWiget}</div>
+        <GndMap />
+        <GndHeader />
+        <GndLegend />
         <GndProjectEditor
           open={this.state.projectEditorOpen}
           projectId={projectId}
@@ -112,26 +64,19 @@ class GndApp extends React.Component {
   }
 }
 
-GndApp.propTypes = {
-  classes: PropTypes.object.isRequired
-  // TODO: Add other props
-};
-
-// The app acts as a glue for attaching the datastore to the various UI
-// components.
 const enhance = compose(
   connect((store, props) => ({
     projectId: store.path.projectId,
     project: getActiveProject(store),
     auth: getAuth(store),
     profile: getProfile(store),
-    mapFeatures: getMapFeatures(store)
+    mapFeatures: getMapFeatures(store),
+    firebase: store.firebase
   })),
   withGndDatastore,
   withHandlers({
     updateProject
-  }),
-  withStyles(styles)
+  })
 );
 
 export default enhance(GndApp);

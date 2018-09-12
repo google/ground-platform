@@ -13,20 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-.top-right-controls {
-  float: right;
-  margin: 12px;
-  display: flex;
-}
-
-.user-thumb {
-	width: 32px;
-	height: 32px;
-	border-radius: 32px;
-	z-index: 100;
-}
-
-.top-right-controls button {
-	margin-left: 10px !important;
-}

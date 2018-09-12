@@ -13,10 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
- body {
-  margin: 0;
-  padding: 0;
-  font-family: "Roboto", sans-serif;
-  color: #212121;
+
+.header {
+  height: 62px;
+	white-space: nowrap;
+}
+
+.logo {
+	position: relative;
+	top: 6px;
+	left: 10px;
+	vertical-align: middle;
+	width: 48px;
+	height: 48px;
+}
+
+.untitled {
+	color: #616161 !important;
+	font-style: italic;
+}
+
+.title {
+	color: #212121;
+  font-size: 15pt;
+	position: relative;
+	top: 8px;
+	left: 18px;	
+	white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+
+.top-right-controls {
+  float: right;
+  margin: 14px 16px;
+  display: flex;
+}
+
+.user-thumb {
+	width: 32px;
+	height: 32px;
+	border-radius: 32px;
+}
+
+.top-right-controls button {
+	margin-left: 10px !important;
 }

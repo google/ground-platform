@@ -19,12 +19,16 @@ import React from "react";
 import { compose } from "redux";
 import { firestoreConnect } from "react-redux-firebase";
 
+// TODO: Turn into class, GndDatastore, wrapper around firebase and Redux store.
+
 // Returns {} if key is present but value is undefined (i.e., loaded but
 // empty, or undefined if key is not present (i.e., still loading,).
 const getFirestoreData = (store, key) =>
 	key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
 
-const getActiveProject = store => getFirestoreData(store, "activeProject");
+// TODO: Create empty project on "create" action and remove || {}.
+// TOOD: Handle loading state.
+const getActiveProject = store => getFirestoreData(store, "activeProject") || {}; 
 
 const getMapFeatures = store => getFirestoreData(store, "mapFeatures");
 
@@ -34,6 +38,10 @@ const getProfile = store => store.firebase.profile;
 
 const updateProject = store => (projectId, project) =>
 	store.firestore.set({ collection: "projects", doc: projectId }, project);
+
+// TODO: i18n.
+const getLocalizedText = (obj) => obj &&
+	(obj['*'] || obj['en'] || obj['pt']);
 
 const withGndDatastore = compose(
 	WrappedComponent =>
@@ -62,5 +70,6 @@ export {
 	updateProject,
 	getAuth,
 	getProfile,
-	getMapFeatures
+	getMapFeatures,
+	getLocalizedText,
 };
