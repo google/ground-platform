@@ -1,0 +1,67 @@
+/**
+ * Copyright 2018 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+.header {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 62px;
+  background-color: #fafafa;
+  opacity: 0.9;
+	white-space: nowrap;
+}
+
+.logo {
+	position: relative;
+	top: 6px;
+	left: 10px;
+	vertical-align: middle;
+	width: 48px;
+	height: 48px;
+}
+
+.untitled {
+	color: #616161 !important;
+	font-style: italic;
+}
+
+.title {
+	color: #212121;
+  font-size: 15pt;
+	position: relative;
+	top: 8px;
+	left: 18px;	
+	white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+
+.top-right-controls {
+  float: right;
+  margin: 14px 16px;
+  display: flex;
+}
+
+.user-thumb {
+	width: 32px;
+	height: 32px;
+	border-radius: 32px;
+}
+
+.top-right-controls button {
+	margin-left: 10px !important;
+}
