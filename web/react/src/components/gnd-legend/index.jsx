@@ -41,6 +41,7 @@ const styles = {
     width: 300,
     top: 96,
     right: 16,
+    opacity: 0.97,
   },
   bullet: {
     display: 'inline-block',

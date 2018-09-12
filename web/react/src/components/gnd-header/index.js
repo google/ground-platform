@@ -35,7 +35,7 @@ import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({});
 
-const GndAppBar = withStyles({root: {background: '#fafafa', opacity: 0.9}})(AppBar);
+const GndAppBar = withStyles({root: {background: '#fafafa', opacity: 0.97}})(AppBar);
 
 // TODO: Properly ellisize title on overflow.
 // TODO: Show description on hover?
