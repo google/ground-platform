@@ -13,14 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 .header {
-  position: absolute;
-  top: 0;
-  width: 100vw;
   height: 62px;
-  background-color: #fafafa;
-  opacity: 0.9;
 	white-space: nowrap;
 }
 

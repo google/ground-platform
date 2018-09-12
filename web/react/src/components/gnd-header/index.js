@@ -30,13 +30,14 @@ import {
   getLocalizedText,
 } from "../../datastore.js";
 import { withHandlers } from "recompose";
+import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({});
 
-// TODO: Resize logo.
-// TODO: Wrap in Material UI AppBar.
+const GndAppBar = withStyles({root: {background: '#fafafa', opacity: 0.9}})(AppBar);
+
 // TODO: Properly ellisize title on overflow.
 // TODO: Show description on hover?
 
@@ -94,11 +95,13 @@ class GndHeader extends React.Component {
     );
 
     return (      
+    <GndAppBar>
       <div className="header">
         <img src={logo} className="logo" /> 
         <span className={`title ${!title && 'untitled'}`}>{title || 'Untitled project'}</span>
         <div className="top-right-controls">{AuthWiget}</div>
       </div>
+      </GndAppBar>
     );
   }
 };
