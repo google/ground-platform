@@ -19,6 +19,7 @@ import React from "react";
 import GndMap from "../gnd-map";
 import GndHeader from "../gnd-header";
 import GndProjectEditor from "../gnd-project-editor";
+import GndLegend from "../gnd-legend";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import {
@@ -50,6 +51,7 @@ class GndApp extends React.Component {
       <React.Fragment>
         <GndMap />
         <GndHeader />
+        <GndLegend />
         <GndProjectEditor
           open={this.state.projectEditorOpen}
           projectId={projectId}

@@ -16,7 +16,6 @@
  */
  
 import React from 'react'
-import PropTypes from 'prop-types';
 import "./index.css";
 import logo from "./logo.png"
 import { connect } from "react-redux";
