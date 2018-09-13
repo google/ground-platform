@@ -17,6 +17,7 @@
 
 import React from "react";
 import { compose } from "redux";
+import { connect } from "react-redux";
 import { firestoreConnect } from "react-redux-firebase";
 
 // TODO: Turn into class, GndDatastore, wrapper around firebase and Redux store.
@@ -25,10 +26,12 @@ import { firestoreConnect } from "react-redux-firebase";
 // empty, or undefined if key is not present (i.e., still loading,).
 const getFirestoreData = (store, key) =>
 	key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
+const getActiveProjectId = store => store.path.projectId;
 
 // TODO: Create empty project on "create" action and remove || {}.
 // TOOD: Handle loading state.
-const getActiveProject = store => getFirestoreData(store, "activeProject") || {}; 
+const getActiveProject = store =>
+	getFirestoreData(store, "activeProject") || {};
 
 const getMapFeatures = store => getFirestoreData(store, "mapFeatures");
 
@@ -36,12 +39,29 @@ const getAuth = store => store.firebase.auth;
 
 const getProfile = store => store.firebase.profile;
 
-const updateProject = store => (projectId, project) =>
-	store.firestore.set({ collection: "projects", doc: projectId }, project);
+const updateProject = props => (projectId, project) =>
+	props.firestore.set({ collection: "projects", doc: projectId }, project);
 
 // TODO: i18n.
-const getLocalizedText = (obj) => obj &&
-	(obj['*'] || obj['en'] || obj['pt']);
+const getLocalizedText = obj => obj && (obj["*"] || obj["en"] || obj["pt"]);
+
+// Mount project data onto store based on current projectId in path.
+const connectGndDatastore = compose(
+	connect((store, props) => ({
+		projectId: getActiveProjectId(store)
+	})),
+	firestoreConnect(({ projectId }) => [
+		{
+			collection: "projects",
+			doc: projectId,
+			storeAs: "activeProject"
+		},
+		{
+			collection: `projects/${projectId}/features`,
+			storeAs: "mapFeatures"
+		}
+	])
+);
 
 const withGndDatastore = compose(
 	WrappedComponent =>
@@ -51,7 +71,7 @@ const withGndDatastore = compose(
 			}
 		},
 	// https://github.com/prescottprue/redux-firestore#types-of-queries
-	firestoreConnect(({projectId}) => [
+	firestoreConnect(({ projectId }) => [
 		{
 			collection: "projects",
 			doc: projectId,
@@ -65,11 +85,12 @@ const withGndDatastore = compose(
 );
 
 export {
-	withGndDatastore,
 	getActiveProject,
+	getActiveProjectId,
 	updateProject,
 	getAuth,
 	getProfile,
 	getMapFeatures,
 	getLocalizedText,
+	connectGndDatastore
 };

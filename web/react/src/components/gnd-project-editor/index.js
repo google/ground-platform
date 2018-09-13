@@ -14,131 +14,145 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import React from 'react'
-import { compose } from 'redux'
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { withStyles } from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
+
+import React from "react";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { withHandlers } from "recompose";
+import {
+  getActiveProjectId,
+  getActiveProject,
+  updateProject
+} from "../../datastore.js";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import { withStyles } from "@material-ui/core/styles";
+import PropTypes from "prop-types";
+import { withFirebase, withFirestore } from "react-redux-firebase";
 
 const styles = theme => ({
   container: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    display: "flex",
+    flexWrap: "wrap"
   },
-  textField: {
+  json: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
-    width: 200,
-  },
-  menu: {
-    width: 200,
-  },
+    width: '100%'
+  }
 });
 
 class GndProjectEditor extends React.Component {
   state = {};
+
+  handleClose = () => {
+    this.props.close();
+  };
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.project === this.state.project) {
       return;
     }
     this.setState((prevState, prevProps) => ({
-      ...prevProps,
+      ...prevState,
       projectId: nextProps.projectId,
-      project: {
-        title: nextProps.project.title || {},
-        description: nextProps.project.description || {}
-      },
-      // TODO: i18n. This temp hack added for demo data.
-      lang: nextProps.project &&
-        nextProps.project.title &&
-        nextProps.project.title.pt ? 'pt' : 'en'
+      project: JSON.stringify(nextProps.project || {}, null, "  ")
     }));
   }
 
-  handleChange = key => event => {
-    let value = event.target.value;
-    this.setState((prevState, props) => {
-      const lang = prevState.lang;
-      let newState = prevState;
-      newState.project[key][lang] = value;
-      return newState;
-    });
+  handleChangeJson = event => {
+    let project = event.target.value;
+    this.setState((prevState, props) => ({ ...prevState, project }));
   };
 
-  handleSave = () => event => {
-    this.props.updateProject(this.state.projectId, this.state.project);
+  handleSave = event => {
+    try {
+      this.props
+        .updateProject(this.state.projectId, JSON.parse(this.state.project))
+        .then(ref => this.props.close());
+    } catch (e) {
+      alert(e);
+    }
     event.preventDefault();
-  }
+  };
 
   render() {
-    const { classes, open } = this.props;
-    const { project, lang } = this.state;
+    const { classes, projectEditorOpen } = this.props;
+    const { project } = this.state;
     if (!project) {
-      return <div>Loading...</div>
+      return <div>Loading...</div>;
     }
     return (
       <Dialog
-        open={open}
+        open={projectEditorOpen}
         onClose={this.handleClose}
         aria-labelledby="form-dialog-title"
+        fullWidth
+        maxWidth="md"
       >
-      <form noValidate autoComplete="off" onSubmit={this.handleSave()}>
-      <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
-      <DialogContent>
-          <TextField
-            id="title"
-            label="Project name"
-            className={classes.textField}
-            value={project.title[lang] || ''}
-            onChange={this.handleChange('title')}
-            margin="normal"
-          />
-          <TextField
-            id="description"
-            label="Description"
-            className={classes.textField}
-            value={project.description[lang] || ''}
-            onChange={this.handleChange('description')}
-            margin="normal"
-            multiline
-            rowsMax="4"
-          />
-      </DialogContent>
-    <DialogActions>
-      <Button onClick={this.handleClose} color="primary">
-        Cancel
-      </Button>
-      <Button 
-        variant="contained" 
-        color="primary"
-        className={classes.button}
-        type="submit">
-        Save
-      </Button>
-    </DialogActions>
-    </form>
-  </Dialog>
-    )
+        <form
+          noValidate
+          autoComplete="off"
+          onSubmit={ev => this.handleSave(ev)}
+        >
+          <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
+          <DialogContent>
+            <TextField
+              id="json"
+              label="Project Definition (JSON)"
+              className={classes.json}
+              value={project}
+              onChange={ev => this.handleChangeJson(ev)}
+              margin="normal"
+              multiline
+              rows="20"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.button}
+              type="submit"
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+    );
   }
-};
+}
 
-GndProjectEditor.propTypes = {
-  projectId: PropTypes.string.isRequired,
-  project: PropTypes.object,
-  classes: PropTypes.object.isRequired,
-  updateProject: PropTypes.func.isRequired,
-};
+const mapStateToProps = (store, props) => ({
+  projectId: getActiveProjectId(store),
+  project: getActiveProject(store),
+  projectEditorOpen: store.projectEditorOpen
+});
 
- const enhance = compose(
-  withStyles(styles),
-)
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  close: () => dispatch({type: 'CLOSE_PROJECT_EDITOR'}),  
+});
 
-export default enhance(GndProjectEditor)
+const enhance = compose(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+  ),
+  withFirebase,
+  withFirestore,
+  withHandlers({
+    updateProject
+  }),
+  withStyles(styles)
+);
+
+export default enhance(GndProjectEditor);

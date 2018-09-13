@@ -44,6 +44,7 @@ const createStoreWithFirebase = compose(
 )(createStore)
 
 const initialState = {
+	projectEditorOpen: false,
 }
 
 // TODO: use HOFs like compose() instead.

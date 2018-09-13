@@ -18,65 +18,20 @@
 import React from "react";
 import GndMap from "../gnd-map";
 import GndHeader from "../gnd-header";
-import GndProjectEditor from "../gnd-project-editor";
 import GndLegend from "../gnd-legend";
-import { connect } from "react-redux";
-import { compose } from "redux";
-import {
-  withGndDatastore,
-  getAuth,
-  getProfile,
-  getActiveProject,
-  updateProject,
-  getMapFeatures
-} from "../../datastore.js";
-import { withHandlers } from "recompose";
-import PropTypes from "prop-types";
+import { connectGndDatastore } from "../../datastore.js";
 import "./index.css";
 
 class GndApp extends React.Component {
-  state = {
-    projectEditorOpen: false
-  };
-
-  handleEditProjectClick = () => {
-    this.setState({
-      ...this.state,
-      projectEditorOpen: true
-    });
-  };
-
   render() {
-    const { auth, projectId, project, updateProject } = this.props;
     return (
       <React.Fragment>
         <GndMap />
         <GndHeader />
         <GndLegend />
-        <GndProjectEditor
-          open={this.state.projectEditorOpen}
-          projectId={projectId}
-          project={project}
-          updateProject={updateProject}
-        />
       </React.Fragment>
     );
   }
 }
 
-const enhance = compose(
-  connect((store, props) => ({
-    projectId: store.path.projectId,
-    project: getActiveProject(store),
-    auth: getAuth(store),
-    profile: getProfile(store),
-    mapFeatures: getMapFeatures(store),
-    firebase: store.firebase
-  })),
-  withGndDatastore,
-  withHandlers({
-    updateProject
-  })
-);
-
-export default enhance(GndApp);
+export default connectGndDatastore(GndApp);

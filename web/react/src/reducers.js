@@ -14,29 +14,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import { combineReducers } from 'redux';
-import { firebaseReducer } from 'react-redux-firebase'
-import { firestoreReducer } from 'redux-firestore'
-import { connectRouter, createMatchSelector } from 'connected-react-router'
-import history from './history.js'
 
-const matchPath = createMatchSelector({ path: '/p/:projectId' });
+import { combineReducers } from "redux";
+import { firebaseReducer } from "react-redux-firebase";
+import { firestoreReducer } from "redux-firestore";
+import { connectRouter, createMatchSelector } from "connected-react-router";
+import history from "./history.js";
+
+const matchPath = createMatchSelector({ path: "/p/:projectId" });
 
 const pathReducer = (state = {}, action) => {
-	if (action.type === '@@router/LOCATION_CHANGE') {
-		const match = matchPath({router: action.payload})
+	if (action.type === "@@router/LOCATION_CHANGE") {
+		const match = matchPath({ router: action.payload });
 		if (match) {
-			return {...state, ...match.params};
+			return { ...state, ...match.params };
 		}
 	}
-	return state
-}
+	return state;
+};
+
+const projectEditorReducer = (state = false, action) => {
+	switch (action.type) {
+		case "OPEN_PROJECT_EDITOR":
+			return true;
+		case "CLOSE_PROJECT_EDITOR":
+			return false;
+		default:
+			return state;
+	}
+};
 
 const rootReducer = combineReducers({
-  path: pathReducer,
-  firebase: firebaseReducer,
-  firestore: firestoreReducer,
-})
+	path: pathReducer,
+	firebase: firebaseReducer,
+	firestore: firestoreReducer,
+	projectEditorOpen: projectEditorReducer
+});
 
 export default connectRouter(history)(rootReducer);

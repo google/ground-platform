@@ -14,33 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import React from 'react'
+
+import React from "react";
 import "./index.css";
-import logo from "./logo.png"
+import logo from "./logo.png";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import {
-  withGndDatastore,
   getAuth,
   getProfile,
   getActiveProject,
-  updateProject,
-  getLocalizedText,
+  getLocalizedText
 } from "../../datastore.js";
-import { withHandlers } from "recompose";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
+import GndProjectEditor from "../gnd-project-editor";
+import { withFirebase } from "react-redux-firebase";
 
 const styles = theme => ({});
 
-const GndAppBar = withStyles({root: {background: '#fafafa', opacity: 0.97}})(AppBar);
+const GndAppBar = withStyles({
+  root: { background: "#fafafa", opacity: 0.97 }
+})(AppBar);
 
-// TODO: Properly ellisize title on overflow.
-// TODO: Show description on hover?
+// TODO: Properly ellipsize title on overflow.
+// TODO: Show project description on hover?
 
 class GndHeader extends React.Component {
+
+  handleEditProjectClick = () => {
+    this.props.openProjectEditor();
+  };
+
   handleSignInClick = () => {
     this.props.firebase.login({
       provider: "google",
@@ -53,17 +59,8 @@ class GndHeader extends React.Component {
   };
 
   render() {
-    const { auth, projectId, project } = this.props;
+    const { auth, project } = this.props;
     // TODO: Move into separate component.
-            // <Button
-        //   variant="contained"
-        //   size="small"
-        //   color="secondary"
-        //   className="edit-project"
-        //   onClick={this.handleEditProjectClick}
-        // >
-        //   Edit project
-        // </Button>
     const title = getLocalizedText(project.title);
     const AuthWiget = auth.isEmpty ? (
       <Button
@@ -84,6 +81,15 @@ class GndHeader extends React.Component {
         <Button
           variant="contained"
           size="small"
+          color="secondary"
+          className="edit-project"
+          onClick={this.handleEditProjectClick}
+        >
+          Edit project
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
           color="primary"
           className="sign-out"
           onClick={this.handleSignOutClick}
@@ -93,30 +99,40 @@ class GndHeader extends React.Component {
       </React.Fragment>
     );
 
-    return (      
-    <GndAppBar>
-      <div className="header">
-        <img src={logo} className="logo" /> 
-        <span className={`title ${!title && 'untitled'}`}>{title || 'Untitled project'}</span>
-        <div className="top-right-controls">{AuthWiget}</div>
-      </div>
-      </GndAppBar>
+    return (
+      <React.Fragment>
+        <GndAppBar>
+          <div className="header">
+            <img src={logo} className="logo" />
+            <span className={`title ${!title && "untitled"}`}>
+              {title || "Untitled project"}
+            </span>
+            <div className="top-right-controls">{AuthWiget}</div>
+          </div>
+        </GndAppBar>
+        <GndProjectEditor />
+      </React.Fragment>
     );
   }
-};
+}
+
+const mapStateToProps = (store, props) => ({
+  project: getActiveProject(store),
+  auth: getAuth(store),
+  profile: getProfile(store)
+});
+
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  openProjectEditor: () => dispatch({ type: "OPEN_PROJECT_EDITOR" })
+});
 
 const enhance = compose(
-  connect((store, props) => ({
-    projectId: store.path.projectId,
-    project: getActiveProject(store),
-    auth: getAuth(store),
-    profile: getProfile(store)
-  })),
-  withGndDatastore,
-  withHandlers({
-    updateProject
-  }),
-  withStyles(styles)  
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
+  withFirebase,
+  withStyles(styles)
 );
 
 export default enhance(GndHeader);
