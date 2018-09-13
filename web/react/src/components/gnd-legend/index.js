@@ -36,10 +36,14 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Divider from "@material-ui/core/Divider";
 import { withFirestore } from "react-redux-firebase";
+import Icon from "@material-ui/core/Icon";
+import IconButton from "@material-ui/core/IconButton";
+import SettingsIcon from "@material-ui/icons/Settings";
 
-const styles = {
+const styles = theme => ({
   card: {
     position: "absolute",
     width: 300,
@@ -58,40 +62,46 @@ const styles = {
   },
   pos: {
     marginBottom: 12
+  },
+  button: {
+    margin: theme.spacing.unit
   }
-};
+});
 
-const png = filebase =>
-  require(`../../images/${filebase}.png`);
+const png = filebase => require(`../../images/${filebase}.png`);
 
 const iconSrc = iconId => {
   switch (iconId) {
-    case 'tree':
-      return png('tree');
-    case 'house-map-marker':
-      return png('home-map-marker');
-    case 'star-circle':
-      return png('star-circle');
-    default: 
-      return png('map-marker');
-  } 
-}
+    case "tree":
+      return png("tree");
+    case "house-map-marker":
+      return png("home-map-marker");
+    case "star-circle":
+      return png("star-circle");
+    default:
+      return png("map-marker");
+  }
+};
 
-const featureTypeListItem = (ftId, ft) => (
+const featureTypeListItem = (ftId, ft, classes) => (
   <ListItem button>
     <ListItemIcon>
       <img width="24" height="24" src={iconSrc(ft.iconId)} />
     </ListItemIcon>
     <ListItemText primary={getLocalizedText(ft.itemLabel)} />
+    <ListItemSecondaryAction>
+      <IconButton className={classes.button} aria-label="Customize">
+        <SettingsIcon />
+      </IconButton>
+    </ListItemSecondaryAction>
   </ListItem>
 );
-
 
 class GndLegend extends React.Component {
   render() {
     const { classes } = this.props;
-    const featureTypes = (this.props.project && 
-      this.props.project.featureTypes) || {};
+    const featureTypes =
+      (this.props.project && this.props.project.featureTypes) || {};
     return (
       <Card className={classes.card}>
         <CardContent>
@@ -99,13 +109,11 @@ class GndLegend extends React.Component {
             Legend
           </Typography>
           <List>
-            {Object.keys(featureTypes).map(
-               ftId => featureTypeListItem(ftId, featureTypes[ftId]))}
+            {Object.keys(featureTypes).map(ftId =>
+              featureTypeListItem(ftId, featureTypes[ftId], classes)
+            )}
           </List>
         </CardContent>
-        <CardActions>
-          <Button size="small">Customize</Button>
-        </CardActions>
       </Card>
     );
   }
@@ -113,13 +121,11 @@ class GndLegend extends React.Component {
 
 const mapStateToProps = (store, props) => ({
   projectId: getActiveProjectId(store),
-  project: getActiveProject(store),
+  project: getActiveProject(store)
 });
 
 const enhance = compose(
-  connect(
-    mapStateToProps,
-  ),
+  connect(mapStateToProps),
   withFirestore,
   withStyles(styles)
 );
