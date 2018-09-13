@@ -14,68 +14,114 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import React from 'react'
+
+import React from "react";
 import "./index.css";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import {
-  withGndDatastore,
-  getAuth,
-  getProfile,
+  getActiveProjectId,
   getActiveProject,
-  updateProject,
-  getLocalizedText,
+  getLocalizedText
 } from "../../datastore.js";
 import { withHandlers } from "recompose";
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import Typography from '@material-ui/core/Typography';
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
+
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import Divider from "@material-ui/core/Divider";
+import { withFirestore } from "react-redux-firebase";
 
 const styles = {
   card: {
-  	position: 'absolute',
+    position: "absolute",
     width: 300,
     top: 96,
     right: 16,
-    opacity: 0.97,
+    opacity: 0.97
   },
   bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
+    display: "inline-block",
+    margin: "0 2px",
+    transform: "scale(0.8)"
   },
   title: {
     marginBottom: 16,
-    fontSize: 14,
+    fontSize: 14
   },
   pos: {
-    marginBottom: 12,
-  },
+    marginBottom: 12
+  }
 };
 
-class GndLegend extends React.Component {
-	render() {
-		const { classes } = this.props;
-	  const bull = <span className={classes.bullet}>•</span>;
+const png = filebase =>
+  require(`../../images/${filebase}.png`);
 
-	  return (
-	    <Card className={classes.card}>
-	      <CardContent>
-	        <Typography className={classes.title} color="textSecondary">
-	          Legend
-	        </Typography>
-	        Markers here
-	      </CardContent>
-	      <CardActions>
-	        <Button size="small">Customize</Button>
-	      </CardActions>
-	    </Card>
-	  );		
-	}
+const iconSrc = iconId => {
+  switch (iconId) {
+    case 'tree':
+      return png('tree');
+    case 'house-map-marker':
+      return png('home-map-marker');
+    case 'star-circle':
+      return png('star-circle');
+    default: 
+      return png('map-marker');
+  } 
 }
 
-export default withStyles(styles)(GndLegend);
+const featureTypeListItem = (ftId, ft) => (
+  <ListItem button>
+    <ListItemIcon>
+      <img width="24" height="24" src={iconSrc(ft.iconId)} />
+    </ListItemIcon>
+    <ListItemText primary={getLocalizedText(ft.itemLabel)} />
+  </ListItem>
+);
+
+
+class GndLegend extends React.Component {
+  render() {
+    const { classes } = this.props;
+    const featureTypes = (this.props.project && 
+      this.props.project.featureTypes) || {};
+    return (
+      <Card className={classes.card}>
+        <CardContent>
+          <Typography className={classes.title} color="textSecondary">
+            Legend
+          </Typography>
+          <List>
+            {Object.keys(featureTypes).map(
+               ftId => featureTypeListItem(ftId, featureTypes[ftId]))}
+          </List>
+        </CardContent>
+        <CardActions>
+          <Button size="small">Customize</Button>
+        </CardActions>
+      </Card>
+    );
+  }
+}
+
+const mapStateToProps = (store, props) => ({
+  projectId: getActiveProjectId(store),
+  project: getActiveProject(store),
+});
+
+const enhance = compose(
+  connect(
+    mapStateToProps,
+  ),
+  withFirestore,
+  withStyles(styles)
+);
+
+export default enhance(GndLegend);
