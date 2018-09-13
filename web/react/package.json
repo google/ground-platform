@@ -10,6 +10,7 @@
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-google-maps": "^9.4.5",
+    "react-input-autosize": "^2.2.1",
     "react-redux": "^5.0.7",
     "react-redux-firebase": "^2.1.8",
     "react-router": "^4.3.1",

@@ -24,13 +24,17 @@ import {
   getAuth,
   getProfile,
   getActiveProject,
-  getLocalizedText
+  getActiveProjectId,
+  getLocalizedText,
+  updateProjectTitle
 } from "../../datastore.js";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import GndProjectEditor from "../gnd-project-editor";
-import { withFirebase } from "react-redux-firebase";
+import { withFirebase, withFirestore } from "react-redux-firebase";
+import AutosizeInput from "react-input-autosize";
+import { withHandlers } from "recompose";
 
 const styles = theme => ({});
 
@@ -38,10 +42,21 @@ const GndAppBar = withStyles({
   root: { background: "#fafafa", opacity: 0.97 }
 })(AppBar);
 
-// TODO: Properly ellipsize title on overflow.
-// TODO: Show project description on hover?
-
 class GndHeader extends React.Component {
+  state = {
+    projectId: null,
+    title: " "
+  };
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.projectId === this.state.projectId &&
+      (nextProps.project && nextProps.project.title) === this.state.title
+    ) {
+      return;
+    }
+    this.reset(nextProps);
+  }
 
   handleEditProjectClick = () => {
     this.props.openProjectEditor();
@@ -58,10 +73,53 @@ class GndHeader extends React.Component {
     this.props.firebase.logout();
   };
 
+  handleTitleChange(ev) {
+    this.setState({
+      title: ev.target.value
+    });
+  }
+
+  handleKeyPress(ev) {
+    switch (ev.key) {
+      case "Enter":
+        this.saveChanges().then(() => this.refs.input.blur());
+        break;
+      case "Escape":
+        this.reset(this.props);
+        this.refs.input.blur();
+        break;
+      default:
+        // n/a.
+    }
+  }
+
+  handleBlur(ev) {
+    this.saveChanges();
+  }
+
+  saveChanges() {
+    const { projectId, title } = this.state;
+    if (projectId && title) {
+      if (getLocalizedText(this.props.project) === title) {
+        return Promise.resolve();
+      } else {
+        return this.props.updateProjectTitle(projectId, title);
+      }
+    } else {
+      return Promise.reject(`projectId: ${projectId} title: ${title}`);
+    }
+  }
+
+  reset(props) {
+    this.setState({
+      projectId: props.projectId,
+      title: (props.project && getLocalizedText(props.project.title)) || ""
+    });
+  }
+
   render() {
-    const { auth, project } = this.props;
-    // TODO: Move into separate component.
-    const title = getLocalizedText(project.title);
+    const { auth } = this.props;
+    // TODO: Move title and login link into separate component.
     const AuthWiget = auth.isEmpty ? (
       <Button
         variant="contained"
@@ -85,7 +143,7 @@ class GndHeader extends React.Component {
           className="edit-project"
           onClick={this.handleEditProjectClick}
         >
-          Edit project
+          Project JSON
         </Button>
         <Button
           variant="contained"
@@ -103,10 +161,18 @@ class GndHeader extends React.Component {
       <React.Fragment>
         <GndAppBar>
           <div className="header">
-            <img src={logo} className="logo" />
-            <span className={`title ${!title && "untitled"}`}>
-              {title || "Untitled project"}
-            </span>
+            <img src={logo} className="logo" alt="Ground logo" />
+            <AutosizeInput
+              inputClassName={`title ${!this.state.title && "untitled"}`}
+              name="form-field-name"
+              ref="input"
+              value={this.state.title}
+              placeholder="Untitled project"
+              placeholderIsMinWidth
+              onChange={this.handleTitleChange.bind(this)}
+              onKeyDown={this.handleKeyPress.bind(this)}
+              onBlur={this.handleBlur.bind(this)}
+            />
             <div className="top-right-controls">{AuthWiget}</div>
           </div>
         </GndAppBar>
@@ -117,6 +183,7 @@ class GndHeader extends React.Component {
 }
 
 const mapStateToProps = (store, props) => ({
+  projectId: getActiveProjectId(store),
   project: getActiveProject(store),
   auth: getAuth(store),
   profile: getProfile(store)
@@ -131,7 +198,12 @@ const enhance = compose(
     mapStateToProps,
     mapDispatchToProps
   ),
+  // TODO: Better abstract remote datastore so that we don't expose withFire*.
   withFirebase,
+  withFirestore,
+  withHandlers({
+    updateProjectTitle
+  }),
   withStyles(styles)
 );
 

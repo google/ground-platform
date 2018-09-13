@@ -14,11 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import React from "react";
-import './index.css'
-import { compose, withProps } from "recompose"
-import { withScriptjs, withGoogleMap, GoogleMap, Marker } from "react-google-maps"
+import "./index.css";
+import { compose, withProps } from "recompose";
+import {
+	withScriptjs,
+	withGoogleMap,
+	GoogleMap,
+	Marker
+} from "react-google-maps";
 import googleMapsConfig from "../../.google-maps-config.js";
 
 class GndMap extends React.Component {
@@ -45,51 +50,54 @@ class GndMap extends React.Component {
 			return markers;
 		}
 
-
-		markers.push((<Marker 
-			key={key}
-			position={{lat: pos.latitude, lng: pos.longitude}} />));
+		markers.push(
+			<Marker key={key} position={{ lat: pos.latitude, lng: pos.longitude }} />
+		);
 		return markers;
 	}
 
 	render() {
-		const {features} = this.props;
-		console.log(features);
+		const { features } = this.props;
 		return (
 			<GoogleMap
 				bootstrapURLKeys={{ key: googleMapsConfig.apiKey }}
-				onGoogleApiLoaded={({map, maps}) => this.onMapLoaded(map, maps)}
+				onGoogleApiLoaded={({ map, maps }) => this.onMapLoaded(map, maps)}
 				defaultCenter={this.props.center}
 				defaultZoom={this.props.zoom}
-	      defaultMapTypeId="hybrid"
-	      defaultOptions={{
-		      disableDefaultUI: true,
-		  		zoomControl: true,
-  		    scrollwheel: true,	
-	      }}
+				defaultMapTypeId="hybrid"
+				defaultOptions={{
+					disableDefaultUI: true,
+					zoomControl: true,
+					scrollwheel: true
+				}}
 			>
-			{features && Object.keys(features).reduce((markers, key) => this.renderFeature(markers, key, features[key]), [])}
+				{features &&
+					Object.keys(features).reduce(
+						(markers, key) => this.renderFeature(markers, key, features[key]),
+						[]
+					)}
 			</GoogleMap>
 		);
 	}
 }
 
-const mapsApiUrl = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing";
+const mapsApiUrl =
+	"https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing";
 
 const enhance = compose(
-  withProps({
-    googleMapURL: `${mapsApiUrl}&key=${googleMapsConfig.apiKey}`,
-    loadingElement: <div id="loading" />,
-    containerElement: <div id="map-container" />,
-    mapElement: <div id="map" />,
+	withProps({
+		googleMapURL: `${mapsApiUrl}&key=${googleMapsConfig.apiKey}`,
+		loadingElement: <div id="loading" />,
+		containerElement: <div id="map-container" />,
+		mapElement: <div id="map" />,
 		center: {
 			lat: 0,
 			lng: 0
 		},
 		zoom: 3
-  }),
-  withScriptjs,
-  withGoogleMap
+	}),
+	withScriptjs,
+	withGoogleMap
 );
 
 export default enhance(GndMap);

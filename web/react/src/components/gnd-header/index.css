@@ -42,8 +42,23 @@
 	white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; 
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 3px 6px;
+  border-radius: 3px;
 }
 
+.title:focus {
+  border: 1px solid #009113 !important;
+  padding-left: 5px;
+  background: #fafafa;
+}
+
+.title:hover {
+  border: 1px solid #e0e0e0;
+  padding-left: 5px;
+}
 
 .top-right-controls {
   float: right;

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import React from "react";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { firestoreConnect } from "react-redux-firebase";
@@ -43,7 +42,14 @@ const updateProject = props => (projectId, project) =>
 	props.firestore.set({ collection: "projects", doc: projectId }, project);
 
 // TODO: i18n.
-const getLocalizedText = obj => obj && (obj["*"] || obj["en"] || obj["pt"]);
+const updateProjectTitle = props => (projectId, newTitle) =>
+	props.firestore
+		.collection("projects")
+		.doc(projectId)
+		.set({ title: {_: newTitle} }, { merge: true });
+
+// TODO: i18n.
+const getLocalizedText = obj => obj && (obj["_"] || obj["en"] || obj["pt"]);
 
 // Mount project data onto store based on current projectId in path.
 const connectGndDatastore = compose(
@@ -63,31 +69,11 @@ const connectGndDatastore = compose(
 	])
 );
 
-const withGndDatastore = compose(
-	WrappedComponent =>
-		class extends React.Component {
-			render() {
-				return <WrappedComponent {...this.props} />;
-			}
-		},
-	// https://github.com/prescottprue/redux-firestore#types-of-queries
-	firestoreConnect(({ projectId }) => [
-		{
-			collection: "projects",
-			doc: projectId,
-			storeAs: "activeProject"
-		},
-		{
-			collection: `projects/${projectId}/features`,
-			storeAs: "mapFeatures"
-		}
-	])
-);
-
 export {
 	getActiveProject,
 	getActiveProjectId,
 	updateProject,
+	updateProjectTitle,
 	getAuth,
 	getProfile,
 	getMapFeatures,
