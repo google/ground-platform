@@ -34,26 +34,35 @@ import GndInlineEdit from "../gnd-inline-edit";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import GndMarkerImage from "../gnd-marker-image";
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Typography from '@material-ui/core/Typography';
 
 const styles = theme => ({
   container: {
     display: "flex",
     flexWrap: "wrap"
   },
-  json: {
-    marginLeft: theme.spacing.unit,
-    marginRight: theme.spacing.unit,
-    width: '100%'
-  }
+  formTabs: {
+    marginTop: 12,
+    backgroundColor: theme.palette.background.paper,
+    width: '100%',
+  },  
 });
 
 class GndFeatureTypeEditor extends React.Component {
-  state = {};
+  state = {
+    formIndex: 0,
+  };
 
   handleClose = () => {
     this.props.close();
   };
 
+  handleTabChange = (event, value) => {
+    this.setState({ formIndex: value });
+  };
 
   handleSave = event => {
     // try {
@@ -70,10 +79,24 @@ class GndFeatureTypeEditor extends React.Component {
 
   }
 
+  formTab(form) {
+    return (<Tab label={form.defn && getLocalizedText(form.defn.titles)} />);
+  }
+
+  formEditor(form) {
+    return (<div>{form.id}</div>);
+  }
+
   render() {
-    const { classes, editState } = this.props;
+    const { classes, theme, editState } = this.props;
     const id = editState && editState.id;
     const defn = editState && editState.defn;
+    const forms = (defn && defn.forms) || {};
+    const formsArray = Object.keys(forms).map(id => ({id: id, defn: forms[id]}));
+    if (formsArray.length == 0) {
+      formsArray.push({id: 'generateid', defn: {}});
+    }
+    // TODO: Add empty template if no forms present.
     return (
       <Dialog
         open={!!editState}
@@ -91,7 +114,7 @@ class GndFeatureTypeEditor extends React.Component {
             Place type config
           </DialogTitle>
           <DialogContent>
-            <div class="ft-header">
+            <div className="ft-header">
               <div className="marker-container">
                 <GndMarkerImage className="marker" featureType={defn} />
               </div>
@@ -102,7 +125,25 @@ class GndFeatureTypeEditor extends React.Component {
                 placeholder="Unnamed place type"
               />
             </div>
-            <h2>Work in progress..</h2>
+            <Typography variant="caption" align="center">
+              Form definitions
+            </Typography>
+            <div className={classes.formTabs}>
+              <AppBar position="static" color="default">
+                <Tabs
+                  value={this.state.formIndex}
+                  onChange={this.handleTabChange}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  fullWidth
+                >
+                  {formsArray.map(form => this.formTab(form))}
+                </Tabs>
+              </AppBar>
+              <div>
+                {this.formEditor(formsArray[this.state.formIndex])}
+              </div>
+            </div>
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">
@@ -141,7 +182,7 @@ const enhance = compose(
   withHandlers({
     updateProject
   }),
-  withStyles(styles)
+  withStyles(styles, { withTheme: true })
 );
 
 export default enhance(GndFeatureTypeEditor);
