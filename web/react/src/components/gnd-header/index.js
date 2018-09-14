@@ -45,7 +45,8 @@ const GndAppBar = withStyles({
 class GndHeader extends React.Component {
   state = {
     projectId: null,
-    title: " "
+    title: " ",
+    hasFocus: false,
   };
 
   componentWillReceiveProps(nextProps) {
@@ -86,14 +87,19 @@ class GndHeader extends React.Component {
         break;
       case "Escape":
         this.reset(this.props);
-        this.refs.input.blur();
+        // this.refs.input.blur();
         break;
       default:
         // n/a.
     }
   }
 
+  handleFocus(ev) {
+    this.setState({hasFocus: true});
+  }
+
   handleBlur(ev) {
+    this.setState({hasFocus: false});
     this.saveChanges();
   }
 
@@ -113,11 +119,16 @@ class GndHeader extends React.Component {
   reset(props) {
     this.setState({
       projectId: props.projectId,
-      title: (props.project && getLocalizedText(props.project.title)) || ""
+      title: (props.project && getLocalizedText(props.project.title)) || "",
+      hasFocus: false,
     });
   }
 
   render() {
+    // Remove focus after [ESC] is pressed.
+    if (!this.state.hasFocus && this.refs.input) {
+      this.refs.input.blur();
+    }
     const { auth } = this.props;
     // TODO: Move title and login link into separate component.
     const AuthWiget = auth.isEmpty ? (
@@ -171,6 +182,7 @@ class GndHeader extends React.Component {
               placeholderIsMinWidth
               onChange={this.handleTitleChange.bind(this)}
               onKeyDown={this.handleKeyPress.bind(this)}
+              onFocus={this.handleFocus.bind(this)}
               onBlur={this.handleBlur.bind(this)}
             />
             <div className="top-right-controls">{AuthWiget}</div>
