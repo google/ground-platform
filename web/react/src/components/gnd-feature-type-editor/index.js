@@ -16,12 +16,12 @@
  */
 
 import React from "react";
+import "./index.css";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { withHandlers } from "recompose";
 import {
-  getActiveProjectId,
-  getActiveProject,
+  getLocalizedText,
   updateProject
 } from "../../datastore.js";
 import TextField from "@material-ui/core/TextField";
@@ -70,15 +70,10 @@ class GndFeatureTypeEditor extends React.Component {
 
   }
 
-  getLabel() {
-    return null;
-  }
-
   render() {
     const { classes, editState } = this.props;
     const id = editState && editState.id;
     const defn = editState && editState.defn;
-    console.log(defn);
     return (
       <Dialog
         open={!!editState}
@@ -96,13 +91,17 @@ class GndFeatureTypeEditor extends React.Component {
             Place type config
           </DialogTitle>
           <DialogContent>
-            <GndMarkerImage featureType={defn} />
-            <GndInlineEdit
-              className="ftLabel"
-              onCommitChanges={this.handleLabelChange.bind(this)}
-              value={this.getLabel()}
-              placeholder="Unnamed place type"
-            />
+            <div class="ft-header">
+              <div className="marker-container">
+                <GndMarkerImage className="marker" featureType={defn} />
+              </div>
+              <GndInlineEdit
+                className="ft-label"              
+                onCommitChanges={this.handleLabelChange.bind(this)}
+                value={getLocalizedText(defn && defn.itemLabel)}
+                placeholder="Unnamed place type"
+              />
+            </div>
             <h2>Work in progress..</h2>
           </DialogContent>
           <DialogActions>

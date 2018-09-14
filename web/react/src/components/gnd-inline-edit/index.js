@@ -85,16 +85,16 @@ class GndInlineEdit extends React.Component {
     if (!hasFocus && this.refs.input) {
       this.refs.input.blur();
     }
-    const { className, placeholder } = this.props;
+    const { className, inputClassName, placeholder } = this.props;
     // TODO: Move title and login link into separate component.
 
     return (
       <AutosizeInput
-        inputClassName={`${className} inline-edit ${!value && "untitled"}`}
+        className={className}
+        inputClassName={`${inputClassName} inline-edit ${!value && "untitled"}`}
         ref="input"
         value={value}
         placeholder={placeholder}
-        placeholderIsMinWidth
         onChange={this.handleChange.bind(this)}
         onKeyDown={this.handleKeyDown.bind(this)}
         onFocus={this.handleFocus.bind(this)}

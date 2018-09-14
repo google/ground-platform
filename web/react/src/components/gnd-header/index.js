@@ -122,7 +122,7 @@ class GndHeader extends React.Component {
           <div className="header">
             <img src={logo} className="logo" alt="Ground logo" />
             <GndInlineEdit
-              className="title"
+              inputClassName="title"
               onCommitChanges={this.handleSaveTitleChange.bind(this)}
               value={this.getTitle()}
               placeholder="Untitled project"
