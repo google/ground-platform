@@ -32,6 +32,7 @@ import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import GndProjectEditor from "../gnd-project-editor";
+import GndInlineEdit from "../gnd-inline-edit";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import AutosizeInput from "react-input-autosize";
 import { withHandlers } from "recompose";
@@ -43,22 +44,6 @@ const GndAppBar = withStyles({
 })(AppBar);
 
 class GndHeader extends React.Component {
-  state = {
-    projectId: null,
-    title: " ",
-    hasFocus: false,
-  };
-
-  componentWillReceiveProps(nextProps) {
-    if (
-      nextProps.projectId === this.state.projectId &&
-      (nextProps.project && nextProps.project.title) === this.state.title
-    ) {
-      return;
-    }
-    this.reset(nextProps);
-  }
-
   handleEditProjectClick = () => {
     this.props.openProjectEditor();
   };
@@ -74,62 +59,26 @@ class GndHeader extends React.Component {
     this.props.firebase.logout();
   };
 
-  handleTitleChange(ev) {
-    this.setState({
-      title: ev.target.value
-    });
-  }
-
-  handleKeyPress(ev) {
-    switch (ev.key) {
-      case "Enter":
-        this.saveChanges().then(() => this.refs.input.blur());
-        break;
-      case "Escape":
-        this.reset(this.props);
-        // this.refs.input.blur();
-        break;
-      default:
-        // n/a.
+  handleSaveTitleChange(value) {
+    value = value.trim();
+    const projectId = this.props.projectId;
+    if (!projectId) {
+      return Promise.reject('Project not loaded');
     }
+    // Don't save if unchanged.
+    if (this.getTitle() === value) {
+      return Promise.resolve();
+    } 
+    return this.props.updateProjectTitle(projectId, value);
   }
 
-  handleFocus(ev) {
-    this.setState({hasFocus: true});
-  }
-
-  handleBlur(ev) {
-    this.setState({hasFocus: false});
-    this.saveChanges();
-  }
-
-  saveChanges() {
-    const { projectId, title } = this.state;
-    if (projectId && title) {
-      if (getLocalizedText(this.props.project) === title) {
-        return Promise.resolve();
-      } else {
-        return this.props.updateProjectTitle(projectId, title);
-      }
-    } else {
-      return Promise.reject(`projectId: ${projectId} title: ${title}`);
-    }
-  }
-
-  reset(props) {
-    this.setState({
-      projectId: props.projectId,
-      title: (props.project && getLocalizedText(props.project.title)) || "",
-      hasFocus: false,
-    });
+  getTitle() {
+    return (this.props.project && getLocalizedText(this.props.project.title)) || "";
   }
 
   render() {
-    // Remove focus after [ESC] is pressed.
-    if (!this.state.hasFocus && this.refs.input) {
-      this.refs.input.blur();
-    }
     const { auth } = this.props;
+
     // TODO: Move title and login link into separate component.
     const AuthWiget = auth.isEmpty ? (
       <Button
@@ -173,17 +122,10 @@ class GndHeader extends React.Component {
         <GndAppBar>
           <div className="header">
             <img src={logo} className="logo" alt="Ground logo" />
-            <AutosizeInput
-              inputClassName={`title ${!this.state.title && "untitled"}`}
-              name="form-field-name"
-              ref="input"
-              value={this.state.title}
+            <GndInlineEdit
+              onSaveChanges={this.handleSaveTitleChange.bind(this)}
+              value={this.getTitle()}
               placeholder="Untitled project"
-              placeholderIsMinWidth
-              onChange={this.handleTitleChange.bind(this)}
-              onKeyDown={this.handleKeyPress.bind(this)}
-              onFocus={this.handleFocus.bind(this)}
-              onBlur={this.handleBlur.bind(this)}
             />
             <div className="top-right-controls">{AuthWiget}</div>
           </div>

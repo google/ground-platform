@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,32 +15,34 @@
  * limitations under the License.
  */
 
-.header {
-  height: 62px;
-	white-space: nowrap;
+.inline-edit {
+  color: #212121;
+  font-size: 15pt;
+  position: relative;
+  top: 8px;
+  left: 14px; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 3px 6px;
+  border-radius: 3px;
 }
 
-.logo {
-	position: relative;
-	top: 6px;
-	left: 10px;
-	vertical-align: middle;
-	width: 48px;
-	height: 48px;
+.inline-edit:focus {
+  border: 1px solid #009113 !important;
+  padding-left: 5px;
+  background: #fafafa;
 }
 
-.top-right-controls {
-  float: right;
-  margin: 14px 16px;
-  display: flex;
+.inline-edit:hover {
+  border: 1px solid #e0e0e0;
+  padding-left: 5px;
 }
 
-.user-thumb {
-	width: 32px;
-	height: 32px;
-	border-radius: 32px;
-}
-
-.top-right-controls button {
-	margin-left: 10px !important;
+.untitled {
+  color: #616161 !important;
+  font-style: italic;
 }
