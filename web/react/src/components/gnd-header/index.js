@@ -60,7 +60,6 @@ class GndHeader extends React.Component {
   };
 
   handleSaveTitleChange(value) {
-    value = value.trim();
     const projectId = this.props.projectId;
     if (!projectId) {
       return Promise.reject('Project not loaded');
@@ -93,7 +92,7 @@ class GndHeader extends React.Component {
       <React.Fragment>
         <img
           alt={auth.displayName}
-          src={auth.photoURL + "?sz=32"}
+          src={auth.photoURL + "?sz=64"}
           className="user-thumb"
         />
         <Button
@@ -123,6 +122,7 @@ class GndHeader extends React.Component {
           <div className="header">
             <img src={logo} className="logo" alt="Ground logo" />
             <GndInlineEdit
+              className="title"
               onSaveChanges={this.handleSaveTitleChange.bind(this)}
               value={this.getTitle()}
               placeholder="Untitled project"

@@ -88,18 +88,18 @@ class GndLegend extends React.Component {
     this.props.openFeatureTypeEditor(ftId);
   }
 
-  featureTypeListItem(ftId, ft, classes) {
+  featureTypeListItem(ft, classes) {
     return (
-      <ListItem button>
+      <ListItem button key={ft.id}>
         <ListItemIcon>
-          <img width="24" height="24" src={iconSrc(ft.iconId)} />
+          <img width="24" height="24" src={iconSrc(ft.defn.iconId)} />
         </ListItemIcon>
-        <ListItemText primary={getLocalizedText(ft.itemLabel)} />
+        <ListItemText primary={ft.label} />
         <ListItemSecondaryAction>
           <IconButton
             className={classes.button}
             aria-label="Customize"
-            onClick={this.onCustomizeClickHandler.bind(this, ftId)}
+            onClick={this.onCustomizeClickHandler.bind(this, ft.id)}
           >
             <SettingsIcon />
           </IconButton>
@@ -112,6 +112,14 @@ class GndLegend extends React.Component {
     const { classes } = this.props;
     const featureTypes =
       (this.props.project && this.props.project.featureTypes) || {};
+    const featureTypesArray = Object.keys(featureTypes).map(id => ({
+      id,
+      defn: featureTypes[id],
+      label: getLocalizedText(featureTypes[id].itemLabel) || "Place"
+    }));
+    featureTypesArray.sort((a, b) =>
+      a.label.localeCompare(b.label)
+    );
     return (
       <Card className={classes.card}>
         <CardContent>
@@ -119,9 +127,7 @@ class GndLegend extends React.Component {
             Legend
           </Typography>
           <List>
-            {Object.keys(featureTypes).map(ftId =>
-              this.featureTypeListItem(ftId, featureTypes[ftId], classes)
-            )}
+            {featureTypesArray.map(ft => this.featureTypeListItem(ft, classes))}
           </List>
         </CardContent>
       </Card>
@@ -133,7 +139,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   openFeatureTypeEditor: ftId =>
     dispatch({
       type: "OPEN_FEATURE_TYPE_EDITOR",
-      payload: { featureTypeId: ftId },
+      payload: { featureTypeId: ftId }
     })
 });
 

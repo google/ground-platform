@@ -18,28 +18,25 @@
 .inline-edit {
   color: #212121;
   font-size: 15pt;
-  position: relative;
-  top: 8px;
-  left: 14px; 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; 
   background: transparent;
   border: none;
   outline: none;
-  padding: 3px 6px;
+  padding: 3px 2px 3px 5px;
   border-radius: 3px;
 }
 
 .inline-edit:focus {
   border: 1px solid #009113 !important;
-  padding-left: 5px;
+  padding-left: 4px;
   background: #fafafa;
 }
 
 .inline-edit:hover {
   border: 1px solid #e0e0e0;
-  padding-left: 5px;
+  padding-left: 4px;
 }
 
 .untitled {

@@ -43,3 +43,9 @@
 .top-right-controls button {
 	margin-left: 10px !important;
 }
+
+.title {
+  position: relative;
+  top: 8px;
+  left: 14px; 
+}
