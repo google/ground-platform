@@ -30,8 +30,10 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import GndInlineEdit from "../gnd-inline-edit";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
+import GndMarkerImage from "../gnd-marker-image";
 
 const styles = theme => ({
   container: {
@@ -52,42 +54,34 @@ class GndFeatureTypeEditor extends React.Component {
     this.props.close();
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.project === this.state.project) {
-      return;
-    }
-    this.setState((prevState, prevProps) => ({
-      ...prevState,
-      projectId: nextProps.projectId,
-      project: JSON.stringify(nextProps.project || {}, null, "  ")
-    }));
-  }
-
-  handleChangeJson = event => {
-    let project = event.target.value;
-    this.setState((prevState, props) => ({ ...prevState, project }));
-  };
 
   handleSave = event => {
-    try {
-      this.props
-        .updateProject(this.state.projectId, JSON.parse(this.state.project))
-        .then(ref => this.props.close());
-    } catch (e) {
-      alert(e);
-    }
-    event.preventDefault();
+    // try {
+    //   this.props
+    //     .updateProject(this.state.projectId, JSON.parse(this.state.project))
+    //     .then(ref => this.props.close());
+    // } catch (e) {
+    //   alert(e);
+    // }
+    // event.preventDefault();
   };
 
+  handleLabelChange(newLabel) {
+
+  }
+
+  getLabel() {
+    return null;
+  }
+
   render() {
-    const { classes, featureTypeEditorOpen } = this.props;
-    const { project } = this.state;
-    if (!project) {
-      return <div>Loading...</div>;
-    }
+    const { classes, editState } = this.props;
+    const id = editState && editState.id;
+    const defn = editState && editState.defn;
+    console.log(defn);
     return (
       <Dialog
-        open={!!featureTypeEditorOpen}
+        open={!!editState}
         onClose={this.handleClose}
         aria-labelledby="form-dialog-title"
         fullWidth
@@ -98,18 +92,18 @@ class GndFeatureTypeEditor extends React.Component {
           autoComplete="off"
           onSubmit={ev => this.handleSave(ev)}
         >
-          <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
+          <DialogTitle>
+            Place type config
+          </DialogTitle>
           <DialogContent>
-            <TextField
-              id="json"
-              label="Project Definition (JSON)"
-              className={classes.json}
-              value={project}
-              onChange={ev => this.handleChangeJson(ev)}
-              margin="normal"
-              multiline
-              rows="20"
+            <GndMarkerImage featureType={defn} />
+            <GndInlineEdit
+              className="ftLabel"
+              onCommitChanges={this.handleLabelChange.bind(this)}
+              value={this.getLabel()}
+              placeholder="Unnamed place type"
             />
+            <h2>Work in progress..</h2>
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">
@@ -131,9 +125,7 @@ class GndFeatureTypeEditor extends React.Component {
 }
 
 const mapStateToProps = (store, props) => ({
-  projectId: getActiveProjectId(store),
-  project: getActiveProject(store),
-  featureTypeEditorOpen: store.featureTypeEditorOpen
+  editState: store.featureTypeEditState
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

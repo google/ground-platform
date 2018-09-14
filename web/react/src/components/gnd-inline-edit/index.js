@@ -42,14 +42,15 @@ class GndInlineEdit extends React.Component {
     });
   }
 
-  handleKeyPress(ev) {
+  handleKeyDown(ev) {
     switch (ev.key) {
       case "Enter":
         this.saveChanges().then(() => this.refs.input.blur());
+        ev.preventDefault();
         break;
       case "Escape":
         this.reset(this.props);
-        // this.refs.input.blur();
+        ev.preventDefault();
         break;
       default:
        // n/a.
@@ -75,7 +76,7 @@ class GndInlineEdit extends React.Component {
   saveChanges() {
     const value = this.state.value.trim();
     this.setState({value});
-    return this.props.onSaveChanges(value);
+    return this.props.onCommitChanges(value);
   }
 
   render() {
@@ -95,7 +96,7 @@ class GndInlineEdit extends React.Component {
         placeholder={placeholder}
         placeholderIsMinWidth
         onChange={this.handleChange.bind(this)}
-        onKeyDown={this.handleKeyPress.bind(this)}
+        onKeyDown={this.handleKeyDown.bind(this)}
         onFocus={this.handleFocus.bind(this)}
         onBlur={this.handleBlur.bind(this)}
       />

@@ -24,6 +24,7 @@ import {
   getActiveProject,
   getLocalizedText
 } from "../../datastore.js";
+import GndMarkerImage from "../gnd-marker-image";
 import { withHandlers } from "recompose";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -49,48 +50,36 @@ const styles = theme => ({
     width: 260,
     top: 86,
     right: 26,
-    opacity: 0.97,
+    opacity: 0.97
   },
   cardContent: {
-    padding: 0,
+    padding: 0
   },
   list: {
-    width: '100%',
-    overflow: 'auto',
+    width: "100%",
+    overflow: "auto",
+    minHeight: 100,
     maxHeight: 300,
-    margin: 0,
+    margin: 0
   },
   heading: {
-    padding: '16px 16px 8px 16px',
-    fontSize: 12,
-  },
+    padding: "16px 20px 4px 20px",
+    fontSize: 12
+  }
 });
 
-const png = filebase => require(`../../images/${filebase}.png`);
-
-const iconSrc = iconId => {
-  switch (iconId) {
-    case "tree":
-      return png("tree");
-    case "house-map-marker":
-      return png("home-map-marker");
-    case "star-circle":
-      return png("star-circle");
-    default:
-      return png("map-marker");
-  }
-};
-
 class GndLegend extends React.Component {
-  onCustomizeClickHandler(ftId) {
-    this.props.openFeatureTypeEditor(ftId);
+  onCustomizeClickHandler(featureTypeId) {
+    const featureTypes =
+      (this.props.project && this.props.project.featureTypes) || {};
+    this.props.openFeatureTypeEditor(featureTypeId, featureTypes[featureTypeId]);
   }
 
   featureTypeListItem(ft, classes) {
     return (
       <ListItem button key={ft.id}>
         <ListItemIcon>
-          <img width="24" height="24" src={iconSrc(ft.defn.iconId)} />
+          <GndMarkerImage featureType={ft.defn} />
         </ListItemIcon>
         <ListItemText primary={ft.label} />
         <ListItemSecondaryAction>
@@ -115,9 +104,7 @@ class GndLegend extends React.Component {
       defn: featureTypes[id],
       label: getLocalizedText(featureTypes[id].itemLabel) || "Place"
     }));
-    featureTypesArray.sort((a, b) =>
-      a.label.localeCompare(b.label)
-    );
+    featureTypesArray.sort((a, b) => a.label.localeCompare(b.label));
     return (
       <Card className={classes.card}>
         <CardContent className={classes.cardContent}>
@@ -134,10 +121,10 @@ class GndLegend extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  openFeatureTypeEditor: ftId =>
+  openFeatureTypeEditor: (id, defn) =>
     dispatch({
       type: "OPEN_FEATURE_TYPE_EDITOR",
-      payload: { featureTypeId: ftId }
+      payload: { id, defn }
     })
 });
 

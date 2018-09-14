@@ -14,32 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import React from "react";
 
-.inline-edit {
-  color: #212121;
-  font-size: 15pt;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; 
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 3px 2px 3px 5px;
-  border-radius: 3px;
-}
+const png = filebase => require(`../../images/${filebase}.png`);
 
-.inline-edit:focus {
-  border: 1px solid #009113 !important;
-  padding: 2px 1px 2px 4px;
-  background: #fafafa;
-}
+const iconSrc = iconId => {
+  switch (iconId) {
+    case "tree":
+      return png("tree");
+    case "house-map-marker":
+      return png("home-map-marker");
+    case "star-circle":
+      return png("star-circle");
+    default:
+      return png("map-marker");
+  }
+};
 
-.inline-edit:hover {
-  border: 1px solid #e0e0e0;
-  padding: 2px 1px 2px 4px;
-}
+const GndMarkerImage = (props) => (
+  <img width="24" height="24" src={props.featureType && iconSrc(props.featureType.iconId)} />
+);
 
-.untitled {
-  color: #757575 !important;
-  font-style: italic;
-}
+export default GndMarkerImage;
