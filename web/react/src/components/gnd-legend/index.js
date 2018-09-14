@@ -46,26 +46,24 @@ import SettingsIcon from "@material-ui/icons/Settings";
 const styles = theme => ({
   card: {
     position: "absolute",
-    width: 300,
-    top: 96,
-    right: 16,
-    opacity: 0.97
+    width: 260,
+    top: 86,
+    right: 26,
+    opacity: 0.97,
   },
-  bullet: {
-    display: "inline-block",
-    margin: "0 2px",
-    transform: "scale(0.8)"
+  cardContent: {
+    padding: 0,
   },
-  title: {
-    marginBottom: 16,
-    fontSize: 14
+  list: {
+    width: '100%',
+    overflow: 'auto',
+    maxHeight: 300,
+    margin: 0,
   },
-  pos: {
-    marginBottom: 12
+  heading: {
+    padding: '16px 16px 8px 16px',
+    fontSize: 12,
   },
-  button: {
-    margin: theme.spacing.unit
-  }
 });
 
 const png = filebase => require(`../../images/${filebase}.png`);
@@ -122,11 +120,11 @@ class GndLegend extends React.Component {
     );
     return (
       <Card className={classes.card}>
-        <CardContent>
-          <Typography className={classes.title} color="textSecondary">
+        <CardContent className={classes.cardContent}>
+          <Typography className={classes.heading} color="textSecondary">
             Legend
           </Typography>
-          <List>
+          <List className={classes.list}>
             {featureTypesArray.map(ft => this.featureTypeListItem(ft, classes))}
           </List>
         </CardContent>
