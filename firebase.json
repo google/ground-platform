@@ -4,7 +4,7 @@
     "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/build/default",
+    "public": "web/react/build",
     "rewrites": [
       {
         "source": "**/!(*.*)",
