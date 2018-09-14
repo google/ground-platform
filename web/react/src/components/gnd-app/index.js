@@ -19,8 +19,8 @@ import React from "react";
 import GndMap from "../gnd-map";
 import GndHeader from "../gnd-header";
 import GndLegend from "../gnd-legend";
+import GndFeatureTypeEditor from "../gnd-feature-type-editor";
 import { connectGndDatastore } from "../../datastore.js";
-import "./index.css";
 
 class GndApp extends React.Component {
   render() {
@@ -29,6 +29,7 @@ class GndApp extends React.Component {
         <GndMap />
         <GndHeader />
         <GndLegend />
+        <GndFeatureTypeEditor />
       </React.Fragment>
     );
   }

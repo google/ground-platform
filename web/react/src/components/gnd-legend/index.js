@@ -83,21 +83,31 @@ const iconSrc = iconId => {
   }
 };
 
-const featureTypeListItem = (ftId, ft, classes) => (
-  <ListItem button>
-    <ListItemIcon>
-      <img width="24" height="24" src={iconSrc(ft.iconId)} />
-    </ListItemIcon>
-    <ListItemText primary={getLocalizedText(ft.itemLabel)} />
-    <ListItemSecondaryAction>
-      <IconButton className={classes.button} aria-label="Customize">
-        <SettingsIcon />
-      </IconButton>
-    </ListItemSecondaryAction>
-  </ListItem>
-);
-
 class GndLegend extends React.Component {
+  onCustomizeClickHandler(ftId) {
+    this.props.openFeatureTypeEditor(ftId);
+  }
+
+  featureTypeListItem(ftId, ft, classes) {
+    return (
+      <ListItem button>
+        <ListItemIcon>
+          <img width="24" height="24" src={iconSrc(ft.iconId)} />
+        </ListItemIcon>
+        <ListItemText primary={getLocalizedText(ft.itemLabel)} />
+        <ListItemSecondaryAction>
+          <IconButton
+            className={classes.button}
+            aria-label="Customize"
+            onClick={this.onCustomizeClickHandler.bind(this, ftId)}
+          >
+            <SettingsIcon />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+    );
+  }
+
   render() {
     const { classes } = this.props;
     const featureTypes =
@@ -110,7 +120,7 @@ class GndLegend extends React.Component {
           </Typography>
           <List>
             {Object.keys(featureTypes).map(ftId =>
-              featureTypeListItem(ftId, featureTypes[ftId], classes)
+              this.featureTypeListItem(ftId, featureTypes[ftId], classes)
             )}
           </List>
         </CardContent>
@@ -119,13 +129,24 @@ class GndLegend extends React.Component {
   }
 }
 
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  openFeatureTypeEditor: ftId =>
+    dispatch({
+      type: "OPEN_FEATURE_TYPE_EDITOR",
+      payload: { featureTypeId: ftId },
+    })
+});
+
 const mapStateToProps = (store, props) => ({
   projectId: getActiveProjectId(store),
   project: getActiveProject(store)
 });
 
 const enhance = compose(
-  connect(mapStateToProps),
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  ),
   withFirestore,
   withStyles(styles)
 );

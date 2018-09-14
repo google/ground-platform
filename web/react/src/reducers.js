@@ -44,11 +44,24 @@ const projectEditorReducer = (state = false, action) => {
 	}
 };
 
+
+const featureTypeEditorReducer = (state = null, action) => {
+	switch (action.type) {
+		case "OPEN_FEATURE_TYPE_EDITOR":
+			return action.payload.featureTypeId;
+		case "CLOSE_FEATURE_TYPE_EDITOR":
+			return null;
+		default:
+			return state;
+	}
+};
+
 const rootReducer = combineReducers({
 	path: pathReducer,
 	firebase: firebaseReducer,
 	firestore: firestoreReducer,
-	projectEditorOpen: projectEditorReducer
+	projectEditorOpen: projectEditorReducer,
+	featureTypeEditorOpen: featureTypeEditorReducer,
 });
 
 export default connectRouter(history)(rootReducer);
