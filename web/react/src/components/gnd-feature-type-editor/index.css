@@ -40,3 +40,10 @@
   display: table-cell;
   vertical-align: top;
 }
+
+.ft-header-caption {
+  margin-left: 14px;
+}
+.tab-wrapper {
+  border-bottom: 1px solid #ddd;
+}

@@ -20,10 +20,7 @@ import "./index.css";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { withHandlers } from "recompose";
-import {
-  getLocalizedText,
-  updateProject
-} from "../../datastore.js";
+import { getLocalizedText, updateProject } from "../../datastore.js";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -34,26 +31,21 @@ import GndInlineEdit from "../gnd-inline-edit";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import GndMarkerImage from "../gnd-marker-image";
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import Typography from '@material-ui/core/Typography';
+import AppBar from "@material-ui/core/AppBar";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap"
-  },
-  formTabs: {
-    marginTop: 12,
-    backgroundColor: theme.palette.background.paper,
-    width: '100%',
-  },  
+  tabs: {
+    flexGrow: 1
+  }
 });
 
 class GndFeatureTypeEditor extends React.Component {
   state = {
-    formIndex: 0,
+    formIndex: 0
   };
 
   handleClose = () => {
@@ -75,16 +67,14 @@ class GndFeatureTypeEditor extends React.Component {
     // event.preventDefault();
   };
 
-  handleLabelChange(newLabel) {
-
-  }
+  handleLabelChange(newLabel) {}
 
   formTab(form) {
-    return (<Tab label={form.defn && getLocalizedText(form.defn.titles)} />);
+    return <Tab label={form.title} />;
   }
 
   formEditor(form) {
-    return (<div>{form.id}</div>);
+    return <div>{form && form.id}</div>;
   }
 
   render() {
@@ -92,10 +82,13 @@ class GndFeatureTypeEditor extends React.Component {
     const id = editState && editState.id;
     const defn = editState && editState.defn;
     const forms = (defn && defn.forms) || {};
-    const formsArray = Object.keys(forms).map(id => ({id: id, defn: forms[id]}));
-    if (formsArray.length == 0) {
-      formsArray.push({id: 'generateid', defn: {}});
-    }
+    const formsArray = Object.keys(forms).map(id => ({
+      id: id,
+      title: getLocalizedText(forms[id].titles),
+      defn: forms[id]
+    }));
+    formsArray.sort((a, b) => a.title.localeCompare(b.title));
+    formsArray.push({ id: "generateid", title: "New form", defn: {} });
     // TODO: Add empty template if no forms present.
     return (
       <Dialog
@@ -111,39 +104,35 @@ class GndFeatureTypeEditor extends React.Component {
           onSubmit={ev => this.handleSave(ev)}
         >
           <DialogTitle>
-            Place type config
-          </DialogTitle>
-          <DialogContent>
             <div className="ft-header">
               <div className="marker-container">
                 <GndMarkerImage className="marker" featureType={defn} />
               </div>
               <GndInlineEdit
-                className="ft-label"              
+                className="ft-label"
                 onCommitChanges={this.handleLabelChange.bind(this)}
                 value={getLocalizedText(defn && defn.itemLabel)}
                 placeholder="Unnamed place type"
               />
-            </div>
-            <Typography variant="caption" align="center">
-              Form definitions
-            </Typography>
-            <div className={classes.formTabs}>
-              <AppBar position="static" color="default">
-                <Tabs
-                  value={this.state.formIndex}
-                  onChange={this.handleTabChange}
-                  indicatorColor="primary"
-                  textColor="primary"
-                  fullWidth
-                >
-                  {formsArray.map(form => this.formTab(form))}
-                </Tabs>
-              </AppBar>
-              <div>
-                {this.formEditor(formsArray[this.state.formIndex])}
+              <div className="ft-header-caption">
+                <Typography variant="caption">Place type definition</Typography>
               </div>
             </div>
+          </DialogTitle>
+          <DialogContent>
+            <div className="tab-wrapper">
+              <Tabs
+                value={this.state.formIndex}
+                onChange={this.handleTabChange}
+                indicatorColor="primary"
+                textColor="primary"
+                centered
+              >
+                {formsArray.map(form => this.formTab(form))}
+              </Tabs>
+            </div>
+
+            {this.formEditor(formsArray[this.state.formIndex])}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">
@@ -169,13 +158,13 @@ const mapStateToProps = (store, props) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  close: () => dispatch({type: 'CLOSE_FEATURE_TYPE_EDITOR'}),  
+  close: () => dispatch({ type: "CLOSE_FEATURE_TYPE_EDITOR" })
 });
 
 const enhance = compose(
   connect(
     mapStateToProps,
-    mapDispatchToProps,
+    mapDispatchToProps
   ),
   withFirebase,
   withFirestore,
