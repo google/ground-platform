@@ -32,14 +32,14 @@ const styles = {
 class GndMultiSelectOption extends React.Component {
 	handleCodeChange(newCode) {
 		const { onChange, option } = this.props;
-		const newOption = update(option, { code: { $set: newCode.trim() } });
+		const newOption = update(option, { code: { $set: newCode } });
 		onChange(newOption);
 	}
 
 	handleLabelChange(newLabel) {
 		const { onChange, option } = this.props;
 		const newOption = update(option, {
-			labels: { _: { $set: newLabel.trim() } }
+			labels: { _: { $set: newLabel } }
 		});
 		onChange(newOption);
 	}
@@ -54,6 +54,7 @@ class GndMultiSelectOption extends React.Component {
 					classes={{ root: classes.option }}
 					value={code}
 					onChange={ev => this.handleCodeChange(ev.target.value)}
+					onBlur={ev => this.handleCodeChange(ev.target.value.trim())}
 					placeholder="Code"
 					margin="dense"
 					required
@@ -63,6 +64,7 @@ class GndMultiSelectOption extends React.Component {
 					classes={{ root: classes.option }}
 					value={getLocalizedText(labels)}
 					onChange={ev => this.handleLabelChange(ev.target.value)}
+					onBlur={ev => this.handleLabelChange(ev.target.value.trim())}
 					placeholder="Option"
 					margin="dense"
 					required

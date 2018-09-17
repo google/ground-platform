@@ -40,7 +40,9 @@ class GndFormElementEditor extends React.Component {
   handleLabelChange(newLabel) {
     const { element, onChange } = this.props;
     // TODO: i18n.
-    const newElement = update(element, { labels: { _: { $set: newLabel } } });
+    const newElement = update(element, {
+      labels: { _: { $set: newLabel } }
+    });
     onChange(newElement);
   }
 
@@ -55,17 +57,13 @@ class GndFormElementEditor extends React.Component {
     onChange(newElement);
   }
 
-
   render() {
     // Option 1. Component uses schema of Ground element
     // Option 2. Editor has callbacks for ea change and updates
     const { classes, element } = this.props;
     const { id, labels, type, required, options } = element;
     return (
-      <GndFocusableRow
-        key={id}
-        collapsedHeight="40px"
-      >
+      <GndFocusableRow key={id} collapsedHeight="40px">
         <div>
           <TextField
             id="fieldLabel"
@@ -73,6 +71,7 @@ class GndFormElementEditor extends React.Component {
             style={{ width: "64%" }}
             value={getLocalizedText(labels)}
             onChange={ev => this.handleLabelChange(ev.target.value)}
+            onBlur={ev => this.handleLabelChange(ev.target.value.trim())}
             placeholder="Field name"
             margin="normal"
           />
@@ -81,6 +80,7 @@ class GndFormElementEditor extends React.Component {
             classes={{ root: classes.type }}
             style={{ width: "33%", marginLeft: 16 }}
             onChange={ev => this.handleTypeChange(ev.target.value)}
+            onBlur={ev => this.handleTypeChange(ev.target.value.trim())}
           >
             <MenuItem value="text_field">Text</MenuItem>
             <MenuItem value="multiple_choice">Multiple choice</MenuItem>
