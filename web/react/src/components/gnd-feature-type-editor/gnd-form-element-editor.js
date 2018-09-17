@@ -49,11 +49,26 @@ class GndFormElementEditor extends React.Component {
 
   handleTypeChange(newType) {
     const { element, onChange } = this.props;
-    onChange(
-      update(element, {
-        type: { $set: newType }
-      })
-    );
+
+    switch (newType) {
+      case "select_one":
+      case "select_multiple":
+        onChange(
+          update(element, {
+            type: { $set: "multiple_choice" },
+            cardinality: { $set: newType },
+          })
+        );
+        break;
+      default:
+        onChange(
+          update(element, {
+            type: { $set: newType },
+            cardinality: { $set: undefined },
+            options: { $set: undefined },
+          })
+        );
+    }
   }
 
   handleRequiredChange(newRequired) {
@@ -74,7 +89,8 @@ class GndFormElementEditor extends React.Component {
     // Option 1. Component uses schema of Ground element
     // Option 2. Editor has callbacks for ea change and updates
     const { classes, element } = this.props;
-    const { id, labels, type, required, options } = element;
+    const { id, labels, required, options } = element;
+    const type = element.type === "multiple_choice" ? element.cardinality : element.type;
     return (
       <GndFocusableRow key={id} collapsedHeight="40px">
         <div>
@@ -96,10 +112,11 @@ class GndFormElementEditor extends React.Component {
             onBlur={ev => this.handleTypeChange(ev.target.value.trim())}
           >
             <MenuItem value="text_field">Text</MenuItem>
-            <MenuItem value="multiple_choice">Multiple choice</MenuItem>
+            <MenuItem value="select_one">Select one</MenuItem>
+            <MenuItem value="select_multiple">Select multiple</MenuItem>
           </Select>
         </div>
-        {type === "multiple_choice" && (
+        {element.type === "multiple_choice" && (
           <GndMultiSelectOptionsEditor
             options={options}
             onChange={this.handleOptionsChange.bind(this)}

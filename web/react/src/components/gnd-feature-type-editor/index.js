@@ -125,6 +125,7 @@ class GndFeatureTypeEditor extends React.Component {
           scroll="paper"
           maxWidth="false"
           classes={{ paper: "ft-dialog" }}
+          disableEscapeKeyDown
         >
           <DialogTitle>
             <div className="ft-header">
