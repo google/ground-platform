@@ -42,7 +42,7 @@ import update from "immutability-helper";
 
 const styles = theme => ({
   dialog: {
-    height: "100vh",
+    height: "100vh"
   }
 });
 
@@ -82,22 +82,19 @@ class GndFeatureTypeEditor extends React.Component {
   handleFeatureTypeLabelChange(newLabel) {
     const { featureType } = this.state;
     // TODO: i18n.
-    featureType.defn.itemLabel["_"] = newLabel;
     this.setState({
       ...this.state,
-      featureType
     });
     return Promise.resolve();
   }
 
   handleFormChange(newForm) {
     const { featureType } = this.state;
-    const newFeatureType = update(featureType, {
-      defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
-    });
     this.setState({
       ...this.state,
-      featureType: newFeatureType
+      featureType: update(featureType, {
+        defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
+      })
     });
   }
 
@@ -124,7 +121,7 @@ class GndFeatureTypeEditor extends React.Component {
           fullWidth
           scroll="paper"
           maxWidth="false"
-          classes={{paper: "ft-dialog"}}
+          classes={{ paper: "ft-dialog" }}
         >
           <DialogTitle>
             <div className="ft-header">
