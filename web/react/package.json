@@ -8,6 +8,7 @@
     "connected-react-router": "^4.4.1",
     "firebase": "^5.4.0",
     "history": "^4.7.2",
+    "immutability-helper": "^2.8.1",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-google-maps": "^9.4.5",
@@ -26,5 +27,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "eslint-plugin-react": "^7.11.1"
   }
 }

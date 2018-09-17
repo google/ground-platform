@@ -25,11 +25,8 @@ import {
   getLocalizedText
 } from "../../datastore.js";
 import GndMarkerImage from "../gnd-marker-image";
-import { withHandlers } from "recompose";
 import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -38,9 +35,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import Divider from "@material-ui/core/Divider";
 import { withFirestore } from "react-redux-firebase";
-import Icon from "@material-ui/core/Icon";
 import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
 

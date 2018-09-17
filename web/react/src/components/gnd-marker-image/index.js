@@ -31,8 +31,14 @@ const iconSrc = iconId => {
   }
 };
 
-const GndMarkerImage = ({featureType, className}) => (
-  <img width="24" height="24" src={featureType && iconSrc(featureType.iconId)} className={className}/>
+const GndMarkerImage = ({ featureType, className }) => (
+  <img
+    width="24"
+    height="24"
+    src={featureType && iconSrc(featureType.iconId)}
+    className={className}
+    alt="Map marker"
+  />
 );
 
 export default GndMarkerImage;

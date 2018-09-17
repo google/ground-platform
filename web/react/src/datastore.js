@@ -48,6 +48,12 @@ const updateProjectTitle = props => (projectId, newTitle) =>
 		.doc(projectId)
 		.set({ title: {_: newTitle} }, { merge: true });
 
+const updateFeatureType = props => (projectId, featureTypeId, newFeatureType) =>
+	props.firestore
+		.collection("projects")
+		.doc(projectId)
+		.set({ featureTypes: {[featureTypeId]: newFeatureType} }, { merge: true });
+
 // TODO: i18n.
 const getLocalizedText = obj => obj && (obj["_"] || obj["en"] || obj["pt"]);
 
@@ -74,6 +80,7 @@ export {
 	getActiveProjectId,
 	updateProject,
 	updateProjectTitle,
+	updateFeatureType,
 	getAuth,
 	getProfile,
 	getMapFeatures,

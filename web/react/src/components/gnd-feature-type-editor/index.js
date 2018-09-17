@@ -20,8 +20,11 @@ import "./index.css";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { withHandlers } from "recompose";
-import { getLocalizedText, updateProject } from "../../datastore.js";
-import TextField from "@material-ui/core/TextField";
+import {
+  getActiveProjectId,
+  getLocalizedText,
+  updateFeatureType
+} from "../../datastore.js";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -31,11 +34,11 @@ import GndInlineEdit from "../gnd-inline-edit";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import GndMarkerImage from "../gnd-marker-image";
-import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import GndFormEditor from "./gnd-form-editor";
+import update from "immutability-helper";
 
 const styles = theme => ({
   tabs: {
@@ -45,7 +48,8 @@ const styles = theme => ({
 
 class GndFeatureTypeEditor extends React.Component {
   state = {
-    formIndex: 0
+    formIndex: 0,
+    featureType: null
   };
 
   handleClose = () => {
@@ -56,31 +60,55 @@ class GndFeatureTypeEditor extends React.Component {
     this.setState({ formIndex: value });
   };
 
-  handleSave = event => {
-    // try {
-    //   this.props
-    //     .updateProject(this.state.projectId, JSON.parse(this.state.project))
-    //     .then(ref => this.props.close());
-    // } catch (e) {
-    //   alert(e);
-    // }
-    // event.preventDefault();
-  };
-
-  handleLabelChange(newLabel) {}
-
-  formTab(form) {
-    return <Tab label={form.title} />;
+  componentDidUpdate(prevProps) {
+    if (prevProps.editState === this.props.editState) {
+      return;
+    }
+    this.setState({ formIndex: 0, featureType: this.props.editState });
   }
 
-  formEditor(form) {
-    return <div>{form && form.id}</div>;
+  handleSave = event => {
+    try {
+      const { projectId, updateFeatureType, close } = this.props;
+      const { featureType } = this.state;
+      updateFeatureType(
+        projectId,
+        featureType.id,
+        featureType.defn
+      ).then(ref => this.props.close());
+    } catch (e) {
+      alert(e);
+    }
+    event.preventDefault();
+  };
+
+  handleFeatureTypeLabelChange(newLabel) {
+    const { featureType } = this.state;
+    // TODO: i18n.
+    featureType.defn.itemLabel["_"] = newLabel;
+    this.setState({
+      ...this.state,
+      featureType
+    });
+    return Promise.resolve();
+  }
+
+  handleFormChange(newForm) {
+    const { featureType } = this.state;
+    const newFeatureType = update(featureType, {
+      defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
+    });
+    this.setState({
+      ...this.state,
+      featureType: newFeatureType
+    });
   }
 
   render() {
-    const { classes, theme, editState } = this.props;
-    const id = editState && editState.id;
-    const defn = editState && editState.defn;
+    const { classes } = this.props;
+    const { featureType, formIndex } = this.state;
+    const defn = featureType && featureType.defn;
+    const featureTypeLabel = getLocalizedText(defn && defn.itemLabel);
     const forms = (defn && defn.forms) || {};
     const formsArray = Object.keys(forms).map(id => ({
       id: id,
@@ -88,11 +116,11 @@ class GndFeatureTypeEditor extends React.Component {
       defn: forms[id]
     }));
     formsArray.sort((a, b) => a.title.localeCompare(b.title));
-    formsArray.push({ id: "generateid", title: "New form", defn: {} });
+    // formsArray.push({ id: "generateid", title: "New form", defn: {} });
     // TODO: Add empty template if no forms present.
     return (
       <Dialog
-        open={!!editState}
+        open={!!featureType}
         onClose={this.handleClose}
         aria-labelledby="form-dialog-title"
         fullWidth
@@ -106,12 +134,12 @@ class GndFeatureTypeEditor extends React.Component {
           <DialogTitle>
             <div className="ft-header">
               <div className="marker-container">
-                <GndMarkerImage className="marker" featureType={defn} />
+                <GndMarkerImage className="marker" featureType={featureType} />
               </div>
               <GndInlineEdit
                 className="ft-label"
-                onCommitChanges={this.handleLabelChange.bind(this)}
-                value={getLocalizedText(defn && defn.itemLabel)}
+                onCommitChanges={this.handleFeatureTypeLabelChange.bind(this)}
+                value={featureTypeLabel}
                 placeholder="Unnamed place type"
               />
               <div className="ft-header-caption">
@@ -122,17 +150,21 @@ class GndFeatureTypeEditor extends React.Component {
           <DialogContent>
             <div className="tab-wrapper">
               <Tabs
-                value={this.state.formIndex}
+                value={formIndex}
                 onChange={this.handleTabChange}
                 indicatorColor="primary"
                 textColor="primary"
                 centered
               >
-                {formsArray.map(form => this.formTab(form))}
+                {formsArray.map(form => (
+                  <Tab label={form.title} key={form.id} />
+                ))}
               </Tabs>
             </div>
-
-            {this.formEditor(formsArray[this.state.formIndex])}
+            <GndFormEditor
+              form={formsArray[formIndex]}
+              onChange={this.handleFormChange.bind(this)}
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">
@@ -154,6 +186,7 @@ class GndFeatureTypeEditor extends React.Component {
 }
 
 const mapStateToProps = (store, props) => ({
+  projectId: getActiveProjectId(store),
   editState: store.featureTypeEditState
 });
 
@@ -169,7 +202,7 @@ const enhance = compose(
   withFirebase,
   withFirestore,
   withHandlers({
-    updateProject
+    updateFeatureType
   }),
   withStyles(styles, { withTheme: true })
 );

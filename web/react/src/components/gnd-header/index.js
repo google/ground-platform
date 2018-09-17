@@ -34,7 +34,6 @@ import { withStyles } from "@material-ui/core/styles";
 import GndProjectEditor from "../gnd-project-editor";
 import GndInlineEdit from "../gnd-inline-edit";
 import { withFirebase, withFirestore } from "react-redux-firebase";
-import AutosizeInput from "react-input-autosize";
 import { withHandlers } from "recompose";
 
 const styles = theme => ({});
