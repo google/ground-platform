@@ -40,21 +40,34 @@ class GndFormElementEditor extends React.Component {
   handleLabelChange(newLabel) {
     const { element, onChange } = this.props;
     // TODO: i18n.
-    const newElement = update(element, {
-      labels: { _: { $set: newLabel } }
-    });
-    onChange(newElement);
+    onChange(
+      update(element, {
+        labels: { _: { $set: newLabel } }
+      })
+    );
   }
 
-  handleTypeChange(newType) {}
+  handleTypeChange(newType) {
+    const { element, onChange } = this.props;
+    onChange(
+      update(element, {
+        type: { $set: newType }
+      })
+    );
+  }
 
-  handleRequiredChange(newRequired) {}
+  handleRequiredChange(newRequired) {
+    const { element, onChange } = this.props;
+    onChange(
+      update(element, {
+        required: { $set: newRequired }
+      })
+    );
+  }
 
   handleOptionsChange(newOptions) {
     const { element, onChange } = this.props;
-    // TODO: i18n.
-    const newElement = update(element, { options: { $set: newOptions } });
-    onChange(newElement);
+    onChange(update(element, { options: { $set: newOptions } }));
   }
 
   render() {
