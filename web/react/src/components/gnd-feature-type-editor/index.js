@@ -41,8 +41,8 @@ import GndFormEditor from "./gnd-form-editor";
 import update from "immutability-helper";
 
 const styles = theme => ({
-  tabs: {
-    flexGrow: 1
+  dialog: {
+    height: "100vh",
   }
 });
 
@@ -123,7 +123,8 @@ class GndFeatureTypeEditor extends React.Component {
           aria-labelledby="form-dialog-title"
           fullWidth
           scroll="paper"
-          maxWidth="md"
+          maxWidth="false"
+          classes={{paper: "ft-dialog"}}
         >
           <DialogTitle>
             <div className="ft-header">

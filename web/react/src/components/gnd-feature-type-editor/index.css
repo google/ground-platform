@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+.ft-dialog {
+  max-width: 640px;
+  height: 100vh;
+}
 
 .ft-header {
    display: table;
