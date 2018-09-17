@@ -84,6 +84,9 @@ class GndFeatureTypeEditor extends React.Component {
     // TODO: i18n.
     this.setState({
       ...this.state,
+      featureType: update(featureType, {
+        defn: { itemLabel: { ["_"]: { $set: newLabel } } }
+      })
     });
     return Promise.resolve();
   }
