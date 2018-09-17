@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -9,6 +10,7 @@ const styles = {
     whiteSpace: "nowrap",
     padding: "24px 24px 8px 32px",
     marginBottom: "8px",
+    outline: "none",
   },
   selected: {
     borderLeft: "solid #009113 4px",
@@ -44,7 +46,7 @@ class GndFocusableRow extends React.Component {
   };
 
   render() {
-    const { classes, collapsedHeight } = this.props;
+    const { classes, collapsedHeight, onClick } = this.props;
     const { state } = this.state;
     return (
       <Paper
@@ -56,6 +58,7 @@ class GndFocusableRow extends React.Component {
         onMouseLeave={this.handleMouseLeave.bind(this)}
         onFocus={this.handleFocus.bind(this)}
         onBlur={this.handleBlur.bind(this)}
+        tabIndex="-1"
       >
         <Collapse in={state==="selected"} collapsedHeight={collapsedHeight}>
           {this.props.children}

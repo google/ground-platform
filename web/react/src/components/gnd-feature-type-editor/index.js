@@ -71,15 +71,12 @@ class GndFeatureTypeEditor extends React.Component {
     try {
       const { projectId, updateFeatureType, close } = this.props;
       const { featureType } = this.state;
-      updateFeatureType(
-        projectId,
-        featureType.id,
-        featureType.defn
-      ).then(ref => this.props.close());
+      updateFeatureType(projectId, featureType.id, featureType.defn).then(ref =>
+        this.props.close()
+      );
     } catch (e) {
       alert(e);
     }
-    event.preventDefault();
   };
 
   handleFeatureTypeLabelChange(newLabel) {
@@ -119,17 +116,14 @@ class GndFeatureTypeEditor extends React.Component {
     // formsArray.push({ id: "generateid", title: "New form", defn: {} });
     // TODO: Add empty template if no forms present.
     return (
-      <Dialog
-        open={!!featureType}
-        onClose={this.handleClose}
-        aria-labelledby="form-dialog-title"
-        fullWidth
-        maxWidth="md"
-      >
-        <form
-          noValidate
-          autoComplete="off"
-          onSubmit={ev => this.handleSave(ev)}
+      <form noValidate autoComplete="off" onSubmit={ev => ev.preventDefault()}>
+        <Dialog
+          open={!!featureType}
+          onClose={this.handleClose}
+          aria-labelledby="form-dialog-title"
+          fullWidth
+          scroll="paper"
+          maxWidth="md"
         >
           <DialogTitle>
             <div className="ft-header">
@@ -146,9 +140,7 @@ class GndFeatureTypeEditor extends React.Component {
                 <Typography variant="caption">Place type definition</Typography>
               </div>
             </div>
-          </DialogTitle>
-          <DialogContent>
-            <div className="tab-wrapper">
+            <div className="tab-container">
               <Tabs
                 value={formIndex}
                 onChange={this.handleTabChange}
@@ -161,6 +153,8 @@ class GndFeatureTypeEditor extends React.Component {
                 ))}
               </Tabs>
             </div>
+          </DialogTitle>
+          <DialogContent>
             <GndFormEditor
               form={formsArray[formIndex]}
               onChange={this.handleFormChange.bind(this)}
@@ -174,13 +168,13 @@ class GndFeatureTypeEditor extends React.Component {
               variant="contained"
               color="primary"
               className={classes.button}
-              type="submit"
+              onClick={() => this.handleSave()}
             >
               Save
             </Button>
           </DialogActions>
-        </form>
-      </Dialog>
+        </Dialog>
+      </form>
     );
   }
 }

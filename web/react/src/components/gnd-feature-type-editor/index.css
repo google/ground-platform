@@ -44,6 +44,10 @@
 .ft-header-caption {
   margin-left: 14px;
 }
-.tab-wrapper {
+
+.tab-container {
   border-bottom: 1px solid #ddd;
+}
+
+.form-editor {
 }
