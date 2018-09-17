@@ -12,6 +12,7 @@ const styles = {
     marginBottom: "8px",
     outline: "none",
   },
+  // TODO: Get border color from theme.
   selected: {
     borderLeft: "solid #009113 4px",
     paddingLeft: 28

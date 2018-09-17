@@ -23,11 +23,15 @@ import ReactDOM from 'react-dom';
 import GndApp from './components/gnd-app';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router'
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { theme } from './mui-theme.js';
 
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-    	<GndApp/>
+    	<MuiThemeProvider theme={theme}>
+      	<GndApp/>
+      </MuiThemeProvider>
     </ConnectedRouter>  	
   </Provider>,
   document.getElementById('root')
