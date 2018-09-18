@@ -57,7 +57,7 @@ class GndFormElementEditor extends React.Component {
           update(element, {
             type: { $set: "multiple_choice" },
             cardinality: { $set: newType },
-            options: { $set: element.options || [] },
+            options: { $set: element.options || [{labels: {}}] },
           })
         );
         break;
