@@ -18,24 +18,58 @@
 import React from "react";
 import GndMultiSelectOption from "./gnd-multi-select-option";
 import update from "immutability-helper";
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit,
+  },
+  addOption: {
+  	padding: 16,
+  },
+  addOptionLink: {
+    color: theme.palette.text.dark,
+    textDecoration: "none",
+    fontSize: 14,
+  },
+});
 
 class GndMultiSelectOptionsEditor extends React.Component {
 	handleChange(newOption, idx) {
 		const { options, onChange } = this.props;
-		const newOptions = update(options, {[idx]: {$set: newOption}});
-		onChange(newOptions);
+		if (newOption) {
+			onChange(update(options, {[idx]: {$set: newOption}}));
+		} else {
+			onChange(update(options, {$splice: [[idx, 1]]}));			
+		}
+	}
+
+	handleAddOptionClick() {
+		const { options, onChange } = this.props;
+		onChange(update(options, {$push: [{labels: {}}]}));
 	}
 
 	render() {
+		const { classes } = this.props;
 		const options = this.props.options || [];
-		return options.map((option, idx) => (
+		let components = options.map((option, idx) => (
 			<GndMultiSelectOption
 				key={"option-" + idx}
 				option={option || {}}
 				onChange={newOption => this.handleChange(newOption, idx)}
 			/>
 		));
+		components.push(
+			<div key="add-option" className={classes.addOption}>
+				<a href="#" className={classes.addOptionLink}
+	      variant="text" onClick={this.handleAddOptionClick.bind(this)}>
+	        Add option
+	      </a>
+      </div>
+		);
+		return components;
 	}
 }
 
-export default GndMultiSelectOptionsEditor;
+export default withStyles(styles)(GndMultiSelectOptionsEditor);

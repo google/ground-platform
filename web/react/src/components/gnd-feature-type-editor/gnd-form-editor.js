@@ -31,7 +31,6 @@ class GndFormEditor extends React.Component {
 
   render() {
     const { form } = this.props;
-
     if (!form || !form.defn || !form.defn.elements) {
       return null;
     }

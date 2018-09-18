@@ -39,6 +39,7 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import GndFormEditor from "./gnd-form-editor";
 import update from "immutability-helper";
+import SwipeableViews from "react-swipeable-views";
 
 const styles = theme => ({
   dialog: {
@@ -115,15 +116,16 @@ class GndFeatureTypeEditor extends React.Component {
     formsArray.sort((a, b) => a.title.localeCompare(b.title));
     // formsArray.push({ id: "generateid", title: "New form", defn: {} });
     // TODO: Add empty template if no forms present.
+    // TODO: Adjust height of swipeable area so that forms don't scroll more
+    // than necessary.
     return (
       <form noValidate autoComplete="off" onSubmit={ev => ev.preventDefault()}>
         <Dialog
-          open={!!featureType}
+          open={Boolean(featureType)}
           onClose={this.handleClose}
           aria-labelledby="form-dialog-title"
-          fullWidth
           scroll="paper"
-          maxWidth="false"
+          fullWidth
           classes={{ paper: "ft-dialog" }}
           disableEscapeKeyDown
         >
@@ -156,11 +158,19 @@ class GndFeatureTypeEditor extends React.Component {
               </Tabs>
             </div>
           </DialogTitle>
-          <DialogContent>
-            <GndFormEditor
-              form={formsArray[formIndex]}
-              onChange={this.handleFormChange.bind(this)}
-            />
+          <DialogContent>            
+            <SwipeableViews
+              index={formIndex}
+              onChangeIndex={this.handleChangeIndex}
+            >
+              {formsArray.map((form, idx) => (
+                <GndFormEditor
+                  key={"form" + idx}
+                  form={form}
+                  onChange={this.handleFormChange.bind(this)}
+                />
+              ))}
+            </SwipeableViews>
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">

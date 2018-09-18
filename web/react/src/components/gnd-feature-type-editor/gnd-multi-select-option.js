@@ -21,15 +21,26 @@ import { getLocalizedText } from "../../datastore.js";
 import { withStyles } from "@material-ui/core/styles";
 import Input from "@material-ui/core/Input";
 import update from "immutability-helper";
+import Icon from "@material-ui/core/Icon";
+import IconButton from "@material-ui/core/IconButton";
+import { MoreVert } from "@material-ui/icons";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
 
 // TODO: Fix styling.
 const styles = {
 	option: {
-		fontSize: "8pt"
+		fontSize: 8
+	},
+	optionMenuButton: {
 	}
 };
 
 class GndMultiSelectOption extends React.Component {
+	state = {
+		menuAnchorEl: null
+	};
+
 	handleCodeChange(newCode) {
 		const { onChange, option } = this.props;
 		const newOption = update(option, { code: { $set: newCode } });
@@ -44,31 +55,68 @@ class GndMultiSelectOption extends React.Component {
 		onChange(newOption);
 	}
 
+	handleMoreClick(ev) {
+		this.setState({ menuAnchorEl: ev.currentTarget });
+	}
+
+	handleMenuClose() {
+		this.setState({ menuAnchorEl: null });
+	}
+
+	handleDeleteOption(ev) {
+		const { onChange } = this.props;
+		this.setState({ menuAnchorEl: null });
+		onChange(undefined);
+	}
+
 	render() {
 		const { classes, option } = this.props;
+		const { menuAnchorEl } = this.state;
 		const { code, labels } = option;
+		// TODO: Check if option button SVG shows on older browsers. Does Icon
+		// fall back to PNG?
 		return (
-			<div style={{ marginLeft: 16 }}>
+			<div style={{ marginLeft: 16, whiteSpace: "nowrap" }}>
 				<TextField
-					style={{ width: "15%" }}
+					style={{ width: 100 }}
 					classes={{ root: classes.option }}
-					value={code}
+					value={code || ""}
 					onChange={ev => this.handleCodeChange(ev.target.value)}
 					onBlur={ev => this.handleCodeChange(ev.target.value.trim())}
 					placeholder="Code"
-					margin="dense"
+					margin="normal"
 					required
 				/>
 				<TextField
-					style={{ width: "85%", marginLeft: 16 }}
+					style={{ width: 330, marginLeft: 16 }}
 					classes={{ root: classes.option }}
-					value={getLocalizedText(labels)}
+					value={getLocalizedText(labels) || ""}
 					onChange={ev => this.handleLabelChange(ev.target.value)}
 					onBlur={ev => this.handleLabelChange(ev.target.value.trim())}
 					placeholder="Option"
-					margin="dense"
+					margin="normal"
 					required
 				/>
+				<IconButton
+					style={{ marginRight: 16 }}
+					className={classes.optionMenuButton}
+					aria-label="Option menu"
+					aria-owns={menuAnchorEl ? "option-menu" : null}
+					aria-haspopup="true"
+					onClick={this.handleMoreClick.bind(this)}
+				>
+					<MoreVert />
+				</IconButton>
+				<Menu
+					id="option-menu"
+					anchorEl={menuAnchorEl}
+					open={Boolean(menuAnchorEl)}
+					onClose={this.handleMenuClose.bind(this)}
+				>
+					<MenuItem onClick={this.handleDeleteOption.bind(this)}>
+						Delete option
+					</MenuItem>
+				</Menu>
 			</div>
 		);
 	}
