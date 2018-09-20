@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -9,7 +8,7 @@ const styles = {
   field: {
     whiteSpace: "nowrap",
     padding: "24px 24px 8px 32px",
-    marginBottom: "8px",
+    margin: "0 8px 8px 8px",
     outline: "none",
   },
   // TODO: Get border color from theme.
@@ -47,7 +46,7 @@ class GndFocusableRow extends React.Component {
   };
 
   render() {
-    const { classes, collapsedHeight, onClick } = this.props;
+    const { classes, collapsedHeight } = this.props;
     const { state } = this.state;
     return (
       <Paper

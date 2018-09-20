@@ -24,12 +24,15 @@ import {
   getActiveProject,
   updateProject
 } from "../../datastore.js";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  Typography
+} from "@material-ui/core";
+import JSONInput from "react-json-editor-ajrm/es";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 
@@ -38,77 +41,77 @@ const styles = theme => ({
     display: "flex",
     flexWrap: "wrap"
   },
-  json: {
+  inputField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
-    width: '100%'
+    width: "100%",
   }
 });
 
 class GndProjectEditor extends React.Component {
-  state = {};
-
-  handleClose = () => {
-    this.props.close();
+  state = {
+    projectId: this.props.projectId,
+    project: this.props.project,
+    hasErrors: false,
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.project === this.state.project) {
-      return;
+  componentDidUpdate(prevProps) {
+    const { projectId, project } = this.props;
+    if (prevProps.project !== project) {
+      this.setState((prevState, prevProps) => ({
+        projectId: projectId,
+        project: project,
+      }));
     }
-    this.setState((prevState, prevProps) => ({
-      ...prevState,
-      projectId: nextProps.projectId,
-      project: JSON.stringify(nextProps.project || {}, null, "  ")
-    }));
   }
 
-  handleChangeJson = event => {
-    let project = event.target.value;
-    this.setState((prevState, props) => ({ ...prevState, project }));
+  handleChange = event => {
+    this.setState({ project: event.jsObject, hasErrors: event.error });
   };
 
   handleSave = event => {
+    const { projectId, project } = this.state;
+    const { close } = this.props;
     try {
       this.props
-        .updateProject(this.state.projectId, JSON.parse(this.state.project))
-        .then(ref => this.props.close());
+        .updateProject(projectId, project)
+        .then(ref => close());
     } catch (e) {
       alert(e);
     }
     event.preventDefault();
   };
 
+  handleClose = () => {
+    this.props.close();
+  };
+
   render() {
-    const { classes, projectEditorOpen } = this.props;
-    const { project } = this.state;
+    const { classes, project, projectEditorOpen } = this.props;
     if (!project) {
       return <div>Loading...</div>;
     }
     return (
-      <Dialog
-        open={projectEditorOpen}
-        onClose={this.handleClose}
-        aria-labelledby="form-dialog-title"
-        fullWidth
-        maxWidth="md"
-      >
-        <form
-          noValidate
-          autoComplete="off"
-          onSubmit={ev => this.handleSave(ev)}
+      <form noValidate autoComplete="off" onSubmit={ev => ev.preventDefault()}>
+        <Dialog
+          open={projectEditorOpen}
+          onClose={this.handleClose}
+          aria-labelledby="form-dialog-title"
+          fullWidth
+          maxWidth="md"
         >
           <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
           <DialogContent>
-            <TextField
-              id="json"
-              label="Project Definition (JSON)"
-              className={classes.json}
-              value={project}
-              onChange={ev => this.handleChangeJson(ev)}
-              margin="normal"
-              multiline
-              rows="20"
+            <Typography variant="subheading">
+              Project Definition (JSON)
+            </Typography>
+            <JSONInput
+              id="json-editor"
+              theme="light_mitsuketa_tribute"
+              width="100%"
+              height="490px"
+              placeholder={this.state.project}
+              onChange={ev => this.handleChange(ev)}
             />
           </DialogContent>
           <DialogActions>
@@ -119,13 +122,14 @@ class GndProjectEditor extends React.Component {
               variant="contained"
               color="primary"
               className={classes.button}
-              type="submit"
+              onClick={() => this.handleSave()}
+              disabled={this.state.hasErrors}
             >
               Save
             </Button>
           </DialogActions>
-        </form>
-      </Dialog>
+        </Dialog>
+      </form>
     );
   }
 }
@@ -137,13 +141,13 @@ const mapStateToProps = (store, props) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  close: () => dispatch({type: 'CLOSE_PROJECT_EDITOR'}),  
+  close: () => dispatch({ type: "CLOSE_PROJECT_EDITOR" })
 });
 
 const enhance = compose(
   connect(
     mapStateToProps,
-    mapDispatchToProps,
+    mapDispatchToProps
   ),
   withFirebase,
   withFirestore,

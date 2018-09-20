@@ -19,13 +19,9 @@ import React from "react";
 import TextField from "@material-ui/core/TextField";
 import { getLocalizedText } from "../../datastore.js";
 import { withStyles } from "@material-ui/core/styles";
-import Input from "@material-ui/core/Input";
 import update from "immutability-helper";
-import Icon from "@material-ui/core/Icon";
-import IconButton from "@material-ui/core/IconButton";
+import { IconButton, Menu, MenuItem } from "@material-ui/core";
 import { MoreVert } from "@material-ui/icons";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
 
 // TODO: Fix styling.
 const styles = {

@@ -37,7 +37,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import { withFirestore } from "react-redux-firebase";
 import IconButton from "@material-ui/core/IconButton";
-import SettingsIcon from "@material-ui/icons/Settings";
+import { Settings } from "@material-ui/icons";
 
 const styles = theme => ({
   card: {
@@ -83,7 +83,7 @@ class GndLegend extends React.Component {
             aria-label="Customize"
             onClick={this.onCustomizeClickHandler.bind(this, ft.id)}
           >
-            <SettingsIcon />
+            <Settings />
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>

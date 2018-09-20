@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 .ft-dialog {
-  max-width: 640px;
+  width: 640px;
   height: 100vh;
+  padding: 12px;
 }
 
 .ft-header {
@@ -45,12 +46,13 @@
   vertical-align: top;
 }
 
-.ft-header-caption {
-  margin-left: 14px;
+.ft-label-input {
+  color: #212121;
+  font-size: 15pt;  
 }
 
-.tab-container {
-  border-bottom: 1px solid #ddd;
+.ft-header-caption {
+  margin-left: 14px;
 }
 
 .form-editor {

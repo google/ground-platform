@@ -54,6 +54,8 @@ const updateFeatureType = props => (projectId, featureTypeId, newFeatureType) =>
 		.doc(projectId)
 		.set({ featureTypes: {[featureTypeId]: newFeatureType} }, { merge: true });
 
+const generateId = props => () => props.firestore.collection("ids").doc().id;
+
 // TODO: i18n.
 const getLocalizedText = obj => obj && (obj["_"] || obj["en"] || obj["pt"]);
 
@@ -85,5 +87,6 @@ export {
 	getProfile,
 	getMapFeatures,
 	getLocalizedText,
-	connectGndDatastore
+	connectGndDatastore,
+	generateId,
 };

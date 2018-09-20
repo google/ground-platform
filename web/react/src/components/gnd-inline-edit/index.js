@@ -17,23 +17,20 @@
 
 import React from "react";
 import "./index.css";
-import { withStyles } from "@material-ui/core/styles";
 import AutosizeInput from "react-input-autosize";
-import { compose } from "redux";
-
-const styles = theme => ({});
+import { Edit } from "@material-ui/icons";
 
 class GndInlineEdit extends React.Component {
   state = {
-    value: " ",
-    hasFocus: false
+    value: this.props.value || "",
+    hasFocus: false,
+    iconHover: false
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.value === this.state.value) {
-      return;
+  componentDidUpdate(prevProps) {
+    if (this.props.value !== prevProps.value) {
+      this.setState({ value: this.props.value });
     }
-    this.reset(nextProps);
   }
 
   handleChange(ev) {
@@ -45,7 +42,7 @@ class GndInlineEdit extends React.Component {
   handleKeyDown(ev) {
     switch (ev.key) {
       case "Enter":
-        this.saveChanges().then(() => this.refs.input.blur());
+        this.input.blur();
         ev.preventDefault();
         break;
       case "Escape":
@@ -53,16 +50,21 @@ class GndInlineEdit extends React.Component {
         ev.preventDefault();
         break;
       default:
-       // n/a.
+      // n/a.
     }
   }
 
   handleFocus(ev) {
-    this.setState({ hasFocus: true });
+    if (!this.props.useIcon) {
+      this.setState({
+        hasFocus: true,
+        iconHover: false
+      });
+    }
   }
 
   handleBlur(ev) {
-    this.setState({ hasFocus: false });
+    this.setState({ hasFocus: false, iconHover: false });
     this.saveChanges();
   }
 
@@ -74,38 +76,70 @@ class GndInlineEdit extends React.Component {
   }
 
   saveChanges() {
+    const { value: prevValue, onCommitChanges } = this.props;
     const value = this.state.value.trim();
-    this.setState({value});
-    return this.props.onCommitChanges(value);
+    if (onCommitChanges && value !== prevValue) {
+      this.setState({ value });
+      return onCommitChanges(value);
+    }
+  }
+
+  handleEditIconClick(ev) {
+    this.setState({ hasFocus: true });
+  }
+
+  handleInputBlur(ev) {
+    this.setState({ editing: false });
+  }
+
+  onRenderInput(input) {
+    this.input = input;
+    if (input != null && this.props.useIcon) {
+      input.focus();
+    }
   }
 
   render() {
-    const { value, hasFocus } = this.state;
+    const { value, hasFocus, iconHover } = this.state;
     // Remove focus after [ESC] is pressed.
-    if (!hasFocus && this.refs.input) {
-      this.refs.input.blur();
+    if (!hasFocus && this.input) {
+      this.input.blur();
     }
-    const { className, inputClassName, placeholder } = this.props;
-    // TODO: Move title and login link into separate component.
-
+    const {
+      className,
+      inputClassName,
+      editIconClassName,
+      placeholder,
+      useIcon
+    } = this.props;
     return (
-      <AutosizeInput
-        className={className}
-        inputClassName={`${inputClassName} inline-edit ${!value && "untitled"}`}
-        ref="input"
-        value={value}
-        placeholder={placeholder}
-        onChange={this.handleChange.bind(this)}
-        onKeyDown={this.handleKeyDown.bind(this)}
-        onFocus={this.handleFocus.bind(this)}
-        onBlur={this.handleBlur.bind(this)}
-      />
+      <React.Fragment>
+        <AutosizeInput
+          className={className}
+          inputClassName={`inline-edit ${!useIcon &&
+            "clickable-inline-edit"} ${!value && "untitled"} ${inputClassName}`}
+          ref={this.onRenderInput.bind(this)}
+          value={value}
+          disabled={useIcon && !hasFocus}
+          placeholder={placeholder}
+          onChange={this.handleChange.bind(this)}
+          onKeyDown={this.handleKeyDown.bind(this)}
+          onFocus={this.handleFocus.bind(this)}
+          onBlur={this.handleBlur.bind(this)}
+        />
+        {useIcon &&
+          !hasFocus && (
+            <Edit
+              className={editIconClassName}
+              color={iconHover ? "action" : "disabled"}
+              onClick={this.handleEditIconClick.bind(this)}
+              onMouseEnter={ev => this.setState({ iconHover: true })}
+              onMouseLeave={ev => this.setState({ iconHover: false })}
+            />
+          )}
+      </React.Fragment>
     );
   }
 }
 
-const enhance = compose(  
-  withStyles(styles)
-);
-
-export default enhance(GndInlineEdit);
+export default GndInlineEdit;

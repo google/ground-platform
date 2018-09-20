@@ -19,6 +19,18 @@ import React from "react";
 import PropTypes from "prop-types";
 import GndFormElementEditor from "./gnd-form-element-editor";
 import update from "immutability-helper";
+import { Add } from "@material-ui/icons";
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+
+const styles = theme => ({
+  button: {
+    marginLeft: 18
+  },
+  leftIcon: {
+    marginRight: theme.spacing.unit
+  }
+});
 
 class GndFormEditor extends React.Component {
   handleElementChange(newElement, idx) {
@@ -29,19 +41,58 @@ class GndFormEditor extends React.Component {
     onChange(newForm);
   }
 
+  createElement() {
+    const { generateId } = this.props;
+    return {
+      id: generateId(),
+      labels: {},
+      type: "text_field",
+      required: "false",
+    }
+  }
+  
+  handleAddFieldClick() {
+    const { form, onChange } = this.props;
+    // TODO: Auto focus on label field.
+    const newForm = update(form, {      
+      defn: { elements: { $push: [this.createElement()] } }
+    });
+    onChange(newForm);
+  }
+
   render() {
-    const { form } = this.props;
+    const { form, classes } = this.props;
     if (!form || !form.defn || !form.defn.elements) {
       return null;
     }
-    return form.defn.elements.map((element, idx) => (
+    const formElements = form.defn.elements.map((element, idx) => (
       <GndFormElementEditor
         key={element.id}
         element={element}
         onChange={el => this.handleElementChange(el, idx)}
       />
     ));
+    return (
+      <React.Fragment>
+        {formElements}
+        <Button
+          color="primary"
+          className={classes.button}
+          onClick={this.handleAddFieldClick.bind(this)}
+        >
+          <Add className={classes.leftIcon} />
+          Add another
+        </Button>
+      </React.Fragment>
+    );
   }
 }
 
-export default GndFormEditor;
+GndFormEditor.propTypes = {
+  form: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  generatedId: PropTypes.func.isRequired,
+};
+
+export default withStyles(styles)(GndFormEditor);

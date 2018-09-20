@@ -23,27 +23,29 @@ import { withHandlers } from "recompose";
 import {
   getActiveProjectId,
   getLocalizedText,
+  generateId,
   updateFeatureType
 } from "../../datastore.js";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  Typography
+} from "@material-ui/core";
 import GndInlineEdit from "../gnd-inline-edit";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import GndMarkerImage from "../gnd-marker-image";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
 import GndFormEditor from "./gnd-form-editor";
 import update from "immutability-helper";
 import SwipeableViews from "react-swipeable-views";
+import GndFormTabs from "./gnd-form-tabs";
 
 const styles = theme => ({
   dialog: {
-    height: "100vh"
+    padding: 40
   }
 });
 
@@ -53,6 +55,13 @@ class GndFeatureTypeEditor extends React.Component {
     featureType: null
   };
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.editState === this.props.editState) {
+      return;
+    }
+    this.setState({ formIndex: 0, featureType: this.props.editState });
+  }
+
   handleClose = () => {
     this.props.close();
   };
@@ -61,32 +70,12 @@ class GndFeatureTypeEditor extends React.Component {
     this.setState({ formIndex: value });
   };
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.editState === this.props.editState) {
-      return;
-    }
-    this.setState({ formIndex: 0, featureType: this.props.editState });
-  }
-
-  handleSave = event => {
-    try {
-      const { projectId, updateFeatureType, close } = this.props;
-      const { featureType } = this.state;
-      updateFeatureType(projectId, featureType.id, featureType.defn).then(ref =>
-        this.props.close()
-      );
-    } catch (e) {
-      alert(e);
-    }
-  };
-
   handleFeatureTypeLabelChange(newLabel) {
     const { featureType } = this.state;
     // TODO: i18n.
     this.setState({
-      ...this.state,
       featureType: update(featureType, {
-        defn: { itemLabel: { ["_"]: { $set: newLabel } } }
+        defn: { itemLabel: { _: { $set: newLabel } } }
       })
     });
     return Promise.resolve();
@@ -95,15 +84,65 @@ class GndFeatureTypeEditor extends React.Component {
   handleFormChange(newForm) {
     const { featureType } = this.state;
     this.setState({
-      ...this.state,
       featureType: update(featureType, {
         defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
       })
     });
   }
 
+  handleFormTitleChange(form, newTitle) {
+    const { featureType } = this.state;
+    // TODO: i18n.
+    this.setState({
+      featureType: update(featureType, {
+        defn: {
+          forms: { [form.id]: { titles: { _: { $set: newTitle } } } }
+        }
+      })
+    });
+  }
+
+  createElement() {
+    const { generateId } = this.props;
+    return {
+      id: generateId(),
+      labels: {},
+      type: "text_field",
+      required: "false"
+    };
+  }
+
+  handleAddFormClick() {
+    const { generateId } = this.props;
+    const { featureType } = this.state;
+    this.setState({
+      featureType: update(featureType, {
+        defn: {
+          forms: {
+            [generateId()]: {
+              $set: { titles: {}, elements: [this.createElement()] }
+            }
+          }
+        }
+      }),
+      formIndex: Object.keys(featureType.defn.forms).length
+    });
+  }
+
+  handleSave(event) {
+    try {
+      const { projectId, updateFeatureType, close } = this.props;
+      const { featureType } = this.state;
+      updateFeatureType(projectId, featureType.id, featureType.defn).then(ref =>
+        close()
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   render() {
-    const { classes } = this.props;
+    const { classes, generateId } = this.props;
     const { featureType, formIndex } = this.state;
     const defn = featureType && featureType.defn;
     const featureTypeLabel = getLocalizedText(defn && defn.itemLabel);
@@ -113,7 +152,7 @@ class GndFeatureTypeEditor extends React.Component {
       title: getLocalizedText(forms[id].titles),
       defn: forms[id]
     }));
-    formsArray.sort((a, b) => a.title.localeCompare(b.title));
+
     // formsArray.push({ id: "generateid", title: "New form", defn: {} });
     // TODO: Add empty template if no forms present.
     // TODO: Adjust height of swipeable area so that forms don't scroll more
@@ -125,7 +164,7 @@ class GndFeatureTypeEditor extends React.Component {
           onClose={this.handleClose}
           aria-labelledby="form-dialog-title"
           scroll="paper"
-          fullWidth
+          maxWidth={false}
           classes={{ paper: "ft-dialog" }}
           disableEscapeKeyDown
         >
@@ -136,6 +175,7 @@ class GndFeatureTypeEditor extends React.Component {
               </div>
               <GndInlineEdit
                 className="ft-label"
+                inputClassName="ft-label-input"
                 onCommitChanges={this.handleFeatureTypeLabelChange.bind(this)}
                 value={featureTypeLabel}
                 placeholder="Unnamed place type"
@@ -144,21 +184,15 @@ class GndFeatureTypeEditor extends React.Component {
                 <Typography variant="caption">Place type definition</Typography>
               </div>
             </div>
-            <div className="tab-container">
-              <Tabs
-                value={formIndex}
-                onChange={this.handleTabChange}
-                indicatorColor="primary"
-                textColor="primary"
-                centered
-              >
-                {formsArray.map(form => (
-                  <Tab label={form.title} key={form.id} />
-                ))}
-              </Tabs>
-            </div>
+            <GndFormTabs
+              formIndex={formIndex}
+              onTabChange={this.handleTabChange.bind(this)}
+              onFormTitleChange={this.handleFormTitleChange.bind(this)}
+              onAddFormClick={this.handleAddFormClick.bind(this)}
+              formsArray={formsArray}
+            />
           </DialogTitle>
-          <DialogContent>            
+          <DialogContent>
             <SwipeableViews
               index={formIndex}
               onChangeIndex={this.handleChangeIndex}
@@ -168,6 +202,7 @@ class GndFeatureTypeEditor extends React.Component {
                   key={"form" + idx}
                   form={form}
                   onChange={this.handleFormChange.bind(this)}
+                  generateId={generateId}
                 />
               ))}
             </SwipeableViews>
@@ -208,7 +243,8 @@ const enhance = compose(
   withFirebase,
   withFirestore,
   withHandlers({
-    updateFeatureType
+    updateFeatureType,
+    generateId
   }),
   withStyles(styles, { withTheme: true })
 );
