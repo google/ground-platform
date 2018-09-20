@@ -77,9 +77,9 @@ class GndProjectEditor extends React.Component {
         .updateProject(projectId, project)
         .then(ref => close());
     } catch (e) {
-      alert(e);
+      alert("Save failed");
+      console.error(e);
     }
-    event.preventDefault();
   };
 
   handleClose = () => {

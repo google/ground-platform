@@ -137,6 +137,7 @@ class GndFeatureTypeEditor extends React.Component {
         close()
       );
     } catch (e) {
+      alert("Save failed");
       console.error(e);
     }
   }
