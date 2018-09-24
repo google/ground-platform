@@ -32,7 +32,7 @@ import {
   DialogContent,
   Typography
 } from "@material-ui/core";
-import JSONInput from "react-json-editor-ajrm/es";
+import JSONInput from "react-json-editor-ajrm/index";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 
