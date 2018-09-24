@@ -22,6 +22,7 @@ import update from "immutability-helper";
 import { Add } from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 
 const styles = theme => ({
   button: {
@@ -29,16 +30,39 @@ const styles = theme => ({
   },
   leftIcon: {
     marginRight: theme.spacing.unit
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit
+  },
+  bottomLeftControls: {
+    float: "left"
+  },
+  bottomRightControls: {
+    float: "right",
+    marginRight: 24
+  },
+  bottomControls: {
+    display: "block",
+    width: "100%"
   }
 });
 
 class GndFormEditor extends React.Component {
   handleElementChange(newElement, idx) {
     const { form, onChange } = this.props;
-    const newForm = update(form, {
-      defn: { elements: { [idx]: { $set: newElement } } }
-    });
-    onChange(newForm);
+    if (newElement) {
+      onChange(
+        update(form, {
+          defn: { elements: { [idx]: { $set: newElement } } }
+        })
+      );
+    } else {
+      onChange(
+        update(form, {
+          defn: { elements: { $splice: [[idx, 1]] } }
+        })
+      );
+    }
   }
 
   createElement() {
@@ -47,17 +71,22 @@ class GndFormEditor extends React.Component {
       id: generateId(),
       labels: {},
       type: "text_field",
-      required: "false",
-    }
+      required: "false"
+    };
   }
-  
+
   handleAddFieldClick() {
     const { form, onChange } = this.props;
     // TODO: Auto focus on label field.
-    const newForm = update(form, {      
+    const newForm = update(form, {
       defn: { elements: { $push: [this.createElement()] } }
     });
     onChange(newForm);
+  }
+
+  handleDeleteFormClick() {
+    const { form, onChange } = this.props;
+    onChange({id: form.id, defn: undefined});
   }
 
   render() {
@@ -75,14 +104,29 @@ class GndFormEditor extends React.Component {
     return (
       <React.Fragment>
         {formElements}
-        <Button
-          color="primary"
-          className={classes.button}
-          onClick={this.handleAddFieldClick.bind(this)}
-        >
-          <Add className={classes.leftIcon} />
-          Add another
-        </Button>
+        <div className={classes.bottomControls}>
+          <span classNamne={classes.bottomLeftControls}>
+            <Button
+              color="primary"
+              className={classes.button}
+              onClick={this.handleAddFieldClick.bind(this)}
+            >
+              <Add className={classes.leftIcon} />
+              Add field
+            </Button>
+          </span>
+          <span className={classes.bottomRightControls}>
+            <Button
+              color="secondary"
+              size="medium"
+              className={classes.button}
+              onClick={this.handleDeleteFormClick.bind(this)}
+            >
+              Delete form
+              <DeleteForeverIcon className={classes.rightIcon} />
+            </Button>
+          </span>
+        </div>
       </React.Fragment>
     );
   }
@@ -92,7 +136,7 @@ GndFormEditor.propTypes = {
   form: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  generatedId: PropTypes.func.isRequired,
+  generatedId: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(GndFormEditor);

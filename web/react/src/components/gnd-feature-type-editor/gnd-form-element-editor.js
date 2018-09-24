@@ -18,12 +18,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
+import { IconButton, Switch, Select, MenuItem, TextField, FormGroup, FormControlLabel } from "@material-ui/core";
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import { getLocalizedText } from "../../datastore.js";
 import GndFocusableRow from "./gnd-focusable-row";
 import GndMultiSelectOptionsEditor from "./gnd-multi-select-options-editor";
@@ -33,7 +29,17 @@ const styles = {
   label: {
     marginTop: 0
   },
-  type: {}
+  type: {},
+  bottomLeftControls: {
+    float: "left"
+  },
+  bottomRightControls: {
+    float: "right"
+  },
+  bottomControls: {
+    width: "100%",
+    display: "block",
+  }
 };
 
 class GndFormElementEditor extends React.Component {
@@ -57,7 +63,7 @@ class GndFormElementEditor extends React.Component {
           update(element, {
             type: { $set: "multiple_choice" },
             cardinality: { $set: newType },
-            options: { $set: element.options || [{labels: {}}] },
+            options: { $set: element.options || [{ labels: {} }] }
           })
         );
         break;
@@ -65,7 +71,7 @@ class GndFormElementEditor extends React.Component {
         onChange(
           update(element, {
             type: { $set: newType },
-            $unset: ["cardinality", "options"],
+            $unset: ["cardinality", "options"]
           })
         );
     }
@@ -85,12 +91,17 @@ class GndFormElementEditor extends React.Component {
     onChange(update(element, { options: { $set: newOptions } }));
   }
 
+  handleDeleteClick(ev) {
+    this.props.onChange(undefined);
+  }
+
   render() {
     // Option 1. Component uses schema of Ground element
     // Option 2. Editor has callbacks for ea change and updates
     const { classes, element } = this.props;
     const { id, labels, required, options } = element;
-    const type = element.type === "multiple_choice" ? element.cardinality : element.type;
+    const type =
+      element.type === "multiple_choice" ? element.cardinality : element.type;
     return (
       <GndFocusableRow key={id} collapsedHeight="40px">
         <div>
@@ -122,16 +133,24 @@ class GndFormElementEditor extends React.Component {
             onChange={this.handleOptionsChange.bind(this)}
           />
         )}
-        <FormGroup row>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={required}
-                onChange={ev => this.handleRequiredChange(ev.target.checked)}
-              />
-            }
-            label="Required"
-          />
+        <FormGroup row className={classes.bottomControls}>
+          <span className={classes.bottomLeftControls}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={required}
+                  onChange={ev => this.handleRequiredChange(ev.target.checked)}
+                />
+              }
+              label="Required"
+            />
+          </span>
+          <span className={classes.bottomRightControls}>
+            <IconButton onClick={this.handleDeleteClick.bind(this)}>
+              <DeleteForeverIcon />
+            </IconButton>
+          </span>
+          <div style={{clear: "both"}}></div>
         </FormGroup>
       </GndFocusableRow>
     );

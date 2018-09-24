@@ -82,12 +82,38 @@ class GndFeatureTypeEditor extends React.Component {
   }
 
   handleFormChange(newForm) {
-    const { featureType } = this.state;
-    this.setState({
-      featureType: update(featureType, {
-        defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
-      })
-    });
+    const { generateId } = this.props;
+    const { featureType, formIndex } = this.state;
+    if (newForm.defn) {
+      this.setState({
+        featureType: update(featureType, {
+          defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
+        })
+      });
+    } else {
+      if (Object.keys(featureType.defn.forms).length > 1) {
+        this.setState({
+          featureType: update(featureType, {
+            defn: { forms: { $unset: [newForm.id] } }
+          }),
+          formIndex: Math.max(formIndex - 1, 0)
+        });
+      } else {
+        this.setState({
+          featureType: update(featureType, {
+            defn: {
+              forms: {
+                $unset: [newForm.id],
+                [generateId()]: {
+                  $set: this.createForm()
+                }
+              }
+            }
+          }),
+          formIndex: 0
+        });
+      }
+    }
   }
 
   handleFormTitleChange(form, newTitle) {
@@ -112,6 +138,10 @@ class GndFeatureTypeEditor extends React.Component {
     };
   }
 
+  createForm() {
+    return { titles: {}, elements: [this.createElement()] };
+  }
+
   handleAddFormClick() {
     const { generateId } = this.props;
     const { featureType } = this.state;
@@ -120,7 +150,7 @@ class GndFeatureTypeEditor extends React.Component {
         defn: {
           forms: {
             [generateId()]: {
-              $set: { titles: {}, elements: [this.createElement()] }
+              $set: this.createForm()
             }
           }
         }
