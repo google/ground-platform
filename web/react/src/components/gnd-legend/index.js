@@ -115,6 +115,11 @@ class GndLegend extends React.Component {
   }
 }
 
+const mapStateToProps = (store, props) => ({
+  projectId: getActiveProjectId(store),
+  project: getActiveProject(store)
+});
+
 const mapDispatchToProps = (dispatch, ownProps) => ({
   openFeatureTypeEditor: (id, defn) =>
     dispatch({
@@ -123,10 +128,6 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     })
 });
 
-const mapStateToProps = (store, props) => ({
-  projectId: getActiveProjectId(store),
-  project: getActiveProject(store)
-});
 
 const enhance = compose(
   connect(

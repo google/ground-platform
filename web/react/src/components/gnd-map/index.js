@@ -17,7 +17,9 @@
 
 import React from "react";
 import "./index.css";
+import { connect } from "react-redux";
 import { compose, withProps } from "recompose";
+import { getActiveProject, getMapFeatures } from "../../datastore.js";
 import {
 	withScriptjs,
 	withGoogleMap,
@@ -40,24 +42,34 @@ class GndMap extends React.Component {
 		this.resolveMap(map);
 	}
 
-	renderFeature(markers, key, feature) {
-		if (!feature) {
+	getIcon(project, feature) {
+		// TODO: Preload icons on project change.
+		// TODO: Increase size.
+		return {
+			path: "M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z",
+			fillColor: "#ff9131",
+			fillOpacity: 1,
+			strokeWeight: 0
+		};
+	}
+
+	renderFeature(markers, project, featureId, feature) {
+		if (!project || !feature || !feature.center) {
 			return markers;
 		}
-
 		const pos = feature.center;
-		if (!pos) {
-			return markers;
-		}
-
 		markers.push(
-			<Marker key={key} position={{ lat: pos.latitude, lng: pos.longitude }} />
+			<Marker
+				key={featureId}
+				position={{ lat: pos.latitude, lng: pos.longitude }}
+				icon={this.getIcon(project, feature)}
+			/>
 		);
 		return markers;
 	}
 
 	render() {
-		const { features } = this.props;
+		const { project, features } = this.props;
 		return (
 			<GoogleMap
 				bootstrapURLKeys={{ key: googleMapsConfig.apiKey }}
@@ -73,7 +85,13 @@ class GndMap extends React.Component {
 			>
 				{features &&
 					Object.keys(features).reduce(
-						(markers, key) => this.renderFeature(markers, key, features[key]),
+						(markers, featureId) =>
+							this.renderFeature(
+								markers,
+								project,
+								featureId,
+								features[featureId]
+							),
 						[]
 					)}
 			</GoogleMap>
@@ -81,10 +99,16 @@ class GndMap extends React.Component {
 	}
 }
 
+const mapStateToProps = (store, props) => ({
+	project: getActiveProject(store),
+	features: getMapFeatures(store)
+});
+
 const mapsApiUrl =
 	"https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing";
 
 const enhance = compose(
+	connect(mapStateToProps),
 	withProps({
 		googleMapURL: `${mapsApiUrl}&key=${googleMapsConfig.apiKey}`,
 		loadingElement: <div id="loading" />,
