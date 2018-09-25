@@ -15,20 +15,23 @@
  * limitations under the License.
  */
 
-import "./index.css";
-import store from "./store.js";
 import React from "react";
-import ReactDOM from "react-dom";
-import GndApp from "./components/gnd-app";
-import { Provider } from "react-redux";
-import { MuiThemeProvider } from "@material-ui/core/styles";
-import { theme } from "./mui-theme.js";
+import GndMap from "../gnd-map";
+import GndHeader from "../gnd-header";
+import GndLegend from "../gnd-legend";
+import GndFeatureTypeEditor from "../gnd-feature-type-editor";
 
-ReactDOM.render(
-	<Provider store={store}>
-		<MuiThemeProvider theme={theme}>
-			<GndApp />
-		</MuiThemeProvider>
-	</Provider>,
-	document.getElementById("root")
-);
+class GndMain extends React.Component {
+  render() {
+    return (
+      <React.Fragment>
+        <GndMap />
+        <GndHeader />
+        <GndLegend />
+        <GndFeatureTypeEditor />
+      </React.Fragment>
+    );
+  }
+}
+
+export default GndMain;

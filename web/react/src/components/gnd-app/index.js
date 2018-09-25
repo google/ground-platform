@@ -16,21 +16,18 @@
  */
 
 import React from "react";
-import GndMap from "../gnd-map";
-import GndHeader from "../gnd-header";
-import GndLegend from "../gnd-legend";
-import GndFeatureTypeEditor from "../gnd-feature-type-editor";
+import GndMain from "../gnd-main";
 import { connectGndDatastore } from "../../datastore.js";
+import { Route, Switch } from 'react-router' // react-router v4
+import { ConnectedRouter } from 'connected-react-router'
+import history from '../../history.js'
 
 class GndApp extends React.Component {
   render() {
     return (
-      <React.Fragment>
-        <GndMap />
-        <GndHeader />
-        <GndLegend />
-        <GndFeatureTypeEditor />
-      </React.Fragment>
+      <ConnectedRouter history={history}>
+        <Route exact path="/p/:projectId" render={() => <GndMain />} />        
+      </ConnectedRouter>
     );
   }
 }
