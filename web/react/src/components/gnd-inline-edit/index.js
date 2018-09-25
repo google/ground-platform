@@ -27,9 +27,16 @@ class GndInlineEdit extends React.Component {
     iconHover: false
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.props.value !== prevProps.value) {
       this.setState({ value: this.props.value });
+    }
+    if (this.state.value !== prevState.value ||
+      this.state.hasFocus !== prevState.hasFocus ||
+      this.state.iconHover !== prevState.iconHover) {
+      // Force AutosizeInput to copy style from input field styles to so that /
+      // the new size can be correctly calculated.
+      this.input && this.input.copyInputStyles();
     }
   }
 
