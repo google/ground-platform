@@ -110,6 +110,7 @@ class GndProjectEditor extends React.Component {
               theme="light_mitsuketa_tribute"
               width="100%"
               height="490px"
+              locale="en"
               placeholder={this.state.project}
               onChange={ev => this.handleChange(ev)}
             />

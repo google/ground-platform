@@ -71,36 +71,39 @@ class GndFeatureTypeEditor extends React.Component {
   };
 
   handleFeatureTypeLabelChange(newLabel) {
-    const { featureType } = this.state;
-    // TODO: i18n.
-    this.setState({
-      featureType: update(featureType, {
-        defn: { itemLabel: { _: { $set: newLabel } } }
-      })
+    this.updateState({
+      // TODO: i18n.
+      defn: { itemLabel: { _: { $set: newLabel } } }
     });
     return Promise.resolve();
+  }
+
+  updateState(featureTypeUpdate, opt_newStates) {
+    const { featureType } = this.state;
+    this.setState({
+      featureType: update(featureType, featureTypeUpdate),
+      ...opt_newStates
+    });
   }
 
   handleFormChange(newForm) {
     const { generateId } = this.props;
     const { featureType, formIndex } = this.state;
     if (newForm.defn) {
-      this.setState({
-        featureType: update(featureType, {
-          defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
-        })
+      this.updateState({
+        defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
       });
     } else {
       if (Object.keys(featureType.defn.forms).length > 1) {
-        this.setState({
-          featureType: update(featureType, {
+        this.updateState(
+          {
             defn: { forms: { $unset: [newForm.id] } }
-          }),
-          formIndex: Math.max(formIndex - 1, 0)
-        });
+          },
+          { formIndex: Math.max(formIndex - 1, 0) }
+        );
       } else {
-        this.setState({
-          featureType: update(featureType, {
+        this.updateState(
+          {
             defn: {
               forms: {
                 $unset: [newForm.id],
@@ -109,22 +112,19 @@ class GndFeatureTypeEditor extends React.Component {
                 }
               }
             }
-          }),
-          formIndex: 0
-        });
+          },
+          { formIndex: 0 }
+        );
       }
     }
   }
 
   handleFormTitleChange(form, newTitle) {
-    const { featureType } = this.state;
-    // TODO: i18n.
-    this.setState({
-      featureType: update(featureType, {
-        defn: {
-          forms: { [form.id]: { titles: { _: { $set: newTitle } } } }
-        }
-      })
+    this.updateState({
+      // TODO: i18n.
+      defn: {
+        forms: { [form.id]: { titles: { _: { $set: newTitle } } } }
+      }
     });
   }
 
@@ -145,8 +145,8 @@ class GndFeatureTypeEditor extends React.Component {
   handleAddFormClick() {
     const { generateId } = this.props;
     const { featureType } = this.state;
-    this.setState({
-      featureType: update(featureType, {
+    this.updateState(
+      {
         defn: {
           forms: {
             [generateId()]: {
@@ -154,9 +154,9 @@ class GndFeatureTypeEditor extends React.Component {
             }
           }
         }
-      }),
-      formIndex: Object.keys(featureType.defn.forms).length
-    });
+      },
+      { formIndex: Object.keys(featureType.defn.forms).length }
+    );
   }
 
   handleSave(event) {

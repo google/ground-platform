@@ -105,7 +105,7 @@ class GndFormEditor extends React.Component {
       <React.Fragment>
         {formElements}
         <div className={classes.bottomControls}>
-          <span classNamne={classes.bottomLeftControls}>
+          <span className={classes.bottomLeftControls}>
             <Button
               color="primary"
               className={classes.button}
@@ -136,7 +136,7 @@ GndFormEditor.propTypes = {
   form: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  generatedId: PropTypes.func.isRequired
+  generateId: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(GndFormEditor);

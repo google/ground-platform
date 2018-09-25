@@ -126,7 +126,7 @@ class GndInlineEdit extends React.Component {
           inputClassName={`inline-edit ${!useIcon &&
             "clickable-inline-edit"} ${!value && "untitled"} ${inputClassName}`}
           ref={this.onRenderInput.bind(this)}
-          value={value}
+          value={value || ""}
           disabled={useIcon && !hasFocus}
           placeholder={placeholder}
           onChange={this.handleChange.bind(this)}

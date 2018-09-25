@@ -54,9 +54,9 @@ class GndEditableTabLabel extends React.Component {
 }
 
 GndEditableTabLabel.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   classes: PropTypes.object.isRequired,
-  placeholder: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };
 
