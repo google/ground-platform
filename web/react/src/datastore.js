@@ -48,12 +48,6 @@ const updateProjectTitle = props => (projectId, newTitle) =>
 		.doc(projectId)
 		.set({ title: {_: newTitle} }, { merge: true });
 
-const updateFeatureType = props => (projectId, featureTypeId, newFeatureType) =>
-	props.firestore
-		.collection("projects")
-		.doc(projectId)
-		.set({ featureTypes: {[featureTypeId]: newFeatureType} }, { merge: true });
-
 const generateId = props => () => props.firestore.collection("ids").doc().id;
 
 // TODO: i18n.
@@ -82,7 +76,6 @@ export {
 	getActiveProjectId,
 	updateProject,
 	updateProjectTitle,
-	updateFeatureType,
 	getAuth,
 	getProfile,
 	getMapFeatures,

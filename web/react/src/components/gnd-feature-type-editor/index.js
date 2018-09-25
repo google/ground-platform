@@ -22,9 +22,10 @@ import { connect } from "react-redux";
 import { withHandlers } from "recompose";
 import {
   getActiveProjectId,
+  getActiveProject,
   getLocalizedText,
   generateId,
-  updateFeatureType
+  updateProject
 } from "../../datastore.js";
 import {
   Button,
@@ -151,11 +152,12 @@ class GndFeatureTypeEditor extends React.Component {
 
   handleSave(event) {
     try {
-      const { projectId, updateFeatureType, close } = this.props;
+      const { projectId, project, updateProject, close } = this.props;
       const { featureType } = this.state;
-      updateFeatureType(projectId, featureType.id, featureType.defn).then(ref =>
-        close()
-      );
+      const newProject = update(project, {
+        featureTypes: { [featureType.id]: { $set: featureType.defn } }
+      });
+      updateProject(projectId, newProject).then(ref => close());
     } catch (e) {
       alert("Save failed");
       console.error(e);
@@ -249,6 +251,7 @@ class GndFeatureTypeEditor extends React.Component {
 
 const mapStateToProps = (store, props) => ({
   projectId: getActiveProjectId(store),
+  project: getActiveProject(store),
   editState: store.featureTypeEditState
 });
 
@@ -264,7 +267,7 @@ const enhance = compose(
   withFirebase,
   withFirestore,
   withHandlers({
-    updateFeatureType,
+    updateProject,
     generateId
   }),
   withStyles(styles, { withTheme: true })
