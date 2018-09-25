@@ -16,6 +16,7 @@
  */
 
 import React from "react";
+import PropTypes from "prop-types";
 import "./index.css";
 import AutosizeInput from "react-input-autosize";
 import { Edit } from "@material-ui/icons";
@@ -23,17 +24,20 @@ import { Edit } from "@material-ui/icons";
 class GndInlineEdit extends React.Component {
   state = {
     value: this.props.value || "",
-    hasFocus: false,
+    hasFocus: this.props.autoFocus,
     iconHover: false
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.value !== prevProps.value) {
-      this.setState({ value: this.props.value });
+    const { value, autoFocus } = this.props;
+    if (value !== prevProps.value || autoFocus !== prevProps.autoFocus) {
+      this.setState({ value: value, hasFocus: autoFocus });
     }
-    if (this.state.value !== prevState.value ||
+    if (
+      this.state.value !== prevState.value ||
       this.state.hasFocus !== prevState.hasFocus ||
-      this.state.iconHover !== prevState.iconHover) {
+      this.state.iconHover !== prevState.iconHover
+    ) {
       // Force AutosizeInput to copy style from input field styles to so that /
       // the new size can be correctly calculated.
       this.input && this.input.copyInputStyles();
@@ -148,5 +152,14 @@ class GndInlineEdit extends React.Component {
     );
   }
 }
+
+GndInlineEdit.propTypes = {
+  className: PropTypes.string,
+  inputClassName: PropTypes.string,
+  editIconClassName: PropTypes.string,
+  placeholder: PropTypes.string,
+  useIcon: PropTypes.bool,
+  autoFocus: PropTypes.bool
+};
 
 export default GndInlineEdit;

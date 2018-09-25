@@ -51,3 +51,8 @@
   color: #212121;
   font-size: 15pt;  
 }
+
+.edit-json {
+	top: 6px;
+	left: 12px;
+}

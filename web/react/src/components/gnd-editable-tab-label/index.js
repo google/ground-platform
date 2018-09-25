@@ -35,12 +35,13 @@ const styles = theme => ({
 
 class GndEditableTabLabel extends React.Component {
   render() {
-    const { label, classes, placeholder, onChange } = this.props;
+    const { label, classes, placeholder, onChange, autoFocus } = this.props;
     return (
       <span className={classes.tabWrapper}>
         <span className={classes.tab}>
           <GndInlineEdit
             value={label}
+            autoFocus={autoFocus}
             inputClassName={classes.input}
             editIconClassName={classes.icon}
             onCommitChanges={onChange}
@@ -58,6 +59,7 @@ GndEditableTabLabel.propTypes = {
   classes: PropTypes.object.isRequired,
   placeholder: PropTypes.string,
   onChange: PropTypes.func.isRequired,
+  autoFocus: PropTypes.bool
 };
 
 export default withStyles(styles)(GndEditableTabLabel);

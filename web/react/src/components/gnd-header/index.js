@@ -28,13 +28,13 @@ import {
   getLocalizedText,
   updateProjectTitle
 } from "../../datastore.js";
-import AppBar from "@material-ui/core/AppBar";
-import Button from "@material-ui/core/Button";
+import { AppBar, Button, IconButton } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import GndProjectEditor from "../gnd-project-editor";
 import GndInlineEdit from "../gnd-inline-edit";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import { withHandlers } from "recompose";
+import { Code } from "@material-ui/icons";
 
 const styles = theme => ({});
 
@@ -61,17 +61,19 @@ class GndHeader extends React.Component {
   handleSaveTitleChange(value) {
     const projectId = this.props.projectId;
     if (!projectId) {
-      return Promise.reject('Project not loaded');
+      return Promise.reject("Project not loaded");
     }
     // Don't save if unchanged.
     if (this.getTitle() === value) {
       return Promise.resolve();
-    } 
+    }
     return this.props.updateProjectTitle(projectId, value);
   }
 
   getTitle() {
-    return (this.props.project && getLocalizedText(this.props.project.title)) || "";
+    return (
+      (this.props.project && getLocalizedText(this.props.project.title)) || ""
+    );
   }
 
   render() {
@@ -97,15 +99,6 @@ class GndHeader extends React.Component {
         <Button
           variant="contained"
           size="small"
-          color="secondary"
-          className="edit-project"
-          onClick={this.handleEditProjectClick}
-        >
-          Project JSON
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
           color="primary"
           className="sign-out"
           onClick={this.handleSignOutClick}
@@ -126,6 +119,14 @@ class GndHeader extends React.Component {
               value={this.getTitle()}
               placeholder="Untitled project"
             />
+            <IconButton
+              color="secondary"
+              className="edit-json"
+              onClick={this.handleEditProjectClick}
+            >
+              <Code />
+            </IconButton>
+
             <div className="top-right-controls">{AuthWiget}</div>
           </div>
         </GndAppBar>

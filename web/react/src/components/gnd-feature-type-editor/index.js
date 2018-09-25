@@ -86,36 +86,26 @@ class GndFeatureTypeEditor extends React.Component {
     });
   }
 
+  updateFormDefn(newForm) {
+    this.updateState({
+      defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
+    });
+  }
+
+  deleteForm(id, formIndex) {
+    this.updateState(
+      {
+        defn: { forms: { $unset: [id] } }
+      },
+      { formIndex: Math.max(formIndex - 1, 0) }
+    );
+  }
+
   handleFormChange(newForm) {
-    const { generateId } = this.props;
-    const { featureType, formIndex } = this.state;
     if (newForm.defn) {
-      this.updateState({
-        defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
-      });
+      this.updateFormDefn(newForm);
     } else {
-      if (Object.keys(featureType.defn.forms).length > 1) {
-        this.updateState(
-          {
-            defn: { forms: { $unset: [newForm.id] } }
-          },
-          { formIndex: Math.max(formIndex - 1, 0) }
-        );
-      } else {
-        this.updateState(
-          {
-            defn: {
-              forms: {
-                $unset: [newForm.id],
-                [generateId()]: {
-                  $set: this.createForm()
-                }
-              }
-            }
-          },
-          { formIndex: 0 }
-        );
-      }
+      this.deleteForm(newForm.id, this.state.formIndex);
     }
   }
 

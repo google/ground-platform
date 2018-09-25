@@ -19,11 +19,14 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import GndEditableTabLabel from "../gnd-editable-tab-label";
 import { Add } from "@material-ui/icons";
-import { Tabs, Tab, IconButton } from "@material-ui/core";
+import { Tabs, Tab, IconButton, Button } from "@material-ui/core";
 
 const styles = theme => ({
 	tabContainer: {
 		boxShadow: "0 3px 3px -px #333",
+		marginTop: 12
+	},
+	addButtonNoForms: {
 		marginTop: 12
 	}
 });
@@ -85,37 +88,51 @@ class GndFormTabs extends React.Component {
 			formsArray,
 			formIndex,
 			onTabChange,
-			onFormTitleChange
+			onFormTitleChange,
+			onAddFormClick
 		} = this.props;
+		if (formsArray.length === 0) {
+			return (
+				<Button
+					classes={{ root: classes.addButtonNoForms }}
+				  color="primary"
+					onClick={onAddFormClick}
+				>
+					<Add size="small" />
+					Add form
+				</Button>
+			);
+		}
 		const { scrollButtons } = this.state;
-
+		const isLastTab = formIndex === formsArray.length - 1;
 		// TODO: Add empty template if no forms present.
 		// TODO: Adjust height of swipeable area so that forms don't scroll more
 		// than necessary.
 		return (
 			<div className={classes.tabContainer} ref={this.tabsRef}>
-					<Tabs
-						value={formIndex}
-						onChange={onTabChange}
-						indicatorColor="primary"
-						textColor="primary"
-						scrollable
-						scrollButtons={scrollButtons}
-					>
-						{formsArray.map((form, idx) => (
-							<Tab
-								label={
-									<GndEditableTabLabel
-										label={form.title}
-										placeholder="Untitled form"
-										onChange={newTitle => onFormTitleChange(form, newTitle)}
-									/>
-								}
-								key={form.id}
-							/>
-						))}
-						<Tab component={this.addFormButton.bind(this)} key="add-form" />
-					</Tabs>
+				<Tabs
+					value={formIndex}
+					onChange={onTabChange}
+					indicatorColor="primary"
+					textColor="primary"
+					scrollable
+					scrollButtons={scrollButtons}
+				>
+					{formsArray.map((form, idx) => (
+						<Tab
+							label={
+								<GndEditableTabLabel
+								  autoFocus={!form.title && isLastTab}
+									label={form.title}
+									placeholder="Untitled form"
+									onChange={newTitle => onFormTitleChange(form, newTitle)}
+								/>
+							}
+							key={form.id}
+						/>
+					))}
+					<Tab component={this.addFormButton.bind(this)} key="add-form" />
+				</Tabs>
 			</div>
 		);
 	}
