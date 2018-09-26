@@ -29,15 +29,19 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
-
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import {
+  IconButton,
+  Menu,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction
+} from "@material-ui/core";
 import { withFirestore } from "react-redux-firebase";
-import IconButton from "@material-ui/core/IconButton";
-import { Settings } from "@material-ui/icons";
+import { MoreVert, Settings } from "@material-ui/icons";
+import { GoogleEarth } from 'mdi-material-ui'
 
 const styles = theme => ({
   card: {
@@ -64,13 +68,33 @@ const styles = theme => ({
 });
 
 class GndLegend extends React.Component {
-  onCustomizeClickHandler(featureTypeId) {
+  state = {
+    menuAnchorEl: null
+  };
+
+  handleCustomizeClick(featureTypeId) {
     const featureTypes =
       (this.props.project && this.props.project.featureTypes) || {};
-    this.props.openFeatureTypeEditor(featureTypeId, featureTypes[featureTypeId]);
+    this.props.openFeatureTypeEditor(
+      featureTypeId,
+      featureTypes[featureTypeId]
+    );
+    this.setState({ menuAnchorEl: null });
+  }
+
+  handleDownloadKmlClick(featureTypeId) {
+  }
+
+  handleMoreClick(ev) {
+    this.setState({ menuAnchorEl: ev.currentTarget });
+  }
+
+  handleMenuClose() {
+    this.setState({ menuAnchorEl: null });
   }
 
   featureTypeListItem(ft, classes) {
+    const { menuAnchorEl } = this.state;
     return (
       <ListItem button key={ft.id}>
         <ListItemIcon>
@@ -79,12 +103,30 @@ class GndLegend extends React.Component {
         <ListItemText primary={ft.label} />
         <ListItemSecondaryAction>
           <IconButton
-            className={classes.button}
-            aria-label="Customize"
-            onClick={this.onCustomizeClickHandler.bind(this, ft.id)}
+            style={{ marginRight: 16 }}
+            className="actions-menu-button"
+            aria-label="Feature type actions"
+            aria-owns={menuAnchorEl ? "feature-type-menu" : null}
+            aria-haspopup="true"
+            onClick={this.handleMoreClick.bind(this)}
           >
-            <Settings />
+            <MoreVert />
           </IconButton>
+          <Menu
+            id="feature-type-menu"
+            anchorEl={menuAnchorEl}
+            open={Boolean(menuAnchorEl)}
+            onClose={this.handleMenuClose.bind(this)}
+          >
+            <MenuItem onClick={ev => this.handleDownloadKmlClick(ft.id)}>
+              <GoogleEarth className="menu-icon"/>
+              <Typography>Download KML</Typography>
+            </MenuItem>
+            <MenuItem onClick={ev => this.handleCustomizeClick(ft.id)}>
+              <Settings className="menu-icon"/>              
+              <Typography>Customize</Typography>
+            </MenuItem>
+          </Menu>
         </ListItemSecondaryAction>
       </ListItem>
     );
@@ -127,7 +169,6 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
       payload: { id, defn }
     })
 });
-
 
 const enhance = compose(
   connect(
