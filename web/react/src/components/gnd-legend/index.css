@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
- 
+ .actions-menu-button {
+ 	 margin: 0 !important
+ }
+
+ .menu-icon {
+ 	 margin-right: 12px;
+ }
