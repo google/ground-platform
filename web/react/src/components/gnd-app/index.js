@@ -18,7 +18,7 @@
 import React from "react";
 import GndMain from "../gnd-main";
 import { connectGndDatastore } from "../../datastore.js";
-import { Route, Switch } from 'react-router' // react-router v4
+import { Route } from 'react-router' // react-router v4
 import { ConnectedRouter } from 'connected-react-router'
 import history from '../../history.js'
 

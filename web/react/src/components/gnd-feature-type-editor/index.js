@@ -114,7 +114,12 @@ class GndFeatureTypeEditor extends React.Component {
     this.updateState({
       // TODO: i18n.
       defn: {
-        forms: { [form.id]: { titles: { _: { $set: newTitle } } } }
+        forms: {
+          [form.id]: {
+            titles: prevTitles =>
+              update(prevTitles || {}, { _: { $set: newTitle } })
+          }
+        }
       }
     });
   }
