@@ -19,10 +19,12 @@ import React from "react";
 import "./index.css";
 import { connect } from "react-redux";
 import { compose } from "redux";
+import { withHandlers } from "recompose";
 import {
   getActiveProjectId,
   getActiveProject,
-  getLocalizedText
+  getLocalizedText,
+  generateId
 } from "../../datastore.js";
 import GndMarkerImage from "../gnd-marker-image";
 import Card from "@material-ui/core/Card";
@@ -30,6 +32,7 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import {
+  Button,
   IconButton,
   Menu,
   MenuItem,
@@ -40,8 +43,8 @@ import {
   ListItemSecondaryAction
 } from "@material-ui/core";
 import { withFirestore } from "react-redux-firebase";
-import { MoreVert, Settings } from "@material-ui/icons";
-import { GoogleEarth } from 'mdi-material-ui'
+import { Add, MoreVert, Settings } from "@material-ui/icons";
+import { GoogleEarth } from "mdi-material-ui";
 
 const styles = theme => ({
   card: {
@@ -64,6 +67,11 @@ const styles = theme => ({
   heading: {
     padding: "16px 20px 4px 20px",
     fontSize: 12
+  },
+  addFeatureTypeBtn: {
+    marginBottom: 12,
+    marginRight: 12,
+    float: "right"
   }
 });
 
@@ -72,7 +80,8 @@ class GndLegend extends React.Component {
     menuAnchorEl: null
   };
 
-  handleCustomizeClick(featureTypeId) {
+  handleCustomizeClick() {
+    const { featureTypeId } = this.state;
     const featureTypes =
       (this.props.project && this.props.project.featureTypes) || {};
     this.props.openFeatureTypeEditor(
@@ -82,15 +91,22 @@ class GndLegend extends React.Component {
     this.setState({ menuAnchorEl: null });
   }
 
-  handleDownloadKmlClick(featureTypeId) {
-  }
+  handleDownloadKmlClick() {}
 
-  handleMoreClick(ev) {
-    this.setState({ menuAnchorEl: ev.currentTarget });
+  handleMoreClick(ev, featureTypeId) {
+    this.setState({
+      menuAnchorEl: ev.currentTarget,
+      featureTypeId: featureTypeId
+    });
   }
 
   handleMenuClose() {
     this.setState({ menuAnchorEl: null });
+  }
+
+  handleAddFeatureTypeClick() {
+    const { openFeatureTypeEditor, generateId } = this.props;
+    openFeatureTypeEditor(generateId(), {});
   }
 
   featureTypeListItem(ft, classes) {
@@ -108,7 +124,7 @@ class GndLegend extends React.Component {
             aria-label="Feature type actions"
             aria-owns={menuAnchorEl ? "feature-type-menu" : null}
             aria-haspopup="true"
-            onClick={this.handleMoreClick.bind(this)}
+            onClick={ev => this.handleMoreClick(ev, ft.id)}
           >
             <MoreVert />
           </IconButton>
@@ -118,12 +134,12 @@ class GndLegend extends React.Component {
             open={Boolean(menuAnchorEl)}
             onClose={this.handleMenuClose.bind(this)}
           >
-            <MenuItem onClick={ev => this.handleDownloadKmlClick(ft.id)}>
-              <GoogleEarth className="menu-icon"/>
+            <MenuItem onClick={ev => this.handleDownloadKmlClick()}>
+              <GoogleEarth className="menu-icon" />
               <Typography>Download KML</Typography>
             </MenuItem>
-            <MenuItem onClick={ev => this.handleCustomizeClick(ft.id)}>
-              <Settings className="menu-icon"/>              
+            <MenuItem onClick={ev => this.handleCustomizeClick()}>
+              <Settings className="menu-icon" />
               <Typography>Customize</Typography>
             </MenuItem>
           </Menu>
@@ -139,7 +155,7 @@ class GndLegend extends React.Component {
     const featureTypesArray = Object.keys(featureTypes).map(id => ({
       id,
       defn: featureTypes[id],
-      label: getLocalizedText(featureTypes[id].itemLabel) || "Place"
+      label: getLocalizedText(featureTypes[id].itemLabel) || "<Untitled>"
     }));
     featureTypesArray.sort((a, b) => a.label.localeCompare(b.label));
     return (
@@ -151,6 +167,18 @@ class GndLegend extends React.Component {
           <List className={classes.list}>
             {featureTypesArray.map(ft => this.featureTypeListItem(ft, classes))}
           </List>
+          <Button
+            size="small"
+            color="default"
+            classes={{ root: classes.addFeatureTypeBtn }}
+            aria-label="Add feature type"
+            onClick={this.handleAddFeatureTypeClick.bind(this)}
+          >
+            <Add fontSize="small" color="action" />
+            <Typography fontSize="small" color="textSecondary">
+              Add feature type
+            </Typography>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -176,6 +204,7 @@ const enhance = compose(
     mapDispatchToProps
   ),
   withFirestore,
+  withHandlers({ generateId }),
   withStyles(styles)
 );
 

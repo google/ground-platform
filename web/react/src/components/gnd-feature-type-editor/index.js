@@ -76,7 +76,10 @@ class GndFeatureTypeEditor extends React.Component {
   handleFeatureTypeLabelChange(newLabel) {
     this.updateState({
       // TODO: i18n.
-      defn: { itemLabel: { _: { $set: newLabel } } }
+      defn: {
+        itemLabel: prevLabels =>
+          update(prevLabels || {}, { _: { $set: newLabel } })
+      }
     });
     return Promise.resolve();
   }
