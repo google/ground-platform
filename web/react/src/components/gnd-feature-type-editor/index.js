@@ -50,6 +50,8 @@ const styles = theme => ({
   }
 });
 
+const isEmpty = obj => !(obj && Object.keys(obj).length);
+
 class GndFeatureTypeEditor extends React.Component {
   state = {
     formIndex: 0,
@@ -130,7 +132,7 @@ class GndFeatureTypeEditor extends React.Component {
       id: generateId(),
       labels: {},
       type: "text_field",
-      required: "false"
+      required: false
     };
   }
 
@@ -141,17 +143,19 @@ class GndFeatureTypeEditor extends React.Component {
   handleAddFormClick() {
     const { generateId } = this.props;
     const { featureType } = this.state;
+    const forms = featureType.defn.forms || {};
     this.updateState(
       {
         defn: {
-          forms: {
-            [generateId()]: {
-              $set: this.createForm()
-            }
-          }
+          forms: prevForms =>
+            update(prevForms || {}, {
+              [generateId()]: {
+                $set: this.createForm()
+              }
+            })
         }
       },
-      { formIndex: Object.keys(featureType.defn.forms).length }
+      { formIndex: Object.keys(forms).length }
     );
   }
 

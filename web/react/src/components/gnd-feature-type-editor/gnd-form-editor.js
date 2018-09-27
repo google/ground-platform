@@ -71,7 +71,7 @@ class GndFormEditor extends React.Component {
       id: generateId(),
       labels: {},
       type: "text_field",
-      required: "false"
+      required: false
     };
   }
 

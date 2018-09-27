@@ -18,8 +18,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { IconButton, Switch, Select, MenuItem, TextField, FormGroup, FormControlLabel } from "@material-ui/core";
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import {
+  IconButton,
+  Switch,
+  Select,
+  MenuItem,
+  TextField,
+  FormGroup,
+  FormControlLabel
+} from "@material-ui/core";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import { getLocalizedText } from "../../datastore.js";
 import GndFocusableRow from "./gnd-focusable-row";
 import GndMultiSelectOptionsEditor from "./gnd-multi-select-options-editor";
@@ -38,7 +46,7 @@ const styles = {
   },
   bottomControls: {
     width: "100%",
-    display: "block",
+    display: "block"
   }
 };
 
@@ -109,7 +117,7 @@ class GndFormElementEditor extends React.Component {
             id="fieldLabel"
             classes={{ root: classes.label }}
             style={{ width: "64%" }}
-            value={getLocalizedText(labels)}
+            value={getLocalizedText(labels) || ""}
             onChange={ev => this.handleLabelChange(ev.target.value)}
             onBlur={ev => this.handleLabelChange(ev.target.value.trim())}
             placeholder="Field name"
@@ -150,7 +158,7 @@ class GndFormElementEditor extends React.Component {
               <DeleteForeverIcon />
             </IconButton>
           </span>
-          <div style={{clear: "both"}}></div>
+          <div style={{ clear: "both" }} />
         </FormGroup>
       </GndFocusableRow>
     );
