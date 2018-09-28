@@ -18,6 +18,7 @@
 'use strict';
 
 const GndSpreadsheet = require('./gnd-spreadsheet');
+const GndKmlWritter = require('./gnd-kml-writter');
 
 class GndCloudFunctions {
   constructor(db, auth) {
@@ -32,11 +33,100 @@ class GndCloudFunctions {
       && new GndSpreadsheet(this.auth_, sheetConfig.sheetId));
   }
 
+  exportKml(req, res) {
+    const {
+      project: providedProjectId,
+      featureType: providedFeatureTypeId,
+      lang: desiredLanguage,
+    } = req.query;
+
+    // TODO: add Schema validation
+    // TODO: respect the icon config in the proj setting
+
+    let data = {};
+    return this.db_.fetchProject(providedProjectId).then(
+      project => {
+        if (!project.exists) {
+          res.status(404).send('not found');
+          return Promise.reject(new Error('project not found: ' + providedProjectId));
+        }
+        data['projects'] = {};
+        data['projects'][project.id] = {}
+        data['projects'][project.id]['data'] = project.data();
+        data['projects'][project.id]['featureTypes'] = {};
+        return project.ref.collection('features').get();
+      }
+    ).then(
+      features => {
+        let recordPromises = [];
+        features.forEach(
+          feature => {
+            const featureTypeId = feature.get('featureTypeId');
+            if (providedFeatureTypeId && featureTypeId != providedFeatureTypeId) {
+              return;
+            }
+            const projectRef = feature.ref.parent.parent;
+            let projectMap = data['projects'][projectRef.id];
+            if (!projectMap['featureTypes'][featureTypeId]) {
+              projectMap['featureTypes'][featureTypeId] = {};
+              projectMap['featureTypes'][featureTypeId]['features'] = {};
+            }
+            let featureTypeMap = projectMap['featureTypes'][featureTypeId];
+            featureTypeMap['features'][feature.id] = {};
+            featureTypeMap['features'][feature.id]['data'] = feature.data();
+            featureTypeMap['features'][feature.id]['records'] = {}; 
+            recordPromises.push(feature.ref.collection('records').get());
+          }
+        );
+        return Promise.all(recordPromises);
+      }
+    ).then(
+      recordsList => {
+        recordsList.forEach(
+          records => {
+            records.forEach(
+              record => {
+                const featureTypeId = record.get('featureTypeId');
+                const featureRef = record.ref.parent.parent;
+                const projectRef = featureRef.parent.parent;
+                let featureMap = data['projects'][projectRef.id]['featureTypes'][featureTypeId]['features'][featureRef.id];
+                featureMap['records'][record.id] = record.data();
+              }
+            );
+          }
+      
+        );
+        let gndKmlWritter = new GndKmlWritter(data);
+        return gndKmlWritter.getTmpKmlFile(desiredLanguage ? desiredLanguage : '');
+      }
+    ).then(
+      tmpKmlFilePath => {
+        return res.download(tmpKmlFilePath);
+      }
+    ).catch(
+      err => {
+        console.log(err);
+        return res.status(500).end();
+      }
+    );
+  }
+
+  exportCsv(req, res) {
+    const {
+      project: providedProjectId,
+      featureType: providedFeatureTypeId,
+      lang: desiredLanguage,
+    } = req.query;
+
+    return res.status(500).send('Not supported yet.');
+  }
+
   updateSpreadsheetColumns(req, res) {
     const {
       project: projectId,
       featureType: featureTypeId,
-      form: formId
+      form: formId,
+      lang: lang
     } = req.query;
     return this.getSheet_(projectId).then(sheet => {
       if (!sheet) {
@@ -56,7 +146,7 @@ class GndCloudFunctions {
             cols[cols.length - 1].location.dimensionRange.endIndex : 0;
           const existingColumnIds = cols.map(col => col.metadataValue);
           return sheet
-            .updateColumns(existingColumnIds, form.elements, insertAt)
+            .updateColumns(existingColumnIds, form.elements, insertAt, lang)
             .then(cnt => res.send(`${cnt} columns added`));
         });
       });
@@ -70,7 +160,7 @@ class GndCloudFunctions {
     return this.getSheet_(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds => 
         this.db_.fetchFeature(projectId, featureId).then(feature =>
-          sheet.addRow(feature, recordId, record, colIds))));
+          sheet.addRow(feature, featureId, recordId, record, colIds))));
   }
 
   onUpdateRecord(change, context) {
@@ -80,7 +170,7 @@ class GndCloudFunctions {
     return this.getSheet_(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds =>
         this.db_.fetchFeature(projectId, featureId).then(feature => 
-          sheet.updateRow(feature, recordId, record, colIds))));
+          sheet.updateRow(feature, featureId, recordId, record, colIds))));
   }
 }
 
