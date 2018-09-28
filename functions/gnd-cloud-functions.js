@@ -42,7 +42,6 @@ class GndCloudFunctions {
 
     // TODO: add Schema validation
     // TODO: respect the icon config in the proj setting
-
     let data = {};
     return this.db_.fetchProject(providedProjectId).then(
       project => {
@@ -52,52 +51,54 @@ class GndCloudFunctions {
         }
         data['projects'] = {};
         data['projects'][project.id] = {}
-        data['projects'][project.id]['data'] = project.data();
+        data['projects'][project.id]['title'] = project.get('title');
         data['projects'][project.id]['featureTypes'] = {};
-        return project.ref.collection('features').get();
+        const featureTypes = project.get('featureTypes');
+        for (var featureTypeIdVar in featureTypes) {
+          const featureType = featureTypes[featureTypeIdVar];
+          data['projects'][project.id]['featureTypes'][featureTypeIdVar] = {};
+          data['projects'][project.id]['featureTypes'][featureTypeIdVar]['definition'] = featureType;
+          data['projects'][project.id]['featureTypes'][featureTypeIdVar]['features'] = {};
+        }
+        return Promise.all([
+          project.ref.collection('features').get(),
+          project.ref.collection('records').get()]);
       }
     ).then(
-      features => {
-        let recordPromises = [];
+      results => {
+        const features = results[0];
         features.forEach(
           feature => {
             const featureTypeId = feature.get('featureTypeId');
             if (providedFeatureTypeId && featureTypeId != providedFeatureTypeId) {
               return;
             }
-            const projectRef = feature.ref.parent.parent;
-            let projectMap = data['projects'][projectRef.id];
-            if (!projectMap['featureTypes'][featureTypeId]) {
-              projectMap['featureTypes'][featureTypeId] = {};
-              projectMap['featureTypes'][featureTypeId]['features'] = {};
-            }
-            let featureTypeMap = projectMap['featureTypes'][featureTypeId];
+            const projectId = feature.ref.parent.parent.id;
+            let featureTypeMap = data['projects'][projectId]['featureTypes'][featureTypeId];
             featureTypeMap['features'][feature.id] = {};
             featureTypeMap['features'][feature.id]['data'] = feature.data();
             featureTypeMap['features'][feature.id]['records'] = {}; 
-            recordPromises.push(feature.ref.collection('records').get());
           }
         );
-        return Promise.all(recordPromises);
-      }
-    ).then(
-      recordsList => {
-        recordsList.forEach(
-          records => {
-            records.forEach(
-              record => {
-                const featureTypeId = record.get('featureTypeId');
-                const featureRef = record.ref.parent.parent;
-                const projectRef = featureRef.parent.parent;
-                let featureMap = data['projects'][projectRef.id]['featureTypes'][featureTypeId]['features'][featureRef.id];
-                featureMap['records'][record.id] = record.data();
-              }
-            );
+        const records = results[1];
+        records.forEach(
+          record => {
+            const featureTypeId = record.get('featureTypeId');
+            if (providedFeatureTypeId && featureTypeId != providedFeatureTypeId) {
+              return;
+            }
+            const featureId = record.get('featureId');
+            const projectId = record.ref.parent.parent.id;
+            let featureMap = data['projects'][projectId]['featureTypes'][featureTypeId]['features'][featureId];
+            if (Object.keys(featureMap).length == 0) {
+              // If the related feature itself doesn't exist, skip
+              return;
+            }
+            featureMap['records'][record.id] = record.data();
           }
-      
         );
-        let gndKmlWritter = new GndKmlWritter(data);
-        return gndKmlWritter.getTmpKmlFile(desiredLanguage ? desiredLanguage : '');
+        let gndKmlWritter = new GndKmlWritter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
+        return gndKmlWritter.getTmpKmlFile();
       }
     ).then(
       tmpKmlFilePath => {
@@ -106,7 +107,8 @@ class GndCloudFunctions {
     ).catch(
       err => {
         console.log(err);
-        return res.status(500).end();
+        //return res.status(500).end();
+        return res.send(data);
       }
     );
   }

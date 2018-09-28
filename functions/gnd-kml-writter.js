@@ -4,7 +4,8 @@ const os = require('os');
 
 class GndKmlWritter {
 
-  constructor(rawData, desiredLanguage) {
+  constructor(projName, rawData, desiredLanguage) {
+    this.projName_ = projName;
     this.rawData_ = rawData;
     this.desiredLanguage_ = desiredLanguage;
   }
@@ -19,7 +20,7 @@ class GndKmlWritter {
       });
     }).then(
       folderPath => {
-        const filePath = folderPath + '/out.kml'
+        const filePath = folderPath + '/' + this.projName_ + '.kml'
         return new Promise((resolve, reject) => {
           fs.writeFile(filePath, kmlString, (err) => {
             if (err) reject(err);
@@ -50,17 +51,13 @@ class GndKmlWritter {
     kml +=
       '<name>' +
       GndKmlWritter.getFieldWithDesiredLanguage_(
-        project['data']['title'], [desiredLanguage]) +
+        project['title'], [desiredLanguage]) +
       '</name>\n';
-    kml +=
-      '<description>' +
-      GndKmlWritter.getFieldWithDesiredLanguage_(
-        project['data']['description'], [desiredLanguage]) +
-      '</description>\n';
 
     for (var featureTypeId in project['featureTypes']) {
       const features = project['featureTypes'][featureTypeId]['features'];
-      kml = GndKmlWritter.addFeatureTypeToKml_(kml, featureTypeId, features, desiredLanguage);
+      const featureTypeDef = project['featureTypes'][featureTypeId]['definition'];
+      kml = GndKmlWritter.addFeatureTypeToKml_(kml, featureTypeId, featureTypeDef, features, desiredLanguage);
     }
 
     kml += '</Document>\n';
@@ -68,25 +65,25 @@ class GndKmlWritter {
   }
 
   // TODO: Add different styles for different featureTypeId
-  static addFeatureTypeToKml_(kml, featureTypeId, features, desiredLanguage) {
+  static addFeatureTypeToKml_(kml, featureTypeId, featureTypeDef, features, desiredLanguage) {
     kml += '<Folder>\n';
     kml += '<name>' + featureTypeId + '</name>\n';
     for (var featureId in features) {
       const feature = features[featureId];
-      kml = GndKmlWritter.addFeatureToKml_(kml, featureId, feature, desiredLanguage);
+      kml = GndKmlWritter.addFeatureToKml_(kml, featureTypeDef, featureId, feature, desiredLanguage);
     }
 
     kml += '</Folder>\n';
     return kml;
   }
 
-  static addFeatureToKml_(kml, featureId, feature, desiredLanguage) {
+  static addFeatureToKml_(kml, featureTypeDef, featureId, feature, desiredLanguage) {
     kml += '<Placemark>\n';
     kml += '<name>' + featureId + '</name>\n';
 
     const records = feature['records'];
     if (Object.keys(records).length > 0) {
-      kml = GndKmlWritter.addRecordsToKml_(kml, records, desiredLanguage);
+      kml = GndKmlWritter.addRecordsToKml_(kml, featureTypeDef, records, desiredLanguage);
     }
     const featureData = feature['data'];
     kml = GndKmlWritter.addFeatureDataToKml_(kml, featureData);
@@ -95,24 +92,67 @@ class GndKmlWritter {
     return kml;
   }
 
-  static addRecordsToKml_(kml, records, desiredLanguage) {
+  static addRecordsToKml_(kml, featureTypeDef, records, desiredLanguage) {
     kml += '<description>';
     kml += '<style>table, th, td {\n' +
       'border: 1px solid black;\n' +
       'border-collapse: collapse;\n' +
+      'table-layout: fixed;\n' +
+      'text-align: left;\n' +
+      'width: 100% ;\n' +
       '}</style>\n';
-    kml += '<table>';
-    kml += '<tr><th>RecordId</th><th>Record</th></tr>';
+    let recordCnt = 0;
     for (var recordId in records) {
+      recordCnt += 1;
+      kml += '<table>';
+      kml += '<caption align="left">Record: ' + recordCnt + '</caption>';
       const record = records[recordId];
-      kml += '<tr>';
-      kml += '<td>' + recordId + '</td>';
-      kml += '<td><pre>' + JSON.stringify(record, null, 2) + '</pre></td>';
-      kml += '</tr>';
+      const formDef = featureTypeDef['forms'][record['formId']];
+      kml += GndKmlWritter.recordToHtmlTableRow(formDef, record, desiredLanguage);
+      kml += '</table>';
     }
-    kml += '</table>';
     kml += '</description>\n';
     return kml;
+  }
+
+  static recordToHtmlTableRow(formsDef, record, desiredLanguage) {
+    let row = '';
+    // Add modifiedBy
+    row += '<tr>';
+    row += '<th>Modified Time</th>';
+    row += '<td>' + record['clientTimeModified'] + '</td>';
+    row += '</tr>';
+    // Add Responses
+    const questions = formsDef['elements'];
+    const responses = record['responses'];
+    for (var question in questions) {
+      const questionId = questions[question]['id'];
+      const questionLabels = questions[question]['labels'];
+
+      const responseCode = responses[questionId] ? responses[questionId][0] : null;
+      let response = responseCode ? responseCode : ' - ';
+      if (questions[question]['options'] && responseCode) {
+        let optionLabelsMapping = new Map();
+        questions[question]['options'].forEach(
+          option => {
+            if (option['code'] == responseCode) {
+              response = GndKmlWritter.getFieldWithDesiredLanguage_(
+                option['labels'], desiredLanguage);
+            }
+          }
+        );
+      }
+      
+      row += '<tr>'
+      row +=
+        '<th>' +
+        GndKmlWritter.getFieldWithDesiredLanguage_(
+          questionLabels, desiredLanguage)
+        + '</th>';
+      row += '<td>' + response + '</td>';
+      row += '</tr>';
+    }
+    return row;
   }
 
   static addFeatureDataToKml_(kml, featureData) {
@@ -124,6 +164,9 @@ class GndKmlWritter {
   }
 
   static getFieldWithDesiredLanguage_(data, desiredLanguage) {
+    if (!data) {
+      return '';
+    }
     const keys = new Set(Object.keys(data));
     if (keys.size == 0) {
       return '';
