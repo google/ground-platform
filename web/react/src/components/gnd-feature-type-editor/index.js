@@ -60,8 +60,6 @@ const styles = theme => ({
   }
 });
 
-const isEmpty = obj => !(obj && Object.keys(obj).length);
-
 class GndFeatureTypeEditor extends React.Component {
   state = {
     formIndex: 0,
@@ -174,7 +172,7 @@ class GndFeatureTypeEditor extends React.Component {
 
   handleSave(event) {
     try {
-      const { projectId, project, updateProject, close, auth } = this.props;
+      const { projectId, project, updateProject, auth } = this.props;
       const { featureType } = this.state;
       const newProject = update(project, {
         featureTypes: {
@@ -189,7 +187,7 @@ class GndFeatureTypeEditor extends React.Component {
   }
 
   onSaved(id) {
-      this.props.close()
+    this.props.close();
     if (this.props.projectId !== id) {
       // TODO: Refactor into custom action.
       history.push(`/p/${id}`);
@@ -287,7 +285,7 @@ const mapStateToProps = (store, props) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  close: () => dispatch({ type: "CLOSE_FEATURE_TYPE_EDITOR" }),
+  close: () => dispatch({ type: "CLOSE_FEATURE_TYPE_EDITOR" })
 });
 
 const enhance = compose(
