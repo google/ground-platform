@@ -35,6 +35,7 @@ import GndInlineEdit from "../gnd-inline-edit";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 import { withHandlers } from "recompose";
 import { Code } from "@material-ui/icons";
+import history from "../../history.js";
 
 const styles = theme => ({});
 
@@ -59,7 +60,7 @@ class GndHeader extends React.Component {
   };
 
   handleSaveTitleChange(value) {
-    const projectId = this.props.projectId;
+    const { auth, projectId } = this.props;
     if (!projectId) {
       return Promise.reject("Project not loaded");
     }
@@ -67,7 +68,16 @@ class GndHeader extends React.Component {
     if (this.getTitle() === value) {
       return Promise.resolve();
     }
-    return this.props.updateProjectTitle(projectId, value);
+    return this.props
+      .updateProjectTitle(projectId, value, auth)
+      .then(id => this.onTitleSaved(id));
+  }
+
+  onTitleSaved(id) {
+    if (this.props.projectId !== id) {
+      // TODO: Refactor into custom action.
+      history.push(`/p/${id}`);
+    }
   }
 
   getTitle() {

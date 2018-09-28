@@ -23,7 +23,7 @@ import { ConnectedRouter } from 'connected-react-router'
 import history from '../../history.js'
 
 class GndApp extends React.Component {
-  render() {
+  render() {  	
     return (
       <ConnectedRouter history={history}>
         <Route exact path="/p/:projectId" render={() => <GndMain />} />        

@@ -27,10 +27,11 @@ const getFirestoreData = (store, key) =>
 	key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
 const getActiveProjectId = store => store.path.projectId;
 
-// TODO: Create empty project on "create" action and remove || {}.
 // TOOD: Handle loading state.
 const getActiveProject = store =>
-	getFirestoreData(store, "activeProject") || {};
+	getActiveProjectId(store) === ":new"
+		? {}
+		: getFirestoreData(store, "activeProject");
 
 const getMapFeatures = store => getFirestoreData(store, "mapFeatures");
 
@@ -38,15 +39,41 @@ const getAuth = store => store.firebase.auth;
 
 const getProfile = store => store.firebase.profile;
 
-const updateProject = props => (projectId, project) =>
-	props.firestore.set({ collection: "projects", doc: projectId }, project);
+const updateProject = props => (projectId, project, auth) => {
+	if (projectId === ":new") {
+		return props.firestore
+			.add({ collection: "projects" }, {...project, acl: getDefaultAcls(auth)})
+			.then(ref => ref.id);
+	} else {
+		return props.firestore
+			.set({ collection: "projects", doc: projectId }, project)
+			.then(() => projectId);
+	}
+};
+
+const getDefaultAcls = (auth) => {
+	console.log(auth);
+	return {
+		[auth.email]: ["r", "w"],
+		"gndtestuser@gmail.com": ["r", "w"]
+	};
+}
 
 // TODO: i18n.
-const updateProjectTitle = props => (projectId, newTitle) =>
-	props.firestore
+const updateProjectTitle = props => (projectId, newTitle, auth) => {
+	if (projectId === ":new") {
+	return props.firestore
+		.collection("projects")
+		.add({ title: { _: newTitle }, acl: getDefaultAcls(auth) })
+		.then(ref => ref.id);
+	} else {
+	return props.firestore
 		.collection("projects")
 		.doc(projectId)
-		.set({ title: {_: newTitle} }, { merge: true });
+		.set({ title: { _: newTitle } }, { merge: true })
+		.then(() => projectId);		
+	}
+}
 
 const generateId = props => () => props.firestore.collection("ids").doc().id;
 
@@ -81,5 +108,5 @@ export {
 	getMapFeatures,
 	getLocalizedText,
 	connectGndDatastore,
-	generateId,
+	generateId
 };

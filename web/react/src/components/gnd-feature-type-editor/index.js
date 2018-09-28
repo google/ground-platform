@@ -21,6 +21,7 @@ import { compose } from "redux";
 import { connect } from "react-redux";
 import { withHandlers } from "recompose";
 import {
+  getAuth,
   getActiveProjectId,
   getActiveProject,
   getLocalizedText,
@@ -43,6 +44,15 @@ import GndFormEditor from "./gnd-form-editor";
 import update from "immutability-helper";
 import SwipeableViews from "react-swipeable-views";
 import GndFormTabs from "./gnd-form-tabs";
+import history from "../../history.js";
+
+// TODO: Refactor.
+update.extend("$auto", function(value, object) {
+  return object ? update(object, value) : update({}, value);
+});
+update.extend("$autoArray", function(value, object) {
+  return object ? update(object, value) : update([], value);
+});
 
 const styles = theme => ({
   dialog: {
@@ -164,15 +174,25 @@ class GndFeatureTypeEditor extends React.Component {
 
   handleSave(event) {
     try {
-      const { projectId, project, updateProject, close } = this.props;
+      const { projectId, project, updateProject, close, auth } = this.props;
       const { featureType } = this.state;
       const newProject = update(project, {
-        featureTypes: { [featureType.id]: { $set: featureType.defn } }
+        featureTypes: {
+          $auto: { [featureType.id]: { $set: featureType.defn } }
+        }
       });
-      updateProject(projectId, newProject).then(ref => close());
+      updateProject(projectId, newProject, auth).then(id => this.onSaved(id));
     } catch (e) {
       alert("Save failed");
       console.error(e);
+    }
+  }
+
+  onSaved(id) {
+      this.props.close()
+    if (this.props.projectId !== id) {
+      // TODO: Refactor into custom action.
+      history.push(`/p/${id}`);
     }
   }
 
@@ -188,8 +208,6 @@ class GndFeatureTypeEditor extends React.Component {
       defn: forms[id]
     }));
 
-    // formsArray.push({ id: "generateid", title: "New form", defn: {} });
-    // TODO: Add empty template if no forms present.
     // TODO: Adjust height of swipeable area so that forms don't scroll more
     // than necessary.
     return (
@@ -262,13 +280,14 @@ class GndFeatureTypeEditor extends React.Component {
 }
 
 const mapStateToProps = (store, props) => ({
+  auth: getAuth(store),
   projectId: getActiveProjectId(store),
   project: getActiveProject(store),
   editState: store.featureTypeEditState
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  close: () => dispatch({ type: "CLOSE_FEATURE_TYPE_EDITOR" })
+  close: () => dispatch({ type: "CLOSE_FEATURE_TYPE_EDITOR" }),
 });
 
 const enhance = compose(

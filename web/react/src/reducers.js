@@ -56,12 +56,20 @@ const featureTypeEditStateReducer = (state = null, action) => {
 	}
 };
 
+const selectProjectIdReducer = (state = null, action) => {
+	if (action.type === "SELECT_PROJECT") {
+		return action.projectId;
+	}
+	return state;
+}
+
 const rootReducer = combineReducers({
 	path: pathReducer,
 	firebase: firebaseReducer,
 	firestore: firestoreReducer,
 	projectEditorOpen: projectEditorReducer,
 	featureTypeEditState: featureTypeEditStateReducer,
+	selectedProjectId: selectProjectIdReducer,
 });
 
 export default connectRouter(history)(rootReducer);
