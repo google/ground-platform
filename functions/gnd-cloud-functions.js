@@ -18,7 +18,7 @@
 'use strict';
 
 const GndSpreadsheet = require('./gnd-spreadsheet');
-const GndKmlWritter = require('./gnd-kml-writter');
+const GndKmlWriter = require('./gnd-kml-writer');
 
 class GndCloudFunctions {
   constructor(db, auth) {
@@ -62,6 +62,8 @@ class GndCloudFunctions {
         }
         return Promise.all([
           project.ref.collection('features').get(),
+          // TODO: Filter records by featureType where specified with something like:
+          // project.ref.collection('records').where('featureTypeId', '==', providedFeatureTypeId).get()
           project.ref.collection('records').get()
         ]);
       }
@@ -98,8 +100,8 @@ class GndCloudFunctions {
             featureMap['records'][record.id] = record.data();
           }
         );
-        let gndKmlWritter = new GndKmlWritter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
-        return gndKmlWritter.getTmpKmlFile();
+        let gndKmlWriter = new GndKmlWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
+        return gndKmlWriter.getTmpKmlFile();
       }
     ).then(
       tmpKmlFilePath => {
@@ -111,7 +113,7 @@ class GndCloudFunctions {
         //return res.status(500).end();
         return res.send(data);
       }
-    );
+    )
   }
 
   exportCsv(req, res) {
