@@ -142,13 +142,13 @@ class GndKmlWritter {
           }
         );
       }
-      
+
       row += '<tr>'
       row +=
         '<th>' +
         GndKmlWritter.getFieldWithDesiredLanguage_(
-          questionLabels, desiredLanguage)
-        + '</th>';
+          questionLabels, desiredLanguage) +
+        '</th>';
       row += '<td>' + response + '</td>';
       row += '</tr>';
     }

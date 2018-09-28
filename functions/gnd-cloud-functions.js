@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 'use strict';
 
 const GndSpreadsheet = require('./gnd-spreadsheet');
@@ -27,10 +27,10 @@ class GndCloudFunctions {
   }
 
   getSheet_(projectId) {
-    return this.db_.fetchSheetsConfig(projectId).then(sheetConfig => 
-      sheetConfig 
-      && sheetConfig.sheetId 
-      && new GndSpreadsheet(this.auth_, sheetConfig.sheetId));
+    return this.db_.fetchSheetsConfig(projectId).then(sheetConfig =>
+      sheetConfig &&
+      sheetConfig.sheetId &&
+      new GndSpreadsheet(this.auth_, sheetConfig.sheetId));
   }
 
   exportKml(req, res) {
@@ -62,7 +62,8 @@ class GndCloudFunctions {
         }
         return Promise.all([
           project.ref.collection('features').get(),
-          project.ref.collection('records').get()]);
+          project.ref.collection('records').get()
+        ]);
       }
     ).then(
       results => {
@@ -77,7 +78,7 @@ class GndCloudFunctions {
             let featureTypeMap = data['projects'][projectId]['featureTypes'][featureTypeId];
             featureTypeMap['features'][feature.id] = {};
             featureTypeMap['features'][feature.id]['data'] = feature.data();
-            featureTypeMap['features'][feature.id]['records'] = {}; 
+            featureTypeMap['features'][feature.id]['records'] = {};
           }
         );
         const records = results[1];
@@ -156,22 +157,36 @@ class GndCloudFunctions {
   }
 
   onCreateRecord(change, context) {
-    const {projectId, featureId, recordId} = context.params;
+    const {
+      projectId,
+      featureId,
+      recordId
+    } = context.params;
     const record = change.data();
-    const {featureTypeId, formId} = record;
+    const {
+      featureTypeId,
+      formId
+    } = record;
     return this.getSheet_(projectId).then(sheet =>
-      sheet && sheet.getColumnIds().then(colIds => 
+      sheet && sheet.getColumnIds().then(colIds =>
         this.db_.fetchFeature(projectId, featureId).then(feature =>
           sheet.addRow(feature, featureId, recordId, record, colIds))));
   }
 
   onUpdateRecord(change, context) {
-    const {projectId, featureId, recordId} = context.params;
+    const {
+      projectId,
+      featureId,
+      recordId
+    } = context.params;
     const record = change.after.data();
-    const {featureTypeId, formId} = record;
+    const {
+      featureTypeId,
+      formId
+    } = record;
     return this.getSheet_(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds =>
-        this.db_.fetchFeature(projectId, featureId).then(feature => 
+        this.db_.fetchFeature(projectId, featureId).then(feature =>
           sheet.updateRow(feature, featureId, recordId, record, colIds))));
   }
 }
