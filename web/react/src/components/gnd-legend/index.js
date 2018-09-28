@@ -19,10 +19,12 @@ import React from "react";
 import "./index.css";
 import { connect } from "react-redux";
 import { compose } from "redux";
+import { withHandlers } from "recompose";
 import {
   getActiveProjectId,
   getActiveProject,
-  getLocalizedText
+  getLocalizedText,
+  exportKml
 } from "../../datastore.js";
 import GndMarkerImage from "../gnd-marker-image";
 import Card from "@material-ui/core/Card";
@@ -41,7 +43,7 @@ import {
 } from "@material-ui/core";
 import { withFirestore } from "react-redux-firebase";
 import { MoreVert, Settings } from "@material-ui/icons";
-import { GoogleEarth } from 'mdi-material-ui'
+import { GoogleEarth } from "mdi-material-ui";
 
 const styles = theme => ({
   card: {
@@ -83,6 +85,8 @@ class GndLegend extends React.Component {
   }
 
   handleDownloadKmlClick(featureTypeId) {
+    const { projectId, exportKml } = this.props;
+    exportKml(projectId, featureTypeId);    
   }
 
   handleMoreClick(ev) {
@@ -119,11 +123,11 @@ class GndLegend extends React.Component {
             onClose={this.handleMenuClose.bind(this)}
           >
             <MenuItem onClick={ev => this.handleDownloadKmlClick(ft.id)}>
-              <GoogleEarth className="menu-icon"/>
+              <GoogleEarth className="menu-icon" />
               <Typography>Download KML</Typography>
             </MenuItem>
             <MenuItem onClick={ev => this.handleCustomizeClick(ft.id)}>
-              <Settings className="menu-icon"/>              
+              <Settings className="menu-icon" />
               <Typography>Customize</Typography>
             </MenuItem>
           </Menu>
@@ -176,6 +180,7 @@ const enhance = compose(
     mapDispatchToProps
   ),
   withFirestore,
+  withHandlers({exportKml}),
   withStyles(styles)
 );
 

@@ -50,8 +50,6 @@ const styles = theme => ({
   }
 });
 
-const isEmpty = obj => !(obj && Object.keys(obj).length);
-
 class GndFeatureTypeEditor extends React.Component {
   state = {
     formIndex: 0,
