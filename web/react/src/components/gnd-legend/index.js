@@ -24,7 +24,8 @@ import {
   getActiveProjectId,
   getActiveProject,
   getLocalizedText,
-  generateId
+  generateId,
+  exportKml
 } from "../../datastore.js";
 import GndMarkerImage from "../gnd-marker-image";
 import Card from "@material-ui/core/Card";
@@ -91,7 +92,10 @@ class GndLegend extends React.Component {
     this.setState({ menuAnchorEl: null });
   }
 
-  handleDownloadKmlClick() {}
+  handleDownloadKmlClick(featureTypeId) {
+    const { projectId, exportKml } = this.props;
+    exportKml(projectId, featureTypeId);
+  }
 
   handleMoreClick(ev, featureTypeId) {
     this.setState({
@@ -134,11 +138,11 @@ class GndLegend extends React.Component {
             open={Boolean(menuAnchorEl)}
             onClose={this.handleMenuClose.bind(this)}
           >
-            <MenuItem onClick={ev => this.handleDownloadKmlClick()}>
+            <MenuItem onClick={ev => this.handleDownloadKmlClick(ft.id)}>
               <GoogleEarth className="menu-icon" />
               <Typography>Download KML</Typography>
             </MenuItem>
-            <MenuItem onClick={ev => this.handleCustomizeClick()}>
+            <MenuItem onClick={ev => this.handleCustomizeClick(ft.id)}>
               <Settings className="menu-icon" />
               <Typography>Customize</Typography>
             </MenuItem>
@@ -204,7 +208,7 @@ const enhance = compose(
     mapDispatchToProps
   ),
   withFirestore,
-  withHandlers({ generateId }),
+  withHandlers({ exportKml, generateId }),
   withStyles(styles)
 );
 

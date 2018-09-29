@@ -31,6 +31,12 @@ const db = new GndDatastore(admin.firestore());
 const auth = new GndAuth();
 const gnd = new GndCloudFunctions(db, auth);
 
+exports.exportKml = functions.https.onRequest((req, res) =>
+	gnd.exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
+
+exports.exportCsv = functions.https.onRequest((req, res) =>
+	gnd.exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+
 // Test via shell:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
 exports.updateColumns = functions.https.onRequest((req, res) => 

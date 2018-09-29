@@ -18,6 +18,7 @@
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { firestoreConnect } from "react-redux-firebase";
+import firebaseConfig from "./.firebase-config.js";
 
 // TODO: Turn into class, GndDatastore, wrapper around firebase and Redux store.
 
@@ -98,9 +99,16 @@ const connectGndDatastore = compose(
 	])
 );
 
+const exportKml = props => (projectId, featureTypeId) => {
+	window.location.href = `${
+		firebaseConfig.functionsURL
+	}/exportKml?project=${projectId}&featureType=${featureTypeId}`;
+};
+
 export {
 	getActiveProject,
 	getActiveProjectId,
+	exportKml,
 	updateProject,
 	updateProjectTitle,
 	getAuth,

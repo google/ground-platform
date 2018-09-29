@@ -20,7 +20,7 @@
 class GndDatastore {
   constructor(db) {
     this.db_ = db;
-  }
+  }  
 
   fetch_(docRef) {
     return docRef.get().then(doc => doc.exists ? doc.data() : null);
@@ -30,16 +30,32 @@ class GndDatastore {
     return this.fetch_(this.db_.doc(path));    
   }
 
+  fetchCollection_(path) {
+    return this.db_.collection(path).get();
+  }
+
+  fetchProject(projectId) {
+    return this.db_.doc(`projects/${projectId}`).get();
+  }
+
   fetchRecord(projectId, featureId, recordId) {
     return this.fetchDoc_(`projects/${projectId}/features/${featureId}/records/${recordId}`);
   }
 
-  fetchForm(projectId, featureTypeId, formId) {
-    return this.fetchDoc_(`projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
+  fetchRecords(projectId, featureId) {
+    return this.fetchCollection_(`projects/${projectId}/features/${featureId}/records`);
   }
 
   fetchFeature(projectId, featureId) {
     return this.fetchDoc_(`projects/${projectId}/features/${featureId}`);
+  }
+
+  fetchFeatures(projectId) {
+    return this.fetchCollection_(`projects/${projectId}/features`);
+  }
+
+  fetchForm(projectId, featureTypeId, formId) {
+    return this.fetchDoc_(`projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
   }
 
   fetchSheetsConfig(projectId) {
