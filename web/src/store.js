@@ -15,7 +15,7 @@
  * limitations under the License.
  */
  
-import { composeWithDevTools } from 'redux-devtools-extension';
+import { composeWithDevTools } from 'redux-devtools-extension'
 import rootReducer from './reducers.js';
 import { reactReduxFirebase } from 'react-redux-firebase'
 import { reduxFirestore } from 'redux-firestore'
@@ -29,10 +29,10 @@ import { routerMiddleware } from 'connected-react-router'
 const rrfConfig = {
   userProfile: 'users',
   useFirestoreForProfile: true
-}
+};
 
-firebase.initializeApp(firebaseConfig)
-firebase.firestore().settings({ timestampsInSnapshots: true })
+firebase.initializeApp(firebaseConfig);
+firebase.firestore().settings({ timestampsInSnapshots: true });
 
 // Add reactReduxFirebase enhancer when making store creator
 const createStoreWithFirebase = compose(
@@ -41,7 +41,7 @@ const createStoreWithFirebase = compose(
   ),
   reduxFirestore(firebase),
   reactReduxFirebase(firebase, rrfConfig)
-)(createStore)
+)(createStore);
 
 const initialState = {
 	projectEditorOpen: false,
@@ -51,6 +51,6 @@ const initialState = {
 // TODO: Move connectRouter into reducers.
 // Create store with reducers and initial state
 const store = createStoreWithFirebase(
-	rootReducer, initialState, composeWithDevTools())
+	rootReducer, initialState, composeWithDevTools());
 
 export default store;

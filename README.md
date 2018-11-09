@@ -10,5 +10,7 @@ This repo contains three main components, each in their own respective subdirect
 * [functions](functions/): Firebase Cloud Functions used to sync with Google Sheets and other data sources
 * [firestore](firestore/): Configuration for Ground's main Firestore instance
 
-At present, Polymer only supports Nodejs 8.0+, while Firstore Cloud Functions only supports v6.11.5. Follow the instructions in each subdirectory listed above for developing each component.
+At time of writing, Firestore Cloud Functions only supports Node.js v6.11.5, 
+while the web dashboard is built using a newer version of Node.js. Follow the 
+instructions in each subdirectory above for developing each component.
 
