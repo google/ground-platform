@@ -19,21 +19,21 @@ Ground that you'd like to share, post them to the
 
 # Features
 
-*   **Flexible Data Collection**: **Raster basemaps**, **photo, audio, and video
-    attachments**, **custom forms and data validation**, and other features,
+*   **Flexible Data Collection**: Raster basemaps, photo, audio, and video
+    attachments, custom forms and data validation, and other features,
     make Ground a great tool for collecting geospatial data on a wide range of
     domains. You can tune Ground to meet your needs, whether you're tracking
     malaria outbreaks or mapping animal habitats.
 
 *   **Community Engagement**: Use Ground to foster interest, trust, and
-    participation with local and global communities. **Crowd-sourcing** features
+    participation with local and global communities. Crowd-sourcing features
     provide a means leveraging local knowledge at a large scale to produce
     otherwise inaccessible insights.
 
 *   **Offline First**: Mobility is crucial when collecting or verifying data in
-    remote areas. Ground's **offline mobile data collection** and **offline
-    raster basemaps** give users uninterrupted access to important data wherever
-    they may be. Intelligent **background data sync** automatically uploads new
+    remote areas. Ground's offline mobile data collection and offline
+    raster basemaps give users uninterrupted access to important data wherever
+    they may be. Intelligent background data sync automatically uploads new
     data when an internet connection is available.
 
 *   **Remeasurement**: Ground's unique data collection model doesn't only allow
