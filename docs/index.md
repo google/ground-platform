@@ -89,10 +89,10 @@ one of the currently maintained Ground source repositories:
 *Important:* Be sure to read each repository's contribution guidelines before
 contributing!
 
-*   https://github.com/google/gnd-cloud: Contains source code for Ground cloud
+*   <https://github.com/google/gnd-cloud>: Contains source code for Ground cloud
     components.
 
-*   https://github.com/google/gnd-android: Contains source code for the Ground
+*   <https://github.com/google/gnd-android>: Contains source code for the Ground
     Android application.
 
 ## Join the Discussion
@@ -100,11 +100,11 @@ contributing!
 Join official Ground discussion groups to get updates on new features, get in
 touch with other Ground users, and add your voice to the conversation:
 
-*   https://groups.google.com/forum/#!forum/ground-discuss: General discussions
+*   <https://groups.google.com/forum/#!forum/ground-discuss>: General discussions
     about Ground are held in this discussion group. Join to explore ideas with
     others, ask questions, or engage with the Ground community.
 
-*   https://groups.google.com/forum/#!forum/ground-announcements: Project wide
+*   <https://groups.google.com/forum/#!forum/ground-announcements>: Project wide
     announcements happen in this discussion group. Join this group to stay up to
     date on major feature updates and other important changes.
 
