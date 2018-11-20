@@ -13,7 +13,7 @@ researchers, NGOs, and other interest groups to collect data that matters.
 on a best-effort basis. If you would like to contribute to Ground development,
 see the [Contribute](#contribute) section. If you have questions or ideas about
 Ground that you'd like to share, post them to the
-https://groups.google.com/forum/#!forum/ground-discuss discussion group.
+[ground-discuss](https://groups.google.com/forum/#!forum/ground-discuss) discussion group.
 
 <!--Partner Reel-->
 
