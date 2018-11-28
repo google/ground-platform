@@ -93,7 +93,8 @@ one of the currently maintained Ground source repositories:
 contributing!
 
 *   <https://github.com/google/gnd-cloud>: Contains source code for Ground cloud
-    components.
+    components, including the Web Console and Firebase Cloud Functions and
+    database config.
 
 *   <https://github.com/google/gnd-android>: Contains source code for the Ground
     Android application.
