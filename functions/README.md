@@ -70,7 +70,7 @@ cloud functions.
     $ firebase use --add <project-name>
     ```
   
-    Where <project-name> is the name of a project associated with your firebase
+    Where `<project-name>` is the name of a project associated with your firebase
     account.
 
 4. Fetch the firebase database config:
