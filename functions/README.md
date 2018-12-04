@@ -1,6 +1,9 @@
 # Ground Cloud Functions
 
-## First-time developer setup
+[Environment Setup](#environment-setup)
+[Developer Workflow](#development-workflow)
+
+## Environment setup
 
 The following sections describe how to set up your development environment to
 modify, run, and deploy Ground Cloud Functions source code. 
@@ -17,24 +20,24 @@ Firestore Cloud Functions currently require version 6.11.5 of Node.js.
 
 1. Install the required version of Node.js:
 
-  ```
-  $ nvm install 6.11.5
-  ```
-
-  To set this as the default version run:
-
-  ```
-  $ nvm alias default 6.11.5
-  ```
+    ```
+    $ nvm install 6.11.5
+    ```
+  
+    To set this as the default version run:
+  
+    ```
+    $ nvm alias default 6.11.5
+    ```
 
 2. Download project dependencies:
 
-  **Note:** Ensure `gnd-cloud/functions` is your current working directory
-  before installing dependencies.
-
-  ```
-  $ npm install
-  ```
+    **Note:** Ensure `gnd-cloud/functions` is your current working directory
+    before installing dependencies.
+  
+    ```
+    $ npm install
+    ```
 
 ### Set up Firebase
 
@@ -43,38 +46,38 @@ cloud functions.
 
 1. Install [Firebase CLI](https://firebase.google.com/docs/cli/) globally to your system:
 
-  **Note:** This step is required even if you've already installed the tools for use with the web/ component.
-
-  ```
-  $ npm install -g firebase-tools
-  ```
-
-  For more information on using `npm install`, see <https://docs.npmjs.com/cli/install>
-
-  For more information on firebase-tools, see <https://github.com/firebase/firebase-tools>
+    **Note:** This step is required even if you've already installed the tools for use with the web/ component.
+  
+    ```
+    $ npm install -g firebase-tools
+    ```
+  
+    For more information on using `npm install`, see <https://docs.npmjs.com/cli/install>
+  
+    For more information on firebase-tools, see <https://github.com/firebase/firebase-tools>
 
 2. Log into Firebase:
 
-  ```
-  $ firebase login
-  ```
-
-  After you run the `login` command, follow the prompts in your browser  or terminal to authenticate your firebase account.
+    ```
+    $ firebase login
+    ```
+  
+    After you run the `login` command, follow the prompts in your browser  or terminal to authenticate your firebase account.
 
 3. Select your Firebase project:
 
-  ```
-  $ firebase use --add <project-name>
-  ```
-
-  Where <project-name> is the name of a project associated with your firebase
-  account.
+    ```
+    $ firebase use --add <project-name>
+    ```
+  
+    Where <project-name> is the name of a project associated with your firebase
+    account.
 
 4. Fetch the firebase database config:
 
-  ```
-  $ firebase functions:config:get > .runtimeconfig.json
-  ```
+    ```
+    $ firebase functions:config:get > .runtimeconfig.json
+    ```
 
 ### Set up a service account and keys
 
@@ -93,37 +96,35 @@ In order to synchronize data with Google Sheets, Ground uses a special Google Cl
 After the service account is created, you can regenerate keys under
 `Actions > Create key > JSON` at `https://console.cloud.google.com/apis/credentials?project=<project-name>` where `<project-name>` is the name of the project associated with your firebase account.
 
-## Developer workflow
+## Development workflow
 
 The following steps are useful for testing or examining modifications to the
 Ground Cloud Functions source code. 
 
-### Select Node.js version
-
 1. Select a Node.js version: 
 
-  ```
-  $ nvm use 6.11.5
-  ```
+    ```
+    $ nvm use 6.11.5
+    ```
 
 2. Confirm you are logged into firebase:
 
-  ```
-  $ firebase login
-  ```
+    ```
+    $ firebase login
+    ```
 
 3. Run cloud functions locally to test changes:
 
-  ```
-  $ firebase functions:shell
-  ```
-
-  For more information on using the Firebase shell, see <https://firebase.google.com/docs/functions/local-emulator>.
+    ```
+    $ firebase functions:shell
+    ```
+  
+    For more information on using the Firebase shell, see <https://firebase.google.com/docs/functions/local-emulator>.
 
 ### Deploy to Firebase
 
 To deploy cloud functions to Firebase run:
 
-  ```
-  $ firebase deploy --only functions
-  ```
+    ```
+    $ firebase deploy --only functions
+    ```
