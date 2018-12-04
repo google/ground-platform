@@ -2,115 +2,128 @@
 
 ## First-time developer setup
 
-This guide assumes `functions/` is your current working directory.
+The following sections describe how to set up your development environment to
+modify, run, and deploy Ground Cloud Functions source code. 
 
-## Install NVM
+**Note:** This guide assumes `gnd-cloud/functions/` is your current working directory.
 
-If you haven't already done so, install Node Version Manager (NVM) following the instructions found at:
+## Node.js setup
 
-  https://github.com/creationix/nvm#installation
+This guide recommends using Node Version Manager (nvm) to install and manage versions
+of Node.js, and assumes nvm is installed. For more information on nvm, as well
+as installation instructions, see: <https://github.com/creationix/nvm#installation>
 
-## Install Node.js 6.11.5
+Firestore Cloud Functions currently require version 6.11.5 of Node.js.
 
-Firestore Cloud Functions requires a older version of Node.js that Polymer:
+1. Install the required version of Node.js:
 
-```
-$ nvm install 6.11.5
-```
+  ```
+  $ nvm install 6.11.5
+  ```
 
-You can set this as the default version with:
+  To set this as the default version run:
 
-```
-$ nvm alias default 6.11.5
-```
+  ```
+  $ nvm alias default 6.11.5
+  ```
 
-Next, install [Firebase CLI](https://firebase.google.com/docs/cli/) globally to your system (`-g`) using Node Package Manager (NPM):
+2. Download project dependencies:
 
-```
-$ npm install -g firebase-tools
-```
+  **Note:** Ensure `gnd-cloud/functions` is your current working directory
+  before installing dependencies.
 
-This is required even if you've already installed the tools for use with the web/ component.
-
-### Downloading dependencies
-
-Download Node.js dependencies required by Ground Cloud Functions with:
-
-```
-$ npm install
-```
+  ```
+  $ npm install
+  ```
 
 ### Set up Firebase
 
-Follow these steps to allow running the local shell or to deploy Firebase functions.
+Complete the following steps to set up Firebase before running or deploying
+cloud functions.
 
-You can then log into Firebase with:
+1. Install [Firebase CLI](https://firebase.google.com/docs/cli/) globally to your system:
 
-```
-$ firebase login
-```
+  **Note:** This step is required even if you've already installed the tools for use with the web/ component.
 
-Once authenticated, select your Firebase project with:
+  ```
+  $ npm install -g firebase-tools
+  ```
 
-```
-$ firebase use --add gnddemo1
-```
+  For more information on using `npm install`, see <https://docs.npmjs.com/cli/install>
 
-Before running the first time, fetch the database config with:
+  For more information on firebase-tools, see <https://github.com/firebase/firebase-tools>
 
-```
-$ firebase functions:config:get > .runtimeconfig.json
-```
+2. Log into Firebase:
 
-### Set up service account and keys
+  ```
+  $ firebase login
+  ```
+
+  After you run the `login` command, follow the prompts in your browser  or terminal to authenticate your firebase account.
+
+3. Select your Firebase project:
+
+  ```
+  $ firebase use --add <project-name>
+  ```
+
+  Where <project-name> is the name of a project associated with your firebase
+  account.
+
+4. Fetch the firebase database config:
+
+  ```
+  $ firebase functions:config:get > .runtimeconfig.json
+  ```
+
+### Set up a service account and keys
 
 In order to synchronize data with Google Sheets, Ground uses a special Google Cloud Service Account. This prevents project creators from needing to authorize Ground to read and write files in their Google Drive files each time a spreadsheet is linked. Instead, project creators can simply grant the service account Edit access to the linked spreadsheet.
 
-To create a new service account:
+1. Create a new service account:
+  
+   * Follow the steps detailed at <https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating_a_service_account> to create a new service account.
+   * Make a note of the email address of the service account. Users need this account to allow access to their spreadsheets.
 
-  https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating_a_service_account
+2. Create a new private key:
 
-Select the "Console" tab for instructions on creating the account through the Google Cloud Console UI.
+   * Follow the steps detailed at <https://cloud.google.com/iam/docs/creating-managing-service-account-keys#creating_service_account_keys>
+   * When prompted for key type, select "JSON". Download and save the resulting key file in `service-account-secret.json`. As the name implies, this file should be kept secret, and should not be checked into source control.
 
-Make a note of the email address of the service account. This is the account users will need to allow access to their spreadsheets.
-
-Next, create a new private key:
-
-  https://cloud.google.com/iam/docs/creating-managing-service-account-keys#creating_service_account_keys
-
-When prompted for key type, select "JSON". Download and save the resulting key file in `service-account-secret.json`. As the name implies, this file should be kept secret, and should not be checked into source control.
-
-Once the account is created, keys can regenerated again in future under Actions > Create key > JSON at:
-
-  https://console.cloud.google.com/apis/credentials?project=gnddemo1
-
-Where `gnddemo` is your project name.
+After the service account is created, you can regenerate keys under
+`Actions > Create key > JSON` at `https://console.cloud.google.com/apis/credentials?project=<project-name>` where `<project-name>` is the name of the project associated with your firebase account.
 
 ## Developer workflow
 
+The following steps are useful for testing or examining modifications to the
+Ground Cloud Functions source code. 
+
 ### Select Node.js version
 
-You can switch versions manually when opening a new shell with:
+1. Select a Node.js version: 
 
-```
-$ nvm use 6.11.5
-```
+  ```
+  $ nvm use 6.11.5
+  ```
 
-### Running Cloud Functions locally
+2. Confirm you are logged into firebase:
 
-You can then run the local functions emulator with:
+  ```
+  $ firebase login
+  ```
 
-```
-$ firebase functions:shell
-```
+3. Run cloud functions locally to test changes:
 
-Instructions for using the shell can be found at https://firebase.google.com/docs/functions/local-emulator.
+  ```
+  $ firebase functions:shell
+  ```
 
-## Deploy to Firebase hosting
+  For more information on using the Firebase shell, see <https://firebase.google.com/docs/functions/local-emulator>.
 
-To deploy theCloud Functions to Firebase:
+### Deploy to Firebase
 
-```
-$ firebase deploy --only functions
-```
+To deploy cloud functions to Firebase run:
 
+  ```
+  $ firebase deploy --only functions
+  ```
