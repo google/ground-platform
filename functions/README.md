@@ -1,7 +1,7 @@
 # Ground Cloud Functions
 
-[Environment Setup](#environment-setup)
-[Developer Workflow](#development-workflow)
+* [Environment Setup](#environment-setup)
+* [Development Workflow](#development-workflow)
 
 ## Environment setup
 
