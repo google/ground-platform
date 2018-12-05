@@ -119,9 +119,9 @@ Where `project_id` is the id of a Ground project defined in the Cloud Firestore 
 
 2. Log into Firebase:
 
-  ```
-  $ firebase login
-  ```
+    ```
+    $ firebase login
+    ```
 
 3. Select your Firebase project:
 
@@ -132,12 +132,12 @@ Where `project_id` is the id of a Ground project defined in the Cloud Firestore 
 
 4. Deploy the Ground Web Console build to Firebase web hosting:
 
-  > **Note:** You must deploy the web console from the repository's root
-  > directory. 
+    > **Note:** You must deploy the web console from the repository's root
+    > directory. 
 
-  ```
-  $ cd <path/to/ground>/gnd-cloud
-  $ pushd .. && firebase deploy --only hosting && prod
-  ```
-  Where `<path/to/ground>` is the path to the gnd-cloud repository root on your
-  system.
+    ```
+    $ cd <path/to/ground>/gnd-cloud
+    $ pushd .. && firebase deploy --only hosting && prod
+    ```
+    Where `<path/to/ground>` is the path to the gnd-cloud repository root on your
+    system.
