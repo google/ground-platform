@@ -10,7 +10,7 @@ This repo contains three main components, each in their own respective subdirect
 * [functions](functions/): Firebase Cloud Functions used to sync with Google Sheets and other data sources
 * [firestore](firestore/): Configuration for Ground's main Firestore instance
 
-At time of writing, Firestore Cloud Functions only supports Node.js v6.11.5, 
-while the web dashboard is built using a newer version of Node.js. Follow the 
-instructions in each subdirectory above for developing each component.
+Firestore Cloud Functions currently only supports Node.js v6.11.5, 
+while the web dashboard is built using a newer version of Node.js. Contributors should use the appropriate version of Node for the component they are working on. Follow the instructions provided in the README of each subdirectory to set up the proper
+development environment for each component. 
 
