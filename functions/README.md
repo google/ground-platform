@@ -8,12 +8,12 @@
 The following sections describe how to set up your development environment to
 modify, run, and deploy Ground Cloud Functions source code. 
 
-**Note:** This guide assumes `gnd-cloud/functions/` is your current working directory.
+> **Note:** All instructions in this guide assume `gnd-cloud/functions/` is your current working directory.
 
-## Node.js setup
+### Node.js 
 
 This guide recommends using Node Version Manager (nvm) to install and manage versions
-of Node.js, and assumes nvm is installed. For more information on nvm, as well
+of Node.js and assumes nvm is installed. For more information on nvm, as well
 as installation instructions, see: <https://github.com/creationix/nvm#installation>
 
 Firestore Cloud Functions currently require version 6.11.5 of Node.js.
