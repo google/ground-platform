@@ -125,6 +125,4 @@ Ground Cloud Functions source code.
 
 To deploy cloud functions to Firebase run:
 
-    ```
     $ firebase deploy --only functions
-    ```
