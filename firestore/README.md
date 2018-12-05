@@ -1,23 +1,25 @@
 # Ground Firestore Config
 
-This directory contains the configuration for new Firestore instances. After following instructions in [../functions](../functions/README.md), the config can be deployed as follows.
+This directory contains configuration files for new Firestore instances. Complete the following steps to deploy the Firestore configuration:
 
-If not already logged in, run:
+> **Important:** Before completing the steps listed in this document, follow the instructions provided in [../functions](../functions/README.md) to set up your development environment. 
 
-```
-$ firebase login
-```
+1. Log into Firebase:
 
-Once authenticated, select your Firebase project with:
+    ```
+    $ firebase login
+    ```
 
-```
-$ firebase use --add gnddemo1
-```
+2. Select your Firebase project:
 
-Replace `gnddemo1` with the name of your Firebase project.
+    ```
+    $ firebase use --add <project-name>
+    ```
+    Where `<project-name>` is the name of a project associated with your
+    Firebase account.
 
-Then, deploy config with:
+3. Deploy the Firestore configuration:
 
-```
-$ firebase deploy --only firestore
-```
+    ```
+    $ firebase deploy --only firestore
+    ```
