@@ -229,10 +229,10 @@ class GndFeatureTypeEditor extends React.Component {
                 inputClassName="ft-label-input"
                 onCommitChanges={this.handleFeatureTypeLabelChange.bind(this)}
                 value={featureTypeLabel}
-                placeholder="Unnamed place type"
+                placeholder="Unnamed feature type"
               />
               <div className="ft-header-caption">
-                <Typography variant="caption">Place type definition</Typography>
+                <Typography variant="caption">Feature type</Typography>
               </div>
             </div>
             <GndFormTabs
