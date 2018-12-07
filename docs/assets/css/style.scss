@@ -1,0 +1,10 @@
+---
+---
+
+@import "{{ site.theme }}";
+.page-header {
+  background-image: url(https://github.com/google/ground-platform/raw/master/docs/assets/images/aerial-forest-lake.jpg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
