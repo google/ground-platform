@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// @flow
+
 import React from "react";
 import { compose } from "redux";
 import { connect } from "react-redux";
@@ -36,7 +38,7 @@ import JSONInput from "react-json-editor-ajrm/index";
 import { withStyles } from "@material-ui/core/styles";
 import { withFirebase, withFirestore } from "react-redux-firebase";
 
-const styles = theme => ({
+const styles = (theme: Object) => ({
   container: {
     display: "flex",
     flexWrap: "wrap"
@@ -48,14 +50,30 @@ const styles = theme => ({
   }
 });
 
-class GndProjectEditor extends React.Component {
+// TODO: Define Project object type.
+type Props = {
+  classes: Object,
+  projectId: ?string,
+  project: ?Object,
+  projectEditorOpen: boolean,
+  close: Function,
+  updateProject: Function,
+};
+
+type State = {
+  projectId: ?string,
+  project: ?Object,
+  hasErrors: boolean,
+};
+
+class GndProjectEditor extends React.Component<Props, State> {
   state = {
     projectId: this.props.projectId,
     project: this.props.project,
     hasErrors: false,
   };
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     const { projectId, project } = this.props;
     if (prevProps.project !== project) {
       this.setState((prevState, prevProps) => ({
