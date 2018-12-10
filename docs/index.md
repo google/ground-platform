@@ -87,16 +87,17 @@ the world.
 ## Contribute
 
 If you'd like to contribute to the development of Ground source code, check out
-one of the currently maintained Ground source repositories:
+one of the currently maintained Ground source repositories.  
 
-*Important:* Be sure to read each repository's contribution guidelines before
-contributing!
+*Important:* Be sure to read each repository's `CONTRIBUTING.md` before
+contributing! The `CONTRIBUTING.md` file contains important guidelines for
+contributors to the Ground project.
 
-*   <https://github.com/google/gnd-cloud>: Contains source code for Ground cloud
+*   [ground-platform](https://github.com/google/ground-platform): Contains source code for Ground cloud
     components, including the Web Console and Firebase Cloud Functions and
     database config.
 
-*   <https://github.com/google/gnd-android>: Contains source code for the Ground
+*   [ground-android](https://github.com/google/ground-android): Contains source code for the Ground
     Android application.
 
 ## Join the Discussion
