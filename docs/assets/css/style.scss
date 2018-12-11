@@ -2,9 +2,26 @@
 ---
 
 @import "{{ site.theme }}";
+
+// Variables
+
+$font-heading: "Fredoka One", cursive;
+$font-body: "Lora", serif;
+
+// Style declarations
+
 .page-header {
   background-image: url(https://github.com/google/ground-platform/raw/master/docs/assets/images/aerial-forest-lake.jpg);
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-heading;
+  text-transform: uppercase;
+} 
+
+:not(h1, h2, h3, h4, h5, h6) {
+  font-family: $font-body;
 }
