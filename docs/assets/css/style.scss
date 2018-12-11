@@ -5,7 +5,7 @@
 
 // Variables
 
-$font-heading: "Fredoka One", cursive;
+$font-heading: "Fredoka One", sans-serif;
 $font-body: "Lora", serif;
 
 // Style declarations
@@ -26,7 +26,17 @@ h1, h2, h3, h4, h5, h6 {
   font-family: $font-body;
 }
 
+.project-name {
+  font-family: $font-heading;
+  font-variant: all-small-caps;
+  font-weight: lighter;
+  letter-spacing: 1pt;
+}
+
 .project-tagline {
-  font-family: $font-body;
+  font-family: sans-serif;
+  font-weight: normal;
+  margin-bottom: 2rem;
+  font-variant: all-small-caps;
   text-transform: none;
 }
