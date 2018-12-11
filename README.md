@@ -1,6 +1,6 @@
 # Ground Platform
 
-Ground is a free, map-centric data collection platform for occasionally connected devices.
+Ground is an open source, map-centric data collection platform for occasionally connected devices.
 
 This is not an officially supported Google product, and it is currently under development on best-effort basis. Please check back periodically for updates.
 
