@@ -12,9 +12,9 @@ modify, run, and deploy Ground Cloud Functions source code.
 
 ### Node.js 
 
-This guide recommends using Node Version Manager (nvm) to install and manage versions
-of Node.js and assumes nvm is installed. For more information on nvm, as well
-as installation instructions, see: <https://github.com/creationix/nvm#installation>
+> **Note**: This guide recommends using Node Version Manager (nvm) to install and manage versions
+> of Node.js and assumes nvm is installed. For more information on nvm, as well
+> as installation instructions, see: <https://github.com/creationix/nvm#installation>
 
 Firestore Cloud Functions currently require version 6.11.5 of Node.js.
 
