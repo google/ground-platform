@@ -13,9 +13,9 @@ work on Ground Web Console source code.
 
 ### Node.js 
 
-This guide recommends using Node Version Manager (nvm) to install and manage versions
-of Node.js and assumes nvm is installed. For more information on nvm, as well
-as installation instructions, see: <https://github.com/creationix/nvm#installation>
+> **Note**: This guide recommends using Node Version Manager (nvm) to install and manage versions
+> of Node.js and assumes nvm is installed. For more information on nvm, as well
+> as installation instructions, see: <https://github.com/creationix/nvm#installation>
 
 To set up Node.js:
 
