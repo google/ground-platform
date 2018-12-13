@@ -22,6 +22,10 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
 } 
 
+h1 {
+  font-size: 1.8rem;
+}
+
 .main-content p {
   font-family: $font-body;
 }
@@ -32,6 +36,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: lighter;
   letter-spacing: 1pt;
   font-size: 4.5rem;
+  opacity: 0.8;
 }
 
 .project-tagline {
