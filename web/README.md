@@ -9,7 +9,7 @@
 The following sections describe how to set up your development environment to
 work on Ground Web Console source code.
 
-> **Note:** All instructions in this guide assume `gnd-cloud/web/` is your current working directory.
+> **Note:** All instructions in this guide assume `ground-platform/web/` is your current working directory.
 
 ### Node.js 
 
@@ -136,8 +136,8 @@ Where `project_id` is the id of a Ground project defined in the Cloud Firestore 
     > directory. 
 
     ```
-    $ cd <path/to/ground>/gnd-cloud
+    $ cd <path/to/ground>/ground-platform
     $ pushd .. && firebase deploy --only hosting && prod
     ```
-    Where `<path/to/ground>` is the path to the gnd-cloud repository root on your
+    Where `<path/to/ground>` is the path to the ground-platform repository root on your
     system.

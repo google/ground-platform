@@ -8,7 +8,7 @@
 The following sections describe how to set up your development environment to
 modify, run, and deploy Ground Cloud Functions source code. 
 
-> **Note:** All instructions in this guide assume `gnd-cloud/functions/` is your current working directory.
+> **Note:** All instructions in this guide assume `ground-platform/functions/` is your current working directory.
 
 ### Node.js 
 
@@ -32,7 +32,7 @@ Firestore Cloud Functions currently require version 6.11.5 of Node.js.
 
 2. Download project dependencies:
 
-    **Note:** Ensure `gnd-cloud/functions` is your current working directory
+    **Note:** Ensure `ground-platform/functions` is your current working directory
     before installing dependencies.
   
     ```
