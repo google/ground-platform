@@ -25,7 +25,7 @@
     <!--<a id="skip-to-content" href="#content">Skip to the content.</a>-->
 
     <header class="page-header" role="banner">
-      <img src="/assets/images/ic_launcher_round.png">
+      <img src="{{ '/assets/images/ic_launcher_round.png?v=' | append: site.github.build_revision | relative_url }}">
       <h1 class="project-name">{{ site.title | default: site.github.repository_name }}</h1>
       <h2 class="project-tagline">{{ site.description | default: site.github.project_tagline }}</h2>
       {% if site.github.is_project_page %}
