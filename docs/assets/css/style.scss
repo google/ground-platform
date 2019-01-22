@@ -15,6 +15,7 @@ $font-body: "Lora", serif;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  max-height: 400px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -28,6 +29,11 @@ h1 {
 
 .main-content p {
   font-family: $font-body;
+}
+
+.project-logo {
+  width: 80px;
+  height: 80px;
 }
 
 .project-name {
