@@ -38,19 +38,19 @@ following sections to learn how to fork this repository and contribute.
 ### Setup
 
 The following instructions describe how to fork this repository in order 
-to contribute to the ground-android codebase.
+to contribute to the ground-platform codebase.
 
 1. Fork this repository, see <https://help.github.com/articles/fork-a-repo/>.
 
 2. Clone your fork:
     
-    `git clone https://github.com/<username>/ground-android.git`
+    `git clone https://github.com/<username>/ground-platform.git`
     
     Where `<username>` is your github username.
 
 3. Add the base repository as a remote:
     
-    `git remote add upstream https://github.com/google/ground-android.git`
+    `git remote add upstream https://github.com/google/ground-platform.git`
 
 4. Follow the instructions in the README files of each of the directories listed under [About this Repository](#about-this-repository) section of this readme to set up your development environment.
 
@@ -100,7 +100,7 @@ submit them to the base repository using a pull request.
     Where `<branch>` is the branch name you used in step 2.
 
 1. Create a [pull request](https://help.github.com/articles/about-pull-requests/) to have your changes reviewed and merged into the base 
-repository. Reference the [issue](https://github.com/google/ground-android/issues) your changes resolve in either the commit message for your changes or in your pull request. 
+repository. Reference the [issue](https://github.com/google/ground-platform/issues) your changes resolve in either the commit message for your changes or in your pull request. 
 
     For more information on creating pull requests, see <https://help.github.com/articles/creating-a-pull-request/>. 
     
