@@ -17,6 +17,7 @@
 
 import React from "react";
 import PropTypes from "prop-types";
+import GndFormWarning from "./gnd-form-warning";
 import { withStyles } from "@material-ui/core/styles";
 import {
   IconButton,
@@ -51,6 +52,10 @@ const styles = {
 };
 
 class GndFormElementEditor extends React.Component {
+  state = {
+    deleteWarningDialogOpen: false
+  };
+
   handleLabelChange(newLabel) {
     const { element, onChange } = this.props;
     // TODO: i18n.
@@ -100,8 +105,16 @@ class GndFormElementEditor extends React.Component {
   }
 
   handleDeleteClick(ev) {
-    this.props.onChange(undefined);
+    this.setState({ deleteWarningDialogOpen: true });
   }
+
+  handleCancelDeletionClick = () => {
+    this.setState({ deleteWarningDialogOpen: false });
+  };
+
+  handleConfirmDeletionClick = () => {
+    this.props.onChange(undefined);
+  };
 
   render() {
     // Option 1. Component uses schema of Ground element
@@ -157,6 +170,10 @@ class GndFormElementEditor extends React.Component {
             <IconButton onClick={this.handleDeleteClick.bind(this)}>
               <DeleteForeverIcon />
             </IconButton>
+            <GndFormWarning
+              open={this.state.deleteWarningDialogOpen}
+              onCancel={this.handleCancelDeletionClick}
+              onConfirm={this.handleConfirmDeletionClick} />
           </span>
           <div style={{ clear: "both" }} />
         </FormGroup>
@@ -166,7 +183,7 @@ class GndFormElementEditor extends React.Component {
 }
 
 GndFormElementEditor.propTypes = {
-  classes: PropTypes.object.isRequired
+  open: PropTypes.bool.isRequired
 };
 
 export default withStyles(styles)(GndFormElementEditor);
