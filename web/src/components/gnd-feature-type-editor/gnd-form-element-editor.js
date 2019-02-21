@@ -183,7 +183,7 @@ class GndFormElementEditor extends React.Component {
 }
 
 GndFormElementEditor.propTypes = {
-  open: PropTypes.bool.isRequired
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(GndFormElementEditor);
