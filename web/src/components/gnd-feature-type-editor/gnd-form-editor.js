@@ -18,6 +18,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import GndFormElementEditor from "./gnd-form-element-editor";
+import GndFormWarning from "./gnd-form-warning";
 import update from "immutability-helper";
 import { Add } from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
@@ -48,6 +49,10 @@ const styles = theme => ({
 });
 
 class GndFormEditor extends React.Component {
+  state = {
+    deleteFormWarningDialogOpen: false
+  };
+
   handleElementChange(newElement, idx) {
     const { form, onChange } = this.props;
     if (newElement) {
@@ -85,9 +90,17 @@ class GndFormEditor extends React.Component {
   }
 
   handleDeleteFormClick() {
+    this.setState({ deleteFormWarningDialogOpen: true });
+  }
+
+  handleCancelDeletionClick = () => {
+    this.setState({ deleteFormWarningDialogOpen: false });
+  };
+
+  handleConfirmDeletionClick = () => {
     const { form, onChange } = this.props;
     onChange({id: form.id, defn: undefined});
-  }
+  };
 
   render() {
     const { form, classes } = this.props;
@@ -125,6 +138,10 @@ class GndFormEditor extends React.Component {
               Delete form
               <DeleteForeverIcon className={classes.rightIcon} />
             </Button>
+            <GndFormWarning
+              open={this.state.deleteFormWarningDialogOpen}
+              onCancel={this.handleCancelDeletionClick}
+              onConfirm={this.handleConfirmDeletionClick} />
           </span>
         </div>
       </React.Fragment>
