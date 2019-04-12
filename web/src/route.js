@@ -30,6 +30,7 @@ export const paths = [
 // It only makes sense to recalculate the `matchPath` whenever the pathname
 // of the location changes. That's why `createMatchSelector` memoizes
 // the latest result based on the location's pathname.
+// Note: function based on createMatchSelector from "connected-react-router".
 export const createMatchSelector = () => {
   let lastPathname = null
   let lastMatch = null
