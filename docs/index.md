@@ -108,10 +108,6 @@ contributors to the Ground project.
 Join official Ground discussion groups to get updates on new features, get in
 touch with other Ground users, and add your voice to the conversation:
 
-*   <https://groups.google.com/forum/#!forum/ground-discuss>: General
-    discussions about Ground are held in this discussion group. Join to explore
-    ideas with others, ask questions, or engage with the Ground community.
-
 *   <https://groups.google.com/forum/#!forum/ground-announcements>: Project wide
     announcements happen in this discussion group. Join this group to stay up to
     date on major feature updates and other important changes.
