@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-import { compose } from "redux";
-import { connect } from "react-redux";
 import { firestoreConnect } from "react-redux-firebase";
 import firebaseConfig from "./.firebase-config.js";
 
@@ -72,7 +70,7 @@ const updateProjectTitle = props => (projectId, newTitle, auth) => {
 		.collection("projects")
 		.doc(projectId)
 		.set({ title: { _: newTitle } }, { merge: true })
-		.then(() => projectId);		
+		.then(() => projectId);
 	}
 }
 
@@ -82,22 +80,31 @@ const generateId = props => () => props.firestore.collection("ids").doc().id;
 const getLocalizedText = obj => obj && (obj["_"] || obj["en"] || obj["pt"]);
 
 // Mount project data onto store based on current projectId in path.
-const connectGndDatastore = compose(
-	connect((store, props) => ({
-		projectId: getActiveProjectId(store)
-	})),
-	firestoreConnect(({ projectId }) => [
+const connectProject =
+	firestoreConnect((store, props) => [
 		{
 			collection: "projects",
-			doc: projectId,
+			doc: store.match.params.projectId,
 			storeAs: "activeProject"
 		},
 		{
-			collection: `projects/${projectId}/features`,
+			collection: `projects/${store.match.params.projectId}/features`,
 			storeAs: "mapFeatures"
 		}
-	])
-);
+	]);
+
+// Mount feature data onto store based on current projectId and featureId in
+// path.
+const connectFeature =
+	firestoreConnect((store, props) => [
+		{
+			collection: `projects/${store.match.params.projectId}/records`,
+      where: [
+         ['featureId', '==', store.match.params.featureId]
+      ],
+			storeAs: "featureRecords"
+		}
+	]);
 
 const exportKml = props => (projectId, featureTypeId) => {
 	window.location.href = `${
@@ -115,6 +122,7 @@ export {
 	getProfile,
 	getMapFeatures,
 	getLocalizedText,
-	connectGndDatastore,
+  connectFeature,
+	connectProject,
 	generateId
 };

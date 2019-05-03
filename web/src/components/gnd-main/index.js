@@ -16,10 +16,24 @@
  */
 
 import React from "react";
+import { Route } from 'react-router' // react-router v4
 import GndMap from "../gnd-map";
 import GndHeader from "../gnd-header";
 import GndLegend from "../gnd-legend";
 import GndFeatureTypeEditor from "../gnd-feature-type-editor";
+import { connectProject, connectFeature } from "../../datastore.js";
+import { featurePath } from '../../route.js'
+
+
+function GndObservations({ match }) {
+  return (
+    <div>
+      TODO(maralka): exatact observations for feature
+      { match.params.projectId } in project { match.params.featureId } and
+      display in side panel.
+    </div>
+  );
+}
 
 class GndMain extends React.Component {
   render() {
@@ -29,9 +43,10 @@ class GndMain extends React.Component {
         <GndHeader />
         <GndLegend />
         <GndFeatureTypeEditor />
+        <Route path={featurePath} component={connectFeature(GndObservations)} />
       </React.Fragment>
     );
   }
 }
 
-export default GndMain;
+export default connectProject(GndMain);

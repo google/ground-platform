@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2018 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,7 @@ import { combineReducers } from "redux";
 import { firebaseReducer } from "react-redux-firebase";
 import { firestoreReducer } from "redux-firestore";
 import { connectRouter } from "connected-react-router";
-import { createMatchSelector } from "./route.js"
 import history from "./history.js";
-
-const matchPath = createMatchSelector({});
-
-const pathReducer = (state = {}, action) => {
-	if (action.type === "@@router/LOCATION_CHANGE") {
-		const match = matchPath({ router: action.payload });
-		if (match) {
-			return { ...state, ...match.params };
-		}
-	}
-	return state;
-};
 
 const projectEditorReducer = (state = false, action) => {
 	switch (action.type) {
@@ -44,7 +31,6 @@ const projectEditorReducer = (state = false, action) => {
 			return state;
 	}
 };
-
 
 const featureTypeEditStateReducer = (state = null, action) => {
 	switch (action.type) {
@@ -65,7 +51,6 @@ const selectProjectIdReducer = (state = null, action) => {
 }
 
 const rootReducer = combineReducers({
-	path: pathReducer,
 	firebase: firebaseReducer,
 	firestore: firestoreReducer,
 	projectEditorOpen: projectEditorReducer,
