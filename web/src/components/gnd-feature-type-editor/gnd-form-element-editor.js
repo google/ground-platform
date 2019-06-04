@@ -29,6 +29,9 @@ import {
   FormControlLabel
 } from "@material-ui/core";
 import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import CheckBoxMultipleMarked from 'mdi-react/CheckboxMultipleMarkedIcon';
+import CheckCircle from 'mdi-react/CheckCircleIcon';
+import ShortText from 'mdi-react/TextIcon';
 import { getLocalizedText } from "../../datastore.js";
 import GndFocusableRow from "./gnd-focusable-row";
 import GndMultiSelectOptionsEditor from "./gnd-multi-select-options-editor";
@@ -143,9 +146,9 @@ class GndFormElementEditor extends React.Component {
             onChange={ev => this.handleTypeChange(ev.target.value)}
             onBlur={ev => this.handleTypeChange(ev.target.value.trim())}
           >
-            <MenuItem value="text_field">Text</MenuItem>
-            <MenuItem value="select_one">Select one</MenuItem>
-            <MenuItem value="select_multiple">Select multiple</MenuItem>
+            <MenuItem value="text_field"><ShortText style={{ marginRight: 5 }}></ShortText>Text</MenuItem>
+            <MenuItem value="select_one"><CheckCircle style={{ marginRight: 5 }}></CheckCircle>Select one</MenuItem>
+            <MenuItem value="select_multiple"><CheckBoxMultipleMarked style={{ marginRight: 5 }}></CheckBoxMultipleMarked>Select multiple</MenuItem>
           </Select>
         </div>
         {element.type === "multiple_choice" && (
