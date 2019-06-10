@@ -51,6 +51,9 @@ const styles = {
   bottomControls: {
     width: "100%",
     display: "block"
+  },
+  icon: {
+    marginRight: 5
   }
 };
 
@@ -146,9 +149,9 @@ class GndFormElementEditor extends React.Component {
             onChange={ev => this.handleTypeChange(ev.target.value)}
             onBlur={ev => this.handleTypeChange(ev.target.value.trim())}
           >
-            <MenuItem value="text_field"><ShortText style={{ marginRight: 5 }}></ShortText>Text</MenuItem>
-            <MenuItem value="select_one"><CheckCircle style={{ marginRight: 5 }}></CheckCircle>Select one</MenuItem>
-            <MenuItem value="select_multiple"><CheckBoxMultipleMarked style={{ marginRight: 5 }}></CheckBoxMultipleMarked>Select multiple</MenuItem>
+            <MenuItem value="text_field"><ShortText className={classes.icon}></ShortText>Text</MenuItem>
+            <MenuItem value="select_one"><CheckCircle className={classes.icon}></CheckCircle>Select one</MenuItem>
+            <MenuItem value="select_multiple"><CheckBoxMultipleMarked className={classes.icon}></CheckBoxMultipleMarked>Select multiple</MenuItem>
           </Select>
         </div>
         {element.type === "multiple_choice" && (
