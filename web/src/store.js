@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import { composeWithDevTools } from 'redux-devtools-extension'
 import rootReducer from './reducers.js';
 import { reactReduxFirebase } from 'react-redux-firebase'
