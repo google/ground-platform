@@ -35,6 +35,7 @@
     "lint": "./node_modules/.bin/eslint ."
   },
   "devDependencies": {
+    "eslint-config-google": "0.13.0",
     "eslint-plugin-flowtype": "^3.2.0",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-react-native": "^3.7.0",

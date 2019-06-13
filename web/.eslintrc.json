@@ -11,7 +11,7 @@
     "react",
     "react-native"
   ],
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "google"],
   "settings": {
     "react": {
       "pragma": "React",
