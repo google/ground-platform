@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* eslint-env browser */
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { firestoreConnect } from "react-redux-firebase";
@@ -53,7 +54,6 @@ const updateProject = props => (projectId, project, auth) => {
 };
 
 const getDefaultAcls = (auth) => {
-	console.log(auth);
 	return {
 		[auth.email]: ["r", "w"],
 		"gndtestuser@gmail.com": ["r", "w"]
@@ -72,7 +72,7 @@ const updateProjectTitle = props => (projectId, newTitle, auth) => {
 		.collection("projects")
 		.doc(projectId)
 		.set({ title: { _: newTitle } }, { merge: true })
-		.then(() => projectId);		
+		.then(() => projectId);
 	}
 }
 
@@ -83,7 +83,7 @@ const getLocalizedText = obj => obj && (obj["_"] || obj["en"] || obj["pt"]);
 
 // Mount project data onto store based on current projectId in path.
 const connectGndDatastore = compose(
-	connect((store, props) => ({
+	connect((store) => ({
 		projectId: getActiveProjectId(store)
 	})),
 	firestoreConnect(({ projectId }) => [
@@ -99,7 +99,7 @@ const connectGndDatastore = compose(
 	])
 );
 
-const exportKml = props => (projectId, featureTypeId) => {
+const exportKml = () => (projectId, featureTypeId) => {
 	window.location.href = `${
 		firebaseConfig.functionsURL
 	}/exportKml?project=${projectId}&featureType=${featureTypeId}`;

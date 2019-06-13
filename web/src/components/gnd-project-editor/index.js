@@ -17,6 +17,7 @@
 
 // @flow
 
+/* eslint-env browser */
 import React from "react";
 import { compose } from "redux";
 import { connect } from "react-redux";
@@ -76,7 +77,7 @@ class GndProjectEditor extends React.Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     const { projectId, project } = this.props;
     if (prevProps.project !== project) {
-      this.setState((prevState, prevProps) => ({
+      this.setState(() => ({
         projectId: projectId,
         project: project,
       }));
@@ -87,16 +88,15 @@ class GndProjectEditor extends React.Component<Props, State> {
     this.setState({ project: event.jsObject, hasErrors: event.error });
   };
 
-  handleSave = event => {
+  handleSave = () => {
     const { projectId, project } = this.state;
     const { close } = this.props;
     try {
       this.props
         .updateProject(projectId, project)
-        .then(ref => close());
+        .then(() => close());
     } catch (e) {
       alert("Save failed");
-      console.error(e);
     }
   };
 
@@ -153,13 +153,13 @@ class GndProjectEditor extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = (store, props) => ({
+const mapStateToProps = (store) => ({
   projectId: getActiveProjectId(store),
   project: getActiveProject(store),
   projectEditorOpen: store.projectEditorOpen
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = (dispatch) => ({
   close: () => dispatch({ type: "CLOSE_PROJECT_EDITOR" })
 });
 
