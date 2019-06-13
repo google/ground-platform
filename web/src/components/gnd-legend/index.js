@@ -21,7 +21,6 @@ import { connect } from "react-redux";
 import { compose } from "redux";
 import { withHandlers } from "recompose";
 import {
-  getActiveProjectId,
   getActiveProject,
   getLocalizedText,
   generateId,
@@ -190,7 +189,7 @@ class GndLegend extends React.Component {
 }
 
 const mapStateToProps = (store, props) => ({
-  projectId: getActiveProjectId(store),
+  projectId: props.projectId,
   project: getActiveProject(store)
 });
 

@@ -22,7 +22,6 @@ import { compose } from "redux";
 import { connect } from "react-redux";
 import { withHandlers } from "recompose";
 import {
-  getActiveProjectId,
   getActiveProject,
   updateProject
 } from "../../datastore.js";
@@ -154,7 +153,7 @@ class GndProjectEditor extends React.Component<Props, State> {
 }
 
 const mapStateToProps = (store, props) => ({
-  projectId: getActiveProjectId(store),
+  projectId: props.projectId,
   project: getActiveProject(store),
   projectEditorOpen: store.projectEditorOpen
 });

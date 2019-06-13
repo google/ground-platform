@@ -25,12 +25,13 @@ import { connectProject, connectFeature } from "../../datastore.js";
 import { featurePath } from '../../route.js'
 
 
-function GndObservations({ match }) {
+function GndFeatureDetails({ match }) {
   return (
     <div>
-      TODO(maralka): exatact observations for feature
-      { match.params.projectId } in project { match.params.featureId } and
-      display in side panel.
+      { /* TODO(maralka): Display feature data loaded in the store inside of
+        side panel. */ }
+      Placeholder for { match.params.featureId } of project
+      { match.params.projectId }
     </div>
   );
 }
@@ -40,10 +41,12 @@ class GndMain extends React.Component {
     return (
       <React.Fragment>
         <GndMap />
-        <GndHeader />
-        <GndLegend />
-        <GndFeatureTypeEditor />
-        <Route path={featurePath} component={connectFeature(GndObservations)} />
+        <GndHeader projectId={this.props.match.params.projectId} />
+        <GndLegend projectId={this.props.match.params.projectId} />
+        <GndFeatureTypeEditor projectId={this.props.match.params.projectId} />
+        <Route
+          path={featurePath}
+          component={connectFeature(GndFeatureDetails)} />
       </React.Fragment>
     );
   }

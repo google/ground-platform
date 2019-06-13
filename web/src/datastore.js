@@ -24,13 +24,10 @@ import firebaseConfig from "./.firebase-config.js";
 // empty, or undefined if key is not present (i.e., still loading,).
 const getFirestoreData = (store, key) =>
 	key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
-const getActiveProjectId = store => store.path.projectId;
 
 // TOOD: Handle loading state.
 const getActiveProject = store =>
-	getActiveProjectId(store) === ":new"
-		? {}
-		: getFirestoreData(store, "activeProject");
+	getFirestoreData(store, "activeProject") || {};
 
 const getMapFeatures = store => getFirestoreData(store, "mapFeatures");
 
@@ -99,9 +96,9 @@ const connectFeature =
 	firestoreConnect((store, props) => [
 		{
 			collection: `projects/${store.match.params.projectId}/records`,
-      where: [
-         ['featureId', '==', store.match.params.featureId]
-      ],
+			where: [
+				['featureId', '==', store.match.params.featureId]
+			],
 			storeAs: "featureRecords"
 		}
 	]);
@@ -114,7 +111,6 @@ const exportKml = props => (projectId, featureTypeId) => {
 
 export {
 	getActiveProject,
-	getActiveProjectId,
 	exportKml,
 	updateProject,
 	updateProjectTitle,
@@ -122,7 +118,7 @@ export {
 	getProfile,
 	getMapFeatures,
 	getLocalizedText,
-  connectFeature,
+	connectFeature,
 	connectProject,
 	generateId
 };
