@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { createMuiTheme } from '@material-ui/core/styles';
+import {createMuiTheme} from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   palette: {
@@ -32,9 +32,9 @@ const theme = createMuiTheme({
     },
     text: {
       dark: '#939393',
-    }
+    },
     // error: will use the default color
   },
 });
 
-export { theme };
+export {theme};

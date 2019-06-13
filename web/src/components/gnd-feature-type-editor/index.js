@@ -15,62 +15,62 @@
  * limitations under the License.
  */
 
-import React from "react";
-import "./index.css";
-import { compose } from "redux";
-import { connect } from "react-redux";
-import { withHandlers } from "recompose";
+import React from 'react';
+import './index.css';
+import {compose} from 'redux';
+import {connect} from 'react-redux';
+import {withHandlers} from 'recompose';
 import {
   getAuth,
   getActiveProjectId,
   getActiveProject,
   getLocalizedText,
   generateId,
-  updateProject
-} from "../../datastore.js";
+  updateProject,
+} from '../../datastore.js';
 import {
   Button,
   Dialog,
   DialogTitle,
   DialogActions,
   DialogContent,
-  Typography
-} from "@material-ui/core";
-import GndInlineEdit from "../gnd-inline-edit";
-import { withStyles } from "@material-ui/core/styles";
-import { withFirebase, withFirestore } from "react-redux-firebase";
-import GndMarkerImage from "../gnd-marker-image";
-import GndFormEditor from "./gnd-form-editor";
-import update from "immutability-helper";
-import SwipeableViews from "react-swipeable-views";
-import GndFormTabs from "./gnd-form-tabs";
-import history from "../../history.js";
+  Typography,
+} from '@material-ui/core';
+import GndInlineEdit from '../gnd-inline-edit';
+import {withStyles} from '@material-ui/core/styles';
+import {withFirebase, withFirestore} from 'react-redux-firebase';
+import GndMarkerImage from '../gnd-marker-image';
+import GndFormEditor from './gnd-form-editor';
+import update from 'immutability-helper';
+import SwipeableViews from 'react-swipeable-views';
+import GndFormTabs from './gnd-form-tabs';
+import history from '../../history.js';
 
 // TODO: Refactor.
-update.extend("$auto", function(value, object) {
+update.extend('$auto', function(value, object) {
   return object ? update(object, value) : update({}, value);
 });
-update.extend("$autoArray", function(value, object) {
+update.extend('$autoArray', function(value, object) {
   return object ? update(object, value) : update([], value);
 });
 
-const styles = theme => ({
+const styles = (theme) => ({
   dialog: {
-    padding: 40
-  }
+    padding: 40,
+  },
 });
 
 class GndFeatureTypeEditor extends React.Component {
   state = {
     formIndex: 0,
-    featureType: null
+    featureType: null,
   };
 
   componentDidUpdate(prevProps) {
     if (prevProps.editState === this.props.editState) {
       return;
     }
-    this.setState({ formIndex: 0, featureType: this.props.editState });
+    this.setState({formIndex: 0, featureType: this.props.editState});
   }
 
   handleClose = () => {
@@ -78,40 +78,40 @@ class GndFeatureTypeEditor extends React.Component {
   };
 
   handleTabChange = (event, value) => {
-    this.setState({ formIndex: value });
+    this.setState({formIndex: value});
   };
 
   handleFeatureTypeLabelChange(newLabel) {
     this.updateState({
       // TODO: i18n.
       defn: {
-        itemLabel: prevLabels =>
-          update(prevLabels || {}, { _: { $set: newLabel } })
-      }
+        itemLabel: (prevLabels) =>
+          update(prevLabels || {}, {_: {$set: newLabel}}),
+      },
     });
     return Promise.resolve();
   }
 
   updateState(featureTypeUpdate, opt_newStates) {
-    const { featureType } = this.state;
+    const {featureType} = this.state;
     this.setState({
       featureType: update(featureType, featureTypeUpdate),
-      ...opt_newStates
+      ...opt_newStates,
     });
   }
 
   updateFormDefn(newForm) {
     this.updateState({
-      defn: { forms: { [newForm.id]: { $set: newForm.defn } } }
+      defn: {forms: {[newForm.id]: {$set: newForm.defn}}},
     });
   }
 
   deleteForm(id, formIndex) {
     this.updateState(
-      {
-        defn: { forms: { $unset: [id] } }
-      },
-      { formIndex: Math.max(formIndex - 1, 0) }
+        {
+          defn: {forms: {$unset: [id]}},
+        },
+        {formIndex: Math.max(formIndex - 1, 0)}
     );
   }
 
@@ -129,59 +129,59 @@ class GndFeatureTypeEditor extends React.Component {
       defn: {
         forms: {
           [form.id]: {
-            titles: prevTitles =>
-              update(prevTitles || {}, { _: { $set: newTitle } })
-          }
-        }
-      }
+            titles: (prevTitles) =>
+              update(prevTitles || {}, {_: {$set: newTitle}}),
+          },
+        },
+      },
     });
   }
 
   createElement() {
-    const { generateId } = this.props;
+    const {generateId} = this.props;
     return {
       id: generateId(),
       labels: {},
-      type: "text_field",
-      required: false
+      type: 'text_field',
+      required: false,
     };
   }
 
   createForm() {
-    return { titles: {}, elements: [this.createElement()] };
+    return {titles: {}, elements: [this.createElement()]};
   }
 
   handleAddFormClick() {
-    const { generateId } = this.props;
-    const { featureType } = this.state;
+    const {generateId} = this.props;
+    const {featureType} = this.state;
     const forms = featureType.defn.forms || {};
     this.updateState(
-      {
-        defn: {
-          forms: prevForms =>
-            update(prevForms || {}, {
-              [generateId()]: {
-                $set: this.createForm()
-              }
-            })
-        }
-      },
-      { formIndex: Object.keys(forms).length }
+        {
+          defn: {
+            forms: (prevForms) =>
+              update(prevForms || {}, {
+                [generateId()]: {
+                  $set: this.createForm(),
+                },
+              }),
+          },
+        },
+        {formIndex: Object.keys(forms).length}
     );
   }
 
   handleSave(event) {
     try {
-      const { projectId, project, updateProject, auth } = this.props;
-      const { featureType } = this.state;
+      const {projectId, project, updateProject, auth} = this.props;
+      const {featureType} = this.state;
       const newProject = update(project, {
         featureTypes: {
-          $auto: { [featureType.id]: { $set: featureType.defn } }
-        }
+          $auto: {[featureType.id]: {$set: featureType.defn}},
+        },
       });
-      updateProject(projectId, newProject, auth).then(id => this.onSaved(id));
+      updateProject(projectId, newProject, auth).then((id) => this.onSaved(id));
     } catch (e) {
-      alert("Save failed");
+      alert('Save failed');
       console.error(e);
     }
   }
@@ -195,28 +195,28 @@ class GndFeatureTypeEditor extends React.Component {
   }
 
   render() {
-    const { classes, generateId } = this.props;
-    const { featureType, formIndex } = this.state;
+    const {classes, generateId} = this.props;
+    const {featureType, formIndex} = this.state;
     const defn = featureType && featureType.defn;
     const featureTypeLabel = getLocalizedText(defn && defn.itemLabel);
     const forms = (defn && defn.forms) || {};
-    const formsArray = Object.keys(forms).map(id => ({
+    const formsArray = Object.keys(forms).map((id) => ({
       id: id,
       title: getLocalizedText(forms[id].titles),
-      defn: forms[id]
+      defn: forms[id],
     }));
 
     // TODO: Adjust height of swipeable area so that forms don't scroll more
     // than necessary.
     return (
-      <form noValidate autoComplete="off" onSubmit={ev => ev.preventDefault()}>
+      <form noValidate autoComplete="off" onSubmit={(ev) => ev.preventDefault()}>
         <Dialog
           open={Boolean(featureType)}
           onClose={this.handleClose}
           aria-labelledby="form-dialog-title"
           scroll="paper"
           maxWidth={false}
-          classes={{ paper: "ft-dialog" }}
+          classes={{paper: 'ft-dialog'}}
           disableEscapeKeyDown
         >
           <DialogTitle>
@@ -250,7 +250,7 @@ class GndFeatureTypeEditor extends React.Component {
             >
               {formsArray.map((form, idx) => (
                 <GndFormEditor
-                  key={"form" + idx}
+                  key={'form' + idx}
                   form={form}
                   onChange={this.handleFormChange.bind(this)}
                   generateId={generateId}
@@ -281,25 +281,25 @@ const mapStateToProps = (store, props) => ({
   auth: getAuth(store),
   projectId: getActiveProjectId(store),
   project: getActiveProject(store),
-  editState: store.featureTypeEditState
+  editState: store.featureTypeEditState,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  close: () => dispatch({ type: "CLOSE_FEATURE_TYPE_EDITOR" })
+  close: () => dispatch({type: 'CLOSE_FEATURE_TYPE_EDITOR'}),
 });
 
 const enhance = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  withFirebase,
-  withFirestore,
-  withHandlers({
-    updateProject,
-    generateId
-  }),
-  withStyles(styles, { withTheme: true })
+    connect(
+        mapStateToProps,
+        mapDispatchToProps
+    ),
+    withFirebase,
+    withFirestore,
+    withHandlers({
+      updateProject,
+      generateId,
+    }),
+    withStyles(styles, {withTheme: true})
 );
 
 export default enhance(GndFeatureTypeEditor);

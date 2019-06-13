@@ -16,20 +16,20 @@
  */
 
 /* eslint-env browser */
-import "./index.css";
-import store from "./store.js";
-import React from "react";
-import ReactDOM from "react-dom";
-import GndApp from "./components/gnd-app";
-import { Provider } from "react-redux";
-import { MuiThemeProvider } from "@material-ui/core/styles";
-import { theme } from "./mui-theme.js";
+import './index.css';
+import store from './store.js';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import GndApp from './components/gnd-app';
+import {Provider} from 'react-redux';
+import {MuiThemeProvider} from '@material-ui/core/styles';
+import {theme} from './mui-theme.js';
 
 ReactDOM.render(
-	<Provider store={store}>
-		<MuiThemeProvider theme={theme}>
-			<GndApp />
-		</MuiThemeProvider>
-	</Provider>,
-	document.getElementById("root")
+    <Provider store={store}>
+      <MuiThemeProvider theme={theme}>
+        <GndApp />
+      </MuiThemeProvider>
+    </Provider>,
+    document.getElementById('root')
 );

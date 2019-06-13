@@ -16,10 +16,10 @@
  */
 
 /* eslint-env browser */
-import { compose } from "redux";
-import { connect } from "react-redux";
-import { firestoreConnect } from "react-redux-firebase";
-import firebaseConfig from "./.firebase-config.js";
+import {compose} from 'redux';
+import {connect} from 'react-redux';
+import {firestoreConnect} from 'react-redux-firebase';
+import firebaseConfig from './.firebase-config.js';
 
 // TODO: Turn into class, GndDatastore, wrapper around firebase and Redux store.
 
@@ -27,94 +27,94 @@ import firebaseConfig from "./.firebase-config.js";
 // empty, or undefined if key is not present (i.e., still loading,).
 const getFirestoreData = (store, key) =>
 	key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
-const getActiveProjectId = store => store.path.projectId;
+const getActiveProjectId = (store) => store.path.projectId;
 
 // TOOD: Handle loading state.
-const getActiveProject = store =>
-	getActiveProjectId(store) === ":new"
+const getActiveProject = (store) =>
+	getActiveProjectId(store) === ':new'
 		? {}
-		: getFirestoreData(store, "activeProject");
+		: getFirestoreData(store, 'activeProject');
 
-const getMapFeatures = store => getFirestoreData(store, "mapFeatures");
+const getMapFeatures = (store) => getFirestoreData(store, 'mapFeatures');
 
-const getAuth = store => store.firebase.auth;
+const getAuth = (store) => store.firebase.auth;
 
-const getProfile = store => store.firebase.profile;
+const getProfile = (store) => store.firebase.profile;
 
-const updateProject = props => (projectId, project, auth) => {
-	if (projectId === ":new") {
-		return props.firestore
-			.add({ collection: "projects" }, {...project, acl: getDefaultAcls(auth)})
-			.then(ref => ref.id);
-	} else {
-		return props.firestore
-			.set({ collection: "projects", doc: projectId }, project)
-			.then(() => projectId);
-	}
+const updateProject = (props) => (projectId, project, auth) => {
+  if (projectId === ':new') {
+    return props.firestore
+        .add({collection: 'projects'}, {...project, acl: getDefaultAcls(auth)})
+        .then((ref) => ref.id);
+  } else {
+    return props.firestore
+        .set({collection: 'projects', doc: projectId}, project)
+        .then(() => projectId);
+  }
 };
 
 const getDefaultAcls = (auth) => {
-	return {
-		[auth.email]: ["r", "w"],
-		"gndtestuser@gmail.com": ["r", "w"]
-	};
-}
+  return {
+    [auth.email]: ['r', 'w'],
+    'gndtestuser@gmail.com': ['r', 'w'],
+  };
+};
 
 // TODO: i18n.
-const updateProjectTitle = props => (projectId, newTitle, auth) => {
-	if (projectId === ":new") {
-	return props.firestore
-		.collection("projects")
-		.add({ title: { _: newTitle }, acl: getDefaultAcls(auth) })
-		.then(ref => ref.id);
-	} else {
-	return props.firestore
-		.collection("projects")
-		.doc(projectId)
-		.set({ title: { _: newTitle } }, { merge: true })
-		.then(() => projectId);
-	}
-}
+const updateProjectTitle = (props) => (projectId, newTitle, auth) => {
+  if (projectId === ':new') {
+    return props.firestore
+        .collection('projects')
+        .add({title: {_: newTitle}, acl: getDefaultAcls(auth)})
+        .then((ref) => ref.id);
+  } else {
+    return props.firestore
+        .collection('projects')
+        .doc(projectId)
+        .set({title: {_: newTitle}}, {merge: true})
+        .then(() => projectId);
+  }
+};
 
-const generateId = props => () => props.firestore.collection("ids").doc().id;
+const generateId = (props) => () => props.firestore.collection('ids').doc().id;
 
 // TODO: i18n.
-const getLocalizedText = obj => obj && (obj["_"] || obj["en"] || obj["pt"]);
+const getLocalizedText = (obj) => obj && (obj['_'] || obj['en'] || obj['pt']);
 
 // Mount project data onto store based on current projectId in path.
 const connectGndDatastore = compose(
-	connect((store) => ({
-		projectId: getActiveProjectId(store)
-	})),
-	firestoreConnect(({ projectId }) => [
-		{
-			collection: "projects",
-			doc: projectId,
-			storeAs: "activeProject"
-		},
-		{
-			collection: `projects/${projectId}/features`,
-			storeAs: "mapFeatures"
-		}
-	])
+    connect((store) => ({
+      projectId: getActiveProjectId(store),
+    })),
+    firestoreConnect(({projectId}) => [
+      {
+        collection: 'projects',
+        doc: projectId,
+        storeAs: 'activeProject',
+      },
+      {
+        collection: `projects/${projectId}/features`,
+        storeAs: 'mapFeatures',
+      },
+    ])
 );
 
 const exportKml = () => (projectId, featureTypeId) => {
-	window.location.href = `${
-		firebaseConfig.functionsURL
-	}/exportKml?project=${projectId}&featureType=${featureTypeId}`;
+  window.location.href = `${
+    firebaseConfig.functionsURL
+  }/exportKml?project=${projectId}&featureType=${featureTypeId}`;
 };
 
 export {
-	getActiveProject,
-	getActiveProjectId,
-	exportKml,
-	updateProject,
-	updateProjectTitle,
-	getAuth,
-	getProfile,
-	getMapFeatures,
-	getLocalizedText,
-	connectGndDatastore,
-	generateId
+  getActiveProject,
+  getActiveProjectId,
+  exportKml,
+  updateProject,
+  updateProjectTitle,
+  getAuth,
+  getProfile,
+  getMapFeatures,
+  getLocalizedText,
+  connectGndDatastore,
+  generateId,
 };

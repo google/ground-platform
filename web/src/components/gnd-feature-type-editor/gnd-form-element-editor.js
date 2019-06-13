@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import GndFormWarning from "./gnd-form-warning";
-import { withStyles } from "@material-ui/core/styles";
+import React from 'react';
+import PropTypes from 'prop-types';
+import GndFormWarning from './gnd-form-warning';
+import {withStyles} from '@material-ui/core/styles';
 import {
   IconButton,
   Switch,
@@ -26,96 +26,96 @@ import {
   MenuItem,
   TextField,
   FormGroup,
-  FormControlLabel
-} from "@material-ui/core";
-import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+  FormControlLabel,
+} from '@material-ui/core';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CheckBoxMultipleMarked from 'mdi-react/CheckboxMultipleMarkedIcon';
 import CheckCircle from 'mdi-react/CheckCircleIcon';
 import ShortText from 'mdi-react/TextIcon';
-import { getLocalizedText } from "../../datastore.js";
-import GndFocusableRow from "./gnd-focusable-row";
-import GndMultiSelectOptionsEditor from "./gnd-multi-select-options-editor";
-import update from "immutability-helper";
+import {getLocalizedText} from '../../datastore.js';
+import GndFocusableRow from './gnd-focusable-row';
+import GndMultiSelectOptionsEditor from './gnd-multi-select-options-editor';
+import update from 'immutability-helper';
 
 const styles = {
   label: {
-    marginTop: 0
+    marginTop: 0,
   },
   type: {},
   bottomLeftControls: {
-    float: "left"
+    float: 'left',
   },
   bottomRightControls: {
-    float: "right"
+    float: 'right',
   },
   bottomControls: {
-    width: "100%",
-    display: "block"
+    width: '100%',
+    display: 'block',
   },
   icon: {
-    marginRight: 5
-  }
+    marginRight: 5,
+  },
 };
 
 class GndFormElementEditor extends React.Component {
   state = {
-    deleteWarningDialogOpen: false
+    deleteWarningDialogOpen: false,
   };
 
   handleLabelChange(newLabel) {
-    const { element, onChange } = this.props;
+    const {element, onChange} = this.props;
     // TODO: i18n.
     onChange(
-      update(element, {
-        labels: { _: { $set: newLabel } }
-      })
+        update(element, {
+          labels: {_: {$set: newLabel}},
+        })
     );
   }
 
   handleTypeChange(newType) {
-    const { element, onChange } = this.props;
+    const {element, onChange} = this.props;
 
     switch (newType) {
-      case "select_one":
-      case "select_multiple":
+      case 'select_one':
+      case 'select_multiple':
         onChange(
-          update(element, {
-            type: { $set: "multiple_choice" },
-            cardinality: { $set: newType },
-            options: { $set: element.options || [{ labels: {} }] }
-          })
+            update(element, {
+              type: {$set: 'multiple_choice'},
+              cardinality: {$set: newType},
+              options: {$set: element.options || [{labels: {}}]},
+            })
         );
         break;
       default:
         onChange(
-          update(element, {
-            type: { $set: newType },
-            $unset: ["cardinality", "options"]
-          })
+            update(element, {
+              type: {$set: newType},
+              $unset: ['cardinality', 'options'],
+            })
         );
     }
   }
 
   handleRequiredChange(newRequired) {
-    const { element, onChange } = this.props;
+    const {element, onChange} = this.props;
     onChange(
-      update(element, {
-        required: { $set: newRequired }
-      })
+        update(element, {
+          required: {$set: newRequired},
+        })
     );
   }
 
   handleOptionsChange(newOptions) {
-    const { element, onChange } = this.props;
-    onChange(update(element, { options: { $set: newOptions } }));
+    const {element, onChange} = this.props;
+    onChange(update(element, {options: {$set: newOptions}}));
   }
 
   handleDeleteClick(ev) {
-    this.setState({ deleteWarningDialogOpen: true });
+    this.setState({deleteWarningDialogOpen: true});
   }
 
   handleCancelDeletionClick = () => {
-    this.setState({ deleteWarningDialogOpen: false });
+    this.setState({deleteWarningDialogOpen: false});
   };
 
   handleConfirmDeletionClick = () => {
@@ -125,36 +125,36 @@ class GndFormElementEditor extends React.Component {
   render() {
     // Option 1. Component uses schema of Ground element
     // Option 2. Editor has callbacks for ea change and updates
-    const { classes, element } = this.props;
-    const { id, labels, required, options } = element;
+    const {classes, element} = this.props;
+    const {id, labels, required, options} = element;
     const type =
-      element.type === "multiple_choice" ? element.cardinality : element.type;
+      element.type === 'multiple_choice' ? element.cardinality : element.type;
     return (
       <GndFocusableRow key={id} collapsedHeight="40px">
         <div>
           <TextField
             id="fieldLabel"
-            classes={{ root: classes.label }}
-            style={{ width: "64%" }}
-            value={getLocalizedText(labels) || ""}
-            onChange={ev => this.handleLabelChange(ev.target.value)}
-            onBlur={ev => this.handleLabelChange(ev.target.value.trim())}
+            classes={{root: classes.label}}
+            style={{width: '64%'}}
+            value={getLocalizedText(labels) || ''}
+            onChange={(ev) => this.handleLabelChange(ev.target.value)}
+            onBlur={(ev) => this.handleLabelChange(ev.target.value.trim())}
             placeholder="Field name"
             margin="normal"
           />
           <Select
             value={type}
-            classes={{ root: classes.type }}
-            style={{ width: "33%", marginLeft: 16 }}
-            onChange={ev => this.handleTypeChange(ev.target.value)}
-            onBlur={ev => this.handleTypeChange(ev.target.value.trim())}
+            classes={{root: classes.type}}
+            style={{width: '33%', marginLeft: 16}}
+            onChange={(ev) => this.handleTypeChange(ev.target.value)}
+            onBlur={(ev) => this.handleTypeChange(ev.target.value.trim())}
           >
             <MenuItem value="text_field"><ShortText className={classes.icon}></ShortText>Text</MenuItem>
             <MenuItem value="select_one"><CheckCircle className={classes.icon}></CheckCircle>Select one</MenuItem>
             <MenuItem value="select_multiple"><CheckBoxMultipleMarked className={classes.icon}></CheckBoxMultipleMarked>Select multiple</MenuItem>
           </Select>
         </div>
-        {element.type === "multiple_choice" && (
+        {element.type === 'multiple_choice' && (
           <GndMultiSelectOptionsEditor
             options={options}
             onChange={this.handleOptionsChange.bind(this)}
@@ -166,7 +166,7 @@ class GndFormElementEditor extends React.Component {
               control={
                 <Switch
                   checked={required}
-                  onChange={ev => this.handleRequiredChange(ev.target.checked)}
+                  onChange={(ev) => this.handleRequiredChange(ev.target.checked)}
                 />
               }
               label="Required"
@@ -181,7 +181,7 @@ class GndFormElementEditor extends React.Component {
               onCancel={this.handleCancelDeletionClick}
               onConfirm={this.handleConfirmDeletionClick} />
           </span>
-          <div style={{ clear: "both" }} />
+          <div style={{clear: 'both'}} />
         </FormGroup>
       </GndFocusableRow>
     );
@@ -189,7 +189,7 @@ class GndFormElementEditor extends React.Component {
 }
 
 GndFormElementEditor.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(GndFormElementEditor);
