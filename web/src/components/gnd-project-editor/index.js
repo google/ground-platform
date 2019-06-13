@@ -18,37 +18,37 @@
 // @flow
 
 /* eslint-env browser */
-import React from "react";
-import { compose } from "redux";
-import { connect } from "react-redux";
-import { withHandlers } from "recompose";
+import React from 'react';
+import {compose} from 'redux';
+import {connect} from 'react-redux';
+import {withHandlers} from 'recompose';
 import {
   getActiveProjectId,
   getActiveProject,
-  updateProject
-} from "../../datastore.js";
+  updateProject,
+} from '../../datastore.js';
 import {
   Button,
   Dialog,
   DialogTitle,
   DialogActions,
   DialogContent,
-  Typography
-} from "@material-ui/core";
-import JSONInput from "react-json-editor-ajrm/index";
-import { withStyles } from "@material-ui/core/styles";
-import { withFirebase, withFirestore } from "react-redux-firebase";
+  Typography,
+} from '@material-ui/core';
+import JSONInput from 'react-json-editor-ajrm/index';
+import {withStyles} from '@material-ui/core/styles';
+import {withFirebase, withFirestore} from 'react-redux-firebase';
 
 const styles = (theme: Object) => ({
   container: {
-    display: "flex",
-    flexWrap: "wrap"
+    display: 'flex',
+    flexWrap: 'wrap',
   },
   inputField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
-    width: "100%",
-  }
+    width: '100%',
+  },
 });
 
 // TODO: Define Project object type.
@@ -75,7 +75,7 @@ class GndProjectEditor extends React.Component<Props, State> {
   };
 
   componentDidUpdate(prevProps: Props) {
-    const { projectId, project } = this.props;
+    const {projectId, project} = this.props;
     if (prevProps.project !== project) {
       this.setState(() => ({
         projectId: projectId,
@@ -84,19 +84,19 @@ class GndProjectEditor extends React.Component<Props, State> {
     }
   }
 
-  handleChange = event => {
-    this.setState({ project: event.jsObject, hasErrors: event.error });
+  handleChange = (event) => {
+    this.setState({project: event.jsObject, hasErrors: event.error});
   };
 
   handleSave = () => {
-    const { projectId, project } = this.state;
-    const { close } = this.props;
+    const {projectId, project} = this.state;
+    const {close} = this.props;
     try {
       this.props
-        .updateProject(projectId, project)
-        .then(() => close());
+          .updateProject(projectId, project)
+          .then(() => close());
     } catch (e) {
-      alert("Save failed");
+      alert('Save failed');
     }
   };
 
@@ -105,12 +105,12 @@ class GndProjectEditor extends React.Component<Props, State> {
   };
 
   render() {
-    const { classes, project, projectEditorOpen } = this.props;
+    const {classes, project, projectEditorOpen} = this.props;
     if (!project) {
       return <div>Loading...</div>;
     }
     return (
-      <form noValidate autoComplete="off" onSubmit={ev => ev.preventDefault()}>
+      <form noValidate autoComplete="off" onSubmit={(ev) => ev.preventDefault()}>
         <Dialog
           open={projectEditorOpen}
           onClose={this.handleClose}
@@ -130,7 +130,7 @@ class GndProjectEditor extends React.Component<Props, State> {
               height="490px"
               locale="en"
               placeholder={this.state.project}
-              onChange={ev => this.handleChange(ev)}
+              onChange={(ev) => this.handleChange(ev)}
             />
           </DialogContent>
           <DialogActions>
@@ -156,24 +156,24 @@ class GndProjectEditor extends React.Component<Props, State> {
 const mapStateToProps = (store) => ({
   projectId: getActiveProjectId(store),
   project: getActiveProject(store),
-  projectEditorOpen: store.projectEditorOpen
+  projectEditorOpen: store.projectEditorOpen,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  close: () => dispatch({ type: "CLOSE_PROJECT_EDITOR" })
+  close: () => dispatch({type: 'CLOSE_PROJECT_EDITOR'}),
 });
 
 const enhance = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  withFirebase,
-  withFirestore,
-  withHandlers({
-    updateProject
-  }),
-  withStyles(styles)
+    connect(
+        mapStateToProps,
+        mapDispatchToProps
+    ),
+    withFirebase,
+    withFirestore,
+    withHandlers({
+      updateProject,
+    }),
+    withStyles(styles)
 );
 
 export default enhance(GndProjectEditor);

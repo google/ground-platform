@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import "./index.css";
-import AutosizeInput from "react-input-autosize";
-import { Edit } from "@material-ui/icons";
+import React from 'react';
+import PropTypes from 'prop-types';
+import './index.css';
+import AutosizeInput from 'react-input-autosize';
+import {Edit} from '@material-ui/icons';
 
 class GndInlineEdit extends React.Component {
   state = {
-    value: this.props.value || "",
+    value: this.props.value || '',
     hasFocus: this.props.autoFocus,
-    iconHover: false
+    iconHover: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    const { value, autoFocus } = this.props;
+    const {value, autoFocus} = this.props;
     if (value !== prevProps.value || autoFocus !== prevProps.autoFocus) {
-      this.setState({ value: value, hasFocus: autoFocus });
+      this.setState({value: value, hasFocus: autoFocus});
     }
     if (
       this.state.value !== prevState.value ||
@@ -50,17 +50,17 @@ class GndInlineEdit extends React.Component {
 
   handleChange(ev) {
     this.setState({
-      value: ev.target.value
+      value: ev.target.value,
     });
   }
 
   handleKeyDown(ev) {
     switch (ev.key) {
-      case "Enter":
+      case 'Enter':
         this.input.blur();
         ev.preventDefault();
         break;
-      case "Escape":
+      case 'Escape':
         this.reset(this.props);
         ev.preventDefault();
         break;
@@ -73,38 +73,38 @@ class GndInlineEdit extends React.Component {
     if (!this.props.useIcon) {
       this.setState({
         hasFocus: true,
-        iconHover: false
+        iconHover: false,
       });
     }
   }
 
   handleBlur(ev) {
-    this.setState({ hasFocus: false, iconHover: false });
+    this.setState({hasFocus: false, iconHover: false});
     this.saveChanges();
   }
 
   reset(props) {
     this.setState({
-      value: props.value || "",
-      hasFocus: false
+      value: props.value || '',
+      hasFocus: false,
     });
   }
 
   saveChanges() {
-    const { value: prevValue, onCommitChanges } = this.props;
+    const {value: prevValue, onCommitChanges} = this.props;
     const value = this.state.value.trim();
     if (onCommitChanges && value !== prevValue) {
-      this.setState({ value });
+      this.setState({value});
       return onCommitChanges(value);
     }
   }
 
   handleEditIconClick(ev) {
-    this.setState({ hasFocus: true });
+    this.setState({hasFocus: true});
   }
 
   handleInputBlur(ev) {
-    this.setState({ editing: false });
+    this.setState({editing: false});
   }
 
   onRenderInput(input) {
@@ -115,7 +115,7 @@ class GndInlineEdit extends React.Component {
   }
 
   render() {
-    const { value, hasFocus, iconHover } = this.state;
+    const {value, hasFocus, iconHover} = this.state;
     // Remove focus after [ESC] is pressed.
     if (!hasFocus && this.input) {
       this.input.blur();
@@ -125,16 +125,16 @@ class GndInlineEdit extends React.Component {
       inputClassName,
       editIconClassName,
       placeholder,
-      useIcon
+      useIcon,
     } = this.props;
     return (
       <React.Fragment>
         <AutosizeInput
           className={className}
           inputClassName={`inline-edit ${!useIcon &&
-            "clickable-inline-edit"} ${!value && "untitled"} ${inputClassName}`}
+            'clickable-inline-edit'} ${!value && 'untitled'} ${inputClassName}`}
           ref={this.onRenderInput.bind(this)}
-          value={value || ""}
+          value={value || ''}
           disabled={useIcon && !hasFocus}
           placeholder={placeholder}
           onChange={this.handleChange.bind(this)}
@@ -144,14 +144,14 @@ class GndInlineEdit extends React.Component {
         />
         {useIcon &&
           !hasFocus && (
-            <Edit
-              className={editIconClassName}
-              color={iconHover ? "action" : "disabled"}
-              onClick={this.handleEditIconClick.bind(this)}
-              onMouseEnter={ev => this.setState({ iconHover: true })}
-              onMouseLeave={ev => this.setState({ iconHover: false })}
-            />
-          )}
+          <Edit
+            className={editIconClassName}
+            color={iconHover ? 'action' : 'disabled'}
+            onClick={this.handleEditIconClick.bind(this)}
+            onMouseEnter={(ev) => this.setState({iconHover: true})}
+            onMouseLeave={(ev) => this.setState({iconHover: false})}
+          />
+        )}
       </React.Fragment>
     );
   }
@@ -163,7 +163,7 @@ GndInlineEdit.propTypes = {
   editIconClassName: PropTypes.string,
   placeholder: PropTypes.string,
   useIcon: PropTypes.bool,
-  autoFocus: PropTypes.bool
+  autoFocus: PropTypes.bool,
 };
 
 export default GndInlineEdit;

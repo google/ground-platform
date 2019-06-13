@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import Button from "@material-ui/core/Button";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -27,35 +27,35 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 class GndFormWarning extends React.Component {
   render() {
     return (
-        <Dialog
-          open={this.props.open}
-          onClose={this.props.onCancel}
-          aria-labelledby="delete-form-alert-dialog-title"
-          aria-describedby="delete-form-alert-dialog-description"
-        >
-          <DialogTitle id="delete-form-alert-dialog-title">
+      <Dialog
+        open={this.props.open}
+        onClose={this.props.onCancel}
+        aria-labelledby="delete-form-alert-dialog-title"
+        aria-describedby="delete-form-alert-dialog-description"
+      >
+        <DialogTitle id="delete-form-alert-dialog-title">
             WARNING
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="delete-form-alert-dialog-description">
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-form-alert-dialog-description">
               Deleting this will cause any associated data to be lost.
               Are you sure?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={this.props.onCancel}
-              color="primary">
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={this.props.onCancel}
+            color="primary">
               No
-            </Button>
-            <Button
-              onClick={this.props.onConfirm}
-              color="primary"
-              variant="contained" >
+          </Button>
+          <Button
+            onClick={this.props.onConfirm}
+            color="primary"
+            variant="contained" >
               Yes
-            </Button>
-          </DialogActions>
-        </Dialog>
+          </Button>
+        </DialogActions>
+      </Dialog>
     );
   }
 }
@@ -63,7 +63,7 @@ class GndFormWarning extends React.Component {
 GndFormWarning.propTypes = {
   open: PropTypes.bool.isRequired,
   onCancel: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired
+  onConfirm: PropTypes.func.isRequired,
 };
 
 export default GndFormWarning;

@@ -15,106 +15,106 @@
  * limitations under the License.
  */
 
-import React from "react";
-import TextField from "@material-ui/core/TextField";
-import { getLocalizedText } from "../../datastore.js";
-import { withStyles } from "@material-ui/core/styles";
-import update from "immutability-helper";
-import { IconButton, Menu, MenuItem } from "@material-ui/core";
-import { MoreVert } from "@material-ui/icons";
+import React from 'react';
+import TextField from '@material-ui/core/TextField';
+import {getLocalizedText} from '../../datastore.js';
+import {withStyles} from '@material-ui/core/styles';
+import update from 'immutability-helper';
+import {IconButton, Menu, MenuItem} from '@material-ui/core';
+import {MoreVert} from '@material-ui/icons';
 
 // TODO: Fix styling.
 const styles = {
-	option: {
-		fontSize: 8
-	},
-	optionMenuButton: {
-	}
+  option: {
+    fontSize: 8,
+  },
+  optionMenuButton: {
+  },
 };
 
 class GndMultiSelectOption extends React.Component {
 	state = {
-		menuAnchorEl: null
+	  menuAnchorEl: null,
 	};
 
 	handleCodeChange(newCode) {
-		const { onChange, option } = this.props;
-		const newOption = update(option, { code: { $set: newCode } });
-		onChange(newOption);
+	  const {onChange, option} = this.props;
+	  const newOption = update(option, {code: {$set: newCode}});
+	  onChange(newOption);
 	}
 
 	handleLabelChange(newLabel) {
-		const { onChange, option } = this.props;
-		const newOption = update(option, {
-			labels: { _: { $set: newLabel } }
-		});
-		onChange(newOption);
+	  const {onChange, option} = this.props;
+	  const newOption = update(option, {
+	    labels: {_: {$set: newLabel}},
+	  });
+	  onChange(newOption);
 	}
 
 	handleMoreClick(ev) {
-		this.setState({ menuAnchorEl: ev.currentTarget });
+	  this.setState({menuAnchorEl: ev.currentTarget});
 	}
 
 	handleMenuClose() {
-		this.setState({ menuAnchorEl: null });
+	  this.setState({menuAnchorEl: null});
 	}
 
 	handleDeleteOption(ev) {
-		const { onChange } = this.props;
-		this.setState({ menuAnchorEl: null });
-		onChange(undefined);
+	  const {onChange} = this.props;
+	  this.setState({menuAnchorEl: null});
+	  onChange(undefined);
 	}
 
 	render() {
-		const { classes, option } = this.props;
-		const { menuAnchorEl } = this.state;
-		const { code, labels } = option;
-		// TODO: Check if option button SVG shows on older browsers. Does Icon
-		// fall back to PNG?
-		return (
-			<div style={{ marginLeft: 16, whiteSpace: "nowrap" }}>
-				<TextField
-					style={{ width: 100 }}
-					classes={{ root: classes.option }}
-					value={code || ""}
-					onChange={ev => this.handleCodeChange(ev.target.value)}
-					onBlur={ev => this.handleCodeChange(ev.target.value.trim())}
-					placeholder="Code"
-					margin="normal"
-					required
-				/>
-				<TextField
-					style={{ width: 330, marginLeft: 16 }}
-					classes={{ root: classes.option }}
-					value={getLocalizedText(labels) || ""}
-					onChange={ev => this.handleLabelChange(ev.target.value)}
-					onBlur={ev => this.handleLabelChange(ev.target.value.trim())}
-					placeholder="Option"
-					margin="normal"
-					required
-				/>
-				<IconButton
-					style={{ marginRight: 16 }}
-					className={classes.optionMenuButton}
-					aria-label="Option menu"
-					aria-owns={menuAnchorEl ? "option-menu" : null}
-					aria-haspopup="true"
-					onClick={this.handleMoreClick.bind(this)}
-				>
-					<MoreVert />
-				</IconButton>
-				<Menu
-					id="option-menu"
-					anchorEl={menuAnchorEl}
-					open={Boolean(menuAnchorEl)}
-					onClose={this.handleMenuClose.bind(this)}
-				>
-					<MenuItem onClick={this.handleDeleteOption.bind(this)}>
+	  const {classes, option} = this.props;
+	  const {menuAnchorEl} = this.state;
+	  const {code, labels} = option;
+	  // TODO: Check if option button SVG shows on older browsers. Does Icon
+	  // fall back to PNG?
+	  return (
+	    <div style={{marginLeft: 16, whiteSpace: 'nowrap'}}>
+	      <TextField
+	        style={{width: 100}}
+	        classes={{root: classes.option}}
+	        value={code || ''}
+	        onChange={(ev) => this.handleCodeChange(ev.target.value)}
+	        onBlur={(ev) => this.handleCodeChange(ev.target.value.trim())}
+	        placeholder="Code"
+	        margin="normal"
+	        required
+	      />
+	      <TextField
+	        style={{width: 330, marginLeft: 16}}
+	        classes={{root: classes.option}}
+	        value={getLocalizedText(labels) || ''}
+	        onChange={(ev) => this.handleLabelChange(ev.target.value)}
+	        onBlur={(ev) => this.handleLabelChange(ev.target.value.trim())}
+	        placeholder="Option"
+	        margin="normal"
+	        required
+	      />
+	      <IconButton
+	        style={{marginRight: 16}}
+	        className={classes.optionMenuButton}
+	        aria-label="Option menu"
+	        aria-owns={menuAnchorEl ? 'option-menu' : null}
+	        aria-haspopup="true"
+	        onClick={this.handleMoreClick.bind(this)}
+	      >
+	        <MoreVert />
+	      </IconButton>
+	      <Menu
+	        id="option-menu"
+	        anchorEl={menuAnchorEl}
+	        open={Boolean(menuAnchorEl)}
+	        onClose={this.handleMenuClose.bind(this)}
+	      >
+	        <MenuItem onClick={this.handleDeleteOption.bind(this)}>
 						Delete option
-					</MenuItem>
-				</Menu>
-			</div>
-		);
+	        </MenuItem>
+	      </Menu>
+	    </div>
+	  );
 	}
 }
 export default withStyles(styles)(GndMultiSelectOption);

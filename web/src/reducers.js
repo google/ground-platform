@@ -15,61 +15,61 @@
  * limitations under the License.
  */
 
-import { combineReducers } from "redux";
-import { firebaseReducer } from "react-redux-firebase";
-import { firestoreReducer } from "redux-firestore";
-import { connectRouter, createMatchSelector } from "connected-react-router";
-import history from "./history.js";
+import {combineReducers} from 'redux';
+import {firebaseReducer} from 'react-redux-firebase';
+import {firestoreReducer} from 'redux-firestore';
+import {connectRouter, createMatchSelector} from 'connected-react-router';
+import history from './history.js';
 
-const matchPath = createMatchSelector({ path: "/p/:projectId" });
+const matchPath = createMatchSelector({path: '/p/:projectId'});
 
 const pathReducer = (state = {}, action) => {
-	if (action.type === "@@router/LOCATION_CHANGE") {
-		const match = matchPath({ router: action.payload });
-		if (match) {
-			return { ...state, ...match.params };
-		}
-	}
-	return state;
+  if (action.type === '@@router/LOCATION_CHANGE') {
+    const match = matchPath({router: action.payload});
+    if (match) {
+      return {...state, ...match.params};
+    }
+  }
+  return state;
 };
 
 const projectEditorReducer = (state = false, action) => {
-	switch (action.type) {
-		case "OPEN_PROJECT_EDITOR":
-			return true;
-		case "CLOSE_PROJECT_EDITOR":
-			return false;
-		default:
-			return state;
-	}
+  switch (action.type) {
+    case 'OPEN_PROJECT_EDITOR':
+      return true;
+    case 'CLOSE_PROJECT_EDITOR':
+      return false;
+    default:
+      return state;
+  }
 };
 
 
 const featureTypeEditStateReducer = (state = null, action) => {
-	switch (action.type) {
-		case "OPEN_FEATURE_TYPE_EDITOR":
-			return action.payload;
-		case "CLOSE_FEATURE_TYPE_EDITOR":
-			return null;
-		default:
-			return state;
-	}
+  switch (action.type) {
+    case 'OPEN_FEATURE_TYPE_EDITOR':
+      return action.payload;
+    case 'CLOSE_FEATURE_TYPE_EDITOR':
+      return null;
+    default:
+      return state;
+  }
 };
 
 const selectProjectIdReducer = (state = null, action) => {
-	if (action.type === "SELECT_PROJECT") {
-		return action.projectId;
-	}
-	return state;
-}
+  if (action.type === 'SELECT_PROJECT') {
+    return action.projectId;
+  }
+  return state;
+};
 
 const rootReducer = combineReducers({
-	path: pathReducer,
-	firebase: firebaseReducer,
-	firestore: firestoreReducer,
-	projectEditorOpen: projectEditorReducer,
-	featureTypeEditState: featureTypeEditStateReducer,
-	selectedProjectId: selectProjectIdReducer,
+  path: pathReducer,
+  firebase: firebaseReducer,
+  firestore: firestoreReducer,
+  projectEditorOpen: projectEditorReducer,
+  featureTypeEditState: featureTypeEditStateReducer,
+  selectedProjectId: selectProjectIdReducer,
 });
 
 export default connectRouter(history)(rootReducer);

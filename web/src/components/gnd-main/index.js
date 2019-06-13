@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import React from "react";
-import GndMap from "../gnd-map";
-import GndHeader from "../gnd-header";
-import GndLegend from "../gnd-legend";
-import GndFeatureTypeEditor from "../gnd-feature-type-editor";
+import React from 'react';
+import GndMap from '../gnd-map';
+import GndHeader from '../gnd-header';
+import GndLegend from '../gnd-legend';
+import GndFeatureTypeEditor from '../gnd-feature-type-editor';
 
 class GndMain extends React.Component {
   render() {

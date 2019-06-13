@@ -14,24 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from "react";
+import React from 'react';
 
-const png = filebase => require(`../../images/${filebase}.png`);
+const png = (filebase) => require(`../../images/${filebase}.png`);
 
-const iconSrc = iconId => {
+const iconSrc = (iconId) => {
   switch (iconId) {
-    case "tree":
-      return png("tree");
-    case "house-map-marker":
-      return png("home-map-marker");
-    case "star-circle":
-      return png("star-circle");
+    case 'tree':
+      return png('tree');
+    case 'house-map-marker':
+      return png('home-map-marker');
+    case 'star-circle':
+      return png('star-circle');
     default:
-      return png("map-marker");
+      return png('map-marker');
   }
 };
 
-const GndMarkerImage = ({ featureType, className }) => (
+const GndMarkerImage = ({featureType, className}) => (
   <img
     width="24"
     height="24"

@@ -15,95 +15,95 @@
  * limitations under the License.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
-import GndFormElementEditor from "./gnd-form-element-editor";
-import GndFormWarning from "./gnd-form-warning";
-import update from "immutability-helper";
-import { Add } from "@material-ui/icons";
-import Button from "@material-ui/core/Button";
-import { withStyles } from "@material-ui/core/styles";
-import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import React from 'react';
+import PropTypes from 'prop-types';
+import GndFormElementEditor from './gnd-form-element-editor';
+import GndFormWarning from './gnd-form-warning';
+import update from 'immutability-helper';
+import {Add} from '@material-ui/icons';
+import Button from '@material-ui/core/Button';
+import {withStyles} from '@material-ui/core/styles';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
-const styles = theme => ({
+const styles = (theme) => ({
   button: {
-    marginLeft: 18
+    marginLeft: 18,
   },
   leftIcon: {
-    marginRight: theme.spacing.unit
+    marginRight: theme.spacing.unit,
   },
   rightIcon: {
-    marginLeft: theme.spacing.unit
+    marginLeft: theme.spacing.unit,
   },
   bottomLeftControls: {
-    float: "left"
+    float: 'left',
   },
   bottomRightControls: {
-    float: "right",
-    marginRight: 24
+    float: 'right',
+    marginRight: 24,
   },
   bottomControls: {
-    display: "block",
-    width: "100%"
-  }
+    display: 'block',
+    width: '100%',
+  },
 });
 
 class GndFormEditor extends React.Component {
   state = {
-    deleteFormWarningDialogOpen: false
+    deleteFormWarningDialogOpen: false,
   };
 
   handleElementChange(newElement, idx) {
-    const { form, onChange } = this.props;
+    const {form, onChange} = this.props;
     if (newElement) {
       onChange(
-        update(form, {
-          defn: { elements: { [idx]: { $set: newElement } } }
-        })
+          update(form, {
+            defn: {elements: {[idx]: {$set: newElement}}},
+          })
       );
     } else {
       onChange(
-        update(form, {
-          defn: { elements: { $splice: [[idx, 1]] } }
-        })
+          update(form, {
+            defn: {elements: {$splice: [[idx, 1]]}},
+          })
       );
     }
   }
 
   createElement() {
-    const { generateId } = this.props;
+    const {generateId} = this.props;
     return {
       id: generateId(),
       labels: {},
-      type: "text_field",
-      required: false
+      type: 'text_field',
+      required: false,
     };
   }
 
   handleAddFieldClick() {
-    const { form, onChange } = this.props;
+    const {form, onChange} = this.props;
     // TODO: Auto focus on label field.
     const newForm = update(form, {
-      defn: { elements: { $push: [this.createElement()] } }
+      defn: {elements: {$push: [this.createElement()]}},
     });
     onChange(newForm);
   }
 
   handleDeleteFormClick() {
-    this.setState({ deleteFormWarningDialogOpen: true });
+    this.setState({deleteFormWarningDialogOpen: true});
   }
 
   handleCancelDeletionClick = () => {
-    this.setState({ deleteFormWarningDialogOpen: false });
+    this.setState({deleteFormWarningDialogOpen: false});
   };
 
   handleConfirmDeletionClick = () => {
-    const { form, onChange } = this.props;
+    const {form, onChange} = this.props;
     onChange({id: form.id, defn: undefined});
   };
 
   render() {
-    const { form, classes } = this.props;
+    const {form, classes} = this.props;
     if (!form || !form.defn || !form.defn.elements) {
       return null;
     }
@@ -111,7 +111,7 @@ class GndFormEditor extends React.Component {
       <GndFormElementEditor
         key={element.id}
         element={element}
-        onChange={el => this.handleElementChange(el, idx)}
+        onChange={(el) => this.handleElementChange(el, idx)}
       />
     ));
     return (
@@ -153,7 +153,7 @@ GndFormEditor.propTypes = {
   form: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  generateId: PropTypes.func.isRequired
+  generateId: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(GndFormEditor);

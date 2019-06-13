@@ -15,32 +15,32 @@
  * limitations under the License.
  */
 
-import React from "react";
-import "./index.css";
-import logo from "./logo.png";
-import { connect } from "react-redux";
-import { compose } from "redux";
+import React from 'react';
+import './index.css';
+import logo from './logo.png';
+import {connect} from 'react-redux';
+import {compose} from 'redux';
 import {
   getAuth,
   getProfile,
   getActiveProject,
   getActiveProjectId,
   getLocalizedText,
-  updateProjectTitle
-} from "../../datastore.js";
-import { AppBar, Button, IconButton } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import GndProjectEditor from "../gnd-project-editor";
-import GndInlineEdit from "../gnd-inline-edit";
-import { withFirebase, withFirestore } from "react-redux-firebase";
-import { withHandlers } from "recompose";
-import { Code } from "@material-ui/icons";
-import history from "../../history.js";
+  updateProjectTitle,
+} from '../../datastore.js';
+import {AppBar, Button, IconButton} from '@material-ui/core';
+import {withStyles} from '@material-ui/core/styles';
+import GndProjectEditor from '../gnd-project-editor';
+import GndInlineEdit from '../gnd-inline-edit';
+import {withFirebase, withFirestore} from 'react-redux-firebase';
+import {withHandlers} from 'recompose';
+import {Code} from '@material-ui/icons';
+import history from '../../history.js';
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 const GndAppBar = withStyles({
-  root: { background: "#fafafa", opacity: 0.97 }
+  root: {background: '#fafafa', opacity: 0.97},
 })(AppBar);
 
 class GndHeader extends React.Component {
@@ -50,8 +50,8 @@ class GndHeader extends React.Component {
 
   handleSignInClick = () => {
     this.props.firebase.login({
-      provider: "google",
-      type: "popup"
+      provider: 'google',
+      type: 'popup',
     });
   };
 
@@ -60,17 +60,17 @@ class GndHeader extends React.Component {
   };
 
   handleSaveTitleChange(value) {
-    const { auth, projectId } = this.props;
+    const {auth, projectId} = this.props;
     if (!projectId) {
-      return Promise.reject("Project not loaded");
+      return Promise.reject('Project not loaded');
     }
     // Don't save if unchanged.
     if (this.getTitle() === value) {
       return Promise.resolve();
     }
     return this.props
-      .updateProjectTitle(projectId, value, auth)
-      .then(id => this.onTitleSaved(id));
+        .updateProjectTitle(projectId, value, auth)
+        .then((id) => this.onTitleSaved(id));
   }
 
   onTitleSaved(id) {
@@ -82,12 +82,12 @@ class GndHeader extends React.Component {
 
   getTitle() {
     return (
-      (this.props.project && getLocalizedText(this.props.project.title)) || ""
+      (this.props.project && getLocalizedText(this.props.project.title)) || ''
     );
   }
 
   render() {
-    const { auth } = this.props;
+    const {auth} = this.props;
 
     // TODO: Move title and login link into separate component.
     const AuthWiget = auth.isEmpty ? (
@@ -103,7 +103,7 @@ class GndHeader extends React.Component {
       <React.Fragment>
         <img
           alt={auth.displayName}
-          src={auth.photoURL + "?sz=64"}
+          src={auth.photoURL + '?sz=64'}
           className="user-thumb"
         />
         <Button
@@ -150,25 +150,25 @@ const mapStateToProps = (store, props) => ({
   projectId: getActiveProjectId(store),
   project: getActiveProject(store),
   auth: getAuth(store),
-  profile: getProfile(store)
+  profile: getProfile(store),
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  openProjectEditor: () => dispatch({ type: "OPEN_PROJECT_EDITOR" })
+  openProjectEditor: () => dispatch({type: 'OPEN_PROJECT_EDITOR'}),
 });
 
 const enhance = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  // TODO: Better abstract remote datastore so that we don't expose withFire*.
-  withFirebase,
-  withFirestore,
-  withHandlers({
-    updateProjectTitle
-  }),
-  withStyles(styles)
+    connect(
+        mapStateToProps,
+        mapDispatchToProps
+    ),
+    // TODO: Better abstract remote datastore so that we don't expose withFire*.
+    withFirebase,
+    withFirestore,
+    withHandlers({
+      updateProjectTitle,
+    }),
+    withStyles(styles)
 );
 
 export default enhance(GndHeader);
