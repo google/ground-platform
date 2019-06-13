@@ -22,7 +22,6 @@ import { connect } from "react-redux";
 import { withHandlers } from "recompose";
 import {
   getAuth,
-  getActiveProjectId,
   getActiveProject,
   getLocalizedText,
   generateId,
@@ -279,7 +278,7 @@ class GndFeatureTypeEditor extends React.Component {
 
 const mapStateToProps = (store, props) => ({
   auth: getAuth(store),
-  projectId: getActiveProjectId(store),
+  projectId: props.projectId,
   project: getActiveProject(store),
   editState: store.featureTypeEditState
 });

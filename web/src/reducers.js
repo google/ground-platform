@@ -18,20 +18,8 @@
 import { combineReducers } from "redux";
 import { firebaseReducer } from "react-redux-firebase";
 import { firestoreReducer } from "redux-firestore";
-import { connectRouter, createMatchSelector } from "connected-react-router";
+import { connectRouter } from "connected-react-router";
 import history from "./history.js";
-
-const matchPath = createMatchSelector({ path: "/p/:projectId" });
-
-const pathReducer = (state = {}, action) => {
-	if (action.type === "@@router/LOCATION_CHANGE") {
-		const match = matchPath({ router: action.payload });
-		if (match) {
-			return { ...state, ...match.params };
-		}
-	}
-	return state;
-};
 
 const projectEditorReducer = (state = false, action) => {
 	switch (action.type) {
@@ -43,7 +31,6 @@ const projectEditorReducer = (state = false, action) => {
 			return state;
 	}
 };
-
 
 const featureTypeEditStateReducer = (state = null, action) => {
 	switch (action.type) {
@@ -64,7 +51,6 @@ const selectProjectIdReducer = (state = null, action) => {
 }
 
 const rootReducer = combineReducers({
-	path: pathReducer,
 	firebase: firebaseReducer,
 	firestore: firestoreReducer,
 	projectEditorOpen: projectEditorReducer,

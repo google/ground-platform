@@ -24,7 +24,6 @@ import {
   getAuth,
   getProfile,
   getActiveProject,
-  getActiveProjectId,
   getLocalizedText,
   updateProjectTitle
 } from "../../datastore.js";
@@ -87,7 +86,7 @@ class GndHeader extends React.Component {
   }
 
   render() {
-    const { auth } = this.props;
+    const { auth, projectId } = this.props;
 
     // TODO: Move title and login link into separate component.
     const AuthWiget = auth.isEmpty ? (
@@ -140,14 +139,14 @@ class GndHeader extends React.Component {
             <div className="top-right-controls">{AuthWiget}</div>
           </div>
         </GndAppBar>
-        <GndProjectEditor />
+        <GndProjectEditor projectId={projectId}/>
       </React.Fragment>
     );
   }
 }
 
 const mapStateToProps = (store, props) => ({
-  projectId: getActiveProjectId(store),
+  projectId: props.projectId,
   project: getActiveProject(store),
   auth: getAuth(store),
   profile: getProfile(store)
