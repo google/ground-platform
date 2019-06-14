@@ -14,7 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* global require */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const png = (filebase) => require(`../../images/${filebase}.png`);
 
@@ -40,5 +43,10 @@ const GndMarkerImage = ({featureType, className}) => (
     alt="Map marker"
   />
 );
+
+GndMarkerImage.propTypes = {
+  featureType: PropTypes.string,
+  className: PropTypes.string,
+};
 
 export default GndMarkerImage;

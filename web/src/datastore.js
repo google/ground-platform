@@ -26,14 +26,15 @@ import firebaseConfig from './.firebase-config.js';
 // Returns {} if key is present but value is undefined (i.e., loaded but
 // empty, or undefined if key is not present (i.e., still loading,).
 const getFirestoreData = (store, key) =>
-	key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
+  key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
+
 const getActiveProjectId = (store) => store.path.projectId;
 
 // TOOD: Handle loading state.
 const getActiveProject = (store) =>
-	getActiveProjectId(store) === ':new'
-		? {}
-		: getFirestoreData(store, 'activeProject');
+  getActiveProjectId(store) === ':new'
+    ? {}
+    : getFirestoreData(store, 'activeProject');
 
 const getMapFeatures = (store) => getFirestoreData(store, 'mapFeatures');
 
