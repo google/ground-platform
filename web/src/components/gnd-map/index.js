@@ -27,6 +27,7 @@ import {
   Marker,
 } from 'react-google-maps';
 import googleMapsConfig from '../../.google-maps-config.js';
+import PropTypes from 'prop-types';
 
 class GndMap extends React.Component {
   // https://github.com/google-map-react/google-map-react/blob/master/API.md
@@ -46,7 +47,9 @@ class GndMap extends React.Component {
     // TODO: Preload icons on project change.
     // TODO: Increase size.
     return {
-      path: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z',
+      path: `M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,
+             1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,
+             22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z`,
       fillColor: '#ff9131',
       fillOpacity: 1,
       strokeWeight: 0,
@@ -84,16 +87,14 @@ class GndMap extends React.Component {
         }}
       >
         {features &&
-					Object.keys(features).reduce(
-					    (markers, featureId) =>
-					      this.renderFeature(
-					          markers,
-					          project,
-					          featureId,
-					          features[featureId]
-					      ),
-					    []
-					)}
+          Object.keys(features).reduce((markers, featureId) =>
+            this.renderFeature(markers,
+                project,
+                featureId,
+                features[featureId]
+            ),
+          []
+          )}
       </GoogleMap>
     );
   }
@@ -105,7 +106,7 @@ const mapStateToProps = (store, props) => ({
 });
 
 const mapsApiUrl =
-	'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing';
+  'https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing';
 
 const enhance = compose(
     connect(mapStateToProps),
@@ -123,5 +124,12 @@ const enhance = compose(
     withScriptjs,
     withGoogleMap
 );
+
+GndMap.propTypes = {
+  project: PropTypes.string,
+  features: PropTypes.object,
+  center: PropTypes.object,
+  zoom: PropTypes.number,
+};
 
 export default enhance(GndMap);
