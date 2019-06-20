@@ -17,19 +17,19 @@
 
 import React from 'react';
 import GndMain from '../gnd-main';
-import {connectGndDatastore} from '../../datastore.js';
 import {Route} from 'react-router'; // react-router v4
 import {ConnectedRouter} from 'connected-react-router';
 import history from '../../history.js';
+import {projectBasePath} from '../../route.js';
 
 class GndApp extends React.Component {
   render() {
     return (
       <ConnectedRouter history={history}>
-        <Route exact path="/p/:projectId" render={() => <GndMain />} />
+        <Route path={projectBasePath} component={GndMain} />
       </ConnectedRouter>
     );
   }
 }
 
-export default connectGndDatastore(GndApp);
+export default GndApp;

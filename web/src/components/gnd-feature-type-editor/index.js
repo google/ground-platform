@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* eslint-env browser */
 import React from 'react';
 import './index.css';
 import {compose} from 'redux';
@@ -22,7 +23,6 @@ import {connect} from 'react-redux';
 import {withHandlers} from 'recompose';
 import {
   getAuth,
-  getActiveProjectId,
   getActiveProject,
   getLocalizedText,
   generateId,
@@ -60,7 +60,19 @@ const styles = (theme) => ({
   },
 });
 
-class GndFeatureTypeEditor extends React.Component {
+type Props = {
+  auth: Object,
+  classes: Object,
+  close: Function,
+  editState: string,
+  featureType: string,
+  generateId: Function,
+  projectId: string,
+  project: Object,
+  updateProject: Function,
+};
+
+class GndFeatureTypeEditor extends React.Component<Props> {
   state = {
     formIndex: 0,
     featureType: null,
@@ -92,11 +104,11 @@ class GndFeatureTypeEditor extends React.Component {
     return Promise.resolve();
   }
 
-  updateState(featureTypeUpdate, opt_newStates) {
+  updateState(featureTypeUpdate, optNewStates) {
     const {featureType} = this.state;
     this.setState({
       featureType: update(featureType, featureTypeUpdate),
-      ...opt_newStates,
+      ...optNewStates,
     });
   }
 
@@ -182,7 +194,6 @@ class GndFeatureTypeEditor extends React.Component {
       updateProject(projectId, newProject, auth).then((id) => this.onSaved(id));
     } catch (e) {
       alert('Save failed');
-      console.error(e);
     }
   }
 
@@ -209,7 +220,10 @@ class GndFeatureTypeEditor extends React.Component {
     // TODO: Adjust height of swipeable area so that forms don't scroll more
     // than necessary.
     return (
-      <form noValidate autoComplete="off" onSubmit={(ev) => ev.preventDefault()}>
+      <form
+        noValidate
+        autoComplete="off"
+        onSubmit={(ev) => ev.preventDefault()}>
         <Dialog
           open={Boolean(featureType)}
           onClose={this.handleClose}
@@ -277,9 +291,8 @@ class GndFeatureTypeEditor extends React.Component {
   }
 }
 
-const mapStateToProps = (store, props) => ({
+const mapStateToProps = (store) => ({
   auth: getAuth(store),
-  projectId: getActiveProjectId(store),
   project: getActiveProject(store),
   editState: store.featureTypeEditState,
 });

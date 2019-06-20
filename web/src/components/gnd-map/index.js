@@ -126,7 +126,7 @@ const enhance = compose(
 );
 
 GndMap.propTypes = {
-  project: PropTypes.string,
+  project: PropTypes.object,
   features: PropTypes.object,
   center: PropTypes.object,
   zoom: PropTypes.number,
