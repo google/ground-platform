@@ -35,8 +35,7 @@ To set up Firebase:
 1. Visit https://console.firebase.google.com and create a new project using the default settings.
 1. Click the **&lt;/&gt;** icon to configure Firebase for web. Don't enable "Also setup up Firebase hosting" (for now).
 1. Click "Next".
-1. Create a new file, `src/.firebase-config.js`.
-1. Copy the key-value pairs from the web page into the file, surrounding thent with an export block as follows:
+1. Create a new file `src/.firebase-config.js` with the key-value pairs that appear in the Firebase Console, surrounded by an export block as follows:
     ```javascript
     export default {
       apiKey: "<api-key>",
