@@ -9,7 +9,7 @@
 The following sections describe how to set up your development environment to
 work on Ground Web Console source code.
 
-> **Note:** All instructions in this guide assume `ground-platform/web/` is your current working directory.
+> **Important:** All instructions in this guide assume `ground-platform/web/` is your current working directory.
 
 ### Node.js 
 
@@ -32,12 +32,11 @@ To set up Node.js:
 
 To set up Firebase:
 
-1. Visit <https://firebase.corp.google.com/> and create and/or select your development instance.
-2. Select **Project Overview**.
-3. Select the **+ Add app** chip displayed under the main heading, then select the **web icon** (**&lt;/&gt;**).
-4. Copy the second key/value pair that appears into a new file,
-  `src/.firebase-config.js `, surrounding it with the following export block:
-
+1. Visit https://console.firebase.google.com and create a new project using the default settings.
+1. Click the **&lt;/&gt;** icon to configure Firebase for web. Don't enable "Also setup up Firebase hosting" (for now).
+1. Click "Next".
+1. Create a new file, `src/.firebase-config.js`.
+1. Copy the key-value pairs from the web page into the file, surrounding thent with an export block as follows:
     ```javascript
     export default {
       apiKey: "<api-key>",
@@ -48,15 +47,13 @@ To set up Firebase:
       messagingSenderId: "1234567890"
     };
     ```
-    Where:
-    * `<api-key>` is your Firebase api key, see <https://cloud.google.com/docs/authentication/api-keys>
-    * `<project-name>` is the name of your Firebase project.
-
-5. Install firebase tools:
+1. Install firebase tools:
 
     ```
     $ npm install -g firebase-tools
     ```
+
+For full instructions see also https://firebase.google.com/docs/web/setup.
 
 ### Add Google Maps API Key
 
@@ -66,7 +63,7 @@ To set up Firebase:
     > Platform](https://console.cloud.google.com/) under APIs \> Services \>
     > Credentials.
 
-2. Write the key to `src/.google-maps-config.js` as follows:
+1. Write the key to `src/.google-maps-config.js` as follows:
 
     ```html
     export default {
