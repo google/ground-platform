@@ -45,12 +45,13 @@ type Props = {
 
 class GndMain extends React.Component<Props> {
   render() {
+    const projectId = this.props.match.params.projectId;
     return (
       <React.Fragment>
         <GndMap />
-        <GndHeader projectId={this.props.match.params.projectId} />
-        <GndLegend projectId={this.props.match.params.projectId} />
-        <GndFeatureTypeEditor projectId={this.props.match.params.projectId} />
+        <GndHeader projectId={projectId} />
+        <GndLegend projectId={projectId} />
+        <GndFeatureTypeEditor projectId={projectId} />
         <Route
           path={featurePath}
           component={connectFeature(GndFeatureDetails)} />
