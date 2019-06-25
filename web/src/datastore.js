@@ -2,22 +2,20 @@
  * @license
  * Copyright 2018 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 /* eslint-env browser */
-import {compose} from 'redux';
-import {connect} from 'react-redux';
 import {firestoreConnect} from 'react-redux-firebase';
 import firebaseConfig from './.firebase-config.js';
 
@@ -28,13 +26,9 @@ import firebaseConfig from './.firebase-config.js';
 const getFirestoreData = (store, key) =>
   key in store.firestore.data ? store.firestore.data[key] || {} : undefined;
 
-const getActiveProjectId = (store) => store.path.projectId;
-
 // TOOD: Handle loading state.
 const getActiveProject = (store) =>
-  getActiveProjectId(store) === ':new'
-    ? {}
-    : getFirestoreData(store, 'activeProject');
+  getFirestoreData(store, 'activeProject') || {};
 
 const getMapFeatures = (store) => getFirestoreData(store, 'mapFeatures');
 
@@ -83,22 +77,31 @@ const generateId = (props) => () => props.firestore.collection('ids').doc().id;
 const getLocalizedText = (obj) => obj && (obj['_'] || obj['en'] || obj['pt']);
 
 // Mount project data onto store based on current projectId in path.
-const connectGndDatastore = compose(
-    connect((store) => ({
-      projectId: getActiveProjectId(store),
-    })),
-    firestoreConnect(({projectId}) => [
-      {
-        collection: 'projects',
-        doc: projectId,
-        storeAs: 'activeProject',
-      },
-      {
-        collection: `projects/${projectId}/features`,
-        storeAs: 'mapFeatures',
-      },
-    ])
-);
+const connectProject =
+  firestoreConnect((store, props) => [
+    {
+      collection: 'projects',
+      doc: store.match.params.projectId,
+      storeAs: 'activeProject',
+    },
+    {
+      collection: `projects/${store.match.params.projectId}/features`,
+      storeAs: 'mapFeatures',
+    },
+  ]);
+
+// Mount feature data onto store based on current projectId and featureId in
+// path.
+const connectFeature =
+  firestoreConnect((store, props) => [
+    {
+      collection: `projects/${store.match.params.projectId}/records`,
+      where: [
+        ['featureId', '==', store.match.params.featureId],
+      ],
+      storeAs: 'featureRecords',
+    },
+  ]);
 
 const exportKml = () => (projectId, featureTypeId) => {
   window.location.href = `${
@@ -108,7 +111,6 @@ const exportKml = () => (projectId, featureTypeId) => {
 
 export {
   getActiveProject,
-  getActiveProjectId,
   exportKml,
   updateProject,
   updateProjectTitle,
@@ -116,6 +118,7 @@ export {
   getProfile,
   getMapFeatures,
   getLocalizedText,
-  connectGndDatastore,
+  connectFeature,
+  connectProject,
   generateId,
 };

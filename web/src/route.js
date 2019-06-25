@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2018 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,5 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import GndMain from '../gnd-main';
-import {Route} from 'react-router'; // react-router v4
-import {ConnectedRouter} from 'connected-react-router';
-import history from '../../history.js';
-import {projectBasePath} from '../../route.js';
-
-class GndApp extends React.Component {
-  render() {
-    return (
-      <ConnectedRouter history={history}>
-        <Route path={projectBasePath} component={GndMain} />
-      </ConnectedRouter>
-    );
-  }
-}
-
-export default GndApp;
+export const projectBasePath = '/p/:projectId';
+export const featurePath = `${projectBasePath}/f/:featureId`;

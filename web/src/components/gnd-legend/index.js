@@ -21,7 +21,6 @@ import {connect} from 'react-redux';
 import {compose} from 'redux';
 import {withHandlers} from 'recompose';
 import {
-  getActiveProjectId,
   getActiveProject,
   getLocalizedText,
   generateId,
@@ -76,7 +75,16 @@ const styles = (theme) => ({
   },
 });
 
-class GndLegend extends React.Component {
+type Props = {
+  classes: Object,
+  exportKml: Function,
+  generateId: Function,
+  openFeatureTypeEditor: Function,
+  projectId: string,
+  project: Object,
+};
+
+class GndLegend extends React.Component<Props> {
   state = {
     menuAnchorEl: null,
   };
@@ -169,7 +177,8 @@ class GndLegend extends React.Component {
             Legend
           </Typography>
           <List className={classes.list}>
-            {featureTypesArray.map((ft) => this.featureTypeListItem(ft, classes))}
+            {featureTypesArray.map(
+                (ft) => this.featureTypeListItem(ft, classes))}
           </List>
           <Button
             size="small"
@@ -189,8 +198,7 @@ class GndLegend extends React.Component {
   }
 }
 
-const mapStateToProps = (store, props) => ({
-  projectId: getActiveProjectId(store),
+const mapStateToProps = (store) => ({
   project: getActiveProject(store),
 });
 

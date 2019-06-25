@@ -23,7 +23,6 @@ import {compose} from 'redux';
 import {connect} from 'react-redux';
 import {withHandlers} from 'recompose';
 import {
-  getActiveProjectId,
   getActiveProject,
   updateProject,
 } from '../../datastore.js';
@@ -54,10 +53,10 @@ const styles = (theme: Object) => ({
 // TODO: Define Project object type.
 type Props = {
   classes: Object,
+  close: Function,
   projectId: ?string,
   project: ?Object,
   projectEditorOpen: boolean,
-  close: Function,
   updateProject: Function,
 };
 
@@ -110,7 +109,10 @@ class GndProjectEditor extends React.Component<Props, State> {
       return <div>Loading...</div>;
     }
     return (
-      <form noValidate autoComplete="off" onSubmit={(ev) => ev.preventDefault()}>
+      <form
+        noValidate
+        autoComplete="off"
+        onSubmit={(ev) => ev.preventDefault()}>
         <Dialog
           open={projectEditorOpen}
           onClose={this.handleClose}
@@ -154,7 +156,6 @@ class GndProjectEditor extends React.Component<Props, State> {
 }
 
 const mapStateToProps = (store) => ({
-  projectId: getActiveProjectId(store),
   project: getActiveProject(store),
   projectEditorOpen: store.projectEditorOpen,
 });

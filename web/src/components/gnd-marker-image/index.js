@@ -45,8 +45,8 @@ const GndMarkerImage = ({featureType, className}) => (
 );
 
 GndMarkerImage.propTypes = {
-  featureType: PropTypes.string,
   className: PropTypes.string,
+  featureType: PropTypes.object,
 };
 
 export default GndMarkerImage;
