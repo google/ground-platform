@@ -23,15 +23,21 @@ import GndLegend from '../gnd-legend';
 import GndFeatureTypeEditor from '../gnd-feature-type-editor';
 import {connectProject, connectFeature} from '../../datastore.js';
 import {featurePath} from '../../route.js';
+import Sidebar from 'react-sidebar';
 
 function GndFeatureDetails({match}) {
   return (
-    <div>
-      {/* TODO(maralka): Display feature data loaded in the store inside of
-        side panel. */}
-      Placeholder for {match.params.featureId} of project
-      {match.params.projectId}
-    </div>
+    <Sidebar
+      sidebar={<b>{match.params.featureId}</b>}
+      open={true}
+      styles={{sidebar: {background: 'white'}}}
+    >
+    </Sidebar>
+  /* TODO(dhvogel):
+      - Shift panel to right of screen
+      - Import nice cards to show data
+      - Show feature data loaded in store (1 feature per card)
+  */
   );
 }
 
