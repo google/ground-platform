@@ -30,7 +30,8 @@ function GndFeatureDetails({match}) {
     <Sidebar
       sidebar={<b>{match.params.featureId}</b>}
       open={true}
-      styles={{sidebar: {background: 'white'}}}
+      styles={{sidebar: {background: 'white', top: 62, width: 100, textAlign: 'center'}}}
+      pullRight={true}
     >
     </Sidebar>
   /* TODO(dhvogel):
