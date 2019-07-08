@@ -174,7 +174,7 @@ class GndLegend extends React.Component<Props> {
       <Card className={classes.card}>
         <CardContent className={classes.cardContent}>
           <Typography className={classes.heading} color="textSecondary">
-            Legend
+            Layer
           </Typography>
           <List className={classes.list}>
             {featureTypesArray.map(
@@ -184,12 +184,12 @@ class GndLegend extends React.Component<Props> {
             size="small"
             color="default"
             classes={{root: classes.addFeatureTypeBtn}}
-            aria-label="Add feature type"
+            aria-label="Add layer"
             onClick={this.handleAddFeatureTypeClick.bind(this)}
           >
             <Add fontSize="small" color="action" />
             <Typography fontSize="small" color="textSecondary">
-              Add feature type
+              Add layer
             </Typography>
           </Button>
         </CardContent>
