@@ -174,7 +174,7 @@ class GndLegend extends React.Component<Props> {
       <Card className={classes.card}>
         <CardContent className={classes.cardContent}>
           <Typography className={classes.heading} color="textSecondary">
-            Layer
+            Layers
           </Typography>
           <List className={classes.list}>
             {featureTypesArray.map(
