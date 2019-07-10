@@ -35,13 +35,16 @@ type Props = {
 class GndFeatureDetails extends React.Component<Props> {
   render() {
     const records = this.props.records;
-    const responsesList = records.responses.map((response, index) => {
+    const recordsList = records.map((record, index) => {
+      const responsesList = Object.keys(record.responses).map((responseKey, idx) => {
+        return <Typography key={idx} variant='subheading'>
+          {responseKey}:{record.responses.responseKey}
+        </Typography>;
+      });
       return <Card key={index}>
         <CardHeader title={this.props.records.featureId} />
         <CardContent>
-          <Typography variant="subheading">
-          time: {response.time}
-          </Typography>
+          {responsesList}
         </CardContent>
       </Card>;
     });
@@ -51,7 +54,7 @@ class GndFeatureDetails extends React.Component<Props> {
         open={true}
         pullRight={true}
       >
-        {responsesList}
+        {recordsList}
       </Drawer>
     /* TODO(dhvogel):
         - Shift panel to right of screen
@@ -64,20 +67,30 @@ class GndFeatureDetails extends React.Component<Props> {
 
 // start of code change
 const mapStateToProps = (store) => ({
-  records: {
-    formId: 'test12345',
-    featureId: 'feature123',
-    responses: [
-      {
-        'myObservationField': 'myObservationValue',
-        'time': 'July 10, 2019',
-      },
-      {
-        'myOtherObservationField': 'myObservationValue',
-        'time': 'July 11, 2019',
-      },
-    ],
-  },
+  records: [
+    {
+      formId: 'test12345',
+      featureId: 'feature123',
+      responses:
+        {
+          'myObservationField': 'myObservationValue',
+          'myOtherObservationField': 'myObservationValue',
+        },
+      created: 'July 1, 2019',
+      lastModified: 'July 12, 2019',
+    },
+    {
+      formId: 'test12345',
+      featureId: 'feature123',
+      responses: 
+        {
+          'myObservationField': 'myOtherObservationValue',
+          'myOtherOtherObservationField': 'myOtherObservationValue',
+        },
+      created: 'July 2, 2019',
+      lastModified: 'July 5, 2019',
+    },
+  ],
 });
 
 export default connect(mapStateToProps)(GndFeatureDetails);
