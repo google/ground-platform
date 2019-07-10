@@ -21,32 +21,19 @@ import GndMap from '../gnd-map';
 import GndHeader from '../gnd-header';
 import GndLegend from '../gnd-legend';
 import GndFeatureTypeEditor from '../gnd-feature-type-editor';
+import GndFeatureDetails from '../gnd-feature-details';
 import {connectProject, connectFeature} from '../../datastore.js';
 import {featurePath} from '../../route.js';
-import Sidebar from 'react-sidebar';
 
-function GndFeatureDetails({match}) {
-  return (
-    <Sidebar
-      sidebar={<b>{match.params.featureId}</b>}
-      open={true}
-      styles={{sidebar: {background: 'white', top: 62, width: 100, textAlign: 'center'}}}
-      pullRight={true}
-    >
-    </Sidebar>
-  /* TODO(dhvogel):
-      - Shift panel to right of screen
-      - Import nice cards to show data
-      - Show feature data loaded in store (1 feature per card)
-  */
-  );
-}
-
-GndFeatureDetails.propTypes = {
-  match: Object,
-};
 
 type Props = {
+  match: Object,
+  records: {
+    formId: String,
+  }
+};
+
+GndFeatureDetails.propTypes = {
   match: Object,
 };
 
@@ -61,10 +48,13 @@ class GndMain extends React.Component<Props> {
         <GndFeatureTypeEditor projectId={projectId} />
         <Route
           path={featurePath}
-          component={connectFeature(GndFeatureDetails)} />
+          component={
+            connectFeature(GndFeatureDetails)
+          } />
       </React.Fragment>
     );
   }
 }
+
 
 export default connectProject(GndMain);
