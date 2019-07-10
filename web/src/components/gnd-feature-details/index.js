@@ -20,33 +20,38 @@ import {connect} from 'react-redux';
 import Drawer from '@material-ui/core/Drawer';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import CardHeader from '@material-ui/core/CardHeader';
+import Typography from '@material-ui/core/Typography';
 
 type Props = {
   match: Object,
   records: {
     featureId: String,
-    formId: String
+    formId: String,
+    responses: Array
   }
 };
 
 class GndFeatureDetails extends React.Component<Props> {
   render() {
+    const records = this.props.records;
+    const responsesList = records.responses.map((response, index) => {
+      return <Card key={index}>
+        <CardHeader title={this.props.records.featureId} />
+        <CardContent>
+          <Typography variant="subheading">
+          time: {response.time}
+          </Typography>
+        </CardContent>
+      </Card>;
+    });
     return (
       <Drawer
         anchor="right"
         open={true}
         pullRight={true}
       >
-        <Card>
-          <CardContent>
-            <b>{this.props.records.featureId}</b>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            {this.props.records.formId}
-          </CardContent>
-        </Card>
+        {responsesList}
       </Drawer>
     /* TODO(dhvogel):
         - Shift panel to right of screen
@@ -62,9 +67,16 @@ const mapStateToProps = (store) => ({
   records: {
     formId: 'test12345',
     featureId: 'feature123',
-    responses: {
-      'myObservationField': 'myObservationValue',
-    },
+    responses: [
+      {
+        'myObservationField': 'myObservationValue',
+        'time': 'July 10, 2019',
+      },
+      {
+        'myOtherObservationField': 'myObservationValue',
+        'time': 'July 11, 2019',
+      },
+    ],
   },
 });
 
