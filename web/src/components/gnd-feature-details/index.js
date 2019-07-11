@@ -36,9 +36,9 @@ class GndFeatureDetails extends React.Component<Props> {
   render() {
     const records = this.props.records;
     const recordsList = records.map((record, index) => {
-      const responsesList = Object.keys(record.responses).map((responseKey, idx) => {
+      const responsesList = Object.entries(record.responses).map(([key, value], idx) => {
         return <Typography key={idx} variant='subheading'>
-          {responseKey}:{record.responses.responseKey}
+          {key}: {value}
         </Typography>;
       });
       return <Card key={index}>
@@ -56,11 +56,6 @@ class GndFeatureDetails extends React.Component<Props> {
       >
         {recordsList}
       </Drawer>
-    /* TODO(dhvogel):
-        - Shift panel to right of screen
-        - Import nice cards to show data
-        - Show feature data loaded in store (1 feature per card)
-    */
     );
   }
 }
@@ -74,7 +69,7 @@ const mapStateToProps = (store) => ({
       responses:
         {
           'myObservationField': 'myObservationValue',
-          'myOtherObservationField': 'myObservationValue',
+          'myOtherObservationField': 'myOtherObservationValue',
         },
       created: 'July 1, 2019',
       lastModified: 'July 12, 2019',
@@ -82,10 +77,10 @@ const mapStateToProps = (store) => ({
     {
       formId: 'test12345',
       featureId: 'feature123',
-      responses: 
+      responses:
         {
-          'myObservationField': 'myOtherObservationValue',
-          'myOtherOtherObservationField': 'myOtherObservationValue',
+          'myObservationField': 'myObservationValue',
+          'myOtherOtherObservationField': 'myOtherOtherObservationValue',
         },
       created: 'July 2, 2019',
       lastModified: 'July 5, 2019',
