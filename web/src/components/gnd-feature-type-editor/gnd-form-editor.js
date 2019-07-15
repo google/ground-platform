@@ -20,10 +20,15 @@ import PropTypes from 'prop-types';
 import GndFormElementEditor from './gnd-form-element-editor';
 import GndFormWarning from './gnd-form-warning';
 import update from 'immutability-helper';
-import {Add} from '@material-ui/icons';
+import {Add, DragHandle} from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
 import {withStyles} from '@material-ui/core/styles';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import {
+  sortableContainer,
+  sortableElement,
+  sortableHandle,
+} from 'react-sortable-hoc';
 
 const styles = (theme) => ({
   button: {
@@ -46,6 +51,19 @@ const styles = (theme) => ({
     display: 'block',
     width: '100%',
   },
+  sortableElement: {
+    zIndex: 1300,
+    '&:hover div[name=sortableHandle]': {
+      visibility: 'visible',
+    }
+  },
+  sortableHandle: {
+    textAlign: 'center',
+    visibility: 'hidden',
+    '&:hover': {
+      cursor: 'move',
+    }
+  }
 });
 
 class GndFormEditor extends React.Component {
@@ -102,21 +120,65 @@ class GndFormEditor extends React.Component {
     onChange({id: form.id, defn: undefined});
   };
 
+  onSortEnd = ({oldIndex, newIndex}) => {
+    const {form, onChange} = this.props;
+    const oldIndexElement = form.defn.elements[oldIndex];
+    const newIndexElement = form.defn.elements[newIndex];
+    onChange(
+      update(form, {
+        defn: {
+          elements: {
+            [oldIndex]: {$set: newIndexElement},
+            [newIndex]: {$set: oldIndexElement}
+          }
+        },
+      })
+    );
+  };
+
   render() {
     const {form, classes} = this.props;
     if (!form || !form.defn || !form.defn.elements) {
       return null;
     }
-    const formElements = form.defn.elements.map((element, idx) => (
-      <GndFormElementEditor
-        key={element.id}
-        element={element}
-        onChange={(el) => this.handleElementChange(el, idx)}
-      />
-    ));
+    
+    const SortableHandle = sortableHandle(() =>
+      <div className={classes.sortableHandle} name="sortableHandle">
+        <DragHandle fontSize="inherit"/>
+      </div>
+    );
+
+    const SortableElement = sortableElement(({element, onChange}) =>
+      <div className={classes.sortableElement}>
+        <SortableHandle />
+        <GndFormElementEditor
+          key={element.id}
+          element={element}
+          onChange={onChange}
+        />
+      </div>
+    );
+
+    const SortableContainer = sortableContainer(({children}) => 
+      <div>{children}</div>
+    );
+    
     return (
       <React.Fragment>
-        {formElements}
+        <SortableContainer
+          onSortEnd={this.onSortEnd}
+          lockAxis='y'
+          useDragHandle
+        >
+          {form.defn.elements.map((element, index) => (
+            <SortableElement
+              key={`item-${index}`}
+              index={index}
+              element={element}
+              onChange={(el) => this.handleElementChange(el, index)}
+            />
+          ))}
+        </SortableContainer>
         <div className={classes.bottomControls}>
           <span className={classes.bottomLeftControls}>
             <Button
