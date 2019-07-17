@@ -133,7 +133,7 @@ Where `project_id` is the id of a Ground project defined in the Cloud Firestore 
 
     ```
     $ cd <path/to/ground>/ground-platform
-    $ pushd .. && firebase deploy --only hosting && prod
+    $ pushd .. && firebase deploy --only hosting && popd
     ```
     Where `<path/to/ground>` is the path to the ground-platform repository root on your
     system.
