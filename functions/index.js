@@ -19,9 +19,9 @@
 
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const Auth = require('./auth');
+const Auth = require('./common/auth');
 const CloudFunctions = require('./cloud-functions')
-const Datastore = require('./datastore')
+const Datastore = require('./common/datastore')
 
 // functions.config().firebase is auto-populated with configuration needed to
 // initialize the firebase-admin SDK when deploying via Firebase CLI.

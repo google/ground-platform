@@ -18,7 +18,7 @@
 'use strict';
 
 const functions = require('firebase-functions');
-const serviceAccount = require('./service-account-secret.json');
+const serviceAccount = require('../service-account-secret.json');
 const {JWT} = require('google-auth-library');
 
 const API_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];

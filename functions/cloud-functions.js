@@ -17,8 +17,8 @@
 
 'use strict';
 
-const Spreadsheet = require('./spreadsheet');
-const KmlWriter = require('./kml-writer');
+const Spreadsheet = require('./common/spreadsheet');
+const KmlWriter = require('./common/kml-writer');
 
 class CloudFunctions {
   constructor(db, auth) {
