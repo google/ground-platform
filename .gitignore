@@ -1,6 +1,5 @@
 !.gitignore
-.firebase-config.js
-.google-maps-config.js
+.*
 **/firebase-init.html
 **/google-maps-api-key.html
 **/*-secret.json
