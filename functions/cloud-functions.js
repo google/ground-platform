@@ -17,20 +17,16 @@
 
 'use strict';
 
+const {db, auth} = require('./common/context');
 const Spreadsheet = require('./common/spreadsheet');
 const KmlWriter = require('./common/kml-writer');
 
 class CloudFunctions {
-  constructor(db, auth) {
-    this.db_ = db;
-    this.auth_ = auth;
-  }
-
   getSheet_(projectId) {
-    return this.db_.fetchSheetsConfig(projectId).then(sheetConfig =>
+    return db.fetchSheetsConfig(projectId).then(sheetConfig =>
       sheetConfig &&
       sheetConfig.sheetId &&
-      new Spreadsheet(this.auth_, sheetConfig.sheetId));
+      new Spreadsheet(auth, sheetConfig.sheetId));
   }
 
   exportKml(req, res) {
@@ -43,7 +39,7 @@ class CloudFunctions {
     // TODO: add Schema validation
     // TODO: respect the icon config in the proj setting
     let data = {};
-    return this.db_.fetchProject(providedProjectId).then(
+    return db.fetchProject(providedProjectId).then(
       project => {
         if (!project.exists) {
           res.status(404).send('not found');
@@ -137,7 +133,7 @@ class CloudFunctions {
       if (!sheet) {
         return res.status(400).send('Project spreadsheet config not found');
       }
-      return this.db_.fetchForm(projectId, featureTypeId, formId).then(form => {
+      return db.fetchForm(projectId, featureTypeId, formId).then(form => {
         if (!form) {
           return res.status(400).send('Form definition not found');
         }
@@ -171,7 +167,7 @@ class CloudFunctions {
     } = record;
     return this.getSheet_(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds =>
-        this.db_.fetchFeature(projectId, featureId).then(feature =>
+        db.fetchFeature(projectId, featureId).then(feature =>
           sheet.addRow(feature, featureId, recordId, record, colIds))));
   }
 
@@ -188,7 +184,7 @@ class CloudFunctions {
     } = record;
     return this.getSheet_(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds =>
-        this.db_.fetchFeature(projectId, featureId).then(feature =>
+        db.fetchFeature(projectId, featureId).then(feature =>
           sheet.updateRow(feature, featureId, recordId, record, colIds))));
   }
 }
