@@ -18,32 +18,31 @@
 'use strict';
 
 const functions = require('firebase-functions');
-const CloudFunctions = require('./cloud-functions')
-
-const fns = new CloudFunctions();
-
-exports.exportKml = functions.https.onRequest((req, res) =>
-	fns.exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
+const exportCsv = require('./export-csv')
+const exportKml = require('./export-kml')
+const updateColumns = require('./update-columns')
+const onCreateRecord = require('./on-create-record')
+const onUpdateRecord = require('./on-update-record')
 
 exports.exportCsv = functions.https.onRequest((req, res) =>
-	fns.exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+	exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+
+  exports.exportKml = functions.https.onRequest((req, res) =>
+	exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
 
 // Test via shell:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
 exports.updateColumns = functions.https.onRequest((req, res) => 
-  fns.updateSpreadsheetColumns(req, res)
-    .catch(err => res.status(500).send(`${err}`)));
+  updateColumns(req, res).catch(err => res.status(500).send(`${err}`)));
 
 // Test via shell:
 // onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onCreateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
-  .onCreate((change, context) => 
-     fns.onCreateRecord(change, context));
+  .onCreate((change, context) => onCreateRecord(change, context));
 
 // Test via shell:
 // onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onUpdateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
-  .onUpdate((change, context) => 
-     fns.onUpdateRecord(change, context));
+  .onUpdate((change, context) => onUpdateRecord(change, context));
