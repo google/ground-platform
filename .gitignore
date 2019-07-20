@@ -1,5 +1,6 @@
 !.gitignore
 .*
+**/firebase-debug.log
 **/firebase-init.html
 **/google-maps-api-key.html
 **/*-secret.json
