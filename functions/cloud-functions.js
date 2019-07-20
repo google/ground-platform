@@ -17,10 +17,10 @@
 
 'use strict';
 
-const GndSpreadsheet = require('./gnd-spreadsheet');
-const GndKmlWriter = require('./gnd-kml-writer');
+const Spreadsheet = require('./spreadsheet');
+const KmlWriter = require('./kml-writer');
 
-class GndCloudFunctions {
+class CloudFunctions {
   constructor(db, auth) {
     this.db_ = db;
     this.auth_ = auth;
@@ -30,7 +30,7 @@ class GndCloudFunctions {
     return this.db_.fetchSheetsConfig(projectId).then(sheetConfig =>
       sheetConfig &&
       sheetConfig.sheetId &&
-      new GndSpreadsheet(this.auth_, sheetConfig.sheetId));
+      new Spreadsheet(this.auth_, sheetConfig.sheetId));
   }
 
   exportKml(req, res) {
@@ -100,8 +100,8 @@ class GndCloudFunctions {
             featureMap['records'][record.id] = record.data();
           }
         );
-        let gndKmlWriter = new GndKmlWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
-        return gndKmlWriter.getTmpKmlFile();
+        let kmlWriter = new KmlWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
+        return kmlWriter.getTmpKmlFile();
       }
     ).then(
       tmpKmlFilePath => {
@@ -193,4 +193,4 @@ class GndCloudFunctions {
   }
 }
 
-module.exports = GndCloudFunctions;
+module.exports = CloudFunctions;

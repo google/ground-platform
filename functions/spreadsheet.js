@@ -184,7 +184,7 @@ function updateRowRequest(recordId, values) {
   }
 }
 
-class GndSpreadsheet {
+class Spreadsheet {
   constructor(auth, sheetId) {
     this.auth_ = auth;
     this.sheetId_ = sheetId;
@@ -339,4 +339,4 @@ class GndSpreadsheet {
   }  
 }
 
-module.exports = GndSpreadsheet;
+module.exports = Spreadsheet;

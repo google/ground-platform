@@ -23,7 +23,7 @@ const {JWT} = require('google-auth-library');
 
 const API_SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
-class GndAuth {
+class Auth {
   constructor() {
     this.jwtClient_ = null;
   }
@@ -40,4 +40,4 @@ class GndAuth {
   }
 }
 
-module.exports = GndAuth;
+module.exports = Auth;

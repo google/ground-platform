@@ -19,28 +19,28 @@
 
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const GndAuth = require('./gnd-auth');
-const GndCloudFunctions = require('./gnd-cloud-functions')
-const GndDatastore = require('./gnd-datastore')
+const Auth = require('./auth');
+const CloudFunctions = require('./cloud-functions')
+const Datastore = require('./datastore')
 
 // functions.config().firebase is auto-populated with configuration needed to
 // initialize the firebase-admin SDK when deploying via Firebase CLI.
 admin.initializeApp(functions.config().firebase);
 
-const db = new GndDatastore(admin.firestore());
-const auth = new GndAuth();
-const gnd = new GndCloudFunctions(db, auth);
+const db = new Datastore(admin.firestore());
+const auth = new Auth();
+const fns = new CloudFunctions(db, auth);
 
 exports.exportKml = functions.https.onRequest((req, res) =>
-	gnd.exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
+	fns.exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
 
 exports.exportCsv = functions.https.onRequest((req, res) =>
-	gnd.exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+	fns.exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
 
 // Test via shell:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
 exports.updateColumns = functions.https.onRequest((req, res) => 
-  gnd.updateSpreadsheetColumns(req, res)
+  fns.updateSpreadsheetColumns(req, res)
     .catch(err => res.status(500).send(`${err}`)));
 
 // Test via shell:
@@ -48,11 +48,11 @@ exports.updateColumns = functions.https.onRequest((req, res) =>
 exports.onCreateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
   .onCreate((change, context) => 
-     gnd.onCreateRecord(change, context));
+     fns.onCreateRecord(change, context));
 
 // Test via shell:
 // onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onUpdateRecord = functions.firestore
   .document('projects/{projectId}/features/{featureId}/records/{recordId}')
   .onUpdate((change, context) => 
-     gnd.onUpdateRecord(change, context));
+     fns.onUpdateRecord(change, context));
