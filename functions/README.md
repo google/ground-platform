@@ -56,9 +56,6 @@ cloud functions.
   
     For more information on firebase-tools, see <https://github.com/firebase/firebase-tools>
 
-
-npm install?
-
 2. Log into Firebase:
 
     ```
