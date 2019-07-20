@@ -17,18 +17,11 @@
 
 'use strict';
 
-const {db, auth} = require('./common/context');
-const Spreadsheet = require('./common/spreadsheet');
+const {db} = require('./common/context');
+const {getSheet} = require('./common/sheet-config');
 const KmlWriter = require('./common/kml-writer');
 
 class CloudFunctions {
-  getSheet_(projectId) {
-    return db.fetchSheetsConfig(projectId).then(sheetConfig =>
-      sheetConfig &&
-      sheetConfig.sheetId &&
-      new Spreadsheet(auth, sheetConfig.sheetId));
-  }
-
   exportKml(req, res) {
     const {
       project: providedProjectId,
@@ -129,7 +122,7 @@ class CloudFunctions {
       form: formId,
       lang: lang
     } = req.query;
-    return this.getSheet_(projectId).then(sheet => {
+    return getSheet(projectId).then(sheet => {
       if (!sheet) {
         return res.status(400).send('Project spreadsheet config not found');
       }
@@ -165,7 +158,7 @@ class CloudFunctions {
       featureTypeId,
       formId
     } = record;
-    return this.getSheet_(projectId).then(sheet =>
+    return getSheet(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds =>
         db.fetchFeature(projectId, featureId).then(feature =>
           sheet.addRow(feature, featureId, recordId, record, colIds))));
@@ -182,7 +175,7 @@ class CloudFunctions {
       featureTypeId,
       formId
     } = record;
-    return this.getSheet_(projectId).then(sheet =>
+    return getSheet(projectId).then(sheet =>
       sheet && sheet.getColumnIds().then(colIds =>
         db.fetchFeature(projectId, featureId).then(feature =>
           sheet.updateRow(feature, featureId, recordId, record, colIds))));
