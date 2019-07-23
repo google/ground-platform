@@ -16,6 +16,7 @@
  */
 
 import React from 'react';
+import {compose} from 'redux';
 import {connect} from 'react-redux';
 import Drawer from '@material-ui/core/Drawer';
 import Card from '@material-ui/core/Card';
@@ -23,6 +24,15 @@ import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import {getFeatureRecords} from '../../datastore.js';
+import {withStyles} from '@material-ui/core/styles';
+
+const styles = (theme) => ({
+  paper: {
+    top: 62,
+    paddingTop: 20,
+    width: 200,
+  },
+});
 
 type Props = {
   match: Object,
@@ -30,13 +40,17 @@ type Props = {
     featureId: String,
     formId: String,
     responses: Array
-  }
+  },
+  classes: Object,
 };
 
 class GndFeatureDetails extends React.Component<Props> {
   render() {
-    const records = this.props.records;
-    const recordsList = records.map((record, index) => {
+    if (!this.props.records) return null;
+    const {records, classes} = this.props;
+    // eslint-disable-next-line max-len
+    const recordsList = Object.entries(records).map(([recordId, record], index) => {
+      // eslint-disable-next-line max-len
       const responsesList = Object.entries(record.responses).map(([key, value], idx) => {
         return <Typography key={idx} variant='subheading'>
           {key}: {value}
@@ -54,6 +68,7 @@ class GndFeatureDetails extends React.Component<Props> {
         anchor="right"
         open={true}
         pullRight={true}
+        classes={{paper: classes.paper}}
       >
         {recordsList}
       </Drawer>
@@ -66,4 +81,11 @@ const mapStateToProps = (store) => ({
   records: getFeatureRecords(store),
 });
 
-export default connect(mapStateToProps)(GndFeatureDetails);
+const enhance = compose(
+    connect(
+        mapStateToProps
+    ),
+    withStyles(styles)
+);
+
+export default enhance(GndFeatureDetails);
