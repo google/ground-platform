@@ -22,6 +22,7 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
+import {getFeatureRecords} from '../../datastore.js';
 
 type Props = {
   match: Object,
@@ -62,30 +63,7 @@ class GndFeatureDetails extends React.Component<Props> {
 
 // start of code change
 const mapStateToProps = (store) => ({
-  records: [
-    {
-      formId: 'test12345',
-      featureId: 'feature123',
-      responses:
-        {
-          'myObservationField': 'myObservationValue',
-          'myOtherObservationField': 'myOtherObservationValue',
-        },
-      created: 'July 1, 2019',
-      lastModified: 'July 12, 2019',
-    },
-    {
-      formId: 'test12345',
-      featureId: 'feature123',
-      responses:
-        {
-          'myObservationField': 'myObservationValue',
-          'myOtherOtherObservationField': 'myOtherOtherObservationValue',
-        },
-      created: 'July 2, 2019',
-      lastModified: 'July 5, 2019',
-    },
-  ],
+  records: getFeatureRecords(store),
 });
 
 export default connect(mapStateToProps)(GndFeatureDetails);
