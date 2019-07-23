@@ -17,7 +17,7 @@
  
 'use strict';
 
-class GndDatastore {
+class Datastore {
   constructor(db) {
     this.db_ = db;
   }  
@@ -63,4 +63,4 @@ class GndDatastore {
   }
 }
 
-module.exports = GndDatastore;
+module.exports = Datastore;

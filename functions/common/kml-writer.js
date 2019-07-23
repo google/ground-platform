@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-class GndKmlWriter {
+class KmlWriter {
 
   constructor(projName, rawData, desiredLanguage) {
     this.projName_ = projName;
@@ -11,10 +11,10 @@ class GndKmlWriter {
   }
 
   getTmpKmlFile() {
-    const kmlString = GndKmlWriter.buildKml_(this.rawData_, this.desiredLanguage_);
+    const kmlString = KmlWriter.buildKml_(this.rawData_, this.desiredLanguage_);
 
     return new Promise((resolve, reject) => {
-      fs.mkdtemp(path.join(os.tmpdir(), 'gndExport-'), (err, folderPath) => {
+      fs.mkdtemp(path.join(os.tmpdir(), 'export-'), (err, folderPath) => {
         if (err) reject(err);
         return resolve(folderPath)
       });
@@ -39,7 +39,7 @@ class GndKmlWriter {
 
     for (var projectId in rawData['projects']) {
       const project = rawData['projects'][projectId];
-      kml = GndKmlWriter.addProjectToKml_(kml, project, desiredLanguage);
+      kml = KmlWriter.addProjectToKml_(kml, project, desiredLanguage);
     }
 
     kml += '</kml>\n';
@@ -50,14 +50,14 @@ class GndKmlWriter {
     kml += '<Document>\n';
     kml +=
       '<name>' +
-      GndKmlWriter.getFieldWithDesiredLanguage_(
+      KmlWriter.getFieldWithDesiredLanguage_(
         project['title'], [desiredLanguage]) +
       '</name>\n';
 
     for (var featureTypeId in project['featureTypes']) {
       const features = project['featureTypes'][featureTypeId]['features'];
       const featureTypeDef = project['featureTypes'][featureTypeId]['definition'];
-      kml = GndKmlWriter.addFeatureTypeToKml_(kml, featureTypeId, featureTypeDef, features, desiredLanguage);
+      kml = KmlWriter.addFeatureTypeToKml_(kml, featureTypeId, featureTypeDef, features, desiredLanguage);
     }
 
     kml += '</Document>\n';
@@ -70,7 +70,7 @@ class GndKmlWriter {
     kml += '<name>' + featureTypeId + '</name>\n';
     for (var featureId in features) {
       const feature = features[featureId];
-      kml = GndKmlWriter.addFeatureToKml_(kml, featureTypeDef, featureId, feature, desiredLanguage);
+      kml = KmlWriter.addFeatureToKml_(kml, featureTypeDef, featureId, feature, desiredLanguage);
     }
 
     kml += '</Folder>\n';
@@ -83,10 +83,10 @@ class GndKmlWriter {
 
     const records = feature['records'];
     if (Object.keys(records).length > 0) {
-      kml = GndKmlWriter.addRecordsToKml_(kml, featureTypeDef, records, desiredLanguage);
+      kml = KmlWriter.addRecordsToKml_(kml, featureTypeDef, records, desiredLanguage);
     }
     const featureData = feature['data'];
-    kml = GndKmlWriter.addFeatureDataToKml_(kml, featureData);
+    kml = KmlWriter.addFeatureDataToKml_(kml, featureData);
 
     kml += '</Placemark>\n';
     return kml;
@@ -108,7 +108,7 @@ class GndKmlWriter {
       kml += '<caption align="left">Record: ' + recordCnt + '</caption>';
       const record = records[recordId];
       const formDef = featureTypeDef['forms'][record['formId']];
-      kml += GndKmlWriter.recordToHtmlTableRow(formDef, record, desiredLanguage);
+      kml += KmlWriter.recordToHtmlTableRow(formDef, record, desiredLanguage);
       kml += '</table>';
     }
     kml += '</description>\n';
@@ -136,7 +136,7 @@ class GndKmlWriter {
         questions[question]['options'].forEach(
           option => {
             if (option['code'] == responseCode) {
-              response = GndKmlWriter.getFieldWithDesiredLanguage_(
+              response = KmlWriter.getFieldWithDesiredLanguage_(
                 option['labels'], desiredLanguage);
             }
           }
@@ -146,7 +146,7 @@ class GndKmlWriter {
       row += '<tr>'
       row +=
         '<th>' +
-        GndKmlWriter.getFieldWithDesiredLanguage_(
+        KmlWriter.getFieldWithDesiredLanguage_(
           questionLabels, desiredLanguage) +
         '</th>';
       row += '<td>' + response + '</td>';
@@ -180,4 +180,4 @@ class GndKmlWriter {
   }
 }
 
-module.exports = GndKmlWriter;
+module.exports = KmlWriter;

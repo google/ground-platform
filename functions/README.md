@@ -21,13 +21,13 @@ Firestore Cloud Functions currently require version 6.11.5 of Node.js.
 1. Install the required version of Node.js:
 
     ```
-    $ nvm install 6.11.5
+    $ nvm install 8.16.0
     ```
   
     To set this as the default version run:
   
     ```
-    $ nvm alias default 6.11.5
+    $ nvm alias default 8.16.0
     ```
 
 2. Download project dependencies:
@@ -62,7 +62,7 @@ cloud functions.
     $ firebase login
     ```
   
-    After you run the `login` command, follow the prompts in your browser  or terminal to authenticate your firebase account.
+    After you run the `login` command, follow the prompts in your browser  or terminal to authenticate your Firebase account.
 
 3. Select your Firebase project:
 
@@ -81,20 +81,17 @@ cloud functions.
 
 ### Set up a service account and keys
 
-In order to synchronize data with Google Sheets, Ground uses a special Google Cloud Service Account. This prevents project creators from needing to authorize Ground to read and write files in their Google Drive files each time a spreadsheet is linked. Instead, project creators can simply grant the service account Edit access to the linked spreadsheet.
+Ground uses a Google Cloud Service Account to manage and synchronize data in Google Sheets.
 
 1. Create a new service account:
   
-   * Follow the steps detailed at <https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating_a_service_account> to create a new service account.
-   * Make a note of the email address of the service account. Users need this account to allow access to their spreadsheets.
+   * Follow the steps detailed at <https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating_a_service_account> to create a new service account. If you already
+   create a service account for your project and are trying to generate a new key, you can skip this step.
 
 2. Create a new private key:
 
    * Follow the steps detailed at <https://cloud.google.com/iam/docs/creating-managing-service-account-keys#creating_service_account_keys>
    * When prompted for key type, select "JSON". Download and save the resulting key file in `service-account-secret.json`. As the name implies, this file should be kept secret, and should not be checked into source control.
-
-After the service account is created, you can regenerate keys under
-`Actions > Create key > JSON` at `https://console.cloud.google.com/apis/credentials?project=<project-name>` where `<project-name>` is the name of the project associated with your firebase account.
 
 ## Development workflow
 
@@ -104,10 +101,10 @@ Ground Cloud Functions source code.
 1. Select a Node.js version: 
 
     ```
-    $ nvm use 6.11.5
+    $ nvm use 8.16.0
     ```
 
-2. Confirm you are logged into firebase:
+2. Confirm you're logged into firebase:
 
     ```
     $ firebase login
