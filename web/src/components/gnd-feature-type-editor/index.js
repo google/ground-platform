@@ -243,11 +243,8 @@ class GndFeatureTypeEditor extends React.Component<Props> {
                 inputClassName="ft-label-input"
                 onCommitChanges={this.handleFeatureTypeLabelChange.bind(this)}
                 value={featureTypeLabel}
-                placeholder="Unnamed feature type"
+                placeholder="Unnamed layer"
               />
-              <div className="ft-header-caption">
-                <Typography variant="caption">Feature type</Typography>
-              </div>
             </div>
             <GndFormTabs
               formIndex={formIndex}
