@@ -17,18 +17,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import GndFormElementEditor from './gnd-form-element-editor';
 import GndFormWarning from './gnd-form-warning';
 import update from 'immutability-helper';
-import {Add, DragHandle} from '@material-ui/icons';
+import {Add} from '@material-ui/icons';
 import Button from '@material-ui/core/Button';
 import {withStyles} from '@material-ui/core/styles';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import {
-  sortableContainer,
-  sortableElement,
-  sortableHandle,
-} from 'react-sortable-hoc';
+import {GndSortableContainer, GndSortableElement} from './gnd-sortable';
 
 const styles = (theme) => ({
   button: {
@@ -50,19 +45,6 @@ const styles = (theme) => ({
   bottomControls: {
     display: 'block',
     width: '100%',
-  },
-  sortableElement: {
-    zIndex: 1300,
-    '&:hover div[name=sortableHandle]': {
-      visibility: 'visible',
-    }
-  },
-  sortableHandle: {
-    textAlign: 'center',
-    visibility: 'hidden',
-    '&:hover': {
-      cursor: 'move',
-    }
   }
 });
 
@@ -142,43 +124,22 @@ class GndFormEditor extends React.Component {
       return null;
     }
     
-    const SortableHandle = sortableHandle(() =>
-      <div className={classes.sortableHandle} name="sortableHandle">
-        <DragHandle fontSize="inherit"/>
-      </div>
-    );
-
-    const SortableElement = sortableElement(({element, onChange}) =>
-      <div className={classes.sortableElement}>
-        <SortableHandle />
-        <GndFormElementEditor
-          key={element.id}
-          element={element}
-          onChange={onChange}
-        />
-      </div>
-    );
-
-    const SortableContainer = sortableContainer(({children}) => 
-      <div>{children}</div>
-    );
-    
     return (
       <React.Fragment>
-        <SortableContainer
+        <GndSortableContainer
           onSortEnd={this.onSortEnd}
           lockAxis='y'
           useDragHandle
         >
           {form.defn.elements.map((element, index) => (
-            <SortableElement
+            <GndSortableElement
               key={`item-${index}`}
               index={index}
               element={element}
               onChange={(el) => this.handleElementChange(el, index)}
             />
           ))}
-        </SortableContainer>
+        </GndSortableContainer>
         <div className={classes.bottomControls}>
           <span className={classes.bottomLeftControls}>
             <Button
