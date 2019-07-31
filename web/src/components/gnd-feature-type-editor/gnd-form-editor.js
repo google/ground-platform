@@ -105,14 +105,13 @@ class GndFormEditor extends React.Component {
   onSortEnd = ({oldIndex, newIndex}) => {
     const {form, onChange} = this.props;
     const oldIndexElement = form.defn.elements[oldIndex];
-    const newIndexElement = form.defn.elements[newIndex];
     onChange(
       update(form, {
         defn: {
-          elements: {
-            [oldIndex]: {$set: newIndexElement},
-            [newIndex]: {$set: oldIndexElement}
-          }
+          elements: {$splice: [
+            [oldIndex, 1],
+            [newIndex, 0, oldIndexElement]
+          ]}
         },
       })
     );
