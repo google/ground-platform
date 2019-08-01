@@ -30,7 +30,25 @@ const styles = (theme) => ({
   paper: {
     top: 62,
     paddingTop: 20,
-    width: 200,
+    width: 300,
+  },
+  title: {
+    fontWeight: 'bold',
+  },
+  date: {
+    marginTop: -20,
+    fontStyle: 'italic',
+  },
+  key: {
+    fontSize: 12,
+    marginBlockEnd: '0.2em',
+    color: 'gray',
+  },
+  value: {
+    marginBlockStart: '0.2em',
+  },
+  card: {
+    marginBottom: 20,
   },
 });
 
@@ -53,12 +71,14 @@ class GndFeatureDetails extends React.Component<Props> {
       // eslint-disable-next-line max-len
       const responsesList = Object.entries(record.responses).map(([key, value], idx) => {
         return <Typography key={idx} variant='subheading'>
-          {key}: {value}
+          <p className={classes.key}>{key}</p>
+          <p className={classes.value}>{value}</p>
         </Typography>;
       });
-      return <Card key={index}>
-        <CardHeader title={this.props.records.featureId} />
+      return <Card key={index} classes={{root: classes.card}}>
+        <CardHeader title={record.created.user.displayName} classes={{title: classes.title}}/>
         <CardContent>
+          <p className={classes.date}>{record.created.clientTimestamp}</p>
           {responsesList}
         </CardContent>
       </Card>;
