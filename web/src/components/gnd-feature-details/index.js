@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2018 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ const styles = (theme) => ({
     fontWeight: 'bold',
   },
   date: {
-    marginTop: -20,
     fontStyle: 'italic',
   },
   key: {
@@ -49,6 +48,12 @@ const styles = (theme) => ({
   },
   card: {
     marginBottom: 20,
+  },
+  cardHeaderRoot: {
+    paddingBottom: 0,
+  },
+  cardContentRoot: {
+    paddingTop: 0,
   },
 });
 
@@ -76,8 +81,8 @@ class GndFeatureDetails extends React.Component<Props> {
         </Typography>;
       });
       return <Card key={index} classes={{root: classes.card}}>
-        <CardHeader title={record.created.user.displayName} classes={{title: classes.title}}/>
-        <CardContent>
+        <CardHeader title={record.created.user.displayName} classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
+        <CardContent classes={{root: classes.cardContentRoot}}>
           <p className={classes.date}>{record.created.clientTimestamp}</p>
           {responsesList}
         </CardContent>
@@ -96,7 +101,6 @@ class GndFeatureDetails extends React.Component<Props> {
   }
 }
 
-// start of code change
 const mapStateToProps = (store) => ({
   records: getFeatureRecords(store),
 });
