@@ -32,6 +32,8 @@ const getActiveProject = (store) =>
 
 const getMapFeatures = (store) => getFirestoreData(store, 'mapFeatures');
 
+const getFeatureRecords = (store) => getFirestoreData(store, 'featureRecords');
+
 const getAuth = (store) => store.firebase.auth;
 
 const getProfile = (store) => store.firebase.profile;
@@ -117,6 +119,7 @@ export {
   getAuth,
   getProfile,
   getMapFeatures,
+  getFeatureRecords,
   getLocalizedText,
   connectFeature,
   connectProject,

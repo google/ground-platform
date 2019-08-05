@@ -21,25 +21,19 @@ import GndMap from '../gnd-map';
 import GndHeader from '../gnd-header';
 import GndLegend from '../gnd-legend';
 import GndFeatureTypeEditor from '../gnd-feature-type-editor';
+import GndFeatureDetails from '../gnd-feature-details';
 import {connectProject, connectFeature} from '../../datastore.js';
 import {featurePath} from '../../route.js';
 
-function GndFeatureDetails({match}) {
-  return (
-    <div>
-      {/* TODO(maralka): Display feature data loaded in the store inside of
-        side panel. */}
-      Placeholder for {match.params.featureId} of project
-      {match.params.projectId}
-    </div>
-  );
-}
-
-GndFeatureDetails.propTypes = {
-  match: Object,
-};
 
 type Props = {
+  match: Object,
+  records: {
+    formId: String,
+  }
+};
+
+GndFeatureDetails.propTypes = {
   match: Object,
 };
 
@@ -54,10 +48,13 @@ class GndMain extends React.Component<Props> {
         <GndFeatureTypeEditor projectId={projectId} />
         <Route
           path={featurePath}
-          component={connectFeature(GndFeatureDetails)} />
+          component={
+            connectFeature(GndFeatureDetails)
+          } />
       </React.Fragment>
     );
   }
 }
+
 
 export default connectProject(GndMain);
