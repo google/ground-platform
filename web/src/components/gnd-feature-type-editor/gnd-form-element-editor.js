@@ -36,7 +36,6 @@ import {getLocalizedText} from '../../datastore.js';
 import GndFocusableRow from './gnd-focusable-row';
 import GndMultiSelectOptionsEditor from './gnd-multi-select-options-editor';
 import update from 'immutability-helper';
-import { Autorenew } from '@material-ui/icons';
 
 const styles = {
   label: {
