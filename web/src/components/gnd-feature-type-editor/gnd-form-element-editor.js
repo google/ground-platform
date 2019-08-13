@@ -36,12 +36,12 @@ import {getLocalizedText} from '../../datastore.js';
 import GndFocusableRow from './gnd-focusable-row';
 import GndMultiSelectOptionsEditor from './gnd-multi-select-options-editor';
 import update from 'immutability-helper';
+import { Autorenew } from '@material-ui/icons';
 
 const styles = {
   label: {
     marginTop: 0,
   },
-  type: {},
   bottomLeftControls: {
     float: 'left',
   },
@@ -54,6 +54,18 @@ const styles = {
   },
   icon: {
     marginRight: 5,
+    marginBottom: 0,
+    color: 'rgba(0, 0, 0, 0.54)',
+    position: 'absolute',
+    top: '25%',
+    paddingRight: 20,
+  },
+  menuItemRoot: {
+    height: '12px',
+  },
+  menuItemText: {
+    display: 'inline', 
+    paddingLeft: '30px',
   },
 };
 
@@ -144,14 +156,13 @@ class GndFormElementEditor extends React.Component {
           />
           <Select
             value={type}
-            classes={{root: classes.type}}
             style={{width: '33%', marginLeft: 16}}
             onChange={(ev) => this.handleTypeChange(ev.target.value)}
             onBlur={(ev) => this.handleTypeChange(ev.target.value.trim())}
           >
-            <MenuItem value="text_field"><ShortText className={classes.icon}></ShortText>Text</MenuItem>
-            <MenuItem value="select_one"><CheckCircle className={classes.icon}></CheckCircle>Select one</MenuItem>
-            <MenuItem value="select_multiple"><CheckBoxMultipleMarked className={classes.icon}></CheckBoxMultipleMarked>Select multiple</MenuItem>
+            <MenuItem value="text_field" classes={{root: classes.menuItemRoot}}><ShortText className={classes.icon} size="1em"></ShortText><p className={classes.menuItemText}>Text</p></MenuItem>
+            <MenuItem value="select_one" classes={{root: classes.menuItemRoot}}><CheckCircle className={classes.icon} size="1em"></CheckCircle><p className={classes.menuItemText}>Select one</p></MenuItem>
+            <MenuItem value="select_multiple" classes={{root: classes.menuItemRoot}}><CheckBoxMultipleMarked className={classes.icon} size="1em"></CheckBoxMultipleMarked><p className={classes.menuItemText}>Select multiple</p></MenuItem>
           </Select>
         </div>
         {element.type === 'multiple_choice' && (
