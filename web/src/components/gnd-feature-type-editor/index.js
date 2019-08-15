@@ -34,12 +34,10 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  Typography,
 } from '@material-ui/core';
 import GndInlineEdit from '../gnd-inline-edit';
 import {withStyles} from '@material-ui/core/styles';
 import {withFirebase, withFirestore} from 'react-redux-firebase';
-import GndMarkerImage from '../gnd-marker-image';
 import GndFormEditor from './gnd-form-editor';
 import update from 'immutability-helper';
 import SwipeableViews from 'react-swipeable-views';
@@ -99,6 +97,16 @@ class GndFeatureTypeEditor extends React.Component<Props> {
       defn: {
         itemLabel: (prevLabels) =>
           update(prevLabels || {}, {_: {$set: newLabel}}),
+      },
+    });
+    return Promise.resolve();
+  }
+
+  handleFeatureTypeColorChange(color) {
+    this.updateState({
+      defn: {
+        defaultStyle: (prevDefaultStyles) =>
+          update(prevDefaultStyles || {}, {color: {$set: color}}),
       },
     });
     return Promise.resolve();
@@ -210,6 +218,8 @@ class GndFeatureTypeEditor extends React.Component<Props> {
     const {featureType, formIndex} = this.state;
     const defn = featureType && featureType.defn;
     const featureTypeLabel = getLocalizedText(defn && defn.itemLabel);
+    const defaultColor = '#ff9131';
+    const featureTypeColor = defn && defn.defaultStyle && defn.defaultStyle.color || defaultColor;
     const forms = (defn && defn.forms) || {};
     const formsArray = Object.keys(forms).map((id) => ({
       id: id,
@@ -235,15 +245,20 @@ class GndFeatureTypeEditor extends React.Component<Props> {
         >
           <DialogTitle>
             <div className="ft-header">
-              <div className="marker-container">
-                <GndMarkerImage className="marker" featureType={featureType} />
-              </div>
               <GndInlineEdit
                 className="ft-label"
                 inputClassName="ft-label-input"
                 onCommitChanges={this.handleFeatureTypeLabelChange.bind(this)}
                 value={featureTypeLabel}
                 placeholder="Unnamed layer"
+              />
+            </div>
+            <div className="ft-header">
+              <GndInlineEdit
+                className="ft-label"
+                inputClassName="ft-label-input"
+                onCommitChanges={this.handleFeatureTypeColorChange.bind(this)}
+                value={featureTypeColor}
               />
             </div>
             <GndFormTabs
