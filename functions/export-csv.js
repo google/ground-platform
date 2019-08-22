@@ -18,6 +18,7 @@
 'use strict';
 
 const {db} = require('./common/context');
+const CsvWriter = require('./common/csv-writer');
 
 function exportCsv(req, res) {
   const {
@@ -26,7 +27,57 @@ function exportCsv(req, res) {
     lang: desiredLanguage,
   } = req.query;
 
-  return res.status(500).send('Not supported yet.');
+  // return res.status(500).send('Not supported yet.');
+
+  let data = {};
+  db.fetchProject(providedProjectId).then(
+    project => {
+      if (!project.exists) {
+        res.status(404).send('not found');
+        return Promise.reject(new Error('project not found: ' + providedProjectId))
+      }
+      return Promise.all([
+        fetchForm(project.id, featureType),
+        project.ref.collection('records').get()
+      ]);
+    }
+  ).then(
+    results => {
+      const form = results[0];
+      for(var prop in form) {
+        if(form.hasOwnProperty(prop)) {
+          form[prop]['elements'].forEach(
+            field => {
+              data[field['id']] = [field['labels']['_']];
+            }
+          );
+        }
+      }
+      data = data.slice(0, -1);
+
+      const records = results[1];
+      records.forEach(
+        record => {
+          const responses = record.get('responses');
+          for(var response in responses) {
+            data[prop].push(responses[response])
+          }
+        }
+      );
+      let csvWriter = new CsvWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
+      return csvWriter.getTmpKmlFile();
+    }
+  ).then(
+    tmpCsvFilePath => {
+      return res.download(tmpCsvFilePath);
+    }
+  ).catch(
+    err => {
+      console.log(err);
+      //return res.status(500).end();
+      return res.send(data);
+    }
+  )
 }
 
 
