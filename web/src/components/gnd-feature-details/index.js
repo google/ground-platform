@@ -25,6 +25,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import {getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
+import {connectFeature} from '../../datastore.js';
 
 const styles = (theme) => ({
   paper: {
@@ -81,9 +82,11 @@ class GndFeatureDetails extends React.Component<Props> {
         </Typography>;
       });
       return <Card key={index} classes={{root: classes.card}}>
-        <CardHeader title={record.created.user.displayName} classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
+        <CardHeader
+          title={record.created && record.created.user ? record.created.user.displayName : ""}
+          classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
         <CardContent classes={{root: classes.cardContentRoot}}>
-          <p className={classes.date}>{record.created.clientTimestamp}</p>
+          <p className={classes.date}>{record.created ? record.created.clientTimestamp : ""}</p>
           {responsesList}
         </CardContent>
       </Card>;
@@ -92,7 +95,7 @@ class GndFeatureDetails extends React.Component<Props> {
       <Drawer
         anchor="right"
         open={true}
-        pullRight={true}
+        pullright={"true"}
         classes={{paper: classes.paper}}
       >
         {recordsList}
@@ -106,6 +109,7 @@ const mapStateToProps = (store) => ({
 });
 
 const enhance = compose(
+    (store) => connectFeature(store),
     connect(
         mapStateToProps
     ),

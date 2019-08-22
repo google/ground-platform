@@ -22,9 +22,8 @@ import GndHeader from '../gnd-header';
 import GndLegend from '../gnd-legend';
 import GndFeatureTypeEditor from '../gnd-feature-type-editor';
 import GndFeatureDetails from '../gnd-feature-details';
-import {connectProject, connectFeature} from '../../datastore.js';
+import {connectProject} from '../../datastore.js';
 import {featurePath} from '../../route.js';
-
 
 type Props = {
   match: Object,
@@ -33,24 +32,16 @@ type Props = {
   }
 };
 
-GndFeatureDetails.propTypes = {
-  match: Object,
-};
-
 class GndMain extends React.Component<Props> {
   render() {
     const projectId = this.props.match.params.projectId;
     return (
       <React.Fragment>
-        <GndMap />
+        <GndMap projectId={projectId} {...this.props} />
         <GndHeader projectId={projectId} />
         <GndLegend projectId={projectId} />
         <GndFeatureTypeEditor projectId={projectId} />
-        <Route
-          path={featurePath}
-          component={
-            connectFeature(GndFeatureDetails)
-          } />
+        <Route path={featurePath} component={GndFeatureDetails} />
       </React.Fragment>
     );
   }

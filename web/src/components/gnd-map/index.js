@@ -20,6 +20,7 @@ import './index.css';
 import {connect} from 'react-redux';
 import {compose, withProps} from 'recompose';
 import {getActiveProject, getMapFeatures} from '../../datastore.js';
+import {getFeaturePath} from '../../route.js';
 import {
   withScriptjs,
   withGoogleMap,
@@ -63,7 +64,12 @@ class GndMap extends React.Component {
     };
   }
 
-  renderFeature(markers, project, featureId, feature) {
+  onMarkerClick(projectId, featureId) {
+    var url = getFeaturePath(projectId, featureId);
+    this.props.history.push(url);
+  }
+
+  renderFeature(markers, projectId, project, featureId, feature) {
     if (!project || !feature || !feature.center) {
       return markers;
     }
@@ -73,13 +79,14 @@ class GndMap extends React.Component {
           key={featureId}
           position={{lat: pos.latitude, lng: pos.longitude}}
           icon={this.getIcon(project, feature)}
+          onClick={this.onMarkerClick.bind(this, projectId, featureId)}
         />
     );
     return markers;
   }
 
   render() {
-    const {project, features} = this.props;
+    const {projectId, project, features} = this.props;
     return (
       <GoogleMap
         bootstrapURLKeys={{key: googleMapsConfig.apiKey}}
@@ -96,6 +103,7 @@ class GndMap extends React.Component {
         {features &&
           Object.keys(features).reduce((markers, featureId) =>
             this.renderFeature(markers,
+                projectId,
                 project,
                 featureId,
                 features[featureId]
@@ -133,6 +141,7 @@ const enhance = compose(
 );
 
 GndMap.propTypes = {
+  projectId: PropTypes.string,
   project: PropTypes.object,
   features: PropTypes.object,
   center: PropTypes.object,
