@@ -17,7 +17,7 @@
  
 'use strict';
 
-const google = require('googleapis');
+const { google } = require('googleapis');
 const util = require('util');
 
 const sheets = google.sheets('v4');
