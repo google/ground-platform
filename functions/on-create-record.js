@@ -37,4 +37,4 @@ function onCreateRecord(change, context) {
         sheet.addRow(feature, featureId, recordId, record, colIds))));
 }
 
-module.exports = {onCreateRecord};
+module.exports = onCreateRecord;

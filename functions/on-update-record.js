@@ -37,4 +37,4 @@ function onUpdateRecord(change, context) {
         sheet.updateRow(feature, featureId, recordId, record, colIds))));
 }
 
-module.exports = {onUpdateRecord};
+module.exports = onUpdateRecord;
