@@ -25,6 +25,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import {getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
+import {connectFeature} from '../../datastore.js';
 
 const styles = (theme) => ({
   paper: {
@@ -73,6 +74,9 @@ class GndFeatureDetails extends React.Component<Props> {
     const {records, classes} = this.props;
     // eslint-disable-next-line max-len
     const recordsList = Object.entries(records).map(([recordId, record], index) => {
+      const created = record.created;
+      const creatorName = created && created.user && created.user.displayName;
+      const clientTimestamp = created && created.clientTimestamp;
       // eslint-disable-next-line max-len
       const responsesList = Object.entries(record.responses).map(([key, value], idx) => {
         return <Typography key={idx} variant='subheading'>
@@ -81,9 +85,11 @@ class GndFeatureDetails extends React.Component<Props> {
         </Typography>;
       });
       return <Card key={index} classes={{root: classes.card}}>
-        <CardHeader title={record.created.user.displayName} classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
+        <CardHeader
+          title={creatorName && ""}
+          classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
         <CardContent classes={{root: classes.cardContentRoot}}>
-          <p className={classes.date}>{record.created.clientTimestamp}</p>
+          <p className={classes.date}>{clientTimestamp && ""}</p>
           {responsesList}
         </CardContent>
       </Card>;
@@ -92,7 +98,9 @@ class GndFeatureDetails extends React.Component<Props> {
       <Drawer
         anchor="right"
         open={true}
-        pullRight={true}
+        // React does not recognize pullRight and pullright is considered a
+        // non-boolean attribute.
+        pullright={"true"}
         classes={{paper: classes.paper}}
       >
         {recordsList}
@@ -106,6 +114,7 @@ const mapStateToProps = (store) => ({
 });
 
 const enhance = compose(
+    (store) => connectFeature(store),
     connect(
         mapStateToProps
     ),
