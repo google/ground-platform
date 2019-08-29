@@ -74,6 +74,9 @@ class GndFeatureDetails extends React.Component<Props> {
     const {records, classes} = this.props;
     // eslint-disable-next-line max-len
     const recordsList = Object.entries(records).map(([recordId, record], index) => {
+      const created = record.created;
+      const creatorName = created && created.user && created.user.displayName;
+      const clientTimestamp = created && created.clientTimestamp;
       // eslint-disable-next-line max-len
       const responsesList = Object.entries(record.responses).map(([key, value], idx) => {
         return <Typography key={idx} variant='subheading'>
@@ -83,10 +86,10 @@ class GndFeatureDetails extends React.Component<Props> {
       });
       return <Card key={index} classes={{root: classes.card}}>
         <CardHeader
-          title={record.created && record.created.user ? record.created.user.displayName : ""}
+          title={creatorName && ""}
           classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
         <CardContent classes={{root: classes.cardContentRoot}}>
-          <p className={classes.date}>{record.created ? record.created.clientTimestamp : ""}</p>
+          <p className={classes.date}>{clientTimestamp && ""}</p>
           {responsesList}
         </CardContent>
       </Card>;
@@ -95,6 +98,8 @@ class GndFeatureDetails extends React.Component<Props> {
       <Drawer
         anchor="right"
         open={true}
+        // React does not recognize pullRight and pullright is considered a
+        // non-boolean attribute.
         pullright={"true"}
         classes={{paper: classes.paper}}
       >
