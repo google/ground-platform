@@ -77,9 +77,11 @@ const styles = (theme) => ({
     zIndex: 3,
   },
   defaultStyle: {
-    paddingLeft: 13,
-    paddingRight: 5,
-    fontSize: '1.1rem',
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 23,
+    paddingRight: 15,
+    fontSize: '1.0rem',
     fontWeight: 400,
   },
 });
