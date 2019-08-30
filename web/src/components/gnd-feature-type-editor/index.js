@@ -34,17 +34,16 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  Typography,
 } from '@material-ui/core';
 import GndInlineEdit from '../gnd-inline-edit';
 import {withStyles} from '@material-ui/core/styles';
 import {withFirebase, withFirestore} from 'react-redux-firebase';
-import GndMarkerImage from '../gnd-marker-image';
 import GndFormEditor from './gnd-form-editor';
 import update from 'immutability-helper';
 import SwipeableViews from 'react-swipeable-views';
 import GndFormTabs from './gnd-form-tabs';
 import history from '../../history.js';
+import { TwitterPicker } from 'react-color'
 
 // TODO: Refactor.
 update.extend('$auto', function(value, object) {
@@ -57,6 +56,33 @@ update.extend('$autoArray', function(value, object) {
 const styles = (theme) => ({
   dialog: {
     padding: 40,
+  },
+  colorPicker: {
+    maxWidth: 30,
+    maxHeight: 30,
+    minWidth: 30,
+    minHeight: 30,
+  },
+  colorPickerCover: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: 0,
+  },
+  colorPickerTab: {
+    position: 'absolute',
+    left: 145,
+    zIndex: 3,
+  },
+  defaultStyle: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 23,
+    paddingRight: 15,
+    fontSize: '1.0rem',
+    fontWeight: 400,
   },
 });
 
@@ -76,6 +102,7 @@ class GndFeatureTypeEditor extends React.Component<Props> {
   state = {
     formIndex: 0,
     featureType: null,
+    showColorPicker: false,
   };
 
   componentDidUpdate(prevProps) {
@@ -99,6 +126,16 @@ class GndFeatureTypeEditor extends React.Component<Props> {
       defn: {
         itemLabel: (prevLabels) =>
           update(prevLabels || {}, {_: {$set: newLabel}}),
+      },
+    });
+    return Promise.resolve();
+  }
+
+  handleFeatureTypeColorChange(color) {
+    this.updateState({
+      defn: {
+        defaultStyle: (prevDefaultStyles) =>
+          update(prevDefaultStyles || {}, {color: {$set: color}}),
       },
     });
     return Promise.resolve();
@@ -205,11 +242,25 @@ class GndFeatureTypeEditor extends React.Component<Props> {
     }
   }
 
+  handleColorChange({hex}) {
+    this.handleFeatureTypeColorChange(hex);
+  }
+
+  openColorPicker() {
+    this.setState({showColorPicker: true});
+  }
+
+  closeColorPicker() {
+    this.setState({showColorPicker: false});
+  }
+
   render() {
     const {classes, generateId} = this.props;
     const {featureType, formIndex} = this.state;
     const defn = featureType && featureType.defn;
     const featureTypeLabel = getLocalizedText(defn && defn.itemLabel);
+    const defaultColor = '#ff9131';
+    const featureTypeColor = (defn && defn.defaultStyle && defn.defaultStyle.color) || defaultColor;
     const forms = (defn && defn.forms) || {};
     const formsArray = Object.keys(forms).map((id) => ({
       id: id,
@@ -235,9 +286,6 @@ class GndFeatureTypeEditor extends React.Component<Props> {
         >
           <DialogTitle>
             <div className="ft-header">
-              <div className="marker-container">
-                <GndMarkerImage className="marker" featureType={featureType} />
-              </div>
               <GndInlineEdit
                 className="ft-label"
                 inputClassName="ft-label-input"
@@ -245,6 +293,27 @@ class GndFeatureTypeEditor extends React.Component<Props> {
                 value={featureTypeLabel}
                 placeholder="Unnamed layer"
               />
+            </div>
+            <div>
+              <span
+                className={classes.defaultStyle}>
+                Default style</span>
+              <Button
+                className={classes.colorPicker}
+                style={{background: featureTypeColor}}
+                onClick={this.openColorPicker.bind(this)}> </Button>
+              {this.state.showColorPicker &&
+                <div
+                  className={classes.colorPickerTab}>
+                  <div className={classes.colorPickerCover}
+                    onClick={this.closeColorPicker.bind(this)}
+                  />
+                  <TwitterPicker
+                    color={featureTypeColor}
+                    onChangeComplete = {this.handleColorChange.bind(this)}
+                  />
+                </div>
+              }
             </div>
             <GndFormTabs
               formIndex={formIndex}
