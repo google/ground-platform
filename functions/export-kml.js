@@ -103,4 +103,4 @@ function exportKml(req, res) {
   )
 }
 
-module.exports = {exportKml};
+module.exports = exportKml;

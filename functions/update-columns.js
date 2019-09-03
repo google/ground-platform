@@ -52,4 +52,4 @@ function updateColumns(req, res) {
   });
 }
 
-module.exports = {updateColumns};
+module.exports = updateColumns;

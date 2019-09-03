@@ -81,4 +81,4 @@ function exportCsv(req, res) {
 }
 
 
-module.exports = {exportCsv};
+module.exports = exportCsv;

@@ -20,6 +20,7 @@ import './index.css';
 import {connect} from 'react-redux';
 import {compose, withProps} from 'recompose';
 import {getActiveProject, getMapFeatures} from '../../datastore.js';
+import {getFeaturePath} from '../../route.js';
 import {
   withScriptjs,
   withGoogleMap,
@@ -47,12 +48,13 @@ class GndMap extends React.Component {
     // TODO: Preload icons on project change.
     // TODO: Increase size.
     const featureTypeId = feature.featureTypeId;
-    const color = project &&
+    const defaultColor = '#ff9131';
+    const color = (project &&
                   project.featureTypes &&
                   project.featureTypes[featureTypeId] &&
                   project.featureTypes[featureTypeId].defaultStyle &&
-                  project.featureTypes[featureTypeId].defaultStyle.color
-                  || '#ff9131';
+                  project.featureTypes[featureTypeId].defaultStyle.color)
+                  || defaultColor;
     return {
       path: `M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,
              1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,
@@ -63,7 +65,12 @@ class GndMap extends React.Component {
     };
   }
 
-  renderFeature(markers, project, featureId, feature) {
+  onMarkerClick(projectId, featureId) {
+    var url = getFeaturePath(projectId, featureId);
+    this.props.history.push(url);
+  }
+
+  renderFeature(markers, projectId, project, featureId, feature) {
     if (!project || !feature || !feature.center) {
       return markers;
     }
@@ -73,13 +80,14 @@ class GndMap extends React.Component {
           key={featureId}
           position={{lat: pos.latitude, lng: pos.longitude}}
           icon={this.getIcon(project, feature)}
+          onClick={this.onMarkerClick.bind(this, projectId, featureId)}
         />
     );
     return markers;
   }
 
   render() {
-    const {project, features} = this.props;
+    const {projectId, project, features} = this.props;
     return (
       <GoogleMap
         bootstrapURLKeys={{key: googleMapsConfig.apiKey}}
@@ -96,6 +104,7 @@ class GndMap extends React.Component {
         {features &&
           Object.keys(features).reduce((markers, featureId) =>
             this.renderFeature(markers,
+                projectId,
                 project,
                 featureId,
                 features[featureId]
@@ -133,6 +142,7 @@ const enhance = compose(
 );
 
 GndMap.propTypes = {
+  projectId: PropTypes.string,
   project: PropTypes.object,
   features: PropTypes.object,
   center: PropTypes.object,

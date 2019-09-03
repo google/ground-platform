@@ -95,7 +95,7 @@ const connectProject =
 // Mount feature data onto store based on current projectId and featureId in
 // path.
 const connectFeature =
-  firestoreConnect((store, props) => [
+  firestoreConnect((store) => [
     {
       collection: `projects/${store.match.params.projectId}/records`,
       where: [
