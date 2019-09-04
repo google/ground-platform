@@ -61,7 +61,7 @@ const styles = (theme) => ({
 type Props = {
   match: Object,
   records: {
-    featureId: String,
+    featureTypeId: String,
     formId: String,
     responses: Array
   },
@@ -81,10 +81,10 @@ class GndFeatureDetails extends React.Component<Props> {
       const creatorName = created && created.user && created.user.displayName;
       const clientTimestamp = created && created.clientTimestamp;
       // eslint-disable-next-line max-len
-      const feature = featureTypes[record.featureId] &&
-                      featureTypes[record.featureId]['forms'] &&
-                      featureTypes[record.featureId]['forms'][record.formId] &&
-                      featureTypes[record.featureId]['forms'][record.formId]['elements'];
+      const feature = featureTypes[record.featureTypeId] &&
+                      featureTypes[record.featureTypeId]['forms'] &&
+                      featureTypes[record.featureTypeId]['forms'][record.formId] &&
+                      featureTypes[record.featureTypeId]['forms'][record.formId]['elements'];
       const responsesList = Object.entries(record.responses).map(([fieldId, fieldValue], idx) => {
         const fieldObj = feature.filter(
             (formElement) => formElement.id === fieldId);
