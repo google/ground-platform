@@ -28,10 +28,13 @@ function exportCsv(req, res) {
   } = req.query;
 
   // return res.status(500).send('Not supported yet.');
-
+  console.log("Entered");
+  // res.send({"status": "ok"});
+  // return {"status": "ok"};
   let data = {};
   db.fetchProject(providedProjectId).then(
     project => {
+      console.log("=== In fetchProject ===");
       if (!project.exists) {
         res.status(404).send('not found');
         return Promise.reject(new Error('project not found: ' + providedProjectId))
@@ -65,7 +68,7 @@ function exportCsv(req, res) {
         }
       );
       let csvWriter = new CsvWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
-      return csvWriter.getTmpKmlFile();
+      return csvWriter.getTmpCsvFile();
     }
   ).then(
     tmpCsvFilePath => {
