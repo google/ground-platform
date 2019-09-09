@@ -75,21 +75,20 @@ class GndFeatureDetails extends React.Component<Props> {
     const {records, classes} = this.props;
     const featureTypes =
       (this.props.project && this.props.project.featureTypes) || {};
-    // eslint-disable-next-line max-len
     const recordsList = Object.entries(records).map(([recordId, record], index) => {
       const created = record.created;
       const creatorName = created && created.user && created.user.displayName;
       const clientTimestamp = created && created.clientTimestamp;
-      // eslint-disable-next-line max-len
-      const feature = featureTypes[record.featureTypeId] &&
+      const featureElements = featureTypes[record.featureTypeId] &&
                       featureTypes[record.featureTypeId]['forms'] &&
                       featureTypes[record.featureTypeId]['forms'][record.formId] &&
                       featureTypes[record.featureTypeId]['forms'][record.formId]['elements'];
       const responsesList = Object.entries(record.responses).map(([fieldId, fieldValue], idx) => {
-        const fieldObj = feature.filter(
+        const fieldObj = featureElements.filter(
             (formElement) => formElement.id === fieldId);
+        if (!(fieldObj && fieldObj[0] && fieldObj[0]['labels'] && fieldObj[0]['labels']['_'])) return null;
         return <Typography key={idx} variant='subheading'>
-          <p className={classes.key}>{fieldObj[0] ? fieldObj[0]['labels']['_'] : 'label not found'}</p>
+          <p className={classes.key}>{fieldObj[0]['labels']['_']}</p>
           <p className={classes.value}>{fieldValue}</p>
         </Typography>;
       });
