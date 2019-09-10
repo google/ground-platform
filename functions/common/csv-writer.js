@@ -35,12 +35,12 @@ class CsvWriter {
     let csv = '';
     let index = 0;
     while (true) {
-    for (var prop in rawData) {
-        csv += rawData[prop][index] + ',';
-    }
-    index += 1;
-    csv.slice(0, -1);
-    csv += '\n';
+      for (var prop in rawData) {
+          csv += rawData[prop][index] + ',';
+      }
+      index += 1;
+      csv.slice(0, -1);
+      csv += '\n';
     }
   }
 }
