@@ -22,26 +22,21 @@ const CsvWriter = require('./common/csv-writer');
 
 function exportCsv(req, res) {
   const {
-    project: providedProjectId,
-    featureType: providedFeatureTypeId,
+    project: projectId,
+    featureType: featureTypeId,
     lang: desiredLanguage,
   } = req.query;
 
-  // return res.status(500).send('Not supported yet.');
-  console.log("Entered");
-  // res.send({"status": "ok"});
-  // return {"status": "ok"};
   let data = {};
-  db.fetchProject(providedProjectId).then(
+  return db.fetchProject(projectId).then(
     project => {
-      console.log("=== In fetchProject ===");
       if (!project.exists) {
         res.status(404).send('not found');
-        return Promise.reject(new Error('project not found: ' + providedProjectId))
+        return Promise.reject(new Error('project not found: ' + projectId))
       }
       return Promise.all([
-        fetchForm(project.id, featureType),
-        project.ref.collection('records').get()
+        db.fetchForm(project.id, featureTypeId),
+        db.fetchRecords(project.id, featureTypeId)
       ]);
     }
   ).then(
@@ -67,7 +62,7 @@ function exportCsv(req, res) {
           }
         }
       );
-      let csvWriter = new CsvWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
+      let csvWriter = new CsvWriter(projectId, data, desiredLanguage ? desiredLanguage : '');
       return csvWriter.getTmpCsvFile();
     }
   ).then(
