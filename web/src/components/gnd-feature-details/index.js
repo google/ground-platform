@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* global require */
 import React from 'react';
 import {compose} from 'redux';
 import {connect} from 'react-redux';
@@ -26,11 +27,14 @@ import Typography from '@material-ui/core/Typography';
 import {getActiveProject, getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
 import {connectFeature} from '../../datastore.js';
+import Grid from '@material-ui/core/Grid';
+import CloseIcon from '@material-ui/icons/Close';
+
+const mapMarker = require(`../../images/map-marker.png`);
 
 const styles = (theme) => ({
   paper: {
     top: 62,
-    paddingTop: 20,
     width: 300,
   },
   title: {
@@ -48,7 +52,8 @@ const styles = (theme) => ({
     marginBlockStart: '0.2em',
   },
   card: {
-    marginBottom: 20,
+    marginBottom: 1,
+    margin: 20,
   },
   cardHeaderRoot: {
     paddingBottom: 0,
@@ -75,6 +80,7 @@ class GndFeatureDetails extends React.Component<Props> {
     const {records, classes} = this.props;
     const featureTypes =
       (this.props.project && this.props.project.featureTypes) || {};
+    let layerName;
     const recordsList = Object.entries(records).map(([recordId, record], index) => {
       const created = record.created;
       const creatorName = created && created.user && created.user.displayName;
@@ -83,6 +89,7 @@ class GndFeatureDetails extends React.Component<Props> {
                       featureTypes[record.featureTypeId]['forms'] &&
                       featureTypes[record.featureTypeId]['forms'][record.formId] &&
                       featureTypes[record.featureTypeId]['forms'][record.formId]['elements'];
+      layerName = featureTypes[record.featureTypeId].itemLabel['_'];
       const responsesList = Object.entries(record.responses).map(([fieldId, fieldValue], idx) => {
         const fieldObj = featureElements.filter(
             (formElement) => formElement.id === fieldId);
@@ -111,6 +118,19 @@ class GndFeatureDetails extends React.Component<Props> {
         pullright={'true'}
         classes={{paper: classes.paper}}
       >
+        <div style={{height: 50, borderBottom: '1px solid #D3D3D3', borderTop: '1px solid #D3D3D3', verticalAlign: 'center'}}>
+          <Grid container spacing={12} style={{paddingLeft: 10, paddingRight: 5}}>
+            <Grid item xs={2}>
+              <img width="24" height="24" src={mapMarker} style={{paddingTop: 14}}/>
+            </Grid>
+            <Grid item xs={8}>
+              <p>{layerName}</p>
+            </Grid>
+            <Grid item xs={2}>
+              <CloseIcon style={{paddingTop: 14}}/>
+            </Grid>
+          </Grid>
+        </div>
         {recordsList}
       </Drawer>
     );
