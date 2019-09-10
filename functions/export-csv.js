@@ -51,7 +51,6 @@ function exportCsv(req, res) {
           );
         }
       }
-      data = data.slice(0, -1);
 
       const records = results[1];
       records.forEach(
