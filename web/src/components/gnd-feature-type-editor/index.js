@@ -77,6 +77,9 @@ const styles = (theme) => ({
     zIndex: 3,
   },
   defaultStyle: {
+    padding: 5,
+  },
+  defaultStyleText: {
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 23,
@@ -294,9 +297,9 @@ class GndFeatureTypeEditor extends React.Component<Props> {
                 placeholder="Unnamed layer"
               />
             </div>
-            <div>
+            <div className={classes.defaultStyle}>
               <span
-                className={classes.defaultStyle}>
+                className={classes.defaultStyleText}>
                 Default style</span>
               <Button
                 className={classes.colorPicker}
