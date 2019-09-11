@@ -73,12 +73,12 @@ const styles = (theme) => ({
   },
   colorPickerTab: {
     position: 'absolute',
-    left: 160,
+    left: 165,
     zIndex: 3,
   },
   defaultStyle: {
-    paddingTop: 5,
-    paddingLeft: 5,
+    paddingTop: 8,
+    paddingLeft: 8,
   },
   defaultStyleText: {
     paddingTop: 10,
