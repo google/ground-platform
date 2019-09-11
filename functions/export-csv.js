@@ -26,8 +26,10 @@ function exportCsv(req, res) {
     featureType: featureTypeId,
     lang: desiredLanguage,
   } = req.query;
+  console.log('In the function');
 
   let data = {};
+  let numberOfRecords = 0;
   return db.fetchProject(projectId).then(
     project => {
       if (!project.exists) {
@@ -41,6 +43,7 @@ function exportCsv(req, res) {
     }
   ).then(
     results => {
+      console.log(results);
       const form = results[0];
       for(var prop in form) {
         if(form.hasOwnProperty(prop)) {
@@ -53,20 +56,38 @@ function exportCsv(req, res) {
       }
 
       const records = results[1];
+      numberOfRecords = records.length;
       records.forEach(
         record => {
           const responses = record.get('responses');
-          for(var response in responses) {
-            data[prop].push(responses[response])
+          for(var prop in responses) {
+            toPush = response[prop];
+            if (Array.isArray(toPush)) {
+              toPush = '"' + toPush.join() + '"';
+            }
+            data[prop].push(toPush);
           }
         }
       );
-      let csvWriter = new CsvWriter(projectId, data, desiredLanguage ? desiredLanguage : '');
-      return csvWriter.getTmpCsvFile();
+      // let csvWriter = new CsvWriter(projectId, data, desiredLanguage ? desiredLanguage : '', numberOfRecords);
+      // return csvWriter.getTmpCsvFile();
+      return data;
     }
   ).then(
-    tmpCsvFilePath => {
-      return res.download(tmpCsvFilePath);
+    // tmpCsvFilePath => {
+    //   return res.download(tmpCsvFilePath);
+    // }
+    data => {
+      res.type('csv');
+      for (i = 0; i <= numberOfRecords; i++) {
+        toSend = '';
+        for (var prop in data) {
+          toSend += data[prop][i] + ',';
+        }
+        toSend.slice(0, -1);
+        res.write(toSend + '\n');
+      }
+      return res.end();
     }
   ).catch(
     err => {
