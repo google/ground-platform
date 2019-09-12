@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* global require */
 import React from 'react';
 import {compose} from 'redux';
 import {connect} from 'react-redux';
@@ -23,14 +24,17 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
-import {getFeatureRecords} from '../../datastore.js';
+import {getActiveProject, getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
 import {connectFeature} from '../../datastore.js';
+import Grid from '@material-ui/core/Grid';
+import CloseIcon from '@material-ui/icons/Close';
+
+const mapMarker = require(`../../images/map-marker.png`);
 
 const styles = (theme) => ({
   paper: {
     top: 62,
-    paddingTop: 20,
     width: 300,
   },
   title: {
@@ -48,7 +52,8 @@ const styles = (theme) => ({
     marginBlockStart: '0.2em',
   },
   card: {
-    marginBottom: 20,
+    marginBottom: 1,
+    margin: 20,
   },
   cardHeaderRoot: {
     paddingBottom: 0,
@@ -61,35 +66,45 @@ const styles = (theme) => ({
 type Props = {
   match: Object,
   records: {
-    featureId: String,
+    featureTypeId: String,
     formId: String,
     responses: Array
   },
   classes: Object,
+  project: Object,
 };
 
 class GndFeatureDetails extends React.Component<Props> {
   render() {
-    if (!this.props.records) return null;
+    if (!this.props.records || !this.props.project.featureTypes) return null;
     const {records, classes} = this.props;
-    // eslint-disable-next-line max-len
+    const featureTypes =
+      (this.props.project && this.props.project.featureTypes) || {};
+    let layerName;
     const recordsList = Object.entries(records).map(([recordId, record], index) => {
       const created = record.created;
       const creatorName = created && created.user && created.user.displayName;
       const clientTimestamp = created && created.clientTimestamp;
-      // eslint-disable-next-line max-len
-      const responsesList = Object.entries(record.responses).map(([key, value], idx) => {
+      const featureElements = featureTypes[record.featureTypeId] &&
+                      featureTypes[record.featureTypeId]['forms'] &&
+                      featureTypes[record.featureTypeId]['forms'][record.formId] &&
+                      featureTypes[record.featureTypeId]['forms'][record.formId]['elements'];
+      layerName = featureTypes[record.featureTypeId].itemLabel['_'];
+      const responsesList = Object.entries(record.responses).map(([fieldId, fieldValue], idx) => {
+        const fieldObj = featureElements.filter(
+            (formElement) => formElement.id === fieldId);
+        if (!(fieldObj && fieldObj[0] && fieldObj[0]['labels'] && fieldObj[0]['labels']['_'])) return null;
         return <Typography key={idx} variant='subheading'>
-          <p className={classes.key}>{key}</p>
-          <p className={classes.value}>{value}</p>
+          <p className={classes.key}>{fieldObj[0]['labels']['_']}</p>
+          <p className={classes.value}>{fieldValue}</p>
         </Typography>;
       });
       return <Card key={index} classes={{root: classes.card}}>
         <CardHeader
-          title={creatorName && ""}
+          title={creatorName && ''}
           classes={{title: classes.title, root: classes.cardHeaderRoot}}/>
         <CardContent classes={{root: classes.cardContentRoot}}>
-          <p className={classes.date}>{clientTimestamp && ""}</p>
+          <p className={classes.date}>{clientTimestamp && ''}</p>
           {responsesList}
         </CardContent>
       </Card>;
@@ -100,9 +115,22 @@ class GndFeatureDetails extends React.Component<Props> {
         open={true}
         // React does not recognize pullRight and pullright is considered a
         // non-boolean attribute.
-        pullright={"true"}
+        pullright={'true'}
         classes={{paper: classes.paper}}
       >
+        <div style={{height: 50, borderBottom: '1px solid #D3D3D3', borderTop: '1px solid #D3D3D3', verticalAlign: 'center'}}>
+          <Grid container spacing={12} style={{paddingLeft: 10, paddingRight: 5}}>
+            <Grid item xs={2}>
+              <img width="24" height="24" src={mapMarker} style={{paddingTop: 14}}/>
+            </Grid>
+            <Grid item xs={8}>
+              <p>{layerName}</p>
+            </Grid>
+            <Grid item xs={2}>
+              <CloseIcon style={{paddingTop: 14}}/>
+            </Grid>
+          </Grid>
+        </div>
         {recordsList}
       </Drawer>
     );
@@ -110,6 +138,7 @@ class GndFeatureDetails extends React.Component<Props> {
 }
 
 const mapStateToProps = (store) => ({
+  project: getActiveProject(store),
   records: getFeatureRecords(store),
 });
 
