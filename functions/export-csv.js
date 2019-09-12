@@ -26,7 +26,6 @@ function exportCsv(req, res) {
     featureType: featureTypeId,
     lang: desiredLanguage,
   } = req.query;
-  console.log('In the function');
 
   let data = {};
   let numberOfRecords = 0;
@@ -69,14 +68,9 @@ function exportCsv(req, res) {
           }
         }
       );
-      // let csvWriter = new CsvWriter(projectId, data, desiredLanguage ? desiredLanguage : '', numberOfRecords);
-      // return csvWriter.getTmpCsvFile();
       return data;
     }
   ).then(
-    // tmpCsvFilePath => {
-    //   return res.download(tmpCsvFilePath);
-    // }
     data => {
       res.type('csv');
       for (i = 0; i <= numberOfRecords; i++) {
