@@ -114,7 +114,7 @@ const mapStateToProps = (store) => ({
 });
 
 const enhance = compose(
-    (store) => connectFeature(store),
+    connectFeature,
     connect(
         mapStateToProps
     ),
