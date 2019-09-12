@@ -51,10 +51,15 @@ const styles = (theme) => ({
     marginBottom: 20,
   },
   cardHeaderRoot: {
+    paddingTop: 0,
     paddingBottom: 0,
   },
   cardContentRoot: {
     paddingTop: 0,
+    paddingBottom: 0,
+    '&:last-child': {
+      paddingBottom: 0,
+    },
   },
 });
 
