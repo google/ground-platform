@@ -75,7 +75,9 @@ function exportCsv(req, res) {
         for(var prop in responses) {
           toPush = response[prop];
           if (Array.isArray(toPush)) {
-            toPush = '"' + toPush.join() + '"';
+            toPush = '"' + escapeQuotes(toPush.join()) + '"';
+          } else {
+            toPush = '"' + escapeQuotes(toPush) + '"';
           }
           data[prop].push(toPush);
         }
@@ -95,6 +97,10 @@ function exportCsv(req, res) {
         res.write(toSend + '\n');
       }
       return res.end();
+  }
+
+  function escapeQuotes( str ) {
+    return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
   }
 }
 
