@@ -26,12 +26,15 @@ import Typography from '@material-ui/core/Typography';
 import {getActiveProject, getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
 import {connectFeature} from '../../datastore.js';
+import GridList from '@material-ui/core/GridList';
 
 const styles = (theme) => ({
   paper: {
     top: 62,
     paddingTop: 20,
     width: 300,
+    overflow: 'auto',
+    height: '100%',
   },
   title: {
     fontWeight: 'bold',
@@ -57,8 +60,8 @@ const styles = (theme) => ({
     paddingBottom: 0,
   },
   cardContentRoot: {
-    paddingTop: 0,
-    paddingBottom: 0,
+    "paddingTop": 0,
+    "paddingBottom": 0,
     '&:last-child': {
       paddingBottom: 0,
     },
@@ -118,8 +121,11 @@ class GndFeatureDetails extends React.Component<Props> {
         pullright={'true'}
         classes={{paper: classes.paper}}
         variant="persistent"
+        docked='false'
       >
-        {recordsList}
+        <GridList spacing={1} cols={1} cellHeight='auto'>
+          {recordsList}
+        </GridList>
       </Drawer>
     );
   }
