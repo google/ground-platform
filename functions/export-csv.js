@@ -41,37 +41,51 @@ function exportCsv(req, res) {
     }
   ).then(
     results => {
-      console.log(results);
-      const form = results[0];
-      for(var prop in form) {
-        if(form.hasOwnProperty(prop)) {
-          form[prop]['elements'].forEach(
-            field => {
-              data[field['id']] = [field['labels']['_']];
-            }
-          );
-        }
-      }
-
-      const records = results[1];
-      numberOfRecords = records.length;
-      records.forEach(
-        record => {
-          const responses = record.get('responses');
-          for(var prop in responses) {
-            toPush = response[prop];
-            if (Array.isArray(toPush)) {
-              toPush = '"' + toPush.join() + '"';
-            }
-            data[prop].push(toPush);
-          }
-        }
-      );
-      return data;
+      return readFormAndRecords(results, data);
     }
   ).then(
     data => {
-      res.type('csv');
+      return streamToRes();
+    }
+  ).catch(
+    err => {
+      console.log(err);
+      //return res.status(500).end();
+      return res.send(data);
+    }
+  )
+
+  function readFormAndRecords(results) {
+    const form = results[0];
+    for(var prop in form) {
+      if(form.hasOwnProperty(prop)) {
+        form[prop]['elements'].forEach(
+          field => {
+            data[field['id']] = [field['labels']['_']];
+          }
+        );
+      }
+    }
+  
+    const records = results[1];
+    numberOfRecords = records.length;
+    records.forEach(
+      record => {
+        const responses = record.get('responses');
+        for(var prop in responses) {
+          toPush = response[prop];
+          if (Array.isArray(toPush)) {
+            toPush = '"' + toPush.join() + '"';
+          }
+          data[prop].push(toPush);
+        }
+      }
+    );
+    return data;
+  }
+  
+  function streamToRes() {
+    res.type('csv');
       for (i = 0; i <= numberOfRecords; i++) {
         toSend = '';
         for (var prop in data) {
@@ -81,15 +95,9 @@ function exportCsv(req, res) {
         res.write(toSend + '\n');
       }
       return res.end();
-    }
-  ).catch(
-    err => {
-      console.log(err);
-      //return res.status(500).end();
-      return res.send(data);
-    }
-  )
+  }
 }
+
 
 
 module.exports = exportCsv;
