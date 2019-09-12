@@ -88,7 +88,7 @@ function exportCsv(req, res) {
   
   function streamToRes() {
     res.type('csv');
-      for (i = 0; i <= numberOfRecords; i++) {
+      for (var i = 0; i <= numberOfRecords; i++) {
         toSend = '';
         for (var prop in data) {
           toSend += data[prop][i] + ',';
