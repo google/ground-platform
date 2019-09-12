@@ -18,7 +18,6 @@
 'use strict';
 
 const {db} = require('./common/context');
-const CsvWriter = require('./common/csv-writer');
 
 function exportCsv(req, res) {
   const {
