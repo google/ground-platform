@@ -49,6 +49,8 @@ const styles = (theme) => ({
   },
   card: {
     marginBottom: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
   cardHeaderRoot: {
     paddingTop: 0,
@@ -115,6 +117,7 @@ class GndFeatureDetails extends React.Component<Props> {
         // non-boolean attribute.
         pullright={'true'}
         classes={{paper: classes.paper}}
+        variant="persistent"
       >
         {recordsList}
       </Drawer>
