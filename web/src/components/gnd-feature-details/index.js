@@ -27,6 +27,7 @@ import Typography from '@material-ui/core/Typography';
 import {getActiveProject, getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
 import {connectFeature} from '../../datastore.js';
+import GridList from '@material-ui/core/GridList';
 import Grid from '@material-ui/core/Grid';
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -36,6 +37,8 @@ const styles = (theme) => ({
   paper: {
     top: 62,
     width: 300,
+    overflow: 'auto',
+    height: '100%',
   },
   title: {
     fontWeight: 'bold',
@@ -52,14 +55,20 @@ const styles = (theme) => ({
     marginBlockStart: '0.2em',
   },
   card: {
-    marginBottom: 1,
-    margin: 20,
+    marginBottom: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
   cardHeaderRoot: {
+    paddingTop: 0,
     paddingBottom: 0,
   },
   cardContentRoot: {
-    paddingTop: 0,
+    'paddingTop': 0,
+    'paddingBottom': 0,
+    '&:last-child': {
+      paddingBottom: 0,
+    },
   },
 });
 
@@ -117,6 +126,8 @@ class GndFeatureDetails extends React.Component<Props> {
         // non-boolean attribute.
         pullright={'true'}
         classes={{paper: classes.paper}}
+        variant="persistent"
+        docked='false'
       >
         <div style={{height: 50, borderBottom: '1px solid #D3D3D3', borderTop: '1px solid #D3D3D3', verticalAlign: 'center'}}>
           <Grid container spacing={12} style={{paddingLeft: 10, paddingRight: 5}}>
@@ -124,14 +135,16 @@ class GndFeatureDetails extends React.Component<Props> {
               <img width="24" height="24" src={mapMarker} style={{paddingTop: 14}}/>
             </Grid>
             <Grid item xs={8}>
-              <p>{layerName}</p>
+              <p style={{fontWeight: 500}}>{layerName}</p>
             </Grid>
             <Grid item xs={2}>
               <CloseIcon style={{paddingTop: 14}}/>
             </Grid>
           </Grid>
+          <GridList style={{paddingTop: 20, paddingBottom: 50}} spacing={1} cols={1} cellHeight='auto'>
+            {recordsList}
+          </GridList>
         </div>
-        {recordsList}
       </Drawer>
     );
   }
