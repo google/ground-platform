@@ -50,6 +50,7 @@ function exportCsv(req, res) {
     data => {
       var records = data[0];
       var elements = data[1];
+      // TODO: Add Latitude and Longitude to header and rows.
       records.docs.forEach(doc => {
         var arr = [];
         if (doc.data()['featureTypeId'] == featureTypeId) {
@@ -74,6 +75,7 @@ function exportCsv(req, res) {
   // escape a double quote if not already escaped
   // source: https://gist.github.com/getify/3667624
   function escapeQuotes(str) {
+    // TODO: Revisit once we know what needs to be escaped and how.
     return str.toString().replace(/\\([\s\S])|(")/g,"\\$1$2");
   }
 }
