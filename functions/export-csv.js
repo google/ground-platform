@@ -26,7 +26,6 @@ function exportCsv(req, res) {
     lang: desiredLanguage,
   } = req.query;
 
-  let data = {};
   return db.fetchProject(projectId).then(
     project => {
       if (!project.exists) {
@@ -40,7 +39,7 @@ function exportCsv(req, res) {
       for (var el in elements) {
         arr.push('"' + escapeQuotes(elements[el]['labels']['_']) + '"');
       }
-      res.write(arr.join() + '\n');
+      res.write(arr.join(',') + '\n');
       
       return Promise.all(
         [db.fetchRecords(project.id, featureTypeId),
@@ -54,11 +53,11 @@ function exportCsv(req, res) {
         var arr = [];
         if (doc.data()['featureTypeId'] == featureTypeId) {
           for (var el in elements) {
-            var value = escapeQuotes(doc.data()['responses'][elements[el]['id']]);
-            value = value === undefined ? '' : value;
-            arr.push('"' + value + '"');
+            var value = doc.data()['responses'][elements[el]['id']];
+            value = value == (undefined || null) ? '' : value;
+            arr.push('"' + escapeQuotes(value) + '"');
           }
-          res.write(arr.join() + '\n')
+          res.write(arr.join(',') + '\n')
         }
       })
 
@@ -66,16 +65,16 @@ function exportCsv(req, res) {
     }
   ).catch(
     err => {
-      console.error("=Export Failed= " , err);
+      console.error("Export Failed: " , err);
       return res.status(500).end();
     }
   )
 
+  // escape a double quote if not already escaped
+  // source: https://gist.github.com/getify/3667624
   function escapeQuotes(str) {
-    return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+    return str.toString().replace(/\\([\s\S])|(")/g,"\\$1$2");
   }
 }
-
-
 
 module.exports = exportCsv;
