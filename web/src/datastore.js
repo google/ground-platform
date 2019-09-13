@@ -80,14 +80,14 @@ const getLocalizedText = (obj) => obj && (obj['_'] || obj['en'] || obj['pt']);
 
 // Mount project data onto store based on current projectId in path.
 const connectProject =
-  firestoreConnect((store, props) => [
+  firestoreConnect((props) => [
     {
       collection: 'projects',
-      doc: store.match.params.projectId,
+      doc: props.match.params.projectId,
       storeAs: 'activeProject',
     },
     {
-      collection: `projects/${store.match.params.projectId}/features`,
+      collection: `projects/${props.match.params.projectId}/features`,
       storeAs: 'mapFeatures',
     },
   ]);
@@ -95,11 +95,11 @@ const connectProject =
 // Mount feature data onto store based on current projectId and featureId in
 // path.
 const connectFeature =
-  firestoreConnect((store) => [
+  firestoreConnect((props) => [
     {
-      collection: `projects/${store.match.params.projectId}/records`,
+      collection: `projects/${props.match.params.projectId}/records`,
       where: [
-        ['featureId', '==', store.match.params.featureId],
+        ['featureId', '==', props.match.params.featureId],
       ],
       storeAs: 'featureRecords',
     },
