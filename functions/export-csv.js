@@ -41,6 +41,7 @@ function exportCsv(req, res) {
       }
       res.write(arr.join(',') + '\n');
       
+      // TODO: see if can do without Promise.all by having 'elements' in the scope for chained promise.
       return Promise.all(
         [db.fetchRecords(project.id, featureTypeId),
           elements]);
