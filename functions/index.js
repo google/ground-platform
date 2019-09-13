@@ -26,7 +26,6 @@ const onUpdateRecord = require('./on-update-record')
 
 exports.exportCsv = functions.https.onRequest((req, res) =>
 	exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
-
 exports.exportKml = functions.https.onRequest((req, res) =>
 	exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
 
