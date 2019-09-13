@@ -27,79 +27,51 @@ function exportCsv(req, res) {
   } = req.query;
 
   let data = {};
-  let numberOfRecords = 0;
   return db.fetchProject(projectId).then(
     project => {
       if (!project.exists) {
         res.status(404).send('not found');
         return Promise.reject(new Error('project not found: ' + projectId))
       }
-      return Promise.all([
-        db.fetchForm(project.id, featureTypeId),
-        db.fetchRecords(project.id, featureTypeId)
-      ]);
-    }
-  ).then(
-    results => {
-      return readFormAndRecords(results, data);
+      res.type('text/csv');
+      let form = project.get('featureTypes')[featureTypeId]['forms'];
+      let elements = form[Object.keys(form)[0]]['elements'];
+      var arr = []
+      for (var el in elements) {
+        arr.push('"' + escapeQuotes(elements[el]['labels']['_']) + '"');
+      }
+      res.write(arr.join() + '\n');
+      
+      return Promise.all(
+        [db.fetchRecords(project.id, featureTypeId),
+          elements]);
     }
   ).then(
     data => {
-      return streamToRes();
+      var records = data[0];
+      var elements = data[1];
+      records.docs.forEach(doc => {
+        var arr = [];
+        if (doc.data()['featureTypeId'] == featureTypeId) {
+          for (var el in elements) {
+            var value = escapeQuotes(doc.data()['responses'][elements[el]['id']]);
+            value = value === undefined ? '' : value;
+            arr.push('"' + value + '"');
+          }
+          res.write(arr.join() + '\n')
+        }
+      })
+
+      return res.end();
     }
   ).catch(
     err => {
-      console.log(err);
-      //return res.status(500).end();
-      return res.send(data);
+      console.error("=Export Failed= " , err);
+      return res.status(500).end();
     }
   )
 
-  function readFormAndRecords(results) {
-    const form = results[0];
-    for(var prop in form) {
-      if(form.hasOwnProperty(prop)) {
-        form[prop]['elements'].forEach(
-          field => {
-            data[field['id']] = [field['labels']['_']];
-          }
-        );
-      }
-    }
-  
-    const records = results[1];
-    numberOfRecords = records.length;
-    records.forEach(
-      record => {
-        const responses = record.get('responses');
-        for(var prop in responses) {
-          toPush = response[prop];
-          if (Array.isArray(toPush)) {
-            toPush = '"' + escapeQuotes(toPush.join()) + '"';
-          } else {
-            toPush = '"' + escapeQuotes(toPush) + '"';
-          }
-          data[prop].push(toPush);
-        }
-      }
-    );
-    return data;
-  }
-  
-  function streamToRes() {
-    res.type('csv');
-      for (var i = 0; i <= numberOfRecords; i++) {
-        toSend = '';
-        for (var prop in data) {
-          toSend += data[prop][i] + ',';
-        }
-        toSend.slice(0, -1);
-        res.write(toSend + '\n');
-      }
-      return res.end();
-  }
-
-  function escapeQuotes( str ) {
+  function escapeQuotes(str) {
     return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
   }
 }
