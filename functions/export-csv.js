@@ -43,14 +43,11 @@ function exportCsv(req, res) {
       arr.push('"Latitude"');
       arr.push('"Longitude"');
       res.write(arr.join(',') + '\n');
-      // TODO: see if can do without Promise.all by having 'elements' in the scope for chained promise.
-      return Promise.all(
-        [db.fetchFeatures(project.id),
-          elements]);
+      return db.fetchFeatures(project.id);
     }
   ).then(
     data => {
-      features = data[0];
+      features = data;
       var promises = [];
       features.docs.forEach(feature => {
         promises.push(db.fetchRecords(projectId, feature.id));
