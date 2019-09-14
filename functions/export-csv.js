@@ -25,7 +25,9 @@ function exportCsv(req, res) {
     featureType: featureTypeId,
     lang: desiredLanguage,
   } = req.query;
-
+  // TODO: Simplify/refactor post G4G19.
+  var elements = [];
+  var features = [];
   return db.fetchProject(projectId).then(
     project => {
       if (!project.exists) {
@@ -34,49 +36,57 @@ function exportCsv(req, res) {
       }
       res.type('text/csv');
       let form = project.get('featureTypes')[featureTypeId]['forms'];
-      let elements = form[Object.keys(form)[0]]['elements'];
+      elements = form[Object.keys(form)[0]]['elements'];
       var arr = []
       for (var el in elements) {
         arr.push('"' + escapeQuotes(elements[el]['labels']['_']) + '"');
       }
+      arr.push('"Latitude"');
+      arr.push('"Longitude"');
       res.write(arr.join(',') + '\n');
-      
-      // TODO: see if can do without Promise.all by having 'elements' in the scope for chained promise.
-      return Promise.all(
-        [db.fetchRecords(project.id, featureTypeId),
-          elements]);
+      return db.fetchFeatures(project.id);
     }
   ).then(
     data => {
-      var records = data[0];
-      var elements = data[1];
-      // TODO: Add Latitude and Longitude to header and rows.
-      records.docs.forEach(doc => {
-        var arr = [];
-        if (doc.data()['featureTypeId'] == featureTypeId) {
-          for (var el in elements) {
-            var value = doc.data()['responses'][elements[el]['id']];
-            value = value == (undefined || null) ? '' : value;
-            arr.push('"' + escapeQuotes(value) + '"');
-          }
-          res.write(arr.join(',') + '\n')
-        }
-      })
-
+      features = data;
+      var promises = [];
+      features.docs.forEach(feature => {
+        promises.push(db.fetchRecords(projectId, feature.id));
+      });
+      return Promise.all(promises);
+    }
+  )
+  .then(
+    records => {
+      var records = records[0]; // TODO: remove this line if fetchRecords give correct data
+      features.docs.forEach(feature => {
+          records.docs.forEach(record => {
+            if (record.get('featureId') == feature.id) { // TODO: remove this condition if fetchRecords give correct data
+              var arr = [];
+              for (var el in elements) {
+                var value = record.data()['responses'][elements[el]['id']];
+                value = value == (undefined || null) ? '' : value;
+                arr.push('"' + escapeQuotes(value) + '"');
+              }
+              var center = feature.data()['center'];
+              arr.push('"' + center['_latitude'] + '"');
+              arr.push('"' + center['_longitude'] + '"');
+              res.write(arr.join(',') + '\n');
+            }
+          });
+      });
       return res.end();
     }
-  ).catch(
+  )
+  .catch(
     err => {
       console.error("Export Failed: " , err);
       return res.status(500).end();
     }
   )
 
-  // escape a double quote if not already escaped
-  // source: https://gist.github.com/getify/3667624
   function escapeQuotes(str) {
-    // TODO: Revisit once we know what needs to be escaped and how.
-    return str.toString().replace(/\\([\s\S])|(")/g,"\\$1$2");
+    return str.replace(/\r?\n/g, '\\n').replace(/"/g, '""');
   }
 }
 
