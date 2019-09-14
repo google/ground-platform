@@ -25,6 +25,7 @@ function exportCsv(req, res) {
     featureType: featureTypeId,
     lang: desiredLanguage,
   } = req.query;
+  // TODO: Simplify/refactor post G4G19.
   var elements = [];
   var features = [];
   return db.fetchProject(projectId).then(
