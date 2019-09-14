@@ -84,11 +84,8 @@ function exportCsv(req, res) {
     }
   )
 
-  // escape a double quote if not already escaped
-  // source: https://gist.github.com/getify/3667624
   function escapeQuotes(str) {
-    // TODO: Revisit once we know what needs to be escaped and how.
-    return str.toString().replace(/\\([\s\S])|(")/g,"\\$1$2").replace(/(\r\n|\n|\r)/g,"\\n");
+    return str.replace(/\r?\n/g, '\\n').replace(/"/g, '""');
   }
 }
 
