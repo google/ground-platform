@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
+ /*global google*/
+
 import React from 'react';
 import './index.css';
 import {connect} from 'react-redux';
 import {compose, withProps} from 'recompose';
 import {getActiveProject, getMapFeatures} from '../../datastore.js';
-import {getFeaturePath} from '../../route.js';
+import {getFeaturePath, featurePath} from '../../route.js';
 import {
   withScriptjs,
   withGoogleMap,
@@ -29,6 +31,7 @@ import {
 } from 'react-google-maps';
 import googleMapsConfig from '../../.google-maps-config.js';
 import PropTypes from 'prop-types';
+import { matchPath } from "react-router";
 
 class GndMap extends React.Component {
   // https://github.com/google-map-react/google-map-react/blob/master/API.md
@@ -40,11 +43,19 @@ class GndMap extends React.Component {
     });
   }
 
+  getSelectedFeatureIdFromUrl() {
+    const match = matchPath(this.props.location.pathname, featurePath);
+    if (!match) {
+      return null;
+    }
+    return match.params.featureId;
+  }
+
   onMapLoaded(map, maps) {
     this.resolveMap(map);
   }
 
-  getIcon(project, feature) {
+  getIcon(project, feature, isSelected) {
     // TODO: Preload icons on project change.
     // TODO: Increase size.
     const featureTypeId = feature.featureTypeId;
@@ -61,7 +72,11 @@ class GndMap extends React.Component {
              22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z`,
       fillColor: color,
       fillOpacity: 1,
+      width: 14,
+      height: 20,
+      anchor: new google.maps.Point(7, 20),      
       strokeWeight: 0,
+      scale: isSelected ? 1.5 : 1,
     };
   }
 
@@ -70,7 +85,7 @@ class GndMap extends React.Component {
     this.props.history.push(url);
   }
 
-  renderFeature(markers, projectId, project, featureId, feature) {
+  renderFeature(markers, projectId, project, featureId, feature, isSelected) {
     if (!project || !feature || !feature.center) {
       return markers;
     }
@@ -79,7 +94,7 @@ class GndMap extends React.Component {
         <Marker
           key={featureId}
           position={{lat: pos.latitude, lng: pos.longitude}}
-          icon={this.getIcon(project, feature)}
+          icon={this.getIcon(project, feature, isSelected)}
           onClick={this.onMarkerClick.bind(this, projectId, featureId)}
         />
     );
@@ -88,6 +103,7 @@ class GndMap extends React.Component {
 
   render() {
     const {projectId, project, features} = this.props;
+    const selectedFeatureId = this.getSelectedFeatureIdFromUrl();
     return (
       <GoogleMap
         bootstrapURLKeys={{key: googleMapsConfig.apiKey}}
@@ -107,7 +123,8 @@ class GndMap extends React.Component {
                 projectId,
                 project,
                 featureId,
-                features[featureId]
+                features[featureId],
+                featureId === selectedFeatureId
             ),
           []
           )}
