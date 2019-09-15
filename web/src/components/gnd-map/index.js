@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+ /*global google*/
+
 import React from 'react';
 import './index.css';
 import {connect} from 'react-redux';
@@ -70,6 +72,9 @@ class GndMap extends React.Component {
              22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z`,
       fillColor: color,
       fillOpacity: 1,
+      width: 14,
+      height: 20,
+      anchor: new google.maps.Point(7, 20),      
       strokeWeight: 0,
       scale: isSelected ? 1.5 : 1,
     };
