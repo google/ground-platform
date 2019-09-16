@@ -26,6 +26,7 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import {getActiveProject, getFeatureRecords} from '../../datastore.js';
 import {withStyles} from '@material-ui/core/styles';
+import {getProjectBasePath} from '../../route.js';
 import {connectFeature} from '../../datastore.js';
 import GridList from '@material-ui/core/GridList';
 import Grid from '@material-ui/core/Grid';
@@ -84,6 +85,12 @@ type Props = {
 };
 
 class GndFeatureDetails extends React.Component<Props> {
+  onDrawerClose() {
+    const projectId = this.props.match.params.projectId;
+    var url = getProjectBasePath(projectId);
+    this.props.history.push(url);
+  }
+
   render() {
     if (!this.props.records || !this.props.project.featureTypes) return null;
     const {records, classes} = this.props;
@@ -138,7 +145,9 @@ class GndFeatureDetails extends React.Component<Props> {
               <p style={{fontWeight: 500}}>{layerName}</p>
             </Grid>
             <Grid item xs={2}>
-              <CloseIcon style={{paddingTop: 14}}/>
+              <CloseIcon
+                style={{paddingTop: 14}}
+                onClick={this.onDrawerClose.bind(this)}/>
             </Grid>
           </Grid>
           <GridList style={{paddingTop: 20, paddingBottom: 50}} spacing={1} cols={1} cellHeight='auto'>

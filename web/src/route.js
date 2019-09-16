@@ -18,6 +18,10 @@
 export const projectBasePath = '/p/:projectId';
 export const featurePath = `${projectBasePath}/f/:featureId`;
 
+export const getProjectBasePath = (projectId) => {
+  return `/p/${projectId}`;
+};
+
 export const getFeaturePath = (projectId, featureId) => {
   return `/p/${projectId}/f/${featureId}`;
 };
