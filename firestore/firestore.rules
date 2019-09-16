@@ -1,7 +1,17 @@
 service cloud.firestore {
   match /databases/{database}/documents {
+  	function isRegistered() {
+    	return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function email() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email;
+    }
     match /{document=**} {
-      allow read, write;
+      allow read;
+      allow write: if isRegistered() && email().matches('(.*@google[.]com|gndtestuser@gmail[.]com)');
+    }
+    match /users/{allDocuments} {
+      allow create: if request.auth != null;
     }
   }
 }

@@ -2,6 +2,16 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+function formatValue(value) {
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  } else if (typeof value == 'string' || typeof value == 'number') {
+    return value.toString();
+  } else {
+    return '';
+  }
+}
+
 class KmlWriter {
 
   constructor(projName, rawData, desiredLanguage) {
@@ -118,10 +128,10 @@ class KmlWriter {
   static recordToHtmlTableRow(formsDef, record, desiredLanguage) {
     let row = '';
     // Add modifiedBy
-    row += '<tr>';
-    row += '<th>Modified Time</th>';
-    row += '<td>' + record['clientTimeModified'] + '</td>';
-    row += '</tr>';
+    // row += '<tr>';
+    // row += '<th>Modified Time</th>';
+    // row += '<td>' + (record['clientTimeModified'] || '') + '</td>';
+    // row += '</tr>';
     // Add Responses
     const questions = formsDef['elements'];
     const responses = record['responses'];
@@ -129,19 +139,20 @@ class KmlWriter {
       const questionId = questions[question]['id'];
       const questionLabels = questions[question]['labels'];
 
-      const responseCode = responses[questionId] ? responses[questionId][0] : null;
-      let response = responseCode ? responseCode : ' - ';
-      if (questions[question]['options'] && responseCode) {
-        let optionLabelsMapping = new Map();
-        questions[question]['options'].forEach(
-          option => {
-            if (option['code'] == responseCode) {
-              response = KmlWriter.getFieldWithDesiredLanguage_(
-                option['labels'], desiredLanguage);
-            }
-          }
-        );
-      }
+      let response = formatValue(responses[questionId] || '');
+      // const responseCode = responses[questionId] ? responses[questionId][0] : null;
+      // let response = responseCode ? responseCode : ' - ';
+      // if (questions[question]['options'] && responseCode) {
+      //   let optionLabelsMapping = new Map();
+      //   questions[question]['options'].forEach(
+      //     option => {
+      //       if (option['code'] == responseCode) {
+      //         response = KmlWriter.getFieldWithDesiredLanguage_(
+      //           option['labels'], desiredLanguage);
+      //       }
+      //     }
+      //   );
+      // }
 
       row += '<tr>'
       row +=

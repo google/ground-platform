@@ -96,9 +96,8 @@ function exportKml(req, res) {
     }
   ).catch(
     err => {
-      console.log(err);
-      //return res.status(500).end();
-      return res.send(data);
+      console.log('Export failed', err);
+      return res.status(500).end();
     }
   )
 }

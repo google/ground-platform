@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+ /*global google*/
+
 import React from 'react';
 import './index.css';
 import {connect} from 'react-redux';
@@ -53,6 +55,9 @@ class GndMap extends React.Component {
     this.resolveMap(map);
   }
 
+  /**
+   * @returns {google.maps.Symbol}
+   */
   getIcon(project, feature, isSelected) {
     // TODO: Preload icons on project change.
     // TODO: Increase size.
@@ -65,14 +70,20 @@ class GndMap extends React.Component {
                   project.featureTypes[featureTypeId].defaultStyle.color)
                   || defaultColor;
     return {
+      // Path defined on 24x24 grid.
       path: `M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,
              1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,
              22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z`,
       fillColor: color,
       fillOpacity: 1,
       strokeWeight: 0,
-      scale: isSelected ? 1.5 : 1,
+      width: 14,
+      height: 20,
+      anchor: new google.maps.Point(12, 24),
+      scale: isSelected ? 1.5 : 1
     };
+    // setting anchor shouldn't be necessary:
+    // https://developers.google.com/maps/documentation/javascript/reference/3.37/marker#Icon.anchor
   }
 
   onMarkerClick(projectId, featureId) {

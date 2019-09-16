@@ -105,14 +105,22 @@ const connectFeature =
     },
   ]);
 
-const exportKml = () => (projectId, featureTypeId) => {
-  window.location.href = `${
+const exportCsv = () => (projectId, featureTypeId) => {
+  window.open(`${
     firebaseConfig.functionsURL
-  }/exportKml?project=${projectId}&featureType=${featureTypeId}`;
+  }/exportCsv?project=${projectId}&featureType=${featureTypeId}`);
+};
+
+
+const exportKml = () => (projectId, featureTypeId) => {
+  window.open(`${
+    firebaseConfig.functionsURL
+  }/exportKml?project=${projectId}&featureType=${featureTypeId}`);
 };
 
 export {
   getActiveProject,
+  exportCsv,
   exportKml,
   updateProject,
   updateProjectTitle,

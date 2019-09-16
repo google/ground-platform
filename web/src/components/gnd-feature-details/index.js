@@ -30,6 +30,7 @@ import {connectFeature} from '../../datastore.js';
 import GridList from '@material-ui/core/GridList';
 import Grid from '@material-ui/core/Grid';
 import CloseIcon from '@material-ui/icons/Close';
+import history from '../../history.js';
 
 const mapMarker = require(`../../images/map-marker.png`);
 
@@ -72,6 +73,16 @@ const styles = (theme) => ({
   },
 });
 
+function formatValue(value) {
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  } else if (typeof value == 'string' || typeof value == 'number') {
+    return value.toString();
+  } else {
+    return '';
+  }
+}
+
 type Props = {
   match: Object,
   records: {
@@ -88,7 +99,9 @@ class GndFeatureDetails extends React.Component<Props> {
     if (!this.props.records || !this.props.project.featureTypes) return null;
     const {records, classes} = this.props;
     const featureTypes =
-      (this.props.project && this.props.project.featureTypes) || {};
+      (this.props.project && this.props.project.featureTypes) || {};    
+    const projectId = this.props.match.params.projectId;
+    console.log(this.props.match.params.projectId);
     let layerName;
     const recordsList = Object.entries(records).map(([recordId, record], index) => {
       const created = record.created;
@@ -105,7 +118,7 @@ class GndFeatureDetails extends React.Component<Props> {
         if (!(fieldObj && fieldObj[0] && fieldObj[0]['labels'] && fieldObj[0]['labels']['_'])) return null;
         return <Typography key={idx} variant='subheading'>
           <p className={classes.key}>{fieldObj[0]['labels']['_']}</p>
-          <p className={classes.value}>{fieldValue}</p>
+          <p className={classes.value}>{formatValue(fieldValue)}</p>
         </Typography>;
       });
       return <Card key={index} classes={{root: classes.card}}>
@@ -130,7 +143,7 @@ class GndFeatureDetails extends React.Component<Props> {
         docked='false'
       >
         <div style={{height: 50, borderBottom: '1px solid #D3D3D3', borderTop: '1px solid #D3D3D3', verticalAlign: 'center'}}>
-          <Grid container spacing={12} style={{paddingLeft: 10, paddingRight: 5}}>
+          <Grid container spacing={8} style={{paddingLeft: 10, paddingRight: 5}}>
             <Grid item xs={2}>
               <img width="24" height="24" src={mapMarker} style={{paddingTop: 14}}/>
             </Grid>
@@ -138,7 +151,7 @@ class GndFeatureDetails extends React.Component<Props> {
               <p style={{fontWeight: 500}}>{layerName}</p>
             </Grid>
             <Grid item xs={2}>
-              <CloseIcon style={{paddingTop: 14}}/>
+              <CloseIcon style={{paddingTop: 14}} onClick={this.onCloseClick.bind(this, projectId)}/>
             </Grid>
           </Grid>
           <GridList style={{paddingTop: 20, paddingBottom: 50}} spacing={1} cols={1} cellHeight='auto'>
@@ -147,6 +160,10 @@ class GndFeatureDetails extends React.Component<Props> {
         </div>
       </Drawer>
     );
+  }
+
+  onCloseClick(projectId) {
+    history.push(`/p/${projectId}`);
   }
 }
 

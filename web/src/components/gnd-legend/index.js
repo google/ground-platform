@@ -24,6 +24,7 @@ import {
   getActiveProject,
   getLocalizedText,
   generateId,
+  exportCsv,
   exportKml,
 } from '../../datastore.js';
 import GndMarkerImage from '../gnd-marker-image';
@@ -45,6 +46,7 @@ import {
 import {withFirestore} from 'react-redux-firebase';
 import {Add, MoreVert, Settings} from '@material-ui/icons';
 import {GoogleEarth} from 'mdi-material-ui';
+import {FileDelimitedOutline} from 'mdi-material-ui';
 
 const styles = (theme) => ({
   card: {
@@ -77,6 +79,7 @@ const styles = (theme) => ({
 
 type Props = {
   classes: Object,
+  exportCsv: Function,
   exportKml: Function,
   generateId: Function,
   openFeatureTypeEditor: Function,
@@ -98,6 +101,11 @@ class GndLegend extends React.Component<Props> {
         featureTypes[featureTypeId]
     );
     this.setState({menuAnchorEl: null});
+  }
+
+  handleDownloadCsvClick(featureTypeId) {
+    const {projectId, exportCsv} = this.props;
+    exportCsv(projectId, featureTypeId);
   }
 
   handleDownloadKmlClick(featureTypeId) {
@@ -146,6 +154,10 @@ class GndLegend extends React.Component<Props> {
             open={Boolean(menuAnchorEl)}
             onClose={this.handleMenuClose.bind(this)}
           >
+            <MenuItem onClick={(ev) => this.handleDownloadCsvClick(ft.id)}>
+              <FileDelimitedOutline className="menu-icon" />
+              <Typography>Download CSV</Typography>
+            </MenuItem>
             <MenuItem onClick={(ev) => this.handleDownloadKmlClick(ft.id)}>
               <GoogleEarth className="menu-icon" />
               <Typography>Download KML</Typography>
@@ -216,7 +228,7 @@ const enhance = compose(
         mapDispatchToProps
     ),
     withFirestore,
-    withHandlers({exportKml, generateId}),
+    withHandlers({exportCsv, exportKml, generateId}),
     withStyles(styles)
 );
 

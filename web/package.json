@@ -9,7 +9,7 @@
     "firebase": "^5.4.0",
     "history": "^4.7.2",
     "immutability-helper": "^2.8.1",
-    "mdi-material-ui": "^5.13.0",
+    "mdi-material-ui": "^6.7.0",
     "mdi-react": "5.4.0",
     "prop-types": "15.7.2",
     "react": "^16.4.2",
