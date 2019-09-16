@@ -18,7 +18,6 @@
 'use strict';
 
 const {db} = require('./common/context');
-const CsvWriter = require('./common/csv-writer');
 
 function exportCsv(req, res) {
   const {
@@ -26,56 +25,69 @@ function exportCsv(req, res) {
     featureType: featureTypeId,
     lang: desiredLanguage,
   } = req.query;
-
-  let data = {};
+  // TODO: Simplify/refactor post G4G19.
+  var elements = [];
+  var features = [];
   return db.fetchProject(projectId).then(
     project => {
       if (!project.exists) {
         res.status(404).send('not found');
         return Promise.reject(new Error('project not found: ' + projectId))
       }
-      return Promise.all([
-        db.fetchForm(project.id, featureTypeId),
-        db.fetchRecords(project.id, featureTypeId)
-      ]);
-    }
-  ).then(
-    results => {
-      const form = results[0];
-      for(var prop in form) {
-        if(form.hasOwnProperty(prop)) {
-          form[prop]['elements'].forEach(
-            field => {
-              data[field['id']] = [field['labels']['_']];
-            }
-          );
-        }
+      res.type('text/csv');
+      let form = project.get('featureTypes')[featureTypeId]['forms'];
+      elements = form[Object.keys(form)[0]]['elements'];
+      var arr = []
+      for (var el in elements) {
+        arr.push('"' + escapeQuotes(elements[el]['labels']['_']) + '"');
       }
-
-      const records = results[1];
-      records.forEach(
-        record => {
-          const responses = record.get('responses');
-          for(var response in responses) {
-            data[prop].push(responses[response])
-          }
-        }
-      );
-      let csvWriter = new CsvWriter(projectId, data, desiredLanguage ? desiredLanguage : '');
-      return csvWriter.getTmpCsvFile();
+      arr.push('"Latitude"');
+      arr.push('"Longitude"');
+      res.write(arr.join(',') + '\n');
+      return db.fetchFeatures(project.id);
     }
   ).then(
-    tmpCsvFilePath => {
-      return res.download(tmpCsvFilePath);
-    }
-  ).catch(
-    err => {
-      console.log(err);
-      //return res.status(500).end();
-      return res.send(data);
+    data => {
+      features = data;
+      var promises = [];
+      features.docs.forEach(feature => {
+        promises.push(db.fetchRecords(projectId, feature.id));
+      });
+      return Promise.all(promises);
     }
   )
-}
+  .then(
+    records => {
+      var records = records[0]; // TODO: remove this line if fetchRecords give correct data
+      features.docs.forEach(feature => {
+          records.docs.forEach(record => {
+            if (record.get('featureId') == feature.id) { // TODO: remove this condition if fetchRecords give correct data
+              var arr = [];
+              for (var el in elements) {
+                var value = record.data()['responses'][elements[el]['id']];
+                value = value == (undefined || null) ? '' : value;
+                arr.push('"' + escapeQuotes(value) + '"');
+              }
+              var center = feature.data()['center'];
+              arr.push('"' + center['_latitude'] + '"');
+              arr.push('"' + center['_longitude'] + '"');
+              res.write(arr.join(',') + '\n');
+            }
+          });
+      });
+      return res.end();
+    }
+  )
+  .catch(
+    err => {
+      console.error("Export Failed: " , err);
+      return res.status(500).end();
+    }
+  )
 
+  function escapeQuotes(str) {
+    return str.replace(/\r?\n/g, '\\n').replace(/"/g, '""');
+  }
+}
 
 module.exports = exportCsv;

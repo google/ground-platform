@@ -73,14 +73,16 @@ const styles = (theme) => ({
   },
   colorPickerTab: {
     position: 'absolute',
-    left: 145,
+    left: 142,
     zIndex: 3,
   },
   defaultStyle: {
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 23,
-    paddingRight: 15,
+    paddingTop: 14,
+    paddingBottom: 6,
+    paddingLeft: 6,
+  },
+  defaultStyleText: {
+    paddingRight: 16,
     fontSize: '1.0rem',
     fontWeight: 400,
   },
@@ -287,16 +289,15 @@ class GndFeatureTypeEditor extends React.Component<Props> {
           <DialogTitle>
             <div className="ft-header">
               <GndInlineEdit
-                className="ft-label"
                 inputClassName="ft-label-input"
                 onCommitChanges={this.handleFeatureTypeLabelChange.bind(this)}
                 value={featureTypeLabel}
                 placeholder="Unnamed layer"
               />
             </div>
-            <div>
+            <div className={classes.defaultStyle}>
               <span
-                className={classes.defaultStyle}>
+                className={classes.defaultStyleText}>
                 Default style</span>
               <Button
                 className={classes.colorPicker}

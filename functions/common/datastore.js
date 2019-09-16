@@ -43,7 +43,7 @@ class Datastore {
   }
 
   fetchRecords(projectId, featureId) {
-    return this.fetchCollection_(`projects/${projectId}/features/${featureId}/records`);
+    return this.fetchCollection_(`projects/${projectId}/records`);
   }
 
   fetchFeature(projectId, featureId) {
