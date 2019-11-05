@@ -1,6 +1,6 @@
 import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { GroundApp } from './ground_app';
+import { GroundApp } from './ground-app';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {

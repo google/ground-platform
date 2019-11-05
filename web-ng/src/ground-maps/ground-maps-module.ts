@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { GroundMaps } from './ground_maps'
+import { GroundMaps } from './ground-maps'
 
 import { AgmCoreModule } from '@agm/core';
 

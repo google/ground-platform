@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { GroundMaps } from '../ground_maps/ground_maps';
+import { GroundMaps } from '../ground-maps/ground-maps';
 
 const routes: Routes = [{path: '', component: GroundMaps}];
 const config = RouterModule.forRoot(routes);

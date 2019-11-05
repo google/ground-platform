@@ -5,6 +5,11 @@ Install ng CLI using npm:
 npm install -g @angular/cli
 ```
 
+Install angular-devkit:
+```
+npm install --save-dev @angular-devkit/build-angular
+```
+
 Upgrade Node.js to the newest version using nvm: (Angular requires Node.js version 10.9.0 or later.)
 ```
 nvm install node --reinstall-packages-from=node

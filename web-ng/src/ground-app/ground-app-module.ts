@@ -1,9 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
-import { AppRoutingModule } from './routing_module';
-import { GroundApp } from './ground_app';
-import { GroundMapsModule } from '../ground_maps/ground_maps_module';
+import { AppRoutingModule } from './routing-module';
+import { GroundApp } from './ground-app';
+import { GroundMapsModule } from '../ground-maps/ground-maps-module';
 
 @NgModule({
   declarations: [
