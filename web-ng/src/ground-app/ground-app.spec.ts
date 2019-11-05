@@ -5,12 +5,8 @@ import { GroundApp } from './ground-app';
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule
-      ],
-      declarations: [
-        GroundApp
-      ],
+      imports: [RouterTestingModule],
+      declarations: [GroundApp],
     }).compileComponents();
   }));
 
@@ -30,6 +26,8 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(GroundApp);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('span').textContent).toContain('Ground app is running!');
+    expect(compiled.querySelector('span').textContent).toContain(
+      'Ground app is running!'
+    );
   });
 });

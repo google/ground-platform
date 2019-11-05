@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { GroundMaps } from './ground-maps'
+import { GroundMaps } from './ground-maps';
 
 import { AgmCoreModule } from '@agm/core';
 
@@ -8,11 +8,11 @@ import { AgmCoreModule } from '@agm/core';
   imports: [
     BrowserModule,
     AgmCoreModule.forRoot({
-    // TODO: load apikey from local config file
-    apiKey: ''
-    })
+      // TODO: load apikey from local config file
+      apiKey: '',
+    }),
   ],
-  declarations: [ GroundMaps ],
-  bootstrap: [ GroundMaps ]
+  declarations: [GroundMaps],
+  bootstrap: [GroundMaps],
 })
 export class GroundMapsModule {}

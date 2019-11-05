@@ -6,14 +6,8 @@ import { GroundApp } from './ground-app';
 import { GroundMapsModule } from '../ground-maps/ground-maps-module';
 
 @NgModule({
-  declarations: [
-    GroundApp
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    GroundMapsModule
-  ],
-  bootstrap: [GroundApp]
+  declarations: [GroundApp],
+  imports: [BrowserModule, AppRoutingModule, GroundMapsModule],
+  bootstrap: [GroundApp],
 })
-export class AppModule { }
+export class AppModule {}
