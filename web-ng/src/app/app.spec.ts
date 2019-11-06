@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -17,30 +16,30 @@
 
 import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { GroundApp } from './ground-app';
+import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
-      declarations: [GroundApp],
+      declarations: [AppComponent],
     }).compileComponents();
   }));
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(GroundApp);
+    const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();
   });
 
   it(`should have as title 'Ground'`, () => {
-    const fixture = TestBed.createComponent(GroundApp);
+    const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app.title).toEqual('Ground');
   });
 
   it('should render title', () => {
-    const fixture = TestBed.createComponent(GroundApp);
+    const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
     expect(compiled.querySelector('span').textContent).toContain(

@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -17,14 +16,19 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { MapComponent } from './map.component';
 
-import { AppRoutingModule } from './routing-module';
-import { GroundApp } from './ground-app';
-import { GroundMapsModule } from '../ground-maps/ground-maps-module';
+import { AgmCoreModule } from '@agm/core';
 
 @NgModule({
-  declarations: [GroundApp],
-  imports: [BrowserModule, AppRoutingModule, GroundMapsModule],
-  bootstrap: [GroundApp],
+  imports: [
+    BrowserModule,
+    AgmCoreModule.forRoot({
+      // TODO: load apikey from local config file
+      apiKey: '',
+    }),
+  ],
+  declarations: [MapComponent],
+  bootstrap: [MapComponent],
 })
-export class AppModule {}
+export class MapModule {}

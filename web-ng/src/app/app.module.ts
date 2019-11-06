@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -15,15 +14,16 @@
  * limitations under the License.
  */
 
+import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { GroundMaps } from '../ground-maps/ground-maps';
 
-const routes: Routes = [{ path: '', component: GroundMaps }];
-const config = RouterModule.forRoot(routes);
+import { AppRoutingModule } from './routing.module';
+import { AppComponent } from './app.component';
+import { MapModule } from '../map/map.module';
 
 @NgModule({
-  imports: [config],
-  exports: [RouterModule],
+  declarations: [AppComponent],
+  imports: [BrowserModule, AppRoutingModule, MapModule],
+  bootstrap: [AppComponent],
 })
-export class AppRoutingModule {}
+export class AppModule {}

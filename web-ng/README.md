@@ -1,4 +1,6 @@
-# Dev Environment Setup
+# Ground Web Console in Angular(WIP)
+
+## Dev Environment Setup
 
 Install ng CLI using npm:
 ```
@@ -14,10 +16,6 @@ Upgrade Node.js to the newest version using nvm: (Angular requires Node.js versi
 ```
 nvm install node --reinstall-packages-from=node
 ```
-
-# WebNg
-
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.14.
 
 ## Development server
 

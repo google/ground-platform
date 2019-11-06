@@ -4,8 +4,8 @@
     "rootDir": ".",
     "outDir": "build",
     "lib": [
-			"es2018",
-			"dom"
+      "es2018",
+      "dom"
     ],
     "experimentalDecorators": true
   },

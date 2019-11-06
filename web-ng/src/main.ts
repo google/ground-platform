@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -18,7 +17,7 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import { AppModule } from './ground-app/ground-app-module';
+import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
 if (environment.production) {

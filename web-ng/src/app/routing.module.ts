@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -15,15 +14,15 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { MapComponent } from '../map/map.component';
 
-@Component({
-  selector: 'ground-maps',
-  templateUrl: './ground-maps.ng.html',
-  styleUrls: ['./ground-maps.css'],
+const routes: Routes = [{ path: '', component: MapComponent }];
+const config = RouterModule.forRoot(routes);
+
+@NgModule({
+  imports: [config],
+  exports: [RouterModule],
 })
-export class GroundMaps {
-  title = 'This is a Ground Map';
-  lat = 40.767716;
-  lng = -73.971714;
-}
+export class AppRoutingModule {}

@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -19,9 +18,9 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './ground-app.ng.html',
-  styleUrls: ['./ground-app.css'],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.css'],
 })
-export class GroundApp {
+export class AppComponent {
   title = 'Ground';
 }

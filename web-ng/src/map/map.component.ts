@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -15,21 +14,15 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { GroundMaps } from './ground-maps';
+import { Component } from '@angular/core';
 
-import { AgmCoreModule } from '@agm/core';
-
-@NgModule({
-  imports: [
-    BrowserModule,
-    AgmCoreModule.forRoot({
-      // TODO: load apikey from local config file
-      apiKey: '',
-    }),
-  ],
-  declarations: [GroundMaps],
-  bootstrap: [GroundMaps],
+@Component({
+  selector: 'ground-map',
+  templateUrl: './map.component.html',
+  styleUrls: ['./map.css'],
 })
-export class GroundMapsModule {}
+export class MapComponent {
+  title = 'This is a Ground Map';
+  lat = 40.767716;
+  lng = -73.971714;
+}
