@@ -2,9 +2,9 @@
 name: Feature request
 about: Request a new feature
 title: "[Feature] Description"
-labels: 'type: fr, web, priority: p2'
+labels: 'priority: p2, type: fr, web'
 assignees: ''
 
 ---
 
-Update the issue title above and provide a step-by-step description of the feature being requested.
+
