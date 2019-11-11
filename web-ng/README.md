@@ -3,19 +3,15 @@
 ## Dev Environment Setup
 
 Install ng CLI using npm:
+
 ```
 npm install -g @angular/cli
 ```
 
-Install angular-devkit:
-```
-npm install --save-dev @angular-devkit/build-angular
-```
+Install recent version of Node.js using nvm:
 
-Upgrade Node.js to the newest version using nvm: (Angular requires Node.js
-version 10.9.0 or later.)
 ```
-nvm install node --reinstall-packages-from=node
+nvm install 13.1.0 --reinstall-packages-from=node
 ```
 
 ## Development server
