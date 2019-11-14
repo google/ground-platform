@@ -17,15 +17,14 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MapComponent } from './map.component';
-
 import { AgmCoreModule } from '@agm/core';
+import { environment } from '../environments/environment';
 
 @NgModule({
   imports: [
     BrowserModule,
     AgmCoreModule.forRoot({
-      // TODO: load apikey from local config file
-      apiKey: '',
+      apiKey: environment.googleMapsApiKey,
     }),
   ],
   declarations: [MapComponent],

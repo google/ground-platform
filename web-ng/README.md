@@ -14,6 +14,23 @@ Install recent version of Node.js using nvm:
 nvm install 13.1.0 --reinstall-packages-from=node
 ```
 
+### Add Google Maps API key
+
+1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
+
+    > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
+    > Platform](https://console.cloud.google.com/) under APIs \> Services \>
+    > Credentials.
+
+2. Write the key to `src/environments/.google-maps-config.json` as follows:
+
+    ```json
+    {
+      "apiKey": "YOUR_API_KEY"
+    }
+    ```
+    Where `YOUR_API_KEY` is your Google Maps API key.
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to http://localhost:4200/. The app
