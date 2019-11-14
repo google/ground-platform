@@ -17,9 +17,9 @@ Upgrade Node.js to the newest version using nvm: (Angular requires Node.js versi
 nvm install node --reinstall-packages-from=node
 ```
 
-### Add Google Maps API Key
+### Add Google Maps API key
 
-1. If you don't already have one, generate a new API key at <https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide>
+1. If you don't already have one, generate a new API key by following  <https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide>
 
     > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
     > Platform](https://console.cloud.google.com/) under APIs \> Services \>
