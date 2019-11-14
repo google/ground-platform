@@ -1,4 +1,4 @@
-# Ground Web Console in Angular(WIP)
+# Ground Web Console in Angular (WIP)
 
 ## Dev Environment Setup
 
