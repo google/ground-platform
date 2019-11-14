@@ -5,7 +5,7 @@
 Install Node.js using nvm:
 
 ```
-nvm install 13.1.0 --reinstall-packages-from=node
+nvm install 13.1.0
 ```
 
 Install ng CLI using npm:
