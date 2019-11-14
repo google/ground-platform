@@ -2,16 +2,16 @@
 
 ## Dev Environment Setup
 
+Install Node.js using nvm:
+
+```
+nvm install 13.1.0 --reinstall-packages-from=node
+```
+
 Install ng CLI using npm:
 
 ```
 npm install -g @angular/cli
-```
-
-Install recent version of Node.js using nvm:
-
-```
-nvm install 13.1.0 --reinstall-packages-from=node
 ```
 
 ### Add Google Maps API key
