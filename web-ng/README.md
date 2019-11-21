@@ -1,19 +1,5 @@
 # Ground Web Console in Angular (WIP)
 
-## Dev Environment Setup
-
-Install Node.js using nvm:
-
-```
-nvm install 13.1.0
-```
-
-Install ng CLI using npm:
-
-```
-npm install -g @angular/cli
-```
-
 ### Add Google Maps API key
 
 1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
@@ -30,6 +16,30 @@ npm install -g @angular/cli
     }
     ```
     Where `YOUR_API_KEY` is your Google Maps API key.
+
+
+## Dev Environment Setup
+
+Install Node.js using nvm:
+
+```
+$ nvm install 13.1.0
+```
+
+Install ng CLI using npm:
+
+```
+$ npm install -g @angular/cli
+```
+
+Install required npm dependencies:
+
+```
+$ npm install
+```
+
+This last step will fail if you haven't yet following instructions above in
+[Add Google Maps API key](#Add Google Maps API key).
 
 ## Development server
 
