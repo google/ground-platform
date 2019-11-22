@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { ProjectService } from './services/project/project.service';
+import { TestBed } from '@angular/core/testing';
 
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.css'],
-})
-export class AppComponent {
-  title?: string;
+import { ProjectService } from './project.service';
 
-  constructor(private projectService: ProjectService) {}
+describe('ProjectService', () => {
+  beforeEach(() => TestBed.configureTestingModule({}));
 
-  ngOnInit() {
-    this.projectService
-      .getActiveProject()
-      .subscribe(project => (this.title = project.title));
-  }
-}
+  it('should be created', () => {
+    // TODO(gino-m): Implement tests.
+    const service: ProjectService = TestBed.get(ProjectService);
+    expect(service).toBeTruthy();
+  });
+});

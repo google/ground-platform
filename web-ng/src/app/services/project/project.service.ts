@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { ProjectService } from './services/project/project.service';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { Project } from '../../shared/models/project.model';
 
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.css'],
+@Injectable({
+  providedIn: 'root',
 })
-export class AppComponent {
-  title?: string;
+export class ProjectService {
+  constructor() {}
 
-  constructor(private projectService: ProjectService) {}
-
-  ngOnInit() {
-    this.projectService
-      .getActiveProject()
-      .subscribe(project => (this.title = project.title));
+  getActiveProject(): Observable<Project> {
+    return of(new Project('Reactive project title'));
   }
 }
