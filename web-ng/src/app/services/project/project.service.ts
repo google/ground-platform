@@ -24,7 +24,7 @@ import { Project } from '../../shared/models/project.model';
 export class ProjectService {
   constructor() {}
 
-  getActiveProject(): Observable<Project> {
+  getActiveProject$(): Observable<Project> {
     return of(new Project('Reactive project title'));
   }
 }

@@ -29,7 +29,7 @@ export class AppComponent {
 
   ngOnInit() {
     this.projectService
-      .getActiveProject()
+      .getActiveProject$()
       .subscribe(project => (this.title = project.title));
   }
 }
