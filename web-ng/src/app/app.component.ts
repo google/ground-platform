@@ -15,21 +15,10 @@
  */
 
 import { Component } from '@angular/core';
-import { ProjectService } from './services/project/project.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.css'],
 })
-export class AppComponent {
-  title?: string;
-
-  constructor(private projectService: ProjectService) {}
-
-  ngOnInit() {
-    this.projectService
-      .getActiveProject$()
-      .subscribe(project => (this.title = project.title));
-  }
-}
+export class AppComponent {}

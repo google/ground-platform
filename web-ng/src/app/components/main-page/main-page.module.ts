@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
-import { AppRoutingModule } from './routing.module';
-import { AppComponent } from './app.component';
-import { MainPageModule } from './components/main-page/main-page.module';
+import { CommonModule } from '@angular/common';
+import { MainPageComponent } from './main-page.component';
+import { MapComponent } from '../../../map/map.component';
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule, MainPageModule],
-  bootstrap: [AppComponent],
+  declarations: [MainPageComponent, MapComponent],
+  imports: [CommonModule],
 })
-export class AppModule {}
+export class MainPageModule {}

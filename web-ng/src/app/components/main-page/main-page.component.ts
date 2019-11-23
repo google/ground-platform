@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ProjectService } from '../../services/project/project.service';
 
-import { AppRoutingModule } from './routing.module';
-import { AppComponent } from './app.component';
-import { MainPageModule } from './components/main-page/main-page.module';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule, MainPageModule],
-  bootstrap: [AppComponent],
+@Component({
+  selector: 'ground-main-page',
+  templateUrl: './main-page.component.html',
+  styleUrls: ['./main-page.component.css'],
 })
-export class AppModule {}
+export class MainPageComponent implements OnInit {
+  title?: string;
+
+  constructor(private projectService: ProjectService) {}
+
+  ngOnInit() {
+    this.projectService
+      .getActiveProject$()
+      .subscribe(project => (this.title = project.title));
+  }
+}

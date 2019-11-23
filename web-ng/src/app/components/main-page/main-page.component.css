@@ -13,17 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-
-import { AppRoutingModule } from './routing.module';
-import { AppComponent } from './app.component';
-import { MainPageModule } from './components/main-page/main-page.module';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [BrowserModule, AppRoutingModule, MainPageModule],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}

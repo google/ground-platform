@@ -20,6 +20,7 @@ import { MapComponent } from './map.component';
 
 @NgModule({
   imports: [BrowserModule],
+  exports: [MapComponent],
   declarations: [MapComponent],
   bootstrap: [MapComponent],
 })
