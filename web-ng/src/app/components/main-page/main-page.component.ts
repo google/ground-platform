@@ -16,6 +16,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'ground-main-page',
@@ -25,11 +26,18 @@ import { ProjectService } from '../../services/project/project.service';
 export class MainPageComponent implements OnInit {
   title?: string;
 
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private projectService: ProjectService
+  ) {}
 
   ngOnInit() {
     this.projectService
       .getActiveProject$()
       .subscribe(project => (this.title = project.title));
+
+    this.route.paramMap.subscribe(params => {
+      this.projectService.activateProject(params.get('projectId')!);
+    });
   }
 }

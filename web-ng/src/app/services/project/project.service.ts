@@ -15,16 +15,22 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
+
+const EMPTY_PROJECT = new Project();
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjectService {
-  constructor() {}
+  private activeProject = new BehaviorSubject<Project>(EMPTY_PROJECT);
+
+  activateProject(id: string) {
+    this.activeProject.next(new Project('Project ' + id));
+  }
 
   getActiveProject$(): Observable<Project> {
-    return of(new Project('Reactive project title'));
+    return this.activeProject;
   }
 }
