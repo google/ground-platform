@@ -25,11 +25,15 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class MainPageComponent implements OnInit {
   title?: string;
+  lang: string;
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService
-  ) {}
+  ) {
+    // TODO: Make dynamic to support i18n.
+    this.lang = "en";
+  }
 
   ngOnInit() {
     this.projectService

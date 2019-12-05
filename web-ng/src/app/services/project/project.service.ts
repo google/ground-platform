@@ -15,22 +15,45 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, of, BehaviorSubject } from 'rxjs';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
+import { switchMap, map, shareReplay } from 'rxjs/operators';
 import { Project } from '../../shared/models/project.model';
-
-const EMPTY_PROJECT = new Project();
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjectService {
-  private activeProject = new BehaviorSubject<Project>(EMPTY_PROJECT);
+  private activeProjectId$ = new ReplaySubject<string>(1);
+  private activeProject$: Observable<Project>;
+
+  constructor(private db: AngularFirestore) {
+    //  on each change to project id.
+    this.activeProject$ = this.activeProjectId$.pipe(
+      // Asynchronously load project. switchMap() internally disposes
+      // of previous subscription if present.
+      switchMap(id => this.loadProject(id)),
+      // Map Firestore document to Project object.
+      map(doc => doc.data() as Project),
+      // Cache last loaded project so that late subscribers don't cause
+      // project to be reloaded.
+      shareReplay(1)
+    );
+  }
+
+  // TODO: More to datastore service.
+  loadProject(id: string) {
+    return this.db
+      .collection('projects')
+      .doc(id)
+      .get();
+  }
 
   activateProject(id: string) {
-    this.activeProject.next(new Project('Project ' + id));
+    this.activeProjectId$.next(id);
   }
 
   getActiveProject$(): Observable<Project> {
-    return this.activeProject;
+    return this.activeProject$;
   }
 }

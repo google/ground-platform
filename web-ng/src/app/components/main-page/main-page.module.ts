@@ -18,9 +18,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MainPageComponent } from './main-page.component';
 import { MapComponent } from '../../../map/map.component';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [MainPageComponent, MapComponent],
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
 })
 export class MainPageModule {}
