@@ -14,5 +14,7 @@
   limitations under the License.
 -->
 
-<div style="height: 48px">{{ title[lang] }}</div>
+<div *ngIf="(activeProject$ | async) as project">
+  <div style="height: 48px">{{ project.title[lang] }}</div>
+</div>
 <ground-map></ground-map>

@@ -17,6 +17,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
+import { Project } from '../../shared/models/project.model';
 
 @Component({
   selector: 'ground-main-page',
@@ -24,24 +26,29 @@ import { ActivatedRoute } from '@angular/router';
   styleUrls: ['./main-page.component.css'],
 })
 export class MainPageComponent implements OnInit {
-  title?: string;
+  activeProject$: Observable<Project>;
   lang: string;
+  subscription: Subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService
   ) {
     // TODO: Make dynamic to support i18n.
-    this.lang = "en";
+    this.lang = 'en';
+    this.activeProject$ = this.projectService.getActiveProject$();
   }
 
   ngOnInit() {
-    this.projectService
-      .getActiveProject$()
-      .subscribe(project => (this.title = project.title));
+    // Activate new project on route changes.
+    this.subscription.add(
+      this.route.paramMap.subscribe(params => {
+        this.projectService.activateProject(params.get('projectId')!);
+      })
+    );
+  }
 
-    this.route.paramMap.subscribe(params => {
-      this.projectService.activateProject(params.get('projectId')!);
-    });
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
