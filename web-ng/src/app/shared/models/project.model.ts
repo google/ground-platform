@@ -15,5 +15,8 @@
  */
 
 export class Project {
-  constructor(readonly title?: string, readonly description?: string) {}
+  constructor(
+    readonly title: Map<string, string>,
+    readonly description?: string
+  ) {}
 }
