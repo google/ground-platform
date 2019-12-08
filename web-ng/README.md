@@ -37,15 +37,15 @@
    the file contents. The contents of the file should look roughly like this:
 
    ```javascript
-  export const firebaseConfig = {
-    apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
-    authDomain: 'my-app.firebaseapp.com',
-    databaseURL: 'https://my-app.firebaseio.com',
-    projectId: 'my-app',
-    storageBucket: 'my-app.appspot.com',
-    messagingSenderId: '12345678',
-    appId: '1:12345678:web:abc123etcetc',
-  };
+    export const firebaseConfig = {
+      apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
+      authDomain: 'my-app.firebaseapp.com',
+      databaseURL: 'https://my-app.firebaseio.com',
+      projectId: 'my-app',
+      storageBucket: 'my-app.appspot.com',
+      messagingSenderId: '12345678',
+      appId: '1:12345678:web:abc123etcetc',
+    };
    ```
 
 ## Dev Environment Setup
