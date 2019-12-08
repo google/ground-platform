@@ -17,12 +17,12 @@
     ```
     Where `YOUR_API_KEY` is your Google Maps API key.
 
-### Firebase API key
+### Download Firebase API key
 
 1. Visit https://console.firebase.google.com and click "Add project".
 
 1. Once your project is created, on the welcome page under "Get started by
-   adding Firebase to your app", click the Web icon (<pre></></pre>).
+   adding Firebase to your app", click the Web icon (`</>`).
 
 1. In Step 1, select "Also set up Firebase hosting for this app".
 
@@ -37,15 +37,15 @@
    the file contents. The contents of the file should look roughly like this:
 
    ```javascript
-    export const firebaseConfig = {
-      apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
-      authDomain: 'my-app.firebaseapp.com',
-      databaseURL: 'https://my-app.firebaseio.com',
-      projectId: 'my-app',
-      storageBucket: 'my-app.appspot.com',
-      messagingSenderId: '12345678',
-      appId: '1:12345678:web:abc123etcetc',
-    };
+  export const firebaseConfig = {
+    apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
+    authDomain: 'my-app.firebaseapp.com',
+    databaseURL: 'https://my-app.firebaseio.com',
+    projectId: 'my-app',
+    storageBucket: 'my-app.appspot.com',
+    messagingSenderId: '12345678',
+    appId: '1:12345678:web:abc123etcetc',
+  };
    ```
 
 ## Dev Environment Setup
