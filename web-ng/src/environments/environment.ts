@@ -19,10 +19,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 import * as googleMapsConfig from './.google-maps-config.json';
+import { firebaseConfig } from "./.firebase-config"
 
 export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
+  firebaseConfig: firebaseConfig
 };
 
 /*

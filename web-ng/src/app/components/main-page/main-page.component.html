@@ -14,4 +14,7 @@
   limitations under the License.
 -->
 
-<router-outlet></router-outlet>
+<div *ngIf="(activeProject$ | async) as project">
+  <div style="height: 48px">{{ project.title[lang] }}</div>
+</div>
+<ground-map></ground-map>
