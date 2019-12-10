@@ -21,6 +21,4 @@ import { Component } from '@angular/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.css'],
 })
-export class AppComponent {
-  title = 'Ground';
-}
+export class AppComponent {}
