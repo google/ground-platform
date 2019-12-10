@@ -15,14 +15,13 @@
  */
 
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { MainPageComponent } from './components/main-page/main-page.component';
-
-const routes: Routes = [{ path: 'p/:projectId', component: MainPageComponent }];
-const config = RouterModule.forRoot(routes);
+import { CommonModule } from '@angular/common';
+import { MainPageComponent } from './main-page.component';
+import { MapComponent } from '../../../map/map.component';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
-  imports: [config],
-  exports: [RouterModule],
+  declarations: [MainPageComponent, MapComponent],
+  imports: [CommonModule, RouterModule],
 })
-export class AppRoutingModule {}
+export class MainPageModule {}
