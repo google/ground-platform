@@ -16,7 +16,11 @@
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { Component } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
+
+@Component({selector: 'ground-map', template: ''})
+class MapComponent {}
 
 describe('MainPageComponent', () => {
   let component: MainPageComponent;
@@ -24,7 +28,7 @@ describe('MainPageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [MainPageComponent],
+      declarations: [MainPageComponent, MapComponent],
     }).compileComponents();
   }));
 
