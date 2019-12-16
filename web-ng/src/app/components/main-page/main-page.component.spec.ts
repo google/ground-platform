@@ -18,27 +18,40 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Component } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 
-@Component({selector: 'ground-map', template: ''})
+@Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
 
 describe('MainPageComponent', () => {
   let component: MainPageComponent;
   let fixture: ComponentFixture<MainPageComponent>;
+  let activatedRoute: ActivatedRouteStub;
 
   beforeEach(async(() => {
+    const routerSpy = createRouterSpy();
+    activatedRoute = new ActivatedRouteStub();
+
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent],
+      providers: [
+        { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: Router, useValue: routerSpy },
+      ],
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(MainPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
+  }));
+
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}
