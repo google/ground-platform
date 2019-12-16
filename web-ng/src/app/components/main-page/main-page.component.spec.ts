@@ -20,6 +20,7 @@ import { Component } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
+import { ProjectService } from '../../services/project/project.service';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
@@ -33,10 +34,16 @@ describe('MainPageComponent', () => {
     const routerSpy = createRouterSpy();
     activatedRoute = new ActivatedRouteStub();
 
+    const projectService = jasmine.createSpyObj('ProjectService', [
+      'getActiveProject$',
+      'activateProject',
+    ]);
+
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: ProjectService, useValue: projectService },
         { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
@@ -45,7 +52,6 @@ describe('MainPageComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
-
 
   it('should create', () => {
     expect(component).toBeTruthy();
