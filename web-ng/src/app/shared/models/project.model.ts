@@ -19,6 +19,6 @@ import { StringDictionary } from "./string-dictionary.model";
 export class Project {
   constructor(
     readonly title: StringDictionary,
-    readonly description?: string
+    readonly description: StringDictionary
   ) {}
 }
