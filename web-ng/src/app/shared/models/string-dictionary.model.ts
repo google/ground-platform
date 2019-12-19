@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { StringDictionary } from "./string-dictionary.model";
-
-export class Project {
-  constructor(
-    readonly title: StringDictionary,
-    readonly description: StringDictionary
-  ) {}
+/**
+ * A dictionary for mapping language code to translatable user-defined text.
+ */
+export interface StringDictionary {
+  [key: string]: string;
 }
