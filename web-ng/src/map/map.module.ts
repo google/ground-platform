@@ -22,6 +22,5 @@ import { MapComponent } from './map.component';
   imports: [BrowserModule],
   exports: [MapComponent],
   declarations: [MapComponent],
-  bootstrap: [MapComponent],
 })
 export class MapModule {}
