@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-.user-thumb {
-  width: 32px;
-  height: 32px;
-  border-radius: 32px;
-}
-
-.rhs-widgets {
-  float: right;
+export interface User {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
 }

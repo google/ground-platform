@@ -1,3 +1,4 @@
+import { AuthService } from './../../services/auth/auth.service';
 /**
  * Copyright 2019 Google LLC
  *
@@ -15,7 +16,6 @@
  */
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { Component } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,6 +45,7 @@ describe('MainPageComponent', () => {
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: ProjectService, useValue: projectService },
         { provide: Router, useValue: routerSpy },
+        { provide: AuthService, useValue: {} },
       ],
     }).compileComponents();
 
