@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { StringDictionary } from "./string-dictionary.model";
+
 export class Project {
   constructor(
-    readonly title: Map<string, string>,
-    readonly description?: string
+    readonly title: StringDictionary,
+    readonly description: StringDictionary
   ) {}
 }
