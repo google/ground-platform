@@ -44,7 +44,7 @@ export class AuthService {
     );
   }
 
-  async googleSignIn() {
+  async signIn() {
     const provider = new auth.GoogleAuthProvider();
     const credential = await this.afAuth.auth.signInWithPopup(provider);
     if (credential.user) return this.updateUserData(credential.user as User);

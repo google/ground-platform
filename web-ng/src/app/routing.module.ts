@@ -17,23 +17,17 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { MainPageComponent } from './components/main-page/main-page.component';
-// import { AuthGuardService } from './services/auth-guard/auth-guard.service';
-import {
-  AngularFireAuthGuard,
-  AngularFireAuthGuardModule,
-} from '@angular/fire/auth-guard';
 
 const routes: Routes = [
   {
     path: 'p/:projectId',
     component: MainPageComponent,
-    canActivate: [AngularFireAuthGuard],
   },
 ];
 const config = RouterModule.forRoot(routes);
 
 @NgModule({
-  imports: [config, AngularFireAuthGuardModule],
+  imports: [config],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

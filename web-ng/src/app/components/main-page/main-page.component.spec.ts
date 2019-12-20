@@ -1,4 +1,3 @@
-import { AuthService } from './../../services/auth/auth.service';
 /**
  * Copyright 2019 Google LLC
  *
@@ -15,6 +14,7 @@ import { AuthService } from './../../services/auth/auth.service';
  * limitations under the License.
  */
 
+import { AuthService } from './../../services/auth/auth.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
