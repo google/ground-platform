@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-#map {
-  height: 100%;
-  width: 100%;
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'ground-map',
+  templateUrl: './map.component.html',
+  styleUrls: ['./map.css'],
+})
+export class MapComponent {
+  zoom = 3;
+  lat = 40.767716;
+  lng = -73.971714;
 }
