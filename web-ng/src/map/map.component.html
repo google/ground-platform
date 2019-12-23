@@ -14,4 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div #map id="map"></div>
+<agm-map 
+  [latitude]="lat" 
+  [longitude]="lng" 
+  [zoom]="zoom" 
+  [streetViewControl]="false"
+  [mapTypeId]="'hybrid'">
+  <agm-marker [latitude]="lat" [longitude]="lng"></agm-marker>
+</agm-map>

@@ -14,31 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.css'],
 })
-export class MapComponent implements AfterViewInit {
-  map!: google.maps.Map;
-  @ViewChild('map', { static: false }) mapElement!: ElementRef;
-
-  ngAfterViewInit() {
-    this.initializeMap();
-  }
-
-  initializeMap() {
-    const lngLat = new google.maps.LatLng(40.767716, -73.971714);
-    const mapOptions: google.maps.MapOptions = {
-      center: lngLat,
-      zoom: 3,
-      fullscreenControl: false,
-      mapTypeControl: false,
-      streetViewControl: false,
-      mapTypeId: google.maps.MapTypeId.HYBRID,
-    };
-    this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-  }
+export class MapComponent {
+  zoom = 3;
+  lat = 40.767716;
+  lng = -73.971714;
 }
