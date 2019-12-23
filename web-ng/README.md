@@ -8,11 +8,11 @@
     > Platform](https://console.cloud.google.com/) under APIs \> Services \>
     > Credentials.
 
-2. Write the key to `src/environments/.google-maps-config.json` as follows:
+2. Write the key to `src/environments/.google-maps-config.ts` as follows:
 
-    ```json
-    {
-      "apiKey": "YOUR_API_KEY"
+    ```javascript
+    export const googleMapsConfig = {
+      apiKey: "YOUR_API_KEY"
     }
     ```
     Where `YOUR_API_KEY` is your Google Maps API key.
