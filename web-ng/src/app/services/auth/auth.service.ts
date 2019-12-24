@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { DataStoreService } from '../data-store/data-store.service';
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { User } from './../../shared/models/user.model';
 import { Injectable } from '@angular/core';
 import { auth } from 'firebase/app';
@@ -30,13 +30,13 @@ export class AuthService {
   user$: Observable<User | null | undefined>;
   constructor(
     private afAuth: AngularFireAuth,
-    private afs: AngularFirestore,
+    private dataStore: DataStoreService,
     private router: Router
   ) {
     this.user$ = this.afAuth.authState.pipe(
       switchMap(user => {
         if (user) {
-          return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
+          return dataStore.user$(user.uid);
         } else {
           return of(null);
         }
@@ -48,27 +48,13 @@ export class AuthService {
     const provider = new auth.GoogleAuthProvider();
     const credential = await this.afAuth.auth.signInWithPopup(provider);
     // If sign in succeeds, write user details to database.
-    if (credential.user) return this.updateUserData(credential.user as User);
+    if (credential.user) {
+      return this.dataStore.updateUser$(credential.user as User);
+    }
   }
 
   async signOut() {
     await this.afAuth.auth.signOut();
     return this.router.navigate(['/']);
-  }
-
-  /**
-   * Store user email, name, and avatar to db for use in application features.
-   */
-  private updateUserData({ uid, email, displayName, photoURL }: User) {
-    // TODO: Move into Cloud Function so this works for all clients.
-    this.afs.doc(`users/${uid}`).set(
-      {
-        uid,
-        email,
-        displayName,
-        photoURL,
-      },
-      { merge: true }
-    );
   }
 }
