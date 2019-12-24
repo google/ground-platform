@@ -17,16 +17,16 @@
 import { TestBed } from '@angular/core/testing';
 import { NEVER } from 'rxjs';
 import { Router } from '@angular/router';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { DataStoreService } from '../data-store/data-store.service'
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: AngularFirestore, useValue: {} },
         { provide: AngularFireAuth, useValue: { authState: NEVER } },
+        { provide: DataStoreService },
         { provide: Router, useValue: {} },
       ],
     });
