@@ -47,6 +47,7 @@ export class AuthService {
   async signIn() {
     const provider = new auth.GoogleAuthProvider();
     const credential = await this.afAuth.auth.signInWithPopup(provider);
+    // If sign in succeeds, write user details to database.
     if (credential.user) return this.updateUserData(credential.user as User);
   }
 
@@ -55,6 +56,9 @@ export class AuthService {
     return this.router.navigate(['/']);
   }
 
+  /**
+   * Store user email, name, and avatar to db for use in application features.
+   */
   private updateUserData({ uid, email, displayName, photoURL }: User) {
     // TODO: Move into Cloud Function so this works for all clients.
     this.afs.doc(`users/${uid}`).set(
