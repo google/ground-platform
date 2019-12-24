@@ -29,7 +29,13 @@ import { User } from './../../shared/models/user.model';
 export class DataStoreService {
   constructor(private db: AngularFirestore) {}
 
-  loadProject(id: string) {
+  /**
+   * Returns an Observable that loads and emits the project with the specified
+   * uuid.
+   *
+   * @param id the id of the requested project.
+   */
+  loadProject$(id: string) {
     return this.db
       .collection('projects')
       .doc(id)
