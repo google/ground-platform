@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 /**
  * Copyright 2019 Google LLC
  *
@@ -27,7 +28,7 @@ import { map } from 'rxjs/operators';
 export class DataStoreService {
   constructor(private db: AngularFirestore) {}
 
-  loadProject(id: string) {
+  loadProject(id: string): Observable<Project> {
     return this.db
       .collection('projects')
       .doc(id)
