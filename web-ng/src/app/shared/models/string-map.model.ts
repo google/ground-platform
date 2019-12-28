@@ -19,4 +19,4 @@ import { Map } from 'immutable';
 /**
  * A dictionary for mapping language code to translatable user-defined text.
  */
-export type StringDictionary = Map<string, string>;
+export type StringMap = Map<string, string>;

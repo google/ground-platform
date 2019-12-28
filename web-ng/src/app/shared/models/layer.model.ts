@@ -16,9 +16,8 @@
 
 import { StringMap } from "./string-map.model";
 
-export class Project {
+export class Layer {
   constructor(
-    readonly title: StringMap,
-    readonly description: StringMap
+    readonly name: StringMap
   ) {}
 }
