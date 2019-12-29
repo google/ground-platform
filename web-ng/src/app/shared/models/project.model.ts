@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import { StringMap } from "./string-map.model";
+import { Layer } from './layer.model';
+import { List } from 'immutable';
+import { StringMap } from './string-map.model';
 
 export class Project {
   constructor(
     readonly title: StringMap,
-    readonly description: StringMap
+    readonly description: StringMap,
+    readonly layers: List<Layer>
   ) {}
 
   /**
@@ -28,7 +31,12 @@ export class Project {
    *
    * @param d the source data in a dictionary keyed by string.
    */
-  static fromJson(d: { [key: string]: any } ): Project {
-    return new Project(StringMap(d.title), StringMap(d.description));
+
+  static fromJson(data: { [key: string]: any }): Project {
+    return new Project(
+      StringMap(data.title),
+      StringMap(data.description),
+      List(Layer.fromJsonMap(data.layers || {}))
+    );
   }
 }
