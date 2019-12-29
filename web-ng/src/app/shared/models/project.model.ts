@@ -21,4 +21,14 @@ export class Project {
     readonly title: StringMap,
     readonly description: StringMap
   ) {}
+
+  /**
+   * Converts the raw object representation deserialized from JSON into an
+   * immutable Project instance.
+   *
+   * @param d the source data in a dictionary keyed by string.
+   */
+  static fromJson(d: { [key: string]: any } ): Project {
+    return new Project(StringMap(d.title), StringMap(d.description));
+  }
 }
