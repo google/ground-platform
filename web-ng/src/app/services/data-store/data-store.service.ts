@@ -33,10 +33,8 @@ export class DataStoreService {
       .doc(id)
       .get()
       .pipe(
-        // Get data from object.
-        map(doc => doc.data()!),
         // Convert object to Project instance.
-        map(Project.fromJson)
+        map(doc => Project.fromJson(doc.id, doc.data()!))
       );
   }
 }
