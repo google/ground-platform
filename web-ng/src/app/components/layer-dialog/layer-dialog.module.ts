@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
-import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
-import { MainPageComponent } from './main-page.component';
-import { MapModule } from '../map/map.module';
-import { MatDialogModule } from '@angular/material/dialog';
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { LayerDialogComponent } from './layer-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
-  entryComponents: [LayerDialogComponent],
-  declarations: [MainPageComponent],
-  imports: [
-    CommonModule,
-    MapModule,
-    MatDialogModule,
-    LayerDialogModule,
-    RouterModule,
-  ],
+  declarations: [LayerDialogComponent],
+  imports: [CommonModule, MatDialogModule],
 })
-export class MainPageModule {}
+export class LayerDialogModule {}

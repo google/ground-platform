@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
 import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
+import { ProjectService } from '../../services/project/project.service';
+import { URLSearchParams } from '@angular/http';
 
 @Component({
   selector: 'ground-main-page',
@@ -32,7 +35,8 @@ export class MainPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private dialog: MatDialog
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -46,9 +50,30 @@ export class MainPageComponent implements OnInit {
         this.projectService.activateProject(params.get('projectId')!);
       })
     );
+    this.subscription.add(
+      this.route.fragment.subscribe(fragment => {
+        this.onFragmentChange(fragment);
+      })
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private onFragmentChange(fragment?: string) {
+    if (!fragment) {
+      return;
+    }
+    const params = new URLSearchParams(fragment);
+    if (params.get('l')) {
+      this.showEditLayerDialog(params.get('l')!);
+    }
+  }
+
+  private showEditLayerDialog(layerId: string) {
+    this.dialog.open(LayerDialogComponent, {
+      data: { layerId },
+    });
   }
 }
