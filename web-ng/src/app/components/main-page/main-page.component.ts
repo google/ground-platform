@@ -15,6 +15,7 @@
  */
 
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -37,6 +38,7 @@ export class MainPageComponent implements OnInit {
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private dialog: MatDialog
+    public auth: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';

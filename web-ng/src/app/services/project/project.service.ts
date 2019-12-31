@@ -32,7 +32,7 @@ export class ProjectService {
     this.activeProject$ = this.activeProjectId$.pipe(
       // Asynchronously load project. switchMap() internally disposes
       // of previous subscription if present.
-      switchMap(id => this.dataStore.loadProject(id)),
+      switchMap(id => this.dataStore.loadProject$(id)),
       // Cache last loaded project so that late subscribers don't cause
       // project to be reloaded.
       shareReplay(1)
