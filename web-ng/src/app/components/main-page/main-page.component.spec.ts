@@ -21,6 +21,7 @@ import { MainPageComponent } from './main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { ProjectService } from '../../services/project/project.service';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
@@ -28,11 +29,12 @@ class MapComponent {}
 describe('MainPageComponent', () => {
   let component: MainPageComponent;
   let fixture: ComponentFixture<MainPageComponent>;
-  let activatedRoute: ActivatedRouteStub;
+  let route: ActivatedRouteStub;
+  let dialog: Partial<MatDialog> = {};
 
   beforeEach(async(() => {
     const routerSpy = createRouterSpy();
-    activatedRoute = new ActivatedRouteStub();
+    route = new ActivatedRouteStub();
 
     const projectService = jasmine.createSpyObj('ProjectService', [
       'getActiveProject$',
@@ -42,7 +44,8 @@ describe('MainPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: ActivatedRoute, useValue: route },
+        { provide: MatDialog, useValue: dialog },
         { provide: ProjectService, useValue: projectService },
         { provide: Router, useValue: routerSpy },
         { provide: AuthService, useValue: {} },

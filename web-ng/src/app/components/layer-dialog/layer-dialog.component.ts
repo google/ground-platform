@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
+import { Component, Inject, OnInit } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-html,
-body {
-  height: 100%;
+@Component({
+  selector: 'app-layer-dialog',
+  templateUrl: './layer-dialog.component.html',
+  styleUrls: ['./layer-dialog.component.css'],
+})
+export class LayerDialogComponent {
+  layerId: string;
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) data: any,
+    private dialogRef: MatDialogRef<LayerDialogComponent>
+  ) {
+    this.layerId = data.layerId!;
+    // Disable closing on clicks outside of dialog.
+    dialogRef.disableClose = true;
+  }
 }
-
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

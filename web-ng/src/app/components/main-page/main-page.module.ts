@@ -14,16 +14,28 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
 import { MainPageComponent } from './main-page.component';
-import { RouterModule } from '@angular/router';
 import { MapModule } from '../map/map.module';
-import { SidePanelModule } from '../side-panel/side-panel.module';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { SidePanelModule } from '../side-panel/side-panel.module';
 
 @NgModule({
+  entryComponents: [LayerDialogComponent],
   declarations: [MainPageComponent],
-  imports: [CommonModule, MapModule, RouterModule, SidePanelModule, MatSidenavModule],
+  imports: [
+    CommonModule,
+    MapModule,
+    MatDialogModule,
+    MatSidenavModule,
+    LayerDialogModule,
+    RouterModule,
+    SidePanelModule,
+  ],
 })
 export class MainPageModule { }

@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayerDialogComponent } from './layer-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+@NgModule({
+  declarations: [LayerDialogComponent],
+  imports: [CommonModule, MatDialogModule],
+})
+export class LayerDialogModule {}

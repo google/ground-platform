@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
-import { ActivatedRoute } from '@angular/router';
+import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
+import { ProjectService } from '../../services/project/project.service';
+import { URLSearchParams } from '@angular/http';
 
 @Component({
   selector: 'ground-main-page',
@@ -35,6 +38,7 @@ export class MainPageComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
+    private dialog: MatDialog
     public auth: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
@@ -50,9 +54,32 @@ export class MainPageComponent implements OnInit {
         this.projectService.activateProject(params.get('projectId')!);
       })
     );
+    this.subscription.add(
+      this.route.fragment.subscribe(fragment => {
+        this.onFragmentChange(fragment);
+      })
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private onFragmentChange(fragment?: string) {
+    if (!fragment) {
+      return;
+    }
+    const params = new URLSearchParams(fragment);
+    // The 'l' param is used to represent the layer id being
+    // edited.
+    if (params.get('l')) {
+      this.showEditLayerDialog(params.get('l')!);
+    }
+  }
+
+  private showEditLayerDialog(layerId: string) {
+    this.dialog.open(LayerDialogComponent, {
+      data: { layerId },
+    });
   }
 }
