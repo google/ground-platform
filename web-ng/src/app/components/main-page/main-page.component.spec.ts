@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { AuthService } from './../../services/auth/auth.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { Component } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,6 +45,7 @@ describe('MainPageComponent', () => {
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: ProjectService, useValue: projectService },
         { provide: Router, useValue: routerSpy },
+        { provide: AuthService, useValue: {} },
       ],
     }).compileComponents();
 
