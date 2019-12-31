@@ -22,6 +22,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageModule } from './components/main-page/main-page.module';
 import { environment } from '../environments/environment';
 
@@ -31,6 +32,7 @@ import { environment } from '../environments/environment';
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,
     AngularFirestoreModule,
+    BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
     MainPageModule,
