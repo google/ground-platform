@@ -25,8 +25,8 @@ import { ProjectService } from '../../services/project/project.service';
   styleUrls: ['./side-panel.component.css']
 })
 export class SidePanelComponent {
-  activeProject$: Observable<Project>;
-  lang: string;
+  readonly activeProject$: Observable<Project>;
+  readonly lang: string;
 
   constructor(
     private projectService: ProjectService

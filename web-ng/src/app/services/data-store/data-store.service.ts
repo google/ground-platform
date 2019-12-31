@@ -16,8 +16,10 @@
 
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
+import { User } from './../../shared/models/user.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -27,14 +29,48 @@ import { map } from 'rxjs/operators';
 export class DataStoreService {
   constructor(private db: AngularFirestore) {}
 
-  loadProject(id: string) {
+  /**
+   * Returns an Observable that loads and emits the project with the specified
+   * uuid.
+   *
+   * @param id the id of the requested project.
+   */
+  loadProject$(id: string) {
     return this.db
       .collection('projects')
       .doc(id)
       .get()
       .pipe(
-        // Convert Firestore document to Project object.
-        map(doc => doc.data() as Project)
+        // Convert object to Project instance.
+        map(doc => Project.fromJson(doc.id, doc.data()!))
       );
+  }
+
+  /**
+   * Returns a stream containing the user with the specified id. Remote changes
+   * to the user will cause a new value to be emitted.
+   *
+   * @param uid the unique id used to represent the user in the data store.
+   */
+  user$(uid: string): Observable<User | undefined> {
+    return this.db.doc<User>(`users/${uid}`).valueChanges();
+  }
+ 
+  /**
+   * Store user email, name, and avatar to db for use in application features.
+   * These attributes are merged with other existing ones if they were added
+   * by other clients.
+   */
+   updateUser$({ uid, email, displayName, photoURL }: User) {
+    // TODO: Move into Cloud Function so this works for all clients.
+    this.db.doc(`users/${uid}`).set(
+      {
+        uid,
+        email,
+        displayName,
+        photoURL,
+      },
+      { merge: true }
+    );
   }
 }

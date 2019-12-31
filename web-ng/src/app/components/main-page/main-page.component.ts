@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { ActivatedRoute } from '@angular/router';
@@ -33,7 +34,8 @@ export class MainPageComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    public auth: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';

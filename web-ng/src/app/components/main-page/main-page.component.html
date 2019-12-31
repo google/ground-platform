@@ -13,14 +13,23 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
+<!-- TODO: Refactor into Header-->
+<div *ngIf="(activeProject$ | async) as project">
+  <div style="height: 48px">{{ project.title.get(lang) }}</div>
+</div>
+<div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
+  <img src="{{ user.photoURL }}=s64" alt="{{ user.displayName }}" class="user-thumb" />
+  <button class="button" (click)="auth.signOut()">Sign out</button>
+</div>
+<ng-template #login>
+  <button class="button" (click)="auth.signIn()">Sign in</button>
+</ng-template>
 <mat-sidenav-container class="main-page-container">
+  <mat-sidenav-content>
+    <ground-map></ground-map>
+  </mat-sidenav-content>
   <mat-sidenav #sidenav mode="over" position="end" [(opened)]="isSidePanelOpen">
     <ground-side-panel></ground-side-panel>
   </mat-sidenav>
-  <mat-sidenav-content>
-    <div *ngIf="(activeProject$ | async) as project">
-      <div style="height: 48px">{{ project.title[lang] }}</div>
-    </div>
-    <ground-map></ground-map>
-  </mat-sidenav-content>
 </mat-sidenav-container>
