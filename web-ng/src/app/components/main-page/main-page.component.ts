@@ -68,6 +68,8 @@ export class MainPageComponent implements OnInit {
       return;
     }
     const params = new URLSearchParams(fragment);
+    // The 'l' param is used to represent the layer id being
+    // edited.
     if (params.get('l')) {
       this.showEditLayerDialog(params.get('l')!);
     }
