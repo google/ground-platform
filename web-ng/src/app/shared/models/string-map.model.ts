@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+import { Map } from 'immutable';
+
 /**
  * A dictionary for mapping language code to translatable user-defined text.
  */
-export interface StringDictionary {
-  [key: string]: string;
-}
+export type StringMap = Map<string, string>;
+
+/**
+ * Builds a new immutable string map.
+ *
+ * @param obj dictionary with language-text pairs.
+ */
+export const StringMap = (obj: any): StringMap => Map(obj);
