@@ -15,10 +15,16 @@
  */
 
 import { StringDictionary } from "./string-dictionary.model";
+import { Layer } from "./layer.model";
+
+type LayerMap = {
+  [key: string]: Layer;
+}
 
 export class Project {
   constructor(
     readonly title: StringDictionary,
-    readonly description: StringDictionary
-  ) {}
+    readonly description: StringDictionary,
+    readonly layers: LayerMap,
+  ) { }
 }

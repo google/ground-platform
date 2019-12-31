@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
+import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MainPageComponent } from './main-page.component';
-import { RouterModule } from '@angular/router';
-import { MapModule } from '../map/map.module';
-import { SidePanelModule } from '../side-panel/side-panel.module';
+import { SidePanelComponent } from './side-panel.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
-  declarations: [MainPageComponent],
-  imports: [CommonModule, MapModule, RouterModule, SidePanelModule, MatSidenavModule, MatCheckboxModule],
+    imports: [BrowserModule, MatSidenavModule],
+    exports: [SidePanelComponent],
+    declarations: [SidePanelComponent],
 })
-export class MainPageModule { }
+export class SidePanelModule { }

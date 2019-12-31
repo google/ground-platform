@@ -23,6 +23,7 @@ import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { MainPageModule } from './components/main-page/main-page.module';
 import { environment } from '../environments/environment';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [AppComponent],
@@ -32,6 +33,7 @@ import { environment } from '../environments/environment';
     BrowserModule,
     AppRoutingModule,
     MainPageModule,
+    BrowserAnimationsModule,
   ],
   bootstrap: [AppComponent],
 })

@@ -13,8 +13,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-<div *ngIf="(activeProject$ | async) as project">
-  <div style="height: 48px">{{ project.title[lang] }}</div>
-</div>
-<ground-map></ground-map>
+<mat-sidenav-container class="main-page-container">
+  <mat-sidenav #sidenav mode="over" position="end" [(opened)]="isSidePanelOpen">
+    <ground-side-panel></ground-side-panel>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div *ngIf="(activeProject$ | async) as project">
+      <div style="height: 48px">{{ project.title[lang] }}</div>
+    </div>
+    <ground-map></ground-map>
+  </mat-sidenav-content>
+</mat-sidenav-container>

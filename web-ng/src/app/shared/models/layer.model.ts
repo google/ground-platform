@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
- .main-page-container {
-     height:100%;
- }
+import { StringDictionary } from "./string-dictionary.model";
+
+export class Layer {
+    constructor(
+        readonly name: StringDictionary,
+    ) { }
+}

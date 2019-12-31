@@ -1,3 +1,4 @@
+import 'hammerjs';
 /**
  * Copyright 2019 Google LLC
  *

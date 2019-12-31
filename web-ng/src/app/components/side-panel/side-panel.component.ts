@@ -14,43 +14,25 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
-import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
+import { ProjectService } from '../../services/project/project.service';
 
 @Component({
-  selector: 'ground-main-page',
-  templateUrl: './main-page.component.html',
-  styleUrls: ['./main-page.component.css'],
+  selector: 'ground-side-panel',
+  templateUrl: './side-panel.component.html',
+  styleUrls: ['./side-panel.component.css']
 })
-export class MainPageComponent implements OnInit {
+export class SidePanelComponent {
   activeProject$: Observable<Project>;
   lang: string;
-  subscription: Subscription = new Subscription();
-  isSidePanelOpen: boolean;
 
   constructor(
-    private route: ActivatedRoute,
     private projectService: ProjectService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.isSidePanelOpen = true;
     this.activeProject$ = this.projectService.getActiveProject$();
-  }
-
-  ngOnInit() {
-    // Activate new project on route changes.
-    this.subscription.add(
-      this.route.paramMap.subscribe(params => {
-        this.projectService.activateProject(params.get('projectId')!);
-      })
-    );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }
