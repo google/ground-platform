@@ -22,7 +22,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   templateUrl: './layer-dialog.component.html',
   styleUrls: ['./layer-dialog.component.css'],
 })
-export class LayerDialogComponent implements OnInit {
+export class LayerDialogComponent {
   layerId: string;
 
   constructor(
@@ -32,11 +32,5 @@ export class LayerDialogComponent implements OnInit {
     this.layerId = data.layerId!;
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
-  }
-
-  ngOnInit() {}
-
-  closeDialog() {
-    this.dialogRef.close('Result');
   }
 }
