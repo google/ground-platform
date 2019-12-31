@@ -21,10 +21,9 @@ import { RouterModule } from '@angular/router';
 import { MapModule } from '../map/map.module';
 import { SidePanelModule } from '../side-panel/side-panel.module';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [MainPageComponent],
-  imports: [CommonModule, MapModule, RouterModule, SidePanelModule, MatSidenavModule, MatCheckboxModule],
+  imports: [CommonModule, MapModule, RouterModule, SidePanelModule, MatSidenavModule],
 })
 export class MainPageModule { }

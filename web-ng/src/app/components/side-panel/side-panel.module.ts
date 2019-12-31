@@ -17,10 +17,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { SidePanelComponent } from './side-panel.component';
-import { MatSidenavModule } from '@angular/material/sidenav';
 
 @NgModule({
-    imports: [BrowserModule, MatSidenavModule],
+    imports: [BrowserModule],
     exports: [SidePanelComponent],
     declarations: [SidePanelComponent],
 })
