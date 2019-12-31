@@ -14,32 +14,33 @@
  * limitations under the License.
  */
 
-import { Layer } from './layer.model';
-import { List } from 'immutable';
 import { StringMap } from './string-map.model';
 
-export class Project {
-  constructor(
-    readonly id: string,
-    readonly title: StringMap,
-    readonly description: StringMap,
-    readonly layers: List<Layer>
-  ) {}
+type Data = { [key: string]: any };
+
+export class Layer {
+  constructor(readonly id: string, readonly name: StringMap) {}
 
   /**
    * Converts the raw object representation deserialized from JSON into an
-   * immutable Project instance.
+   * immutable Layer instance.
    *
-   * @param id the uuid of the project instance.
+   * @param id the uuid of the layer instance.
    * @param data the source data in a dictionary keyed by string.
    */
+  static fromJson(id: string, data: Data): Layer {
+    return new Layer(id, StringMap(data.name));
+  }
 
-  static fromJson(id: string, data: { [key: string]: any }): Project {
-    return new Project(
-      id,
-      StringMap(data.title),
-      StringMap(data.description),
-      List(Layer.fromJsonMap(data.layers || {}))
+  /**
+   * Converts a map of id to raw objectfrom JSON into an array of immutable
+   * Layer instances.
+   *
+   * @param layers a map of raw layer objects keyed by id.
+   */
+  static fromJsonMap(layers: Data) {
+    return Object.keys(layers).map((id: string) =>
+      Layer.fromJson(id, layers[id])
     );
   }
 }

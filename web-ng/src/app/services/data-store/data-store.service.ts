@@ -41,8 +41,8 @@ export class DataStoreService {
       .doc(id)
       .get()
       .pipe(
-        // Convert Firestore document to Project object.
-        map(doc => doc.data() as Project)
+        // Convert object to Project instance.
+        map(doc => Project.fromJson(doc.id, doc.data()!))
       );
   }
 

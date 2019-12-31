@@ -15,8 +15,8 @@
 -->
 
 <!-- TODO: Refactor into Header-->
-<div *ngIf="activeProject$ | async as project">
-  <div style="height: 48px">{{ project.title[lang] }}</div>
+<div *ngIf="(activeProject$ | async) as project">
+  <div style="height: 48px">{{ project.title.get(lang) }}</div>
 </div>
 <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
   <img

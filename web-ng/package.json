@@ -30,17 +30,19 @@
     "@angular/router": "8.2.14",
     "@types/googlemaps": "3.38.0",
     "firebase": "7.5.0",
+    "immutable": "4.0.0-rc.12",
     "rxjs": "6.4.0",
     "tslib": "1.10.0",
     "zone.js": "0.9.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "0.803.19",
+    "@angular-devkit/build-angular": "0.803.21",
     "@angular/cli": "8.3.19",
     "@angular/compiler-cli": "8.2.14",
     "@angular/language-service": "8.2.14",
     "@types/jasmine": "3.3.8",
     "@types/jasminewd2": "2.0.3",
+    "@types/node": "10.0.3",
     "@types/webpack-env": "1.14.1",
     "codelyzer": "5.0.0",
     "gts": "1.1.0",
@@ -54,7 +56,6 @@
     "protractor": "5.4.0",
     "ts-node": "7.0.0",
     "tslint": "5.15.0",
-    "typescript": "3.5.3",
-    "@types/node": "10.0.3"
+    "typescript": "3.5.3"
   }
 }
