@@ -14,20 +14,9 @@
   limitations under the License.
 -->
 
-<!-- TODO: Refactor into Header-->
-<div *ngIf="(activeProject$ | async) as project">
-  <div style="height: 48px">{{ project.title.get(lang) }}</div>
-</div>
-<div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
-  <img
-    src="{{ user.photoURL }}=s64"
-    alt="{{ user.displayName }}"
-    class="user-thumb"
-  />
-  <button class="button" (click)="auth.signOut()">Sign out</button>
-</div>
-<ng-template #login>
-  <button class="button" (click)="auth.signIn()">Sign in</button>
-</ng-template>
-
-<ground-map></ground-map>
+<h2 mat-dialog-title>Customize layer</h2>
+<mat-dialog-content>
+  <div>Layer id: {{ layerId }}</div>
+  <div>TODO: Layer UI goes here</div>
+</mat-dialog-content>
+<mat-dialog-actions><div>TODO: Cancel | Apply</div></mat-dialog-actions>

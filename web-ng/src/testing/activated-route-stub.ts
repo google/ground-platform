@@ -18,23 +18,34 @@ import { convertToParamMap, ParamMap, Params } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
 
 /**
- * An ActivateRoute test double with a `paramMap` observable.
- * Use the `setParamMap()` method to add the next `paramMap` value.
+ * An ActivateRoute test double with `paramMap` and `fragment` observables.
+ * Use the `setParamMap()` method to add the next `paramMap` value, and
+ * `setFragment` to change the URL `fragment`.
  */
 export class ActivatedRouteStub {
-  // Use a ReplaySubject to share previous values with subscribers
-  // and pump new values into the `paramMap` observable
-  private subject = new ReplaySubject<ParamMap>();
+  // Use a ReplaySubjects to share previous values with subscribers
+  // and pump new values into observables.
+  private paramMap$ = new ReplaySubject<ParamMap>();
+  private fragment$ = new ReplaySubject<string | undefined>();
 
-  constructor(initialParams?: Params) {
+  /** The mock paramMap observable field. */
+  readonly paramMap = this.paramMap$.asObservable();
+
+  /** The mock fragment observable field. */
+  readonly fragment = this.fragment$.asObservable();
+
+  constructor(initialParams?: Params, initialFragment?: string) {
     this.setParamMap(initialParams);
+    this.setFragment(initialFragment);
   }
-
-  /** The mock paramMap observable */
-  readonly paramMap = this.subject.asObservable();
 
   /** Set the paramMap observables's next value */
   setParamMap(params?: Params) {
-    this.subject.next(convertToParamMap(params || {}));
-  };
+    this.paramMap$.next(convertToParamMap(params || {}));
+  }
+
+  /** Set the fragment observables's next value */
+  setFragment(fragment?: string) {
+    this.fragment$.next(fragment);
+  }
 }

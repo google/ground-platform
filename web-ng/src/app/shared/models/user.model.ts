@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+export interface User {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
 }
