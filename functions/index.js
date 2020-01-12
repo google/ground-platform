@@ -42,10 +42,7 @@ exports.updateColumns = functions.https.onRequest(
         updateColumns(req, res).catch(err => res.status(500).send(`${err}`)));
 
 // Test via shell:
-// onCreateRecord({featureTypeId: 'households', formId: '1',
-// responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId:
-// 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId:
-// 'newRecord'}});
+// onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onCreateRecord =
     functions.firestore
         .document(
@@ -53,10 +50,7 @@ exports.onCreateRecord =
         .onCreate((change, context) => onCreateRecord(change, context));
 
 // Test via shell:
-// onUpdateRecord({after: {featureTypeId: 'households', formId: '1',
-// responses: {'interviewer': 'George Washington'}}}, {params: {projectId:
-// 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId:
-// 'newRecord'}});
+// onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
 exports.onUpdateRecord =
     functions.firestore
         .document(
