@@ -46,11 +46,7 @@ export class AuthService {
 
   async signIn() {
     const provider = new auth.GoogleAuthProvider();
-    const credential = await this.afAuth.auth.signInWithPopup(provider);
-    // If sign in succeeds, write user details to database.
-    if (credential.user) {
-      return this.dataStore.updateUser$(credential.user as User);
-    }
+    await this.afAuth.auth.signInWithPopup(provider);
   }
 
   async signOut() {
