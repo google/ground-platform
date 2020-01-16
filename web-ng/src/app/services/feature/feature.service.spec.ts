@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { Feature } from '../../shared/models/feature.model';
-import { FeatureService } from '../../services/feature/feature.service';
-import { Observable } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { FeatureService } from './feature.service';
 
-@Component({
-  selector: 'ground-map',
-  templateUrl: './map.component.html',
-  styleUrls: ['./map.css'],
-})
-export class MapComponent {
-  zoom = 3;
-  features$: Observable<Feature[]>;
+describe('FeatureService', () => {
+  beforeEach(() => TestBed.configureTestingModule({}));
 
-  constructor(
-    private featureService: FeatureService,
-  ) {
-    this.features$ = this.featureService.getFeatures$();
-  }
-}
+  it('should be created', () => {
+    const service: FeatureService = TestBed.get(FeatureService);
+    expect(service).toBeTruthy();
+  });
+});

@@ -20,6 +20,7 @@ import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
+import { Feature } from '../../shared/models/feature.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -71,6 +72,23 @@ export class DataStoreService {
         photoURL,
       },
       { merge: true }
+    );
+  }
+
+  loadFeatures$({ id }: Project): Observable<Feature[]> {
+    return this.db
+    .collection(`projects/${id}/features`)
+    .get()
+    .pipe(
+      map(
+        querySnapshot => {
+          var features: Feature[] = [];
+          querySnapshot.docs.forEach(doc => {
+            features.push(Feature.fromJson(doc.id, doc.data()!));
+          });
+          return features;
+        }
+      )
     );
   }
 }
