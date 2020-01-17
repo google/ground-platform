@@ -20,12 +20,13 @@ import { Observable } from 'rxjs';
 import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
 import { Feature } from '../../shared/models/feature.model';
+import { List } from 'immutable';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FeatureService {
-  private features$: Observable<Feature[]>;
+  private features$: Observable<List<Feature>>;
 
   constructor(
     private dataStore: DataStoreService,
@@ -33,10 +34,10 @@ export class FeatureService {
   ) {
     this.features$ = projectService
       .getActiveProject$()
-      .pipe(switchMap(project => dataStore.loadFeatures$(project)));
+      .pipe(switchMap(project => dataStore.features$(project)));
   }
 
-  getFeatures$(): Observable<Feature[]> {
+  getFeatures$(): Observable<List<Feature>>{
     return this.features$;
   }
 }

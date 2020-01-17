@@ -18,6 +18,7 @@ import { Component } from '@angular/core';
 import { Feature } from '../../shared/models/feature.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable } from 'rxjs';
+import { List } from 'immutable';
 
 @Component({
   selector: 'ground-map',
@@ -26,7 +27,7 @@ import { Observable } from 'rxjs';
 })
 export class MapComponent {
   zoom = 3;
-  features$: Observable<Feature[]>;
+  features$: Observable<List<Feature>>;
 
   constructor(
     private featureService: FeatureService,
