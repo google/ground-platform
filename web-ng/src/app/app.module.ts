@@ -25,7 +25,6 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageModule } from './components/main-page/main-page.module';
 import { environment } from '../environments/environment';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [AppComponent],
@@ -37,8 +36,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     BrowserModule,
     AppRoutingModule,
     MainPageModule,
-    BrowserAnimationsModule,
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

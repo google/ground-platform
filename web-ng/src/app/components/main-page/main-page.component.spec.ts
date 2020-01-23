@@ -16,7 +16,7 @@
 
 import { AuthService } from './../../services/auth/auth.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
@@ -24,7 +24,12 @@ import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({ selector: 'ground-map', template: '' })
-class MapComponent {}
+class MapComponent { }
+
+@Component({ selector: 'mat-sidenav', template: '' })
+class MatSideNavComponent {
+  opened = false;
+}
 
 describe('MainPageComponent', () => {
   let component: MainPageComponent;
@@ -50,6 +55,7 @@ describe('MainPageComponent', () => {
         { provide: Router, useValue: routerSpy },
         { provide: AuthService, useValue: {} },
       ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MainPageComponent);
