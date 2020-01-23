@@ -38,7 +38,7 @@ export class MainPageComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
     public auth: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
