@@ -1,5 +1,15 @@
 # Initialize gcloud via CLI
 # $ gcloud init
+#
+# Steps (1, 2, 3, and 4 run simultaneously):
+# ==========================================
+# 1. Install npm packages for firestore
+# 2. Install npm packages for functions
+# 3. Install npm packages for web
+# 4. Install npm packages for web-ng 
+#      |
+#      |  
+#      5. Run eslint checks
 
 steps:
 
