@@ -38,3 +38,12 @@ steps:
      - '-c'
      - |
        cd web-ng && npm install
+
+  # Run eslint for web-ng
+  - name: 'gcr.io/cloud-builders/npm'
+    waitFor: ['-']
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web-ng && npm run eslint
