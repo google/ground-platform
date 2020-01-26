@@ -5,6 +5,7 @@ steps:
 
   # Install node packages for firestore
   - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for firestore'
     waitFor: ['-']
     entrypoint: 'bash'
     args:
@@ -14,6 +15,7 @@ steps:
 
   # Install node packages for functions
   - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for functions'
     waitFor: ['-']
     entrypoint: 'bash'
     args:
@@ -23,6 +25,7 @@ steps:
 
   # Install node packages for web
   - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for web'
     waitFor: ['-']
     entrypoint: 'bash'
     args:
@@ -32,6 +35,7 @@ steps:
 
   # Install node packages for web-ng
   - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for web-ng'
     waitFor: ['-']
     entrypoint: 'bash'
     args:
@@ -41,6 +45,7 @@ steps:
 
   # Run eslint for web-ng
   - name: 'gcr.io/cloud-builders/npm'
+    id: 'Run eslint for web-ng'
     waitFor: ['-']
     entrypoint: 'bash'
     args:
