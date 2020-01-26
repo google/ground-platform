@@ -5,7 +5,10 @@ steps:
 
   # Install node packages
   - name: 'gcr.io/cloud-builders/npm'
-    args: [ 'install', '-g', 'firebase-tools' ]
+    args:
+     - '-c'
+     - |
+       cd functions && npm install
 
   # Build productive files
   - name: 'gcr.io/cloud-builders/npm'
