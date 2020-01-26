@@ -3,5 +3,12 @@
   "rules": {
     "require-jsdoc": "off",
     "max-len": "off"
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+        "jsx": true
+    }
   }
 }
