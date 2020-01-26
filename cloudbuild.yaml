@@ -35,7 +35,7 @@ steps:
 
   # Install node packages for web-ng
   - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install npm packages for web-ng' &install_web_ng
+    id: &install_web_ng 'Install npm packages for web-ng'
     waitFor: ['-']
     entrypoint: 'bash'
     args:
