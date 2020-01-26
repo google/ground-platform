@@ -35,7 +35,7 @@ steps:
 
   # Install node packages for web-ng
   - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install npm packages for web-ng'
+    id: 'Install npm packages for web-ng' > &install_web_ng
     waitFor: ['-']
     entrypoint: 'bash'
     args:
@@ -46,7 +46,7 @@ steps:
   # Run eslint for web-ng
   - name: 'gcr.io/cloud-builders/npm'
     id: 'Run eslint for web-ng'
-    waitFor: ['-']
+    waitFor: ['*install_web_ng']
     entrypoint: 'bash'
     args:
      - '-c'
