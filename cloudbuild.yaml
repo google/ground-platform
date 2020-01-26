@@ -1,3 +1,6 @@
+# Initialize gcloud via CLI
+# $ gcloud init
+
 steps:
 
   # Install node packages
