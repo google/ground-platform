@@ -14,7 +14,7 @@
     "compile": "tsc -p .",
     "fix": "gts fix",
     "prepare": "npm run compile",
-    "pretest": "npm run compile",
+    "pretest": "eslint --fix .",
     "posttest": "npm run check"
   },
   "private": true,
