@@ -36,6 +36,7 @@
     "firebase": "7.5.0",
     "hammerjs": "2.0.8",
     "immutable": "4.0.0-rc.12",
+    "prettier": "^1.19.1",
     "rxjs": "6.4.0",
     "tslib": "1.10.0",
     "zone.js": "0.9.1"
