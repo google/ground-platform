@@ -1,6 +1,6 @@
 {
   "plugins": ["angular", "jasmine"],
-  "extends": ["plugin:jasmine/recommended", "eslint:recommended", "strongloop"],
+  "extends": ["plugin:jasmine/recommended", "eslint:recommended", "strongloop", "google"],
   "rules": {
     "require-jsdoc": "off",
     "max-len": "off",
