@@ -20,6 +20,8 @@ import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
+import { Feature } from '../../shared/models/feature.model';
+import { List } from 'immutable';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -72,5 +74,16 @@ export class DataStoreService {
       },
       { merge: true }
     );
+  }
+
+  features$({ id }: Project): Observable<List<Feature>> {
+    return this.db
+      .collection(`projects/${id}/features`)
+      .valueChanges({idField: 'id'})
+      .pipe(
+        map(
+          array => List(array.map(obj => Feature.fromJson(obj.id, obj)))
+        )
+      );
   }
 }

@@ -15,6 +15,10 @@
  */
 
 import { Component } from '@angular/core';
+import { Feature } from '../../shared/models/feature.model';
+import { FeatureService } from '../../services/feature/feature.service';
+import { Observable } from 'rxjs';
+import { List } from 'immutable';
 
 @Component({
   selector: 'ground-map',
@@ -23,6 +27,11 @@ import { Component } from '@angular/core';
 })
 export class MapComponent {
   zoom = 3;
-  lat = 40.767716;
-  lng = -73.971714;
+  features$: Observable<List<Feature>>;
+
+  constructor(
+    private featureService: FeatureService,
+  ) {
+    this.features$ = this.featureService.getFeatures$();
+  }
 }
