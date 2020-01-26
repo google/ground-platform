@@ -3,7 +3,15 @@
 
 steps:
 
-  # Install node packages
+  # Install node packages for firestore
+  - name: 'gcr.io/cloud-builders/npm'
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd firestore && npm install
+
+  # Install node packages for functions
   - name: 'gcr.io/cloud-builders/npm'
     entrypoint: 'bash'
     args:
@@ -11,6 +19,18 @@ steps:
      - |
        cd functions && npm install
 
-  # Build productive files
+  # Install node packages for web
   - name: 'gcr.io/cloud-builders/npm'
-    args: [ 'run', 'build', '--prod' ]
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web && npm install
+
+  # Install node packages for web-ng
+  - name: 'gcr.io/cloud-builders/npm'
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web-ng && npm install
