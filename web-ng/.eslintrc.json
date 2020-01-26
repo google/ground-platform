@@ -1,8 +1,11 @@
 {
-  "extends": ["eslint:recommended", "strongloop"],
+  "plugins": ["angular", "jasmine"],
+  "extends": ["plugin:jasmine/recommended", "eslint:recommended", "strongloop"],
   "rules": {
     "require-jsdoc": "off",
-    "max-len": "off"
+    "max-len": "off",
+    "semi": ["error", "always"],
+    "angular/on-watch": "warn"
   },
   "parserOptions": {
     "ecmaVersion": 6,
@@ -10,5 +13,8 @@
     "ecmaFeatures": {
         "jsx": true
     }
+  },
+  "env": {
+    "jasmine": true
   }
 }
