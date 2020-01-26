@@ -5,6 +5,7 @@ steps:
 
   # Install node packages
   - name: 'gcr.io/cloud-builders/npm'
+    entrypoint: 'bash'
     args:
      - '-c'
      - |
