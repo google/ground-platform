@@ -20,5 +20,8 @@ limitations under the License.
   [zoom]="zoom" 
   [streetViewControl]="false"
   [mapTypeId]="'hybrid'">
-  <agm-marker [latitude]="lat" [longitude]="lng"></agm-marker>
+  <div *ngFor="let feature of (features$ | async)">
+    <agm-marker [latitude]="feature.location.latitude" 
+                [longitude]="feature.location.longitude"></agm-marker>
+  </div>
 </agm-map>
