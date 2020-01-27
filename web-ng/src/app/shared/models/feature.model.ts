@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-import { firestore } from 'firebase/app'
+import { firestore } from 'firebase/app';
 
 export class Feature {
   constructor(
     readonly id: string,
     readonly layerId: string,
-    readonly location: firestore.GeoPoint,
+    readonly location: firestore.GeoPoint
   ) {}
-
-  /**
-   * Converts the raw object representation deserialized from JSON into an
-   * immutable Feature instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-
-  static fromJson(id: string, data: { [key: string]: any }): Feature {
-    return new Feature(
-      id,
-      data.layerId,
-      data.location,
-    );
-  }
 }

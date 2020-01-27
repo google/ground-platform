@@ -1,3 +1,5 @@
+import { Layer } from './../../shared/models/layer.model';
+import { StringMap } from './../../shared/models/string-map.model';
 /**
  * Copyright 2019 Google LLC
  *
@@ -15,7 +17,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
@@ -44,7 +46,7 @@ export class DataStoreService {
       .get()
       .pipe(
         // Convert object to Project instance.
-        map(doc => Project.fromJson(doc.id, doc.data()!))
+        map(doc => DataStoreService.toProject(doc.id, doc.data()!))
       );
   }
 
@@ -57,13 +59,13 @@ export class DataStoreService {
   user$(uid: string): Observable<User | undefined> {
     return this.db.doc<User>(`users/${uid}`).valueChanges();
   }
- 
+
   /**
    * Store user email, name, and avatar to db for use in application features.
    * These attributes are merged with other existing ones if they were added
    * by other clients.
    */
-   updateUser$({ uid, email, displayName, photoURL }: User) {
+  updateUser$({ uid, email, displayName, photoURL }: User) {
     // TODO: Move into Cloud Function so this works for all clients.
     this.db.doc(`users/${uid}`).set(
       {
@@ -79,11 +81,61 @@ export class DataStoreService {
   features$({ id }: Project): Observable<List<Feature>> {
     return this.db
       .collection(`projects/${id}/features`)
-      .valueChanges({idField: 'id'})
+      .valueChanges({ idField: 'id' })
       .pipe(
-        map(
-          array => List(array.map(obj => Feature.fromJson(obj.id, obj)))
+        map(array =>
+          List(array.map(obj => DataStoreService.toFeature(obj.id, obj)))
         )
       );
+  }
+
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Project instance.
+   *
+   * @param id the uuid of the project instance.
+   * @param data the source data in a dictionary keyed by string.
+   */
+  private static toProject(id: string, data: DocumentData): Project {
+    return new Project(
+      id,
+      StringMap(data.title),
+      StringMap(data.description),
+      List(DataStoreService.toLayers(data.layers || {}))
+    );
+  }
+
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Layer instance.
+   *
+   * @param id the uuid of the layer instance.
+   * @param data the source data in a dictionary keyed by string.
+   */
+  private static toLayer(id: string, data: DocumentData): Layer {
+    return new Layer(id, StringMap(data.name));
+  }
+
+  /**
+   * Converts a map of id to raw object deserialized from Firebase into an array
+   * of immutable Layer instances.
+   *
+   * @param layers a map of raw layer objects keyed by id.
+   */
+  private static toLayers(layers: DocumentData) {
+    return Object.keys(layers).map((id: string) =>
+      DataStoreService.toLayer(id, layers[id])
+    );
+  }
+
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Feature instance.
+   *
+   * @param id the uuid of the project instance.
+   * @param data the source data in a dictionary keyed by string.
+   */
+  private static toFeature(id: string, data: DocumentData): Feature {
+    return new Feature(id, data.layerId, data.location);
   }
 }
