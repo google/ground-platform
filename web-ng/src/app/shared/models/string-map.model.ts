@@ -19,6 +19,7 @@ import { Map } from 'immutable';
 /**
  * A dictionary for mapping language code to translatable user-defined text.
  */
+// tslint:disable-next-line:variable-name no-any
 export type StringMap = Map<string, string>;
 
 /**
@@ -26,4 +27,5 @@ export type StringMap = Map<string, string>;
  *
  * @param obj dictionary with language-text pairs.
  */
+// tslint:disable-next-line:variable-name no-any
 export const StringMap = (obj: any): StringMap => Map(obj);
