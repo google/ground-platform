@@ -20,7 +20,7 @@ import { ProjectService } from './project.service';
 import { DataStoreService } from '../data-store/data-store.service';
 
 describe('ProjectService', () => {
-  let dataStoreServiceStub: Partial<DataStoreService> = {};
+  const dataStoreServiceStub: Partial<DataStoreService> = {};
 
   beforeEach(() =>
     TestBed.configureTestingModule({

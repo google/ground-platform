@@ -17,7 +17,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
-import { HttpParams } from '@angular/http';
+import { HttpParams } from '@angular/common/http';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
@@ -67,7 +67,7 @@ export class MainPageComponent implements OnInit {
     if (!fragment) {
       return;
     }
-    const params = new HttpParams(fragment);
+    const params = new HttpParams({ fromString: fragment });
     // The 'l' param is used to represent the layer id being
     // edited.
     if (params.get('l')) {
