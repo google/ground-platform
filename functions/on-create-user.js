@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import { firestore } from 'firebase/app';
+const {db} = require('./common/context');
 
-export class Feature {
-  constructor(
-    readonly id: string,
-    readonly layerId: string,
-    readonly location: firestore.GeoPoint
-  ) {}
-}
+/**
+ * Called when a new user logs in for the first time.
+ */
+module.exports = user => db.mergeUserProfile(user);
