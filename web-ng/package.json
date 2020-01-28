@@ -7,8 +7,6 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "eslint": "eslint .",
-    "prettier": "prettier --single-quote --trailing-comma es6 --print-width 80 --write --no-bracket-spacing **/*.js",
     "e2e": "ng e2e",
     "check": "gts check",
     "clean": "gts clean",
