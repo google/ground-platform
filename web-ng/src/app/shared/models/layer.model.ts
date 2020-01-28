@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { StringMap } from './string-map.model';
+import { stringMap } from './string-map.model';
 
-type Data = { [key: string]: any };
+interface Data {
+  [key: string]: any;
+}
 
 export class Layer {
-  constructor(readonly id: string, readonly name: StringMap) {}
+  constructor(readonly id: string, readonly name: stringMap) {}
 
   /**
    * Converts the raw object representation deserialized from JSON into an
@@ -29,7 +31,7 @@ export class Layer {
    * @param data the source data in a dictionary keyed by string.
    */
   static fromJson(id: string, data: Data): Layer {
-    return new Layer(id, StringMap(data.name));
+    return new Layer(id, stringMap(data.name));
   }
 
   /**

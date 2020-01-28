@@ -16,13 +16,13 @@
 
 import { Layer } from './layer.model';
 import { List } from 'immutable';
-import { StringMap } from './string-map.model';
+import { stringMap } from './string-map.model';
 
 export class Project {
   constructor(
     readonly id: string,
-    readonly title: StringMap,
-    readonly description: StringMap,
+    readonly title: stringMap,
+    readonly description: stringMap,
     readonly layers: List<Layer>
   ) {}
 
@@ -37,8 +37,8 @@ export class Project {
   static fromJson(id: string, data: { [key: string]: any }): Project {
     return new Project(
       id,
-      StringMap(data.title),
-      StringMap(data.description),
+      stringMap(data.title),
+      stringMap(data.description),
       List(Layer.fromJsonMap(data.layers || {}))
     );
   }

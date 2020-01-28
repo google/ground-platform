@@ -28,7 +28,7 @@ class MatDialogActions {}
 describe('LayerDialogComponent', () => {
   let component: LayerDialogComponent;
   let fixture: ComponentFixture<LayerDialogComponent>;
-  let dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
+  const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

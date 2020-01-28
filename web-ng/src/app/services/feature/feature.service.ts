@@ -37,7 +37,7 @@ export class FeatureService {
       .pipe(switchMap(project => dataStore.features$(project)));
   }
 
-  getFeatures$(): Observable<List<Feature>>{
+  getFeatures$(): Observable<List<Feature>> {
     return this.features$;
   }
 }
