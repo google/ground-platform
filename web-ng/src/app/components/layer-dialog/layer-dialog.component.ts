@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, Input } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-
+import { FormGroup, FormControl } from '@angular/forms';
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
   styleUrls: ['./layer-dialog.component.css'],
 })
 export class LayerDialogComponent {
-  layerId: string;
 
   constructor(
     // tslint:disable-next-line:no-any
