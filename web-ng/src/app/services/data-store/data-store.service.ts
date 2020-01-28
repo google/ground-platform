@@ -1,5 +1,3 @@
-import { Layer } from './../../shared/models/layer.model';
-import { StringMap } from './../../shared/models/string-map.model';
 /**
  * Copyright 2019 Google LLC
  *
@@ -23,7 +21,9 @@ import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Feature } from '../../shared/models/feature.model';
+import { Layer } from './../../shared/models/layer.model';
 import { List } from 'immutable';
+import { StringMap } from './../../shared/models/string-map.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
