@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { StringMap } from './string-map.model';
+import { stringMap } from './string-map.model';
 
 export class Layer {
   constructor(readonly id: string, readonly name: StringMap) {}
