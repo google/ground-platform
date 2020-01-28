@@ -1,5 +1,4 @@
 !.gitignore
-!**/.eslintrc.json
 .*
 **/firebase-debug.log
 **/firebase-init.html
