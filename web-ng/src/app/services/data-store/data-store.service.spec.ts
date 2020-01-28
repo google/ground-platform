@@ -4,7 +4,7 @@ import { DataStoreService } from './data-store.service';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 describe('DataStoreService', () => {
-  let angularFirestoreStub: Partial<AngularFirestore> = {};
+  const angularFirestoreStub: Partial<AngularFirestore> = {};
 
   beforeEach(() =>
     TestBed.configureTestingModule({

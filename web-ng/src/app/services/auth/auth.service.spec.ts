@@ -18,7 +18,7 @@ import { TestBed } from '@angular/core/testing';
 import { NEVER } from 'rxjs';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { DataStoreService } from '../data-store/data-store.service'
+import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {

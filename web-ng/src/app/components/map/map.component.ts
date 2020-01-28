@@ -29,9 +29,7 @@ export class MapComponent {
   zoom = 3;
   features$: Observable<List<Feature>>;
 
-  constructor(
-    private featureService: FeatureService,
-  ) {
+  constructor(private featureService: FeatureService) {
     this.features$ = this.featureService.getFeatures$();
   }
 }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { firestore } from 'firebase/app'
+import { firestore } from 'firebase/app';
 
 export class Feature {
   constructor(
     readonly id: string,
     readonly layerId: string,
-    readonly location: firestore.GeoPoint,
+    readonly location: firestore.GeoPoint
   ) {}
 
   /**
@@ -31,11 +31,8 @@ export class Feature {
    * @param data the source data in a dictionary keyed by string.
    */
 
+  // tslint:disable-next-line:no-any
   static fromJson(id: string, data: { [key: string]: any }): Feature {
-    return new Feature(
-      id,
-      data.layerId,
-      data.location,
-    );
+    return new Feature(id, data.layerId, data.location);
   }
 }

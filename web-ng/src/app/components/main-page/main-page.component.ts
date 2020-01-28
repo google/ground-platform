@@ -67,6 +67,7 @@ export class MainPageComponent implements OnInit {
     if (!fragment) {
       return;
     }
+    // tslint:disable-next-line:deprecation
     const params = new URLSearchParams(fragment);
     // The 'l' param is used to represent the layer id being
     // edited.
