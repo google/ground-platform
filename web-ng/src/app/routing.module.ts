@@ -17,7 +17,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { MainPageComponent } from './components/main-page/main-page.component';
-import {LayerDialogComponent} from './components/layer-dialog/layer-dialog.component';
+import {ColorPickerComponent} from './components/color-picker/color-picker.component';
 
 const routes: Routes = [
   {
@@ -26,7 +26,7 @@ const routes: Routes = [
   },
   {
     path: 'check',
-    component: LayerDialogComponent,
+    component: ColorPickerComponent,
   }
 ];
 const config = RouterModule.forRoot(routes);

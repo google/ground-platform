@@ -24,6 +24,7 @@ import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageModule } from './components/main-page/main-page.module';
+import { ColorPickerModule } from './components/color-picker/color-picker.module';
 import { environment } from '../environments/environment';
 
 @NgModule({
@@ -36,6 +37,7 @@ import { environment } from '../environments/environment';
     BrowserModule,
     AppRoutingModule,
     MainPageModule,
+    ColorPickerModule
   ],
   bootstrap: [AppComponent],
 })
