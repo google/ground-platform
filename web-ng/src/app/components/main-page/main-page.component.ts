@@ -17,12 +17,12 @@
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { ProjectService } from '../../services/project/project.service';
-import { URLSearchParams } from '@angular/http';
 
 @Component({
   selector: 'ground-main-page',
@@ -67,8 +67,7 @@ export class MainPageComponent implements OnInit {
     if (!fragment) {
       return;
     }
-    // tslint:disable-next-line:deprecation
-    const params = new URLSearchParams(fragment);
+    const params = new HttpParams({ fromString: fragment });
     // The 'l' param is used to represent the layer id being
     // edited.
     if (params.get('l')) {

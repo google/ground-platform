@@ -16,31 +16,13 @@
 
 import { Layer } from './layer.model';
 import { List } from 'immutable';
-import { stringMap } from './string-map.model';
+import { StringMap } from './string-map.model';
 
 export class Project {
   constructor(
     readonly id: string,
-    readonly title: stringMap,
-    readonly description: stringMap,
+    readonly title: StringMap,
+    readonly description: StringMap,
     readonly layers: List<Layer>
   ) {}
-
-  /**
-   * Converts the raw object representation deserialized from JSON into an
-   * immutable Project instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-
-  // tslint:disable-next-line:no-any
-  static fromJson(id: string, data: { [key: string]: any }): Project {
-    return new Project(
-      id,
-      stringMap(data.title),
-      stringMap(data.description),
-      List(Layer.fromJsonMap(data.layers || {}))
-    );
-  }
 }

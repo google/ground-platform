@@ -22,17 +22,4 @@ export class Feature {
     readonly layerId: string,
     readonly location: firestore.GeoPoint
   ) {}
-
-  /**
-   * Converts the raw object representation deserialized from JSON into an
-   * immutable Feature instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-
-  // tslint:disable-next-line:no-any
-  static fromJson(id: string, data: { [key: string]: any }): Feature {
-    return new Feature(id, data.layerId, data.location);
-  }
 }

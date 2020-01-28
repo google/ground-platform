@@ -14,36 +14,8 @@
  * limitations under the License.
  */
 
-import { stringMap } from './string-map.model';
-
-interface Data {
-  // tslint:disable-next-line:no-any
-  [key: string]: any;
-}
+import { StringMap } from './string-map.model';
 
 export class Layer {
-  constructor(readonly id: string, readonly name: stringMap) {}
-
-  /**
-   * Converts the raw object representation deserialized from JSON into an
-   * immutable Layer instance.
-   *
-   * @param id the uuid of the layer instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  static fromJson(id: string, data: Data): Layer {
-    return new Layer(id, stringMap(data.name));
-  }
-
-  /**
-   * Converts a map of id to raw objectfrom JSON into an array of immutable
-   * Layer instances.
-   *
-   * @param layers a map of raw layer objects keyed by id.
-   */
-  static fromJsonMap(layers: Data) {
-    return Object.keys(layers).map((id: string) =>
-      Layer.fromJson(id, layers[id])
-    );
-  }
+  constructor(readonly id: string, readonly name: StringMap) {}
 }
