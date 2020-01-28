@@ -57,33 +57,4 @@ export class DataStoreService {
   user$(uid: string): Observable<User | undefined> {
     return this.db.doc<User>(`users/${uid}`).valueChanges();
   }
- 
-  /**
-   * Store user email, name, and avatar to db for use in application features.
-   * These attributes are merged with other existing ones if they were added
-   * by other clients.
-   */
-   updateUser$({ uid, email, displayName, photoURL }: User) {
-    // TODO: Move into Cloud Function so this works for all clients.
-    this.db.doc(`users/${uid}`).set(
-      {
-        uid,
-        email,
-        displayName,
-        photoURL,
-      },
-      { merge: true }
-    );
-  }
-
-  features$({ id }: Project): Observable<List<Feature>> {
-    return this.db
-      .collection(`projects/${id}/features`)
-      .valueChanges({idField: 'id'})
-      .pipe(
-        map(
-          array => List(array.map(obj => Feature.fromJson(obj.id, obj)))
-        )
-      );
-  }
 }

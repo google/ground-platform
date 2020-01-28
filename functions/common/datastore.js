@@ -14,20 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 'use strict';
 
 class Datastore {
   constructor(db) {
     this.db_ = db;
-  }  
+  }
+
+  /**
+   * Stores user email, name, and avatar to db for use in application features.
+   * These attributes are merged with other existing ones if already present.
+   */
+  mergeUserProfile({uid, email, displayName, photoURL}) {
+    return this.db_.doc(`users/${uid}`)
+        .set({uid, email, displayName, photoURL}, {merge: true});
+  }
 
   fetch_(docRef) {
     return docRef.get().then(doc => doc.exists ? doc.data() : null);
   }
 
   fetchDoc_(path) {
-    return this.fetch_(this.db_.doc(path));    
+    return this.fetch_(this.db_.doc(path));
   }
 
   fetchCollection_(path) {
@@ -39,7 +48,8 @@ class Datastore {
   }
 
   fetchRecord(projectId, featureId, recordId) {
-    return this.fetchDoc_(`projects/${projectId}/features/${featureId}/records/${recordId}`);
+    return this.fetchDoc_(
+        `projects/${projectId}/features/${featureId}/records/${recordId}`);
   }
 
   fetchRecords(projectId, featureId) {
@@ -55,7 +65,8 @@ class Datastore {
   }
 
   fetchForm(projectId, featureTypeId, formId) {
-    return this.fetchDoc_(`projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
+    return this.fetchDoc_(
+        `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
   }
 
   fetchSheetsConfig(projectId) {
