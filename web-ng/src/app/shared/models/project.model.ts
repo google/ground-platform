@@ -34,6 +34,7 @@ export class Project {
    * @param data the source data in a dictionary keyed by string.
    */
 
+  // tslint:disable-next-line:no-any
   static fromJson(id: string, data: { [key: string]: any }): Project {
     return new Project(
       id,

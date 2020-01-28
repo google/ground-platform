@@ -17,6 +17,7 @@
 import { stringMap } from './string-map.model';
 
 interface Data {
+  // tslint:disable-next-line:no-any
   [key: string]: any;
 }
 
