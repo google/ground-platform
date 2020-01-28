@@ -1,4 +1,8 @@
 {
+  "rules": {
+    "no-any": false,
+    "deprecation": false
+  },
   "extends": "gts/tslint.json",
   "linterOptions": {
     "exclude": [
