@@ -16,13 +16,13 @@
 
 import { Layer } from './layer.model';
 import { List } from 'immutable';
-import { stringMap } from './string-map.model';
+import { StringMap } from './string-map.model';
 
 export class Project {
   constructor(
     readonly id: string,
-    readonly title: stringMap,
-    readonly description: stringMap,
+    readonly title: StringMap,
+    readonly description: StringMap,
     readonly layers: List<Layer>
   ) {}
 }
