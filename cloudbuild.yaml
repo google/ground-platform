@@ -9,7 +9,7 @@
 # 4. Install npm packages for web-ng 
 #      |
 #      |  
-#      5. Run eslint checks
+#      5. Run lint checks
 
 steps:
 
@@ -55,10 +55,10 @@ steps:
 
   # Run eslint for web-ng
   - name: 'gcr.io/cloud-builders/npm'
-    id: 'Run eslint for web-ng'
+    id: 'Run lint checks for web-ng'
     waitFor: [*install_web_ng]
     entrypoint: 'bash'
     args:
      - '-c'
      - |
-       cd web-ng && npm run eslint
+       cd web-ng && npm run check
