@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ElementRef } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-
+import {MatDialog, MatDialogConfig} from "@angular/material";
+import { ColorPickerComponent } from '../color-picker/color-picker.component';
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
@@ -24,14 +25,30 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class LayerDialogComponent {
   layerId: string;
+  bgColor: string;
 
   constructor(
     // tslint:disable-next-line:no-any
     @Inject(MAT_DIALOG_DATA) data: any,
-    private dialogRef: MatDialogRef<LayerDialogComponent>
+    private dialogRef: MatDialogRef<LayerDialogComponent>,
+    private dialog: MatDialog
   ) {
-    this.layerId = data.layerId!;
-    // Disable closing on clicks outside of dialog.
-    dialogRef.disableClose = true;
+    this.bgColor = "white";
+  
   }
+
+  doSomething(evt: any): void {
+    console.log('testing here event', evt);
+  }
+
+  openColorPickerDialog(evt: MouseEvent): void {
+    const target = new ElementRef(evt.currentTarget);
+    console.log('checking target val', target);
+    this.dialog.open(ColorPickerComponent, {
+      data: {trigger: target}
+    }).componentInstance.onDatePicked.subscribe((evt) => {
+      console.log('something happened', evt);
+      this.bgColor = evt.hex;
+    })
+   }
 }

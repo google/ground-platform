@@ -19,11 +19,12 @@ import { CommonModule } from '@angular/common';
 import { ColorPickerComponent } from './color-picker.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ColorCircleModule } from 'ngx-color/circle';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [ColorPickerComponent],
-  imports: [CommonModule, MatDialogModule, ColorCircleModule, ReactiveFormsModule],
+  imports: [CommonModule, MatDialogModule, MatFormFieldModule, ColorCircleModule, ReactiveFormsModule],
   entryComponents: [ColorPickerComponent]
 })
 export class ColorPickerModule {}
