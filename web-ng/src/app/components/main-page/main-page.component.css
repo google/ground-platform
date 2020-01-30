@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+.main-page-container {
+  height: 100%;
+}
+
 .user-thumb {
   width: 32px;
   height: 32px;

@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { FeatureService } from './feature.service';
-import { DataStoreService } from '../data-store/data-store.service';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { SidePanelComponent } from './side-panel.component';
 
-describe('FeatureService', () => {
-  const dataStoreServiceStub: Partial<DataStoreService> = {};
-
-  beforeEach(() =>
-    TestBed.configureTestingModule({
-      providers: [
-        { provide: DataStoreService, useValue: dataStoreServiceStub },
-      ],
-    })
-  );
-
-  it('should be created', () => {
-    const service: FeatureService = TestBed.get(FeatureService);
-    expect(service).toBeTruthy();
-  });
-});
+@NgModule({
+  imports: [BrowserModule],
+  exports: [SidePanelComponent],
+  declarations: [SidePanelComponent],
+})
+export class SidePanelModule {}

@@ -29,5 +29,11 @@
 <ng-template #login>
   <button class="button" (click)="auth.signIn()">Sign in</button>
 </ng-template>
-
-<ground-map></ground-map>
+<mat-sidenav-container class="main-page-container">
+  <mat-sidenav-content>
+    <ground-map></ground-map>
+  </mat-sidenav-content>
+  <mat-sidenav #sidenav mode="over" position="end" [(opened)]="sideNavOpened">
+    <ground-side-panel></ground-side-panel>
+  </mat-sidenav>
+</mat-sidenav-container>
