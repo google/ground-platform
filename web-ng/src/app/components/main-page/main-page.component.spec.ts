@@ -47,7 +47,7 @@ describe('MainPageComponent', () => {
     ]);
 
     TestBed.configureTestingModule({
-      declarations: [MainPageComponent, MapComponent],
+      declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
       providers: [
         { provide: ActivatedRoute, useValue: route },
         { provide: MatDialog, useValue: dialog },

@@ -19,7 +19,7 @@ import { StringMap } from './string-map.model';
 type Data = { [key: string]: any };
 
 export class Layer {
-  constructor(readonly id: string, readonly name: StringMap) { }
+  constructor(readonly id: string, readonly name: StringMap) {}
 
   /**
    * Converts the raw object representation deserialized from JSON into an

@@ -15,11 +15,15 @@
 -->
 
 <!-- TODO: Refactor into Header-->
-<div *ngIf="(activeProject$ | async) as project">
+<div *ngIf="activeProject$ | async as project">
   <div style="height: 48px">{{ project.title.get(lang) }}</div>
 </div>
 <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
-  <img src="{{ user.photoURL }}=s64" alt="{{ user.displayName }}" class="user-thumb" />
+  <img
+    src="{{ user.photoURL }}=s64"
+    alt="{{ user.displayName }}"
+    class="user-thumb"
+  />
   <button class="button" (click)="auth.signOut()">Sign out</button>
 </div>
 <ng-template #login>
@@ -29,7 +33,7 @@
   <mat-sidenav-content>
     <ground-map></ground-map>
   </mat-sidenav-content>
-  <mat-sidenav #sidenav mode="over" position="end" [(opened)]="isSidePanelOpen">
+  <mat-sidenav #sidenav mode="over" position="end" [(opened)]="sideNavOpened">
     <ground-side-panel></ground-side-panel>
   </mat-sidenav>
 </mat-sidenav-container>

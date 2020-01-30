@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,13 @@ import { ProjectService } from '../../services/project/project.service';
 @Component({
   selector: 'ground-side-panel',
   templateUrl: './side-panel.component.html',
-  styleUrls: ['./side-panel.component.css']
+  styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
   readonly activeProject$: Observable<Project>;
   readonly lang: string;
 
-  constructor(
-    private projectService: ProjectService
-  ) {
+  constructor(private projectService: ProjectService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.activeProject$ = this.projectService.getActiveProject$();

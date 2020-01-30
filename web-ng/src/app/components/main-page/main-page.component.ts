@@ -33,7 +33,7 @@ export class MainPageComponent implements OnInit {
   activeProject$: Observable<Project>;
   lang: string;
   subscription: Subscription = new Subscription();
-  isSidePanelOpen: boolean;
+  sideNavOpened: boolean;
 
   constructor(
     private route: ActivatedRoute,
@@ -43,7 +43,7 @@ export class MainPageComponent implements OnInit {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.isSidePanelOpen = true;
+    this.sideNavOpened = true;
     this.activeProject$ = this.projectService.getActiveProject$();
   }
 

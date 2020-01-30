@@ -38,4 +38,4 @@ import { SidePanelModule } from '../side-panel/side-panel.module';
     SidePanelModule,
   ],
 })
-export class MainPageModule { }
+export class MainPageModule {}
