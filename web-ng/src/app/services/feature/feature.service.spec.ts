@@ -16,9 +16,18 @@
 
 import { TestBed } from '@angular/core/testing';
 import { FeatureService } from './feature.service';
+import { DataStoreService } from '../data-store/data-store.service';
 
 describe('FeatureService', () => {
-  beforeEach(() => TestBed.configureTestingModule({}));
+  const dataStoreServiceStub: Partial<DataStoreService> = {};
+
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: DataStoreService, useValue: dataStoreServiceStub },
+      ],
+    })
+  );
 
   it('should be created', () => {
     const service: FeatureService = TestBed.get(FeatureService);
