@@ -18,6 +18,7 @@ import { Component, Inject, OnInit, ElementRef } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {MatDialog, MatDialogConfig} from "@angular/material";
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
+
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
@@ -33,12 +34,8 @@ export class LayerDialogComponent {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dialog: MatDialog
   ) {
-    this.bgColor = "white";
+    this.bgColor = "black";
   
-  }
-
-  doSomething(evt: any): void {
-    console.log('testing here event', evt);
   }
 
   openColorPickerDialog(evt: MouseEvent): void {

@@ -13,10 +13,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<span> Default Style: </span> <button  [style.background-color]="bgColor" (onDatePicked)="doSomething($event)" (click)="openColorPickerDialog($event)"></button>
+<span> Default Style: </span>
+<button style="cursor: pointer" (click)="openColorPickerDialog($event)">
+  <mat-icon [style.color]="bgColor">
+    place
+  </mat-icon>
+  <mat-icon>expand_less</mat-icon>
+</button>
 <h2 mat-dialog-title>Customize layer</h2>
 <mat-dialog-content>
   <div>Layer id: {{ layerId }}</div>
   <div>TODO: Layer UI goes here</div>
 </mat-dialog-content>
-<mat-dialog-actions><div>TODO: Cancel | Apply</div></mat-dialog-actions>
+<mat-dialog-actions>
+  <div>TODO: Cancel | Apply</div>
+</mat-dialog-actions>

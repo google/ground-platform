@@ -18,9 +18,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LayerDialogComponent } from './layer-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
   declarations: [LayerDialogComponent],
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatDialogModule, MatIconModule],
 })
 export class LayerDialogModule {}

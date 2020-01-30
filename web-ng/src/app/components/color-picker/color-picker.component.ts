@@ -32,6 +32,10 @@ export class ColorPickerComponent implements OnInit {
    this.dialog.open(ColorPickerComponent);
   }
 
+  close() {
+    this._matDialogRef.close();
+  }
+
   handleColorChange($event: ColorEvent) {
     console.log($event.color);
     this.onDatePicked.emit($event.color);
