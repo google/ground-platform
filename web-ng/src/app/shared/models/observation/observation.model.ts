@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-import { Layer } from './layer.model';
-import { Form } from './form/form.model';
-import { StringMap } from './string-map.model';
+import { StringMap } from '../string-map.model';
+import { User } from '../user.model';
+import { AuditInfo } from '../audit-info.model';
+import { Form } from '../form/form.model';
+import { Response } from './response.model';
 import { Map } from 'immutable';
 
-export class Project {
+export class Observation {
   constructor(
     readonly id: string,
-    readonly title: StringMap,
-    readonly description: StringMap,
-    readonly layers: Map<string, Layer>
+    readonly form: Form | null,
+    readonly created: AuditInfo,
+    readonly lastModified: AuditInfo,
+    readonly responses:  Map<string, Response>
   ) {}
-
-  public getForm(layerId: string,  formId: string): Form {
-    const layer = this.layers.get(layerId);
-    if(!layer) {
-      throw Error("Layer not found.");
-    }
-    const form = layer.forms.get(formId);
-    if(!form) {
-      throw Error("Form not found.");
-    }  
-    return form;
-  } 
 }

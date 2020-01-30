@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import { Form } from './form/form.model';
-import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
+import { Field } from './field.model';
 
-export class Layer {
-  constructor(
-    readonly id: string,
-    readonly name: StringMap,
-    readonly forms: Map<string, Form>
-  ) {}
+export class Form {
+  constructor(readonly id: string, readonly fields: Map<string, Field>) {}
 }

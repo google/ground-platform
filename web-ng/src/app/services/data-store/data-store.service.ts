@@ -20,9 +20,16 @@ import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
+import { AuditInfo } from '../../shared/models/audit-info.model';
 import { Feature } from '../../shared/models/feature.model';
+import { Form } from '../../shared/models/form/form.model';
+import { Field, FieldType } from '../../shared/models/form/field.model';
+import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
+import { Option } from '../../shared/models/form/option.model';
 import { Layer } from './../../shared/models/layer.model';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
+import { Observation } from '../../shared/models/observation/observation.model';
+import { Response } from '../../shared/models/observation/response.model';
 import { StringMap } from './../../shared/models/string-map.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
@@ -51,6 +58,23 @@ export class DataStoreService {
   }
 
   /**
+   * Returns an Observable that loads and emits the feature with the specified
+   * uuid.
+   *
+   * @param projectId the id of the project in which requested feature is.
+   * @param featureId the id of the requested feature.
+   */
+  loadFeature$(projectId: string, featureId: string) {
+    return this.db
+      .collection(`projects/${projectId}/features`)
+      .doc(featureId)
+      .get()
+      .pipe(
+        map(doc => DataStoreService.toFeature(doc.id, doc.data()!))
+      );
+  }
+
+  /**
    * Returns a stream containing the user with the specified id. Remote changes
    * to the user will cause a new value to be emitted.
    *
@@ -72,6 +96,33 @@ export class DataStoreService {
   }
 
   /**
+   * Returns an Observable that loads and emits the observations with the specified
+   * uuid.
+   *
+   * @param id the id of the requested project (it should have forms inside).
+   * @param featureId the id of the requested feature.
+   */
+  observations$(
+    project: Project,
+    feature: Feature
+  ): Observable<List<Observation>> {
+    return this.db
+      .collection(`projects/${project.id}/observations`, ref =>
+        ref.where('featureId', '==', feature.id)
+      )
+      .valueChanges({ idField: 'id' }) // what to put here?
+      .pipe(
+        map(array =>
+          List(
+            array.map(obj =>
+              DataStoreService.toObservation(project, feature, obj.id, obj)
+            )
+          )
+        )
+      );
+  }
+
+  /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Project instance.
    *
@@ -83,7 +134,12 @@ export class DataStoreService {
       id,
       StringMap(data.title),
       StringMap(data.description),
-      List(DataStoreService.toLayers(data.layers || {}))
+      Map<string, Layer>(
+        Object.keys(data.layers).map((id: string) => [
+          id as string,
+          DataStoreService.toLayer(id, data.layers[id]),
+        ])
+      )
     );
   }
 
@@ -95,18 +151,100 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toLayer(id: string, data: DocumentData): Layer {
-    return new Layer(id, StringMap(data.name));
+    return new Layer(
+      id,
+      StringMap(data.name),
+      Map<string, Form>(
+        Object.keys(data.forms).map((id: string) => [
+          id as string,
+          DataStoreService.toForm(id, data.forms[id]),
+        ])
+      )
+    );
   }
 
   /**
-   * Converts a map of id to raw object deserialized from Firebase into an array
-   * of immutable Layer instances.
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Form instance.
    *
-   * @param layers a map of raw layer objects keyed by id.
+   * @param id the uuid of the form instance.
+   * @param data the source data in a dictionary keyed by string.
    */
-  private static toLayers(layers: DocumentData) {
-    return Object.keys(layers).map((id: string) =>
-      DataStoreService.toLayer(id, layers[id])
+  private static toForm(id: string, data: DocumentData): Form {
+    return new Form(
+      id,
+      Map<string, Field>(
+        Object.keys(data.elements).map((id: string) => [
+          id as string,
+          DataStoreService.toField(id, data.elements[id]),
+        ])
+      )
+    );
+  }
+
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Field instance.
+   *
+   * @param id the uuid of the project instance.
+   * @param data the source data in a dictionary keyed by string.
+   * {
+   *   index: 0,
+   *   label: { 'en': 'Question 1' },
+   *   required: true,
+   *   type: 'text_field'
+   * }
+   * or
+   * {
+   *   index: 1,
+   *   label: { 'en': 'Question 2' },
+   *   required: false,
+   *   type: 'multiple_choice',
+   *   cardinality: 'select_one',
+   *   options: {
+   *     option001: {
+   *       index: 0,
+   *       code: 'A',
+   *       label: { 'en': 'Option A' }
+   *     },
+   *     // ...
+   *   }
+   */
+  private static toField(id: string, data: DocumentData): Field {
+    return new Field(
+      id,
+      FieldType.TEXT,
+      StringMap(data.label),
+      data.required,
+      data.options ? new MultipleChoice(
+        data.cardinality,
+        Map<string, Option>(
+          Object.keys(data.options).map((id: string) => [
+            id as string,
+            DataStoreService.toOption(id, data.options[id]),
+          ])
+        )
+      ) : null
+    );
+  }
+
+    /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Field instance.
+   *
+   * @param id the uuid of the project instance.
+   * @param data the source data in a dictionary keyed by string.
+   * {
+   *    index: 0,
+   *    code: 'A',
+   *    label: { 'en': 'Option A' }
+   *  }
+   */
+  private static toOption(id: string, data: DocumentData): Option {
+    return new Option(
+      id,
+      data.code,
+      StringMap(data.label)
     );
   }
 
@@ -119,5 +257,60 @@ export class DataStoreService {
    */
   private static toFeature(id: string, data: DocumentData): Feature {
     return new Feature(id, data.layerId, data.location);
+  }
+
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable Observation instance.
+   *
+   * @param data the source data in a dictionary keyed by string.
+   * {
+   *   featureId: 'feature123'
+   *   formId: 'form001',
+   *   responses: {
+   *     'element001': 'Response text',  // For 'text_field  elements.
+   *     'element002': ['A', 'B'],       // For 'multiple_choice' elements.
+   *      // ...
+   *   }
+   *   created: <AUDIT_INFO>,
+   *   lastModified: <AUDIT_INFO>
+   * }
+   */
+  private static toObservation(
+    project: Project,
+    feature: Feature,
+    id: string,
+    data: DocumentData
+  ): Observation {
+    return new Observation(
+      id,
+      project.getForm(feature.layerId, data.formId),
+      DataStoreService.toAuditInfo(data.created),
+      DataStoreService.toAuditInfo(data.lastModified),
+      data.responses.map(
+        (id: string, value: string | number | string[]) => (
+          id as string, new Response(value as string | number)
+        )
+      )
+    );
+  }
+
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable AuditInfo instance.
+   *
+   * @param data the source data in a dictionary keyed by string.
+   * {
+   *   user: {
+   *     id: ...,
+   *     displayName: ...,
+   *     email: ...
+   *   },
+   *   clientTimestamp: ...,
+   *   serverTimestamp: ...
+   * }
+   */
+  private static toAuditInfo(data: DocumentData): AuditInfo {
+    return new AuditInfo(data.user, data.clientTimestamp);
   }
 }

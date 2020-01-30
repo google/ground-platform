@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { DataStoreService } from './../data-store/data-store.service';
+import { switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { FeatureService } from './../feature/feature.service';
+import { Injectable } from '@angular/core';
 import { Observation } from '../../shared/models/observation/observation.model';
-import { Project } from '../../shared/models/project.model';
-import { FeatureService } from '../../services/feature/feature.service';
-import { ProjectService } from '../../services/project/project.service';
 import { List } from 'immutable';
 
-@Component({
-  selector: 'ground-side-panel',
-  templateUrl: './side-panel.component.html',
-  styleUrls: ['./side-panel.component.css'],
+@Injectable({
+  providedIn: 'root',
 })
-export class SidePanelComponent {
-  readonly activeProject$: Observable<Project>;
-  observations$: Observable<List<Observation>>;
-  readonly lang: string;
+export class ObservationService {
+  private observations$: Observable<List<Observation>>;
 
   constructor(
-    private projectService: ProjectService,
+    private dataStore: DataStoreService,
     private featureService: FeatureService
   ) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
-    this.activeProject$ = this.projectService.getActiveProject$();
-    this.observations$ = this.featureService.getObservations$();
+    this.observations$ = featureService
+      .getActiveFeatureAndProject$()
+      .pipe(switchMap(({project, feature}) => dataStore.observations$(project, feature)));
+  }
+
+  getObservations$(): Observable<List<Observation>> {
+    return this.observations$;
   }
 }

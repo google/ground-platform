@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <div *ngIf="activeProject$ | async as project">
-  <div *ngFor="let layer of project.layers">
-    <div>{{ layer.name.get(lang) }}</div>
+  <div *ngFor="let entry of project.layers.entries()">
+    <div>{{ entry[1].name.get(lang) }}</div>
   </div>
 </div>
