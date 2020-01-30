@@ -35,7 +35,7 @@ describe('MainPageComponent', () => {
   let component: MainPageComponent;
   let fixture: ComponentFixture<MainPageComponent>;
   let route: ActivatedRouteStub;
-  let dialog: Partial<MatDialog> = {};
+  const dialog: Partial<MatDialog> = {};
 
   beforeEach(async(() => {
     const routerSpy = createRouterSpy();

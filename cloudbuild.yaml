@@ -1,0 +1,64 @@
+# Initialize gcloud via CLI
+# $ gcloud init
+#
+# Steps (1, 2, 3, and 4 run simultaneously):
+# ==========================================
+# 1. Install npm packages for firestore
+# 2. Install npm packages for functions
+# 3. Install npm packages for web
+# 4. Install npm packages for web-ng 
+#      |
+#      |  
+#      5. Run lint checks
+
+steps:
+
+  # Install node packages for firestore
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for firestore'
+    waitFor: ['-']
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd firestore && npm install
+
+  # Install node packages for functions
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for functions'
+    waitFor: ['-']
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd functions && npm install
+
+  # Install node packages for web
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Install npm packages for web'
+    waitFor: ['-']
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web && npm install
+
+  # Install node packages for web-ng
+  - name: 'gcr.io/cloud-builders/npm'
+    id: &install_web_ng 'Install npm packages for web-ng'
+    waitFor: ['-']
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web-ng && npm install
+
+  # Run eslint for web-ng
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Run lint checks for web-ng'
+    waitFor: [*install_web_ng]
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web-ng && npm run check

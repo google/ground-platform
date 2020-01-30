@@ -4,18 +4,19 @@
 
 1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
 
-    > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
-    > Platform](https://console.cloud.google.com/) under APIs \> Services \>
-    > Credentials.
+   > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
+   > Platform](https://console.cloud.google.com/) under APIs \> Services \>
+   > Credentials.
 
 2. Write the key to `src/environments/.google-maps-config.ts` as follows:
 
-    ```javascript
-    export const googleMapsConfig = {
-      apiKey: "YOUR_API_KEY"
-    }
-    ```
-    Where `YOUR_API_KEY` is your Google Maps API key.
+   ```javascript
+   export const googleMapsConfig = {
+     apiKey: 'YOUR_API_KEY',
+   };
+   ```
+
+   Where `YOUR_API_KEY` is your Google Maps API key.
 
 ### Download Firebase API key
 
@@ -37,15 +38,15 @@
    the file contents. The contents of the file should look roughly like this:
 
    ```javascript
-    export const firebaseConfig = {
-      apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
-      authDomain: 'my-app.firebaseapp.com',
-      databaseURL: 'https://my-app.firebaseio.com',
-      projectId: 'my-app',
-      storageBucket: 'my-app.appspot.com',
-      messagingSenderId: '12345678',
-      appId: '1:12345678:web:abc123etcetc',
-    };
+   export const firebaseConfig = {
+     apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
+     authDomain: 'my-app.firebaseapp.com',
+     databaseURL: 'https://my-app.firebaseio.com',
+     projectId: 'my-app',
+     storageBucket: 'my-app.appspot.com',
+     messagingSenderId: '12345678',
+     appId: '1:12345678:web:abc123etcetc',
+   };
    ```
 
 ## Dev Environment Setup

@@ -26,6 +26,7 @@ export class LayerDialogComponent {
   layerId: string;
 
   constructor(
+    // tslint:disable-next-line:no-any
     @Inject(MAT_DIALOG_DATA) data: any,
     private dialogRef: MatDialogRef<LayerDialogComponent>
   ) {
