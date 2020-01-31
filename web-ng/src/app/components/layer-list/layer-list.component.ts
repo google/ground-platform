@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FeatureService } from '../../services/feature/feature.service';
+ import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
-import { Feature } from '../../shared/models/feature.model';
+import { Observable } from 'rxjs';
+import { Project } from '../../shared/models/project.model';
 
 @Component({
-  selector: 'ground-side-panel',
-  templateUrl: './side-panel.component.html',
-  styleUrls: ['./side-panel.component.css'],
+  selector: 'ground-layer-list',
+  templateUrl: './layer-list.component.html',
+  styleUrls: ['./layer-list.component.css']
 })
-export class SidePanelComponent {
-  readonly selectedFeature$: Observable<Feature>;
+export class LayerListComponent implements OnInit {
+  readonly activeProject$: Observable<Project>;
   readonly lang: string;
 
   constructor(
-    private projectService: ProjectService,
-    private featureService: FeatureService
+    private projectService: ProjectService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.selectedFeature$ = this.featureService.getSelectedFeature$();
+    this.activeProject$ = this.projectService.getActiveProject$();
   }
+
+  ngOnInit() {
+  }
+
 }
+
+

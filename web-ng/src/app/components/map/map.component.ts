@@ -27,6 +27,8 @@ import { List } from 'immutable';
 })
 export class MapComponent {
   zoom = 3;
+  lat = 40.767716;
+  lng = -73.971714;
   features$: Observable<List<Feature>>;
 
   constructor(private featureService: FeatureService) {

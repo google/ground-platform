@@ -23,6 +23,10 @@ const routes: Routes = [
     path: 'p/:projectId',
     component: MainPageComponent,
   },
+  {
+    path: 'p/:projectId/f/:featureId',
+    component: MainPageComponent,
+  },
 ];
 const config = RouterModule.forRoot(routes);
 

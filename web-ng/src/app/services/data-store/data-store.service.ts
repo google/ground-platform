@@ -287,10 +287,10 @@ export class DataStoreService {
       project.getForm(feature.layerId, data.formId),
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),
-      data.responses.map(
-        (id: string, value: string | number | string[]) => (
-          id as string, new Response(value as string | number)
-        )
+      Map<string, Response>(
+        Object.keys(data.responses).map((id: string) => [
+          id as string, new Response(data.responses[id] as string | number | List<string>)
+        ])
       )
     );
   }

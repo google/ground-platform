@@ -20,6 +20,7 @@ import { DataStoreService } from './../data-store/data-store.service';
 import { switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { FeatureService } from './../feature/feature.service';
+import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { List } from 'immutable';

@@ -27,11 +27,8 @@ import { List } from 'immutable';
 })
 export class FeatureService {
   private features$: Observable<List<Feature>>;
-  private activeFeatureId$ = new ReplaySubject<{
-    projectId: string;
-    featureId: string;
-  }>(1);
-  private activeFeature$: Observable<Feature>;
+  private selectedFeatureId$ = new ReplaySubject<string>(1);
+  private selectedFeature$: Observable<Feature>;
 
   constructor(
     private dataStore: DataStoreService,
@@ -41,16 +38,16 @@ export class FeatureService {
       .getActiveProject$()
       .pipe(switchMap(project => dataStore.features$(project)));
 
-    //  on each change to feature id.
-    this.activeFeature$ = this.activeFeatureId$.pipe(
-      // Asynchronously load feature. switchMap() internally disposes
-      // of previous subscription if present.
-      switchMap(({ projectId, featureId }) =>
-        this.dataStore.loadFeature$(projectId, featureId)
-      ),
-      // Cache last loaded feature so that late subscribers don't cause
-      // feature to be reloaded.
-      shareReplay(1)
+    this.selectedFeature$ = this.selectedFeatureId$.pipe(
+      switchMap(featureId =>
+        projectService
+          .getActiveProject$()
+          .pipe(
+            switchMap(project =>
+              this.dataStore.loadFeature$(project.id, featureId)
+            )
+          )
+      )
     );
   }
 
@@ -58,11 +55,11 @@ export class FeatureService {
     return this.features$;
   }
 
-  activateFeature(projectId: string, featureId: string) {
-    this.activeFeatureId$.next({ projectId, featureId });
+  selectFeature(featureId: string) {
+    this.selectedFeatureId$.next(featureId);
   }
 
-  getActiveFeature$(): Observable<Feature> {
-    return this.activeFeature$;
+  getSelectedFeature$(): Observable<Feature> {
+    return this.selectedFeature$;
   }
 }
