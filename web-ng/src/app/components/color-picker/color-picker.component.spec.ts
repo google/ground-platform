@@ -12,16 +12,23 @@ describe('ColorPickerComponent', () => {
   let component: ColorPickerComponent;
   let fixture: ComponentFixture<ColorPickerComponent>;
   const dialogRef: Partial<MatDialogRef<ColorPickerComponent>> = {};
+  
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ColorPickerComponent],
-      imports: [CommonModule, MatDialogModule, MatFormFieldModule, ColorCircleModule, ReactiveFormsModule, MatIconModule],
+      imports: [
+        CommonModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        ColorCircleModule,
+        ReactiveFormsModule,
+        MatIconModule,
+      ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef }
+        { provide: MatDialogRef, useValue: dialogRef },
       ],
-    })
-      .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {

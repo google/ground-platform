@@ -23,11 +23,10 @@ import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
-class MatDialogContent { }
+class MatDialogContent {}
 
 @Component({ selector: 'mat-dialog-actions', template: '' })
-class MatDialogActions { }
-
+class MatDialogActions {}
 
 describe('LayerDialogComponent', () => {
   let component: LayerDialogComponent;

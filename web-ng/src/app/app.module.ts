@@ -37,7 +37,7 @@ import { environment } from '../environments/environment';
     BrowserModule,
     AppRoutingModule,
     MainPageModule,
-    ColorPickerModule
+    ColorPickerModule,
   ],
   bootstrap: [AppComponent],
 })

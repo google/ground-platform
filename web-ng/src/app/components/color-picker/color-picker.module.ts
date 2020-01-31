@@ -25,7 +25,14 @@ import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [ColorPickerComponent],
-  imports: [CommonModule, MatDialogModule, MatFormFieldModule, ColorCircleModule, ReactiveFormsModule, MatIconModule],
-  entryComponents: [ColorPickerComponent]
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    ColorCircleModule,
+    ReactiveFormsModule,
+    MatIconModule,
+  ],
+  entryComponents: [ColorPickerComponent],
 })
-export class ColorPickerModule { }
+export class ColorPickerModule {}
