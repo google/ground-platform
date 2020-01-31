@@ -1,3 +1,5 @@
+import { Feature } from './../../shared/models/feature.model';
+import { Project } from './../../shared/models/project.model';
 /**
  * Copyright 2020 Google LLC
  *
@@ -26,18 +28,12 @@ import { List } from 'immutable';
   providedIn: 'root',
 })
 export class ObservationService {
-  private observations$: Observable<List<Observation>>;
+  constructor(private dataStore: DataStoreService) {}
 
-  constructor(
-    private dataStore: DataStoreService,
-    private featureService: FeatureService
-  ) {
-    this.observations$ = featureService
-      .getActiveFeatureAndProject$()
-      .pipe(switchMap(({project, feature}) => dataStore.observations$(project, feature)));
-  }
-
-  getObservations$(): Observable<List<Observation>> {
-    return this.observations$;
+  observations$(
+    project: Project,
+    feature: Feature
+  ): Observable<List<Observation>> {
+    return this.dataStore.observations$(project, feature);
   }
 }
