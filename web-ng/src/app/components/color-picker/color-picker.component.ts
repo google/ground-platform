@@ -72,6 +72,6 @@ export class ColorPickerComponent implements OnInit {
   }
 
   handleColorChange($event: ColorEvent) {
-    this.onColorPicked.emit($event.color);
+    this.onColorPicked.emit($event);
   }
 }

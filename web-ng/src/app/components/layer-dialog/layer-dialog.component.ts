@@ -18,6 +18,7 @@ import { Component, Inject, OnInit, ElementRef } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
+import { ColorEvent } from 'ngx-color';
 
 @Component({
   selector: 'app-layer-dialog',
@@ -46,8 +47,8 @@ export class LayerDialogComponent {
       .open(ColorPickerComponent, {
         data: { trigger: target },
       })
-      .componentInstance.onColorPicked.subscribe(evt => {
-        this.bgColor = evt.hex;
+      .componentInstance.onColorPicked.subscribe((evt: ColorEvent) => {
+        this.bgColor = evt.color.hex;
       });
   }
 }
