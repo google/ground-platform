@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, Inject, Output, EventEmitter } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import {MatDialog, MatDialogConfig} from "@angular/material";
+import { MatDialog, MatDialogConfig } from "@angular/material";
 import { ColorEvent } from 'ngx-color';
 
 @Component({
@@ -12,11 +12,12 @@ export class ColorPickerComponent implements OnInit {
 
   private readonly _matDialogRef: MatDialogRef<ColorPickerComponent>;
   private readonly triggerElementRef: ElementRef;
-  @Output() public onDatePicked: EventEmitter<{}> = new EventEmitter();
+  @Output() public onColorPicked: EventEmitter<{}> = new EventEmitter();
   constructor(private dialog: MatDialog, _matDialogRef: MatDialogRef<ColorPickerComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }) { 
-      this._matDialogRef = _matDialogRef;
-      this.triggerElementRef = data.trigger;} 
+    @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }) {
+    this._matDialogRef = _matDialogRef;
+    this.triggerElementRef = data.trigger;
+  }
 
   ngOnInit() {
     const matDialogConfig: MatDialogConfig = new MatDialogConfig();
@@ -29,7 +30,7 @@ export class ColorPickerComponent implements OnInit {
   }
 
   openColorPickerDialog() {
-   this.dialog.open(ColorPickerComponent);
+    this.dialog.open(ColorPickerComponent);
   }
 
   close() {
@@ -37,9 +38,7 @@ export class ColorPickerComponent implements OnInit {
   }
 
   handleColorChange($event: ColorEvent) {
-    console.log($event.color);
-    this.onDatePicked.emit($event.color);
-    
+    this.onColorPicked.emit($event.color);
   }
 
 }

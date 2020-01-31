@@ -17,17 +17,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { MainPageComponent } from './components/main-page/main-page.component';
-import {LayerDialogComponent} from './components/layer-dialog/layer-dialog.component';
 
 const routes: Routes = [
   {
     path: 'p/:projectId',
     component: MainPageComponent,
   },
-  {
-    path: 'check',
-    component: LayerDialogComponent,
-  }
 ];
 const config = RouterModule.forRoot(routes);
 

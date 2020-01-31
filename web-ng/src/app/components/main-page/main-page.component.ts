@@ -48,7 +48,6 @@ export class MainPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('reaching this stage');
     // Activate new project on route changes.
     this.subscription.add(
       this.route.paramMap.subscribe(params => {
