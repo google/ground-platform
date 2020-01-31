@@ -18,12 +18,16 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { LayerDialogComponent } from './layer-dialog.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
-class MatDialogContent {}
+class MatDialogContent { }
 
 @Component({ selector: 'mat-dialog-actions', template: '' })
-class MatDialogActions {}
+class MatDialogActions { }
+
 
 describe('LayerDialogComponent', () => {
   let component: LayerDialogComponent;
@@ -33,6 +37,7 @@ describe('LayerDialogComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [LayerDialogComponent, MatDialogContent, MatDialogActions],
+      imports: [CommonModule, MatDialogModule, MatIconModule],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },

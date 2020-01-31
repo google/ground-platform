@@ -20,13 +20,15 @@ export class ColorPickerComponent implements OnInit {
   }
 
   ngOnInit() {
-    const matDialogConfig: MatDialogConfig = new MatDialogConfig();
-    const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
-    matDialogConfig.position = { left: `${rect.left}px`, top: `${rect.bottom + 10}px` };
-    matDialogConfig.width = '300px';
-    matDialogConfig.height = '400px';
-    this._matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
-    this._matDialogRef.updatePosition(matDialogConfig.position);
+    if (this.triggerElementRef) {
+      const matDialogConfig: MatDialogConfig = new MatDialogConfig();
+      const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
+      matDialogConfig.position = { left: `${rect.left}px`, top: `${rect.bottom + 10}px` };
+      matDialogConfig.width = '300px';
+      matDialogConfig.height = '400px';
+      this._matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
+      this._matDialogRef.updatePosition(matDialogConfig.position);
+    }
   }
 
   openColorPickerDialog() {
