@@ -14,22 +14,63 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { Feature } from '../../shared/models/feature.model';
 import { FeatureService } from '../../services/feature/feature.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
+import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.css'],
+  styleUrls: ['./map.component.css'],
 })
-export class MapComponent {
+export class MapComponent implements OnInit {
+  subscription: Subscription = new Subscription();
   zoom = 3;
+  focusedFeatureId = '';
   features$: Observable<List<Feature>>;
+  icon = {
+    url: 'http://maps.google.com/mapfiles/kml/paddle/red-circle.png',
+    scaledSize: {
+      width: 40,
+      height: 40,
+    },
+  };
+  enlargedIcon = {
+    url: 'http://maps.google.com/mapfiles/kml/paddle/red-circle.png',
+    scaledSize: {
+      width: 60,
+      height: 60,
+    },
+  };
 
-  constructor(private featureService: FeatureService) {
+  constructor(
+    private featureService: FeatureService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
     this.features$ = this.featureService.getFeatures$();
+  }
+
+  ngOnInit() {
+    this.subscription.add(
+      this.route.fragment.subscribe(fragment => {
+        const params = new HttpParams({ fromString: fragment });
+        if (params.get('f')) {
+          this.focusedFeatureId = params.get('f')!;
+        }
+      })
+    );
+  }
+
+  featureDetails(featureId: string) {
+    const primaryUrl = this.router
+      .parseUrl(this.router.url)
+      .root.children['primary'].toString();
+    const navigationExtras: NavigationExtras = { fragment: `f=${featureId}` };
+    this.router.navigate([primaryUrl], navigationExtras);
   }
 }
