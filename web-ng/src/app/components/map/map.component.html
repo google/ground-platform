@@ -21,7 +21,7 @@ limitations under the License.
   <div *ngFor="let feature of (features$ | async)">
     <agm-marker [latitude]="feature.location.latitude"
                 [longitude]="feature.location.longitude"
-                (markerClick)="featureDetails(feature.id)"
+                (markerClick)="onFeatureClick(feature.id)"
                 [iconUrl]="feature.id == focusedFeatureId ? enlargedIcon : icon"
                 ></agm-marker>
   </div>

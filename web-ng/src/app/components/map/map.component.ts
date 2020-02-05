@@ -28,19 +28,19 @@ import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
   styleUrls: ['./map.component.css'],
 })
 export class MapComponent implements OnInit {
-  subscription: Subscription = new Subscription();
+  private subscription: Subscription = new Subscription();
   zoom = 3;
   focusedFeatureId = '';
   features$: Observable<List<Feature>>;
   icon = {
-    url: 'http://maps.google.com/mapfiles/kml/paddle/red-circle.png',
+    url: 'assets/img/marker-icon.png',
     scaledSize: {
       width: 40,
       height: 40,
     },
   };
   enlargedIcon = {
-    url: 'http://maps.google.com/mapfiles/kml/paddle/red-circle.png',
+    url: 'assets/img/marker-icon.png',
     scaledSize: {
       width: 60,
       height: 60,
@@ -66,7 +66,8 @@ export class MapComponent implements OnInit {
     );
   }
 
-  featureDetails(featureId: string) {
+  onFeatureClick(featureId: string) {
+    // TODO: refactor URL read/write logic into its own service.
     const primaryUrl = this.router
       .parseUrl(this.router.url)
       .root.children['primary'].toString();
