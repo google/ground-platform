@@ -69,9 +69,7 @@ export class DataStoreService {
       .collection(`projects/${projectId}/features`)
       .doc(featureId)
       .get()
-      .pipe(
-        map(doc => DataStoreService.toFeature(doc.id, doc.data()!))
-      );
+      .pipe(map(doc => DataStoreService.toFeature(doc.id, doc.data()!)));
   }
 
   /**
@@ -110,7 +108,7 @@ export class DataStoreService {
       .collection(`projects/${project.id}/observations`, ref =>
         ref.where('featureId', '==', feature.id)
       )
-      .valueChanges({ idField: 'id' }) // what to put here?
+      .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
           List(
@@ -188,13 +186,16 @@ export class DataStoreService {
    *
    * @param id the uuid of the project instance.
    * @param data the source data in a dictionary keyed by string.
+   * <pre><code>
    * {
    *   index: 0,
    *   label: { 'en': 'Question 1' },
    *   required: true,
    *   type: 'text_field'
    * }
+   * </code></pre>
    * or
+   * <pre><code>
    * {
    *   index: 1,
    *   label: { 'en': 'Question 2' },
@@ -209,6 +210,7 @@ export class DataStoreService {
    *     },
    *     // ...
    *   }
+   * </code></pre>
    */
   private static toField(id: string, data: DocumentData): Field {
     return new Field(
@@ -216,36 +218,35 @@ export class DataStoreService {
       FieldType.TEXT,
       StringMap(data.label),
       data.required,
-      data.options ? new MultipleChoice(
-        data.cardinality,
-        Map<string, Option>(
-          Object.keys(data.options).map((id: string) => [
-            id as string,
-            DataStoreService.toOption(id, data.options[id]),
-          ])
+      data.options &&
+        new MultipleChoice(
+          data.cardinality,
+          Map<string, Option>(
+            Object.keys(data.options).map((id: string) => [
+              id as string,
+              DataStoreService.toOption(id, data.options[id]),
+            ])
+          )
         )
-      ) : null
     );
   }
 
-    /**
+  /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Field instance.
    *
    * @param id the uuid of the project instance.
    * @param data the source data in a dictionary keyed by string.
+   * <pre><code>
    * {
    *    index: 0,
    *    code: 'A',
    *    label: { 'en': 'Option A' }
    *  }
+   * </code></pre>
    */
   private static toOption(id: string, data: DocumentData): Option {
-    return new Option(
-      id,
-      data.code,
-      StringMap(data.label)
-    );
+    return new Option(id, data.code, StringMap(data.label));
   }
 
   /**
@@ -264,6 +265,7 @@ export class DataStoreService {
    * immutable Observation instance.
    *
    * @param data the source data in a dictionary keyed by string.
+   * <pre><code>
    * {
    *   featureId: 'feature123'
    *   formId: 'form001',
@@ -275,6 +277,7 @@ export class DataStoreService {
    *   created: <AUDIT_INFO>,
    *   lastModified: <AUDIT_INFO>
    * }
+   * </code></pre>
    */
   private static toObservation(
     project: Project,
@@ -289,7 +292,8 @@ export class DataStoreService {
       DataStoreService.toAuditInfo(data.lastModified),
       Map<string, Response>(
         Object.keys(data.responses).map((id: string) => [
-          id as string, new Response(data.responses[id] as string | number | List<string>)
+          id as string,
+          new Response(data.responses[id] as string | number | List<string>),
         ])
       )
     );
@@ -300,6 +304,7 @@ export class DataStoreService {
    * immutable AuditInfo instance.
    *
    * @param data the source data in a dictionary keyed by string.
+   * <pre><code>
    * {
    *   user: {
    *     id: ...,
@@ -309,6 +314,7 @@ export class DataStoreService {
    *   clientTimestamp: ...,
    *   serverTimestamp: ...
    * }
+   * </code></pre>
    */
   private static toAuditInfo(data: DocumentData): AuditInfo {
     return new AuditInfo(data.user, data.clientTimestamp);

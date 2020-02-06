@@ -27,6 +27,6 @@ export class Observation {
     readonly form: Form | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
-    readonly responses:  Map<string, Response>
+    readonly responses: Map<string, Response>
   ) {}
 }

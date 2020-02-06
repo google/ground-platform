@@ -27,15 +27,15 @@ export class Project {
     readonly layers: Map<string, Layer>
   ) {}
 
-  getForm(layerId: string,  formId: string): Form {
+  getForm(layerId: string, formId: string): Form {
     const layer = this.layers.get(layerId);
-    if(!layer) {
-      throw Error("Layer not found.");
+    if (!layer) {
+      throw Error('Layer not found.');
     }
     const form = layer.forms.get(formId);
-    if(!form) {
-      throw Error("Form not found.");
-    }  
+    if (!form) {
+      throw Error('Form not found.');
+    }
     return form;
-  } 
+  }
 }

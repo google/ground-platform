@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
@@ -22,23 +22,14 @@ import { Project } from '../../shared/models/project.model';
 @Component({
   selector: 'ground-layer-list',
   templateUrl: './layer-list.component.html',
-  styleUrls: ['./layer-list.component.css']
 })
-export class LayerListComponent implements OnInit {
+export class LayerListComponent {
   readonly activeProject$: Observable<Project>;
   readonly lang: string;
 
-  constructor(
-    private projectService: ProjectService
-  ) {
+  constructor(private projectService: ProjectService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.activeProject$ = this.projectService.getActiveProject$();
   }
-
-  ngOnInit() {
-  }
-
 }
-
-

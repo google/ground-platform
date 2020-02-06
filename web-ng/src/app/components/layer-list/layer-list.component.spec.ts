@@ -30,13 +30,10 @@ describe('LayerListComponent', () => {
     ]);
 
     TestBed.configureTestingModule({
-      declarations: [ LayerListComponent ],
-      providers: [
-        { provide: ProjectService, useValue: projectService },
-      ],
+      declarations: [LayerListComponent],
+      providers: [{ provide: ProjectService, useValue: projectService }],
       schemas: [NO_ERRORS_SCHEMA],
-    })
-    .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -49,5 +46,3 @@ describe('LayerListComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-
-

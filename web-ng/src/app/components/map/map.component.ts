@@ -27,6 +27,7 @@ import { List } from 'immutable';
 })
 export class MapComponent {
   zoom = 3;
+  // TODO: remove it in follow up.
   lat = 40.767716;
   lng = -73.971714;
   features$: Observable<List<Feature>>;

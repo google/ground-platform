@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
- import { List } from "immutable";
-
+import { List } from 'immutable';
 
 export class Response {
-    constructor(readonly value: number | string | List<string>){}
+  constructor(readonly value: number | string | List<string>) {}
 }
-

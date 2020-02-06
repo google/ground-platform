@@ -26,9 +26,8 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'ground-feature-panel',
   templateUrl: './feature-panel.component.html',
-  styleUrls: ['./feature-panel.component.css'],
 })
-export class FeaturePanelComponent implements OnInit {
+export class FeaturePanelComponent {
   readonly observations$: Observable<List<Observation>>;
 
   constructor(
@@ -50,6 +49,4 @@ export class FeaturePanelComponent implements OnInit {
         )
       );
   }
-
-  ngOnInit() {}
 }
