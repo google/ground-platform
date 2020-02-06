@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from './layer-dialog.component';
+import { EditStyleButtonComponent } from './edit-style-button.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  declarations: [LayerDialogComponent],
-  imports: [CommonModule, MatDialogModule],
+  declarations: [EditStyleButtonComponent],
+  imports: [MatDialogModule, MatIconModule],
 })
-export class LayerDialogModule {}
+export class EditStyleButtonModule {}

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2019 Google LLC
+  Copyright 2020 Google LLC
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
   limitations under the License.
 -->
 
-<h2 mat-dialog-title>Customize layer</h2>
-<mat-dialog-content>
-  <div>Layer id: {{ layerId }}</div>
-  <div>TODO: Layer UI goes here</div>
-</mat-dialog-content>
-<mat-dialog-actions><div>TODO: Cancel | Apply</div></mat-dialog-actions>
+<button style="cursor: pointer" (click)="openColorPickerDialog($event)">
+  <mat-icon [style.color]="bgColor">
+    place
+  </mat-icon>
+  <mat-icon>expand_less</mat-icon>
+</button>

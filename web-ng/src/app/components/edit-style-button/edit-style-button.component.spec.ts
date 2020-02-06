@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,23 @@
  */
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { LayerDialogComponent } from './layer-dialog.component';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { EditStyleButtonComponent } from './edit-style-button.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
 
-@Component({ selector: 'mat-dialog-content', template: '' })
-class MatDialogContent {}
-
-@Component({ selector: 'mat-dialog-actions', template: '' })
-class MatDialogActions {}
-
-describe('LayerDialogComponent', () => {
-  let component: LayerDialogComponent;
-  let fixture: ComponentFixture<LayerDialogComponent>;
-  const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
+describe('EditStyleButtonComponent', () => {
+  let component: EditStyleButtonComponent;
+  let fixture: ComponentFixture<EditStyleButtonComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [LayerDialogComponent, MatDialogContent, MatDialogActions],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-      ],
+      declarations: [EditStyleButtonComponent],
+      imports: [MatDialogModule, MatIconModule],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LayerDialogComponent);
+    fixture = TestBed.createComponent(EditStyleButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ElementRef } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialog } from '@angular/material';
-import { ColorPickerComponent } from '../color-picker/color-picker.component';
-import { ColorEvent } from 'ngx-color';
 
 @Component({
   selector: 'app-layer-dialog',
@@ -27,28 +24,14 @@ import { ColorEvent } from 'ngx-color';
 })
 export class LayerDialogComponent {
   layerId: string;
-  bgColor: string;
 
   constructor(
     // tslint:disable-next-line:no-any
     @Inject(MAT_DIALOG_DATA) data: any,
-    private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private dialog: MatDialog
+    private dialogRef: MatDialogRef<LayerDialogComponent>
   ) {
-    this.bgColor = 'black';
     this.layerId = data.layerId!;
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
-  }
-
-  openColorPickerDialog(evt: MouseEvent): void {
-    const target = new ElementRef(evt.currentTarget);
-    this.dialog
-      .open(ColorPickerComponent, {
-        data: { trigger: target },
-      })
-      .componentInstance.onColorPicked.subscribe((evt: ColorEvent) => {
-        this.bgColor = evt.color.hex;
-      });
   }
 }

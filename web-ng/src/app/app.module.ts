@@ -26,6 +26,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageModule } from './components/main-page/main-page.module';
 import { ColorPickerModule } from './components/color-picker/color-picker.module';
 import { environment } from '../environments/environment';
+import { EditStyleButtonModule } from './components/edit-style-button/edit-style-button.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -38,6 +39,7 @@ import { environment } from '../environments/environment';
     AppRoutingModule,
     MainPageModule,
     ColorPickerModule,
+    EditStyleButtonModule,
   ],
   bootstrap: [AppComponent],
 })

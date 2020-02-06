@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from './layer-dialog.component';
-import { MatDialogModule } from '@angular/material/dialog';
-
-@NgModule({
-  declarations: [LayerDialogComponent],
-  imports: [CommonModule, MatDialogModule],
-})
-export class LayerDialogModule {}
