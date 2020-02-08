@@ -66,6 +66,13 @@ export class DataStoreService {
       );
   }
 
+  updateProjectTitle(projectId: string, newTitle: string) {
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .set({ title: { en: newTitle } }, { merge: true })
+      .then(() => projectId);
+  }
   /**
    * Returns an Observable that loads and emits the feature with the specified
    * uuid.
