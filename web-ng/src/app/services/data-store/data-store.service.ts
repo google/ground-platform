@@ -289,13 +289,14 @@ export class DataStoreService {
     id: string,
     data: DocumentData
   ): Observation {
+    const responseIds = data.responses ? Object.keys(data.responses) : [];
     return new Observation(
       id,
       project.getForm(feature.layerId, data.formId),
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),
       Map<string, Response>(
-        Object.keys(data.responses).map((id: string) => [
+        responseIds.map((id: string) => [
           id as string,
           new Response(data.responses[id] as string | number | List<string>),
         ])
