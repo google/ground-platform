@@ -216,6 +216,7 @@ export class DataStoreService {
    * </code></pre>
    */
   private static toField(id: string, data: DocumentData): Field {
+    const optionIds = data.options ? Object.keys(data.options) : [];
     return new Field(
       id,
       FieldType.TEXT,
@@ -225,7 +226,7 @@ export class DataStoreService {
         new MultipleChoice(
           data.cardinality,
           Map<string, Option>(
-            Object.keys(data.options).map((id: string) => [
+            optionIds.map((id: string) => [
               id as string,
               DataStoreService.toOption(id, data.options[id]),
             ])
