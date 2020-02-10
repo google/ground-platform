@@ -170,10 +170,11 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toForm(id: string, data: DocumentData): Form {
+    const elementIds = data.elements ? [] : Object.keys(data.elements);
     return new Form(
       id,
       Map<string, Field>(
-        Object.keys(data.elements).map((id: string) => [
+        elementIds.map((id: string) => [
           id as string,
           DataStoreService.toField(id, data.elements[id]),
         ])
