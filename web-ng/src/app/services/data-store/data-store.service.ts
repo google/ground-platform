@@ -150,11 +150,12 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toLayer(id: string, data: DocumentData): Layer {
+    const formIds = data.forms ? Object.keys(data.forms) : [];
     return new Layer(
       id,
       StringMap(data.name),
       Map<string, Form>(
-        Object.keys(data.forms).map((id: string) => [
+        formIds.map((id: string) => [
           id as string,
           DataStoreService.toForm(id, data.forms[id]),
         ])
