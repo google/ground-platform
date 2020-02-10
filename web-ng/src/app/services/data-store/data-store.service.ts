@@ -32,6 +32,15 @@ import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { StringMap } from './../../shared/models/string-map.model';
 
+/**
+ * Helper to return either the keys of a dictionary, or if missing, returns an
+ * empty array.
+ */
+// tslint:disable-next-line:no-any
+function keys(dict?: any): any[] {
+  return Object.keys(dict || {});
+}
+
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({
@@ -133,7 +142,7 @@ export class DataStoreService {
       StringMap(data.title),
       StringMap(data.description),
       Map<string, Layer>(
-        Object.keys(data.layers).map((id: string) => [
+        keys(data.layers).map((id: string) => [
           id as string,
           DataStoreService.toLayer(id, data.layers[id]),
         ])
@@ -153,7 +162,7 @@ export class DataStoreService {
       id,
       StringMap(data.name),
       Map<string, Form>(
-        Object.keys(data.forms).map((id: string) => [
+        keys(data.forms).map((id: string) => [
           id as string,
           DataStoreService.toForm(id, data.forms[id]),
         ])
@@ -172,7 +181,7 @@ export class DataStoreService {
     return new Form(
       id,
       Map<string, Field>(
-        Object.keys(data.elements).map((id: string) => [
+        keys(data.elements).map((id: string) => [
           id as string,
           DataStoreService.toField(id, data.elements[id]),
         ])
@@ -222,7 +231,7 @@ export class DataStoreService {
         new MultipleChoice(
           data.cardinality,
           Map<string, Option>(
-            Object.keys(data.options).map((id: string) => [
+            keys(data.options).map((id: string) => [
               id as string,
               DataStoreService.toOption(id, data.options[id]),
             ])
@@ -291,7 +300,7 @@ export class DataStoreService {
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),
       Map<string, Response>(
-        Object.keys(data.responses).map((id: string) => [
+        keys(data.responses).map((id: string) => [
           id as string,
           new Response(data.responses[id] as string | number | List<string>),
         ])
