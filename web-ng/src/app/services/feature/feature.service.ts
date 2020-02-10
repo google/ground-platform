@@ -15,8 +15,8 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { switchMap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { switchMap, shareReplay } from 'rxjs/operators';
+import { Observable, ReplaySubject } from 'rxjs';
 import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
 import { Feature } from '../../shared/models/feature.model';
@@ -27,6 +27,8 @@ import { List } from 'immutable';
 })
 export class FeatureService {
   private features$: Observable<List<Feature>>;
+  private selectedFeatureId$ = new ReplaySubject<string>(1);
+  private selectedFeature$: Observable<Feature>;
 
   constructor(
     private dataStore: DataStoreService,
@@ -35,9 +37,29 @@ export class FeatureService {
     this.features$ = projectService
       .getActiveProject$()
       .pipe(switchMap(project => dataStore.features$(project)));
+
+    this.selectedFeature$ = this.selectedFeatureId$.pipe(
+      switchMap(featureId =>
+        projectService
+          .getActiveProject$()
+          .pipe(
+            switchMap(project =>
+              this.dataStore.loadFeature$(project.id, featureId)
+            )
+          )
+      )
+    );
   }
 
   getFeatures$(): Observable<List<Feature>> {
     return this.features$;
+  }
+
+  selectFeature(featureId: string) {
+    this.selectedFeatureId$.next(featureId);
+  }
+
+  getSelectedFeature$(): Observable<Feature> {
+    return this.selectedFeature$;
   }
 }

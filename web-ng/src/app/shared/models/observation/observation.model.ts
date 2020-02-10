@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import { StringMap } from '../string-map.model';
+import { User } from '../user.model';
+import { AuditInfo } from '../audit-info.model';
+import { Form } from '../form/form.model';
+import { Response } from './response.model';
+import { Map } from 'immutable';
 
-@NgModule({
-  imports: [BrowserModule, FeaturePanelModule, LayerListModule],
-  exports: [SidePanelComponent],
-  declarations: [SidePanelComponent],
-})
-export class SidePanelModule {}
+export class Observation {
+  constructor(
+    readonly id: string,
+    readonly form: Form | null,
+    readonly created: AuditInfo,
+    readonly lastModified: AuditInfo,
+    readonly responses: Map<string, Response>
+  ) {}
+}

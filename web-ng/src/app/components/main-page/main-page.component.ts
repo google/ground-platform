@@ -22,6 +22,7 @@ import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
+import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 
 @Component({
@@ -34,10 +35,10 @@ export class MainPageComponent implements OnInit {
   lang: string;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
-
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
+    private featureService: FeatureService,
     private dialog: MatDialog,
     public auth: AuthService
   ) {
@@ -74,6 +75,11 @@ export class MainPageComponent implements OnInit {
     // edited.
     if (params.get('l')) {
       this.showEditLayerDialog(params.get('l')!);
+    }
+    // The 'f' param is used to represent the feature id that
+    // was selected by e.g. clicking the marker.
+    if (params.get('f')) {
+      this.featureService.selectFeature(params.get('f')!);
     }
   }
 

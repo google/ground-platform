@@ -16,13 +16,11 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import { FeaturePanelComponent } from './feature-panel.component';
 
 @NgModule({
-  imports: [BrowserModule, FeaturePanelModule, LayerListModule],
-  exports: [SidePanelComponent],
-  declarations: [SidePanelComponent],
+  imports: [BrowserModule],
+  exports: [FeaturePanelComponent],
+  declarations: [FeaturePanelComponent],
 })
-export class SidePanelModule {}
+export class FeaturePanelModule {}

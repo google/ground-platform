@@ -13,12 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div>
-  <div *ngIf="selectedFeature$ | async as feature; else layers">
-    <ground-feature-panel></ground-feature-panel>
+
+<div *ngIf="activeProject$ | async as project">
+  <div *ngFor="let entry of project.layers">
+    <div>{{ entry[1].name.get(lang) }}</div>
   </div>
 </div>
-
-<ng-template #layers>
-  <ground-layer-list></ground-layer-list>
-</ng-template>

@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import { StringMap } from '../string-map.model';
 
-@NgModule({
-  imports: [BrowserModule, FeaturePanelModule, LayerListModule],
-  exports: [SidePanelComponent],
-  declarations: [SidePanelComponent],
-})
-export class SidePanelModule {}
+export class Option {
+  constructor(
+    readonly id: string,
+    readonly code: string,
+    readonly label: StringMap
+  ) {}
+}

@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import { List } from 'immutable';
 
-@NgModule({
-  imports: [BrowserModule, FeaturePanelModule, LayerListModule],
-  exports: [SidePanelComponent],
-  declarations: [SidePanelComponent],
-})
-export class SidePanelModule {}
+export class Response {
+  constructor(readonly value: number | string | List<string>) {}
+}

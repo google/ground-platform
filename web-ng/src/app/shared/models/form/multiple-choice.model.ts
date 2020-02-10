@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,33 @@
  * limitations under the License.
  */
 
-import { Form } from './form/form.model';
-import { StringMap } from './string-map.model';
+import { StringMap } from '../string-map.model';
+import { Option } from './option.model';
 import { Map } from 'immutable';
 
-export class Layer {
+/**
+ *
+ * It converts in JavaScript to:
+ * {
+ *   1: "SELECT_ONE",
+ *   3: "SELECT_MULTIPLE",
+ *   SELECT_ONE: 1,
+ *   SELECT_MULTIPLE: 2,
+ * }
+ *
+ * So to convert string to enum use:
+ *  var value = Cardinality["SELECT_ONE"]
+ * Because then:
+ *  value == Cardinality.SELECT_ONE
+ */
+export enum Cardinality {
+  SELECT_ONE = 1,
+  SELECT_MULTIPLE = 2,
+}
+
+export class MultipleChoice {
   constructor(
-    readonly id: string,
-    readonly name: StringMap,
-    readonly forms: Map<string, Form>
+    readonly cardinality: Cardinality,
+    readonly options: Map<string, Option>
   ) {}
 }

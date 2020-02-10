@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import { Map } from 'immutable';
+import { Field } from './field.model';
 
-@NgModule({
-  imports: [BrowserModule, FeaturePanelModule, LayerListModule],
-  exports: [SidePanelComponent],
-  declarations: [SidePanelComponent],
-})
-export class SidePanelModule {}
+export class Form {
+  constructor(readonly id: string, readonly fields: Map<string, Field>) {}
+}
