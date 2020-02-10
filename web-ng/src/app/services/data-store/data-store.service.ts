@@ -136,7 +136,6 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toProject(id: string, data: DocumentData): Project {
-    const layerIds = data.layers ? [] : Object.keys(data.layers);
     return new Project(
       id,
       StringMap(data.title),
