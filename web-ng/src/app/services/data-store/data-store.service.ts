@@ -128,7 +128,7 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toProject(id: string, data: DocumentData): Project {
-    const layerIds = data.layers ? [] : Object.keys(data.layers);
+    const layerIds = data.layers ? Object.keys(data.layers) : [];
     return new Project(
       id,
       StringMap(data.title),
@@ -171,7 +171,7 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toForm(id: string, data: DocumentData): Form {
-    const elementIds = data.elements ? [] : Object.keys(data.elements);
+    const elementIds = data.elements ? Object.keys(data.elements) : [];
     return new Form(
       id,
       Map<string, Field>(
