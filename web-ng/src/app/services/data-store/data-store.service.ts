@@ -32,6 +32,14 @@ import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { StringMap } from './../../shared/models/string-map.model';
 
+/**
+ * Helper to return either the keys of a dictionary, or if missing, returns an
+ * empty array.
+ */
+function keys(dict?: any): any[] {
+  return Object.keys(dict || {});
+}
+
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({
@@ -128,13 +136,12 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toProject(id: string, data: DocumentData): Project {
-    const layerIds = data.layers ? Object.keys(data.layers) : [];
     return new Project(
       id,
       StringMap(data.title),
       StringMap(data.description),
       Map<string, Layer>(
-        layerIds.map((id: string) => [
+        keys(data.layers).map((id: string) => [
           id as string,
           DataStoreService.toLayer(id, data.layers[id]),
         ])
@@ -150,12 +157,11 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toLayer(id: string, data: DocumentData): Layer {
-    const formIds = data.forms ? Object.keys(data.forms) : [];
     return new Layer(
       id,
       StringMap(data.name),
       Map<string, Form>(
-        formIds.map((id: string) => [
+        keys(data.forms).map((id: string) => [
           id as string,
           DataStoreService.toForm(id, data.forms[id]),
         ])
@@ -171,11 +177,10 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toForm(id: string, data: DocumentData): Form {
-    const elementIds = data.elements ? Object.keys(data.elements) : [];
     return new Form(
       id,
       Map<string, Field>(
-        elementIds.map((id: string) => [
+        keys(data.elements).map((id: string) => [
           id as string,
           DataStoreService.toField(id, data.elements[id]),
         ])
@@ -216,7 +221,6 @@ export class DataStoreService {
    * </code></pre>
    */
   private static toField(id: string, data: DocumentData): Field {
-    const optionIds = data.options ? Object.keys(data.options) : [];
     return new Field(
       id,
       FieldType.TEXT,
@@ -226,7 +230,7 @@ export class DataStoreService {
         new MultipleChoice(
           data.cardinality,
           Map<string, Option>(
-            optionIds.map((id: string) => [
+            keys(data.options).map((id: string) => [
               id as string,
               DataStoreService.toOption(id, data.options[id]),
             ])
@@ -289,14 +293,13 @@ export class DataStoreService {
     id: string,
     data: DocumentData
   ): Observation {
-    const responseIds = data.responses ? Object.keys(data.responses) : [];
     return new Observation(
       id,
       project.getForm(feature.layerId, data.formId),
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),
       Map<string, Response>(
-        responseIds.map((id: string) => [
+        keys(data.responses).map((id: string) => [
           id as string,
           new Response(data.responses[id] as string | number | List<string>),
         ])
