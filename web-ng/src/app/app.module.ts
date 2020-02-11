@@ -27,6 +27,7 @@ import { MainPageModule } from './components/main-page/main-page.module';
 import { ColorPickerModule } from './components/color-picker/color-picker.module';
 import { environment } from '../environments/environment';
 import { EditStyleButtonModule } from './components/edit-style-button/edit-style-button.module';
+import { InlineEditTitleModule } from './components/inline-edit-title/inline-edit-title.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -40,6 +41,7 @@ import { EditStyleButtonModule } from './components/edit-style-button/edit-style
     MainPageModule,
     ColorPickerModule,
     EditStyleButtonModule,
+    InlineEditTitleModule,
   ],
   bootstrap: [AppComponent],
 })

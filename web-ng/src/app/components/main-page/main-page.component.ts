@@ -32,7 +32,6 @@ import { ProjectService } from '../../services/project/project.service';
 })
 export class MainPageComponent implements OnInit {
   activeProject$: Observable<Project>;
-  lang: string;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
   constructor(
@@ -43,7 +42,6 @@ export class MainPageComponent implements OnInit {
     public auth: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     this.sideNavOpened = true;
     this.activeProject$ = this.projectService.getActiveProject$();
   }

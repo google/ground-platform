@@ -16,6 +16,7 @@
 
 import { CommonModule } from '@angular/common';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
 import { MainPageComponent } from './main-page.component';
 import { MapModule } from '../map/map.module';
@@ -36,6 +37,7 @@ import { SidePanelModule } from '../side-panel/side-panel.module';
     LayerDialogModule,
     RouterModule,
     SidePanelModule,
+    InlineEditTitleModule,
   ],
 })
 export class MainPageModule {}
