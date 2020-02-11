@@ -33,14 +33,14 @@ export class InlineEditTitleComponent implements OnDestroy {
   title!: string;
   projectId!: string;
 
-  subscriptions: Subscription[] = [];
+  subscription: Subscription = new Subscription();
   constructor(
     private dataStoreService: DataStoreService,
     private projectService: ProjectService
   ) {
     this.lang = 'en';
     this.activeProject$ = this.projectService.getActiveProject$();
-    this.subscriptions.push(
+    this.subscription.add(
       this.activeProject$.subscribe(project => {
         this.title = project.title.get(this.lang)!;
         this.projectId = project.id;
@@ -49,7 +49,7 @@ export class InlineEditTitleComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscription.unsubscribe();
   }
 
   updateProjectTitle(evt: { target: HTMLInputElement }) {
