@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { AuthService } from './../../services/auth/auth.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
@@ -59,7 +58,6 @@ describe('MainPageComponent', () => {
         { provide: FeatureService, useValue: featureService },
         { provide: ProjectService, useValue: projectService },
         { provide: Router, useValue: routerSpy },
-        { provide: AuthService, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
