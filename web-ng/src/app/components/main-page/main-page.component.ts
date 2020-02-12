@@ -15,7 +15,6 @@
  */
 
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
@@ -38,8 +37,7 @@ export class MainPageComponent implements OnInit {
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private dialog: MatDialog,
-    public auth: AuthService
+    private dialog: MatDialog
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;

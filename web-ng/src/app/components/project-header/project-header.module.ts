@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-.main-page-container {
-  height: 100%;
-}
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
+import { ProjectHeaderComponent } from './project-header.component';
+
+@NgModule({
+  declarations: [ProjectHeaderComponent],
+  imports: [CommonModule, InlineEditTitleModule],
+  exports: [ProjectHeaderComponent],
+})
+export class ProjectHeaderModule {}

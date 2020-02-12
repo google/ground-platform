@@ -16,7 +16,6 @@
 
 import { CommonModule } from '@angular/common';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
 import { MainPageComponent } from './main-page.component';
 import { MapModule } from '../map/map.module';
@@ -25,6 +24,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { SidePanelModule } from '../side-panel/side-panel.module';
+import { ProjectHeaderModule } from '../project-header/project-header.module';
 
 @NgModule({
   entryComponents: [LayerDialogComponent],
@@ -37,7 +37,7 @@ import { SidePanelModule } from '../side-panel/side-panel.module';
     LayerDialogModule,
     RouterModule,
     SidePanelModule,
-    InlineEditTitleModule,
+    ProjectHeaderModule,
   ],
 })
 export class MainPageModule {}

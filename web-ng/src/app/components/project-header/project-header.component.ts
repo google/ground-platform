@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-.main-page-container {
-  height: 100%;
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from './../../services/auth/auth.service';
+
+@Component({
+  selector: 'app-project-header',
+  templateUrl: './project-header.component.html',
+  styleUrls: ['./project-header.component.css'],
+})
+export class ProjectHeaderComponent implements OnInit {
+  constructor(public auth: AuthService) {}
+
+  ngOnInit() {}
 }
