@@ -29,10 +29,12 @@
   height: 48px;
 }
 
-.ground {
+.app-title {
   height: 28px;
   width: 80px;
   margin-left: 8px;
+  font-family: sans-serif;
+  font-size: 15pt;
 }
 
 .user-thumb {
@@ -70,4 +72,17 @@
   margin-right: 8px;
   border-radius: 5px;
   display: table;
+  font-family: sans-serif;
+}
+
+.share-text {
+  margin-left: 10px;
+  font-family: sans-serif;
+}
+
+.header-divider {
+  border-left: 1px solid grey;
+  height: 500px;
+  margin-left: 8px;
+  margin-right: 8px;
 }

@@ -14,15 +14,15 @@
   limitations under the License.
 -->
 <img class="logo" src="/assets/img/logo.png" />
-<span class="ground"> Ground </span>
-<span> | </span>
+<span class="ground app-title">Ground</span>
+<span class="header-divider"></span>
 <app-inline-edit-title></app-inline-edit-title>
 <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
   <button class="btn-share">
-    <mat-icon class="icon-share"> share </mat-icon>
-    <span> Share </span>
+    <mat-icon class="icon-share">share</mat-icon>
+    <span class="share-text">Share</span>
   </button>
-  <mat-icon class="icon-more-vert"> more_vert </mat-icon>
+  <mat-icon class="icon-more-vert">more_vert</mat-icon>
   <img
     src="{{ user.photoURL }}=s64"
     alt="{{ user.displayName }}"
