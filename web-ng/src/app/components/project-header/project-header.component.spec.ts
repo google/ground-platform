@@ -22,6 +22,7 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ProjectHeaderComponent } from './project-header.component';
 import { environment } from '../../../environments/environment';
 import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
+import { MatIconModule } from '@angular/material/icon';
 
 describe('ProjectHeaderComponent', () => {
   let component: ProjectHeaderComponent;
@@ -34,6 +35,7 @@ describe('ProjectHeaderComponent', () => {
         AngularFireModule.initializeApp(environment.firebaseConfig),
         AngularFireAuthModule,
         AngularFirestoreModule,
+        MatIconModule,
       ],
       declarations: [ProjectHeaderComponent],
       providers: [{ provide: AuthService, useValue: {} }],

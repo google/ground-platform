@@ -18,10 +18,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { ProjectHeaderComponent } from './project-header.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [ProjectHeaderComponent],
-  imports: [CommonModule, InlineEditTitleModule],
+  imports: [CommonModule, InlineEditTitleModule, MatIconModule],
   exports: [ProjectHeaderComponent],
 })
 export class ProjectHeaderModule {}

@@ -14,12 +14,60 @@
  * limitations under the License.
  */
 
+.rhs-widgets {
+  float: right;
+  margin-top: 18px;
+  display: flex;
+}
+
+.logo {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  margin-left: 20px;
+  vertical-align: middle;
+  width: 48px;
+  height: 48px;
+}
+
+.ground {
+  height: 28px;
+  width: 80px;
+  margin-left: 8px;
+}
+
 .user-thumb {
   width: 32px;
   height: 32px;
   border-radius: 32px;
+  margin-right: 8px;
 }
 
-.rhs-widgets {
+.btn-share {
+  background-color: rgb(0, 145, 19);
+  color: white;
+  margin-right: 16px;
+  width: 100px;
+  border-radius: 5px;
+}
+
+.icon-share {
+  vertical-align: middle !important;
+}
+
+.icon-more-vert {
+  margin-right: 16px !important;
+}
+
+.button-rhs {
   float: right;
+}
+
+.btn-auth {
+  color: white;
+  background-color: rgb(0, 145, 19);
+  height: 36px;
+  width: 82px;
+  margin-right: 8px;
+  border-radius: 5px;
+  display: table;
 }
