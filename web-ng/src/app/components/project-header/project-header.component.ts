@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { AuthService } from './../../services/auth/auth.service';
+import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-project-header',
@@ -23,7 +25,14 @@ import { AuthService } from './../../services/auth/auth.service';
   styleUrls: ['./project-header.component.css'],
 })
 export class ProjectHeaderComponent implements OnInit {
-  constructor(public auth: AuthService) {}
+  constructor(public auth: AuthService, private dialog: MatDialog) {}
 
   ngOnInit() {}
+
+  openProfileDialog(evt: MouseEvent): void {
+    const target = new ElementRef(evt.currentTarget);
+    this.dialog.open(UserProfilePopupComponent, {
+      data: { trigger: target },
+    });
+  }
 }

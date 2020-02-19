@@ -14,31 +14,24 @@
  * limitations under the License.
  */
 
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  Inject,
-  Output,
-  EventEmitter,
-} from '@angular/core';
+import { Component, ElementRef, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog, MatDialogConfig } from '@angular/material';
-import { ColorEvent } from 'ngx-color';
+import { AuthService } from './../../services/auth/auth.service';
 
 @Component({
-  selector: 'app-color-picker',
-  templateUrl: './color-picker.component.html',
-  styleUrls: ['./color-picker.component.css'],
+  selector: 'app-user-profile-popup',
+  templateUrl: './user-profile-popup.component.html',
+  styleUrls: ['./user-profile-popup.component.css'],
 })
-export class ColorPickerComponent implements OnInit {
-  private readonly matDialogRef: MatDialogRef<ColorPickerComponent>;
+export class UserProfilePopupComponent implements OnInit {
+  private readonly matDialogRef: MatDialogRef<UserProfilePopupComponent>;
   private readonly triggerElementRef: ElementRef;
-  @Output() onColorPicked: EventEmitter<{}> = new EventEmitter();
 
   constructor(
     private dialog: MatDialog,
-    matDialogRef: MatDialogRef<ColorPickerComponent>,
+    matDialogRef: MatDialogRef<UserProfilePopupComponent>,
+    public auth: AuthService,
     @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }
   ) {
     this.matDialogRef = matDialogRef;
@@ -52,24 +45,17 @@ export class ColorPickerComponent implements OnInit {
     const matDialogConfig: MatDialogConfig = new MatDialogConfig();
     const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
     matDialogConfig.position = {
-      left: `${rect.left}px`,
+      left: `${rect.left - 190}px`,
       top: `${rect.bottom + 10}px`,
     };
-    matDialogConfig.width = '300px';
-    matDialogConfig.height = '400px';
+    matDialogConfig.width = '200px';
+    matDialogConfig.height = '200px';
     this.matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
     this.matDialogRef.updatePosition(matDialogConfig.position);
   }
 
-  openColorPickerDialog() {
-    this.dialog.open(ColorPickerComponent);
-  }
-
-  close() {
+  onSignOut() {
     this.matDialogRef.close();
-  }
-
-  handleColorChange($event: ColorEvent) {
-    this.onColorPicked.emit($event);
+    this.auth.signOut();
   }
 }
