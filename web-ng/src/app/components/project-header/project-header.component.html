@@ -27,8 +27,9 @@
     src="{{ user.photoURL }}=s64"
     alt="{{ user.displayName }}"
     class="user-thumb"
+    style="cursor: pointer"
+    (click)="openProfileDialog($event)"
   />
-  <button class="button btn-auth" (click)="auth.signOut()">Sign Out</button>
 </div>
 <ng-template #login>
   <button class="rhs-widgets btn-auth" (click)="auth.signIn()">SIGN IN</button>

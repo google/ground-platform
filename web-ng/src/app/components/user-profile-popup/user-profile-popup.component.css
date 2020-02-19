@@ -13,22 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+.user-thumb {
+  display: block;
+  margin: 0px auto;
+  border-radius: 32px;
+}
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
-import { ProjectHeaderComponent } from './project-header.component';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
+.user-email {
+  font-size: 10px;
+  color: grey;
+}
 
-@NgModule({
-  declarations: [ProjectHeaderComponent],
-  imports: [
-    CommonModule,
-    InlineEditTitleModule,
-    MatIconModule,
-    MatDialogModule,
-  ],
-  exports: [ProjectHeaderComponent],
-})
-export class ProjectHeaderModule {}
+.user-description {
+  width: 60%;
+  margin: 0px auto;
+  margin-top: 10px;
+}
+
+.btn-signout {
+  margin: 0px auto;
+  display: block;
+  padding: 5px 20px 5px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: sans-serif;
+}
