@@ -25,7 +25,7 @@
     <div class="user-description">
       <div>{{ user.displayName }}</div>
       <div class="user-email">{{ user.email }}</div>
-      <button class="button btn-signout" (click)="this.close($event)">
+      <button class="button btn-signout" (click)="this.onSignOut($event)">
         Sign out
       </button>
     </div>

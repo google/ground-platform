@@ -39,24 +39,22 @@ export class UserProfilePopupComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.triggerElementRef) {
-      const matDialogConfig: MatDialogConfig = new MatDialogConfig();
-      const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
-      matDialogConfig.position = {
-        left: `${rect.left - 190}px`,
-        top: `${rect.bottom + 10}px`,
-      };
-      matDialogConfig.width = '200px';
-      matDialogConfig.height = '200px';
-      this.matDialogRef.updateSize(
-        matDialogConfig.width,
-        matDialogConfig.height
-      );
-      this.matDialogRef.updatePosition(matDialogConfig.position);
+    if (!this.triggerElementRef) {
+      return;
     }
+    const matDialogConfig: MatDialogConfig = new MatDialogConfig();
+    const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
+    matDialogConfig.position = {
+      left: `${rect.left - 190}px`,
+      top: `${rect.bottom + 10}px`,
+    };
+    matDialogConfig.width = '200px';
+    matDialogConfig.height = '200px';
+    this.matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
+    this.matDialogRef.updatePosition(matDialogConfig.position);
   }
 
-  close() {
+  onSignOut() {
     this.matDialogRef.close();
     this.auth.signOut();
   }
