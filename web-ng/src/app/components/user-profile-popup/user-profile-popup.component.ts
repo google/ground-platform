@@ -45,10 +45,10 @@ export class UserProfilePopupComponent implements OnInit {
     const matDialogConfig: MatDialogConfig = new MatDialogConfig();
     const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
     matDialogConfig.position = {
-      left: `${rect.left - 190}px`,
-      top: `${rect.bottom + 10}px`,
+      right: '7px',
+      top: '60px',
     };
-    matDialogConfig.width = '200px';
+    matDialogConfig.width = '300px';
     matDialogConfig.height = '200px';
     this.matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
     this.matDialogRef.updatePosition(matDialogConfig.position);
