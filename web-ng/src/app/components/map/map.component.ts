@@ -16,11 +16,14 @@
 
 import { Component, OnInit } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
+import { Project } from '../../shared/models/project.model';
 import { Feature } from '../../shared/models/feature.model';
+import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
+import { svgTemplate } from './ground-pin-svg-template';
 
 @Component({
   selector: 'ground-map',
@@ -31,6 +34,7 @@ export class MapComponent implements OnInit {
   private subscription: Subscription = new Subscription();
   focusedFeatureId = '';
   features$: Observable<List<Feature>>;
+  activeProject$: Observable<Project>;
   mapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
@@ -41,11 +45,13 @@ export class MapComponent implements OnInit {
   };
 
   constructor(
+    private projectService: ProjectService,
     private featureService: FeatureService,
     private router: Router,
     private route: ActivatedRoute
   ) {
     this.features$ = this.featureService.getFeatures$();
+    this.activeProject$ = this.projectService.getActiveProject$();
   }
 
   ngOnInit() {
@@ -70,30 +76,32 @@ export class MapComponent implements OnInit {
 
   createMarkerOptions(
     feature: Feature,
-    focusedFeatureId: string
+    focusedFeatureId: string,
+    project: Project
   ): google.maps.MarkerOptions {
     // Icon is not yet an input for <map-marker>, this is the only way to change icon for now.
     // Consider break this down when more inputs are available for <map-marker>.
+    const normalScale = 30;
+    const enlargedScale = 50;
+    const defaultIconColor = 'red';
+    const color =
+      project.layers.get(feature.layerId)!.color || defaultIconColor;
     const icon = {
-      url: 'assets/img/marker-icon.png',
+      url:
+        'data:image/svg+xml;charset=UTF-8;base64,' +
+        btoa(svgTemplate.replace('{{ color }}', color)),
       scaledSize: {
-        width: 40,
-        height: 40,
+        width: feature.id === focusedFeatureId ? enlargedScale : normalScale,
+        height: feature.id === focusedFeatureId ? enlargedScale : normalScale,
       },
-    };
-    const enlargedIcon = {
-      url: 'assets/img/marker-icon.png',
-      scaledSize: {
-        width: 60,
-        height: 60,
-      },
-    };
+    } as google.maps.Icon;
+
     return {
       position: new google.maps.LatLng(
         feature.location.latitude,
         feature.location.longitude
       ),
-      icon: feature.id === focusedFeatureId ? enlargedIcon : icon,
+      icon,
     } as google.maps.MarkerOptions;
   }
 }

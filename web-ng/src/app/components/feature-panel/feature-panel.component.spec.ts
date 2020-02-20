@@ -38,7 +38,12 @@ const mockProject = new Project(
   Map<string, Layer>([
     [
       'layer001',
-      new Layer('layer001', StringMap([['en', 'name']]), Map<string, Form>([])),
+      new Layer(
+        'layer001',
+        'red',
+        StringMap([['en', 'name']]),
+        Map<string, Form>([])
+      ),
     ],
   ])
 );

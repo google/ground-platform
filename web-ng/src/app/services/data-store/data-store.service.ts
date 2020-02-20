@@ -167,6 +167,7 @@ export class DataStoreService {
   private static toLayer(id: string, data: DocumentData): Layer {
     return new Layer(
       id,
+      data.color,
       StringMap(data.name),
       Map<string, Form>(
         keys(data.forms).map((id: string) => [
