@@ -39,17 +39,17 @@
   margin: 0px auto;
   margin-top: 10px;
   text-align: center;
-  font-family: sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
 }
 
 .btn-signout {
   margin: 0px auto;
   margin-top: 20px;
   display: block;
-  padding: 10px 24px;
+  padding: 10px 24px 18px 24px;
   cursor: pointer;
   font-weight: 600;
-  font-family: sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
 }
 
 .mat-dialog-container {
