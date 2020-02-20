@@ -23,19 +23,22 @@
 .user-email {
   font-size: 14px;
   color: grey;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .user-display-name {
   font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .user-description {
   margin: 0px auto;
   margin-top: 10px;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
   font-family: sans-serif;
 }
 
