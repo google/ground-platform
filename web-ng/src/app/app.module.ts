@@ -29,6 +29,7 @@ import { environment } from '../environments/environment';
 import { EditStyleButtonModule } from './components/edit-style-button/edit-style-button.module';
 import { InlineEditTitleModule } from './components/inline-edit-title/inline-edit-title.module';
 import { ProjectHeaderModule } from './components/project-header/project-header.module';
+import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -44,6 +45,7 @@ import { ProjectHeaderModule } from './components/project-header/project-header.
     EditStyleButtonModule,
     InlineEditTitleModule,
     ProjectHeaderModule,
+    UserProfilePopupModule,
   ],
   bootstrap: [AppComponent],
 })

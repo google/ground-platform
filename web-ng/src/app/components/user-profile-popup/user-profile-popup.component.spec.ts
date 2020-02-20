@@ -14,43 +14,41 @@
  * limitations under the License.
  */
 
-import { AuthService } from './../../services/auth/auth.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { UserProfilePopupComponent } from './user-profile-popup.component';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { ProjectHeaderComponent } from './project-header.component';
 import { environment } from '../../../environments/environment';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
-describe('ProjectHeaderComponent', () => {
-  let component: ProjectHeaderComponent;
-  let fixture: ComponentFixture<ProjectHeaderComponent>;
+import { Router } from '@angular/router';
+
+describe('UserProfilePopupComponent', () => {
+  let component: UserProfilePopupComponent;
+  let fixture: ComponentFixture<UserProfilePopupComponent>;
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
+
   beforeEach(async(() => {
+    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
+      declarations: [UserProfilePopupComponent],
       imports: [
-        InlineEditTitleModule,
+        MatDialogModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
         AngularFireAuthModule,
         AngularFirestoreModule,
-        MatIconModule,
-        MatDialogModule,
       ],
-      declarations: [ProjectHeaderComponent],
       providers: [
-        { provide: AuthService, useValue: {} },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ProjectHeaderComponent);
+    fixture = TestBed.createComponent(UserProfilePopupComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -59,3 +57,7 @@ describe('ProjectHeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}

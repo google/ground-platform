@@ -16,19 +16,12 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
-import { ProjectHeaderComponent } from './project-header.component';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { UserProfilePopupComponent } from './user-profile-popup.component';
 
 @NgModule({
-  declarations: [ProjectHeaderComponent],
-  imports: [
-    CommonModule,
-    InlineEditTitleModule,
-    MatIconModule,
-    MatDialogModule,
-  ],
-  exports: [ProjectHeaderComponent],
+  declarations: [UserProfilePopupComponent],
+  imports: [CommonModule, MatDialogModule],
+  entryComponents: [UserProfilePopupComponent],
 })
-export class ProjectHeaderModule {}
+export class UserProfilePopupModule {}
