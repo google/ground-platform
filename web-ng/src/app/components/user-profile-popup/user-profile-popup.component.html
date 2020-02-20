@@ -23,9 +23,14 @@
       (click)="openProfileDialog($event)"
     />
     <div class="user-description">
-      <div>{{ user.displayName }}</div>
+      <div class="user-display-name">{{ user.displayName }}</div>
       <div class="user-email">{{ user.email }}</div>
-      <button class="button btn-signout" (click)="onSignOut($event)">
+      <button
+        class="button btn-signout"
+        mat-raised-button
+        color="primary"
+        (click)="onSignOut($event)"
+      >
         Sign out
       </button>
     </div>
