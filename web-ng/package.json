@@ -18,7 +18,6 @@
   },
   "private": true,
   "dependencies": {
-    "@agm/core": "1.1.0",
     "@angular/animations": "9.0.2",
     "@angular/cdk": "8.2.3",
     "@angular/common": "9.0.2",
@@ -32,7 +31,7 @@
     "@angular/platform-browser": "9.0.2",
     "@angular/platform-browser-dynamic": "9.0.2",
     "@angular/router": "9.0.2",
-    "@types/googlemaps": "3.38.0",
+    "@types/googlemaps": "3.39.2",
     "firebase": "7.5.0",
     "hammerjs": "2.0.8",
     "immutable": "4.0.0-rc.12",

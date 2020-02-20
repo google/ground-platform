@@ -29,22 +29,15 @@ import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 })
 export class MapComponent implements OnInit {
   private subscription: Subscription = new Subscription();
-  zoom = 3;
   focusedFeatureId = '';
   features$: Observable<List<Feature>>;
-  icon = {
-    url: 'assets/img/marker-icon.png',
-    scaledSize: {
-      width: 40,
-      height: 40,
-    },
-  };
-  enlargedIcon = {
-    url: 'assets/img/marker-icon.png',
-    scaledSize: {
-      width: 60,
-      height: 60,
-    },
+  mapOptions: google.maps.MapOptions = {
+    center: new google.maps.LatLng(40.767716, -73.971714),
+    zoom: 3,
+    fullscreenControl: false,
+    mapTypeControl: false,
+    streetViewControl: false,
+    mapTypeId: google.maps.MapTypeId.HYBRID,
   };
 
   constructor(
@@ -73,5 +66,34 @@ export class MapComponent implements OnInit {
       .root.children['primary'].toString();
     const navigationExtras: NavigationExtras = { fragment: `f=${featureId}` };
     this.router.navigate([primaryUrl], navigationExtras);
+  }
+
+  createMarkerOptions(
+    feature: Feature,
+    focusedFeatureId: string
+  ): google.maps.MarkerOptions {
+    // Icon is not yet an input for <map-marker>, this is the only way to change icon for now.
+    // Consider break this down when more inputs are available for <map-marker>.
+    const icon = {
+      url: 'assets/img/marker-icon.png',
+      scaledSize: {
+        width: 40,
+        height: 40,
+      },
+    };
+    const enlargedIcon = {
+      url: 'assets/img/marker-icon.png',
+      scaledSize: {
+        width: 60,
+        height: 60,
+      },
+    };
+    return {
+      position: new google.maps.LatLng(
+        feature.location.latitude,
+        feature.location.longitude
+      ),
+      icon: feature.id === focusedFeatureId ? enlargedIcon : icon,
+    } as google.maps.MarkerOptions;
   }
 }
