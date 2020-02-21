@@ -23,7 +23,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
-import { svgTemplate } from './ground-pin-svg-template';
+import { renderPin } from './ground-pin';
 
 @Component({
   selector: 'ground-map',
@@ -85,11 +85,9 @@ export class MapComponent implements OnInit {
     const enlargedScale = 50;
     const defaultIconColor = 'red';
     const color =
-      project.layers.get(feature.layerId)!.color || defaultIconColor;
+      project.layers.get(feature.layerId)?.color || defaultIconColor;
     const icon = {
-      url:
-        'data:image/svg+xml;charset=UTF-8;base64,' +
-        btoa(svgTemplate.replace('{{ color }}', color)),
+      url: 'data:image/svg+xml;charset=UTF-8;base64,' + btoa(renderPin(color)),
       scaledSize: {
         width: feature.id === focusedFeatureId ? enlargedScale : normalScale,
         height: feature.id === focusedFeatureId ? enlargedScale : normalScale,
