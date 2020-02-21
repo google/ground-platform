@@ -21,6 +21,7 @@ import { Map } from 'immutable';
 export class Layer {
   constructor(
     readonly id: string,
+    readonly color: string,
     readonly name: StringMap,
     readonly forms: Map<string, Form>
   ) {}

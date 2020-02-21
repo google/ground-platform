@@ -32,7 +32,7 @@ describe('ProjectService', () => {
 
   it('should be created', () => {
     // TODO(gino-m): Implement tests.
-    const service: ProjectService = TestBed.get(ProjectService);
+    const service: ProjectService = TestBed.inject(ProjectService);
     expect(service).toBeTruthy();
   });
 });

@@ -15,7 +15,7 @@ describe('DataStoreService', () => {
   );
 
   it('should be created', () => {
-    const service: DataStoreService = TestBed.get(DataStoreService);
+    const service: DataStoreService = TestBed.inject(DataStoreService);
     expect(service).toBeTruthy();
   });
 });
