@@ -73,6 +73,23 @@ export class DataStoreService {
       .set({ title: { en: newTitle } }, { merge: true })
       .then(() => projectId);
   }
+
+  updateProjectLayer(projectId: string, layers: string) {
+    const updatedLayers = JSON.parse(layers);
+    return new Promise((resolve, reject) => {
+      this.db
+        .collection('projects')
+        .doc(projectId)
+        .set({ layers: updatedLayers }, { merge: true })
+        .then(() => {
+          resolve(projectId);
+        })
+        .catch(err => {
+          reject('Form not saved');
+        });
+    });
+  }
+
   /**
    * Returns an Observable that loads and emits the feature with the specified
    * uuid.
@@ -335,5 +352,9 @@ export class DataStoreService {
    */
   private static toAuditInfo(data: DocumentData): AuditInfo {
     return new AuditInfo(data.user, data.clientTimestamp);
+  }
+
+  generateId() {
+    return this.db.collection('ids').ref.doc().id;
   }
 }

@@ -19,4 +19,23 @@
   <div>Layer id: {{ layerId }}</div>
   <div>TODO: Layer UI goes here</div>
 </mat-dialog-content>
-<mat-dialog-actions><div>TODO: Cancel | Apply</div></mat-dialog-actions>
+<mat-dialog-actions>
+  <div>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onClose()"
+      class="btn-cancel"
+    >
+      Cancel
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onSave()"
+      class="btn-save"
+    >
+      Save
+    </button>
+  </div>
+</mat-dialog-actions>

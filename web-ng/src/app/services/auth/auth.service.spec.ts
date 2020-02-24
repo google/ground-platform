@@ -20,10 +20,19 @@ import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from './auth.service';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { environment } from '../../../environments/environment';
 
 describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [
+        AngularFireModule.initializeApp(environment.firebaseConfig),
+        AngularFireAuthModule,
+        AngularFirestoreModule,
+      ],
       providers: [
         { provide: AngularFireAuth, useValue: { authState: NEVER } },
         { provide: DataStoreService },

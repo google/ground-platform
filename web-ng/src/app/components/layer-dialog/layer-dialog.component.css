@@ -18,3 +18,23 @@
   width: 800px;
   height: 600px;
 }
+
+.btn-save {
+  color: white;
+  background-color: rgb(0, 145, 19);
+  height: 36px;
+  width: 82px;
+  border-radius: 5px;
+  font-family: sans-serif;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  color: green;
+  height: 36px;
+  width: 82px;
+  border-radius: 5px;
+  font-family: sans-serif;
+  cursor: pointer;
+}

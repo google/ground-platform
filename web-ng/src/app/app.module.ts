@@ -30,6 +30,7 @@ import { EditStyleButtonModule } from './components/edit-style-button/edit-style
 import { InlineEditTitleModule } from './components/inline-edit-title/inline-edit-title.module';
 import { ProjectHeaderModule } from './components/project-header/project-header.module';
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
+import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -46,6 +47,7 @@ import { UserProfilePopupModule } from './components/user-profile-popup/user-pro
     InlineEditTitleModule,
     ProjectHeaderModule,
     UserProfilePopupModule,
+    LayerDialogModule,
   ],
   bootstrap: [AppComponent],
 })
