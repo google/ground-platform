@@ -33,7 +33,7 @@ export class LayerDialogComponent implements OnDestroy {
   layerId: string;
   layer!: Layer;
   project!: Project;
-  activeProject$!: Observable<Project>;
+  activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   constructor(
     // tslint:disable-next-line:no-any
@@ -58,26 +58,21 @@ export class LayerDialogComponent implements OnDestroy {
   onSave() {
     let updatedLayers;
     if (this.layerId === ':new') {
-      updatedLayers = this.project.layers.set(
-        this.dataStoreService.generateId(),
-        {
-          id: this.dataStoreService.generateId(),
-        }
-      );
+      updatedLayers = {
+        [`layers.${this.dataStoreService.generateId()}`]: {},
+      };
     } else {
-      updatedLayers = this.project.layers.set(this.layerId, {
-        id: this.layerId,
-      });
+      updatedLayers = {
+        [`layers.${this.layerId}`]: {},
+      };
     }
-    this.dataStoreService.updateProjectLayer(
-      this.project.id,
-      JSON.stringify(updatedLayers)
-    );
+    this.dataStoreService.updateProjectLayer(this.project.id, updatedLayers);
     this.onClose();
   }
 
   onClose() {
     this.dialogRef.close();
+    // TODO: refactor this path into a custom router wrapper
     return this.router.navigate([`p/${this.project.id}`]);
   }
 

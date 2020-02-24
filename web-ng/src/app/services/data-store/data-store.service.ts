@@ -74,18 +74,18 @@ export class DataStoreService {
       .then(() => projectId);
   }
 
-  updateProjectLayer(projectId: string, layers: string) {
-    const updatedLayers = JSON.parse(layers);
+  // TODO: Define return types for methods in this class
+  updateProjectLayer(projectId: string, layers: {}) {
     return new Promise((resolve, reject) => {
       this.db
         .collection('projects')
         .doc(projectId)
-        .set({ layers: updatedLayers }, { merge: true })
+        .update(layers)
         .then(() => {
           resolve(projectId);
         })
         .catch(err => {
-          reject('Form not saved');
+          reject('Layer not saved');
         });
     });
   }
