@@ -31,8 +31,8 @@ import { Router } from '@angular/router';
 })
 export class LayerDialogComponent implements OnDestroy {
   layerId: string;
-  layer!: Layer;
-  project!: Project;
+  layer?: Layer;
+  projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   constructor(
@@ -50,30 +50,30 @@ export class LayerDialogComponent implements OnDestroy {
     this.subscription.add(
       this.activeProject$.subscribe(project => {
         this.layer = project.layers.get(this.layerId)!;
-        this.project = project;
+        this.projectId = project.id;
       })
     );
   }
 
   onSave() {
-    let updatedLayers;
-    if (this.layerId === ':new') {
-      updatedLayers = {
-        [`layers.${this.dataStoreService.generateId()}`]: {},
-      };
-    } else {
-      updatedLayers = {
-        [`layers.${this.layerId}`]: {},
-      };
+    if (!this.projectId) {
+      return;
     }
-    this.dataStoreService.updateProjectLayer(this.project.id, updatedLayers);
+    const layerId =
+      this.layerId === ':new'
+        ? this.dataStoreService.generateId()
+        : this.layerId;
+    const layer = {
+      id: layerId,
+    };
+    this.dataStoreService.updateProjectLayer(this.projectId, layerId, layer);
     this.onClose();
   }
 
   onClose() {
     this.dialogRef.close();
     // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([`p/${this.project.id}`]);
+    return this.router.navigate([`p/${this.projectId}`]);
   }
 
   ngOnDestroy() {

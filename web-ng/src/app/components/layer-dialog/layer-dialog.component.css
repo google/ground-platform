@@ -25,16 +25,15 @@
   height: 36px;
   width: 82px;
   border-radius: 5px;
-  font-family: sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
   margin-left: 10px;
   cursor: pointer;
 }
 
 .btn-cancel {
-  color: green;
   height: 36px;
   width: 82px;
   border-radius: 5px;
-  font-family: sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
   cursor: pointer;
 }
