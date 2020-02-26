@@ -70,17 +70,14 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   onSave() {
+    // TODO  wait for project to load before showing dialog
     if (!this.projectId) {
-      throw Error('No Project exists with that id');
+      throw Error('Project not yet loaded');
     }
     const layer = {
       id: this.layerId,
     };
-    this.dataStoreService.updateProjectLayer(
-      this.projectId,
-      this.layerId,
-      layer
-    );
+    this.dataStoreService.updateProjectLayer(this.projectId, layer);
     this.onClose();
   }
 

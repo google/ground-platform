@@ -29,14 +29,11 @@ export class Project {
 
   getForm(layerId: string, formId: string): Form {
     const layer = this.layers.get(layerId);
-    let form;
     if (!layer) {
       throw Error('Layer not found.');
     }
-    if (layer.forms) {
-      form = layer.forms.get(formId);
-    }
-    if (!layer.forms || !form) {
+    const form = layer.forms?.get(formId);
+    if (!form) {
       throw Error('Form not found.');
     }
     return form;
