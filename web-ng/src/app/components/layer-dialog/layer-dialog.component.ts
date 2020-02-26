@@ -77,7 +77,11 @@ export class LayerDialogComponent implements OnDestroy {
     const layer = {
       id: this.layerId,
     };
-    this.dataStoreService.updateProjectLayer(this.projectId, layer);
+    try {
+      this.dataStoreService.updateProjectLayer(this.projectId, layer);
+    } catch (err) {
+      alert('Layer update failed.');
+    }
     this.onClose();
   }
 

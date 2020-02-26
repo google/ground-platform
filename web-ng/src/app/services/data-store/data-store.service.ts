@@ -82,8 +82,7 @@ export class DataStoreService {
       .doc(projectId)
       .update({
         [`layers.${layerId}`]: layerDoc,
-      })
-      .then(() => projectId);
+      });
   }
 
   /**
