@@ -49,24 +49,38 @@ export class LayerDialogComponent implements OnDestroy {
     this.activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
       this.activeProject$.subscribe(project => {
-        this.layer = project.layers.get(this.layerId)!;
-        this.projectId = project.id;
+        this.onProjectLoaded(project);
       })
     );
   }
 
+  onProjectLoaded(project: Project) {
+    if (this.layerId === ':new') {
+      this.layerId = this.dataStoreService.generateId();
+      this.layer = {
+        id: this.layerId,
+      };
+    } else {
+      this.layer = project.layers.get(this.layerId);
+    }
+    if (!this.layer) {
+      throw Error('No layer exists');
+    }
+    this.projectId = project.id;
+  }
+
   onSave() {
     if (!this.projectId) {
-      return;
+      throw Error('No Project exists with that id');
     }
-    const layerId =
-      this.layerId === ':new'
-        ? this.dataStoreService.generateId()
-        : this.layerId;
     const layer = {
-      id: layerId,
+      id: this.layerId,
     };
-    this.dataStoreService.updateProjectLayer(this.projectId, layerId, layer);
+    this.dataStoreService.updateProjectLayer(
+      this.projectId,
+      this.layerId,
+      layer
+    );
     this.onClose();
   }
 

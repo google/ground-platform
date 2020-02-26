@@ -76,12 +76,14 @@ export class DataStoreService {
 
   // TODO: Define return types for methods in this class
   updateProjectLayer(projectId: string, layerId: string, layer: Layer) {
+    const updatedLayer = layer as { id: string };
+    delete updatedLayer['id'];
     return new Promise((resolve, reject) => {
       this.db
         .collection('projects')
         .doc(projectId)
         .update({
-          [`layers.${layerId}`]: layer,
+          [`layers.${layerId}`]: updatedLayer,
         })
         .then(() => {
           resolve(projectId);
