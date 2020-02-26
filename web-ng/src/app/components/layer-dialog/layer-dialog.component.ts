@@ -70,7 +70,7 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   onSave() {
-    // TODO  wait for project to load before showing dialog
+    // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
