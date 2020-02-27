@@ -82,6 +82,7 @@ export class LayerDialogComponent implements OnDestroy {
       .updateProjectLayer(this.projectId, layer)
       .then(() => this.onClose())
       .catch(err => {
+        // TODO: Show in toast message, i18n.
         alert('Layer update failed.');
       });
   }
