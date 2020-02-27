@@ -78,6 +78,7 @@ export class LayerDialogComponent implements OnDestroy {
       id: this.layerId,
     };
     try {
+      // TODO: Inform user layer was saved
       this.dataStoreService
         .updateProjectLayer(this.projectId, layer)
         .then(() => this.onClose());
