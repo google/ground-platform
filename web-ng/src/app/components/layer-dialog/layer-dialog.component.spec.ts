@@ -18,6 +18,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { LayerDialogComponent } from './layer-dialog.component';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
@@ -31,11 +36,18 @@ describe('LayerDialogComponent', () => {
   const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
 
   beforeEach(async(() => {
+    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [LayerDialogComponent, MatDialogContent, MatDialogActions],
+      imports: [
+        AngularFireModule.initializeApp(environment.firebaseConfig),
+        AngularFireAuthModule,
+        AngularFirestoreModule,
+      ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
   }));
@@ -50,3 +62,7 @@ describe('LayerDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}

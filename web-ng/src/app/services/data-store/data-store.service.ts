@@ -73,6 +73,18 @@ export class DataStoreService {
       .set({ title: { en: newTitle } }, { merge: true })
       .then(() => projectId);
   }
+
+  // TODO: Define return types for methods in this class
+  updateProjectLayer(projectId: string, layer: Layer) {
+    const { id: layerId, ...layerDoc } = layer;
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .update({
+        [`layers.${layerId}`]: layerDoc,
+      });
+  }
+
   /**
    * Returns an Observable that loads and emits the feature with the specified
    * uuid.
@@ -335,5 +347,9 @@ export class DataStoreService {
    */
   private static toAuditInfo(data: DocumentData): AuditInfo {
     return new AuditInfo(data.user, data.clientTimestamp);
+  }
+
+  generateId() {
+    return this.db.collection('ids').ref.doc().id;
   }
 }

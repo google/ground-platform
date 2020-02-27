@@ -32,7 +32,7 @@ export class Project {
     if (!layer) {
       throw Error('Layer not found.');
     }
-    const form = layer.forms.get(formId);
+    const form = layer.forms?.get(formId);
     if (!form) {
       throw Error('Form not found.');
     }
