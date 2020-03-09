@@ -46,6 +46,6 @@ export class Field {
     readonly type: FieldType,
     readonly label: StringMap,
     readonly required: boolean,
-    readonly multipleChoice: MultipleChoice | null
+    readonly multipleChoice?: MultipleChoice | null
   ) {}
 }

@@ -23,6 +23,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
@@ -43,6 +44,8 @@ describe('LayerDialogComponent', () => {
         AngularFireModule.initializeApp(environment.firebaseConfig),
         AngularFireAuthModule,
         AngularFirestoreModule,
+        FormsModule,
+        ReactiveFormsModule,
       ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
