@@ -116,7 +116,7 @@ export class LayerDialogComponent implements OnDestroy {
 
     // TODO: Inform user layer was saved
     this.dataStoreService
-      .updateProject(this.projectId, layer)
+      .updateLayer(this.projectId, layer)
       .then(() => this.onClose())
       .catch(err => {
         alert('Layer update failed.');
