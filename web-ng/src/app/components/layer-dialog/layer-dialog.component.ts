@@ -24,7 +24,7 @@ import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map } from 'immutable';
@@ -49,13 +49,13 @@ export class LayerDialogComponent implements OnDestroy {
     private projectService: ProjectService,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private fb: FormBuilder
+    private formBuilder: FormBuilder
   ) {
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
-    this.layerForm = this.fb.group({
+    this.layerForm = this.formBuilder.group({
       question: [''],
     });
     this.subscription.add(
@@ -80,6 +80,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
+  // TODO: Make getForm accomodate multiple fields 
   getForm(question: string, fieldId: string, formId: string): Form {
     const form = {
       id: formId,
@@ -87,7 +88,7 @@ export class LayerDialogComponent implements OnDestroy {
         [fieldId]: {
           id: fieldId,
           type: FieldType['TEXT'],
-          required: true,
+          required: false,
           label: StringMap({
             en: question,
           }),
