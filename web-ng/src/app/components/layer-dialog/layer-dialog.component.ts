@@ -20,9 +20,14 @@ import { ProjectService } from '../../services/project/project.service';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Project } from '../../shared/models/project.model';
 import { Layer } from '../../shared/models/layer.model';
+import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { FieldType } from '../../shared/models/form/field.model';
+import { StringMap } from '../../shared/models/string-map.model';
+import { Map } from 'immutable';
 
 @Component({
   selector: 'app-layer-dialog',
@@ -35,18 +40,24 @@ export class LayerDialogComponent implements OnDestroy {
   projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
+  layerForm: FormGroup;
+
   constructor(
     // tslint:disable-next-line:no-any
     @Inject(MAT_DIALOG_DATA) data: any,
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private projectService: ProjectService,
     private dataStoreService: DataStoreService,
-    private router: Router
+    private router: Router,
+    private formBuilder: FormBuilder
   ) {
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
+    this.layerForm = this.formBuilder.group({
+      question: [''],
+    });
     this.subscription.add(
       this.activeProject$.subscribe(project => {
         this.onProjectLoaded(project);
@@ -69,20 +80,46 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
+  // TODO: Make getForm accomodate multiple fields
+  getForm(question: string, fieldId: string, formId: string): Form {
+    const form = {
+      id: formId,
+      fields: Map({
+        [fieldId]: {
+          id: fieldId,
+          type: FieldType['TEXT'],
+          required: false,
+          label: StringMap({
+            en: question,
+          }),
+        },
+      }),
+    };
+    return form;
+  }
+
   onSave() {
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
+    const formId = this.dataStoreService.generateId();
+    const fieldId = this.dataStoreService.generateId();
     const layer = {
       id: this.layerId,
+      forms: Map({
+        [formId]: this.getForm(this.layerForm.value.question, fieldId, formId),
+      }),
     };
+    if (!this.layerForm.value.question) {
+      delete layer['forms'];
+    }
+
     // TODO: Inform user layer was saved
     this.dataStoreService
-      .updateProjectLayer(this.projectId, layer)
+      .updateLayer(this.projectId, layer)
       .then(() => this.onClose())
       .catch(err => {
-        // TODO: Show in toast message, i18n.
         alert('Layer update failed.');
       });
   }

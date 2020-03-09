@@ -18,9 +18,17 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LayerDialogComponent } from './layer-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [LayerDialogComponent],
-  imports: [CommonModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
 })
 export class LayerDialogModule {}
