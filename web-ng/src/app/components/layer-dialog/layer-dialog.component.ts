@@ -80,7 +80,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  // TODO: Make getForm accomodate multiple fields 
+  // TODO: Make getForm accomodate multiple fields
   getForm(question: string, fieldId: string, formId: string): Form {
     const form = {
       id: formId,

@@ -80,7 +80,7 @@ export class DataStoreService {
     if (forms && !forms.isEmpty()) {
       layerDoc['forms'] = forms.toJS();
     }
-    
+
     return this.db
       .collection('projects')
       .doc(projectId)
