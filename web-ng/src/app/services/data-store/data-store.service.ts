@@ -77,15 +77,15 @@ export class DataStoreService {
   // TODO: Define return types for methods in this class
   updateLayer(projectId: string, layer: Layer) {
     const { id: layerId, forms, ...layerDoc } = layer;
-    if (forms && !forms.isEmpty()) {
-      layerDoc['forms'] = forms.toJS();
-    }
 
     return this.db
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layerId}`]: layerDoc,
+        [`layers.${layerId}`]: {
+          forms: forms?.toJS() || {},
+          ...layerDoc,
+        },
       });
   }
 
