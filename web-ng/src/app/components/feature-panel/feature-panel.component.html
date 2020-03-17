@@ -13,10 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
+ <!-- gndtestuser humm1ngb1rd123 -->
+<div *ngIf="layer$ | async as layer">
+  {{ layer.name?.get(lang) }}
+</div>
 <div *ngIf="observations$ | async as observations">
-  <ul *ngFor="let entry of observations">
-    <li>Observation created by {{ entry.created.user.displayName }}</li>
-    <li>Last modified by {{ entry.lastModified.user.displayName }}</li>
-  </ul>
+  <div *ngFor="let observation of observations">
+    <div>{{ observation.created.user.displayName }}</div>
+    <!--TODO: figure out why serverTime is not working-->
+    <div>{{ observation.created.clientTime | date:'medium' }}</div>
+    <div> 
+        <div *ngFor="let field_entry of observation.form.fields ">
+          <label>{{ field_entry[1].label.get(lang) }}</label>: 
+          <span>{{ observation.responses.get(field_entry[1].id).value }}</span>  
+        </div>
+    </div>
+  </div>
 </div>
