@@ -17,11 +17,13 @@
 import { Observation } from './../../shared/models/observation/observation.model';
 import { ObservationService } from './../../services/observation/observation.service';
 import { FeatureService } from './../../services/feature/feature.service';
-import { switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { ProjectService } from './../../services/project/project.service';
 import { List } from 'immutable';
 import { Observable } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
+import { Layer } from '../../shared/models/layer.model';
+import { Field } from '../../shared/models/form/field.model';
 
 @Component({
   selector: 'ground-feature-panel',
@@ -29,12 +31,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FeaturePanelComponent {
   readonly observations$: Observable<List<Observation>>;
+  readonly layer$: Observable<Layer>;
+  readonly fields$: Observable<List<Field>>;
+  readonly lang: string;
 
   constructor(
     private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService
   ) {
+    // TODO: Make dynamic to support i18n.
+    this.lang = 'en';
     this.observations$ = projectService
       .getActiveProject$()
       .pipe(
@@ -48,5 +55,17 @@ export class FeaturePanelComponent {
             )
         )
       );
+    this.layer$ = projectService
+      .getActiveProject$()
+      .pipe(
+        switchMap(project =>
+          featureService
+            .getSelectedFeature$()
+            .pipe(map(feature => project.layers.get(feature.layerId)!))
+        )
+      );
+    this.fields$ = this.layer$.pipe(
+      map(layer => layer.forms?.values().next()?.fields)
+    );
   }
 }
