@@ -350,7 +350,13 @@ export class DataStoreService {
    * </code></pre>
    */
   private static toAuditInfo(data: DocumentData): AuditInfo {
-    return new AuditInfo(data.user, data.clientTimestamp);
+    console.log(data.serverTimestamp);
+    console.log(data.serverTimestamp?.toDate());
+    return new AuditInfo(
+      data.user,
+      data.clientTimestamp?.toDate(),
+      data.serverTimestamp?.toDate()
+    );
   }
 
   generateId() {
