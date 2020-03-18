@@ -20,8 +20,8 @@ export const renderPin = (color: string | undefined) => {
   return svgTemplate.replace('{{ color }}', color || defaultIconColor);
 };
 
-export const getPinSrc = (color: string | undefined) => {
-  return '/assets/img/pin-red.svg';
+export const getPinDangerousSrc = (color: string | undefined) => {
+  return 'data:image/svg+xml;charset=UTF-8;base64,' + btoa(renderPin(color));
 };
 
 const svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>

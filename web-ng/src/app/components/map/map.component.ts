@@ -23,7 +23,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
-import { renderPin } from './ground-pin';
+import { getPinDangerousSrc } from './ground-pin';
 
 @Component({
   selector: 'ground-map',
@@ -85,7 +85,7 @@ export class MapComponent implements OnInit {
     const enlargedScale = 50;
     const color = project.layers.get(feature.layerId)?.color;
     const icon = {
-      url: 'data:image/svg+xml;charset=UTF-8;base64,' + btoa(renderPin(color)),
+      url: getPinDangerousSrc(color),
       scaledSize: {
         width: feature.id === focusedFeatureId ? enlargedScale : normalScale,
         height: feature.id === focusedFeatureId ? enlargedScale : normalScale,
