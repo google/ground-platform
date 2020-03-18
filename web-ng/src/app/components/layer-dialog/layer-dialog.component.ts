@@ -38,7 +38,7 @@ export class LayerDialogComponent implements OnDestroy {
   lang: string;
   layerId: string;
   layer?: Layer;
-  layerName?: string;
+  layerName!: string;
   projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
@@ -113,7 +113,7 @@ export class LayerDialogComponent implements OnDestroy {
     const layer = new Layer(
       this.layerId,
       this.layer?.color,
-      this.layer?.name,
+      this.layer?.name?.set(this.lang, this.layerName),
       this.layerForm.value.question
         ? Map({
             [formId]: this.getForm(
