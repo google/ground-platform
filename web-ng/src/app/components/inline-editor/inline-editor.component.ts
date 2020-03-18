@@ -14,24 +14,41 @@
  * limitations under the License.
  */
 
-import { Component, Input, Output, EventEmitter} from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked,
+} from '@angular/core';
 
 @Component({
   selector: 'inline-editor',
   templateUrl: './inline-editor.component.html',
   styleUrls: ['./inline-editor.component.css'],
-
 })
-export class InlineEditorComponent {
-  @Input() data: string = '';
-  @Input() placeholder: string = '';
+export class InlineEditorComponent implements AfterViewChecked {
+  @Input() data = '';
+  @Input() placeholder = '';
   @Output() focusOut: EventEmitter<string> = new EventEmitter<string>();
-  
-  constructor() {
+
+  @ViewChild('input')
+  inputElement!: ElementRef;
+
+  editMode = false;
+
+  constructor() {}
+
+  ngAfterViewChecked() {
+    if (this.editMode) {
+      this.inputElement.nativeElement.focus();
+    }
   }
 
-
   onFocusOut(event: { target: HTMLInputElement }) {
+    this.editMode = false;
     this.focusOut.emit(event.target.value);
   }
 
@@ -47,5 +64,9 @@ export class InlineEditorComponent {
       default:
       // n/a.
     }
+  }
+
+  enterEditMode() {
+    this.editMode = true;
   }
 }

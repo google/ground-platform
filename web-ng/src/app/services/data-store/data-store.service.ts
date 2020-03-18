@@ -83,7 +83,7 @@ export class DataStoreService {
       .doc(projectId)
       .update({
         [`layers.${layerId}`]: {
-          name:  name?.toJS() || {},
+          name: name?.toJS() || {},
           forms: forms?.toJS() || {},
           ...layerDoc,
         },
