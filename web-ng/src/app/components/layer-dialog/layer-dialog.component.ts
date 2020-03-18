@@ -105,15 +105,20 @@ export class LayerDialogComponent implements OnDestroy {
     }
     const formId = this.dataStoreService.generateId();
     const fieldId = this.dataStoreService.generateId();
-    const layer = {
-      id: this.layerId,
-      forms: Map({
-        [formId]: this.getForm(this.layerForm.value.question, fieldId, formId),
-      }),
-    };
-    if (!this.layerForm.value.question) {
-      delete layer['forms'];
-    }
+    const layer = new Layer(
+      this.layerId,
+      this.layer?.color,
+      this.layer?.name,
+      this.layerForm.value.question
+        ? Map({
+            [formId]: this.getForm(
+              this.layerForm.value.question,
+              fieldId,
+              formId
+            ),
+          })
+        : undefined
+    );
 
     // TODO: Inform user layer was saved
     this.dataStoreService
