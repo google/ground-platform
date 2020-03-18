@@ -17,3 +17,6 @@
 .main-page-container {
   height: 100%;
 }
+.mat-sidenav {
+  width: 300px;
+}

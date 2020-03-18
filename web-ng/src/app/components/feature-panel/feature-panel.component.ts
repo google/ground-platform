@@ -21,18 +21,17 @@ import { map, switchMap } from 'rxjs/operators';
 import { ProjectService } from './../../services/project/project.service';
 import { List } from 'immutable';
 import { Observable } from 'rxjs';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
-import { Field } from '../../shared/models/form/field.model';
 
 @Component({
   selector: 'ground-feature-panel',
   templateUrl: './feature-panel.component.html',
+  styleUrls: ['./feature-panel.component.css'],
 })
 export class FeaturePanelComponent {
   readonly observations$: Observable<List<Observation>>;
   readonly layer$: Observable<Layer>;
-  readonly fields$: Observable<List<Field>>;
   readonly lang: string;
 
   constructor(
@@ -64,8 +63,5 @@ export class FeaturePanelComponent {
             .pipe(map(feature => project.layers.get(feature.layerId)!))
         )
       );
-    this.fields$ = this.layer$.pipe(
-      map(layer => layer.forms?.values().next()?.fields)
-    );
   }
 }

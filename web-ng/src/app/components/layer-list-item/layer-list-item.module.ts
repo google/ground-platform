@@ -16,13 +16,12 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FeaturePanelComponent } from './feature-panel.component';
-import { MatCardModule, MatListModule } from '@angular/material';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { LayerListItemComponent } from './layer-list-item.component';
+import { MatListModule } from '@angular/material';
 
 @NgModule({
-  imports: [BrowserModule, MatCardModule, MatListModule, LayerListItemModule],
-  exports: [FeaturePanelComponent],
-  declarations: [FeaturePanelComponent],
+  imports: [BrowserModule, MatListModule],
+  exports: [LayerListItemComponent],
+  declarations: [LayerListItemComponent],
 })
-export class FeaturePanelModule {}
+export class LayerListItemModule {}

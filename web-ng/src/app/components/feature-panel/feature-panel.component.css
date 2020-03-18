@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FeaturePanelComponent } from './feature-panel.component';
-import { MatCardModule, MatListModule } from '@angular/material';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
-
-@NgModule({
-  imports: [BrowserModule, MatCardModule, MatListModule, LayerListItemModule],
-  exports: [FeaturePanelComponent],
-  declarations: [FeaturePanelComponent],
-})
-export class FeaturePanelModule {}
+.observation-card {
+    margin: 16px;
+}
+.observation-card .field-label {
+    font-size: 12px;
+    line-height: 16px;
+    color: #70757A;
+    margin-bottom: 3px;
+}
+.observation-card .field-response {
+    font-size: 14px;
+    line-height: 20px;
+    color: #3C4043;
+    margin-bottom: 12px;
+}
