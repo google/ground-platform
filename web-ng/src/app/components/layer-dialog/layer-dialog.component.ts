@@ -35,8 +35,10 @@ import { Map } from 'immutable';
   styleUrls: ['./layer-dialog.component.css'],
 })
 export class LayerDialogComponent implements OnDestroy {
+  lang: string;
   layerId: string;
   layer?: Layer;
+  layerName?: string;
   projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
@@ -51,6 +53,7 @@ export class LayerDialogComponent implements OnDestroy {
     private router: Router,
     private formBuilder: FormBuilder
   ) {
+    this.lang = 'en';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.layerId = data.layerId;
@@ -74,6 +77,8 @@ export class LayerDialogComponent implements OnDestroy {
     } else {
       this.layer = project.layers.get(this.layerId);
     }
+    this.layerName = this.layer?.name?.get(this.lang) || '';
+
     if (!this.layer) {
       throw Error('No layer exists');
     }
@@ -133,6 +138,10 @@ export class LayerDialogComponent implements OnDestroy {
     this.dialogRef.close();
     // TODO: refactor this path into a custom router wrapper
     return this.router.navigate([`p/${this.projectId}`]);
+  }
+
+  saveLayerName(value: string) {
+    this.layerName = value;
   }
 
   ngOnDestroy() {
