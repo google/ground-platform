@@ -140,7 +140,7 @@ export class LayerDialogComponent implements OnDestroy {
     return this.router.navigate([`p/${this.projectId}`]);
   }
 
-  saveLayerName(value: string) {
+  setLayerName(value: string) {
     this.layerName = value;
   }
 

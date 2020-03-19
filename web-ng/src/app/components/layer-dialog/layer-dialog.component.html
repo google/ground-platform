@@ -19,7 +19,7 @@
   class="layer-name"
   [data]="layerName" 
   placeholder='Unnamed layer' 
-  (focusOut)='saveLayerName($event)'></inline-editor>
+  (focusOut)='setLayerName($event)'></inline-editor>
 <form [formGroup]="layerForm" (ngSubmit)="onSave($event)">
   <mat-dialog-content>
     <div>Layer id: {{ layerId }}</div>
