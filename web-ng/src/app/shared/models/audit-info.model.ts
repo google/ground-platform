@@ -17,5 +17,9 @@
 import { User } from './user.model';
 
 export class AuditInfo {
-  constructor(readonly user: User, readonly clientTime: Date) {}
+  constructor(
+    readonly user: User,
+    readonly clientTime: Date,
+    readonly serverTime: Date
+  ) {}
 }
