@@ -23,28 +23,54 @@
 <form [formGroup]="layerForm" (ngSubmit)="onSave($event)">
   <mat-dialog-content>
     <div>Layer id: {{ layerId }}</div>
-    <input type="text" formControlName="question" />
-    <div>TODO: Layer UI goes here</div>
-  </mat-dialog-content>
-  <mat-dialog-actions>
-    <div>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="onClose()"
-        type="button"
-        class="btn-cancel"
+    <div formArrayName="questions" class="main-container-questions">
+      <div
+        *ngFor="
+          let question of layerForm.controls.questions.controls;
+          let i = index
+        "
       >
-        Cancel
-      </button>
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        class="btn-save"
-      >
-        Save
-      </button>
+        <div [formGroupName]="i" fxLayout>
+          <mat-form-field appearance="fill" fxFlex="2 1 auto">
+            <mat-label> Question</mat-label>
+            <input matInput formControlName="en" />
+          </mat-form-field>
+          <mat-form-field
+            fxFlex
+            class="field-type"
+            appearance="outline"
+          >
+            <mat-select [(value)]="selected">
+              <mat-select-trigger>
+                <mat-icon class="icon-field-type">{{ getFieldType().icon }}</mat-icon>
+                <span class="label-field-type"> {{ getFieldType().label }} </span>
+              </mat-select-trigger>
+              <mat-option value="text">
+                <mat-icon>short_text</mat-icon>
+                <span>Text</span>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="add-question">
+        <span class="plus-icon"></span>
+        <a class="link-add-question" (click)="addQuestion()"> Add question </a>
+      </div>
     </div>
+  </mat-dialog-content>
+  <mat-dialog-actions fxLayout fxLayoutAlign="end">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="onClose()"
+      type="button"
+      class="btn-cancel"
+    >
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" type="submit" class="btn-save">
+      Save
+    </button>
   </mat-dialog-actions>
 </form>

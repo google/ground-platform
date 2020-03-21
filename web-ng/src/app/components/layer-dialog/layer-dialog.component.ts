@@ -24,8 +24,8 @@ import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { FieldType } from '../../shared/models/form/field.model';
+import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
+import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map } from 'immutable';
 
@@ -43,6 +43,7 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
+  selected = 'text';
 
   constructor(
     // tslint:disable-next-line:no-any
@@ -59,13 +60,31 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
     this.layerForm = this.formBuilder.group({
-      question: [''],
+      questions: this.formBuilder.array([this.initQuestion()]),
     });
     this.subscription.add(
       this.activeProject$.subscribe(project => {
         this.onProjectLoaded(project);
       })
     );
+  }
+
+  getFieldType() {
+    return {
+      icon: 'short_text',
+      label: 'Text',
+    };
+  }
+
+  initQuestion() {
+    return this.formBuilder.group({
+      en: [''],
+    });
+  }
+
+  addQuestion() {
+    const control = this.layerForm.controls['questions'] as FormArray;
+    control.push(this.initQuestion());
   }
 
   onProjectLoaded(project: Project) {
@@ -85,20 +104,10 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  // TODO: Make getForm accomodate multiple fields
-  getForm(question: string, fieldId: string, formId: string): Form {
+  getForm(fields: Map<string, Field>, formId: string) {
     const form = {
       id: formId,
-      fields: Map({
-        [fieldId]: {
-          id: fieldId,
-          type: FieldType['TEXT'],
-          required: false,
-          label: StringMap({
-            en: question,
-          }),
-        },
-      }),
+      fields,
     };
     return form;
   }
@@ -108,8 +117,18 @@ export class LayerDialogComponent implements OnDestroy {
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
+    let fields = Map<string, Field>();
+    this.layerForm.value.questions.map((question: { en: string }) => {
+      const fieldId = this.dataStoreService.generateId();
+      const field: Field = {
+        id: fieldId,
+        type: FieldType['TEXT'],
+        required: false,
+        label: StringMap(question),
+      };
+      fields = fields.set(fieldId, field);
+    });
     const formId = this.dataStoreService.generateId();
-    const fieldId = this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
       this.layer?.color,
@@ -117,8 +136,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.layerForm.value.question
         ? Map({
             [formId]: this.getForm(
-              this.layerForm.value.question,
-              fieldId,
+              fields,
               formId
             ),
           })

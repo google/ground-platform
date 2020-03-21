@@ -25,7 +25,7 @@
   height: 36px;
   width: 82px;
   border-radius: 5px;
-  font-family: "Open Sans", Arial, sans-serif;
+  font-family: 'Open Sans', Arial, sans-serif;
   margin-left: 10px;
   cursor: pointer;
 }
@@ -34,7 +34,7 @@
   height: 36px;
   width: 82px;
   border-radius: 5px;
-  font-family: "Open Sans", Arial, sans-serif;
+  font-family: 'Open Sans', Arial, sans-serif;
   cursor: pointer;
 }
 
@@ -46,4 +46,39 @@
   margin-left: 0;
   margin-right: 0;
   font-weight: bold;
+}
+.link-add-question {
+  color: green;
+  cursor: pointer;
+}
+
+.add-question {
+  border-style: outset;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.plus-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: top;
+  background: linear-gradient(green, green), linear-gradient(green, green);
+  background-position: center;
+  background-size: 50% 2px, 2px 50%;
+  background-repeat: no-repeat;
+}
+
+.field-type {
+  margin-left: 30px;
+  font-size: 12px
+}
+
+.main-container-questions {
+  margin-top: 10px;
+}
+
+.icon-field-type {
+  vertical-align: middle;
+  margin-right: 20px;
 }
