@@ -16,7 +16,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
-import { getPinDangerousSrc } from '../map/ground-pin';
+import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
@@ -33,13 +33,13 @@ export class LayerListItemComponent implements OnInit {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(
-      getPinDangerousSrc(undefined)
+      getPinImageSource()
     );
   }
 
   ngOnInit() {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinDangerousSrc(this.layer?.color)
+      getPinImageSource(this.layer?.color)
     );
   }
 }

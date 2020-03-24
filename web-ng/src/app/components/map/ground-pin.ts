@@ -16,11 +16,11 @@
 
 export const defaultIconColor = 'red';
 
-export const renderPin = (color: string | undefined) => {
+export const renderPin = (color?: string) => {
   return svgTemplate.replace('{{ color }}', color || defaultIconColor);
 };
 
-export const getPinDangerousSrc = (color: string | undefined) => {
+export const getPinImageSource = (color?: string) => {
   return 'data:image/svg+xml;charset=UTF-8;base64,' + btoa(renderPin(color));
 };
 
