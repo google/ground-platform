@@ -32,9 +32,7 @@ export class LayerListItemComponent implements OnInit {
   constructor(private sanitizer: DomSanitizer) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource()
-    );
+    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
   }
 
   ngOnInit() {
