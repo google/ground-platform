@@ -15,8 +15,7 @@
  */
 
 .mat-dialog-content {
-  width: 800px;
-  height: 600px;
+  width: 600px;
 }
 
 .btn-save {
@@ -36,6 +35,7 @@
   border-radius: 5px;
   font-family: 'Open Sans', Arial, sans-serif;
   cursor: pointer;
+  color: green;
 }
 
 .layer-name {
@@ -53,9 +53,10 @@
 }
 
 .add-question {
-  border-style: outset;
-  padding: 15px;
+  padding: 20px;
+  border: 1px solid lightgray;
   border-radius: 10px;
+  margin-top: 20px;
 }
 
 .plus-icon {
@@ -81,4 +82,19 @@
 .icon-field-type {
   vertical-align: middle;
   margin-right: 20px;
+}
+
+.container-question {
+  border-radius: 10px;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 0px thin;
+  margin-top: 10px;
+  border: 1px lightgray;
+  border-style: solid;
+}
+
+.mat-dialog-actions {
+  margin-top: 10px;
 }
