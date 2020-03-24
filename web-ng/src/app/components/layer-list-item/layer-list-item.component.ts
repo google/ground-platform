@@ -14,26 +14,30 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/internal/operators/map';
+import { Component, Input, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
-import { List } from 'immutable';
+import { getPinImageSource } from '../map/ground-pin';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'ground-layer-list',
-  templateUrl: './layer-list.component.html',
+  selector: 'ground-layer-list-item',
+  templateUrl: './layer-list-item.component.html',
+  styleUrls: ['./layer-list-item.component.css'],
 })
-export class LayerListComponent {
-  readonly layers$: Observable<List<Layer>>;
+export class LayerListItemComponent implements OnInit {
+  @Input() layer: Layer | undefined;
+  layerPinUrl: SafeUrl;
   readonly lang: string;
 
-  constructor(private projectService: ProjectService) {
+  constructor(private sanitizer: DomSanitizer) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = projectService
-      .getActiveProject$()
-      .pipe(map(project => List(project.layers.valueSeq().toArray())));
+    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+  }
+
+  ngOnInit() {
+    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.layer?.color)
+    );
   }
 }

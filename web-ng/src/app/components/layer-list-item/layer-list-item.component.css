@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FeaturePanelComponent } from './feature-panel.component';
-import { MatCardModule, MatListModule } from '@angular/material';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
-
-@NgModule({
-  imports: [BrowserModule, MatCardModule, MatListModule, LayerListItemModule],
-  exports: [FeaturePanelComponent],
-  declarations: [FeaturePanelComponent],
-})
-export class FeaturePanelModule {}
+ 
+img {
+    min-width: 24px;
+}

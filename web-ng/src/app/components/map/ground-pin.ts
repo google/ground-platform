@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-export const renderPin = (color: string) => {
-  return svgTemplate.replace('{{ color }}', color);
+export const defaultIconColor = 'red';
+
+export const renderPin = (color?: string) => {
+  return svgTemplate.replace('{{ color }}', color || defaultIconColor);
+};
+
+export const getPinImageSource = (color?: string) => {
+  return 'data:image/svg+xml;charset=UTF-8;base64,' + btoa(renderPin(color));
 };
 
 const svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
