@@ -43,7 +43,7 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  selected = 'text';
+  selectedFieldType = 'text';
 
   constructor(
     // tslint:disable-next-line:no-any
