@@ -13,20 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
- <!-- gndtestuser humm1ngb1rd123 -->
-<div *ngIf="layer$ | async as layer">
-  {{ layer.name?.get(lang) }}
-</div>
+<mat-list *ngIf="layer$ | async as layer">
+  <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
+</mat-list>
 <div *ngIf="observations$ | async as observations">
-  <div *ngFor="let observation of observations">
-    <div>{{ observation.created.user.displayName }}</div>
-    <!--TODO: figure out why serverTime is not working-->
-    <div>{{ observation.created.clientTime | date:'medium' }}</div>
-    <div> 
+  <mat-card class="observation-card" *ngFor="let observation of observations">
+    <mat-card-header>
+      <mat-card-title>
+        {{ observation.created.user.displayName }}
+      </mat-card-title>
+      <!--TODO: figure out why serverTime is not working-->
+      <mat-card-subtitle>
+        {{ observation.created.clientTime | date:'medium' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div>
         <div *ngFor="let field_entry of observation.form.fields ">
-          <label>{{ field_entry[1].label.get(lang) }}</label>: 
-          <span>{{ observation.responses.get(field_entry[1].id).value }}</span>  
+          <label class="field-label">{{ field_entry[1].label.get(lang) }}</label>
+          <div class="field-response">{{ observation.responses?.get(field_entry[1].id)?.value }}</div>
         </div>
-    </div>
-  </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

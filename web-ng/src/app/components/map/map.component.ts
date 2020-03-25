@@ -23,7 +23,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
-import { renderPin } from './ground-pin';
+import { getPinImageSource } from './ground-pin';
 
 @Component({
   selector: 'ground-map',
@@ -83,11 +83,9 @@ export class MapComponent implements OnInit {
     // Consider break this down when more inputs are available for <map-marker>.
     const normalScale = 30;
     const enlargedScale = 50;
-    const defaultIconColor = 'red';
-    const color =
-      project.layers.get(feature.layerId)?.color || defaultIconColor;
+    const color = project.layers.get(feature.layerId)?.color;
     const icon = {
-      url: 'data:image/svg+xml;charset=UTF-8;base64,' + btoa(renderPin(color)),
+      url: getPinImageSource(color),
       scaledSize: {
         width: feature.id === focusedFeatureId ? enlargedScale : normalScale,
         height: feature.id === focusedFeatureId ? enlargedScale : normalScale,
