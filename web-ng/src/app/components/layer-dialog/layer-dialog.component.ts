@@ -35,8 +35,10 @@ import { Map } from 'immutable';
   styleUrls: ['./layer-dialog.component.css'],
 })
 export class LayerDialogComponent implements OnDestroy {
+  lang: string;
   layerId: string;
   layer?: Layer;
+  layerName!: string;
   projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
@@ -51,6 +53,7 @@ export class LayerDialogComponent implements OnDestroy {
     private router: Router,
     private formBuilder: FormBuilder
   ) {
+    this.lang = 'en';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.layerId = data.layerId;
@@ -74,6 +77,8 @@ export class LayerDialogComponent implements OnDestroy {
     } else {
       this.layer = project.layers.get(this.layerId);
     }
+    this.layerName = this.layer?.name?.get(this.lang) || '';
+
     if (!this.layer) {
       throw Error('No layer exists');
     }
@@ -105,15 +110,20 @@ export class LayerDialogComponent implements OnDestroy {
     }
     const formId = this.dataStoreService.generateId();
     const fieldId = this.dataStoreService.generateId();
-    const layer = {
-      id: this.layerId,
-      forms: Map({
-        [formId]: this.getForm(this.layerForm.value.question, fieldId, formId),
-      }),
-    };
-    if (!this.layerForm.value.question) {
-      delete layer['forms'];
-    }
+    const layer = new Layer(
+      this.layerId,
+      this.layer?.color,
+      this.layer?.name?.set(this.lang, this.layerName),
+      this.layerForm.value.question
+        ? Map({
+            [formId]: this.getForm(
+              this.layerForm.value.question,
+              fieldId,
+              formId
+            ),
+          })
+        : undefined
+    );
 
     // TODO: Inform user layer was saved
     this.dataStoreService
@@ -128,6 +138,10 @@ export class LayerDialogComponent implements OnDestroy {
     this.dialogRef.close();
     // TODO: refactor this path into a custom router wrapper
     return this.router.navigate([`p/${this.projectId}`]);
+  }
+
+  setLayerName(value: string) {
+    this.layerName = value;
   }
 
   ngOnDestroy() {

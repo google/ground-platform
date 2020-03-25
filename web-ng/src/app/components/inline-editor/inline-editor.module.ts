@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,11 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from './layer-dialog.component';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { InlineEditorComponent } from './inline-editor.component';
 
 @NgModule({
-  declarations: [LayerDialogComponent],
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule,
-    InlineEditorModule,
-  ],
+  declarations: [InlineEditorComponent],
+  imports: [CommonModule],
+  exports: [InlineEditorComponent],
 })
-export class LayerDialogModule {}
+export class InlineEditorModule {}
