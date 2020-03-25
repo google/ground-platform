@@ -135,10 +135,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.layer?.name?.set(this.lang, this.layerName),
       this.layerForm.value.questions
         ? Map({
-            [formId]: this.getForm(
-              fields,
-              formId
-            ),
+            [formId]: this.getForm(fields, formId),
           })
         : undefined
     );
