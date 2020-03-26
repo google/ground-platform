@@ -104,7 +104,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  getForm(fields: Map<string, Field>, formId: string) {
+  getForm(formId: string, fields: Map<string, Field>) {
     const form = {
       id: formId,
       fields,
@@ -118,7 +118,7 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.layerForm.value.questions.map((question: { en: string }) => {
+    this.layerForm.value.questions.forEach((question: { en: string }) => {
       const fieldId = this.dataStoreService.generateId();
       const field: Field = {
         id: fieldId,
@@ -129,15 +129,16 @@ export class LayerDialogComponent implements OnDestroy {
       fields = fields.set(fieldId, field);
     });
     const formId = this.dataStoreService.generateId();
+    const layerColor = '#ff9131';
     const layer = new Layer(
       this.layerId,
-      this.layer?.color ? this.layer.color : '#ff9131',
+      this.layer?.color ? this.layer.color : layerColor,
       this.layer?.name?.set(this.lang, this.layerName),
       this.layerForm.value.questions
         ? Map({
-            [formId]: this.getForm(fields, formId),
+            [formId]: this.getForm(formId, fields),
           })
-        : undefined
+        : Map<string, Form>()
     );
 
     // TODO: Inform user layer was saved

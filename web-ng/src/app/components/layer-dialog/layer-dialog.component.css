@@ -35,7 +35,7 @@
   border-radius: 5px;
   font-family: 'Open Sans', Arial, sans-serif;
   cursor: pointer;
-  color: green;
+  color: #009113;
 }
 
 .layer-name {
@@ -47,14 +47,15 @@
   margin-right: 0;
   font-weight: bold;
 }
+
 .link-add-question {
-  color: green;
+  color: #009113;
   cursor: pointer;
 }
 
 .add-question {
   padding: 20px;
-  border: 1px solid lightgray;
+  border: 1px solid #e6e7ea;
   border-radius: 10px;
   margin-top: 20px;
 }
@@ -64,7 +65,8 @@
   width: 20px;
   height: 20px;
   vertical-align: top;
-  background: linear-gradient(green, green), linear-gradient(green, green);
+  background: linear-gradient(#009113, #009113),
+    linear-gradient(#009113, #009113);
   background-position: center;
   background-size: 50% 2px, 2px 50%;
   background-repeat: no-repeat;
@@ -72,7 +74,7 @@
 
 .field-type {
   margin-left: 30px;
-  font-size: 12px
+  font-size: 12px;
 }
 
 .main-container-questions {
@@ -91,7 +93,7 @@
   padding-right: 10px;
   border: 0px thin;
   margin-top: 10px;
-  border: 1px lightgray;
+  border: 1px #e6e7ea;
   border-style: solid;
 }
 
