@@ -29,6 +29,8 @@ import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map } from 'immutable';
 
+const layerColor = '#ff9131';
+
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
@@ -129,7 +131,6 @@ export class LayerDialogComponent implements OnDestroy {
       fields = fields.set(fieldId, field);
     });
     const formId = this.dataStoreService.generateId();
-    const layerColor = '#ff9131';
     const layer = new Layer(
       this.layerId,
       this.layer?.color ? this.layer.color : layerColor,
