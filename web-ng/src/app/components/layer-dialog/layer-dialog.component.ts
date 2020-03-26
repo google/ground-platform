@@ -131,7 +131,7 @@ export class LayerDialogComponent implements OnDestroy {
     const formId = this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
-      this.layer?.color ? this.layer.color : '',
+      this.layer?.color ? this.layer.color : '#ff9131',
       this.layer?.name?.set(this.lang, this.layerName),
       this.layerForm.value.questions
         ? Map({
