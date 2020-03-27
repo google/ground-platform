@@ -15,8 +15,7 @@
  */
 
 .mat-dialog-content {
-  width: 800px;
-  height: 600px;
+  width: 600px;
 }
 
 .btn-save {
@@ -25,7 +24,7 @@
   height: 36px;
   width: 82px;
   border-radius: 5px;
-  font-family: "Open Sans", Arial, sans-serif;
+  font-family: 'Open Sans', Arial, sans-serif;
   margin-left: 10px;
   cursor: pointer;
 }
@@ -34,8 +33,9 @@
   height: 36px;
   width: 82px;
   border-radius: 5px;
-  font-family: "Open Sans", Arial, sans-serif;
+  font-family: 'Open Sans', Arial, sans-serif;
   cursor: pointer;
+  color: #009113;
 }
 
 .layer-name {
@@ -46,4 +46,57 @@
   margin-left: 0;
   margin-right: 0;
   font-weight: bold;
+}
+
+.link-add-question {
+  color: #009113;
+  cursor: pointer;
+}
+
+.add-question {
+  padding: 20px;
+  border: 1px solid #e6e7ea;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.plus-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: top;
+  background: linear-gradient(#009113, #009113),
+    linear-gradient(#009113, #009113);
+  background-position: center;
+  background-size: 50% 2px, 2px 50%;
+  background-repeat: no-repeat;
+}
+
+.field-type {
+  margin-left: 30px;
+  font-size: 12px;
+}
+
+.main-container-questions {
+  margin-top: 10px;
+}
+
+.icon-field-type {
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+.container-question {
+  border-radius: 10px;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 0px thin;
+  margin-top: 10px;
+  border: 1px #e6e7ea;
+  border-style: solid;
+}
+
+.mat-dialog-actions {
+  margin-top: 10px;
 }

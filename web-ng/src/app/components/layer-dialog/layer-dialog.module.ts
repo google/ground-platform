@@ -18,9 +18,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LayerDialogComponent } from './layer-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { MatSelectModule } from '@angular/material/select';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [LayerDialogComponent],
@@ -31,6 +35,10 @@ import { InlineEditorModule } from '../inline-editor/inline-editor.module';
     FormsModule,
     ReactiveFormsModule,
     InlineEditorModule,
+    MatInputModule,
+    FlexLayoutModule,
+    MatSelectModule,
+    MatIconModule,
   ],
 })
 export class LayerDialogModule {}
