@@ -29,7 +29,7 @@ import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map } from 'immutable';
 
-const layerColor = '#ff9131';
+const DEFAULT_LAYER_COLOR = '#ff9131';
 
 @Component({
   selector: 'app-layer-dialog',
@@ -62,7 +62,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
     this.layerForm = this.formBuilder.group({
-      questions: this.formBuilder.array([this.initQuestion()]),
+      questions: this.formBuilder.array([this.createQuestionGroup()]),
     });
     this.subscription.add(
       this.activeProject$.subscribe(project => {
@@ -78,7 +78,7 @@ export class LayerDialogComponent implements OnDestroy {
     };
   }
 
-  initQuestion() {
+  createQuestionGroup() {
     return this.formBuilder.group({
       en: [''],
     });
@@ -86,7 +86,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   addQuestion() {
     const control = this.layerForm.controls['questions'] as FormArray;
-    control.push(this.initQuestion());
+    control.push(this.createQuestionGroup());
   }
 
   onProjectLoaded(project: Project) {
@@ -133,9 +133,10 @@ export class LayerDialogComponent implements OnDestroy {
     const formId = this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
-      this.layer?.color ? this.layer.color : layerColor,
+      this.layer?.color || DEFAULT_LAYER_COLOR,
       this.layer?.name?.set(this.lang, this.layerName),
-      this.layerForm.value.questions
+      this.layerForm.value.questions &&
+      this.layerForm.value.questions.length > 0
         ? Map({
             [formId]: this.getForm(formId, fields),
           })
