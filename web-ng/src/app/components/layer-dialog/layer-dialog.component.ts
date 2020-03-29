@@ -134,7 +134,8 @@ export class LayerDialogComponent implements OnDestroy {
     const layer = new Layer(
       this.layerId,
       this.layer?.color || DEFAULT_LAYER_COLOR,
-      this.layer?.name?.set(this.lang, this.layerName),
+      // TODO: Make layerName Map
+      StringMap({ [this.lang]: this.layerName }),
       this.layerForm.value.questions &&
       this.layerForm.value.questions.length > 0
         ? Map({
