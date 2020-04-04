@@ -25,6 +25,7 @@ import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material';
 
 @NgModule({
   declarations: [LayerDialogComponent],
@@ -39,6 +40,7 @@ import { MatIconModule } from '@angular/material/icon';
     FlexLayoutModule,
     MatSelectModule,
     MatIconModule,
+    MatButtonModule,
   ],
 })
 export class LayerDialogModule {}

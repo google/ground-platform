@@ -100,3 +100,16 @@
 .mat-dialog-actions {
   margin-top: 10px;
 }
+
+.container-option {
+  margin: 0 30px;
+}
+
+.field-option {
+  width: 100%;
+}
+
+.add-option {
+  margin-left: 30px;
+  margin-bottom: 10px;
+}
