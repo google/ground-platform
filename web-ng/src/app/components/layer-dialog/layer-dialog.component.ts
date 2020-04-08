@@ -46,7 +46,7 @@ export interface OptionModel {
 }
 
 export interface Question {
-  en: string;
+  label: string;
   fieldType: FormFieldType;
   options: OptionModel[];
 }
@@ -111,7 +111,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   createQuestionGroup() {
     return this.formBuilder.group({
-      en: [''],
+      label: [''],
       fieldType: new FormControl(this.fieldTypes[0]),
       options: this.formBuilder.array([this.createOptionGroup()]),
     });
@@ -177,7 +177,7 @@ export class LayerDialogComponent implements OnDestroy {
         type: FieldType['TEXT'],
         required: false,
         label: StringMap({
-          en: question.en || '',
+          en: question.label || '',
         }),
       };
       if (question.fieldType.type === 'multipleChoice') {
