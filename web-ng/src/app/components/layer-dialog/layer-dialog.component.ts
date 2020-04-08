@@ -65,7 +65,7 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  fieldTypes: Array<FormFieldType> = [
+  fieldTypes: FormFieldType[] = [
     {
       icon: 'short_text',
       label: 'Text',
