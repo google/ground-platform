@@ -24,12 +24,32 @@ import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
+import { Option } from '../../shared/models/form/option.model';
+import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
+import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Map } from 'immutable';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
+
+export interface FormFieldType {
+  icon: string;
+  label: string;
+  type: string;
+}
+
+export interface OptionModel {
+  label: string;
+  code: string;
+}
+
+export interface Question {
+  label: string;
+  fieldType: FormFieldType;
+  options: OptionModel[];
+}
 
 @Component({
   selector: 'app-layer-dialog',
@@ -45,7 +65,18 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  selectedFieldType = 'text';
+  fieldTypes: FormFieldType[] = [
+    {
+      icon: 'short_text',
+      label: 'Text',
+      type: 'text',
+    },
+    {
+      icon: 'library_add_check',
+      label: 'Select multiple',
+      type: 'multipleChoice',
+    },
+  ];
 
   constructor(
     // tslint:disable-next-line:no-any
@@ -80,13 +111,31 @@ export class LayerDialogComponent implements OnDestroy {
 
   createQuestionGroup() {
     return this.formBuilder.group({
-      en: [''],
+      label: [''],
+      fieldType: new FormControl(this.fieldTypes[0]),
+      options: this.formBuilder.array([this.createOptionGroup()]),
+    });
+  }
+
+  createOptionGroup() {
+    return this.formBuilder.group({
+      label: [''],
+      code: [''],
     });
   }
 
   addQuestion() {
     const control = this.layerForm.controls['questions'] as FormArray;
     control.push(this.createQuestionGroup());
+  }
+
+  addOption(control: FormArray) {
+    control.push(
+      this.formBuilder.group({
+        label: [''],
+        code: [''],
+      })
+    );
   }
 
   onProjectLoaded(project: Project) {
@@ -120,14 +169,38 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.layerForm.value.questions.forEach((question: { en: string }) => {
+    this.layerForm.value.questions.forEach((question: Question) => {
+      let options = Map<string, Option>();
       const fieldId = this.dataStoreService.generateId();
-      const field: Field = {
+      let field: Field = {
         id: fieldId,
         type: FieldType['TEXT'],
         required: false,
-        label: StringMap(question),
+        label: StringMap({
+          en: question.label || '',
+        }),
       };
+      if (question.fieldType.type === 'multipleChoice') {
+        question.options.forEach((option: OptionModel) => {
+          const optionId = this.dataStoreService.generateId();
+          options = options.set(optionId, {
+            id: optionId,
+            code: option.code || '',
+            label: StringMap({
+              en: option.label || '',
+            }),
+          });
+        });
+        const multipleChoice: MultipleChoice = {
+          cardinality: Cardinality['SELECT_MULTIPLE'],
+          options,
+        };
+        field = {
+          ...field,
+          type: FieldType['MULTIPLE_CHOICE'],
+          multipleChoice: multipleChoice || Map<string, Option>(),
+        };
+      }
       fields = fields.set(fieldId, field);
     });
     const formId = this.dataStoreService.generateId();
