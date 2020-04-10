@@ -102,7 +102,7 @@
 }
 
 .container-option {
-  margin: 0 30px;
+  margin-right: 20px;
 }
 
 .field-option {
@@ -111,5 +111,21 @@
 
 .add-option {
   margin-left: 30px;
-  margin-bottom: 10px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #009113;
+  text-underline-position: under;
+}
+
+.dot {
+  height: 15px;
+  width: 15px;
+  border: 1px solid black;
+  align-self: center;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.main-container-options {
+  padding-bottom: 20px;
 }

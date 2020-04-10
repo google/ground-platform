@@ -74,28 +74,27 @@
               class="container-option"
             >
               <div [formGroupName]="j" fxLayout fxLayoutGap="15px">
+                <span class="dot"></span>
                 <div fxFlex="2 1 auto">
-                  <mat-form-field appearance="fill" class="field-option">
+                  <mat-form-field class="field-option">
                     <mat-label>Option</mat-label>
                     <input matInput formControlName="label" />
                   </mat-form-field>
                 </div>
                 <div fxFlex>
-                  <mat-form-field appearance="fill">
+                  <mat-form-field>
                     <mat-label>Code</mat-label>
                     <input matInput formControlName="code" />
                   </mat-form-field>
                 </div>
               </div>
             </div>
-            <button
-              mat-raised-button
-              type="button"
+            <a
               class="add-option"
               (click)="addOption(question.controls.options)"
             >
               Add option
-            </button>
+            </a>
           </div>
         </div>
       </div>
