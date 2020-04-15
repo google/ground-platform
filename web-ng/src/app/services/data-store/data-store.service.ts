@@ -332,7 +332,6 @@ export class DataStoreService {
     id: string,
     data: DocumentData
   ): Observation {
-    console.log(data);
     const form = project.getForm(feature.layerId, data.formId);
     return new Observation(
       id,
@@ -386,8 +385,6 @@ export class DataStoreService {
    * </code></pre>
    */
   private static toAuditInfo(data: DocumentData): AuditInfo {
-    console.log(data.serverTimestamp);
-    console.log(data.serverTimestamp?.toDate());
     return new AuditInfo(
       data.user,
       data.clientTimestamp?.toDate(),
