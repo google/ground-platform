@@ -16,6 +16,7 @@
 
 import { StringMap } from '../string-map.model';
 import { MultipleChoice } from './multiple-choice.model';
+import { Option } from '../form/option.model';
 
 /**
  *
@@ -48,4 +49,21 @@ export class Field {
     readonly required: boolean,
     readonly multipleChoice?: MultipleChoice
   ) {}
+
+  /**
+   * Returns an option but only if the given field is of a proper type (MULTIPLE_CHOICE).
+   */
+  getMultipleChoiceOption(optionId: string): Option {
+    if (this.type !== FieldType.MULTIPLE_CHOICE) {
+      throw Error(`Field ${this.id} of type ${this.type} has no options.`);
+    }
+    if (this.multipleChoice === undefined) {
+      throw Error(`Field ${this.id} does not have choices defined.`);
+    }
+    const option = this.multipleChoice.options.get(optionId);
+    if (!option) {
+      throw Error(`Option ${optionId} not found in field ${this.id}.`);
+    }
+    return option;
+  }
 }

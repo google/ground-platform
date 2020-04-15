@@ -16,7 +16,19 @@
 
 import { Map } from 'immutable';
 import { Field } from './field.model';
+import { Option } from '../form/option.model';
 
 export class Form {
   constructor(readonly id: string, readonly fields: Map<string, Field>) {}
+
+  /**
+   * Returns a field option but only if the given field is of a proper type.
+   */
+  getMultipleChoiceFieldOption(fieldId: string, optionId: string): Option {
+    const field = this.fields.get(fieldId);
+    if (!field) {
+      throw Error(`Field ${fieldId} not found in form ${this.id}.`);
+    }
+    return field.getMultipleChoiceOption(optionId);
+  }
 }

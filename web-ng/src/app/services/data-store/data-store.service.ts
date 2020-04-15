@@ -249,7 +249,7 @@ export class DataStoreService {
   private static toField(id: string, data: DocumentData): Field {
     return new Field(
       id,
-      FieldType.TEXT,
+      DataStoreService.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
       data.options &&
@@ -263,6 +263,19 @@ export class DataStoreService {
           )
         )
     );
+  }
+
+  private static stringToFieldType(fieldType: string): FieldType {
+    switch (fieldType) {
+      case 'text_field':
+        return FieldType.TEXT;
+      case 'multiple_choice':
+        return FieldType.MULTIPLE_CHOICE;
+      case 'photo':
+        return FieldType.PHOTO;
+      default:
+        throw Error(`Unsupported field type ${fieldType}`);
+    }
   }
 
   /**
@@ -319,18 +332,40 @@ export class DataStoreService {
     id: string,
     data: DocumentData
   ): Observation {
+    console.log(data);
+    const form = project.getForm(feature.layerId, data.formId);
     return new Observation(
       id,
-      project.getForm(feature.layerId, data.formId),
+      form,
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),
       Map<string, Response>(
-        keys(data.responses).map((id: string) => [
-          id as string,
-          new Response(data.responses[id] as string | number | List<string>),
+        keys(data.responses).map((fieldId: string) => [
+          fieldId as string,
+          DataStoreService.toResponse(form, fieldId, data.responses[fieldId]),
         ])
       )
     );
+  }
+
+  private static toResponse(
+    form: Form,
+    fieldID: string,
+    responseValue: string | List<string>
+  ): Response {
+    if (typeof responseValue === 'string') {
+      return new Response(responseValue as string);
+    }
+    if (responseValue instanceof Array) {
+      return new Response(
+        List(
+          responseValue.map(optionId =>
+            form.getMultipleChoiceFieldOption(fieldID, optionId)
+          )
+        )
+      );
+    }
+    throw Error(`Unknown value type ${typeof responseValue}`);
   }
 
   /**

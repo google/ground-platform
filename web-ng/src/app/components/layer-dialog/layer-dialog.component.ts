@@ -156,11 +156,45 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   getForm(formId: string, fields: Map<string, Field>) {
-    const form = {
-      id: formId,
-      fields,
-    };
+    const form = new Form(formId, fields);
     return form;
+  }
+
+  convertQuersionToField(fieldId: string, question: Question): Field {
+    if (question.fieldType.type === 'text') {
+      return new Field(
+        fieldId,
+        FieldType['TEXT'],
+        StringMap({
+          en: question.label || '',
+        }),
+        /*required=*/ false,
+        /*multipleChoice=*/ undefined
+      );
+    }
+    if (question.fieldType.type === 'multipleChoice') {
+      let options = Map<string, Option>();
+      question.options.forEach((option: OptionModel) => {
+        const optionId = this.dataStoreService.generateId();
+        options = options.set(optionId, {
+          id: optionId,
+          code: option.code || '',
+          label: StringMap({
+            en: option.label || '',
+          }),
+        });
+      });
+      return new Field(
+        fieldId,
+        FieldType['MULTIPLE_CHOICE'],
+        StringMap({
+          en: question.label || '',
+        }),
+        /*required=*/ false,
+        new MultipleChoice(Cardinality['SELECT_MULTIPLE'], options)
+      );
+    }
+    throw Error(`Unexpected question type ${question.fieldType.type}`);
   }
 
   onSave() {
@@ -170,38 +204,11 @@ export class LayerDialogComponent implements OnDestroy {
     }
     let fields = Map<string, Field>();
     this.layerForm.value.questions.forEach((question: Question) => {
-      let options = Map<string, Option>();
       const fieldId = this.dataStoreService.generateId();
-      let field: Field = {
-        id: fieldId,
-        type: FieldType['TEXT'],
-        required: false,
-        label: StringMap({
-          en: question.label || '',
-        }),
-      };
-      if (question.fieldType.type === 'multipleChoice') {
-        question.options.forEach((option: OptionModel) => {
-          const optionId = this.dataStoreService.generateId();
-          options = options.set(optionId, {
-            id: optionId,
-            code: option.code || '',
-            label: StringMap({
-              en: option.label || '',
-            }),
-          });
-        });
-        const multipleChoice: MultipleChoice = {
-          cardinality: Cardinality['SELECT_MULTIPLE'],
-          options,
-        };
-        field = {
-          ...field,
-          type: FieldType['MULTIPLE_CHOICE'],
-          multipleChoice: multipleChoice || Map<string, Option>(),
-        };
-      }
-      fields = fields.set(fieldId, field);
+      fields = fields.set(
+        fieldId,
+        this.convertQuersionToField(fieldId, question)
+      );
     });
     const formId = this.dataStoreService.generateId();
     const layer = new Layer(
