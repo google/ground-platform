@@ -155,11 +155,6 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  getForm(formId: string, fields: Map<string, Field>) {
-    const form = new Form(formId, fields);
-    return form;
-  }
-
   convertQuersionToField(fieldId: string, question: Question): Field {
     if (question.fieldType.type === 'text') {
       return new Field(
@@ -219,7 +214,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.layerForm.value.questions &&
       this.layerForm.value.questions.length > 0
         ? Map({
-            [formId]: this.getForm(formId, fields),
+            [formId]: new Form(formId, fields),
           })
         : Map<string, Form>()
     );
