@@ -34,10 +34,15 @@ import { Map } from 'immutable';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
-export interface FormFieldType {
+export enum FieldTypeOptionType {
+  TEXT = 1,
+  MULTIPLE_CHOICE = 2,
+}
+
+export interface FieldTypeOptionModel {
   icon: string;
   label: string;
-  type: string;
+  type: FieldTypeOptionType;
 }
 
 export interface OptionModel {
@@ -47,7 +52,7 @@ export interface OptionModel {
 
 export interface Question {
   label: string;
-  fieldType: FormFieldType;
+  fieldTypeOption: FieldTypeOptionModel;
   options: OptionModel[];
 }
 
@@ -65,16 +70,17 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  fieldTypes: FormFieldType[] = [
+  fieldTypeOptionTypes = FieldTypeOptionType;
+  fieldTypeOptions: FieldTypeOptionModel[] = [
     {
       icon: 'short_text',
       label: 'Text',
-      type: 'text',
+      type: FieldTypeOptionType.TEXT,
     },
     {
       icon: 'library_add_check',
       label: 'Select multiple',
-      type: 'multipleChoice',
+      type: FieldTypeOptionType.MULTIPLE_CHOICE,
     },
   ];
 
@@ -102,17 +108,10 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
-  getFieldType() {
-    return {
-      icon: 'short_text',
-      label: 'Text',
-    };
-  }
-
   createQuestionGroup() {
     return this.formBuilder.group({
       label: [''],
-      fieldType: new FormControl(this.fieldTypes[0]),
+      fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
       options: this.formBuilder.array([this.createOptionGroup()]),
     });
   }
@@ -155,41 +154,55 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  convertQuestionToField(fieldId: string, question: Question): Field {
-    if (question.fieldType.type === 'text') {
-      return new Field(
-        fieldId,
-        FieldType['TEXT'],
-        StringMap({
-          en: question.label || '',
+  convertQuestionToTextField(fieldId: string, question: Question): Field {
+    return new Field(
+      fieldId,
+      FieldType.TEXT,
+      StringMap({
+        en: question.label || '',
+      }),
+      /*required=*/ false,
+      /*multipleChoice=*/ undefined
+    );
+  }
+
+  convertQuestionToMultipleChoiceField(
+    fieldId: string,
+    question: Question
+  ): Field {
+    let options = Map<string, Option>();
+    question.options.forEach((option: OptionModel) => {
+      const optionId = this.dataStoreService.generateId();
+      options = options.set(optionId, {
+        id: optionId,
+        code: option.code || '',
+        label: StringMap({
+          en: option.label || '',
         }),
-        /*required=*/ false,
-        /*multipleChoice=*/ undefined
-      );
-    }
-    if (question.fieldType.type === 'multipleChoice') {
-      let options = Map<string, Option>();
-      question.options.forEach((option: OptionModel) => {
-        const optionId = this.dataStoreService.generateId();
-        options = options.set(optionId, {
-          id: optionId,
-          code: option.code || '',
-          label: StringMap({
-            en: option.label || '',
-          }),
-        });
       });
-      return new Field(
-        fieldId,
-        FieldType['MULTIPLE_CHOICE'],
-        StringMap({
-          en: question.label || '',
-        }),
-        /*required=*/ false,
-        new MultipleChoice(Cardinality['SELECT_MULTIPLE'], options)
-      );
+    });
+    return new Field(
+      fieldId,
+      FieldType.MULTIPLE_CHOICE,
+      StringMap({
+        en: question.label || '',
+      }),
+      /*required=*/ false,
+      new MultipleChoice(Cardinality.SELECT_MULTIPLE, options)
+    );
+  }
+
+  convertQuestionToField(fieldId: string, question: Question): Field {
+    switch (question.fieldTypeOption.type) {
+      case FieldTypeOptionType.TEXT:
+        return this.convertQuestionToTextField(fieldId, question);
+      case FieldTypeOptionType.MULTIPLE_CHOICE:
+        return this.convertQuestionToMultipleChoiceField(fieldId, question);
+      default:
+        throw Error(
+          `Unexpected question type ${question.fieldTypeOption.type}`
+        );
     }
-    throw Error(`Unexpected question type ${question.fieldType.type}`);
   }
 
   onSave() {
