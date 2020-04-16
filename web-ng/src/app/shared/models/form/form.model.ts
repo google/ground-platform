@@ -22,7 +22,8 @@ export class Form {
   constructor(readonly id: string, readonly fields: Map<string, Field>) {}
 
   /**
-   * Returns a field option but only if the given field is of a proper type.
+   * For MULTIPLE_CHOICE fields, returns the option with the specified id.
+   * Throws an Error if called for other field types.
    */
   getMultipleChoiceFieldOption(fieldId: string, optionId: string): Option {
     const field = this.fields.get(fieldId);

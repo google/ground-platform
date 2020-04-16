@@ -155,7 +155,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  convertQuersionToField(fieldId: string, question: Question): Field {
+  convertQuestionToField(fieldId: string, question: Question): Field {
     if (question.fieldType.type === 'text') {
       return new Field(
         fieldId,
@@ -202,7 +202,7 @@ export class LayerDialogComponent implements OnDestroy {
       const fieldId = this.dataStoreService.generateId();
       fields = fields.set(
         fieldId,
-        this.convertQuersionToField(fieldId, question)
+        this.convertQuestionToField(fieldId, question)
       );
     });
     const formId = this.dataStoreService.generateId();
