@@ -15,33 +15,34 @@
 -->
 
 <div *ngIf="observationForm" class="observation">
-<form [formGroup]="observationForm" (ngSubmit)="onSave()" >
-  <div *ngFor="let field of observationFields ">
-    <label class="field-label" [attr.for]="field.id">
-      {{ field.label.get(lang) }}
-    </label>
-    <div *ngIf="field.type == fieldTypes.TEXT">
+  <form [formGroup]="observationForm" (ngSubmit)="onSave()">
+    <div *ngFor="let field of observationFields ">
+      <label class="field-label" [attr.for]="field.id">
+        {{ field.label.get(lang) }}
+      </label>
       <div class="field-response">
-        <mat-form-field appearance="fill">
-        <input matInput [formControlName]="field.id" [id]="field.id">
-      </mat-form-field>
+        <div *ngIf="field.type == fieldTypes.TEXT">
+          <mat-form-field appearance="fill">
+            <input matInput [formControlName]="field.id" [id]="field.id">
+          </mat-form-field>
+        </div>
+        <div *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE" class="multiple-choice-field">
+          <mat-radio-group [id]="field.id" [formControlName]="field.id"
+            *ngIf="field.multipleChoice.cardinality == cardinality.SELECT_ONE">
+            <mat-radio-button *ngFor="let option of field.multipleChoice.options" [value]="option.id">
+              {{option.label.get(lang)}}
+            </mat-radio-button>
+          </mat-radio-group>
+          <div *ngIf="field.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE">
+            <mat-checkbox [formControlName]="option.id" *ngFor="let option of field.multipleChoice.options" [value]="option.id">
+              {{option.label.get(lang)}}
+            </mat-checkbox>
+          </div>
+        </div>
       </div>
     </div>
-    <div *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
-      class="multiple-choice-field">
-      <div class="field-response">
-        <select [id]="field.id" [formControlName]="field.id">
-          <option 
-            *ngFor="let option_entry of field.multipleChoice.options" 
-            [value]="option_entry[1].id">
-            {{option_entry[1].label.get(lang)}}
-          </option>
-        </select>
-      </div>
-    </div>
-  </div>
-  <button type="submit" [disabled]="!observationForm.valid">Save</button>
-</form>
+    <button type="submit" [disabled]="!observationForm.valid">Save</button>
+  </form>
 </div>
 <div *ngIf="payLoad">
   <strong>Saved the following values</strong><br>{{payLoad}}

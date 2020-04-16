@@ -35,7 +35,6 @@ export class SidePanelComponent {
     private featureService: FeatureService,
     private observationService: ObservationService
   ) {
-    console.log("reload SidePanelComponent")
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.selectedFeature$ = this.featureService.getSelectedFeature$();

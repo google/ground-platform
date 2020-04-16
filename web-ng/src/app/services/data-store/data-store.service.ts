@@ -24,7 +24,10 @@ import { AuditInfo } from '../../shared/models/audit-info.model';
 import { Feature } from '../../shared/models/feature.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
-import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
+import {
+  MultipleChoice,
+  Cardinality,
+} from '../../shared/models/form/multiple-choice.model';
 import { Option } from '../../shared/models/form/option.model';
 import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
@@ -271,12 +274,11 @@ export class DataStoreService {
       data.required,
       data.options &&
         new MultipleChoice(
-          data.cardinality,
-          Map<string, Option>(
-            keys(data.options).map((id: string) => [
-              id as string,
-              DataStoreService.toOption(id, data.options[id]),
-            ])
+          DataStoreService.stringToCardinality(data.cardinality),
+          List(
+            keys(data.options).map((id: string) =>
+              DataStoreService.toOption(id, data.options[id])
+            )
           )
         )
     );
@@ -292,6 +294,17 @@ export class DataStoreService {
         return FieldType.PHOTO;
       default:
         throw Error(`Unsupported field type ${fieldType}`);
+    }
+  }
+
+  private static stringToCardinality(cardinality: string): Cardinality {
+    switch (cardinality) {
+      case 'select_one':
+        return Cardinality.SELECT_ONE;
+      case 'select_multiple':
+        return Cardinality.SELECT_MULTIPLE;
+      default:
+        throw Error(`Unsupported cardinality ${cardinality}`);
     }
   }
 

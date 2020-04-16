@@ -20,6 +20,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ObservationFormComponent } from './observation-form.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   imports: [
@@ -27,6 +29,8 @@ import { MatInputModule } from '@angular/material';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatRadioModule,
+    MatCheckboxModule,
   ],
   exports: [ObservationFormComponent],
   declarations: [ObservationFormComponent],
