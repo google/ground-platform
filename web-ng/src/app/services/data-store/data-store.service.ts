@@ -145,11 +145,28 @@ export class DataStoreService {
       .pipe(
         map(array =>
           List(
-            array.map(obj =>
-              DataStoreService.toObservation(project, feature, obj.id, obj)
-            )
+            array.map(obj => {
+              const form = project.getLayerForm(
+                feature.layerId,
+                (obj as DocumentData).formId
+              );
+              return DataStoreService.toObservation(form, obj.id, obj);
+            })
           )
         )
+      );
+  }
+
+  loadObservation$(project: Project, observationId: string) {
+    return this.db
+      .collection(`projects/${project.id}/observations`)
+      .doc(observationId)
+      .get()
+      .pipe(
+        map(doc => {
+          const form = project.getForm(doc.data()!.formId);
+          return DataStoreService.toObservation(form, doc.id, doc.data()!);
+        })
       );
   }
 
@@ -304,6 +321,9 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toFeature(id: string, data: DocumentData): Feature {
+    if (data === undefined) {
+      throw Error(`Feature ${id} does not have document data.`);
+    }
     return new Feature(id, data.layerId, data.location);
   }
 
@@ -327,14 +347,16 @@ export class DataStoreService {
    * </code></pre>
    */
   private static toObservation(
-    project: Project,
-    feature: Feature,
+    form: Form,
     id: string,
     data: DocumentData
   ): Observation {
-    const form = project.getForm(feature.layerId, data.formId);
+    if (data === undefined) {
+      throw Error(`Observation ${id} does not have document data.`);
+    }
     return new Observation(
       id,
+      data.featureId,
       form,
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),

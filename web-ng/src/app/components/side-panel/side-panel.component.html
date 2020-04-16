@@ -13,11 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div>
+<div *ngIf="selectedObservation$ | async as observation; else feature">
+  <ground-observation-form></ground-observation-form>
+</div>
+
+<ng-template #feature>
   <div *ngIf="selectedFeature$ | async as feature; else layers">
     <ground-feature-panel></ground-feature-panel>
   </div>
-</div>
+</ng-template>
 
 <ng-template #layers>
   <ground-layer-list></ground-layer-list>

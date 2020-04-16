@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import { AuditInfo } from '../audit-info.model';
-import { Form } from '../form/form.model';
-import { Response } from './response.model';
-import { Map } from 'immutable';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ObservationFormComponent } from './observation-form.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material';
 
-export class Observation {
-  constructor(
-    readonly id: string,
-    readonly featureId: string,
-    readonly form: Form | null,
-    readonly created: AuditInfo,
-    readonly lastModified: AuditInfo,
-    readonly responses: Map<string, Response>
-  ) {}
-}
+@NgModule({
+  imports: [
+    BrowserModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
+  exports: [ObservationFormComponent],
+  declarations: [ObservationFormComponent],
+})
+export class ObservationFormModule {}

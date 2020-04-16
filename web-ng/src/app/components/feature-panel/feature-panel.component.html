@@ -16,8 +16,9 @@ limitations under the License.
 <mat-list *ngIf="layer$ | async as layer">
   <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
 </mat-list>
+
 <div *ngIf="observations$ | async as observations">
-  <mat-card class="observation-card" *ngFor="let observation of observations">
+  <mat-card class="observation card" *ngFor="let observation of observations">
     <mat-card-header>
       <mat-card-title>
         {{ observation.created.user.displayName }}
@@ -26,6 +27,9 @@ limitations under the License.
       <mat-card-subtitle>
         {{ observation.created.clientTime | date:'medium' }}
       </mat-card-subtitle>
+      <button mat-icon-button aria-label="actions" (click)="onEditObservationClick(observation)">
+        <mat-icon>more_vert</mat-icon>
+      </button>
     </mat-card-header>
     <mat-card-content>
         <div *ngFor="let field_entry of observation.form.fields ">

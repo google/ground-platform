@@ -1,0 +1,12 @@
+.observation .field-label {
+    font-size: 12px;
+    line-height: 16px;
+    color: #70757A;
+    margin-bottom: 3px;
+}
+.observation .field-response {
+    font-size: 14px;
+    line-height: 20px;
+    color: #3C4043;
+    margin-bottom: 12px;
+}

@@ -17,8 +17,9 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FeatureService } from '../../services/feature/feature.service';
-import { ProjectService } from '../../services/project/project.service';
 import { Feature } from '../../shared/models/feature.model';
+import { Observation } from '../../shared/models/observation/observation.model';
+import { ObservationService } from '../../services/observation/observation.service';
 
 @Component({
   selector: 'ground-side-panel',
@@ -27,14 +28,17 @@ import { Feature } from '../../shared/models/feature.model';
 })
 export class SidePanelComponent {
   readonly selectedFeature$: Observable<Feature>;
+  readonly selectedObservation$: Observable<Observation>;
   readonly lang: string;
 
   constructor(
-    private projectService: ProjectService,
-    private featureService: FeatureService
+    private featureService: FeatureService,
+    private observationService: ObservationService
   ) {
+    console.log("reload SidePanelComponent")
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.selectedFeature$ = this.featureService.getSelectedFeature$();
+    this.selectedObservation$ = this.observationService.getSelectedObservation$();
   }
 }
