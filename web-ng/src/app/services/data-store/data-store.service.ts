@@ -207,7 +207,6 @@ export class DataStoreService {
     };
   }
 
-  //(map, option : Option) => ({...map, [option.id]: this.optionToJS(option)}), {}),
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Form instance.
