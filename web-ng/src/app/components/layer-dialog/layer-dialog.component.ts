@@ -34,15 +34,10 @@ import { Map } from 'immutable';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
-export enum FieldTypeOptionType {
-  TEXT = 1,
-  MULTIPLE_CHOICE = 2,
-}
-
 export interface FieldTypeOptionModel {
   icon: string;
   label: string;
-  type: FieldTypeOptionType;
+  type: FieldType;
 }
 
 export interface OptionModel {
@@ -70,17 +65,17 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  fieldTypeOptionTypes = FieldTypeOptionType;
+  fieldTypes = FieldType;
   fieldTypeOptions: FieldTypeOptionModel[] = [
     {
       icon: 'short_text',
       label: 'Text',
-      type: FieldTypeOptionType.TEXT,
+      type: FieldType.TEXT,
     },
     {
       icon: 'library_add_check',
       label: 'Select multiple',
-      type: FieldTypeOptionType.MULTIPLE_CHOICE,
+      type: FieldType.MULTIPLE_CHOICE,
     },
   ];
 
@@ -194,9 +189,9 @@ export class LayerDialogComponent implements OnDestroy {
 
   convertQuestionToField(fieldId: string, question: Question): Field {
     switch (question.fieldTypeOption.type) {
-      case FieldTypeOptionType.TEXT:
+      case FieldType.TEXT:
         return this.convertQuestionToTextField(fieldId, question);
-      case FieldTypeOptionType.MULTIPLE_CHOICE:
+      case FieldType.MULTIPLE_CHOICE:
         return this.convertQuestionToMultipleChoiceField(fieldId, question);
       default:
         throw Error(
