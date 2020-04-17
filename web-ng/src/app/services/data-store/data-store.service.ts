@@ -400,7 +400,10 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toFeature(id: string, data: DocumentData): Feature {
-    return new Feature(id, data?.layerId, data.location);
+    if (data === undefined) {
+      throw Error(`Feature ${id} does not have document data.`);
+    }
+    return new Feature(id, data.layerId, data.location);
   }
 
   /**
@@ -428,6 +431,9 @@ export class DataStoreService {
     id: string,
     data: DocumentData
   ): Observation {
+    if (data === undefined) {
+      throw Error(`Observation ${id} does not have document data.`);
+    }
     const form = project.getForm(feature.layerId, data.formId);
     return new Observation(
       id,
