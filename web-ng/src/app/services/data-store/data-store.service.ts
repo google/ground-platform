@@ -24,7 +24,10 @@ import { AuditInfo } from '../../shared/models/audit-info.model';
 import { Feature } from '../../shared/models/feature.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
-import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
+import {
+  MultipleChoice,
+  Cardinality,
+} from '../../shared/models/form/multiple-choice.model';
 import { Option } from '../../shared/models/form/option.model';
 import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
@@ -76,17 +79,11 @@ export class DataStoreService {
 
   // TODO: Define return types for methods in this class
   updateLayer(projectId: string, layer: Layer) {
-    const { id: layerId, name, forms, ...layerDoc } = layer;
-
     return this.db
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layerId}`]: {
-          name: name?.toJS() || {},
-          forms: forms?.toJS() || {},
-          ...layerDoc,
-        },
+        [`layers.${layer.id}`]: DataStoreService.layerToJS(layer),
       });
   }
 
@@ -195,6 +192,22 @@ export class DataStoreService {
     );
   }
 
+  private static layerToJS(layer: Layer): {} {
+    const { id: layerId, name, forms, ...layerDoc } = layer;
+    return {
+      name: name?.toJS() || {},
+      forms:
+        forms
+          ?.valueSeq()
+          .reduce(
+            (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
+            {}
+          ) || {},
+      ...layerDoc,
+    };
+  }
+
+  //(map, option : Option) => ({...map, [option.id]: this.optionToJS(option)}), {}),
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Form instance.
@@ -212,6 +225,21 @@ export class DataStoreService {
         ])
       )
     );
+  }
+
+  private static formToJS(form: Form): {} {
+    const { fields, ...formDoc } = form;
+    return {
+      fields:
+        fields?.reduce(
+          (map, field: Field) => ({
+            ...map,
+            [field.id]: this.fieldToJS(field),
+          }),
+          {}
+        ) || {},
+      ...formDoc,
+    };
   }
 
   /**
@@ -254,7 +282,7 @@ export class DataStoreService {
       data.required,
       data.options &&
         new MultipleChoice(
-          data.cardinality,
+          DataStoreService.stringToCardinality(data.cardinality),
           Map<string, Option>(
             keys(data.options).map((id: string) => [
               id as string,
@@ -265,6 +293,57 @@ export class DataStoreService {
     );
   }
 
+  private static fieldToJS(field: Field): {} {
+    const { type, label, multipleChoice, ...fieldDoc } = field;
+    if (multipleChoice === undefined) {
+      return {
+        type: DataStoreService.fieldTypeToString(type),
+        label: label.toJS(),
+        ...fieldDoc,
+      };
+    } else {
+      return {
+        type: DataStoreService.fieldTypeToString(type),
+        label: label.toJS(),
+        cardinality: DataStoreService.cardinalityToString(
+          multipleChoice.cardinality
+        ),
+        // convert list of options to map of optionId: option.
+        options:
+          multipleChoice?.options?.reduce(
+            (map, option: Option) => ({
+              ...map,
+              [option.id]: DataStoreService.optionToJS(option),
+            }),
+            {}
+          ) || {},
+        ...fieldDoc,
+      };
+    }
+  }
+
+  private static stringToCardinality(cardinality: string): Cardinality {
+    switch (cardinality) {
+      case 'select_one':
+        return Cardinality.SELECT_ONE;
+      case 'select_multiple':
+        return Cardinality.SELECT_MULTIPLE;
+      default:
+        throw Error(`Unsupported cardinality ${cardinality}`);
+    }
+  }
+
+  private static cardinalityToString(cardinality: Cardinality): string {
+    switch (cardinality) {
+      case Cardinality.SELECT_ONE:
+        return 'select_one';
+      case Cardinality.SELECT_MULTIPLE:
+        return 'select_multiple';
+      default:
+        throw Error(`Unsupported cardinality ${cardinality}`);
+    }
+  }
+
   private static stringToFieldType(fieldType: string): FieldType {
     switch (fieldType) {
       case 'text_field':
@@ -273,6 +352,19 @@ export class DataStoreService {
         return FieldType.MULTIPLE_CHOICE;
       case 'photo':
         return FieldType.PHOTO;
+      default:
+        throw Error(`Unsupported field type ${fieldType}`);
+    }
+  }
+
+  private static fieldTypeToString(fieldType: FieldType): string {
+    switch (fieldType) {
+      case FieldType.TEXT:
+        return 'text_field';
+      case FieldType.MULTIPLE_CHOICE:
+        return 'multiple_choice';
+      case FieldType.PHOTO:
+        return 'photo';
       default:
         throw Error(`Unsupported field type ${fieldType}`);
     }
@@ -296,6 +388,11 @@ export class DataStoreService {
     return new Option(id, data.code, StringMap(data.label));
   }
 
+  private static optionToJS(option: Option): {} {
+    const { label, ...optionDoc } = option;
+    return { label: label.toJS(), optionDoc };
+  }
+
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Feature instance.
@@ -304,7 +401,7 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toFeature(id: string, data: DocumentData): Feature {
-    return new Feature(id, data.layerId, data.location);
+    return new Feature(id, data?.layerId, data.location);
   }
 
   /**
