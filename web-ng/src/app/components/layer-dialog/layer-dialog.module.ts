@@ -26,6 +26,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
   declarations: [LayerDialogComponent],
@@ -41,6 +42,7 @@ import { MatButtonModule } from '@angular/material';
     MatSelectModule,
     MatIconModule,
     MatButtonModule,
+    MatSlideToggleModule,
   ],
 })
 export class LayerDialogModule {}

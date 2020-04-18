@@ -49,6 +49,7 @@ export interface Question {
   label: string;
   fieldType: FormFieldType;
   options: OptionModel[];
+  required: boolean;
 }
 
 @Component({
@@ -112,6 +113,7 @@ export class LayerDialogComponent implements OnDestroy {
   createQuestionGroup() {
     return this.formBuilder.group({
       label: [''],
+      required: [false],
       fieldType: new FormControl(this.fieldTypes[0]),
       options: this.formBuilder.array([this.createOptionGroup()]),
     });
@@ -175,7 +177,7 @@ export class LayerDialogComponent implements OnDestroy {
       let field: Field = {
         id: fieldId,
         type: FieldType['TEXT'],
-        required: false,
+        required: question.required || false,
         label: StringMap({
           en: question.label || '',
         }),

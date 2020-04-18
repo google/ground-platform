@@ -129,3 +129,13 @@
 .main-container-options {
   padding-bottom: 20px;
 }
+
+.required-label {
+  margin-right: 20px;
+  align-self: center;
+}
+
+.question-actions {
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
