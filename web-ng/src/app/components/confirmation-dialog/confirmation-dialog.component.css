@@ -1,0 +1,9 @@
+.confirmation-btn {
+  color: white;
+  background-color: rgb(0, 145, 19);
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.confirmation-actions {
+  margin-top: 20px;
+}

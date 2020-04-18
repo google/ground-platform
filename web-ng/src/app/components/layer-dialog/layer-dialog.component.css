@@ -129,3 +129,12 @@
 .main-container-options {
   padding-bottom: 20px;
 }
+
+.question-actions {
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+.delete-icon {
+  cursor: pointer;
+}
