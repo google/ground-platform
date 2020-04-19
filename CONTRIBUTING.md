@@ -99,6 +99,10 @@ submit them to the base repository using a pull request.
     
     Where `<branch>` is the branch name you used in step 2.
 
+    If asked for github username and password, make sure to use your [Personal
+    Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) instead of your password, since two-factor authentication is
+    enabled by default.
+
 1. Create a [pull request](https://help.github.com/articles/about-pull-requests/) to have your changes reviewed and merged into the base 
 repository. Reference the [issue](https://github.com/google/ground-platform/issues) your changes resolve in either the commit message for your changes or in your pull request. 
 
