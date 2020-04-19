@@ -177,7 +177,7 @@ export class LayerDialogComponent implements OnDestroy {
       let field: Field = {
         id: fieldId,
         type: FieldType['TEXT'],
-        required: question.required || false,
+        required: question.required,
         label: StringMap({
           en: question.label || '',
         }),
