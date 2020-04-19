@@ -103,6 +103,9 @@ submit them to the base repository using a pull request.
     Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) instead of your password, since two-factor authentication is
     enabled by default.
 
+    Alternatively, one can [connect to GitHub via SSH](https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) instead of HTTPS and use
+    a public/private key pair for authentication.
+
 1. Create a [pull request](https://help.github.com/articles/about-pull-requests/) to have your changes reviewed and merged into the base 
 repository. Reference the [issue](https://github.com/google/ground-platform/issues) your changes resolve in either the commit message for your changes or in your pull request. 
 
