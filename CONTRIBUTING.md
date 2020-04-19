@@ -99,11 +99,11 @@ submit them to the base repository using a pull request.
     
     Where `<branch>` is the branch name you used in step 2.
 
-    If asked for github username and password, make sure to use your [Personal
-    Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) instead of your password, since two-factor authentication is
-    enabled by default.
+    Note (Googlers-only): If asked for github username and password, make sure
+    to use your [Personal Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) instead of your password, since two-factor 
+    authentication is enabled by default for accounts associated with Google.
 
-    Alternatively, one can [connect to GitHub via SSH](https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) instead of HTTPS and use
+    Alternatively, you can [connect to GitHub via SSH](https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) instead of HTTPS and use
     a public/private key pair for authentication.
 
 1. Create a [pull request](https://help.github.com/articles/about-pull-requests/) to have your changes reviewed and merged into the base 
