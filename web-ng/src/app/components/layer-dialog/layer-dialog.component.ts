@@ -144,7 +144,8 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
-  deleteQuestion(index: number) {
+  deleteQuestion(event: MouseEvent, index: number) {
+    event.preventDefault();
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
