@@ -24,14 +24,21 @@
 <form [formGroup]="layerForm" (ngSubmit)="onSave($event)">
   <mat-dialog-content>
     <div>Layer id: {{ layerId }}</div>
-    <div formArrayName="questions" class="main-container-questions">
+    <div
+      formArrayName="questions"
+      cdkDropList
+      (cdkDropListDropped)="drop($event)"
+      class="main-container-questions"
+    >
       <div
         *ngFor="
           let question of layerForm.controls.questions.controls;
           let i = index
         "
         class="container-question"
+        cdkDrag
       >
+        <mat-icon cdkDragHandle class="drag-icon">drag_indicator</mat-icon>
         <div [formGroupName]="i">
           <div fxLayout>
             <mat-form-field appearance="fill" fxFlex="2 1 auto">
