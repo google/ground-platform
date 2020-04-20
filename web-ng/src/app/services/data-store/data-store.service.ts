@@ -389,9 +389,9 @@ export class DataStoreService {
 
   private static optionToJS(option: Option): {} {
     const { label, ...optionDoc } = option;
-    return { 
-      label: label.toJS(), 
-      ...optionDoc, 
+    return {
+      label: label.toJS(),
+      ...optionDoc,
     };
   }
 
