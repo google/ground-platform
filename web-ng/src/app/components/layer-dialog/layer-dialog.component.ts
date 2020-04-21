@@ -17,7 +17,11 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ProjectService } from '../../services/project/project.service';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialog,
+} from '@angular/material/dialog';
 import { Project } from '../../shared/models/project.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
@@ -31,6 +35,7 @@ import { Option } from '../../shared/models/form/option.model';
 import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Map } from 'immutable';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
@@ -86,7 +91,8 @@ export class LayerDialogComponent implements OnDestroy {
     private projectService: ProjectService,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private confirmationDialog: MatDialog
   ) {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
@@ -130,6 +136,28 @@ export class LayerDialogComponent implements OnDestroy {
         code: [''],
       })
     );
+  }
+
+  deleteQuestion(event: MouseEvent, index: number) {
+    event.preventDefault();
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (dialogResult) {
+        const control = this.layerForm.controls['questions'] as FormArray;
+        control.removeAt(index);
+      }
+    });
   }
 
   onProjectLoaded(project: Project) {
