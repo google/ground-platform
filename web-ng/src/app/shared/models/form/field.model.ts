@@ -16,6 +16,7 @@
 
 import { StringMap } from '../string-map.model';
 import { MultipleChoice } from './multiple-choice.model';
+import { Option } from '../form/option.model';
 
 /**
  *
@@ -40,6 +41,7 @@ export enum FieldType {
   PHOTO = 3,
 }
 
+// TODO: add a subclass of Field for each field type.
 export class Field {
   constructor(
     readonly id: string,
@@ -48,4 +50,22 @@ export class Field {
     readonly required: boolean,
     readonly multipleChoice?: MultipleChoice
   ) {}
+
+  /**
+   * For MULTIPLE_CHOICE fields, returns the option with the specified id.
+   * Throws an Error if called for other field types.
+   */
+  getMultipleChoiceOption(optionId: string): Option {
+    if (this.type !== FieldType.MULTIPLE_CHOICE) {
+      throw Error(`Field ${this.id} of type ${this.type} has no options.`);
+    }
+    if (this.multipleChoice === undefined) {
+      throw Error(`Field ${this.id} does not have choices defined.`);
+    }
+    const option = this.multipleChoice.options.get(optionId);
+    if (!option) {
+      throw Error(`Option ${optionId} not found in field ${this.id}.`);
+    }
+    return option;
+  }
 }

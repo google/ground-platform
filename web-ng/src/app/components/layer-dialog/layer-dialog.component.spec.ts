@@ -30,6 +30,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
 
@@ -50,6 +51,7 @@ describe('LayerDialogComponent', () => {
         AngularFireAuthModule,
         AngularFirestoreModule,
         FormsModule,
+        InlineEditorModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
         FlexLayoutModule,

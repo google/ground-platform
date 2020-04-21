@@ -19,18 +19,48 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { LayerListComponent } from './layer-list.component';
 import { ProjectService } from '../../services/project/project.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Project } from '../../shared/models/project.model';
+import { of } from 'rxjs';
+import { Map } from 'immutable';
+import { StringMap } from '../../shared/models/string-map.model';
+import { Layer } from '../../shared/models/layer.model';
+import { Form } from '../../shared/models/form/form.model';
+import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { MatListModule } from '@angular/material';
+
+const mockProject = new Project(
+  'project001',
+  StringMap([['en', 'title']]),
+  StringMap([['en', 'description']]),
+  Map<string, Layer>([
+    [
+      'layer001',
+      new Layer(
+        'layer001',
+        'red',
+        StringMap([['en', 'name']]),
+        Map<string, Form>([])
+      ),
+    ],
+  ])
+);
+
+class MockProjectService {
+  getActiveProject$() {
+    return of<Project>(mockProject);
+  }
+}
+
+const projectService = new MockProjectService();
 
 describe('LayerListComponent', () => {
   let component: LayerListComponent;
   let fixture: ComponentFixture<LayerListComponent>;
 
   beforeEach(async(() => {
-    const projectService = jasmine.createSpyObj('ProjectService', [
-      'getActiveProject$',
-    ]);
-
     TestBed.configureTestingModule({
       declarations: [LayerListComponent],
+      imports: [LayerListItemModule, MatListModule],
       providers: [{ provide: ProjectService, useValue: projectService }],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
