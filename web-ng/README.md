@@ -75,8 +75,9 @@ This last step will fail if you haven't yet following instructions above in
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to http://localhost:4200/. Add 
-`p/<project_name>` as a suffix to the url to see the map interface in your 
-browser (e.g. http://localhost:4200/p/new).
+`p/<project_name>` as a suffix to the url to see an existing project interface
+in your browser. Alternatively, go to http://localhost:4200/p/:new for a
+new project. 
 The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
