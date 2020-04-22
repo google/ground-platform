@@ -54,6 +54,7 @@ export interface Question {
   label: string;
   fieldTypeOption: FieldTypeOptionModel;
   options: OptionModel[];
+  required: boolean;
 }
 
 @Component({
@@ -112,6 +113,7 @@ export class LayerDialogComponent implements OnDestroy {
   createQuestionGroup() {
     return this.formBuilder.group({
       label: [''],
+      required: [false],
       fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
       options: this.formBuilder.array([this.createOptionGroup()]),
     });
@@ -184,7 +186,7 @@ export class LayerDialogComponent implements OnDestroy {
       StringMap({
         en: question.label || '',
       }),
-      /*required=*/ false,
+      question.required,
       /*multipleChoice=*/ undefined
     );
   }
@@ -210,7 +212,7 @@ export class LayerDialogComponent implements OnDestroy {
       StringMap({
         en: question.label || '',
       }),
-      /*required=*/ false,
+      question.required,
       new MultipleChoice(Cardinality.SELECT_MULTIPLE, options)
     );
   }
