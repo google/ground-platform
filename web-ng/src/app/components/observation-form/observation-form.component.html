@@ -16,7 +16,7 @@
 
 <div *ngIf="observationForm" class="observation">
   <form [formGroup]="observationForm" (ngSubmit)="onSave()">
-    <div *ngFor="let field of observationFields ">
+    <div *ngFor="let field of observationFields">
       <label class="field-label" [attr.for]="field.id">
         {{ field.label.get(lang) }}
       </label>

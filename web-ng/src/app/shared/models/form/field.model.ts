@@ -41,6 +41,7 @@ export enum FieldType {
   PHOTO = 3,
 }
 
+// TODO: add a subclass of Field for each field type.
 export class Field {
   constructor(
     readonly id: string,
@@ -51,7 +52,8 @@ export class Field {
   ) {}
 
   /**
-   * Returns an option but only if the given field is of a proper type (MULTIPLE_CHOICE).
+   * For MULTIPLE_CHOICE fields, returns the option with the specified id.
+   * Throws an Error if called for other field types.
    */
   getMultipleChoiceOption(optionId: string): Option {
     if (this.type !== FieldType.MULTIPLE_CHOICE) {

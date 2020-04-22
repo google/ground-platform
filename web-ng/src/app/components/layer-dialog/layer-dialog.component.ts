@@ -34,10 +34,10 @@ import { Map, List } from 'immutable';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
-export interface FormFieldType {
+export interface FieldTypeOptionModel {
   icon: string;
   label: string;
-  type: string;
+  type: FieldType;
 }
 
 export interface OptionModel {
@@ -47,7 +47,7 @@ export interface OptionModel {
 
 export interface Question {
   label: string;
-  fieldType: FormFieldType;
+  fieldTypeOption: FieldTypeOptionModel;
   options: OptionModel[];
 }
 
@@ -65,16 +65,17 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  fieldTypes: FormFieldType[] = [
+  fieldTypes = FieldType;
+  fieldTypeOptions: FieldTypeOptionModel[] = [
     {
       icon: 'short_text',
       label: 'Text',
-      type: 'text',
+      type: FieldType.TEXT,
     },
     {
       icon: 'library_add_check',
       label: 'Select multiple',
-      type: 'multipleChoice',
+      type: FieldType.MULTIPLE_CHOICE,
     },
   ];
 
@@ -102,17 +103,10 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
-  getFieldType() {
-    return {
-      icon: 'short_text',
-      label: 'Text',
-    };
-  }
-
   createQuestionGroup() {
     return this.formBuilder.group({
       label: [''],
-      fieldType: new FormControl(this.fieldTypes[0]),
+      fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
       options: this.formBuilder.array([this.createOptionGroup()]),
     });
   }
@@ -155,43 +149,57 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  convertQuersionToField(fieldId: string, question: Question): Field {
-    if (question.fieldType.type === 'text') {
-      return new Field(
-        fieldId,
-        FieldType['TEXT'],
-        StringMap({
-          en: question.label || '',
-        }),
-        /*required=*/ false,
-        /*multipleChoice=*/ undefined
+  convertQuestionToTextField(fieldId: string, question: Question): Field {
+    return new Field(
+      fieldId,
+      FieldType.TEXT,
+      StringMap({
+        en: question.label || '',
+      }),
+      /*required=*/ false,
+      /*multipleChoice=*/ undefined
+    );
+  }
+
+  convertQuestionToMultipleChoiceField(
+    fieldId: string,
+    question: Question
+  ): Field {
+    let options = List<Option>();
+    question.options.forEach((option: OptionModel) => {
+      const optionId = this.dataStoreService.generateId();
+      options = options.push(
+        new Option(
+          optionId,
+          option.code || '',
+          StringMap({
+            en: option.label || '',
+          })
+        )
       );
-    }
-    if (question.fieldType.type === 'multipleChoice') {
-      let options = List<Option>();
-      question.options.forEach((option: OptionModel) => {
-        const optionId = this.dataStoreService.generateId();
-        options = options.push(
-          new Option(
-            optionId,
-            option.code || '',
-            StringMap({
-              en: option.label || '',
-            })
-          )
+    });
+    return new Field(
+      fieldId,
+      FieldType.MULTIPLE_CHOICE,
+      StringMap({
+        en: question.label || '',
+      }),
+      /*required=*/ false,
+      new MultipleChoice(Cardinality.SELECT_MULTIPLE, options)
+    );
+  }
+
+  convertQuestionToField(fieldId: string, question: Question): Field {
+    switch (question.fieldTypeOption.type) {
+      case FieldType.TEXT:
+        return this.convertQuestionToTextField(fieldId, question);
+      case FieldType.MULTIPLE_CHOICE:
+        return this.convertQuestionToMultipleChoiceField(fieldId, question);
+      default:
+        throw Error(
+          `Unexpected question type ${question.fieldTypeOption.type}`
         );
-      });
-      return new Field(
-        fieldId,
-        FieldType['MULTIPLE_CHOICE'],
-        StringMap({
-          en: question.label || '',
-        }),
-        /*required=*/ false,
-        new MultipleChoice(Cardinality['SELECT_MULTIPLE'], options)
-      );
     }
-    throw Error(`Unexpected question type ${question.fieldType.type}`);
   }
 
   onSave() {
@@ -204,7 +212,7 @@ export class LayerDialogComponent implements OnDestroy {
       const fieldId = this.dataStoreService.generateId();
       fields = fields.set(
         fieldId,
-        this.convertQuersionToField(fieldId, question)
+        this.convertQuestionToField(fieldId, question)
       );
     });
     const formId = this.dataStoreService.generateId();

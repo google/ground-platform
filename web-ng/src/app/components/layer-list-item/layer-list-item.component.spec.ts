@@ -17,6 +17,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LayerListItemComponent } from './layer-list-item.component';
+import { MatListModule } from '@angular/material';
 
 describe('LayerListItemComponent', () => {
   let component: LayerListItemComponent;
@@ -25,6 +26,7 @@ describe('LayerListItemComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [LayerListItemComponent],
+      imports: [MatListModule],
     }).compileComponents();
   }));
 

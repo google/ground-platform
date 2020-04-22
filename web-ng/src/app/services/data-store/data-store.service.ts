@@ -79,17 +79,11 @@ export class DataStoreService {
 
   // TODO: Define return types for methods in this class
   updateLayer(projectId: string, layer: Layer) {
-    const { id: layerId, name, forms, ...layerDoc } = layer;
-
     return this.db
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layerId}`]: {
-          name: name?.toJS() || {},
-          forms: forms?.toJS() || {},
-          ...layerDoc,
-        },
+        [`layers.${layer.id}`]: DataStoreService.layerToJS(layer),
       });
   }
 
@@ -215,6 +209,21 @@ export class DataStoreService {
     );
   }
 
+  private static layerToJS(layer: Layer): {} {
+    const { id: layerId, name, forms, ...layerDoc } = layer;
+    return {
+      name: name?.toJS() || {},
+      forms:
+        forms
+          ?.valueSeq()
+          .reduce(
+            (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
+            {}
+          ) || {},
+      ...layerDoc,
+    };
+  }
+
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Form instance.
@@ -232,6 +241,21 @@ export class DataStoreService {
         ])
       )
     );
+  }
+
+  private static formToJS(form: Form): {} {
+    const { fields, ...formDoc } = form;
+    return {
+      fields:
+        fields?.reduce(
+          (map, field: Field) => ({
+            ...map,
+            [field.id]: this.fieldToJS(field),
+          }),
+          {}
+        ) || {},
+      ...formDoc,
+    };
   }
 
   /**
@@ -284,6 +308,57 @@ export class DataStoreService {
     );
   }
 
+  private static fieldToJS(field: Field): {} {
+    const { type, label, multipleChoice, ...fieldDoc } = field;
+    if (multipleChoice === undefined) {
+      return {
+        type: DataStoreService.fieldTypeToString(type),
+        label: label.toJS(),
+        ...fieldDoc,
+      };
+    } else {
+      return {
+        type: DataStoreService.fieldTypeToString(type),
+        label: label.toJS(),
+        cardinality: DataStoreService.cardinalityToString(
+          multipleChoice.cardinality
+        ),
+        // convert list of options to map of optionId: option.
+        options:
+          multipleChoice?.options?.reduce(
+            (map, option: Option) => ({
+              ...map,
+              [option.id]: DataStoreService.optionToJS(option),
+            }),
+            {}
+          ) || {},
+        ...fieldDoc,
+      };
+    }
+  }
+
+  private static stringToCardinality(cardinality: string): Cardinality {
+    switch (cardinality) {
+      case 'select_one':
+        return Cardinality.SELECT_ONE;
+      case 'select_multiple':
+        return Cardinality.SELECT_MULTIPLE;
+      default:
+        throw Error(`Unsupported cardinality ${cardinality}`);
+    }
+  }
+
+  private static cardinalityToString(cardinality: Cardinality): string {
+    switch (cardinality) {
+      case Cardinality.SELECT_ONE:
+        return 'select_one';
+      case Cardinality.SELECT_MULTIPLE:
+        return 'select_multiple';
+      default:
+        throw Error(`Unsupported cardinality ${cardinality}`);
+    }
+  }
+
   private static stringToFieldType(fieldType: string): FieldType {
     switch (fieldType) {
       case 'text_field':
@@ -297,14 +372,16 @@ export class DataStoreService {
     }
   }
 
-  private static stringToCardinality(cardinality: string): Cardinality {
-    switch (cardinality) {
-      case 'select_one':
-        return Cardinality.SELECT_ONE;
-      case 'select_multiple':
-        return Cardinality.SELECT_MULTIPLE;
+  private static fieldTypeToString(fieldType: FieldType): string {
+    switch (fieldType) {
+      case FieldType.TEXT:
+        return 'text_field';
+      case FieldType.MULTIPLE_CHOICE:
+        return 'multiple_choice';
+      case FieldType.PHOTO:
+        return 'photo';
       default:
-        throw Error(`Unsupported cardinality ${cardinality}`);
+        throw Error(`Unsupported field type ${fieldType}`);
     }
   }
 
@@ -324,6 +401,14 @@ export class DataStoreService {
    */
   private static toOption(id: string, data: DocumentData): Option {
     return new Option(id, data.code, StringMap(data.label));
+  }
+
+  private static optionToJS(option: Option): {} {
+    const { label, ...optionDoc } = option;
+    return {
+      label: label.toJS(),
+      ...optionDoc,
+    };
   }
 
   /**
