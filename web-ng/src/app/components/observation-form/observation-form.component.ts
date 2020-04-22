@@ -3,6 +3,7 @@ import { FieldType, Field } from '../../shared/models/form/field.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Option } from '../../shared/models/form/option.model';
 import { Observation } from '../../shared/models/observation/observation.model';
+import { Response } from '../../shared/models/observation/response.model';
 import { ObservationService } from '../../services/observation/observation.service';
 import {
   FormGroup,
@@ -46,37 +47,96 @@ export class ObservationFormComponent {
     if (observation === undefined) {
       throw Error('Observation is not selected.');
     }
-    this.observationForm = this.toFormGroup(observation);
+    this.observationForm = this.getFormGroupForObservation(observation);
   }
 
-  toFormGroup(observation?: Observation): FormGroup {
+  populateFormGroupWithControlsForSelectOneField(
+    group: { [fieldId: string]: FormControl },
+    field: Field,
+    response?: Response
+  ): void {
+    const selectedOptionId = ((response?.value as List<
+      Option
+    >)?.first() as Option)?.id;
+    group[field.id] = field.required
+      ? new FormControl(selectedOptionId, Validators.required)
+      : new FormControl(selectedOptionId);
+  }
+
+  populateFormGroupWithControlsForSelectMultipleField(
+    group: { [fieldId: string]: FormControl },
+    field: Field,
+    response?: Response
+  ): void {
+    const selectedOptions = response?.value as List<Option>;
+    for (const option of field.multipleChoice!.options) {
+      group[option.id] = new FormControl(
+        selectedOptions?.contains(option) || false
+      );
+    }
+  }
+
+  populateFormGroupWithControlsForMultipleChoiceField(
+    group: { [fieldId: string]: FormControl },
+    field: Field,
+    response?: Response
+  ): void {
+    switch (field.multipleChoice?.cardinality) {
+      case Cardinality.SELECT_ONE:
+        this.populateFormGroupWithControlsForSelectOneField(
+          group,
+          field,
+          response
+        );
+        return;
+      case Cardinality.SELECT_MULTIPLE:
+        this.populateFormGroupWithControlsForSelectMultipleField(
+          group,
+          field,
+          response
+        );
+        return;
+      default:
+        throw Error(
+          `Can not create FormControl(s) for given Cardinality:${field.multipleChoice?.cardinality}`
+        );
+    }
+  }
+
+  populateFormGroupWithControlsForTextField(
+    group: { [fieldId: string]: FormControl },
+    field: Field,
+    response?: Response
+  ): void {
+    const value = response?.value as string;
+    group[field.id] = field.required
+      ? new FormControl(value, Validators.required)
+      : new FormControl(value);
+  }
+
+  getFormGroupForObservation(observation?: Observation): FormGroup {
     const group: { [fieldId: string]: FormControl } = {};
     for (const [fieldId, field] of observation!.form!.fields) {
-      const observationValue = observation!.responses?.get(fieldId)?.value;
-      if (field.type === FieldType.TEXT) {
-        const stringValue = observationValue as string;
-        group[fieldId] = field.required
-          ? new FormControl(stringValue, Validators.required)
-          : new FormControl(stringValue);
-      } else if (field.type === FieldType.MULTIPLE_CHOICE) {
-        const selectedOptionId = ((observationValue as List<
-          Option
-        >)?.first() as Option)?.id;
-        if (field.multipleChoice?.cardinality === Cardinality.SELECT_ONE) {
-          group[fieldId] = field.required
-            ? new FormControl(selectedOptionId, Validators.required)
-            : new FormControl(selectedOptionId);
-        } else if (
-          field.multipleChoice?.cardinality === Cardinality.SELECT_MULTIPLE
-        ) {
-          const selectedOptions = observation!.responses?.get(fieldId)
-            ?.value as List<Option>;
-          for (const option of field.multipleChoice.options) {
-            group[option.id] = new FormControl(
-              selectedOptions?.contains(option) || false
-            );
-          }
-        }
+      const fieldResponse = observation!.responses?.get(fieldId);
+      switch (field.type) {
+        case FieldType.TEXT:
+          this.populateFormGroupWithControlsForTextField(
+            group,
+            field,
+            fieldResponse
+          );
+          break;
+        case FieldType.MULTIPLE_CHOICE:
+          this.populateFormGroupWithControlsForMultipleChoiceField(
+            group,
+            field,
+            fieldResponse
+          );
+          break;
+        default:
+          throw Error(
+            `Can not create FormControl(s) for given FieldType:${field.type}`
+          );
       }
     }
     return this.formBuilder.group(group);
