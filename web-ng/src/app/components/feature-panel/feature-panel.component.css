@@ -29,3 +29,7 @@
     color: #3C4043;
     margin-bottom: 12px;
 }
+.option-label:not(:last-child):after {
+    content: ", ";
+    display: inline-block;
+}

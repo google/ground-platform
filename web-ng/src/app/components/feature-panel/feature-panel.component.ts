@@ -23,6 +23,7 @@ import { List } from 'immutable';
 import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
+import { FieldType } from '../../shared/models/form/field.model';
 
 @Component({
   selector: 'ground-feature-panel',
@@ -33,6 +34,7 @@ export class FeaturePanelComponent {
   readonly observations$: Observable<List<Observation>>;
   readonly layer$: Observable<Layer>;
   readonly lang: string;
+  readonly fieldTypes = FieldType;
 
   constructor(
     private projectService: ProjectService,
