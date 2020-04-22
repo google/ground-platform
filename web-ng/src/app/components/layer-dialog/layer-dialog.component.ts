@@ -17,7 +17,11 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ProjectService } from '../../services/project/project.service';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+  MatDialog,
+} from '@angular/material/dialog';
 import { Project } from '../../shared/models/project.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
@@ -31,13 +35,14 @@ import { Option } from '../../shared/models/form/option.model';
 import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Map } from 'immutable';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
-export interface FormFieldType {
+export interface FieldTypeOptionModel {
   icon: string;
   label: string;
-  type: string;
+  type: FieldType;
 }
 
 export interface OptionModel {
@@ -47,7 +52,7 @@ export interface OptionModel {
 
 export interface Question {
   label: string;
-  fieldType: FormFieldType;
+  fieldTypeOption: FieldTypeOptionModel;
   options: OptionModel[];
   required: boolean;
 }
@@ -66,16 +71,17 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
-  fieldTypes: FormFieldType[] = [
+  fieldTypes = FieldType;
+  fieldTypeOptions: FieldTypeOptionModel[] = [
     {
       icon: 'short_text',
       label: 'Text',
-      type: 'text',
+      type: FieldType.TEXT,
     },
     {
       icon: 'library_add_check',
       label: 'Select multiple',
-      type: 'multipleChoice',
+      type: FieldType.MULTIPLE_CHOICE,
     },
   ];
 
@@ -86,7 +92,8 @@ export class LayerDialogComponent implements OnDestroy {
     private projectService: ProjectService,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private confirmationDialog: MatDialog
   ) {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
@@ -103,18 +110,11 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
-  getFieldType() {
-    return {
-      icon: 'short_text',
-      label: 'Text',
-    };
-  }
-
   createQuestionGroup() {
     return this.formBuilder.group({
       label: [''],
       required: [false],
-      fieldType: new FormControl(this.fieldTypes[0]),
+      fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
       options: this.formBuilder.array([this.createOptionGroup()]),
     });
   }
@@ -140,6 +140,28 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
+  deleteQuestion(event: MouseEvent, index: number) {
+    event.preventDefault();
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (dialogResult) {
+        const control = this.layerForm.controls['questions'] as FormArray;
+        control.removeAt(index);
+      }
+    });
+  }
+
   onProjectLoaded(project: Project) {
     if (this.layerId === ':new') {
       this.layerId = this.dataStoreService.generateId();
@@ -157,12 +179,55 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = project.id;
   }
 
-  getForm(formId: string, fields: Map<string, Field>) {
-    const form = {
-      id: formId,
-      fields,
-    };
-    return form;
+  convertQuestionToTextField(fieldId: string, question: Question): Field {
+    return new Field(
+      fieldId,
+      FieldType.TEXT,
+      StringMap({
+        en: question.label || '',
+      }),
+      question.required,
+      /*multipleChoice=*/ undefined
+    );
+  }
+
+  convertQuestionToMultipleChoiceField(
+    fieldId: string,
+    question: Question
+  ): Field {
+    let options = Map<string, Option>();
+    question.options.forEach((option: OptionModel) => {
+      const optionId = this.dataStoreService.generateId();
+      options = options.set(optionId, {
+        id: optionId,
+        code: option.code || '',
+        label: StringMap({
+          en: option.label || '',
+        }),
+      });
+    });
+    return new Field(
+      fieldId,
+      FieldType.MULTIPLE_CHOICE,
+      StringMap({
+        en: question.label || '',
+      }),
+      question.required,
+      new MultipleChoice(Cardinality.SELECT_MULTIPLE, options)
+    );
+  }
+
+  convertQuestionToField(fieldId: string, question: Question): Field {
+    switch (question.fieldTypeOption.type) {
+      case FieldType.TEXT:
+        return this.convertQuestionToTextField(fieldId, question);
+      case FieldType.MULTIPLE_CHOICE:
+        return this.convertQuestionToMultipleChoiceField(fieldId, question);
+      default:
+        throw Error(
+          `Unexpected question type ${question.fieldTypeOption.type}`
+        );
+    }
   }
 
   onSave() {
@@ -172,38 +237,11 @@ export class LayerDialogComponent implements OnDestroy {
     }
     let fields = Map<string, Field>();
     this.layerForm.value.questions.forEach((question: Question) => {
-      let options = Map<string, Option>();
       const fieldId = this.dataStoreService.generateId();
-      let field: Field = {
-        id: fieldId,
-        type: FieldType['TEXT'],
-        required: question.required,
-        label: StringMap({
-          en: question.label || '',
-        }),
-      };
-      if (question.fieldType.type === 'multipleChoice') {
-        question.options.forEach((option: OptionModel) => {
-          const optionId = this.dataStoreService.generateId();
-          options = options.set(optionId, {
-            id: optionId,
-            code: option.code || '',
-            label: StringMap({
-              en: option.label || '',
-            }),
-          });
-        });
-        const multipleChoice: MultipleChoice = {
-          cardinality: Cardinality['SELECT_MULTIPLE'],
-          options,
-        };
-        field = {
-          ...field,
-          type: FieldType['MULTIPLE_CHOICE'],
-          multipleChoice: multipleChoice || Map<string, Option>(),
-        };
-      }
-      fields = fields.set(fieldId, field);
+      fields = fields.set(
+        fieldId,
+        this.convertQuestionToField(fieldId, question)
+      );
     });
     const formId = this.dataStoreService.generateId();
     const layer = new Layer(
@@ -214,7 +252,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.layerForm.value.questions &&
       this.layerForm.value.questions.length > 0
         ? Map({
-            [formId]: this.getForm(formId, fields),
+            [formId]: new Form(formId, fields),
           })
         : Map<string, Form>()
     );

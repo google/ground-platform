@@ -39,7 +39,7 @@
               <input matInput formControlName="label" />
             </mat-form-field>
             <mat-form-field fxFlex class="field-type" appearance="outline">
-              <mat-select #selectFieldType formControlName="fieldType">
+              <mat-select #selectFieldType formControlName="fieldTypeOption">
                 <mat-select-trigger>
                   <mat-icon class="icon-field-type">{{
                     selectFieldType.value
@@ -54,7 +54,7 @@
                     }}
                   </span>
                 </mat-select-trigger>
-                <mat-option *ngFor="let field of fieldTypes" [value]="field">
+                <mat-option *ngFor="let field of fieldTypeOptions" [value]="field">
                   <mat-icon>{{ field.icon }}</mat-icon>
                   <span>{{ field.label }}</span>
                 </mat-option>
@@ -62,7 +62,7 @@
             </mat-form-field>
           </div>
           <div
-            *ngIf="question.value.fieldType.type == 'multipleChoice'"
+            *ngIf="question.value.fieldTypeOption.type == fieldTypes.MULTIPLE_CHOICE"
             formArrayName="options"
             class="main-container-options"
           >
@@ -97,9 +97,15 @@
             </a>
           </div>
           <div fxLayout fxLayoutAlign="end" class="question-actions">
-            <span class="required-label">Required</span>
-            <mat-slide-toggle formControlName="required" color="primary">
-            </mat-slide-toggle>
+            <button mat-icon-button (click)="deleteQuestion($event, j)">
+              <mat-icon>delete_forever</mat-icon>
+            </button>
+            <span class="vertical-divider"></span>
+            <div class="required-toggle">
+              <span class="required-label">Required</span>
+              <mat-slide-toggle formControlName="required" color="primary">
+              </mat-slide-toggle>
+            </div>
           </div>
         </div>
       </div>

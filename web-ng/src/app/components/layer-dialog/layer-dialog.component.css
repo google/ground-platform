@@ -132,10 +132,19 @@
 
 .required-label {
   margin-right: 20px;
-  align-self: center;
 }
 
 .question-actions {
   margin-bottom: 20px;
   margin-right: 10px;
+}
+
+.vertical-divider {
+  border-left: 1px solid grey;
+  height: 30px;
+  margin: 3px 20px;
+}
+
+.required-toggle {
+  padding-top: 5px;
 }
