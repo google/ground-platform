@@ -26,6 +26,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @NgModule({
@@ -42,6 +43,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     MatSelectModule,
     MatIconModule,
     MatButtonModule,
+    MatSlideToggleModule,
   ],
 })
 export class LayerDialogModule {}
