@@ -218,9 +218,9 @@ export class DataStoreService {
     return new Form(
       id,
       Map<string, Field>(
-        keys(data.elements).map((id: string) => [
+        keys(data.fields).map((id: string) => [
           id as string,
-          DataStoreService.toField(id, data.elements[id]),
+          DataStoreService.toField(id, data.fields[id]),
         ])
       )
     );

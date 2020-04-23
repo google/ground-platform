@@ -244,17 +244,21 @@ export class LayerDialogComponent implements OnDestroy {
       );
     });
     const formId = this.dataStoreService.generateId();
+    let forms = this.layer?.forms;
+    forms = forms
+      ? forms.set(formId, new Form(formId, fields))
+      : this.layerForm.value.questions &&
+        this.layerForm.value.questions.length > 0
+      ? Map({
+          [formId]: new Form(formId, fields),
+        })
+      : Map<string, Form>();
     const layer = new Layer(
       this.layerId,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      this.layerForm.value.questions &&
-      this.layerForm.value.questions.length > 0
-        ? Map({
-            [formId]: new Form(formId, fields),
-          })
-        : Map<string, Form>()
+      forms
     );
 
     // TODO: Inform user layer was saved
