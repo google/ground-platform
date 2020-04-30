@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-.main-page-container {
+.container {
+  display: flex;
+  flex-flow: column;
   height: 100%;
 }
+
+.header{
+  flex: 0 1 auto;
+}
+
+.content{
+  flex: 1 1 auto;
+}
+
+.main-page-container{
+  height: 100%;
+}
+
 .mat-sidenav {
   width: 300px;
 }

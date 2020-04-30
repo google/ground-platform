@@ -13,13 +13,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-<app-project-header></app-project-header>
-<mat-sidenav-container class="main-page-container">
-  <mat-sidenav-content>
-    <ground-map></ground-map>
-  </mat-sidenav-content>
-  <mat-sidenav #sidenav mode="over" position="end" [(opened)]="sideNavOpened">
-    <ground-side-panel></ground-side-panel>
-  </mat-sidenav>
-</mat-sidenav-container>
+<div class="container">
+  <div class="header">
+    <app-project-header></app-project-header>
+  </div>
+  <div class="content">
+    <mat-sidenav-container class="main-page-container">
+      <mat-sidenav-content>
+        <ground-map></ground-map>
+      </mat-sidenav-content>
+      <mat-sidenav #sidenav mode="over" position="end" [(opened)]="sideNavOpened">
+        <ground-side-panel></ground-side-panel>
+      </mat-sidenav>
+    </mat-sidenav-container>
+  </div>
+</div>
