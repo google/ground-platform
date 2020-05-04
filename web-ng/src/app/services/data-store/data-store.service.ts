@@ -215,15 +215,14 @@ export class DataStoreService {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toForm(id: string, data: DocumentData): Form {
-    return new Form(
-      id,
-      Map<string, Field>(
-        keys(data.fields).map((id: string) => [
-          id as string,
-          DataStoreService.toField(id, data.fields[id]),
-        ])
-      )
-    );
+    return new Form(id, Map<string, Field>(this.toFormFields(data)));
+  }
+
+  private static toFormFields(data: DocumentData): Iterable<[string, Field]> {
+    return keys(data.fields).map((id: string) => [
+      id as string,
+      DataStoreService.toField(id, data.fields[id]),
+    ]);
   }
 
   static formToJS(form: Form): { id: string; fields: Map<string, Field> | {} } {
