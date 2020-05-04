@@ -39,17 +39,17 @@
               <input matInput formControlName="label" />
             </mat-form-field>
             <mat-form-field fxFlex class="field-type" appearance="outline">
-              <mat-select #selectFieldType formControlName="fieldTypeOption">
+              <mat-select formControlName="fieldTypeOption" (selectionChange)="onFieldTypeSelect($event.value, question)">
                 <mat-select-trigger>
                   <mat-icon class="icon-field-type">{{
-                    selectFieldType.value
-                      ? selectFieldType.value.icon
+                    getFieldTypeByQuestion(i)
+                      ? getFieldTypeByQuestion(i).icon
                       : 'short_text'
                   }}</mat-icon>
                   <span class="label-field-type">
                     {{
-                      selectFieldType.value
-                        ? selectFieldType.value.label
+                      getFieldTypeByQuestion
+                        ? getFieldTypeByQuestion(i).label
                         : 'Text'
                     }}
                   </span>
@@ -102,7 +102,7 @@
             </a>
           </div>
           <div fxLayout fxLayoutAlign="end" class="question-actions">
-            <button mat-icon-button (click)="deleteQuestion($event, j)">
+            <button mat-icon-button (click)="deleteQuestion($event, i)">
               <mat-icon class="trash-icon">delete_forever</mat-icon>
             </button>
             <span class="vertical-divider"></span>

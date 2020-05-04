@@ -226,7 +226,7 @@ export class DataStoreService {
     );
   }
 
-  private static formToJS(form: Form): {} {
+  static formToJS(form: Form): { id: string; fields: Map<string, Field> | {} } {
     const { fields, ...formDoc } = form;
     return {
       fields:

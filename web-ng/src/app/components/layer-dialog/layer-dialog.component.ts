@@ -57,6 +57,28 @@ export interface Question {
   required: boolean;
 }
 
+export interface FirestoreFieldModel {
+  type: string;
+  label: {
+    en: string;
+  };
+  required: boolean;
+  cardinality?: string;
+  options?: FirestoreOptionModel[];
+}
+
+export interface FirestoreOptionModel {
+  label: { en: string };
+  code: string;
+}
+
+export interface QuestionGroupModel {
+  label: string;
+  fieldTypeOption: FieldTypeOptionModel;
+  options?: FormArray;
+  required: boolean;
+}
+
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
@@ -71,6 +93,7 @@ export class LayerDialogComponent implements OnDestroy {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   layerForm: FormGroup;
+  fields!: Map<string, Field> | {};
   fieldTypes = FieldType;
   fieldTypeOptions: FieldTypeOptionModel[] = [
     {
@@ -115,7 +138,6 @@ export class LayerDialogComponent implements OnDestroy {
       label: [''],
       required: [false],
       fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
-      options: this.formBuilder.array([this.createOptionGroup()]),
     });
   }
 
@@ -172,6 +194,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.layer = project.layers.get(this.layerId);
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
+    this.setFields();
+    if (this.fields && Object.keys(this.fields).length > 0) {
+      this.setQuestions(Object.values(this.fields));
+    }
 
     if (!this.layer) {
       throw Error('No layer exists');
@@ -236,29 +262,31 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.layerForm.value.questions.forEach((question: Question) => {
-      const fieldId = this.dataStoreService.generateId();
-      fields = fields.set(
-        fieldId,
-        this.convertQuestionToField(fieldId, question)
-      );
-    });
-    const formId = this.dataStoreService.generateId();
-    let forms = this.layer?.forms;
-    forms = forms
-      ? forms.set(formId, new Form(formId, fields))
-      : this.layerForm.value.questions &&
-        this.layerForm.value.questions.length > 0
-      ? Map({
-          [formId]: new Form(formId, fields),
-        })
-      : Map<string, Form>();
+    this.layerForm.value.questions.forEach(
+      (question: Question, index: number) => {
+        const layerFieldId = this.fields && Object.keys(this.fields)[index];
+        const fieldId = layerFieldId
+          ? layerFieldId
+          : this.dataStoreService.generateId();
+        fields = fields.set(
+          fieldId,
+          this.convertQuestionToField(fieldId, question)
+        );
+      }
+    );
+    const form = this.getForms();
+    const formId = form ? form.id : this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      forms
+      this.layerForm.value.questions &&
+      this.layerForm.value.questions.length > 0
+        ? Map({
+            [formId]: new Form(formId, fields),
+          })
+        : Map<string, Form>()
     );
 
     // TODO: Inform user layer was saved
@@ -278,6 +306,72 @@ export class LayerDialogComponent implements OnDestroy {
 
   setLayerName(value: string) {
     this.layerName = value;
+  }
+
+  private getForms(): Form | undefined {
+    const forms = this.layer?.forms;
+    return forms ? forms.valueSeq().first() : undefined;
+  }
+
+  private setFields() {
+    const form = this.getForms();
+    if (form) {
+      this.fields = DataStoreService.formToJS(form).fields;
+    }
+  }
+
+  private setQuestions(fields: FirestoreFieldModel[]) {
+    this.layerForm.setControl('questions', this.formBuilder.array([]));
+    const control = this.layerForm.controls.questions as FormArray;
+    fields.forEach((field: FirestoreFieldModel) => {
+      const questionGroup: QuestionGroupModel = {
+        label: field.label.en,
+        required: field.required,
+        fieldTypeOption: this.getFieldType(field.type),
+      };
+      if (field.type === 'multiple_choice') {
+        questionGroup['options'] = this.setOptions(field);
+      }
+      control.push(this.formBuilder.group(questionGroup));
+    });
+  }
+
+  private getFieldType(type: string) {
+    return type === 'multiple_choice'
+      ? this.fieldTypeOptions[1]
+      : this.fieldTypeOptions[0];
+  }
+
+  private setOptions(field: FirestoreFieldModel) {
+    if ('options' in field && field['options']) {
+      const options = new FormArray([]);
+      Object.values(field['options']).forEach(
+        (option: FirestoreOptionModel) => {
+          options.push(
+            this.formBuilder.group({
+              label: option.label.en,
+              code: option.code,
+            })
+          );
+        }
+      );
+      return options;
+    }
+    return undefined;
+  }
+
+  getFieldTypeByQuestion(index: number) {
+    const questions = this.layerForm.get('questions');
+    return questions?.value[index].fieldTypeOption;
+  }
+
+  onFieldTypeSelect(event: FieldTypeOptionModel, control: FormGroup) {
+    if (event.type === 2) {
+      control.addControl(
+        'options',
+        this.formBuilder.array([this.createOptionGroup()])
+      );
+    }
   }
 
   ngOnDestroy() {
