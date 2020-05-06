@@ -35,3 +35,14 @@
 .mat-sidenav {
   width: 300px;
 }
+
+.sidenav-toggle {
+  top: 10px;
+  right: -30px;
+  position: absolute;
+ }
+
+ .sidenav-toggle:hover {
+  right: 0;
+  transition: 0.5s;
+ }
