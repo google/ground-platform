@@ -24,6 +24,7 @@ import { Map } from 'immutable';
 export class Observation {
   constructor(
     readonly id: string,
+    readonly featureId: string,
     readonly form: Form | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
