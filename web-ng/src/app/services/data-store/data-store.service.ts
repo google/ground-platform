@@ -282,11 +282,10 @@ export class DataStoreService {
       data.options &&
         new MultipleChoice(
           DataStoreService.stringToCardinality(data.cardinality),
-          Map<string, Option>(
-            keys(data.options).map((id: string) => [
-              id as string,
-              DataStoreService.toOption(id, data.options[id]),
-            ])
+          List(
+            keys(data.options).map((id: string) =>
+              DataStoreService.toOption(id, data.options[id])
+            )
           )
         )
     );
@@ -440,6 +439,7 @@ export class DataStoreService {
     const form = project.getForm(feature.layerId, data.formId);
     return new Observation(
       id,
+      data.featureId,
       form,
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),

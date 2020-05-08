@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { StringMap } from '../string-map.model';
 import { Option } from './option.model';
-import { Map } from 'immutable';
+import { List } from 'immutable';
 
 /**
  *
@@ -41,6 +40,6 @@ export enum Cardinality {
 export class MultipleChoice {
   constructor(
     readonly cardinality: Cardinality,
-    readonly options: Map<string, Option>
+    readonly options: List<Option>
   ) {}
 }

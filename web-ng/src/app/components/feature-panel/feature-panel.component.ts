@@ -24,6 +24,7 @@ import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { FieldType } from '../../shared/models/form/field.model';
+import { Router, NavigationExtras } from '@angular/router';
 
 @Component({
   selector: 'ground-feature-panel',
@@ -39,7 +40,8 @@ export class FeaturePanelComponent {
   constructor(
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private observationService: ObservationService
+    private observationService: ObservationService,
+    private router: Router
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -65,5 +67,17 @@ export class FeaturePanelComponent {
             .pipe(map(feature => project.layers.get(feature.layerId)!))
         )
       );
+  }
+
+  onEditObservationClick(observation: Observation) {
+    // TODO: refactor URL read/write logic into its own service.
+    console.log('click' + observation.id);
+    const primaryUrl = this.router
+      .parseUrl(this.router.url)
+      .root.children['primary'].toString();
+    const navigationExtras: NavigationExtras = {
+      fragment: `f=${observation.featureId}&o=${observation.id}`,
+    };
+    this.router.navigate([primaryUrl], navigationExtras);
   }
 }
