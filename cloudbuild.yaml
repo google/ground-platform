@@ -8,6 +8,7 @@
 #      |
 #      |  
 #      3. Run lint checks
+#      4. Run unit tests
 
 steps:
 
@@ -40,3 +41,13 @@ steps:
      - '-c'
      - |
        cd web-ng && npm run check
+
+  # Run tests for web-ng
+  - name: 'gcr.io/cloud-builders/npm'
+    id: 'Run tests for web-ng'
+    waitFor: [*install_web_ng]
+    entrypoint: 'bash'
+    args:
+     - '-c'
+     - |
+       cd web-ng && npm run test
