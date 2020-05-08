@@ -50,7 +50,7 @@ function keys(dict?: any): any[] {
   providedIn: 'root',
 })
 export class DataStoreService {
-  constructor(private db: AngularFirestore) {}
+  constructor(private db: AngularFirestore) { }
 
   /**
    * Returns an Observable that loads and emits the project with the specified
@@ -84,6 +84,15 @@ export class DataStoreService {
       .doc(projectId)
       .update({
         [`layers.${layer.id}`]: DataStoreService.layerToJS(layer),
+      });
+  }
+
+  updateObservation(projectId: string, observation: Observation) {
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .update({
+        [`observations.${observation.id}`]: DataStoreService.observationToJS(observation),
       });
   }
 
@@ -297,14 +306,14 @@ export class DataStoreService {
       StringMap(data.label),
       data.required,
       data.options &&
-        new MultipleChoice(
-          DataStoreService.stringToCardinality(data.cardinality),
-          List(
-            keys(data.options).map((id: string) =>
-              DataStoreService.toOption(id, data.options[id])
-            )
+      new MultipleChoice(
+        DataStoreService.stringToCardinality(data.cardinality),
+        List(
+          keys(data.options).map((id: string) =>
+            DataStoreService.toOption(id, data.options[id])
           )
         )
+      )
     );
   }
 
@@ -467,6 +476,23 @@ export class DataStoreService {
     );
   }
 
+  private static observationToJS(observation: Observation): {} {
+    return {
+      featureId: observation.featureId,
+      created: DataStoreService.auditInfoToJs(observation.created),
+      lastModified: DataStoreService.auditInfoToJs(observation.lastModified),
+      responses: DataStoreService.responsesToJS(observation.responses),
+    }
+  }
+
+  private static responsesToJS(responses: Map<string, Response>): {} {
+    return responses.entrySeq().reduce(
+      (obj: {}, [fieldId, response]) => ({
+        ...obj, [fieldId]:
+          DataStoreService.responseToJS(response)
+      }), {});
+  }
+
   private static toResponse(
     form: Form,
     fieldID: string,
@@ -485,6 +511,16 @@ export class DataStoreService {
       );
     }
     throw Error(`Unknown value type ${typeof responseValue}`);
+  }
+
+  private static responseToJS(response: Response): {} {
+    if (typeof response.value === 'string') {
+      return response.value;
+    }
+    if (response.value instanceof List) {
+      return (response.value as List<Option>).map(option => option.id);
+    }
+    throw Error(`Unknown value type of ${response.value}`);
   }
 
   /**
@@ -510,6 +546,14 @@ export class DataStoreService {
       data.clientTimestamp?.toDate(),
       data.serverTimestamp?.toDate()
     );
+  }
+
+  private static auditInfoToJs(auditInfo: AuditInfo): {} {
+    return {
+      user: auditInfo.user,
+      clientTimestamp: auditInfo.clientTime,
+      serverTimestamp: auditInfo.serverTime,
+    };
   }
 
   generateId() {
