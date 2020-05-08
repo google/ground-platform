@@ -5,7 +5,6 @@
 # ==========================================
 # 1. Install npm packages for firestore
 # 2. Install npm packages for functions
-# 3. Install npm packages for web
 # 4. Install npm packages for web-ng 
 #      |
 #      |  
@@ -32,16 +31,6 @@ steps:
      - '-c'
      - |
        cd functions && npm install
-
-  # Install node packages for web
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install npm packages for web'
-    waitFor: ['-']
-    entrypoint: 'bash'
-    args:
-     - '-c'
-     - |
-       cd web && npm install
 
   # Install node packages for web-ng
   - name: 'gcr.io/cloud-builders/npm'
