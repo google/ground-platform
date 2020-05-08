@@ -147,6 +147,19 @@ export class DataStoreService {
       );
   }
 
+  loadObservation$(project: Project, observationId: string) {
+    return this.db
+      .collection(`projects/${project.id}/observations`)
+      .doc(observationId)
+      .get()
+      .pipe(
+        map(doc => {
+          const form = project.getForm(doc.data()!.formId);
+          return FirebaseDataConverter.toObservation(form, doc.id, doc.data()!);
+        })
+      );
+  }
+
   generateId() {
     return this.db.collection('ids').ref.doc().id;
   }
