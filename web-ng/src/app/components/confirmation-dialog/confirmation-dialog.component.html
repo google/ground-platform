@@ -14,11 +14,16 @@
   limitations under the License.
 -->
 
-<input
-  value="{{ this.title }}"
-  placeholder="Untitled project"
-  (keydown)="handleKeyPress($event)"
-  (blur)="updateProjectTitle($event)"
-  AutoSizeInput
-  class="inline-edit"
-/>
+<h1 mat-dialog-title>{{ title }}</h1>
+<div mat-dialog-content>{{ message }}</div>
+<div
+  mat-dialog-actions
+  fxLayout
+  fxLayoutAlign="end"
+  class="confirmation-actions"
+>
+  <button mat-button (click)="onClose()">No</button>
+  <button mat-raised-button (click)="onConfirm()" class="confirmation-btn">
+    Yes
+  </button>
+</div>

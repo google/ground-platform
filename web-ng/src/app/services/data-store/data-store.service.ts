@@ -306,14 +306,14 @@ export class DataStoreService {
       StringMap(data.label),
       data.required,
       data.options &&
-      new MultipleChoice(
-        DataStoreService.stringToCardinality(data.cardinality),
-        List(
-          keys(data.options).map((id: string) =>
-            DataStoreService.toOption(id, data.options[id])
+        new MultipleChoice(
+          DataStoreService.stringToCardinality(data.cardinality),
+          List(
+            keys(data.options).map((id: string) =>
+              DataStoreService.toOption(id, data.options[id])
+            )
           )
         )
-      )
     );
   }
 
