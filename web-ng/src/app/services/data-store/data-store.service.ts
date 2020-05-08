@@ -50,7 +50,7 @@ function keys(dict?: any): any[] {
   providedIn: 'root',
 })
 export class DataStoreService {
-  constructor(private db: AngularFirestore) { }
+  constructor(private db: AngularFirestore) {}
 
   /**
    * Returns an Observable that loads and emits the project with the specified
@@ -92,7 +92,9 @@ export class DataStoreService {
       .collection('projects')
       .doc(projectId)
       .update({
-        [`observations.${observation.id}`]: DataStoreService.observationToJS(observation),
+        [`observations.${observation.id}`]: DataStoreService.observationToJS(
+          observation
+        ),
       });
   }
 
@@ -482,15 +484,17 @@ export class DataStoreService {
       created: DataStoreService.auditInfoToJs(observation.created),
       lastModified: DataStoreService.auditInfoToJs(observation.lastModified),
       responses: DataStoreService.responsesToJS(observation.responses),
-    }
+    };
   }
 
   private static responsesToJS(responses: Map<string, Response>): {} {
     return responses.entrySeq().reduce(
       (obj: {}, [fieldId, response]) => ({
-        ...obj, [fieldId]:
-          DataStoreService.responseToJS(response)
-      }), {});
+        ...obj,
+        [fieldId]: DataStoreService.responseToJS(response),
+      }),
+      {}
+    );
   }
 
   private static toResponse(
