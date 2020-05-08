@@ -440,6 +440,7 @@ export class DataStoreService {
     const form = project.getForm(feature.layerId, data.formId);
     return new Observation(
       id,
+      data.featureId,
       form,
       DataStoreService.toAuditInfo(data.created),
       DataStoreService.toAuditInfo(data.lastModified),
