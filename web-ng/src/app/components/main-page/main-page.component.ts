@@ -25,7 +25,6 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 
-
 @Component({
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
@@ -78,8 +77,7 @@ export class MainPageComponent implements OnInit {
     // The 'f' param is used to represent the feature id that
     // was selected by e.g. clicking the marker.
     if (params.get('f')) {
-      this.
-      featureService.selectFeature(params.get('f')!);
+      this.featureService.selectFeature(params.get('f')!);
     }
     // The 'o' param is used to represent the observation id that
     // was selected by e.g. clicking edit observation button.
