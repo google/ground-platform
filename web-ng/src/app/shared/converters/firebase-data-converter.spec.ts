@@ -20,71 +20,81 @@ import { Form } from '../models/form/form.model';
 import { Map, List } from 'immutable';
 import { Option } from '../../shared/models/form/option.model';
 import { Field, FieldType } from '../models/form/field.model';
-import { MultipleChoice, Cardinality } from '../models/form/multiple-choice.model';
+import {
+  MultipleChoice,
+  Cardinality,
+} from '../models/form/multiple-choice.model';
 
 class MockFirebaseData {
-    static observation001 = {
-        created: {
-            clientTimestamp: undefined,
-            serverTimestamp: undefined,
-            user: {
-                displayName: "Creator",
-                email: "creator@test.com",
-                id: "creator001"
-            },
-        },
-        lastModified: {
-            clientTimestamp: undefined,
-            serverTimestamp: undefined,
-            user: {
-                displayName: "Modifier",
-                email: "modifier@test.com",
-                id: "modifier001"
-            },
-        },
-        featureId: "feature001",
-        formId: "form001",
-        responses: {
-            element001: "text response",
-            element002: ["option001", "option002"]
-        }
-    };
-};
+  static observation001 = {
+    created: {
+      clientTimestamp: undefined,
+      serverTimestamp: undefined,
+      user: {
+        displayName: 'Creator',
+        email: 'creator@test.com',
+        id: 'creator001',
+      },
+    },
+    lastModified: {
+      clientTimestamp: undefined,
+      serverTimestamp: undefined,
+      user: {
+        displayName: 'Modifier',
+        email: 'modifier@test.com',
+        id: 'modifier001',
+      },
+    },
+    featureId: 'feature001',
+    formId: 'form001',
+    responses: {
+      element001: 'text response',
+      element002: ['option001', 'option002'],
+    },
+  };
+}
 
 class MockModel {
-    static element001: Field = new Field(
-        "element001",
-        FieldType.TEXT,
-        StringMap({ "en": "Text Field" }),
-        /*required=*/true);
+  static element001: Field = new Field(
+    'element001',
+    FieldType.TEXT,
+    StringMap({ en: 'Text Field' }),
+    /*required=*/ true
+  );
 
-    static element002: Field = new Field(
-        "element002",
-        FieldType.MULTIPLE_CHOICE,
-        StringMap({ "en": "Multiple Select" }),
-        /*required=*/true,
-        new MultipleChoice(
-            Cardinality.SELECT_MULTIPLE,
-            List([
-                new Option("option001", "code001", StringMap({ "en": "option 1" })),
-                new Option("option002", "code002", StringMap({ "en": "option 2" }))])
-        )
-    );
+  static element002: Field = new Field(
+    'element002',
+    FieldType.MULTIPLE_CHOICE,
+    StringMap({ en: 'Multiple Select' }),
+    /*required=*/ true,
+    new MultipleChoice(
+      Cardinality.SELECT_MULTIPLE,
+      List([
+        new Option('option001', 'code001', StringMap({ en: 'option 1' })),
+        new Option('option002', 'code002', StringMap({ en: 'option 2' })),
+      ])
+    )
+  );
 
-    static form001: Form = new Form(
-        "form001", Map<string, Field>([
-            ["element001", MockModel.element001],
-            ["element002", MockModel.element002]]));
-};
+  static form001: Form = new Form(
+    'form001',
+    Map<string, Field>([
+      ['element001', MockModel.element001],
+      ['element002', MockModel.element002],
+    ])
+  );
+}
 
 describe('FirebaseDataConverter', () => {
-    it('Observation converts back and forth without loosing data.', () => {
-        expect(
-            FirebaseDataConverter.observationToJS(
-                FirebaseDataConverter.toObservation(
-                    MockModel.form001,
-                    "observation001",
-                    MockFirebaseData.observation001))
-        ).toEqual(MockFirebaseData.observation001);
-    });
+  it('Observation converts back and forth without loosing data.', () => {
+    expect(
+      FirebaseDataConverter.observationToJS(
+        FirebaseDataConverter.toObservation(
+          MockModel.form001,
+          'observation001',
+          MockFirebaseData.observation001
+        )
+      )
+    ).toEqual(MockFirebaseData.observation001);
+  });
 });

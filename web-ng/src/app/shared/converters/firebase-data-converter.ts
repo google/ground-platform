@@ -20,7 +20,10 @@ import { StringMap } from '../models/string-map.model';
 import { Layer } from '../models/layer.model';
 import { Form } from '../models/form/form.model';
 import { Field, FieldType } from '../models/form/field.model';
-import { MultipleChoice, Cardinality } from '../models/form/multiple-choice.model';
+import {
+  MultipleChoice,
+  Cardinality,
+} from '../models/form/multiple-choice.model';
 import { Feature } from '../models/feature.model';
 import { Observation } from '../models/observation/observation.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -34,8 +37,8 @@ import { Response } from '../../shared/models/observation/response.model';
  */
 // tslint:disable-next-line:no-any
 function keys(dict?: any): any[] {
-    return Object.keys(dict || {});
-  }
+  return Object.keys(dict || {});
+}
 
 export class FirebaseDataConverter {
   /**
@@ -80,7 +83,7 @@ export class FirebaseDataConverter {
     );
   }
 
- static layerToJS(layer: Layer): {} {
+  static layerToJS(layer: Layer): {} {
     const { id: layerId, name, forms, ...layerDoc } = layer;
     return {
       name: name?.toJS() || {},
@@ -172,7 +175,7 @@ export class FirebaseDataConverter {
           FirebaseDataConverter.stringToCardinality(data.cardinality),
           List(
             keys(data.options).map((id: string) =>
-            FirebaseDataConverter.toOption(id, data.options[id])
+              FirebaseDataConverter.toOption(id, data.options[id])
             )
           )
         )
@@ -332,7 +335,11 @@ export class FirebaseDataConverter {
       Map<string, Response>(
         keys(data.responses).map((fieldId: string) => [
           fieldId as string,
-          FirebaseDataConverter.toResponse(form, fieldId, data.responses[fieldId]),
+          FirebaseDataConverter.toResponse(
+            form,
+            fieldId,
+            data.responses[fieldId]
+          ),
         ])
       )
     );
@@ -343,17 +350,21 @@ export class FirebaseDataConverter {
       featureId: observation.featureId,
       formId: observation.form?.id,
       created: FirebaseDataConverter.auditInfoToJs(observation.created),
-      lastModified: FirebaseDataConverter.auditInfoToJs(observation.lastModified),
+      lastModified: FirebaseDataConverter.auditInfoToJs(
+        observation.lastModified
+      ),
       responses: FirebaseDataConverter.responsesToJS(observation.responses),
-    }
+    };
   }
 
   private static responsesToJS(responses: Map<string, Response>): {} {
     return responses.entrySeq().reduce(
       (obj: {}, [fieldId, response]) => ({
-        ...obj, [fieldId]:
-          FirebaseDataConverter.responseToJS(response)
-      }), {});
+        ...obj,
+        [fieldId]: FirebaseDataConverter.responseToJS(response),
+      }),
+      {}
+    );
   }
 
   private static toResponse(
@@ -381,7 +392,9 @@ export class FirebaseDataConverter {
       return response.value;
     }
     if (response.value instanceof List) {
-      return (response.value as List<Option>).map(option => option.id).toArray();
+      return (response.value as List<Option>)
+        .map(option => option.id)
+        .toArray();
     }
     throw Error(`Unknown value type of ${response.value}`);
   }

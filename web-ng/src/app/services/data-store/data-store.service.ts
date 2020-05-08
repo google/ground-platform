@@ -26,7 +26,6 @@ import { Layer } from './../../shared/models/layer.model';
 import { List } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 
-
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({

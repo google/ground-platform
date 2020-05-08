@@ -57,7 +57,9 @@ export class Field {
    */
   getMultipleChoiceOption(optionId: string): Option {
     if (this.type !== FieldType.MULTIPLE_CHOICE) {
-      throw Error(`Field ${this.id} of type ${FieldType[this.type]} has no options.`);
+      throw Error(
+        `Field ${this.id} of type ${FieldType[this.type]} has no options.`
+      );
     }
     if (this.multipleChoice === undefined) {
       throw Error(`Field ${this.id} does not have choices defined.`);
