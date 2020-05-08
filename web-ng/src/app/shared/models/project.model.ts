@@ -27,7 +27,7 @@ export class Project {
     readonly layers: Map<string, Layer>
   ) {}
 
-  getForm(layerId: string, formId: string): Form {
+  getLayerForm(layerId: string, formId: string): Form {
     const layer = this.layers.get(layerId);
     if (!layer) {
       throw Error(`Layer ${layerId} not found in the project ${this.id}.`);
@@ -37,5 +37,15 @@ export class Project {
       throw Error(`Form ${formId} not found in the layer ${layerId}.`);
     }
     return form;
+  }
+
+  getForm(formId: string): Form {
+    for (const [_, layer] of this.layers) {
+      const form = layer.forms?.get(formId);
+      if (form) {
+        return form;
+      }
+    }
+    throw Error(`Form ${formId} not found in the project ${this.id}.`);
   }
 }
