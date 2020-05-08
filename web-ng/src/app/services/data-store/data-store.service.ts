@@ -282,11 +282,10 @@ export class DataStoreService {
       data.options &&
         new MultipleChoice(
           DataStoreService.stringToCardinality(data.cardinality),
-          Map<string, Option>(
-            keys(data.options).map((id: string) => [
-              id as string,
-              DataStoreService.toOption(id, data.options[id]),
-            ])
+          List(
+            keys(data.options).map((id: string) =>
+              DataStoreService.toOption(id, data.options[id])
+            )
           )
         )
     );
