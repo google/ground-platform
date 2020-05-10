@@ -13,7 +13,7 @@
 steps:
 
   # Install node packages for functions
-  - name: 'gcr.io/cloud-builders/npm'
+  - name: 'gcr.io/cloud-builders/npm'g
     id: 'Install npm packages for functions'
     waitFor: ['-']
     entrypoint: 'bash'
