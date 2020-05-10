@@ -34,7 +34,7 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
 import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
@@ -195,16 +195,18 @@ export class LayerDialogComponent implements OnDestroy {
     fieldId: string,
     question: Question
   ): Field {
-    let options = Map<string, Option>();
+    let options = List<Option>();
     question.options.forEach((option: OptionModel) => {
       const optionId = this.dataStoreService.generateId();
-      options = options.set(optionId, {
-        id: optionId,
-        code: option.code || '',
-        label: StringMap({
-          en: option.label || '',
-        }),
-      });
+      options = options.push(
+        new Option(
+          optionId,
+          option.code || '',
+          StringMap({
+            en: option.label || '',
+          })
+        )
+      );
     });
     return new Field(
       fieldId,
