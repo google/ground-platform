@@ -30,6 +30,7 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
+import { Router } from '@angular/router';
 
 const mockProject = new Project(
   'project001',
@@ -83,12 +84,14 @@ describe('FeaturePanelComponent', () => {
   let fixture: ComponentFixture<FeaturePanelComponent>;
 
   beforeEach(async(() => {
+    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [FeaturePanelComponent],
       providers: [
         { provide: FeatureService, useValue: featureService },
         { provide: ProjectService, useValue: projectService },
         { provide: ObservationService, useValue: observationService },
+        { provide: Router, useValue: routerSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -104,3 +107,7 @@ describe('FeaturePanelComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}
