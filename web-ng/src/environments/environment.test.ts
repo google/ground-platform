@@ -23,10 +23,10 @@ export const environment = {
   production: false,
   googleMapsApiKey: '',
   firebaseConfig: {
-    apiKey: '',
+    apiKey: 'test',
     authDomain: '',
     databaseURL: '',
-    projectId: '',
+    projectId: 'test',
     storageBucket: '',
     messagingSenderId: '',
     appId: '',
