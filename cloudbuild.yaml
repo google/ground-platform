@@ -13,7 +13,7 @@
 steps:
 
   # Install node packages for functions
-  - name: node:12
+  - name: 'gcr.io/cloud-builders-community/ng'
     id: 'Install npm packages for functions'
     waitFor: ['-']
     entrypoint: 'bash'
@@ -23,7 +23,7 @@ steps:
        cd functions && npm install
 
   # Install node packages for web-ng
-  - name: node:12
+  - name: 'gcr.io/cloud-builders-community/ng'
     id: &install_web_ng 'Install npm packages for web-ng'
     waitFor: ['-']
     entrypoint: 'bash'
@@ -33,7 +33,7 @@ steps:
        cd web-ng && npm install
 
   # Run eslint for web-ng
-  - name: node:12
+  - name: 'gcr.io/cloud-builders-community/ng'
     id: 'Run lint checks for web-ng'
     waitFor: [*install_web_ng]
     entrypoint: 'bash'
@@ -43,7 +43,7 @@ steps:
        cd web-ng && npm run check
 
   # Run tests for web-ng
-  - name: node:12
+  - name: 'gcr.io/cloud-builders-community/ng'
     id: 'Run tests for web-ng'
     waitFor: [*install_web_ng]
     entrypoint: 'bash'
