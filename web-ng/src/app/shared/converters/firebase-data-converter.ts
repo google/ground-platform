@@ -109,9 +109,9 @@ export class FirebaseDataConverter {
     return new Form(
       id,
       Map<string, Field>(
-        keys(data.elements).map((id: string) => [
+        keys(data.fields).map((id: string) => [
           id as string,
-          FirebaseDataConverter.toField(id, data.elements[id]),
+          FirebaseDataConverter.toField(id, data.fields[id]),
         ])
       )
     );

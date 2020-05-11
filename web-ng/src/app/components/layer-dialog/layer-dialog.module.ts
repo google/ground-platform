@@ -22,12 +22,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
-import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { TextFieldModule } from '../text-field/text-field.module';
 
 @NgModule({
   declarations: [LayerDialogComponent, ConfirmationDialogComponent],
@@ -40,10 +38,8 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     InlineEditorModule,
     MatInputModule,
     FlexLayoutModule,
-    MatSelectModule,
-    MatIconModule,
     MatButtonModule,
-    MatSlideToggleModule,
+    TextFieldModule,
   ],
 })
 export class LayerDialogModule {}

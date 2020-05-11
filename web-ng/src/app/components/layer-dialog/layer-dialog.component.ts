@@ -28,7 +28,7 @@ import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -39,21 +39,10 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
-export interface FieldTypeOptionModel {
-  icon: string;
-  label: string;
-  type: FieldType;
-}
-
-export interface OptionModel {
-  label: string;
-  code: string;
-}
-
 export interface Question {
   label: string;
-  fieldTypeOption: FieldTypeOptionModel;
-  options: OptionModel[];
+  type: FieldType;
+  options?: List<Option>;
   required: boolean;
 }
 
@@ -70,20 +59,8 @@ export class LayerDialogComponent implements OnDestroy {
   projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
-  layerForm: FormGroup;
   fieldTypes = FieldType;
-  fieldTypeOptions: FieldTypeOptionModel[] = [
-    {
-      icon: 'short_text',
-      label: 'Text',
-      type: FieldType.TEXT,
-    },
-    {
-      icon: 'library_add_check',
-      label: 'Select multiple',
-      type: FieldType.MULTIPLE_CHOICE,
-    },
-  ];
+  fields: List<Field>;
 
   constructor(
     // tslint:disable-next-line:no-any
@@ -100,25 +77,27 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
-    this.layerForm = this.formBuilder.group({
-      questions: this.formBuilder.array([this.createQuestionGroup()]),
-    });
     this.subscription.add(
       this.activeProject$.subscribe(project => {
         this.onProjectLoaded(project);
       })
     );
+    const fields = List<Field>();
+    const fieldId = this.dataStoreService.generateId();
+    this.fields = fields.push(
+      new Field(
+        fieldId,
+        1,
+        StringMap({
+          en: '',
+        }),
+        false,
+        undefined
+      )
+    );
   }
-
-  createQuestionGroup() {
-    return this.formBuilder.group({
-      label: [''],
-      required: [false],
-      fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
-      options: this.formBuilder.array([this.createOptionGroup()]),
-    });
-  }
-
+  
+  // TODO: move options group to separate component
   createOptionGroup() {
     return this.formBuilder.group({
       label: [''],
@@ -127,21 +106,21 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const control = this.layerForm.controls['questions'] as FormArray;
-    control.push(this.createQuestionGroup());
-  }
-
-  addOption(control: FormArray) {
-    control.push(
-      this.formBuilder.group({
-        label: [''],
-        code: [''],
-      })
+    const fieldId = this.dataStoreService.generateId();
+    this.fields = this.fields.push(
+      new Field(
+        fieldId,
+        1,
+        StringMap({
+          en: '',
+        }),
+        false,
+        undefined
+      )
     );
   }
 
-  deleteQuestion(event: MouseEvent, index: number) {
-    event.preventDefault();
+  onFieldDelete(index: number) {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
@@ -156,8 +135,7 @@ export class LayerDialogComponent implements OnDestroy {
 
     dialogRef.afterClosed().subscribe(dialogResult => {
       if (dialogResult) {
-        const control = this.layerForm.controls['questions'] as FormArray;
-        control.removeAt(index);
+        this.fields = this.fields.splice(index, 1);
       }
     });
   }
@@ -172,20 +150,26 @@ export class LayerDialogComponent implements OnDestroy {
       this.layer = project.layers.get(this.layerId);
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
-
+    const form = this.getForms();
+    if (form) {
+      this.fields = this.getForms()?.fields.toList() || List<Field>();
+    }
     if (!this.layer) {
       throw Error('No layer exists');
     }
     this.projectId = project.id;
   }
 
-  convertQuestionToTextField(fieldId: string, question: Question): Field {
+  private getForms(): Form | undefined {
+    const forms = this.layer?.forms;
+    return forms ? forms.valueSeq().first() : undefined;
+  }
+
+  convertQuestionToTextField(fieldId: string, question: Field): Field {
     return new Field(
       fieldId,
       FieldType.TEXT,
-      StringMap({
-        en: question.label || '',
-      }),
+      StringMap(question.label),
       question.required,
       /*multipleChoice=*/ undefined
     );
@@ -193,10 +177,10 @@ export class LayerDialogComponent implements OnDestroy {
 
   convertQuestionToMultipleChoiceField(
     fieldId: string,
-    question: Question
+    question: Field
   ): Field {
     let options = List<Option>();
-    question.options.forEach((option: OptionModel) => {
+    question.multipleChoice?.options?.forEach((option: Option) => {
       const optionId = this.dataStoreService.generateId();
       options = options.push(
         new Option(
@@ -219,16 +203,14 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
-  convertQuestionToField(fieldId: string, question: Question): Field {
-    switch (question.fieldTypeOption.type) {
+  convertQuestionToField(fieldId: string, question: Field): Field {
+    switch (question.type) {
       case FieldType.TEXT:
         return this.convertQuestionToTextField(fieldId, question);
       case FieldType.MULTIPLE_CHOICE:
         return this.convertQuestionToMultipleChoiceField(fieldId, question);
       default:
-        throw Error(
-          `Unexpected question type ${question.fieldTypeOption.type}`
-        );
+        throw Error(`Unexpected question type ${question.type}`);
     }
   }
 
@@ -238,21 +220,24 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.layerForm.value.questions.forEach((question: Question) => {
-      const fieldId = this.dataStoreService.generateId();
+    this.fields.forEach((question: Field, index: number) => {
+      const layerFieldId = this.fields && this.fields.get(index)?.id;
+      const fieldId = layerFieldId
+        ? layerFieldId
+        : this.dataStoreService.generateId();
       fields = fields.set(
         fieldId,
         this.convertQuestionToField(fieldId, question)
       );
     });
-    const formId = this.dataStoreService.generateId();
+    const form = this.getForms();
+    const formId = form ? form.id : this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      this.layerForm.value.questions &&
-      this.layerForm.value.questions.length > 0
+      this.fields && this.fields.size > 0
         ? Map({
             [formId]: new Form(formId, fields),
           })
@@ -276,6 +261,24 @@ export class LayerDialogComponent implements OnDestroy {
 
   setLayerName(value: string) {
     this.layerName = value;
+  }
+
+  onFieldUpdate(event: Question, index: number) {
+    const fieldId = this.fields.get(index)?.id;
+    const field = new Field(
+      fieldId || '',
+      event.type,
+      StringMap({
+        en: event.label,
+      }),
+      event.required,
+      undefined
+    );
+    this.fields = this.fields.set(index, field);
+  }
+
+  trackByFn(index: number) {
+    return index;
   }
 
   ngOnDestroy() {

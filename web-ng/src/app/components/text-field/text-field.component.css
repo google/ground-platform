@@ -1,0 +1,44 @@
+.field-type {
+  margin-left: 30px;
+  font-size: 12px;
+}
+
+.icon-field-type {
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+.question-actions {
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+.trash-icon {
+  color: #707074;
+}
+
+.vertical-divider {
+  border-left: 1px solid #e0e0e0;
+  height: 30px;
+  margin: 3px 20px;
+}
+
+.required-toggle {
+  padding-top: 5px;
+}
+
+.required-label {
+  margin-right: 20px;
+}
+
+.container-question {
+    border-radius: 10px;
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 0px thin;
+    margin-top: 10px;
+    border: 1px #e6e7ea;
+    border-style: solid;
+
+}
