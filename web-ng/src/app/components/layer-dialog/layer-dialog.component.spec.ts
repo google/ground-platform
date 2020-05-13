@@ -17,7 +17,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { LayerDialogComponent } from './layer-dialog.component';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
@@ -31,6 +35,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
 
@@ -59,6 +65,8 @@ describe('LayerDialogComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
+        MatDialogModule,
+        MatSlideToggleModule,
       ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
