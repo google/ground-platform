@@ -125,7 +125,7 @@ export class DataStoreService {
         map(array =>
           List(
             array.map(obj => {
-              const form = project.getLayerForm(
+              const form = project.getForm(
                 feature.layerId,
                 (obj as DocumentData).formId
               );
@@ -136,14 +136,17 @@ export class DataStoreService {
       );
   }
 
-  loadObservation$(project: Project, observationId: string) {
+  loadObservation$(project: Project, feature: Feature, observationId: string) {
     return this.db
       .collection(`projects/${project.id}/observations`)
       .doc(observationId)
       .get()
       .pipe(
         map(doc => {
-          const form = project.getForm(doc.data()!.formId);
+          const form = project.getForm(
+            feature.layerId,
+            doc.data()!.formId
+          );
           return FirebaseDataConverter.toObservation(form, doc.id, doc.data()!);
         })
       );

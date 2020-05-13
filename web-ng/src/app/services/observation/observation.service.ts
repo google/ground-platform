@@ -23,6 +23,7 @@ import { Observation } from '../../shared/models/observation/observation.model';
 import { List } from 'immutable';
 import { switchMap } from 'rxjs/operators';
 import { ProjectService } from '../project/project.service';
+import { FeatureService } from '../feature/feature.service';
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +34,8 @@ export class ObservationService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private featureService: FeatureService
   ) {
     this.selectedObservation$ = this.selectedObservationId$.pipe(
       switchMap(observationId =>
@@ -41,7 +43,17 @@ export class ObservationService {
           .getActiveProject$()
           .pipe(
             switchMap(project =>
-              this.dataStore.loadObservation$(project, observationId)
+              featureService
+                .getSelectedFeature$()
+                .pipe(
+                  switchMap(feature =>
+                    this.dataStore.loadObservation$(
+                      project,
+                      feature,
+                      observationId
+                    )
+                  )
+                )
             )
           )
       )
