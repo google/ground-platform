@@ -79,8 +79,8 @@ class MockModel {
   static form001: Form = new Form(
     'form001',
     Map({
-      'element001': MockModel.element001,
-      'element002': MockModel.element002,
+      element001: MockModel.element001,
+      element002: MockModel.element002,
     })
   );
 }

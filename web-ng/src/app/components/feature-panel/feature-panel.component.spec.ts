@@ -33,16 +33,10 @@ import { Router } from '@angular/router';
 
 const mockProject = new Project(
   'project001',
-  StringMap({ 'en': 'title' }),
-  StringMap({ 'en': 'description' }),
+  StringMap({ en: 'title' }),
+  StringMap({ en: 'description' }),
   Map({
-    'layer001':
-    new Layer(
-      'layer001',
-      'red',
-      StringMap({ 'en': 'name'}),
-      Map()
-    )
+    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
   })
 );
 
