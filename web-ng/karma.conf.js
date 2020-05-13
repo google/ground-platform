@@ -47,5 +47,12 @@ module.exports = function(config) {
     browsers: ['Chrome'],
     singleRun: false,
     restartOnFileChange: true,
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        // Required to run Chrome as root in test Docker image.
+        flags: ['--no-sandbox']
+      }
+    },
   });
 };
