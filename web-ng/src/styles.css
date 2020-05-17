@@ -23,5 +23,12 @@ body {
 
 body {
   margin: 0;
+  padding: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  color: #212121;
+}
+
+button span {
+  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: bold;
 }

@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-/* eslint-env browser */
-import './index.css';
 import store from './store.js';
 import React from 'react';
 import ReactDOM from 'react-dom';
