@@ -18,6 +18,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { ProjectHeaderComponent } from './project-header.component';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 
@@ -26,6 +27,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   imports: [
     CommonModule,
     InlineEditTitleModule,
+    MatButtonModule,
     MatIconModule,
     MatDialogModule,
   ],

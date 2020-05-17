@@ -36,7 +36,12 @@
       />
     </div>
     <ng-template #login>
-      <button class="rhs-widgets btn-auth" (click)="auth.signIn()">SIGN IN</button>
+      <div class="rhs-widgets">
+        <!-- TODO: Hide sign in button and show once page is initialized. -->
+        <button mat-flat-button color="primary" (click)="auth.signIn()">
+          Sign in
+        </button>
+      </div>
     </ng-template>
   </div>
 </div>

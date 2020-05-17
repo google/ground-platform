@@ -74,17 +74,6 @@
   float: right;
 }
 
-.btn-auth {
-  color: white;
-  background-color: rgb(0, 145, 19);
-  height: 36px;
-  width: 82px;
-  margin-right: 8px;
-  border-radius: 5px;
-  display: table;
-  font-family: sans-serif;
-}
-
 .share-text {
   margin-left: 10px;
   font-family: sans-serif;
