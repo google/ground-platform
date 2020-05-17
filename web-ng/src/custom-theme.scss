@@ -25,9 +25,9 @@
 
 // Define Material palettes, including default, lighter, and darker hue.
 // Available color palettes: https://material.io/design/color/
-$web-ng-primary: mat-palette($mat-green, A600, A500, A700);
-$web-ng-accent: mat-palette($mat-amber, A600, A500, A700);
-$web-ng-warn: mat-palette($mat-pink, A600, A500, A700);
+$web-ng-primary: mat-palette($mat-green, 700, 600, 800);
+$web-ng-accent: mat-palette($mat-amber, 700, 600, 800);
+$web-ng-warn: mat-palette($mat-pink, 600, 500, 700);
 
 // Create the theme object (a Sass map containing all of the palettes).
 $web-ng-theme: mat-light-theme($web-ng-primary, $web-ng-accent, $web-ng-warn);
