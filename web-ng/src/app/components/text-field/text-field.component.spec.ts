@@ -24,8 +24,8 @@ describe('TextFieldComponent', () => {
         MatSlideToggleModule,
         MatFormFieldModule,
         MatInputModule,
-        BrowserAnimationsModule
-      ]
+        BrowserAnimationsModule,
+      ],
     }).compileComponents();
   }));
 

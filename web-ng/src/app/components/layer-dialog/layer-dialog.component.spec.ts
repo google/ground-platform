@@ -60,7 +60,7 @@ describe('LayerDialogComponent', () => {
         FlexLayoutModule,
         MatFormFieldModule,
         MatInputModule,
-        MatDialogModule
+        MatDialogModule,
       ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },

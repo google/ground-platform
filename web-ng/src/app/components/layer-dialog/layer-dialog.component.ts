@@ -96,7 +96,7 @@ export class LayerDialogComponent implements OnDestroy {
       )
     );
   }
-  
+
   // TODO: move options group to separate component
   createOptionGroup() {
     return this.formBuilder.group({

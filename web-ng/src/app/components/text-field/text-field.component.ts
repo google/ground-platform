@@ -1,8 +1,12 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import {
-  FormGroup,
-  FormBuilder
-} from '@angular/forms';
+  Component,
+  OnInit,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+} from '@angular/core';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 
 export interface FieldTypeOptionModel {
