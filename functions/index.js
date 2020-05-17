@@ -24,6 +24,7 @@ const exportKml = require('./export-kml')
 const updateColumns = require('./update-columns')
 const onCreateRecord = require('./on-create-record')
 const onUpdateRecord = require('./on-update-record')
+const importCsv = require('./import-csv')
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
