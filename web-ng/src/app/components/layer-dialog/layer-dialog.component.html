@@ -25,7 +25,7 @@
   <mat-dialog-content>
     <div>Layer id: {{ layerId }}</div>
     <div *ngFor="let field of fields; let i = index; trackBy:trackByFn" fxLayout>
-      <app-text-field
+      <app-form-field-editor
         [label]="field.label.get('en')"
         [required]="field.required"
         [type]="field.type"
@@ -33,7 +33,7 @@
         (delete)="onFieldDelete(i)"
         fxFlex="2 1 auto"
       >
-      </app-text-field>
+      </app-form-field-editor>
     </div>
     <div class="add-question">
       <span class="plus-icon"></span>

@@ -16,11 +16,11 @@ export interface FieldTypeOptionModel {
 }
 
 @Component({
-  selector: 'app-text-field',
-  templateUrl: './text-field.component.html',
-  styleUrls: ['./text-field.component.css'],
+  selector: 'app-form-field-editor',
+  templateUrl: './form-field-editor.component.html',
+  styleUrls: ['./form-field-editor.component.css'],
 })
-export class TextFieldComponent implements OnInit, OnChanges {
+export class FormFieldEditorComponent implements OnInit {
   @Input() label?: string;
   @Input() required?: boolean;
   @Input() type?: string;

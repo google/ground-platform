@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TextFieldComponent } from './text-field.component';
+import { FormFieldEditorComponent } from './form-field-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatSelectModule } from '@angular/material/select';
@@ -9,13 +9,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-describe('TextFieldComponent', () => {
-  let component: TextFieldComponent;
-  let fixture: ComponentFixture<TextFieldComponent>;
+describe('FormFieldEditorComponent', () => {
+  let component: FormFieldEditorComponent;
+  let fixture: ComponentFixture<FormFieldEditorComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TextFieldComponent],
+      declarations: [FormFieldEditorComponent],
       imports: [
         FormsModule,
         ReactiveFormsModule,
@@ -30,7 +30,7 @@ describe('TextFieldComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TextFieldComponent);
+    fixture = TestBed.createComponent(FormFieldEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

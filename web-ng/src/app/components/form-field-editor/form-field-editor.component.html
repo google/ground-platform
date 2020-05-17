@@ -1,0 +1,32 @@
+<form [formGroup]="textFieldGroup" class="container-question">
+    <div fxLayout>
+      <mat-form-field appearance="fill" fxFlex="2 1 auto">
+        <mat-label>Question</mat-label>
+        <input matInput formControlName="label" />
+      </mat-form-field>
+      <mat-form-field fxFlex class="field-type" appearance="outline">
+        <mat-select formControlName="type" (selectionChange)="onFieldTypeSelect($event.value)">
+          <mat-select-trigger>
+            <mat-icon class="icon-field-type">{{ getFieldType().icon }}</mat-icon>
+            <span> {{ getFieldType().label }}</span>
+          </mat-select-trigger>
+          <mat-option *ngFor="let field of fieldTypeOptions" [value]="field">
+            <mat-icon>{{ field.icon }}</mat-icon>
+            <span>{{ field.label }}</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div fxLayout fxLayoutAlign="end" class="question-actions">
+      <button mat-icon-button (click)="onFieldDelete()">
+        <mat-icon class="trash-icon">delete_forever</mat-icon>
+      </button>
+      <span class="vertical-divider"></span>
+      <div class="required-toggle">
+        <span class="required-label">Required</span>
+        <mat-slide-toggle formControlName="required" color="primary">
+        </mat-slide-toggle>
+      </div>
+    </div>
+  </form>
+  

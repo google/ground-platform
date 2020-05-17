@@ -10,10 +10,10 @@ import {
   MatSlideToggleModule,
   MatButtonModule,
 } from '@angular/material';
-import { TextFieldComponent } from './text-field.component';
+import { FormFieldEditorComponent } from './form-field-editor.component';
 
 @NgModule({
-  declarations: [TextFieldComponent],
+  declarations: [FormFieldEditorComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -26,6 +26,6 @@ import { TextFieldComponent } from './text-field.component';
     MatSlideToggleModule,
     MatButtonModule,
   ],
-  exports: [TextFieldComponent],
+  exports: [FormFieldEditorComponent],
 })
-export class TextFieldModule {}
+export class FormFieldEditorModule {}

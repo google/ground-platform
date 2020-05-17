@@ -25,7 +25,7 @@ import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { TextFieldModule } from '../text-field/text-field.module';
+import { FormFieldEditorModule } from '../form-field-editor/form-field-editor.module';
 
 @NgModule({
   declarations: [LayerDialogComponent, ConfirmationDialogComponent],
@@ -39,7 +39,7 @@ import { TextFieldModule } from '../text-field/text-field.module';
     MatInputModule,
     FlexLayoutModule,
     MatButtonModule,
-    TextFieldModule,
+    FormFieldEditorModule,
   ],
 })
 export class LayerDialogModule {}
