@@ -54,14 +54,6 @@
   margin-right: 8px;
 }
 
-.btn-share {
-  background-color: rgb(0, 145, 19);
-  color: white;
-  margin-right: 16px;
-  width: 100px;
-  border-radius: 5px;
-}
-
 .icon-share {
   vertical-align: middle !important;
 }
@@ -72,11 +64,6 @@
 
 .button-rhs {
   float: right;
-}
-
-.share-text {
-  margin-left: 10px;
-  font-family: sans-serif;
 }
 
 .header-divider {

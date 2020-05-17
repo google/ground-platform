@@ -22,9 +22,9 @@
   </div>
   <div class="header-item">
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
-      <button class="btn-share">
+      <button mat-flat-button color="primary">
         <mat-icon class="icon-share">share</mat-icon>
-        <span class="share-text">Share</span>
+        <label>Share</label>
       </button>
       <mat-icon class="icon-more-vert">more_vert</mat-icon>
       <img

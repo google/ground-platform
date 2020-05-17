@@ -28,7 +28,12 @@ body {
   color: #212121;
 }
 
-button span {
+button label {
   font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
   font-weight: bold;
+}
+
+/* Space between button icon and label. */
+button .mat-icon + label {
+  padding-left: 6px;
 }
