@@ -16,6 +16,7 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { ProjectHeaderComponent } from './project-header.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +27,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   declarations: [ProjectHeaderComponent],
   imports: [
     CommonModule,
+    FlexLayoutModule,
     InlineEditTitleModule,
     MatButtonModule,
     MatIconModule,
