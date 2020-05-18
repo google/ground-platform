@@ -29,7 +29,6 @@ export class UserProfilePopupComponent implements OnInit {
   private readonly triggerElementRef: ElementRef;
 
   constructor(
-    private dialog: MatDialog,
     matDialogRef: MatDialogRef<UserProfilePopupComponent>,
     public auth: AuthService,
     @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }
@@ -43,13 +42,10 @@ export class UserProfilePopupComponent implements OnInit {
       return;
     }
     const matDialogConfig: MatDialogConfig = new MatDialogConfig();
-    const rect = this.triggerElementRef.nativeElement.getBoundingClientRect();
     matDialogConfig.position = {
-      right: '7px',
+      right: '12px',
       top: '60px',
     };
-    matDialogConfig.width = '300px';
-    matDialogConfig.height = '200px';
     this.matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
     this.matDialogRef.updatePosition(matDialogConfig.position);
   }
