@@ -66,6 +66,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
+    // As the form fields value change we are emitting the updated value to the layer-dialog.
     this.formFieldGroup.valueChanges.subscribe(value => {
       this.update.emit({
         label: value.label,
@@ -86,6 +87,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     });
   }
 
+  /**
+   * Emits the delete field event to the layer dialog component.
+   *
+   * @returns void
+   *
+   */
+
   onFieldDelete() {
     this.delete.emit();
   }
@@ -93,6 +101,14 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   getFieldType() {
     return this.formFieldGroup.get('type')?.value;
   }
+
+  /**
+   * Updates the type in the formFieldGroup on the select change event.
+   *
+   * @param event: FieldTypeOption
+   * @returns void
+   *
+   */
 
   onFieldTypeSelect(event: FieldTypeOptionModel) {
     this.formFieldGroup.patchValue({ type: event });
