@@ -120,6 +120,14 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
+  /**
+   * Delete the field of a given index.
+   *
+   * @param index - The index of the field
+   * @returns void
+   *
+   */
+
   onFieldDelete(index: number) {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
@@ -165,55 +173,6 @@ export class LayerDialogComponent implements OnDestroy {
     return forms ? forms.valueSeq().first() : undefined;
   }
 
-  convertQuestionToTextField(fieldId: string, question: Field): Field {
-    return new Field(
-      fieldId,
-      FieldType.TEXT,
-      StringMap(question.label),
-      question.required,
-      /*multipleChoice=*/ undefined
-    );
-  }
-
-  convertQuestionToMultipleChoiceField(
-    fieldId: string,
-    question: Field
-  ): Field {
-    let options = List<Option>();
-    question.multipleChoice?.options?.forEach((option: Option) => {
-      const optionId = this.dataStoreService.generateId();
-      options = options.push(
-        new Option(
-          optionId,
-          option.code || '',
-          StringMap({
-            en: option.label || '',
-          })
-        )
-      );
-    });
-    return new Field(
-      fieldId,
-      FieldType.MULTIPLE_CHOICE,
-      StringMap({
-        en: question.label || '',
-      }),
-      question.required,
-      new MultipleChoice(Cardinality.SELECT_MULTIPLE, options)
-    );
-  }
-
-  convertQuestionToField(fieldId: string, question: Field): Field {
-    switch (question.type) {
-      case FieldType.TEXT:
-        return this.convertQuestionToTextField(fieldId, question);
-      case FieldType.MULTIPLE_CHOICE:
-        return this.convertQuestionToMultipleChoiceField(fieldId, question);
-      default:
-        throw Error(`Unexpected question type ${question.type}`);
-    }
-  }
-
   onSave() {
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
@@ -225,10 +184,7 @@ export class LayerDialogComponent implements OnDestroy {
       const fieldId = layerFieldId
         ? layerFieldId
         : this.dataStoreService.generateId();
-      fields = fields.set(
-        fieldId,
-        this.convertQuestionToField(fieldId, question)
-      );
+      fields = fields.set(fieldId, question);
     });
     const form = this.getForms();
     const formId = form ? form.id : this.dataStoreService.generateId();
@@ -262,6 +218,15 @@ export class LayerDialogComponent implements OnDestroy {
   setLayerName(value: string) {
     this.layerName = value;
   }
+
+  /**
+   * Updates the field at given index from event emitted from form-field-editor
+   *
+   * @param index - The index of the field
+   * @param event - updated field emitted from form-field-editor
+   * @returns void
+   *
+   */
 
   onFieldUpdate(event: Question, index: number) {
     const fieldId = this.fields.get(index)?.id;
