@@ -36,6 +36,7 @@ import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
@@ -280,5 +281,22 @@ export class LayerDialogComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  get questions() {
+    return this.layerForm.get('questions') as FormArray;
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(
+      this.questions.controls,
+      event.previousIndex,
+      event.currentIndex
+    );
+    moveItemInArray(
+      this.questions.value,
+      event.previousIndex,
+      event.currentIndex
+    );
   }
 }
