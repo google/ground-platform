@@ -26,14 +26,12 @@ body {
 body {
   margin: 0;
   padding: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-  color: mat-color($foreground);
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
 button label {
   font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
   font-weight: bold;
-  color: mat-color($foreground);
 }
 
 /* Space between button icon and label. */
