@@ -27,12 +27,16 @@
 // Available color palettes: https://material.io/design/color/
 // TODO: Use custom color theme slightly with more saturated colors used in
 // Ground Android app.
-$web-ng-primary: mat-palette($mat-green, 700, 600, 800);
-$web-ng-accent: mat-palette($mat-amber, 700, 600, 800);
-$web-ng-warn: mat-palette($mat-pink, 600, 500, 700);
+$primary: mat-palette($mat-green, 700, 600, 800);
+$accent: mat-palette($mat-amber, 700, 600, 800);
+$warn: mat-palette($mat-pink, 600, 500, 700);
 
 // Create the theme object (a Sass map containing all of the palettes).
-$web-ng-theme: mat-light-theme($web-ng-primary, $web-ng-accent, $web-ng-warn);
+$theme: mat-light-theme($primary, $accent, $warn);
+
+// Get generated palletes from theme.
+$foreground: map-get($theme, foreground);
+$background: map-get($theme, background);
 
 // Include theme styles for core and each component used in the app.
-@include angular-material-theme($web-ng-theme);
+@include angular-material-theme($theme);
