@@ -26,7 +26,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 
-export interface FieldTypeOptionModel {
+export interface FieldTypeModel {
   icon: string;
   label: string;
   type: FieldType;
@@ -43,7 +43,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() type?: string;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
-  fieldTypeOptions: FieldTypeOptionModel[] = [
+  fieldTypes: FieldTypeModel[] = [
     {
       icon: 'short_text',
       label: 'Text',
@@ -62,7 +62,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     this.formFieldGroup = this.formBuilder.group({
       label: [''],
       required: [false],
-      type: this.fieldTypeOptions[0],
+      type: this.fieldTypes[0],
     });
   }
 
@@ -78,8 +78,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    const type = this.fieldTypeOptions.find(
-      fieldTypeOption => fieldTypeOption.type === Number(this.type)
+    const type = this.fieldTypes.find(
+      fieldType => fieldType.type === Number(this.type)
     );
     this.formFieldGroup.setValue({
       label: this.label,
@@ -106,12 +106,12 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   /**
    * Updates the type in the formFieldGroup on the select change event.
    *
-   * @param event: FieldTypeOption
+   * @param event: FieldTypeModel
    * @returns void
    *
    */
 
-  onFieldTypeSelect(event: FieldTypeOptionModel) {
+  onFieldTypeSelect(event: FieldTypeModel) {
     this.formFieldGroup.patchValue({ type: event });
   }
 }
