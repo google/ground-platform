@@ -32,8 +32,6 @@ import { FormBuilder } from '@angular/forms';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
-import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
-import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
