@@ -13,20 +13,22 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div class="header">
-  <div class="header-item">
+<div fxLayout="row" class="header" fxLayoutAlign="flex-self center">
+  <div fxFlex>
     <img class="logo" src="/assets/img/logo.png" />
-    <span class="ground app-title">Ground</span>
+    <span class="app-title">Ground</span>
     <span class="header-divider"></span>
     <app-inline-edit-title></app-inline-edit-title>
   </div>
-  <div class="header-item">
+  <div>
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
-      <button class="btn-share">
-        <mat-icon class="icon-share">share</mat-icon>
-        <span class="share-text">Share</span>
+      <button mat-flat-button color="primary">
+        <mat-icon>share</mat-icon>
+        <label>Share</label>
       </button>
-      <mat-icon class="icon-more-vert">more_vert</mat-icon>
+      <button mat-icon-button aria-label="More project settings">
+        <mat-icon>more_vert</mat-icon>
+      </button>
       <img
         src="{{ user.photoURL }}=s64"
         alt="{{ user.displayName }}"
@@ -36,7 +38,10 @@
       />
     </div>
     <ng-template #login>
-      <button class="rhs-widgets btn-auth" (click)="auth.signIn()">SIGN IN</button>
+      <!-- TODO: Hide sign in button and show once page is initialized. -->
+      <button mat-flat-button color="primary" (click)="auth.signIn()">
+        Sign in
+      </button>
     </ng-template>
   </div>
 </div>

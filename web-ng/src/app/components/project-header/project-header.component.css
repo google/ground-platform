@@ -15,84 +15,42 @@
  */
 
 .header {
-  display: flex;
-  justify-content: space-between;
+  padding: 16px;
+  white-space: nowrap;
 }
 
-.header-item {
-  flex: 0 1 auto;
-}
-
-.rhs-widgets {
-  float: right;
-  margin-top: 18px;
-  display: flex;
+.header div, img, .header span, mat-icon {
+  vertical-align: middle;
 }
 
 .logo {
-  margin-top: 16px;
-  margin-bottom: 16px;
-  margin-left: 20px;
-  vertical-align: middle;
   width: 48px;
   height: 48px;
 }
 
 .app-title {
-  height: 28px;
-  width: 80px;
-  margin-left: 8px;
-  font-family: sans-serif;
-  font-size: 15pt;
+  margin-left: 12px;
+  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 14pt;
   color: #7a7d81;
+}
+
+.header-divider {
+  display: inline-block;
+  border-left: 1px solid #ddd;
+  width: 1px;
+  height: 30px;
+  margin-left: 14px;
+  margin-right: 8px;
+}
+
+app-inline-edit-title {
+  margin-top: 15px;
 }
 
 .user-thumb {
   width: 32px;
   height: 32px;
   border-radius: 32px;
-  margin-right: 8px;
-}
-
-.btn-share {
-  background-color: rgb(0, 145, 19);
-  color: white;
-  margin-right: 16px;
-  width: 100px;
-  border-radius: 5px;
-}
-
-.icon-share {
-  vertical-align: middle !important;
-}
-
-.icon-more-vert {
-  margin-right: 16px !important;
-}
-
-.button-rhs {
-  float: right;
-}
-
-.btn-auth {
-  color: white;
-  background-color: rgb(0, 145, 19);
-  height: 36px;
-  width: 82px;
-  margin-right: 8px;
-  border-radius: 5px;
-  display: table;
-  font-family: sans-serif;
-}
-
-.share-text {
-  margin-left: 10px;
-  font-family: sans-serif;
-}
-
-.header-divider {
-  border-left: 1px solid grey;
-  height: 500px;
-  margin-left: 16px;
   margin-right: 8px;
 }
