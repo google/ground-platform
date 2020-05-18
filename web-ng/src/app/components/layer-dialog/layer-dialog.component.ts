@@ -37,13 +37,6 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
-export interface Question {
-  label: string;
-  type: FieldType;
-  options?: List<Option>;
-  required: boolean;
-}
-
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
@@ -177,12 +170,12 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.fields.forEach((question: Field, index: number) => {
+    this.fields.forEach((field: Field, index: number) => {
       const layerFieldId = this.fields && this.fields.get(index)?.id;
       const fieldId = layerFieldId
         ? layerFieldId
         : this.dataStoreService.generateId();
-      fields = fields.set(fieldId, question);
+      fields = fields.set(fieldId, field);
     });
     const form = this.getForms();
     const formId = form ? form.id : this.dataStoreService.generateId();
@@ -226,14 +219,12 @@ export class LayerDialogComponent implements OnDestroy {
    *
    */
 
-  onFieldUpdate(event: Question, index: number) {
+  onFieldUpdate(event: Field, index: number) {
     const fieldId = this.fields.get(index)?.id;
     const field = new Field(
       fieldId || '',
       event.type,
-      StringMap({
-        en: event.label,
-      }),
+      event.label,
       event.required,
       undefined
     );

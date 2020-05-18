@@ -24,6 +24,7 @@ import {
 } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
+import { StringMap } from '../../shared/models/string-map.model';
 
 export interface FieldTypeOptionModel {
   icon: string;
@@ -69,7 +70,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     // As the form fields value change we are emitting the updated value to the layer-dialog.
     this.formFieldGroup.valueChanges.subscribe(value => {
       this.update.emit({
-        label: value.label,
+        label: StringMap({ en: value.label }),
         required: value.required,
         type: value.type.type,
       });
