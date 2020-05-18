@@ -16,6 +16,7 @@
 
 .header {
   padding: 16px;
+  white-space: nowrap;
 }
 
 .header div, img, .header span, mat-icon {
