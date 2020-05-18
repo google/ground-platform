@@ -14,43 +14,21 @@
  * limitations under the License.
  */
 
-.header {
-  padding: 16px;
-  white-space: nowrap;
-}
+// This file can be replaced during build by using the `fileReplacements` array.
+// `ng build --configuration=test ` replaces `environment.ts` with
+// `environment.test.ts`.
+// The list of file replacements can be found in `angular.json`.
 
-.header div, img, .header span, mat-icon {
-  vertical-align: middle;
-}
-
-.logo {
-  width: 48px;
-  height: 48px;
-}
-
-.app-title {
-  margin-left: 12px;
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 14pt;
-  color: #7a7d81;
-}
-
-.header-divider {
-  display: inline-block;
-  border-left: 1px solid #ddd;
-  width: 1px;
-  height: 30px;
-  margin-left: 14px;
-  margin-right: 8px;
-}
-
-app-inline-edit-title {
-  margin-top: 15px;
-}
-
-.user-thumb {
-  width: 32px;
-  height: 32px;
-  border-radius: 32px;
-  margin-right: 8px;
-}
+export const environment = {
+  production: false,
+  googleMapsApiKey: '',
+  firebaseConfig: {
+    apiKey: 'test',
+    authDomain: '',
+    databaseURL: '',
+    projectId: 'test',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: '',
+  },
+};

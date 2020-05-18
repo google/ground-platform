@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+ :host {
+  display: block;
+  width: 250px;
+ }
+
 .user-thumb {
   display: block;
   margin: 0px auto;
@@ -37,21 +42,10 @@
 
 .user-description {
   margin: 0px auto;
-  margin-top: 10px;
+  margin-top: 10px ;
   text-align: center;
-  font-family: "Open Sans", Arial, sans-serif;
 }
 
 .btn-signout {
-  margin: 0px auto;
   margin-top: 20px;
-  display: block;
-  padding: 10px 24px 18px 24px;
-  cursor: pointer;
-  font-weight: 600;
-  font-family: "Open Sans", Arial, sans-serif;
-}
-
-.mat-dialog-container {
-  border-radius: 10px;
 }
