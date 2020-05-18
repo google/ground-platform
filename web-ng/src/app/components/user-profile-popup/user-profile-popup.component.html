@@ -19,18 +19,15 @@
       src="{{ user.photoURL }}=s64"
       alt="{{ user.displayName }}"
       class="user-thumb"
-      style="cursor: pointer"
-      (click)="openProfileDialog($event)"
     />
     <div class="user-description">
       <div class="user-display-name">{{ user.displayName }}</div>
       <div class="user-email">{{ user.email }}</div>
       <button
-        class="button btn-signout"
-        mat-raised-button
+        class="btn-signout"
+        mat-flat-button
         color="primary"
-        (click)="onSignOut($event)"
-      >
+        (click)="onSignOut($event)">
         Sign out
       </button>
     </div>
