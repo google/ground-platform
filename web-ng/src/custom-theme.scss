@@ -25,6 +25,8 @@
 
 // Define Material palettes, including default, lighter, and darker hue.
 // Available color palettes: https://material.io/design/color/
+// TODO: Use custom color theme slightly with more saturated colors used in
+// Ground Android app.
 $web-ng-primary: mat-palette($mat-green, 700, 600, 800);
 $web-ng-accent: mat-palette($mat-amber, 700, 600, 800);
 $web-ng-warn: mat-palette($mat-pink, 600, 500, 700);
