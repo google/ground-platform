@@ -26,6 +26,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { FormFieldEditorModule } from '../form-field-editor/form-field-editor.module';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [LayerDialogComponent, ConfirmationDialogComponent],
@@ -40,6 +41,7 @@ import { FormFieldEditorModule } from '../form-field-editor/form-field-editor.mo
     FlexLayoutModule,
     MatButtonModule,
     FormFieldEditorModule,
+    DragDropModule,
   ],
 })
 export class LayerDialogModule {}
