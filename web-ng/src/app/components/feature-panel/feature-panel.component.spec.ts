@@ -22,7 +22,6 @@ import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import { firestore } from 'firebase/app';
 import { Feature } from '../../shared/models/feature.model';
-import { Form } from '../../shared/models/form/form.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Project } from '../../shared/models/project.model';
@@ -34,19 +33,11 @@ import { Router } from '@angular/router';
 
 const mockProject = new Project(
   'project001',
-  StringMap([['en', 'title']]),
-  StringMap([['en', 'description']]),
-  Map<string, Layer>([
-    [
-      'layer001',
-      new Layer(
-        'layer001',
-        'red',
-        StringMap([['en', 'name']]),
-        Map<string, Form>([])
-      ),
-    ],
-  ])
+  StringMap({ en: 'title' }),
+  StringMap({ en: 'description' }),
+  Map({
+    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
+  })
 );
 
 const mockFeature = new Feature(
