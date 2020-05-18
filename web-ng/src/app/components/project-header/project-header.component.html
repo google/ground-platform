@@ -14,13 +14,12 @@
   limitations under the License.
 -->
 <div fxLayout="row" class="header" fxLayoutAlign="flex-self center">
-  <div>
+  <div fxFlex>
     <img class="logo" src="/assets/img/logo.png" />
     <span class="app-title">Ground</span>
     <span class="header-divider"></span>
     <app-inline-edit-title></app-inline-edit-title>
   </div>
-  <div fxFlex></div>
   <div>
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
       <button mat-flat-button color="primary">
