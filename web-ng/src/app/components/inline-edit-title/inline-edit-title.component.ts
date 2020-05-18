@@ -25,7 +25,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-inline-edit-title',
   templateUrl: './inline-edit-title.component.html',
-  styleUrls: ['./inline-edit-title.component.css'],
+  styleUrls: ['./inline-edit-title.component.scss'],
 })
 export class InlineEditTitleComponent implements OnDestroy {
   readonly activeProject$: Observable<Project>;
