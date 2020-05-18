@@ -109,9 +109,9 @@ export class FirebaseDataConverter {
     return new Form(
       id,
       Map<string, Field>(
-        keys(data.fields).map((id: string) => [
+        keys(data.elements).map((id: string) => [
           id as string,
-          FirebaseDataConverter.toField(id, data.fields[id]),
+          FirebaseDataConverter.toField(id, data.elements[id]),
         ])
       )
     );
@@ -120,7 +120,7 @@ export class FirebaseDataConverter {
   private static formToJS(form: Form): {} {
     const { fields, ...formDoc } = form;
     return {
-      fields:
+      elements:
         fields?.reduce(
           (map, field: Field) => ({
             ...map,
