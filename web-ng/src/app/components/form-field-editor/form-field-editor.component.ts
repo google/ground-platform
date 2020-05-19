@@ -26,7 +26,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 
-export interface FieldTypeModel {
+export interface FieldTypeSelectOption {
   icon: string;
   label: string;
   type: FieldType;
@@ -43,7 +43,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() type?: string;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
-  fieldTypes: FieldTypeModel[] = [
+  fieldTypes: FieldTypeSelectOption[] = [
     {
       icon: 'short_text',
       label: 'Text',
@@ -106,12 +106,12 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   /**
    * Updates the type in the formFieldGroup on the select change event.
    *
-   * @param event: FieldTypeModel
+   * @param event: FieldTypeSelectOption
    * @returns void
    *
    */
 
-  onFieldTypeSelect(event: FieldTypeModel) {
+  onFieldTypeSelect(event: FieldTypeSelectOption) {
     this.formFieldGroup.patchValue({ type: event });
   }
 }
