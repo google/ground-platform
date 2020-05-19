@@ -170,6 +170,7 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
+      data.index,
       data.options &&
         new MultipleChoice(
           FirebaseDataConverter.stringToCardinality(data.cardinality),

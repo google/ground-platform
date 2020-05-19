@@ -84,6 +84,7 @@ export class LayerDialogComponent implements OnDestroy {
           en: '',
         }),
         false,
+        0,
         undefined
       )
     );
@@ -107,6 +108,7 @@ export class LayerDialogComponent implements OnDestroy {
           en: '',
         }),
         false,
+        this.fields.size,
         undefined
       )
     );
@@ -152,7 +154,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
     if (form) {
-      this.fields = this.getForms()?.fields.toList() || List<Field>();
+      this.fields = this.getForms()?.fields.toList().sortBy(field => field.index)|| List<Field>();
     }
     if (!this.layer) {
       throw Error('No layer exists');
@@ -227,6 +229,7 @@ export class LayerDialogComponent implements OnDestroy {
       event.type,
       event.label,
       event.required,
+      index,
       undefined
     );
     this.fields = this.fields.set(index, field);
@@ -236,24 +239,16 @@ export class LayerDialogComponent implements OnDestroy {
     return index;
   }
 
+  drop(event: CdkDragDrop<string[]>) {
+    const fieldAtPrevIndex = this.fields.get(event.previousIndex);
+    const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
+    if (fieldAtCurrentIndex && fieldAtPrevIndex) {
+      this.fields = this.fields.set(event.previousIndex, fieldAtCurrentIndex);
+      this.fields = this.fields.set(event.currentIndex, fieldAtPrevIndex);
+    }
+  }
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
-  }
-
-  get questions() {
-    return this.layerForm.get('questions') as FormArray;
-  }
-
-  drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(
-      this.questions.controls,
-      event.previousIndex,
-      event.currentIndex
-    );
-    moveItemInArray(
-      this.questions.value,
-      event.previousIndex,
-      event.currentIndex
-    );
   }
 }
