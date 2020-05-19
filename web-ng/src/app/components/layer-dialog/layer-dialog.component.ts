@@ -154,7 +154,10 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
     if (form) {
-      this.fields = this.getForms()?.fields.toList().sortBy(field => field.index)|| List<Field>();
+      this.fields =
+        this.getForms()
+          ?.fields.toList()
+          .sortBy(field => field.index) || List<Field>();
     }
     if (!this.layer) {
       throw Error('No layer exists');
