@@ -22,7 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-project-header',
   templateUrl: './project-header.component.html',
-  styleUrls: ['./project-header.component.css'],
+  styleUrls: ['./project-header.component.scss'],
 })
 export class ProjectHeaderComponent implements OnInit {
   constructor(public auth: AuthService, private dialog: MatDialog) {}
