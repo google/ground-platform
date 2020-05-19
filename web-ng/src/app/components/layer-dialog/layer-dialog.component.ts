@@ -28,35 +28,15 @@ import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
-import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
-import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
-
-export interface FieldTypeOptionModel {
-  icon: string;
-  label: string;
-  type: FieldType;
-}
-
-export interface OptionModel {
-  label: string;
-  code: string;
-}
-
-export interface Question {
-  label: string;
-  fieldTypeOption: FieldTypeOptionModel;
-  options: OptionModel[];
-  required: boolean;
-}
 
 @Component({
   selector: 'app-layer-dialog',
@@ -71,20 +51,8 @@ export class LayerDialogComponent implements OnDestroy {
   projectId?: string;
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
-  layerForm: FormGroup;
   fieldTypes = FieldType;
-  fieldTypeOptions: FieldTypeOptionModel[] = [
-    {
-      icon: 'short_text',
-      label: 'Text',
-      type: FieldType.TEXT,
-    },
-    {
-      icon: 'library_add_check',
-      label: 'Select multiple',
-      type: FieldType.MULTIPLE_CHOICE,
-    },
-  ];
+  fields: List<Field>;
 
   constructor(
     // tslint:disable-next-line:no-any
@@ -101,25 +69,28 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
-    this.layerForm = this.formBuilder.group({
-      questions: this.formBuilder.array([this.createQuestionGroup()]),
-    });
     this.subscription.add(
       this.activeProject$.subscribe(project => {
         this.onProjectLoaded(project);
       })
     );
+    const fields = List<Field>();
+    const fieldId = this.dataStoreService.generateId();
+    this.fields = fields.push(
+      new Field(
+        fieldId,
+        1,
+        StringMap({
+          en: '',
+        }),
+        false,
+        0,
+        undefined
+      )
+    );
   }
 
-  createQuestionGroup() {
-    return this.formBuilder.group({
-      label: [''],
-      required: [false],
-      fieldTypeOption: new FormControl(this.fieldTypeOptions[0]),
-      options: this.formBuilder.array([this.createOptionGroup()]),
-    });
-  }
-
+  // TODO: move options group to separate component
   createOptionGroup() {
     return this.formBuilder.group({
       label: [''],
@@ -128,21 +99,30 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const control = this.layerForm.controls['questions'] as FormArray;
-    control.push(this.createQuestionGroup());
-  }
-
-  addOption(control: FormArray) {
-    control.push(
-      this.formBuilder.group({
-        label: [''],
-        code: [''],
-      })
+    const fieldId = this.dataStoreService.generateId();
+    this.fields = this.fields.push(
+      new Field(
+        fieldId,
+        1,
+        StringMap({
+          en: '',
+        }),
+        false,
+        this.fields.size,
+        undefined
+      )
     );
   }
 
-  deleteQuestion(event: MouseEvent, index: number) {
-    event.preventDefault();
+  /**
+   * Delete the field of a given index.
+   *
+   * @param index - The index of the field
+   * @returns void
+   *
+   */
+
+  onFieldDelete(index: number) {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
@@ -157,8 +137,7 @@ export class LayerDialogComponent implements OnDestroy {
 
     dialogRef.afterClosed().subscribe(dialogResult => {
       if (dialogResult) {
-        const control = this.layerForm.controls['questions'] as FormArray;
-        control.removeAt(index);
+        this.fields = this.fields.splice(index, 1);
       }
     });
   }
@@ -173,64 +152,22 @@ export class LayerDialogComponent implements OnDestroy {
       this.layer = project.layers.get(this.layerId);
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
-
+    const form = this.getForms();
+    if (form) {
+      this.fields =
+        this.getForms()
+          ?.fields.toList()
+          .sortBy(field => field.index) || List<Field>();
+    }
     if (!this.layer) {
       throw Error('No layer exists');
     }
     this.projectId = project.id;
   }
 
-  convertQuestionToTextField(fieldId: string, question: Question): Field {
-    return new Field(
-      fieldId,
-      FieldType.TEXT,
-      StringMap({
-        en: question.label || '',
-      }),
-      question.required,
-      /*multipleChoice=*/ undefined
-    );
-  }
-
-  convertQuestionToMultipleChoiceField(
-    fieldId: string,
-    question: Question
-  ): Field {
-    let options = List<Option>();
-    question.options.forEach((option: OptionModel) => {
-      const optionId = this.dataStoreService.generateId();
-      options = options.push(
-        new Option(
-          optionId,
-          option.code || '',
-          StringMap({
-            en: option.label || '',
-          })
-        )
-      );
-    });
-    return new Field(
-      fieldId,
-      FieldType.MULTIPLE_CHOICE,
-      StringMap({
-        en: question.label || '',
-      }),
-      question.required,
-      new MultipleChoice(Cardinality.SELECT_MULTIPLE, options)
-    );
-  }
-
-  convertQuestionToField(fieldId: string, question: Question): Field {
-    switch (question.fieldTypeOption.type) {
-      case FieldType.TEXT:
-        return this.convertQuestionToTextField(fieldId, question);
-      case FieldType.MULTIPLE_CHOICE:
-        return this.convertQuestionToMultipleChoiceField(fieldId, question);
-      default:
-        throw Error(
-          `Unexpected question type ${question.fieldTypeOption.type}`
-        );
-    }
+  private getForms(): Form | undefined {
+    const forms = this.layer?.forms;
+    return forms ? forms.valueSeq().first() : undefined;
   }
 
   onSave() {
@@ -239,21 +176,21 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.layerForm.value.questions.forEach((question: Question) => {
-      const fieldId = this.dataStoreService.generateId();
-      fields = fields.set(
-        fieldId,
-        this.convertQuestionToField(fieldId, question)
-      );
+    this.fields.forEach((field: Field, index: number) => {
+      const layerFieldId = this.fields && this.fields.get(index)?.id;
+      const fieldId = layerFieldId
+        ? layerFieldId
+        : this.dataStoreService.generateId();
+      fields = fields.set(fieldId, field);
     });
-    const formId = this.dataStoreService.generateId();
+    const form = this.getForms();
+    const formId = form ? form.id : this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      this.layerForm.value.questions &&
-      this.layerForm.value.questions.length > 0
+      this.fields && this.fields.size > 0
         ? Map({
             [formId]: new Form(formId, fields),
           })
@@ -279,24 +216,42 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerName = value;
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+  /**
+   * Updates the field at given index from event emitted from form-field-editor
+   *
+   * @param index - The index of the field
+   * @param event - updated field emitted from form-field-editor
+   * @returns void
+   *
+   */
+
+  onFieldUpdate(event: Field, index: number) {
+    const fieldId = this.fields.get(index)?.id;
+    const field = new Field(
+      fieldId || '',
+      event.type,
+      event.label,
+      event.required,
+      index,
+      undefined
+    );
+    this.fields = this.fields.set(index, field);
   }
 
-  get questions() {
-    return this.layerForm.get('questions') as FormArray;
+  trackByFn(index: number) {
+    return index;
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(
-      this.questions.controls,
-      event.previousIndex,
-      event.currentIndex
-    );
-    moveItemInArray(
-      this.questions.value,
-      event.previousIndex,
-      event.currentIndex
-    );
+    const fieldAtPrevIndex = this.fields.get(event.previousIndex);
+    const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
+    if (fieldAtCurrentIndex && fieldAtPrevIndex) {
+      this.fields = this.fields.set(event.previousIndex, fieldAtCurrentIndex);
+      this.fields = this.fields.set(event.currentIndex, fieldAtPrevIndex);
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

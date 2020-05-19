@@ -120,7 +120,7 @@ export class FirebaseDataConverter {
   private static formToJS(form: Form): {} {
     const { fields, ...formDoc } = form;
     return {
-      fields:
+      elements:
         fields?.reduce(
           (map, field: Field) => ({
             ...map,
@@ -170,6 +170,7 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
+      data.index,
       data.options &&
         new MultipleChoice(
           FirebaseDataConverter.stringToCardinality(data.cardinality),

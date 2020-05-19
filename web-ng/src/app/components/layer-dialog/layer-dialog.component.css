@@ -151,11 +151,3 @@
 .trash-icon {
   color: #707074;
 }
-
-.drag-icon {
-  display: block;
-  margin: 0px auto;
-  cursor: move;
-  padding: 5px;
-  color: #dadde1;
-}

@@ -29,13 +29,11 @@ import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
@@ -61,12 +59,10 @@ describe('LayerDialogComponent', () => {
         ReactiveFormsModule,
         BrowserAnimationsModule,
         FlexLayoutModule,
-        MatSelectModule,
         MatFormFieldModule,
         MatInputModule,
-        MatIconModule,
         MatDialogModule,
-        MatSlideToggleModule,
+        MatIconModule,
       ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
