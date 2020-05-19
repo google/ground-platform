@@ -28,6 +28,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [LayerDialogComponent, ConfirmationDialogComponent],
@@ -44,6 +45,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
     MatIconModule,
     MatButtonModule,
     MatSlideToggleModule,
+    DragDropModule,
   ],
 })
 export class LayerDialogModule {}

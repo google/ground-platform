@@ -84,6 +84,10 @@
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
+            "fileReplacements": [{
+              "replace": "src/environments/environment.ts",
+              "with": "src/environments/environment.test.ts"
+            }],
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
