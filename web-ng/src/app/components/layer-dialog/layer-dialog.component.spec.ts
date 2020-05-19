@@ -33,6 +33,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
@@ -61,6 +62,7 @@ describe('LayerDialogComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         MatDialogModule,
+        MatIconModule,
       ],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: {} },
