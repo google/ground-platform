@@ -12,54 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Initialize gcloud via CLI
-# $ gcloud init
-#
-# Steps (1, 2, 3, and 4 run simultaneously):
-# ==========================================
-# 1. Install npm packages for functions
-# 2. Install npm packages for web-ng 
-#      |
-#      |
-#      3. Run lint checks
-#      4. Run unit tests
+# This build is run automatically on pushes and pull requests.
 
+# The first time the Docker image is created, the total build time can exceed
+# the 10m default. Increase the max. build time to prevent timeouts.
+timeout: 15m
+
+# Build Docker image and run checks and tests. See name property of each step
+# for description.
 steps:
-
-  # Install node packages for functions
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
-    id: 'Install npm packages for functions'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    id: 'Rebuild Docker image with deps as needed'
     args:
-     - '-c'
-     - |
-       cd functions && npm install
+      - --destination=gcr.io/$PROJECT_ID/ground-platform-build
+      - --dockerfile=cloud-build/Dockerfile
+      - --cache=true
 
-  # Install node packages for web-ng
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
-    id: &install_web_ng 'Install npm packages for web-ng'
-    waitFor: ['-']
-    entrypoint: 'bash'
-    args:
-     - '-c'
-     - |
-       cd web-ng && npm install
-
-  # Run eslint for web-ng
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
+  - name: 'gcr.io/$PROJECT_ID/ground-platform-build'
     id: 'Run lint checks for web-ng'
-    waitFor: [*install_web_ng]
     entrypoint: 'bash'
     args:
      - '-c'
      - |
        cd web-ng && npm run check
 
-  # Run tests for web-ng
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
+  - name: 'gcr.io/$PROJECT_ID/ground-platform-build'
     id: 'Run tests for web-ng'
-    waitFor: [*install_web_ng]
     entrypoint: 'bash'
     args:
      - '-c'
