@@ -19,6 +19,7 @@ import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
 import { MainPageComponent } from './main-page.component';
 import { MapModule } from '../map/map.module';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgModule } from '@angular/core';
@@ -32,6 +33,7 @@ import { ProjectHeaderModule } from '../project-header/project-header.module';
   imports: [
     CommonModule,
     MapModule,
+    MatButtonModule,
     MatDialogModule,
     MatSidenavModule,
     LayerDialogModule,
