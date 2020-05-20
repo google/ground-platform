@@ -18,7 +18,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { LayerListComponent } from './layer-list.component';
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
-import { MatListModule } from '@angular/material';
+import { MatListModule } from '@angular/material/list';
 
 @NgModule({
   imports: [BrowserModule, MatListModule, LayerListItemModule],

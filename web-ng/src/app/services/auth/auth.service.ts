@@ -46,11 +46,11 @@ export class AuthService {
 
   async signIn() {
     const provider = new auth.GoogleAuthProvider();
-    await this.afAuth.auth.signInWithPopup(provider);
+    await this.afAuth.signInWithPopup(provider);
   }
 
   async signOut() {
-    await this.afAuth.auth.signOut();
+    await this.afAuth.signOut();
     return this.router.navigate(['/']);
   }
 }

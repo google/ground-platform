@@ -15,7 +15,7 @@
  */
 
 import { Component, ElementRef } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
 import { ColorEvent } from 'ngx-color';
 
