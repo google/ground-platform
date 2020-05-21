@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {StringMap} from '../string-map.model';
-import {User} from '../user.model';
 import {AuditInfo} from '../audit-info.model';
 import {Form} from '../form/form.model';
 import {Response} from './response.model';

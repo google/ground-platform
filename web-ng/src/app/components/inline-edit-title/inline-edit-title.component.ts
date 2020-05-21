@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnDestroy} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {DataStoreService} from '../../services/data-store/data-store.service';
 import {ProjectService} from '../../services/project/project.service';
-import {Observable, Subject} from 'rxjs';
+import {Observable} from 'rxjs';
 import {Project} from '../../shared/models/project.model';
-import {MainPageComponent} from '../main-page/main-page.component';
 import {Subscription} from 'rxjs';
 
 @Component({
