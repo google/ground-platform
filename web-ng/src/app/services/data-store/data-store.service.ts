@@ -125,11 +125,17 @@ export class DataStoreService {
         map(array =>
           List(
             array.map(obj => {
-              const form = project.getForm(
-                feature.layerId,
-                (obj as DocumentData).formId
-              );
-              return FirebaseDataConverter.toObservation(form, obj.id, obj);
+              const form = project
+                .getLayer(feature.layerId)!
+                .getForm((obj as DocumentData).formId);
+              if (!form) {
+                throw Error(
+                  `Form ${(obj as DocumentData).formId} or layer ${
+                    feature.layerId
+                  } not found.`
+                );
+              }
+              return FirebaseDataConverter.toObservation(form!, obj.id, obj);
             })
           )
         )
@@ -143,10 +149,16 @@ export class DataStoreService {
       .get()
       .pipe(
         map(doc => {
-          const form = project.getForm(
-            feature.layerId,
-            doc.data()!.formId
-          );
+          const form = project
+            .getLayer(feature.layerId)!
+            .getForm(doc.data()!.formId);
+          if (!form) {
+            throw Error(
+              `Form ${doc.data()!.formId} or layer ${
+                feature.layerId
+              } not found.`
+            );
+          }
           return FirebaseDataConverter.toObservation(form, doc.id, doc.data()!);
         })
       );
