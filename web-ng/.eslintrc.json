@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/gts",
+  "env": {
+    "jasmine": true
+  },
+  "rules": {
+    "node/no-unpublished-import": "off",
+    "node/no-unpublished-require": "off"
+  }
+}
