@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { Observation } from './../../shared/models/observation/observation.model';
-import { ObservationService } from './../../services/observation/observation.service';
-import { FeatureService } from './../../services/feature/feature.service';
-import { map, switchMap } from 'rxjs/operators';
-import { ProjectService } from './../../services/project/project.service';
-import { List } from 'immutable';
-import { Observable } from 'rxjs';
-import { Component } from '@angular/core';
-import { Layer } from '../../shared/models/layer.model';
-import { FieldType } from '../../shared/models/form/field.model';
-import { Router, NavigationExtras } from '@angular/router';
+import {Observation} from './../../shared/models/observation/observation.model';
+import {ObservationService} from './../../services/observation/observation.service';
+import {FeatureService} from './../../services/feature/feature.service';
+import {map, switchMap} from 'rxjs/operators';
+import {ProjectService} from './../../services/project/project.service';
+import {List} from 'immutable';
+import {Observable} from 'rxjs';
+import {Component} from '@angular/core';
+import {Layer} from '../../shared/models/layer.model';
+import {FieldType} from '../../shared/models/form/field.model';
+import {Router, NavigationExtras} from '@angular/router';
 
 @Component({
   selector: 'ground-feature-panel',

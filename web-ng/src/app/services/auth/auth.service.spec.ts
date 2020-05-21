@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { NEVER } from 'rxjs';
-import { Router } from '@angular/router';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { DataStoreService } from '../data-store/data-store.service';
-import { AuthService } from './auth.service';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { environment } from '../../../environments/environment';
+import {TestBed} from '@angular/core/testing';
+import {NEVER} from 'rxjs';
+import {Router} from '@angular/router';
+import {AngularFireAuth} from '@angular/fire/auth';
+import {DataStoreService} from '../data-store/data-store.service';
+import {AuthService} from './auth.service';
+import {AngularFireModule} from '@angular/fire';
+import {AngularFireAuthModule} from '@angular/fire/auth';
+import {AngularFirestoreModule} from '@angular/fire/firestore';
+import {environment} from '../../../environments/environment';
 
 describe('AuthService', () => {
   beforeEach(() => {
@@ -34,9 +34,9 @@ describe('AuthService', () => {
         AngularFirestoreModule,
       ],
       providers: [
-        { provide: AngularFireAuth, useValue: { authState: NEVER } },
-        { provide: DataStoreService },
-        { provide: Router, useValue: {} },
+        {provide: AngularFireAuth, useValue: {authState: NEVER}},
+        {provide: DataStoreService},
+        {provide: Router, useValue: {}},
       ],
     });
   });

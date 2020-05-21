@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/internal/operators/map';
-import { Layer } from '../../shared/models/layer.model';
-import { List } from 'immutable';
+import {Component, OnInit} from '@angular/core';
+import {ProjectService} from '../../services/project/project.service';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/internal/operators/map';
+import {Layer} from '../../shared/models/layer.model';
+import {List} from 'immutable';
 
 @Component({
   selector: 'ground-layer-list',

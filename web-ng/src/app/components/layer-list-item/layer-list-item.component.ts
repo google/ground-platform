@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { Layer } from '../../shared/models/layer.model';
-import { getPinImageSource } from '../map/ground-pin';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import {Component, Input, OnInit} from '@angular/core';
+import {Layer} from '../../shared/models/layer.model';
+import {getPinImageSource} from '../map/ground-pin';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 
 @Component({
   selector: 'ground-layer-list-item',

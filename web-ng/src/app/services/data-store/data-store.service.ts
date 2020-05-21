@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
-import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { Observable } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
-import { map } from 'rxjs/operators';
-import { User } from './../../shared/models/user.model';
-import { Feature } from '../../shared/models/feature.model';
-import { Layer } from './../../shared/models/layer.model';
-import { List } from 'immutable';
-import { Observation } from '../../shared/models/observation/observation.model';
+import {Injectable} from '@angular/core';
+import {AngularFirestore, DocumentData} from '@angular/fire/firestore';
+import {FirebaseDataConverter} from '../../shared/converters/firebase-data-converter';
+import {Observable} from 'rxjs';
+import {Project} from '../../shared/models/project.model';
+import {map} from 'rxjs/operators';
+import {User} from './../../shared/models/user.model';
+import {Feature} from '../../shared/models/feature.model';
+import {Layer} from './../../shared/models/layer.model';
+import {List} from 'immutable';
+import {Observation} from '../../shared/models/observation/observation.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -55,7 +55,7 @@ export class DataStoreService {
     return this.db
       .collection('projects')
       .doc(projectId)
-      .set({ title: { en: newTitle } }, { merge: true })
+      .set({title: {en: newTitle}}, {merge: true})
       .then(() => projectId);
   }
 
@@ -94,10 +94,10 @@ export class DataStoreService {
     return this.db.doc<User>(`users/${uid}`).valueChanges();
   }
 
-  features$({ id }: Project): Observable<List<Feature>> {
+  features$({id}: Project): Observable<List<Feature>> {
     return this.db
       .collection(`projects/${id}/features`)
-      .valueChanges({ idField: 'id' })
+      .valueChanges({idField: 'id'})
       .pipe(
         map(array =>
           List(array.map(obj => FirebaseDataConverter.toFeature(obj.id, obj)))
@@ -120,7 +120,7 @@ export class DataStoreService {
       .collection(`projects/${project.id}/observations`, ref =>
         ref.where('featureId', '==', feature.id)
       )
-      .valueChanges({ idField: 'id' })
+      .valueChanges({idField: 'id'})
       .pipe(
         map(array =>
           List(

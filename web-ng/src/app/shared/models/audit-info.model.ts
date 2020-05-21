@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { User } from './user.model';
+import {User} from './user.model';
 
 export class AuditInfo {
   constructor(

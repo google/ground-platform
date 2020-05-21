@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ProjectService } from '../../services/project/project.service';
+import {Component, Inject, OnDestroy} from '@angular/core';
+import {Observable} from 'rxjs';
+import {ProjectService} from '../../services/project/project.service';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
   MatDialog,
 } from '@angular/material/dialog';
-import { Project } from '../../shared/models/project.model';
-import { Layer } from '../../shared/models/layer.model';
-import { Form } from '../../shared/models/form/form.model';
-import { Subscription } from 'rxjs';
-import { DataStoreService } from '../../services/data-store/data-store.service';
-import { Router } from '@angular/router';
-import { FormBuilder } from '@angular/forms';
-import { FieldType, Field } from '../../shared/models/form/field.model';
-import { StringMap } from '../../shared/models/string-map.model';
-import { Option } from '../../shared/models/form/option.model';
-import { Map, List } from 'immutable';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import {Project} from '../../shared/models/project.model';
+import {Layer} from '../../shared/models/layer.model';
+import {Form} from '../../shared/models/form/form.model';
+import {Subscription} from 'rxjs';
+import {DataStoreService} from '../../services/data-store/data-store.service';
+import {Router} from '@angular/router';
+import {FormBuilder} from '@angular/forms';
+import {FieldType, Field} from '../../shared/models/form/field.model';
+import {StringMap} from '../../shared/models/string-map.model';
+import {Option} from '../../shared/models/form/option.model';
+import {Map, List} from 'immutable';
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
@@ -189,7 +189,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.layerId,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName }),
+      StringMap({[this.lang]: this.layerName}),
       this.fields && this.fields.size > 0
         ? Map({
             [formId]: new Form(formId, fields),

@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { LayerDialogComponent } from './layer-dialog.component';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {Component} from '@angular/core';
+import {LayerDialogComponent} from './layer-dialog.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
   MatDialogModule,
 } from '@angular/material/dialog';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { environment } from '../../../environments/environment';
-import { Router } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { InlineEditorModule } from '../inline-editor/inline-editor.module';
-import { MatIconModule } from '@angular/material/icon';
+import {AngularFireModule} from '@angular/fire';
+import {AngularFireAuthModule} from '@angular/fire/auth';
+import {AngularFirestoreModule} from '@angular/fire/firestore';
+import {environment} from '../../../environments/environment';
+import {Router} from '@angular/router';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {InlineEditorModule} from '../inline-editor/inline-editor.module';
+import {MatIconModule} from '@angular/material/icon';
 
-@Component({ selector: 'mat-dialog-content', template: '' })
+@Component({selector: 'mat-dialog-content', template: ''})
 class MatDialogContent {}
 
-@Component({ selector: 'mat-dialog-actions', template: '' })
+@Component({selector: 'mat-dialog-actions', template: ''})
 class MatDialogActions {}
 
 describe('LayerDialogComponent', () => {
@@ -65,9 +65,9 @@ describe('LayerDialogComponent', () => {
         MatIconModule,
       ],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: routerSpy },
+        {provide: MAT_DIALOG_DATA, useValue: {}},
+        {provide: MatDialogRef, useValue: dialogRef},
+        {provide: Router, useValue: routerSpy},
       ],
     }).compileComponents();
   }));

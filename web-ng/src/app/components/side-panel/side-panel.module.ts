@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {SidePanelComponent} from './side-panel.component';
+import {FeaturePanelModule} from '../feature-panel/feature-panel.module';
+import {LayerListModule} from '../layer-list/layer-list.module';
 
 @NgModule({
   imports: [BrowserModule, FeaturePanelModule, LayerListModule],

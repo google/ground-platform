@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
-import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
-import { MainPageComponent } from './main-page.component';
-import { MapModule } from '../map/map.module';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { SidePanelModule } from '../side-panel/side-panel.module';
-import { ProjectHeaderModule } from '../project-header/project-header.module';
+import {CommonModule} from '@angular/common';
+import {LayerDialogComponent} from '../layer-dialog/layer-dialog.component';
+import {LayerDialogModule} from '../layer-dialog/layer-dialog.module';
+import {MainPageComponent} from './main-page.component';
+import {MapModule} from '../map/map.module';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
+import {SidePanelModule} from '../side-panel/side-panel.module';
+import {ProjectHeaderModule} from '../project-header/project-header.module';
 
 @NgModule({
   entryComponents: [LayerDialogComponent],

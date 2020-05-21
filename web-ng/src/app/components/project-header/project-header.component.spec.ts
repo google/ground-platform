@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { AuthService } from './../../services/auth/auth.service';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { ProjectHeaderComponent } from './project-header.component';
-import { environment } from '../../../environments/environment';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
+import {AuthService} from './../../services/auth/auth.service';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {AngularFireModule} from '@angular/fire';
+import {AngularFireAuthModule} from '@angular/fire/auth';
+import {AngularFirestoreModule} from '@angular/fire/firestore';
+import {ProjectHeaderComponent} from './project-header.component';
+import {environment} from '../../../environments/environment';
+import {InlineEditTitleModule} from '../inline-edit-title/inline-edit-title.module';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MatDialogModule} from '@angular/material/dialog';
+import {UserProfilePopupComponent} from '../user-profile-popup/user-profile-popup.component';
 describe('ProjectHeaderComponent', () => {
   let component: ProjectHeaderComponent;
   let fixture: ComponentFixture<ProjectHeaderComponent>;
@@ -42,9 +42,9 @@ describe('ProjectHeaderComponent', () => {
       ],
       declarations: [ProjectHeaderComponent],
       providers: [
-        { provide: AuthService, useValue: {} },
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
+        {provide: AuthService, useValue: {}},
+        {provide: MAT_DIALOG_DATA, useValue: {}},
+        {provide: MatDialogRef, useValue: dialogRef},
       ],
     }).compileComponents();
   }));

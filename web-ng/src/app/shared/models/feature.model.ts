@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { firestore } from 'firebase/app';
+import {firestore} from 'firebase/app';
 
 export class Feature {
   constructor(

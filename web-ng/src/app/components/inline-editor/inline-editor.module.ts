@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { InlineEditorComponent } from './inline-editor.component';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {InlineEditorComponent} from './inline-editor.component';
 
 @NgModule({
   declarations: [InlineEditorComponent],

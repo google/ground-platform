@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { ColorPickerComponent } from '../color-picker/color-picker.component';
-import { ColorEvent } from 'ngx-color';
+import {Component, ElementRef} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {ColorPickerComponent} from '../color-picker/color-picker.component';
+import {ColorEvent} from 'ngx-color';
 
 @Component({
   selector: 'app-edit-style-button',
@@ -38,7 +38,7 @@ export class EditStyleButtonComponent {
     const target = new ElementRef(evt.currentTarget);
     this.dialog
       .open(ColorPickerComponent, {
-        data: { trigger: target },
+        data: {trigger: target},
       })
       .componentInstance.onColorPicked.subscribe((evt: ColorEvent) => {
         this.bgColor = evt.color.hex;

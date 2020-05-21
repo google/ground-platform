@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
-import { ProjectHeaderComponent } from './project-header.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {InlineEditTitleModule} from '../inline-edit-title/inline-edit-title.module';
+import {ProjectHeaderComponent} from './project-header.component';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDialogModule} from '@angular/material/dialog';
 
 @NgModule({
   declarations: [ProjectHeaderComponent],

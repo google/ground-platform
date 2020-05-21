@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { InlineEditTitleComponent } from './inline-edit-title.component';
-import { AutoSizeInputModule } from 'ngx-autosize-input';
+import {NgModule} from '@angular/core';
+import {InlineEditTitleComponent} from './inline-edit-title.component';
+import {AutoSizeInputModule} from 'ngx-autosize-input';
 
 @NgModule({
   declarations: [InlineEditTitleComponent],

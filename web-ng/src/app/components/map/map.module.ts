@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { MapComponent } from './map.component';
-import { GoogleMapsModule } from '@angular/google-maps';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {MapComponent} from './map.component';
+import {GoogleMapsModule} from '@angular/google-maps';
 
 @NgModule({
   imports: [BrowserModule, GoogleMapsModule],

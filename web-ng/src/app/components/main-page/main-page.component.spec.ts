@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
-import { MainPageComponent } from './main-page.component';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
-import { ProjectService } from '../../services/project/project.service';
-import { MatDialog } from '@angular/material/dialog';
-import { FeatureService } from '../../services/feature/feature.service';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
+import {MainPageComponent} from './main-page.component';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRouteStub} from '../../../testing/activated-route-stub';
+import {ProjectService} from '../../services/project/project.service';
+import {MatDialog} from '@angular/material/dialog';
+import {FeatureService} from '../../services/feature/feature.service';
 
-@Component({ selector: 'ground-map', template: '' })
+@Component({selector: 'ground-map', template: ''})
 class MapComponent {}
 
-@Component({ selector: 'mat-sidenav', template: '' })
+@Component({selector: 'mat-sidenav', template: ''})
 class MatSideNavComponent {
   opened = false;
 }
@@ -53,11 +53,11 @@ describe('MainPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: route },
-        { provide: MatDialog, useValue: dialog },
-        { provide: FeatureService, useValue: featureService },
-        { provide: ProjectService, useValue: projectService },
-        { provide: Router, useValue: routerSpy },
+        {provide: ActivatedRoute, useValue: route},
+        {provide: MatDialog, useValue: dialog},
+        {provide: FeatureService, useValue: featureService},
+        {provide: ProjectService, useValue: projectService},
+        {provide: Router, useValue: routerSpy},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

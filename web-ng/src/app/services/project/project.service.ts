@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
-import { switchMap, shareReplay } from 'rxjs/operators';
-import { Project } from '../../shared/models/project.model';
-import { DataStoreService } from '../data-store/data-store.service';
+import {Injectable} from '@angular/core';
+import {Observable, ReplaySubject} from 'rxjs';
+import {switchMap, shareReplay} from 'rxjs/operators';
+import {Project} from '../../shared/models/project.model';
+import {DataStoreService} from '../data-store/data-store.service';
 
 @Injectable({
   providedIn: 'root',

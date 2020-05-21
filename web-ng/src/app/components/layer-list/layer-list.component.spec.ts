@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { LayerListComponent } from './layer-list.component';
-import { ProjectService } from '../../services/project/project.service';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Project } from '../../shared/models/project.model';
-import { of } from 'rxjs';
-import { Map } from 'immutable';
-import { StringMap } from '../../shared/models/string-map.model';
-import { Layer } from '../../shared/models/layer.model';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
-import { MatListModule } from '@angular/material/list';
+import {LayerListComponent} from './layer-list.component';
+import {ProjectService} from '../../services/project/project.service';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {Project} from '../../shared/models/project.model';
+import {of} from 'rxjs';
+import {Map} from 'immutable';
+import {StringMap} from '../../shared/models/string-map.model';
+import {Layer} from '../../shared/models/layer.model';
+import {LayerListItemModule} from '../layer-list-item/layer-list-item.module';
+import {MatListModule} from '@angular/material/list';
 
 const mockProject = new Project(
   'project001',
-  StringMap({ en: 'title' }),
-  StringMap({ en: 'description' }),
+  StringMap({en: 'title'}),
+  StringMap({en: 'description'}),
   Map({
-    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
+    layer001: new Layer('layer001', 'red', StringMap({en: 'name'}), Map()),
   })
 );
 
@@ -52,7 +52,7 @@ describe('LayerListComponent', () => {
     TestBed.configureTestingModule({
       declarations: [LayerListComponent],
       imports: [LayerListItemModule, MatListModule],
-      providers: [{ provide: ProjectService, useValue: projectService }],
+      providers: [{provide: ProjectService, useValue: projectService}],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   }));

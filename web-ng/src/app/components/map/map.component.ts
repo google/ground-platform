@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
-import { Project } from '../../shared/models/project.model';
-import { Feature } from '../../shared/models/feature.model';
-import { ProjectService } from '../../services/project/project.service';
-import { FeatureService } from '../../services/feature/feature.service';
-import { Observable, Subscription } from 'rxjs';
-import { List } from 'immutable';
-import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
-import { getPinImageSource } from './ground-pin';
+import {Component, OnInit} from '@angular/core';
+import {HttpParams} from '@angular/common/http';
+import {Project} from '../../shared/models/project.model';
+import {Feature} from '../../shared/models/feature.model';
+import {ProjectService} from '../../services/project/project.service';
+import {FeatureService} from '../../services/feature/feature.service';
+import {Observable, Subscription} from 'rxjs';
+import {List} from 'immutable';
+import {Router, ActivatedRoute, NavigationExtras} from '@angular/router';
+import {getPinImageSource} from './ground-pin';
 
 @Component({
   selector: 'ground-map',
@@ -57,7 +57,7 @@ export class MapComponent implements OnInit {
   ngOnInit() {
     this.subscription.add(
       this.route.fragment.subscribe(fragment => {
-        const params = new HttpParams({ fromString: fragment });
+        const params = new HttpParams({fromString: fragment});
         if (params.get('f')) {
           this.focusedFeatureId = params.get('f')!;
         }
@@ -70,7 +70,7 @@ export class MapComponent implements OnInit {
     const primaryUrl = this.router
       .parseUrl(this.router.url)
       .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = { fragment: `f=${featureId}` };
+    const navigationExtras: NavigationExtras = {fragment: `f=${featureId}`};
     this.router.navigate([primaryUrl], navigationExtras);
   }
 
