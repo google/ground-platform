@@ -36,6 +36,9 @@ import {Map, List} from 'immutable';
 import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
+// To make ESLint happy:
+/*global alert*/
+
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
 @Component({

@@ -25,6 +25,9 @@ import {List} from 'immutable';
 import {Router, ActivatedRoute, NavigationExtras} from '@angular/router';
 import {getPinImageSource} from './ground-pin';
 
+// To make ESLint happy:
+/*global google*/
+
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
