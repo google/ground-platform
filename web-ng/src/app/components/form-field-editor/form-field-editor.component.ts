@@ -22,9 +22,9 @@ import {
   EventEmitter,
   OnChanges,
 } from '@angular/core';
-import {FormGroup, FormBuilder} from '@angular/forms';
-import {FieldType} from '../../shared/models/form/field.model';
-import {StringMap} from '../../shared/models/string-map.model';
+import { FormGroup, FormBuilder } from '@angular/forms';
+import { FieldType } from '../../shared/models/form/field.model';
+import { StringMap } from '../../shared/models/string-map.model';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -70,7 +70,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     // As the form fields value change we are emitting the updated value to the layer-dialog.
     this.formFieldGroup.valueChanges.subscribe(value => {
       this.update.emit({
-        label: StringMap({en: value.label}),
+        label: StringMap({ en: value.label }),
         required: value.required,
         type: value.type.type,
       });
@@ -112,6 +112,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    */
 
   onFieldTypeSelect(event: FieldTypeSelectOption) {
-    this.formFieldGroup.patchValue({type: event});
+    this.formFieldGroup.patchValue({ type: event });
   }
 }

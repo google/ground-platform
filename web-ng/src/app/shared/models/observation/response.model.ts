@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
-import {Option} from '../form/option.model';
+import { List } from 'immutable';
+import { Option } from '../form/option.model';
 
 export class Response {
   constructor(readonly value: number | string | List<Option>) {}

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, OnInit, Inject} from '@angular/core';
-import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {MatDialogConfig} from '@angular/material/dialog';
-import {AuthService} from './../../services/auth/auth.service';
+import { Component, ElementRef, OnInit, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogConfig } from '@angular/material/dialog';
+import { AuthService } from './../../services/auth/auth.service';
 
 @Component({
   selector: 'app-user-profile-popup',
@@ -31,7 +31,7 @@ export class UserProfilePopupComponent implements OnInit {
   constructor(
     matDialogRef: MatDialogRef<UserProfilePopupComponent>,
     public auth: AuthService,
-    @Inject(MAT_DIALOG_DATA) data: {trigger: ElementRef}
+    @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }
   ) {
     this.matDialogRef = matDialogRef;
     this.triggerElementRef = data.trigger;

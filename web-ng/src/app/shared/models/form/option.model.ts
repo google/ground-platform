@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {StringMap} from '../string-map.model';
+import { StringMap } from '../string-map.model';
 
 export class Option {
   constructor(

@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {Project} from '../models/project.model';
-import {StringMap} from '../models/string-map.model';
-import {Layer} from '../models/layer.model';
-import {Form} from '../models/form/form.model';
-import {Field, FieldType} from '../models/form/field.model';
+import { DocumentData } from '@angular/fire/firestore';
+import { Project } from '../models/project.model';
+import { StringMap } from '../models/string-map.model';
+import { Layer } from '../models/layer.model';
+import { Form } from '../models/form/form.model';
+import { Field, FieldType } from '../models/form/field.model';
 import {
   MultipleChoice,
   Cardinality,
 } from '../models/form/multiple-choice.model';
-import {Feature} from '../models/feature.model';
-import {Observation} from '../models/observation/observation.model';
-import {Option} from '../../shared/models/form/option.model';
-import {List, Map} from 'immutable';
-import {AuditInfo} from '../models/audit-info.model';
-import {Response} from '../../shared/models/observation/response.model';
+import { Feature } from '../models/feature.model';
+import { Observation } from '../models/observation/observation.model';
+import { Option } from '../../shared/models/form/option.model';
+import { List, Map } from 'immutable';
+import { AuditInfo } from '../models/audit-info.model';
+import { Response } from '../../shared/models/observation/response.model';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -84,14 +84,14 @@ export class FirebaseDataConverter {
   }
 
   static layerToJS(layer: Layer): {} {
-    const {id: name, forms, ...layerDoc} = layer;
+    const { id: name, forms, ...layerDoc } = layer;
     return {
       name: name?.toJS() || {},
       forms:
         forms
           ?.valueSeq()
           .reduce(
-            (map, form) => ({...map, [form.id]: this.formToJS(form)}),
+            (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
             {}
           ) || {},
       ...layerDoc,
@@ -118,7 +118,7 @@ export class FirebaseDataConverter {
   }
 
   private static formToJS(form: Form): {} {
-    const {fields, ...formDoc} = form;
+    const { fields, ...formDoc } = form;
     return {
       elements:
         fields?.reduce(
@@ -184,7 +184,7 @@ export class FirebaseDataConverter {
   }
 
   private static fieldToJS(field: Field): {} {
-    const {type, label, multipleChoice, ...fieldDoc} = field;
+    const { type, label, multipleChoice, ...fieldDoc } = field;
     if (multipleChoice === undefined) {
       return {
         type: FirebaseDataConverter.fieldTypeToString(type),
@@ -279,7 +279,7 @@ export class FirebaseDataConverter {
   }
 
   private static optionToJS(option: Option): {} {
-    const {label, ...optionDoc} = option;
+    const { label, ...optionDoc } = option;
     return {
       label: label.toJS(),
       ...optionDoc,

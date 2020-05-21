@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
+import { Map } from 'immutable';
 
 /**
  * A dictionary for mapping language code to translatable user-defined text.

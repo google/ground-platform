@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
-import {Field} from './field.model';
-import {Option} from '../form/option.model';
+import { Map } from 'immutable';
+import { Field } from './field.model';
+import { Option } from '../form/option.model';
 
 export class Form {
   constructor(readonly id: string, readonly fields: Map<string, Field>) {}

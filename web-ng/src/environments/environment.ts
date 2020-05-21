@@ -18,8 +18,8 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import {googleMapsConfig} from './.google-maps-config';
-import {firebaseConfig} from './.firebase-config';
+import { googleMapsConfig } from './.google-maps-config';
+import { firebaseConfig } from './.firebase-config';
 
 export const environment = {
   production: false,

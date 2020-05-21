@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {FirebaseDataConverter} from '../../shared/converters/firebase-data-converter';
-import {StringMap} from '../models/string-map.model';
-import {Form} from '../models/form/form.model';
-import {Map, List} from 'immutable';
-import {Option} from '../../shared/models/form/option.model';
-import {Field, FieldType} from '../models/form/field.model';
+import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
+import { StringMap } from '../models/string-map.model';
+import { Form } from '../models/form/form.model';
+import { Map, List } from 'immutable';
+import { Option } from '../../shared/models/form/option.model';
+import { Field, FieldType } from '../models/form/field.model';
 import {
   MultipleChoice,
   Cardinality,
@@ -58,7 +58,7 @@ class MockModel {
   static element001: Field = new Field(
     'element001',
     FieldType.TEXT,
-    StringMap({en: 'Text Field'}),
+    StringMap({ en: 'Text Field' }),
     /*required=*/ true,
     0
   );
@@ -66,14 +66,14 @@ class MockModel {
   static element002: Field = new Field(
     'element002',
     FieldType.MULTIPLE_CHOICE,
-    StringMap({en: 'Multiple Select'}),
+    StringMap({ en: 'Multiple Select' }),
     /*required=*/ true,
     0,
     new MultipleChoice(
       Cardinality.SELECT_MULTIPLE,
       List([
-        new Option('option001', 'code001', StringMap({en: 'option 1'})),
-        new Option('option002', 'code002', StringMap({en: 'option 2'})),
+        new Option('option001', 'code001', StringMap({ en: 'option 1' })),
+        new Option('option002', 'code002', StringMap({ en: 'option 2' })),
       ])
     )
   );

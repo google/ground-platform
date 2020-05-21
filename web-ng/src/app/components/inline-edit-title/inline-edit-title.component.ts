@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy} from '@angular/core';
-import {DataStoreService} from '../../services/data-store/data-store.service';
-import {ProjectService} from '../../services/project/project.service';
-import {Observable} from 'rxjs';
-import {Project} from '../../shared/models/project.model';
-import {Subscription} from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
+import { DataStoreService } from '../../services/data-store/data-store.service';
+import { ProjectService } from '../../services/project/project.service';
+import { Observable } from 'rxjs';
+import { Project } from '../../shared/models/project.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-inline-edit-title',
@@ -51,7 +51,7 @@ export class InlineEditTitleComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  updateProjectTitle(evt: {target: HTMLInputElement}) {
+  updateProjectTitle(evt: { target: HTMLInputElement }) {
     if (!this.projectId) {
       return Promise.reject(new Error('Project not loaded'));
     }
@@ -62,7 +62,7 @@ export class InlineEditTitleComponent implements OnDestroy {
     );
   }
 
-  handleKeyPress(evt: {key: string; target: HTMLInputElement}) {
+  handleKeyPress(evt: { key: string; target: HTMLInputElement }) {
     switch (evt.key) {
       case 'Enter':
         evt.target.blur();

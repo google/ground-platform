@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Form} from './form/form.model';
-import {StringMap} from './string-map.model';
-import {Map} from 'immutable';
+import { Form } from './form/form.model';
+import { StringMap } from './string-map.model';
+import { Map } from 'immutable';
 
 export class Layer {
   constructor(

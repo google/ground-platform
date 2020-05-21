@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {DataStoreService} from './../data-store/data-store.service';
-import {Observable} from 'rxjs';
-import {Feature} from './../../shared/models/feature.model';
-import {Project} from './../../shared/models/project.model';
-import {Injectable} from '@angular/core';
-import {Observation} from '../../shared/models/observation/observation.model';
-import {List} from 'immutable';
+import { DataStoreService } from './../data-store/data-store.service';
+import { Observable } from 'rxjs';
+import { Feature } from './../../shared/models/feature.model';
+import { Project } from './../../shared/models/project.model';
+import { Injectable } from '@angular/core';
+import { Observation } from '../../shared/models/observation/observation.model';
+import { List } from 'immutable';
 
 @Injectable({
   providedIn: 'root',

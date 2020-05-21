@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AuditInfo} from '../audit-info.model';
-import {Form} from '../form/form.model';
-import {Response} from './response.model';
-import {Map} from 'immutable';
+import { AuditInfo } from '../audit-info.model';
+import { Form } from '../form/form.model';
+import { Response } from './response.model';
+import { Map } from 'immutable';
 
 export class Observation {
   constructor(

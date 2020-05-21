@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {ProjectService} from './project.service';
-import {DataStoreService} from '../data-store/data-store.service';
+import { ProjectService } from './project.service';
+import { DataStoreService } from '../data-store/data-store.service';
 
 describe('ProjectService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
 
   beforeEach(() =>
     TestBed.configureTestingModule({
-      providers: [{provide: DataStoreService, useValue: dataStoreServiceStub}],
+      providers: [
+        { provide: DataStoreService, useValue: dataStoreServiceStub },
+      ],
     })
   );
 

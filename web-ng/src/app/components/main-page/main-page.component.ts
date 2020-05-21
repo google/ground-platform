@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
-import {Component, OnInit} from '@angular/core';
-import {HttpParams} from '@angular/common/http';
-import {LayerDialogComponent} from '../layer-dialog/layer-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
-import {Observable, Subscription} from 'rxjs';
-import {Project} from '../../shared/models/project.model';
-import {FeatureService} from '../../services/feature/feature.service';
-import {ProjectService} from '../../services/project/project.service';
+import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable, Subscription } from 'rxjs';
+import { Project } from '../../shared/models/project.model';
+import { FeatureService } from '../../services/feature/feature.service';
+import { ProjectService } from '../../services/project/project.service';
 
 @Component({
   selector: 'ground-main-page',
@@ -66,7 +66,7 @@ export class MainPageComponent implements OnInit {
     if (!fragment) {
       return;
     }
-    const params = new HttpParams({fromString: fragment});
+    const params = new HttpParams({ fromString: fragment });
     // The 'l' param is used to represent the layer id being
     // edited.
     if (params.get('l')) {
@@ -81,7 +81,7 @@ export class MainPageComponent implements OnInit {
 
   private showEditLayerDialog(layerId: string) {
     this.dialog.open(LayerDialogComponent, {
-      data: {layerId},
+      data: { layerId },
     });
   }
 }

@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {FeaturePanelComponent} from './feature-panel.component';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {of} from 'rxjs';
-import {Map, List} from 'immutable';
-import {firestore} from 'firebase/app';
-import {Feature} from '../../shared/models/feature.model';
-import {Layer} from '../../shared/models/layer.model';
-import {Observation} from '../../shared/models/observation/observation.model';
-import {Project} from '../../shared/models/project.model';
-import {StringMap} from '../../shared/models/string-map.model';
-import {ProjectService} from '../../services/project/project.service';
-import {FeatureService} from '../../services/feature/feature.service';
-import {ObservationService} from '../../services/observation/observation.service';
-import {Router} from '@angular/router';
+import { FeaturePanelComponent } from './feature-panel.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { of } from 'rxjs';
+import { Map, List } from 'immutable';
+import { firestore } from 'firebase/app';
+import { Feature } from '../../shared/models/feature.model';
+import { Layer } from '../../shared/models/layer.model';
+import { Observation } from '../../shared/models/observation/observation.model';
+import { Project } from '../../shared/models/project.model';
+import { StringMap } from '../../shared/models/string-map.model';
+import { ProjectService } from '../../services/project/project.service';
+import { FeatureService } from '../../services/feature/feature.service';
+import { ObservationService } from '../../services/observation/observation.service';
+import { Router } from '@angular/router';
 
 const mockProject = new Project(
   'project001',
-  StringMap({en: 'title'}),
-  StringMap({en: 'description'}),
+  StringMap({ en: 'title' }),
+  StringMap({ en: 'description' }),
   Map({
-    layer001: new Layer('layer001', 'red', StringMap({en: 'name'}), Map()),
+    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
   })
 );
 
@@ -79,10 +79,10 @@ describe('FeaturePanelComponent', () => {
     TestBed.configureTestingModule({
       declarations: [FeaturePanelComponent],
       providers: [
-        {provide: FeatureService, useValue: featureService},
-        {provide: ProjectService, useValue: projectService},
-        {provide: ObservationService, useValue: observationService},
-        {provide: Router, useValue: routerSpy},
+        { provide: FeatureService, useValue: featureService },
+        { provide: ProjectService, useValue: projectService },
+        { provide: ObservationService, useValue: observationService },
+        { provide: Router, useValue: routerSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {StringMap} from '../string-map.model';
-import {MultipleChoice} from './multiple-choice.model';
-import {Option} from '../form/option.model';
+import { StringMap } from '../string-map.model';
+import { MultipleChoice } from './multiple-choice.model';
+import { Option } from '../form/option.model';
 
 /**
  *

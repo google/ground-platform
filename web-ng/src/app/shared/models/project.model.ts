@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Layer} from './layer.model';
-import {Form} from './form/form.model';
-import {StringMap} from './string-map.model';
-import {Map} from 'immutable';
+import { Layer } from './layer.model';
+import { Form } from './form/form.model';
+import { StringMap } from './string-map.model';
+import { Map } from 'immutable';
 
 export class Project {
   constructor(

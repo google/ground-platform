@@ -47,12 +47,12 @@ export class InlineEditorComponent implements AfterViewChecked {
     }
   }
 
-  onFocusOut(event: {target: HTMLInputElement}) {
+  onFocusOut(event: { target: HTMLInputElement }) {
     this.editMode = false;
     this.focusOut.emit(event.target.value);
   }
 
-  handleKeyPress(event: {key: string; target: HTMLInputElement}) {
+  handleKeyPress(event: { key: string; target: HTMLInputElement }) {
     switch (event.key) {
       case 'Enter':
         event.target.blur();

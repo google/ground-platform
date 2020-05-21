@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {UserProfilePopupComponent} from './user-profile-popup.component';
-import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {MatDialogModule} from '@angular/material/dialog';
-import {AngularFireModule} from '@angular/fire';
-import {AngularFireAuthModule} from '@angular/fire/auth';
-import {AngularFirestoreModule} from '@angular/fire/firestore';
-import {environment} from '../../../environments/environment';
-import {Router} from '@angular/router';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { UserProfilePopupComponent } from './user-profile-popup.component';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 describe('UserProfilePopupComponent', () => {
   let component: UserProfilePopupComponent;
@@ -40,9 +40,9 @@ describe('UserProfilePopupComponent', () => {
         AngularFirestoreModule,
       ],
       providers: [
-        {provide: MAT_DIALOG_DATA, useValue: {}},
-        {provide: MatDialogRef, useValue: dialogRef},
-        {provide: Router, useValue: routerSpy},
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
   }));

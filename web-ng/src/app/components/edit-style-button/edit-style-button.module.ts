@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {EditStyleButtonComponent} from './edit-style-button.component';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
+import { NgModule } from '@angular/core';
+import { EditStyleButtonComponent } from './edit-style-button.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [EditStyleButtonComponent],

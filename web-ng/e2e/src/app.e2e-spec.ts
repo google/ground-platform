@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {AppPage} from './app.po';
-import {browser, logging} from 'protractor';
+import { AppPage } from './app.po';
+import { browser, logging } from 'protractor';
 
 describe('Ground App', () => {
   let page: AppPage;

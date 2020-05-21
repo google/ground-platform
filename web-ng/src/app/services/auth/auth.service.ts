@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {DataStoreService} from '../data-store/data-store.service';
-import {Observable, of} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
-import {User} from './../../shared/models/user.model';
-import {Injectable} from '@angular/core';
-import {auth} from 'firebase/app';
-import {AngularFireAuth} from '@angular/fire/auth';
-import {Router} from '@angular/router';
+import { DataStoreService } from '../data-store/data-store.service';
+import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { User } from './../../shared/models/user.model';
+import { Injectable } from '@angular/core';
+import { auth } from 'firebase/app';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',

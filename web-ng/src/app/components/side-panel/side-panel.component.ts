@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {Observable} from 'rxjs';
-import {FeatureService} from '../../services/feature/feature.service';
-import {ProjectService} from '../../services/project/project.service';
-import {Feature} from '../../shared/models/feature.model';
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
+import { FeatureService } from '../../services/feature/feature.service';
+import { ProjectService } from '../../services/project/project.service';
+import { Feature } from '../../shared/models/feature.model';
 
 @Component({
   selector: 'ground-side-panel',

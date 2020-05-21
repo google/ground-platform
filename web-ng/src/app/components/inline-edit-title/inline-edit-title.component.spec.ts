@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {InlineEditTitleComponent} from './inline-edit-title.component';
-import {AutoSizeInputModule} from 'ngx-autosize-input';
-import {AngularFireModule} from '@angular/fire';
-import {AngularFireAuthModule} from '@angular/fire/auth';
-import {AngularFirestoreModule} from '@angular/fire/firestore';
-import {environment} from '../../../environments/environment';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { InlineEditTitleComponent } from './inline-edit-title.component';
+import { AutoSizeInputModule } from 'ngx-autosize-input';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { environment } from '../../../environments/environment';
 
 describe('InlineEditTitleComponent', () => {
   let component: InlineEditTitleComponent;

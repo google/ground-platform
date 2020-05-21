@@ -1,14 +1,16 @@
-import {TestBed} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
-import {DataStoreService} from './data-store.service';
-import {AngularFirestore} from '@angular/fire/firestore';
+import { DataStoreService } from './data-store.service';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 describe('DataStoreService', () => {
   const angularFirestoreStub: Partial<AngularFirestore> = {};
 
   beforeEach(() =>
     TestBed.configureTestingModule({
-      providers: [{provide: AngularFirestore, useValue: angularFirestoreStub}],
+      providers: [
+        { provide: AngularFirestore, useValue: angularFirestoreStub },
+      ],
     })
   );
 
