@@ -88,7 +88,6 @@
 
 .container-question {
   border-radius: 10px;
-  padding-top: 20px;
   padding-left: 10px;
   padding-right: 10px;
   border: 0px thin;
@@ -151,4 +150,12 @@
 
 .trash-icon {
   color: #707074;
+}
+
+.drag-icon {
+  display: block;
+  margin: 0px auto;
+  cursor: move;
+  padding: 5px;
+  color: #dadde1;
 }
