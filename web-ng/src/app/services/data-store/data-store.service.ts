@@ -125,14 +125,32 @@ export class DataStoreService {
         map(array =>
           List(
             array.map(obj => {
-              const form = project.getForm(
-                feature.layerId,
-                (obj as DocumentData).formId
+              return FirebaseDataConverter.toObservation(
+                project
+                  .getLayer(feature.layerId)!
+                  .getForm((obj as DocumentData).formId)!,
+                obj.id,
+                obj
               );
-              return FirebaseDataConverter.toObservation(form, obj.id, obj);
             })
           )
         )
+      );
+  }
+
+  loadObservation$(project: Project, feature: Feature, observationId: string) {
+    return this.db
+      .collection(`projects/${project.id}/observations`)
+      .doc(observationId)
+      .get()
+      .pipe(
+        map(doc => {
+          return FirebaseDataConverter.toObservation(
+            project.getLayer(feature.layerId)!.getForm(doc.data()!.formId)!,
+            doc.id,
+            doc.data()!
+          );
+        })
       );
   }
 
