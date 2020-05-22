@@ -21,7 +21,7 @@ timeout: 15m
 # Build Docker image and run checks and tests. See name property of each step
 # for description.
 steps:
-  - name: "gcr.io/kaniko-project/executor:0.22.0"
+  - name: "gcr.io/kaniko-project/executor:v0.22.0"
     id: "Rebuild Docker image with deps as needed"
     args:
       - --destination=gcr.io/$PROJECT_ID/ground-platform-build
