@@ -21,25 +21,25 @@ timeout: 15m
 # Build Docker image and run checks and tests. See name property of each step
 # for description.
 steps:
-  - name: 'gcr.io/kaniko-project/executor:latest'
-    id: 'Rebuild Docker image with deps as needed'
+  - name: "gcr.io/kaniko-project/executor:0.22.0"
+    id: "Rebuild Docker image with deps as needed"
     args:
       - --destination=gcr.io/$PROJECT_ID/ground-platform-build
       - --dockerfile=cloud-build/Dockerfile
       - --cache=true
 
-  - name: 'gcr.io/$PROJECT_ID/ground-platform-build'
-    id: 'Run lint checks for web-ng'
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build"
+    id: "Run lint checks for web-ng"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web-ng && npm run check
+      - "-c"
+      - |
+        cd web-ng && npm run check
 
-  - name: 'gcr.io/$PROJECT_ID/ground-platform-build'
-    id: 'Run tests for web-ng'
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build"
+    id: "Run tests for web-ng"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web-ng && npm run test
+      - "-c"
+      - |
+        cd web-ng && npm run test
