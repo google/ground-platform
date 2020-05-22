@@ -25,17 +25,10 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
     && rm -rf /var/lib/apt/lists/*
 WORKDIR ..
 
-## Install deps in workspace where source will be copied.
-WORKDIR workspace
-
 # Pre-install deps required to build and test Ground Firestore Cloud Functions.
-WORKDIR functions
-COPY functions/package*.json ./
-RUN npm install
-WORKDIR ..
+COPY functions/package*.json workspace/functions/
+RUN cd workspace/functions && npm install
 
 # Pre-install deps required to build and test the Ground web console.
-WORKDIR web-ng
-COPY web-ng/package*.json ./
-RUN npm install
-WORKDIR ..
+COPY web-ng/package*.json workspace/web-ng/
+RUN cd workspace/web-ng && npm install
