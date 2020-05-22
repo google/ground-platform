@@ -147,9 +147,7 @@ export class LayerDialogComponent implements OnDestroy {
   onProjectLoaded(project: Project) {
     if (this.layerId === ':new') {
       this.layerId = this.dataStoreService.generateId();
-      this.layer = {
-        id: this.layerId,
-      };
+      this.layer = new Layer(this.layerId);
     } else {
       this.layer = project.layers.get(this.layerId);
     }

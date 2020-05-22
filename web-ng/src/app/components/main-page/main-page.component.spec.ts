@@ -22,6 +22,7 @@ import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
+import { ObservationService } from '../../services/observation/observation.service';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
@@ -50,12 +51,17 @@ describe('MainPageComponent', () => {
       'selectFeature$',
     ]);
 
+    const observationService = jasmine.createSpyObj('ObservationService', [
+      'selectObservation$',
+    ]);
+
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
       providers: [
         { provide: ActivatedRoute, useValue: route },
         { provide: MatDialog, useValue: dialog },
         { provide: FeatureService, useValue: featureService },
+        { provide: ObservationService, useValue: observationService },
         { provide: ProjectService, useValue: projectService },
         { provide: Router, useValue: routerSpy },
       ],

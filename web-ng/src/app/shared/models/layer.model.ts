@@ -25,4 +25,8 @@ export class Layer {
     readonly name?: StringMap,
     readonly forms?: Map<string, Form>
   ) {}
+
+  getForm(formId: string): Form | undefined {
+    return this.forms?.get(formId);
+  }
 }
