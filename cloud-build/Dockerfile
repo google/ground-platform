@@ -39,7 +39,3 @@ WORKDIR web-ng
 COPY web-ng/package*.json ./
 RUN npm install
 WORKDIR ..
-
-# Return root to work around
-# https://github.com/GoogleContainerTools/kaniko/issues/763.
-WORKDIR /
