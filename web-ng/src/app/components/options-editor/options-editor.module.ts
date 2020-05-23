@@ -17,20 +17,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {
-  MatFormFieldModule,
-  MatInputModule,
-  MatSelectModule,
-  MatIconModule,
-  MatSlideToggleModule,
-  MatButtonModule,
-} from '@angular/material';
-import { FormFieldEditorComponent } from './form-field-editor.component';
-import { OptionsEditorModule } from '../options-editor/options-editor.module';
+import { MatInputModule } from '@angular/material/input';
+import { OptionsEditorComponent } from './options-editor.component';
 
 @NgModule({
-  declarations: [FormFieldEditorComponent],
+  declarations: [OptionsEditorComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -38,12 +31,7 @@ import { OptionsEditorModule } from '../options-editor/options-editor.module';
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatSelectModule,
-    MatIconModule,
-    MatSlideToggleModule,
-    MatButtonModule,
-    OptionsEditorModule,
   ],
-  exports: [FormFieldEditorComponent],
+  exports: [OptionsEditorComponent],
 })
-export class FormFieldEditorModule {}
+export class OptionsEditorModule {}

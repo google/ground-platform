@@ -28,6 +28,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { FormFieldEditorModule } from '../form-field-editor/form-field-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { OptionsEditorModule } from '../options-editor/options-editor.module';
 
 @NgModule({
   declarations: [LayerDialogComponent, ConfirmationDialogComponent],
