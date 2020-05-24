@@ -84,7 +84,7 @@ export class FirebaseDataConverter {
   }
 
   static layerToJS(layer: Layer): {} {
-    const { id: layerId, name, forms, ...layerDoc } = layer;
+    const { name, forms, ...layerDoc } = layer;
     return {
       name: name?.toJS() || {},
       forms:

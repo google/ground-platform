@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
