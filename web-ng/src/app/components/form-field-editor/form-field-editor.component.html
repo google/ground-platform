@@ -37,7 +37,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div *ngIf="formOptions && formOptions.options">
+  <div *ngIf="formOptions?.options">
     <div
       *ngFor="
         let option of formOptions.options;
@@ -47,7 +47,7 @@
       fxLayout
     >
       <app-option-editor
-        [label]="option.label && option.label.get('en')"
+        [label]="option.label?.get('en')"
         [code]="option.code"
         (update)="onOptionUpdate($event, i)"
       ></app-option-editor>
