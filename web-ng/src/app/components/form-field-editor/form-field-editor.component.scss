@@ -1,0 +1,70 @@
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '~src/custom-theme';
+
+.field-type {
+  margin-left: 30px;
+  font-size: 12px;
+}
+
+.icon-field-type {
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+.question-actions {
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+.vertical-divider {
+  border-left: 1px solid #e0e0e0;
+  height: 30px;
+  margin: 3px 20px;
+}
+
+.required-toggle {
+  padding-top: 5px;
+}
+
+.required-label {
+  margin-right: 20px;
+}
+
+.question-container {
+  border-radius: 10px;
+  padding: 0px 10px;
+  margin-top: 10px;
+  border: 1px #e6e7ea;
+  border-style: solid;
+}
+
+.drag-icon {
+  display: block;
+  margin: 0px auto;
+  cursor: move;
+  padding: 5px;
+  color: #dadde1;
+}
+
+.add-option {
+  margin-left: 30px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: mat-color($mat-green, 700);
+  text-underline-position: under;
+}
