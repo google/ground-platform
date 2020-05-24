@@ -40,7 +40,7 @@ export interface FieldTypeSelectOption {
 @Component({
   selector: 'app-form-field-editor',
   templateUrl: './form-field-editor.component.html',
-  styleUrls: ['./form-field-editor.component.css'],
+  styleUrls: ['./form-field-editor.component.scss'],
 })
 export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() label?: string;
