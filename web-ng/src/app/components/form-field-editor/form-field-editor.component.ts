@@ -28,7 +28,7 @@ import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
 import { List } from 'immutable';
-import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
+import { MultipleChoice, Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 
 export interface FieldTypeSelectOption {
@@ -126,7 +126,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   onFieldTypeSelect(event: FieldTypeSelectOption) {
     this.type = event.type.toString();
     this.formFieldGroup.patchValue({ type: event });
-    if (event.type === 2) {
+    if (event.type === FieldType.MULTIPLE_CHOICE) {
       this.onAddOption();
     } else {
       this.formOptions = undefined;
@@ -163,7 +163,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   setOption(index: number, option: Option) {
-    const cardinality = this.formOptions?.cardinality || 2;
+    const cardinality = this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
     let options = this.formOptions?.options || List<Option>();
     options = options?.set(index, option);
     this.multipleChoice = new MultipleChoice(cardinality, options);
