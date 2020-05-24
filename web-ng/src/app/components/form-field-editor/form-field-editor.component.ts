@@ -108,7 +108,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * @returns void
    *
    */
-
   onFieldDelete() {
     this.delete.emit();
   }
@@ -124,7 +123,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * @returns void
    *
    */
-
   onFieldTypeSelect(event: FieldTypeSelectOption) {
     this.type = event.type.toString();
     this.formFieldGroup.patchValue({ type: event });
@@ -143,7 +141,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * @returns void
    *
    */
-
   onOptionUpdate(event: { label: string; code: string }, index: number) {
     const optionId = this.dataStoreService.generateId();
     const option = new Option(

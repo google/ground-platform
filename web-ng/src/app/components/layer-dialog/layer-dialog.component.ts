@@ -113,7 +113,6 @@ export class LayerDialogComponent implements OnDestroy {
    * @returns void
    *
    */
-
   onFieldDelete(index: number) {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
@@ -214,7 +213,6 @@ export class LayerDialogComponent implements OnDestroy {
    * @returns void
    *
    */
-
   onFieldUpdate(event: Field, index: number) {
     const fieldId = this.fields.get(index)?.id;
     const field = new Field(
