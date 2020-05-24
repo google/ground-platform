@@ -136,7 +136,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Emits event to layer dialog whenvever label or code gets updated in options-editor.
+   * Emits event to layer dialog whenvever label or code gets updated in option-editor.
    *
    * @param event: label and code value of the option field.
    * @param index: index of the option to be updated.

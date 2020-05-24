@@ -27,7 +27,7 @@ import {
   MatButtonModule,
 } from '@angular/material';
 import { FormFieldEditorComponent } from './form-field-editor.component';
-import { OptionsEditorModule } from '../options-editor/options-editor.module';
+import { OptionEditorModule } from '../option-editor/option-editor.module';
 
 @NgModule({
   declarations: [FormFieldEditorComponent],
@@ -42,7 +42,7 @@ import { OptionsEditorModule } from '../options-editor/options-editor.module';
     MatIconModule,
     MatSlideToggleModule,
     MatButtonModule,
-    OptionsEditorModule,
+    OptionEditorModule,
   ],
   exports: [FormFieldEditorComponent],
 })

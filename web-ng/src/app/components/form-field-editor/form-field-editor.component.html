@@ -46,11 +46,11 @@
       "
       fxLayout
     >
-      <app-options-editor
+      <app-option-editor
         [label]="option.label && option.label.get('en')"
         [code]="option.code"
         (update)="onOptionUpdate($event, i)"
-      ></app-options-editor>
+      ></app-option-editor>
     </div>
     <a class="add-option" (click)="onAddOption()">
       Add option

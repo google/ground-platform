@@ -25,27 +25,27 @@ import {
 import { FormGroup, FormBuilder } from '@angular/forms';
 
 @Component({
-  selector: 'app-options-editor',
-  templateUrl: './options-editor.component.html',
-  styleUrls: ['./options-editor.component.css'],
+  selector: 'app-option-editor',
+  templateUrl: './option-editor.component.html',
+  styleUrls: ['./option-editor.component.css'],
 })
-export class OptionsEditorComponent implements OnInit, OnChanges {
+export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() code?: string;
   @Input() label?: string;
   @Output() update = new EventEmitter();
 
-  optionsGroup: FormGroup;
+  optionGroup: FormGroup;
 
   constructor(private formBuilder: FormBuilder) {
-    this.optionsGroup = this.formBuilder.group({
+    this.optionGroup = this.formBuilder.group({
       code: [''],
       label: [''],
     });
   }
 
   ngOnInit(): void {
-    // As the options fields value change we are emitting the updated value to the form-field-editor.
-    this.optionsGroup.valueChanges.subscribe(value => {
+    // As the option fields value change we are emitting the updated value to the form-field-editor.
+    this.optionGroup.valueChanges.subscribe(value => {
       this.update.emit({
         code: value.code,
         label: value.label,
@@ -54,7 +54,7 @@ export class OptionsEditorComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    this.optionsGroup.setValue({
+    this.optionGroup.setValue({
       code: this.code,
       label: this.label,
     });

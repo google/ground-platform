@@ -16,7 +16,7 @@
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OptionsEditorComponent } from './options-editor.component';
+import { OptionEditorComponent } from './option-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -25,13 +25,13 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-describe('OptionsEditorComponent', () => {
-  let component: OptionsEditorComponent;
-  let fixture: ComponentFixture<OptionsEditorComponent>;
+describe('OptionEditorComponent', () => {
+  let component: OptionEditorComponent;
+  let fixture: ComponentFixture<OptionEditorComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [OptionsEditorComponent],
+      declarations: [OptionEditorComponent],
       imports: [
         CommonModule,
         BrowserAnimationsModule,
@@ -46,7 +46,7 @@ describe('OptionsEditorComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(OptionsEditorComponent);
+    fixture = TestBed.createComponent(OptionEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -20,10 +20,10 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { OptionsEditorComponent } from './options-editor.component';
+import { OptionEditorComponent } from './option-editor.component';
 
 @NgModule({
-  declarations: [OptionsEditorComponent],
+  declarations: [OptionEditorComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -32,6 +32,6 @@ import { OptionsEditorComponent } from './options-editor.component';
     ReactiveFormsModule,
     MatInputModule,
   ],
-  exports: [OptionsEditorComponent],
+  exports: [OptionEditorComponent],
 })
-export class OptionsEditorModule {}
+export class OptionEditorModule {}
