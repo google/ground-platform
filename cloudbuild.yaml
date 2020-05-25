@@ -54,19 +54,3 @@ steps:
       - "-c"
       - |
         cd web-ng && npm run test
-
-  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
-    id: "Move functions deps"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        mv /usr/src/ground-platform/functions/node_modules functions/
-
-  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
-    id: "Lint functions"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        cd functions && npm run check

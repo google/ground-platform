@@ -23,11 +23,6 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
     && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
-# Cache Cloud Functions build deps.
-WORKDIR /usr/src/ground-platform/functions
-COPY functions/package*.json ./
-RUN npm install
-
 # Cache web console build deps and Ivy build.
 WORKDIR /usr/src/ground-platform/web-ng
 COPY web-ng/package*.json ./
