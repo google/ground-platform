@@ -31,6 +31,7 @@ import { InlineEditTitleModule } from './components/inline-edit-title/inline-edi
 import { ProjectHeaderModule } from './components/project-header/project-header.module';
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
+import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -48,6 +49,7 @@ import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module
     ProjectHeaderModule,
     UserProfilePopupModule,
     LayerDialogModule,
+    ShareDialogModule,
   ],
   bootstrap: [AppComponent],
 })
