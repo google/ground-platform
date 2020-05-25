@@ -27,6 +27,7 @@ steps:
       - --destination=gcr.io/$PROJECT_ID/ground-platform-build
       - --dockerfile=cloud-build/Dockerfile
       - --cache=true
+      - -v=debug
 
   - name: "gcr.io/$PROJECT_ID/ground-platform-build"
     id: "Run lint checks for web-ng"
