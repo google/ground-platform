@@ -32,7 +32,6 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() code?: string;
   @Input() label?: string;
-  @Output() update = new EventEmitter();
 
   optionGroup: FormGroup;
 
@@ -44,13 +43,14 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    // As the option fields value change we are emitting the updated value to the form-field-editor.
-    this.optionGroup.valueChanges.subscribe(value => {
-      this.update.emit({
-        code: value.code,
-        label: value.label,
-      });
-    });
+  }
+
+  getCode() {
+    return this.optionGroup.get('code')?.value;
+  }
+
+  getLabel() {
+    return this.optionGroup.get('label')?.value;
   }
 
   ngOnChanges() {
