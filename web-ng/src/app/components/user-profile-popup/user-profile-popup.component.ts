@@ -16,7 +16,7 @@
 
 import { Component, ElementRef, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialog, MatDialogConfig } from '@angular/material';
+import { MatDialogConfig } from '@angular/material/dialog';
 import { AuthService } from './../../services/auth/auth.service';
 
 @Component({

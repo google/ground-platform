@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// To make ESLint happy:
+/*global btoa*/
+
 export const defaultIconColor = 'red';
 
 export const renderPin = (color?: string) => {

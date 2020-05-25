@@ -31,10 +31,12 @@ import { Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Option } from '../../shared/models/form/option.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+
+// To make ESLint happy:
+/*global alert*/
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
@@ -199,7 +201,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.dataStoreService
       .updateLayer(this.projectId, layer)
       .then(() => this.onClose())
-      .catch(err => {
+      .catch(() => {
         alert('Layer update failed.');
       });
   }

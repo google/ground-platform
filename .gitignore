@@ -1,5 +1,8 @@
-!.gitignore
 .*
+!.gitignore
+!.eslintignore
+!.eslintrc.json
+!.prettierrc.js
 **/firebase-debug.log
 **/firebase-init.html
 **/google-maps-api-key.html
