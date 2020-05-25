@@ -24,23 +24,15 @@ steps:
   - name: "gcr.io/kaniko-project/executor:v0.22.0"
     id: "Rebuild Docker image with deps as needed"
     args:
-      - --destination=gcr.io/$PROJECT_ID/ground-platform-build
+      - --destination=gcr.io/$PROJECT_ID/kaniko-946-repro
       - --dockerfile=cloud-build/Dockerfile
       - --cache=true
       - -v=debug
 
-  - name: "gcr.io/$PROJECT_ID/ground-platform-build"
-    id: "Run lint checks for web-ng"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        cd web-ng && npm run check
-
-  - name: "gcr.io/$PROJECT_ID/ground-platform-build"
+  - name: "gcr.io/$PROJECT_ID/kaniko-946-repro"
     id: "Run tests for web-ng"
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        cd web-ng && npm run test
+        cd web-ng && npm run check
