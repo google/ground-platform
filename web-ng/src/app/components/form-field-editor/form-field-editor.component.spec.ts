@@ -24,10 +24,17 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { environment } from '../../../environments/environment';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { BehaviorSubject } from 'rxjs';
+
+const FirestoreStub = {
+  collection: () => ({
+    doc: (_id: string) => ({
+      valueChanges: () => new BehaviorSubject({ }),
+      set: (_d: any) => new Promise((resolve, _reject) => resolve()),
+    }),
+  }),
+}
 
 describe('FormFieldEditorComponent', () => {
   let component: FormFieldEditorComponent;
@@ -37,9 +44,6 @@ describe('FormFieldEditorComponent', () => {
     TestBed.configureTestingModule({
       declarations: [FormFieldEditorComponent],
       imports: [
-        AngularFireModule.initializeApp(environment.firebaseConfig),
-        AngularFireAuthModule,
-        AngularFirestoreModule,
         FormsModule,
         ReactiveFormsModule,
         BrowserModule,
@@ -49,6 +53,7 @@ describe('FormFieldEditorComponent', () => {
         MatInputModule,
         BrowserAnimationsModule,
       ],
+      providers: [{ provide: AngularFirestore, useValue: FirestoreStub }]
     }).compileComponents();
   }));
 
