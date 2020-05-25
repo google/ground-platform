@@ -18,9 +18,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ShareDialogComponent } from './share-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [ShareDialogComponent],
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatButtonModule, MatDialogModule],
 })
 export class ShareDialogModule {}

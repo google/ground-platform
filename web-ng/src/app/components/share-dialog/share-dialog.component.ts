@@ -26,4 +26,8 @@ export class ShareDialogComponent implements OnInit {
   constructor(private dialogRef: MatDialogRef<ShareDialogComponent>) {}
 
   ngOnInit(): void {}
+
+  close(): void {
+    this.dialogRef.close();
+  }
 }
