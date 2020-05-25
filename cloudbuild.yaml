@@ -12,56 +12,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Initialize gcloud via CLI
-# $ gcloud init
-#
-# Steps (1, 2, 3, and 4 run simultaneously):
-# ==========================================
-# 1. Install npm packages for functions
-# 2. Install npm packages for web-ng 
-#      |
-#      |
-#      3. Run lint checks
-#      4. Run unit tests
+# This build is run automatically on pushes and pull requests.
 
+# The first time the Docker image is created, the total build time can exceed
+# the 10 min default. Increase the max. build time to 20 min to prevent
+# timeouts.
+timeout: 1200s
+
+# Build Docker image and run checks and tests. See name property of each step
+# for description.
 steps:
-
-  # Install node packages for functions
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
-    id: 'Install npm packages for functions'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: "gcr.io/kaniko-project/executor:v0.22.0"
+    id: "Update image"
     args:
-     - '-c'
-     - |
-       cd functions && npm install
+      - --destination=gcr.io/$PROJECT_ID/ground-platform-build:latest
+      - --destination=gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}
+      - --context=dir:///workspace
+      - --dockerfile=cloud-build/Dockerfile
+      - --cache=true
 
-  # Install node packages for web-ng
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
-    id: &install_web_ng 'Install npm packages for web-ng'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Move web-ng deps"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web-ng && npm install
+      - "-c"
+      - |
+        mv /usr/src/ground-platform/web-ng/node_modules web-ng/
 
-  # Run eslint for web-ng
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
-    id: 'Run lint checks for web-ng'
-    waitFor: [*install_web_ng]
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Lint web-ng"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web-ng && npm run check
+      - "-c"
+      - |
+        cd web-ng && npm run check
 
-  # Run tests for web-ng
-  - name: 'gcr.io/ground-android-gcb/node-chrome'
-    id: 'Run tests for web-ng'
-    waitFor: [*install_web_ng]
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Test web-ng"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web-ng && npm run test
+      - "-c"
+      - |
+        cd web-ng && npm run test
+
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Move functions deps"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        mv /usr/src/ground-platform/functions/node_modules functions/
+
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Lint functions"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        cd functions && npm run check
