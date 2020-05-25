@@ -17,12 +17,12 @@ FROM node:latest
 # Download and install Chrome. We don't actually use Chrome directly, but
 # Puppeteers needs several libraries that Chrome depends on, and this is the
 # easiest way to ensure all of its latest dependencies are installed.
-# WORKDIR /tmp
-# RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-#     && apt-get update \
-#     && apt -y install ./google-chrome-stable_current_amd64.deb \
-#     && rm google-chrome-stable_current_amd64.deb \
-#     && rm -rf /var/lib/apt/lists/*
+WORKDIR /tmp
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get update \
+    && apt -y install ./google-chrome-stable_current_amd64.deb \
+    && rm google-chrome-stable_current_amd64.deb \
+    && rm -rf /var/lib/apt/lists/*
 
 # Pre-install deps required to build and test Ground Firestore Cloud Functions.
 WORKDIR /workspace/functions
