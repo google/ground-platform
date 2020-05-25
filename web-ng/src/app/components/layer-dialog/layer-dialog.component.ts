@@ -175,7 +175,7 @@ export class LayerDialogComponent implements OnDestroy {
         field.required,
         index,
         multipleChoice
-      )
+      );
       fields = fields.set(index, updField);
     });
     return fields;
@@ -196,7 +196,7 @@ export class LayerDialogComponent implements OnDestroy {
         field.required,
         index,
         multipleChoice
-      )
+      );
       const layerFieldId = this.fields && this.fields.get(index)?.id;
       const fieldId = layerFieldId
         ? layerFieldId

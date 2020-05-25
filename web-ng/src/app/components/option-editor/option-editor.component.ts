@@ -42,8 +42,7 @@ export class OptionEditorComponent implements OnInit, OnChanges {
     });
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   getCode() {
     return this.optionGroup.get('code')?.value;

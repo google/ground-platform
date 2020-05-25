@@ -146,7 +146,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   getOptions() {
-    if (this.formFieldGroup.get('type')?.value.type == FieldType.TEXT) {
+    if (this.formFieldGroup.get('type')?.value.type === FieldType.TEXT) {
       return;
     }
     let options = List<Option>();

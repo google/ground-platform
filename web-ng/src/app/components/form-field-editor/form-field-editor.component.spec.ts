@@ -27,14 +27,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 
-const FirestoreStub = {
+const firestoreStub = {
   collection: () => ({
     doc: (_id: string) => ({
-      valueChanges: () => new BehaviorSubject({ }),
-      set: (_d: any) => new Promise((resolve, _reject) => resolve()),
+      valueChanges: () => new BehaviorSubject({}),
+      set: (_d: string) => new Promise((resolve, _reject) => resolve()),
     }),
   }),
-}
+};
 
 describe('FormFieldEditorComponent', () => {
   let component: FormFieldEditorComponent;
@@ -53,7 +53,7 @@ describe('FormFieldEditorComponent', () => {
         MatInputModule,
         BrowserAnimationsModule,
       ],
-      providers: [{ provide: AngularFirestore, useValue: FirestoreStub }]
+      providers: [{ provide: AngularFirestore, useValue: firestoreStub }],
     }).compileComponents();
   }));
 
