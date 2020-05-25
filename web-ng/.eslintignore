@@ -1,0 +1,4 @@
+**/*.json
+**/node_modules
+build/
+src/test.ts

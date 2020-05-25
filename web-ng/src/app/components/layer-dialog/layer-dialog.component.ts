@@ -33,9 +33,12 @@ import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ViewChildren, QueryList } from '@angular/core';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
+
+// To make ESLint happy:
+/*global alert*/
 
 const DEFAULT_LAYER_COLOR = '#ff9131';
 
@@ -221,7 +224,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.dataStoreService
       .updateLayer(this.projectId, layer)
       .then(() => this.onClose())
-      .catch(err => {
+      .catch(() => {
         alert('Layer update failed.');
       });
   }
