@@ -17,14 +17,23 @@
 import { TestBed } from '@angular/core/testing';
 import { FeatureService } from './feature.service';
 import { DataStoreService } from '../data-store/data-store.service';
+import { ProjectService } from '../project/project.service';
+import { Subject } from 'rxjs';
+import { Project } from '../../shared/models/project.model';
 
 describe('FeatureService', () => {
-  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  const activeProject$ = new Subject<Project | null>();
 
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
-        { provide: DataStoreService, useValue: dataStoreServiceStub },
+        { provide: DataStoreService, useValue: {} },
+        {
+          provide: ProjectService,
+          useValue: {
+            getActiveProject$: () => activeProject$,
+          },
+        },
       ],
     })
   );
