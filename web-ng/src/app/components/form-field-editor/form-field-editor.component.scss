@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import '~src/custom-theme';
+
 .field-type {
   margin-left: 30px;
   font-size: 12px;
@@ -57,4 +59,9 @@
   cursor: move;
   padding: 5px;
   color: #dadde1;
+}
+
+.add-option {
+  margin-left: 30px;
+  color: mat-color($mat-green, 700);
 }

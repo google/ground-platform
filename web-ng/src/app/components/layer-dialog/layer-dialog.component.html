@@ -34,6 +34,7 @@
           [label]="field.label.get('en')"
           [required]="field.required"
           [type]="field.type"
+          [multipleChoice]="field.multipleChoice"
           (update)="onFieldUpdate($event, i)"
           (delete)="onFieldDelete(i)"
           fxFlex="2 1 auto"

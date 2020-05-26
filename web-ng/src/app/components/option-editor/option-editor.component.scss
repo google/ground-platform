@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-import { Layer } from './layer.model';
-import { StringMap } from './string-map.model';
-import { Map } from 'immutable';
+@import '~src/custom-theme';
 
-export class Project {
-  constructor(
-    readonly id: string,
-    readonly title: StringMap,
-    readonly description: StringMap,
-    readonly layers: Map<string, Layer>
-  ) {}
-
-  getLayer(layerId: string): Layer | undefined {
-    return this.layers.get(layerId);
-  }
+.dot {
+  height: 15px;
+  width: 15px;
+  border: 1px solid mat-color($foreground, light);
+  align-self: center;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 15px;
 }
