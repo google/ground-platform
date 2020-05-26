@@ -21,14 +21,26 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../services/auth/auth.service';
+import { User } from '../../shared/models/user.model';
+import { Subject } from 'rxjs';
 
 describe('InlineEditTitleComponent', () => {
   let component: InlineEditTitleComponent;
   let fixture: ComponentFixture<InlineEditTitleComponent>;
+  const user$ = new Subject<User | null>();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [InlineEditTitleComponent],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: {
+            user$,
+          },
+        },
+      ],
       imports: [
         AutoSizeInputModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),

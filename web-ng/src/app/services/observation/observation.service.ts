@@ -34,8 +34,8 @@ export class ObservationService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService,
-    private featureService: FeatureService
+    projectService: ProjectService,
+    featureService: FeatureService
   ) {
     this.selectedObservation$ = this.selectedObservationId$.pipe(
       switchMap(observationId =>
