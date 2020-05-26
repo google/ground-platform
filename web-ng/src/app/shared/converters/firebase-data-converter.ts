@@ -379,7 +379,7 @@ export class FirebaseDataConverter {
     if (responseValue instanceof Array) {
       return new Response(
         List(
-          responseValue.map((optionId) =>
+          responseValue.map(optionId =>
             form.getMultipleChoiceFieldOption(fieldID, optionId)
           )
         )
@@ -394,7 +394,7 @@ export class FirebaseDataConverter {
     }
     if (response.value instanceof List) {
       return (response.value as List<Option>)
-        .map((option) => option.id)
+        .map(option => option.id)
         .toArray();
     }
     throw Error(`Unknown value type of ${response.value}`);

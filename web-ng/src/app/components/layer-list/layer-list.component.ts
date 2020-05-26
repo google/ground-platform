@@ -34,6 +34,6 @@ export class LayerListComponent {
     this.lang = 'en';
     this.layers$ = projectService
       .getActiveProject$()
-      .pipe(map((project) => List(project.layers.valueSeq().toArray())));
+      .pipe(map(project => List(project.layers.valueSeq().toArray())));
   }
 }

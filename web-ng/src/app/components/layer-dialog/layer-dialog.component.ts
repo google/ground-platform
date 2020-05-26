@@ -72,7 +72,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerId = data.layerId;
     this.activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
-      this.activeProject$.subscribe((project) => {
+      this.activeProject$.subscribe(project => {
         this.onProjectLoaded(project);
       })
     );
@@ -128,7 +128,7 @@ export class LayerDialogComponent implements OnDestroy {
       }
     );
 
-    dialogRef.afterClosed().subscribe((dialogResult) => {
+    dialogRef.afterClosed().subscribe(dialogResult => {
       if (dialogResult) {
         this.fields = this.fields.splice(index, 1);
       }
@@ -148,7 +148,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields =
         this.getForms()
           ?.fields.toList()
-          .sortBy((field) => field.index) || List<Field>();
+          .sortBy(field => field.index) || List<Field>();
     }
     if (!this.layer) {
       throw Error('No layer exists');

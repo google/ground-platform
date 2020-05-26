@@ -38,15 +38,15 @@ export class ObservationService {
     private featureService: FeatureService
   ) {
     this.selectedObservation$ = this.selectedObservationId$.pipe(
-      switchMap((observationId) =>
+      switchMap(observationId =>
         projectService
           .getActiveProject$()
           .pipe(
-            switchMap((project) =>
+            switchMap(project =>
               featureService
                 .getSelectedFeature$()
                 .pipe(
-                  switchMap((feature) =>
+                  switchMap(feature =>
                     this.dataStore.loadObservation$(
                       project,
                       feature,

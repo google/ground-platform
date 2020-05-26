@@ -31,7 +31,7 @@ const firestoreStub = {
   collection: () => ({
     doc: () => ({
       valueChanges: () => new BehaviorSubject({}),
-      set: () => new Promise((resolve) => resolve()),
+      set: () => new Promise(resolve => resolve()),
     }),
   }),
 };

@@ -65,7 +65,7 @@ export class Field {
     if (this.multipleChoice === undefined) {
       throw Error(`Field ${this.id} does not have choices defined.`);
     }
-    const option = this.multipleChoice.options.find((o) => o.id === optionId);
+    const option = this.multipleChoice.options.find(o => o.id === optionId);
     if (!option) {
       throw Error(`Option ${optionId} not found in field ${this.id}.`);
     }

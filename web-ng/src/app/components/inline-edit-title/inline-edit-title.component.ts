@@ -40,7 +40,7 @@ export class InlineEditTitleComponent implements OnDestroy {
     this.lang = 'en';
     this.activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
-      this.activeProject$.subscribe((project) => {
+      this.activeProject$.subscribe(project => {
         this.title = project.title.get(this.lang)!;
         this.projectId = project.id;
       })
