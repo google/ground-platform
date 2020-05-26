@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM node:latest
+FROM node:14.3.0
 
-# Download nad install Chrome. We don't actually use Chrome directly, but
-# this is the easiest way to ensure all of its latest dependencies are
-# installed.
+# Download and install Chrome. We don't actually use Chrome directly, but
+# Puppeteer needs several libraries that Chrome depends on, and this is the
+# easiest way to ensure all of its latest dependencies are installed.
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt-get update \
     && apt -y install ./google-chrome-stable_current_amd64.deb \
     && rm google-chrome-stable_current_amd64.deb \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install node-pre-gyp -g
+    && rm -rf /var/lib/apt/lists/*
+
+# Cache web console build deps and Ivy build.
+WORKDIR /usr/src/ground-platform/web-ng
+COPY web-ng/package*.json ./
+RUN npm install
+RUN ./node_modules/.bin/ngcc
