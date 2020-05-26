@@ -15,7 +15,6 @@
  */
 
 import { Layer } from './layer.model';
-import { Form } from './form/form.model';
 import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
 
