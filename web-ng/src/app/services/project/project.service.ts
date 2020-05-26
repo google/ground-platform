@@ -19,6 +19,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap, shareReplay } from 'rxjs/operators';
 import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,12 +28,17 @@ export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
 
-  constructor(private dataStore: DataStoreService) {
-    //  on each change to project id.
-    this.activeProject$ = this.activeProjectId$.pipe(
-      // Asynchronously load project. switchMap() internally disposes
-      // of previous subscription if present.
-      switchMap(id => this.dataStore.loadProject$(id)),
+  constructor(private dataStore: DataStoreService, authService: AuthService) {
+    // Reload active project each time authenticated user changes.
+    this.activeProject$ = authService.user$.pipe(
+      switchMap(() =>
+        //  on each change to project id.
+        this.activeProjectId$.pipe(
+          // Asynchronously load project. switchMap() internally disposes
+          // of previous subscription if present.
+          switchMap(id => this.dataStore.loadProject$(id))
+        )
+      ),
       // Cache last loaded project so that late subscribers don't cause
       // project to be reloaded.
       shareReplay(1)

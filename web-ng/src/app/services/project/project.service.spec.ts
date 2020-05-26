@@ -18,14 +18,23 @@ import { TestBed } from '@angular/core/testing';
 
 import { ProjectService } from './project.service';
 import { DataStoreService } from '../data-store/data-store.service';
+import { AuthService } from '../auth/auth.service';
+import { Subject } from 'rxjs';
+import { User } from '../../shared/models/user.model';
 
 describe('ProjectService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
-
+  const user$ = new Subject<User | null>();
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: dataStoreServiceStub },
+        {
+          provide: AuthService,
+          useValue: {
+            user$,
+          },
+        },
       ],
     })
   );

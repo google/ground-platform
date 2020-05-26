@@ -32,7 +32,7 @@ export class FeatureService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService
+    projectService: ProjectService
   ) {
     this.features$ = projectService
       .getActiveProject$()
