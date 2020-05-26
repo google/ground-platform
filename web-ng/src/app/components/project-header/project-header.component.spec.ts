@@ -26,10 +26,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
+import { Subject } from 'rxjs';
+import { User } from '../../shared/models/user.model';
+
 describe('ProjectHeaderComponent', () => {
   let component: ProjectHeaderComponent;
   let fixture: ComponentFixture<ProjectHeaderComponent>;
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
+  const user$ = new Subject<User | null>();
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -42,7 +47,12 @@ describe('ProjectHeaderComponent', () => {
       ],
       declarations: [ProjectHeaderComponent],
       providers: [
-        { provide: AuthService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: {
+            user$,
+          },
+        },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
       ],

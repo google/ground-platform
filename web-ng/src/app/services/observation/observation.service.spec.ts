@@ -17,14 +17,16 @@
 import { TestBed } from '@angular/core/testing';
 import { ObservationService } from './observation.service';
 import { DataStoreService } from '../data-store/data-store.service';
+import { ProjectService } from '../project/project.service';
+import { FeatureService } from '../feature/feature.service';
 
 describe('ObservationService', () => {
-  const dataStoreServiceStub: Partial<DataStoreService> = {};
-
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
-        { provide: DataStoreService, useValue: dataStoreServiceStub },
+        { provide: DataStoreService, useValue: {} },
+        { provide: ProjectService, useValue: {} },
+        { provide: FeatureService, useValue: {} },
       ],
     })
   );
