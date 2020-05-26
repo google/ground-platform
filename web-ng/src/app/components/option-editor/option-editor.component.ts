@@ -27,7 +27,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 @Component({
   selector: 'app-option-editor',
   templateUrl: './option-editor.component.html',
-  styleUrls: ['./option-editor.component.css'],
+  styleUrls: ['./option-editor.component.scss'],
 })
 export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() code?: string;
