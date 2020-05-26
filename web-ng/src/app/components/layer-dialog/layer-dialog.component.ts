@@ -34,8 +34,6 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { ViewChildren, QueryList } from '@angular/core';
-import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
 
 // To make ESLint happy:
 /*global alert*/
@@ -48,10 +46,6 @@ const DEFAULT_LAYER_COLOR = '#ff9131';
   styleUrls: ['./layer-dialog.component.css'],
 })
 export class LayerDialogComponent implements OnDestroy {
-  @ViewChildren('fieldEditor') fieldsEditor?: QueryList<
-    FormFieldEditorComponent
-  >;
-
   lang: string;
   layerId: string;
   layer?: Layer;
@@ -167,44 +161,18 @@ export class LayerDialogComponent implements OnDestroy {
     return forms ? forms.valueSeq().first() : undefined;
   }
 
-  getUpdatedFields() {
-    let fields = List<Field>();
-    this.fields.forEach((field, index: number) => {
-      const multipleChoice = this.fieldsEditor?.toArray()[index].getOptions();
-      const updField = new Field(
-        field.id,
-        field.type,
-        field.label,
-        field.required,
-        index,
-        multipleChoice
-      );
-      fields = fields.set(index, updField);
-    });
-    return fields;
-  }
-
   onSave() {
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
-    this.fields.forEach((field, index: number) => {
-      const multipleChoice = this.fieldsEditor?.toArray()[index].getOptions();
-      const updField = new Field(
-        field.id,
-        field.type,
-        field.label,
-        field.required,
-        index,
-        multipleChoice
-      );
+    this.fields.forEach((field: Field, index: number) => {
       const layerFieldId = this.fields && this.fields.get(index)?.id;
       const fieldId = layerFieldId
         ? layerFieldId
         : this.dataStoreService.generateId();
-      fields = fields.set(fieldId, updField);
+      fields = fields.set(fieldId, field);
     });
     const form = this.getForms();
     const formId = form ? form.id : this.dataStoreService.generateId();
@@ -265,7 +233,6 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    this.fields = this.getUpdatedFields();
     const fieldAtPrevIndex = this.fields.get(event.previousIndex);
     const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
     if (fieldAtCurrentIndex && fieldAtPrevIndex) {

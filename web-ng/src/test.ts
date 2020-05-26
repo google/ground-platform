@@ -23,7 +23,7 @@ import {
   platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
 
-declare const require: any;
+declare const require: NodeRequire;
 
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
