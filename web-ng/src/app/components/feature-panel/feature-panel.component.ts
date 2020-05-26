@@ -48,11 +48,11 @@ export class FeaturePanelComponent {
     this.observations$ = projectService
       .getActiveProject$()
       .pipe(
-        switchMap(project =>
+        switchMap((project) =>
           featureService
             .getSelectedFeature$()
             .pipe(
-              switchMap(feature =>
+              switchMap((feature) =>
                 observationService.observations$(project, feature)
               )
             )
@@ -61,10 +61,10 @@ export class FeaturePanelComponent {
     this.layer$ = projectService
       .getActiveProject$()
       .pipe(
-        switchMap(project =>
+        switchMap((project) =>
           featureService
             .getSelectedFeature$()
-            .pipe(map(feature => project.layers.get(feature.layerId)!))
+            .pipe(map((feature) => project.layers.get(feature.layerId)!))
         )
       );
   }

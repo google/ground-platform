@@ -36,14 +36,14 @@ export class FeatureService {
   ) {
     this.features$ = projectService
       .getActiveProject$()
-      .pipe(switchMap(project => dataStore.features$(project)));
+      .pipe(switchMap((project) => dataStore.features$(project)));
 
     this.selectedFeature$ = this.selectedFeatureId$.pipe(
-      switchMap(featureId =>
+      switchMap((featureId) =>
         projectService
           .getActiveProject$()
           .pipe(
-            switchMap(project =>
+            switchMap((project) =>
               this.dataStore.loadFeature$(project.id, featureId)
             )
           )

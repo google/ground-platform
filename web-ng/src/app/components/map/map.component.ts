@@ -59,7 +59,7 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.subscription.add(
-      this.route.fragment.subscribe(fragment => {
+      this.route.fragment.subscribe((fragment) => {
         const params = new HttpParams({ fromString: fragment });
         if (params.get('f')) {
           this.focusedFeatureId = params.get('f')!;

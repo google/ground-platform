@@ -49,12 +49,12 @@ export class MainPageComponent implements OnInit {
   ngOnInit() {
     // Activate new project on route changes.
     this.subscription.add(
-      this.route.paramMap.subscribe(params => {
+      this.route.paramMap.subscribe((params) => {
         this.projectService.activateProject(params.get('projectId')!);
       })
     );
     this.subscription.add(
-      this.route.fragment.subscribe(fragment => {
+      this.route.fragment.subscribe((fragment) => {
         this.onFragmentChange(fragment);
       })
     );

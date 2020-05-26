@@ -29,9 +29,9 @@ import { BehaviorSubject } from 'rxjs';
 
 const firestoreStub = {
   collection: () => ({
-    doc: (_id: string) => ({
+    doc: () => ({
       valueChanges: () => new BehaviorSubject({}),
-      set: (_d: string) => new Promise((resolve, _reject) => resolve()),
+      set: () => new Promise((resolve) => resolve()),
     }),
   }),
 };

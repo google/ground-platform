@@ -47,7 +47,7 @@ export class DataStoreService {
       .get()
       .pipe(
         // Convert object to Project instance.
-        map(doc => FirebaseDataConverter.toProject(doc.id, doc.data()!))
+        map((doc) => FirebaseDataConverter.toProject(doc.id, doc.data()!))
       );
   }
 
@@ -81,7 +81,7 @@ export class DataStoreService {
       .collection(`projects/${projectId}/features`)
       .doc(featureId)
       .get()
-      .pipe(map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)));
+      .pipe(map((doc) => FirebaseDataConverter.toFeature(doc.id, doc.data()!)));
   }
 
   /**
@@ -99,8 +99,8 @@ export class DataStoreService {
       .collection(`projects/${id}/features`)
       .valueChanges({ idField: 'id' })
       .pipe(
-        map(array =>
-          List(array.map(obj => FirebaseDataConverter.toFeature(obj.id, obj)))
+        map((array) =>
+          List(array.map((obj) => FirebaseDataConverter.toFeature(obj.id, obj)))
         )
       );
   }
@@ -117,14 +117,14 @@ export class DataStoreService {
     feature: Feature
   ): Observable<List<Observation>> {
     return this.db
-      .collection(`projects/${project.id}/observations`, ref =>
+      .collection(`projects/${project.id}/observations`, (ref) =>
         ref.where('featureId', '==', feature.id)
       )
       .valueChanges({ idField: 'id' })
       .pipe(
-        map(array =>
+        map((array) =>
           List(
-            array.map(obj => {
+            array.map((obj) => {
               return FirebaseDataConverter.toObservation(
                 project
                   .getLayer(feature.layerId)!
@@ -144,7 +144,7 @@ export class DataStoreService {
       .doc(observationId)
       .get()
       .pipe(
-        map(doc => {
+        map((doc) => {
           return FirebaseDataConverter.toObservation(
             project.getLayer(feature.layerId)!.getForm(doc.data()!.formId)!,
             doc.id,

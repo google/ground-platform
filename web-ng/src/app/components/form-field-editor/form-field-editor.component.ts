@@ -81,7 +81,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     // As the form fields value change we are emitting the updated value to the layer-dialog.
-    this.formFieldGroup.valueChanges.subscribe(value => {
+    this.formFieldGroup.valueChanges.subscribe((value) => {
       this.update.emit({
         label: StringMap({ en: value.label }),
         required: value.required,
@@ -93,7 +93,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     const type = this.fieldTypes.find(
-      fieldType => fieldType.type === Number(this.type)
+      (fieldType) => fieldType.type === Number(this.type)
     );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
