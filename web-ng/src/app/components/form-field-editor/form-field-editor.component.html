@@ -52,9 +52,9 @@
         (update)="onOptionUpdate($event, i)"
       ></app-option-editor>
     </div>
-    <a class="add-option" (click)="onAddOption()">
+    <button mat-button (click)="onAddOption()" class="add-option">
       Add option
-    </a>
+    </button>
   </div>
   <div fxLayout fxLayoutAlign="end" class="question-actions">
     <button mat-icon-button (click)="onFieldDelete()">
