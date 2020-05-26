@@ -37,7 +37,8 @@ const mockProject = new Project(
   StringMap({ en: 'description' }),
   Map({
     layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
-  })
+  }),
+  Map()
 );
 
 const mockFeature = new Feature(

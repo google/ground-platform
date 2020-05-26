@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-import { Layer } from './layer.model';
-import { StringMap } from './string-map.model';
-import { Map } from 'immutable';
-import { Role } from './role.model';
-
-export class Project {
-  constructor(
-    readonly id: string,
-    readonly title: StringMap,
-    readonly description: StringMap,
-    readonly layers: Map<string, Layer>,
-    readonly acl: Map<string, Role>
-  ) {}
-
-  getLayer(layerId: string): Layer | undefined {
-    return this.layers.get(layerId);
-  }
+/**
+ * Represents a possible role in a project's ACLs. Each user can be assigned
+ * at most one role.
+ */
+export enum Role {
+  OWNER,
+  MANAGER,
+  CONTRIBUTOR,
+  VIEWER,
 }
