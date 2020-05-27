@@ -156,7 +156,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       label: StringMap({ en: this.label }),
       required: this.required,
       type: this.type,
-      multipleChoice: this.multipleChoice,
+      multipleChoice: this.formOptions,
     });
   }
 
