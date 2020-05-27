@@ -27,5 +27,4 @@ export type StringMap = Map<string, string>;
  *
  * @param obj dictionary with language-text pairs.
  */
-// tslint:disable-next-line:variable-name no-any
-export const StringMap = (obj: any): StringMap => Map(obj);
+export const StringMap = (obj: {}): StringMap => Map(obj);
