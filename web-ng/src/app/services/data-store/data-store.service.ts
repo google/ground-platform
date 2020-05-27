@@ -51,6 +51,12 @@ export class DataStoreService {
       );
   }
 
+  /**
+   * Updates the project with new title.
+   *
+   * @param projectId the id of the project.
+   * @param newTitle the new title of the project.
+   */
   updateProjectTitle(projectId: string, newTitle: string) {
     return this.db
       .collection('projects')

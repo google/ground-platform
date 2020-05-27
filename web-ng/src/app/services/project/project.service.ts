@@ -52,4 +52,14 @@ export class ProjectService {
   getActiveProject$(): Observable<Project> {
     return this.activeProject$;
   }
+
+  /**
+   * Updates the project with new title by calling the data-store service.
+   *
+   * @param projectId the id of the project.
+   * @param newTitle the new title of the project.
+   */
+  updateTitle(projectId: string, newTitle: string) {
+    return this.dataStore.updateProjectTitle(projectId, newTitle);
+  }
 }
