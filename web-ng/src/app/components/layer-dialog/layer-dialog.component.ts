@@ -28,7 +28,6 @@ import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
-import { FormBuilder } from '@angular/forms';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
@@ -57,13 +56,11 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
 
   constructor(
-    // tslint:disable-next-line:no-any
-    @Inject(MAT_DIALOG_DATA) data: any,
+    @Inject(MAT_DIALOG_DATA) data: { layerId: string },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private projectService: ProjectService,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private formBuilder: FormBuilder,
     private confirmationDialog: MatDialog
   ) {
     this.lang = 'en';
