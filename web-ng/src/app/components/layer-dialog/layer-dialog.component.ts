@@ -92,14 +92,6 @@ export class LayerDialogComponent implements OnDestroy {
     );
   }
 
-  // TODO: move options group to separate component
-  createOptionGroup() {
-    return this.formBuilder.group({
-      label: [''],
-      code: [''],
-    });
-  }
-
   addQuestion() {
     const fieldId = this.dataStoreService.generateId();
     this.fields = this.fields.push(
@@ -123,7 +115,6 @@ export class LayerDialogComponent implements OnDestroy {
    * @returns void
    *
    */
-
   onFieldDelete(index: number) {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
@@ -224,7 +215,6 @@ export class LayerDialogComponent implements OnDestroy {
    * @returns void
    *
    */
-
   onFieldUpdate(event: Field, index: number) {
     const fieldId = this.fields.get(index)?.id;
     const field = new Field(
@@ -233,7 +223,7 @@ export class LayerDialogComponent implements OnDestroy {
       event.label,
       event.required,
       index,
-      undefined
+      event.multipleChoice
     );
     this.fields = this.fields.set(index, field);
   }

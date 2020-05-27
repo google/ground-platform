@@ -37,6 +37,25 @@
       </mat-select>
     </mat-form-field>
   </div>
+  <div *ngIf="formOptions?.options">
+    <div
+      *ngFor="
+        let option of formOptions.options;
+        let i = index;
+        trackBy: trackByFn
+      "
+      fxLayout
+    >
+      <app-option-editor
+        [label]="option.label?.get('en')"
+        [code]="option.code"
+        (update)="onOptionUpdate($event, i)"
+      ></app-option-editor>
+    </div>
+    <button mat-button (click)="onAddOption()" class="add-option">
+      Add option
+    </button>
+  </div>
   <div fxLayout fxLayoutAlign="end" class="question-actions">
     <button mat-icon-button (click)="onFieldDelete()">
       <mat-icon>delete_forever</mat-icon>

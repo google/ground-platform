@@ -16,49 +16,37 @@
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FormFieldEditorComponent } from './form-field-editor.component';
+import { OptionEditorComponent } from './option-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { BehaviorSubject } from 'rxjs';
 
-const firestoreStub = {
-  collection: () => ({
-    doc: () => ({
-      valueChanges: () => new BehaviorSubject({}),
-      set: () => new Promise(resolve => resolve()),
-    }),
-  }),
-};
-
-describe('FormFieldEditorComponent', () => {
-  let component: FormFieldEditorComponent;
-  let fixture: ComponentFixture<FormFieldEditorComponent>;
+describe('OptionEditorComponent', () => {
+  let component: OptionEditorComponent;
+  let fixture: ComponentFixture<OptionEditorComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [FormFieldEditorComponent],
+      declarations: [OptionEditorComponent],
       imports: [
+        CommonModule,
+        BrowserAnimationsModule,
+        FlexLayoutModule,
+        MatFormFieldModule,
         FormsModule,
         ReactiveFormsModule,
-        BrowserModule,
-        MatSelectModule,
-        MatSlideToggleModule,
-        MatFormFieldModule,
         MatInputModule,
-        BrowserAnimationsModule,
+        MatButtonModule,
       ],
-      providers: [{ provide: AngularFirestore, useValue: firestoreStub }],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FormFieldEditorComponent);
+    fixture = TestBed.createComponent(OptionEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

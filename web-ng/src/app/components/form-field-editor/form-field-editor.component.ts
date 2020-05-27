@@ -21,10 +21,18 @@ import {
   Output,
   EventEmitter,
   OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
+import { Option } from '../../shared/models/form/option.model';
+import { List } from 'immutable';
+import {
+  MultipleChoice,
+  Cardinality,
+} from '../../shared/models/form/multiple-choice.model';
+import { DataStoreService } from '../../services/data-store/data-store.service';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -35,14 +43,16 @@ export interface FieldTypeSelectOption {
 @Component({
   selector: 'app-form-field-editor',
   templateUrl: './form-field-editor.component.html',
-  styleUrls: ['./form-field-editor.component.css'],
+  styleUrls: ['./form-field-editor.component.scss'],
 })
 export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() label?: string;
   @Input() required?: boolean;
   @Input() type?: string;
+  @Input() multipleChoice?: MultipleChoice;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+  formOptions: MultipleChoice | undefined;
   fieldTypes: FieldTypeSelectOption[] = [
     {
       icon: 'short_text',
@@ -58,7 +68,10 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   formFieldGroup: FormGroup;
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(
+    private formBuilder: FormBuilder,
+    private dataStoreService: DataStoreService
+  ) {
     this.formFieldGroup = this.formBuilder.group({
       label: [''],
       required: [false],
@@ -73,14 +86,18 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
         label: StringMap({ en: value.label }),
         required: value.required,
         type: value.type.type,
+        multipleChoice: this.formOptions,
       });
     });
   }
 
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
     const type = this.fieldTypes.find(
       fieldType => fieldType.type === Number(this.type)
     );
+    if (changes.multipleChoice) {
+      this.formOptions = this.multipleChoice;
+    }
     this.formFieldGroup.setValue({
       label: this.label,
       required: this.required,
@@ -94,7 +111,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * @returns void
    *
    */
-
   onFieldDelete() {
     this.delete.emit();
   }
@@ -110,8 +126,63 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * @returns void
    *
    */
-
   onFieldTypeSelect(event: FieldTypeSelectOption) {
+    this.type = event.type.toString();
     this.formFieldGroup.patchValue({ type: event });
+    if (event.type === FieldType.MULTIPLE_CHOICE) {
+      this.onAddOption();
+    } else {
+      this.formOptions = undefined;
+    }
+  }
+
+  trackByFn(index: number) {
+    return index;
+  }
+
+  /**
+   * Emits event to layer dialog whenvever label or code gets updated in options-editor.
+   *
+   * @param event: label and code value of the option field.
+   * @param index: index of the option to be updated.
+   * @returns void
+   *
+   */
+
+  onOptionUpdate(event: { label: string; code: string }, index: number) {
+    const option = this.createOption(event.code, event.label);
+    this.setFormOptions(index, option);
+    this.update.emit({
+      label: StringMap({ en: this.label }),
+      required: this.required,
+      type: this.type,
+      multipleChoice: this.formOptions,
+    });
+  }
+
+  onAddOption() {
+    const option = this.createOption('', '');
+    const index = this.formOptions?.options.size || 0;
+    this.setFormOptions(index, option);
+    this.update.emit({
+      label: StringMap({ en: this.label }),
+      required: this.required,
+      type: this.type,
+      multipleChoice: this.multipleChoice,
+    });
+  }
+
+  createOption(code: string, label: string) {
+    const optionId = this.dataStoreService.generateId();
+    const option = new Option(optionId || '', code, StringMap({ en: label }));
+    return option;
+  }
+
+  setFormOptions(index: number, option: Option) {
+    const cardinality =
+      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
+    let options = this.formOptions?.options || List<Option>();
+    options = options?.set(index, option);
+    this.formOptions = new MultipleChoice(cardinality, options);
   }
 }
