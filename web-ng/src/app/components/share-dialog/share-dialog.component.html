@@ -13,10 +13,30 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<mat-dialog-title>Share with contributors</mat-dialog-title>
-<mat-dialog-content> </mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-flat-button color="primary" (click)="close()">
+
+<h1 mat-dialog-title>Share with collaborators</h1>
+<div mat-dialog-content>
+  <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
+    <mat-form-field class="email-input">
+      <mat-label>Email address</mat-label>
+      <input matInput formControlName="email" autocomplete="off" />
+    </mat-form-field>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
+    >
+      <label>Add</label>
+    </button>
+  </form>
+  <h4>Collaborators</h4>
+  <div *ngFor="let entry of acl | async">
+    <!-- TODO: Format list, role names, allow edit role, delete. -->
+    <div>Email: {{ entry[0] }} Role: {{ entry[1] }}</div>
+  </div>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="onDoneClicked()">
     <label>Done</label>
   </button>
-</mat-dialog-actions>
+</div>

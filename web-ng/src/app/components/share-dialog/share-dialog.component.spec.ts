@@ -18,6 +18,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ShareDialogComponent } from './share-dialog.component';
 import { MatDialogRef } from '@angular/material/dialog';
+import { ProjectService } from '../../services/project/project.service';
+import { of } from 'rxjs';
 
 describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
@@ -26,7 +28,13 @@ describe('ShareDialogComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ShareDialogComponent],
-      providers: [{ provide: MatDialogRef, useValue: {} }],
+      providers: [
+        { provide: MatDialogRef, useValue: {} },
+        {
+          provide: ProjectService,
+          useValue: { getActiveProject$: () => of() },
+        },
+      ],
     }).compileComponents();
   }));
 

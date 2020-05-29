@@ -14,20 +14,85 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { Validators, FormControl, FormGroup } from '@angular/forms';
+import { ProjectService } from '../../services/project/project.service';
+import { Role } from '../../shared/models/role.model';
+import { Subscription, ReplaySubject } from 'rxjs';
+import { List } from 'immutable';
+import { Project } from '../../shared/models/project.model';
 
 @Component({
   selector: 'app-share-dialog',
   templateUrl: './share-dialog.component.html',
   styleUrls: ['./share-dialog.component.scss'],
 })
-export class ShareDialogComponent implements OnInit {
-  constructor(private dialogRef: MatDialogRef<ShareDialogComponent>) {}
+export class ShareDialogComponent {
+  addUserForm = new FormGroup({
+    email: new FormControl('', [Validators.email]),
+  });
 
-  ngOnInit(): void {}
+  private projectId?: string;
 
-  close(): void {
+  /** List of acl entries. Each entry consists of an email and a Role. */
+  acl = new ReplaySubject<List<[string, Role]>>();
+
+  private subscription = new Subscription();
+
+  constructor(
+    private dialogRef: MatDialogRef<ShareDialogComponent>,
+    private projectService: ProjectService
+  ) {
+    this.subscription.add(
+      this.projectService
+        .getActiveProject$()
+        .subscribe(p => this.onProjectLoaded(p))
+    );
+  }
+
+  /**
+   * Update ACL and projectId when project is loaded.
+   */
+  private onProjectLoaded(project: Project): void {
+    this.projectId = project.id;
+    this.acl.next(
+      project.acl
+        .entrySeq()
+        .toList()
+        .sortBy(pair => pair[0])
+    );
+  }
+
+  /**
+   * Add/update user role when email address is entered and add is clicked or
+   * enter is pressed.
+   */
+  onAddUserSubmit(): void {
+    if (!this.projectId) {
+      return;
+    }
+    // TODO: Allow setting role.
+    this.projectService.updateRole(
+      this.projectId,
+      this.addUserForm.value['email'],
+      Role.MANAGER
+    );
+    // TODO: Show saving / saved status.
+    this.addUserForm.reset();
+  }
+
+  /**
+   * Close the dialog when "Done" is clicked.
+   */
+  onDoneClicked(): void {
     this.dialogRef.close();
+  }
+
+  /**
+   * Clean up Rx subscription when cleaning up the component.
+   */
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
