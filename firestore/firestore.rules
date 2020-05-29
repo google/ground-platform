@@ -22,14 +22,14 @@
      * as a map keyed by email, with a single role as the value.
      */
     function acl(projectId) {
-    	return get(/databases/$(database)/documents/projects/$(projectId)).data.acl;
+      return get(/databases/$(database)/documents/projects/$(projectId)).data.acl;
     }
 
     /**
      * Returns user profile data associated with specified userId.
      */
-		function user(userId) {
-    	return get(/databases/$(database)/documents/users/$(userId)).data
+    function user(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data
     }
 
     /**
@@ -43,7 +43,7 @@
      * Returns the role of the specified email address in the given project.
      */
     function role(projectId, email) {
-    	return acl(projectId)[email];
+      return acl(projectId)[email];
     }
 
     /**
@@ -65,15 +65,15 @@
      * explicit passlist.
      */
     function canAccess(email) {
-    	return email.matches(passRegexp()) || isInPassList(email);
+      return email.matches(passRegexp()) || isInPassList(email);
     }
 
     /**
      * Return true iff the user with the given email can read the specified
      * project.
      */
-     function canViewProject(projectId, email) {
-    	return canAccess(email) && role(projectId, email) != null;
+    function canViewProject(projectId, email) {
+      return canAccess(email) && role(projectId, email) != null;
     }
 
     /**
@@ -81,7 +81,7 @@
      * project (i.e., modify the project document).
      */
     function canManageProject(projectId, email) {
-    	return canAccess(email) && ['owner', 'manager'].includes(role(projectId, email));
+      return canAccess(email) && ['owner', 'manager'].includes(role(projectId, email));
     }
 
     /**
@@ -90,7 +90,7 @@
      * observations).
      */
     function canContributeToProject(role, email) {
-    	return canAccess(email) && ['owner', 'manager', 'contributor'].includes(role(projectId, email));
+      return canAccess(email) && ['owner', 'manager', 'contributor'].includes(role(projectId, email));
     }
 
     // All users need to be able to read the passlist for rules to work.
@@ -105,21 +105,21 @@
 
     // Apply project-level ACLs and passlist to project documents.
     match /projects/{projectId} {
-    	allow read: if canViewProject(projectId, email())
-    	allow read, write: if canManageProject(projectId, email())
+      allow read: if canViewProject(projectId, email())
+      allow read, write: if canManageProject(projectId, email())
       allow read, write, create: if canAccess(email())
     }
 
     // Apply project-level ACLs and passlist to feature documents.
     match /projects/{projectId}/features/{featureId} {
-    	allow read: if canViewProject(projectId, email())
-    	allow read, write, create: if canContributeToProject(projectId, email())
+      allow read: if canViewProject(projectId, email())
+      allow read, write, create: if canContributeToProject(projectId, email())
     }
 
     // Apply project-level ACLs and passlist to observation documents.
     match /projects/{projectId}/observations/{observationId} {
-    	allow read: if canViewProject(projectId, email())
-    	allow read, write, create: if canContributeToProject(projectId, email())
+      allow read: if canViewProject(projectId, email())
+      allow read, write, create: if canContributeToProject(projectId, email())
     }
   }
 }
