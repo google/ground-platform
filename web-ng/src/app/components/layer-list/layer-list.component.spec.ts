@@ -32,7 +32,13 @@ const mockProject = new Project(
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
   Map({
-    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
+    layer001: new Layer(
+      'layer001',
+      /* index */ -1,
+      'red',
+      StringMap({ en: 'name' }),
+      Map()
+    ),
   })
 );
 
