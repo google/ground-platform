@@ -20,6 +20,7 @@ import { switchMap, shareReplay } from 'rxjs/operators';
 import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
+import { Role } from '../../shared/models/role.model';
 
 @Injectable({
   providedIn: 'root',
@@ -59,7 +60,11 @@ export class ProjectService {
    * @param projectId the id of the project.
    * @param newTitle the new title of the project.
    */
-  updateTitle(projectId: string, newTitle: string) {
+  updateTitle(projectId: string, newTitle: string): Promise<void> {
     return this.dataStore.updateProjectTitle(projectId, newTitle);
+  }
+
+  updateRole(projectId: string, email: string, role: Role): Promise<void> {
+    return this.dataStore.updateRole(projectId, email, role);
   }
 }

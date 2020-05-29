@@ -453,4 +453,12 @@ export class FirebaseDataConverter {
       serverTimestamp: auditInfo.serverTime,
     };
   }
+
+  /**
+   * Returns the string used to represent the specified role in the database.
+   * @param role the Role to be converted.
+   */
+  static toRoleId(role: Role): string {
+    return Role[role].toLowerCase();
+  }
 }
