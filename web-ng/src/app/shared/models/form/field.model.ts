@@ -48,6 +48,7 @@ export class Field {
     readonly type: FieldType,
     readonly label: StringMap,
     readonly required: boolean,
+    readonly index: number,
     readonly multipleChoice?: MultipleChoice
   ) {}
 
@@ -64,11 +65,10 @@ export class Field {
     if (this.multipleChoice === undefined) {
       throw Error(`Field ${this.id} does not have choices defined.`);
     }
-    for (const option of this.multipleChoice.options) {
-      if (option.id === optionId) {
-        return option;
-      }
+    const option = this.multipleChoice.options.find(o => o.id === optionId);
+    if (!option) {
+      throw Error(`Option ${optionId} not found in field ${this.id}.`);
     }
-    throw Error(`Option ${optionId} not found in field ${this.id}.`);
+    return option;
   }
 }

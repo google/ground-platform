@@ -1,64 +1,56 @@
-# Initialize gcloud via CLI
-# $ gcloud init
+# Copyright 2020 Google LLC
 #
-# Steps (1, 2, 3, and 4 run simultaneously):
-# ==========================================
-# 1. Install npm packages for firestore
-# 2. Install npm packages for functions
-# 3. Install npm packages for web
-# 4. Install npm packages for web-ng 
-#      |
-#      |  
-#      5. Run lint checks
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
+# This build is run automatically on pushes and pull requests.
+
+# The first time the Docker image is created, the total build time can exceed
+# the 10 min default. Increase the max. build time to 20 min to prevent
+# timeouts.
+timeout: 1200s
+
+# Build Docker image and run checks and tests. See name property of each step
+# for description.
 steps:
-
-  # Install node packages for firestore
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install npm packages for firestore'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: "gcr.io/kaniko-project/executor:v0.22.0"
+    id: "Update image"
     args:
-     - '-c'
-     - |
-       cd firestore && npm install
+      - --destination=gcr.io/$PROJECT_ID/ground-platform-build:latest
+      - --destination=gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}
+      - --context=dir:///workspace
+      - --dockerfile=cloud-build/Dockerfile
+      - --cache=true
 
-  # Install node packages for functions
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install npm packages for functions'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Move web-ng deps"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd functions && npm install
+      - "-c"
+      - |
+        mv /usr/src/ground-platform/web-ng/node_modules web-ng/
 
-  # Install node packages for web
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Install npm packages for web'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Lint web-ng"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web && npm install
+      - "-c"
+      - |
+        cd web-ng && npm run check
 
-  # Install node packages for web-ng
-  - name: 'gcr.io/cloud-builders/npm'
-    id: &install_web_ng 'Install npm packages for web-ng'
-    waitFor: ['-']
-    entrypoint: 'bash'
+  - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
+    id: "Test web-ng"
+    entrypoint: "bash"
     args:
-     - '-c'
-     - |
-       cd web-ng && npm install
-
-  # Run eslint for web-ng
-  - name: 'gcr.io/cloud-builders/npm'
-    id: 'Run lint checks for web-ng'
-    waitFor: [*install_web_ng]
-    entrypoint: 'bash'
-    args:
-     - '-c'
-     - |
-       cd web-ng && npm run check
+      - "-c"
+      - |
+        cd web-ng && npm run test

@@ -35,8 +35,7 @@ import { Response } from '../../shared/models/observation/response.model';
  * Helper to return either the keys of a dictionary, or if missing, returns an
  * empty array.
  */
-// tslint:disable-next-line:no-any
-function keys(dict?: any): any[] {
+function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
 }
 
@@ -84,7 +83,7 @@ export class FirebaseDataConverter {
   }
 
   static layerToJS(layer: Layer): {} {
-    const { id: layerId, name, forms, ...layerDoc } = layer;
+    const { name, forms, ...layerDoc } = layer;
     return {
       name: name?.toJS() || {},
       forms:
@@ -120,7 +119,7 @@ export class FirebaseDataConverter {
   private static formToJS(form: Form): {} {
     const { fields, ...formDoc } = form;
     return {
-      fields:
+      elements:
         fields?.reduce(
           (map, field: Field) => ({
             ...map,
@@ -170,6 +169,7 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
+      data.index,
       data.options &&
         new MultipleChoice(
           FirebaseDataConverter.stringToCardinality(data.cardinality),

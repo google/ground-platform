@@ -21,103 +21,30 @@
   placeholder="Unnamed layer"
   (focusOut)="setLayerName($event)"
 ></inline-editor>
-<form [formGroup]="layerForm" (ngSubmit)="onSave($event)">
+<form (ngSubmit)="onSave($event)">
   <mat-dialog-content>
     <div>Layer id: {{ layerId }}</div>
-    <div formArrayName="questions" class="main-container-questions">
+    <div cdkDropList (cdkDropListDropped)="drop($event)">
       <div
-        *ngFor="
-          let question of layerForm.controls.questions.controls;
-          let i = index
-        "
-        class="container-question"
+        *ngFor="let field of fields; let i = index; trackBy: trackByFn"
+        fxLayout
+        cdkDrag
       >
-        <div [formGroupName]="i">
-          <div fxLayout>
-            <mat-form-field appearance="fill" fxFlex="2 1 auto">
-              <mat-label>Question</mat-label>
-              <input matInput formControlName="label" />
-            </mat-form-field>
-            <mat-form-field fxFlex class="field-type" appearance="outline">
-              <mat-select #selectFieldType formControlName="fieldTypeOption">
-                <mat-select-trigger>
-                  <mat-icon class="icon-field-type">{{
-                    selectFieldType.value
-                      ? selectFieldType.value.icon
-                      : 'short_text'
-                  }}</mat-icon>
-                  <span class="label-field-type">
-                    {{
-                      selectFieldType.value
-                        ? selectFieldType.value.label
-                        : 'Text'
-                    }}
-                  </span>
-                </mat-select-trigger>
-                <mat-option
-                  *ngFor="let field of fieldTypeOptions"
-                  [value]="field"
-                >
-                  <mat-icon>{{ field.icon }}</mat-icon>
-                  <span>{{ field.label }}</span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div
-            *ngIf="
-              question.value.fieldTypeOption.type == fieldTypes.MULTIPLE_CHOICE
-            "
-            formArrayName="options"
-            class="main-container-options"
-          >
-            <div
-              *ngFor="
-                let option of question.controls.options.controls;
-                let j = index
-              "
-              class="container-option"
-            >
-              <div [formGroupName]="j" fxLayout fxLayoutGap="15px">
-                <span class="dot"></span>
-                <div fxFlex="2 1 auto">
-                  <mat-form-field class="field-option">
-                    <mat-label>Option</mat-label>
-                    <input matInput formControlName="label" />
-                  </mat-form-field>
-                </div>
-                <div fxFlex>
-                  <mat-form-field>
-                    <mat-label>Code</mat-label>
-                    <input matInput formControlName="code" />
-                  </mat-form-field>
-                </div>
-              </div>
-            </div>
-            <a
-              class="add-option"
-              (click)="addOption(question.controls.options)"
-            >
-              Add option
-            </a>
-          </div>
-          <div fxLayout fxLayoutAlign="end" class="question-actions">
-            <button mat-icon-button (click)="deleteQuestion($event, j)">
-              <mat-icon class="trash-icon">delete_forever</mat-icon>
-            </button>
-            <span class="vertical-divider"></span>
-            <div class="required-toggle">
-              <span class="required-label">Required</span>
-              <mat-slide-toggle formControlName="required" color="primary">
-              </mat-slide-toggle>
-            </div>
-          </div>
-        </div>
+        <app-form-field-editor
+          [label]="field.label.get('en')"
+          [required]="field.required"
+          [type]="field.type"
+          [multipleChoice]="field.multipleChoice"
+          (update)="onFieldUpdate($event, i)"
+          (delete)="onFieldDelete(i)"
+          fxFlex="2 1 auto"
+        >
+        </app-form-field-editor>
       </div>
-      <div class="add-question">
-        <span class="plus-icon"></span>
-        <a class="link-add-question" (click)="addQuestion()"> Add question </a>
-      </div>
+    </div>
+    <div class="add-question">
+      <span class="plus-icon"></span>
+      <a class="link-add-question" (click)="addQuestion()"> Add question </a>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions fxLayout fxLayoutAlign="end">

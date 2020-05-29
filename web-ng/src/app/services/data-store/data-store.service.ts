@@ -44,13 +44,19 @@ export class DataStoreService {
     return this.db
       .collection('projects')
       .doc(id)
-      .get()
+      .valueChanges()
       .pipe(
         // Convert object to Project instance.
-        map(doc => FirebaseDataConverter.toProject(doc.id, doc.data()!))
+        map(data => FirebaseDataConverter.toProject(id, data as DocumentData))
       );
   }
 
+  /**
+   * Updates the project with new title.
+   *
+   * @param projectId the id of the project.
+   * @param newTitle the new title of the project.
+   */
   updateProjectTitle(projectId: string, newTitle: string) {
     return this.db
       .collection('projects')
@@ -136,26 +142,31 @@ export class DataStoreService {
         map(array =>
           List(
             array.map(obj => {
-              const form = project.getLayerForm(
-                feature.layerId,
-                (obj as DocumentData).formId
+              return FirebaseDataConverter.toObservation(
+                project
+                  .getLayer(feature.layerId)!
+                  .getForm((obj as DocumentData).formId)!,
+                obj.id,
+                obj
               );
-              return FirebaseDataConverter.toObservation(form, obj.id, obj);
             })
           )
         )
       );
   }
 
-  loadObservation$(project: Project, observationId: string) {
+  loadObservation$(project: Project, feature: Feature, observationId: string) {
     return this.db
       .collection(`projects/${project.id}/observations`)
       .doc(observationId)
       .get()
       .pipe(
         map(doc => {
-          const form = project.getForm(doc.data()!.formId);
-          return FirebaseDataConverter.toObservation(form, doc.id, doc.data()!);
+          return FirebaseDataConverter.toObservation(
+            project.getLayer(feature.layerId)!.getForm(doc.data()!.formId)!,
+            doc.id,
+            doc.data()!
+          );
         })
       );
   }

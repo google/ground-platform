@@ -59,7 +59,8 @@ class MockModel {
     'element001',
     FieldType.TEXT,
     StringMap({ en: 'Text Field' }),
-    /*required=*/ true
+    /*required=*/ true,
+    0
   );
 
   static element002: Field = new Field(
@@ -67,6 +68,7 @@ class MockModel {
     FieldType.MULTIPLE_CHOICE,
     StringMap({ en: 'Multiple Select' }),
     /*required=*/ true,
+    0,
     new MultipleChoice(
       Cardinality.SELECT_MULTIPLE,
       List([
@@ -78,10 +80,10 @@ class MockModel {
 
   static form001: Form = new Form(
     'form001',
-    Map<string, Field>([
-      ['element001', MockModel.element001],
-      ['element002', MockModel.element002],
-    ])
+    Map({
+      element001: MockModel.element001,
+      element002: MockModel.element002,
+    })
   );
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
+// This file can be replaced during build by using the `fileReplacements` array.
+// `ng build --configuration=test ` replaces `environment.ts` with
+// `environment.test.ts`.
+// The list of file replacements can be found in `angular.json`.
 
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
+export const environment = {
+  production: false,
+  googleMapsApiKey: '',
+  firebaseConfig: {
+    apiKey: 'test',
+    authDomain: '',
+    databaseURL: '',
+    projectId: 'test',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: '',
+  },
+};

@@ -16,12 +16,13 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from './user-profile-popup.component';
 
 @NgModule({
   declarations: [UserProfilePopupComponent],
-  imports: [CommonModule, MatDialogModule],
+  imports: [CommonModule, MatButtonModule, MatDialogModule],
   entryComponents: [UserProfilePopupComponent],
 })
 export class UserProfilePopupModule {}

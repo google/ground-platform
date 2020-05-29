@@ -24,25 +24,16 @@ import { of } from 'rxjs';
 import { Map } from 'immutable';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
-import { Form } from '../../shared/models/form/form.model';
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
-import { MatListModule } from '@angular/material';
+import { MatListModule } from '@angular/material/list';
 
 const mockProject = new Project(
   'project001',
-  StringMap([['en', 'title']]),
-  StringMap([['en', 'description']]),
-  Map<string, Layer>([
-    [
-      'layer001',
-      new Layer(
-        'layer001',
-        'red',
-        StringMap([['en', 'name']]),
-        Map<string, Form>([])
-      ),
-    ],
-  ])
+  StringMap({ en: 'title' }),
+  StringMap({ en: 'description' }),
+  Map({
+    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
+  })
 );
 
 class MockProjectService {

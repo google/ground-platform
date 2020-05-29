@@ -15,7 +15,7 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { switchMap, shareReplay } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { Observable, ReplaySubject } from 'rxjs';
 import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
@@ -32,7 +32,7 @@ export class FeatureService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService
+    projectService: ProjectService
   ) {
     this.features$ = projectService
       .getActiveProject$()
