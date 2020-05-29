@@ -1,7 +1,125 @@
-service cloud.firestore {
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ // Define access rules for Firestore collections and documents.
+ service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write;
+    /**
+     * Reads access control list for specified projectId. The ACL is represented
+     * as a map keyed by email, with a single role as the value.
+     */
+    function acl(projectId) {
+    	return get(/databases/$(database)/documents/projects/$(projectId)).data.acl;
+    }
+
+    /**
+     * Returns user profile data associated with specified userId.
+     */
+		function user(userId) {
+    	return get(/databases/$(database)/documents/users/$(userId)).data
+    }
+
+    /**
+     * Returns email address for the requesting user.
+     */
+    function email() {
+      return user(request.auth.uid).email;
+    }
+
+    /**
+     * Returns the role of the specified email address in the given project.
+     */
+    function role(projectId, email) {
+    	return acl(projectId)[email];
+    }
+
+    /**
+     * Returns the regular expression for users allowed access.
+     */
+    function passRegexp() {
+      return get(/databases/$(database)/documents/passlist/regexp).data.regexp
+    }
+
+    /**
+     * Returns true iff the specified email is in the pass list.
+     */
+    function isInPassList(email) {
+      return exists(/databases/$(database)/documents/passlist/$(email))
+    }
+
+    /**
+     * Return true iff the user's email is in the implicit regex or
+     * explicit passlist.
+     */
+    function canAccess(email) {
+    	return email.matches(passRegexp()) || isInPassList(email);
+    }
+
+    /**
+     * Return true iff the user with the given email can read the specified
+     * project.
+     */
+     function canViewProject(projectId, email) {
+    	return canAccess(email) && role(projectId, email) != null;
+    }
+
+    /**
+     * Return true iff the user with the given email can manage the specified
+     * project (i.e., modify the project document).
+     */
+    function canManageProject(projectId, email) {
+    	return canAccess(email) && ['owner', 'manager'].includes(role(projectId, email));
+    }
+
+    /**
+     * Return true iff the user with the given email can contribute features 
+     * and observations to the specified project (i.e., add/edit features and
+     * observations).
+     */
+    function canContributeToProject(role, email) {
+    	return canAccess(email) && ['owner', 'manager', 'contributor'].includes(role(projectId, email));
+    }
+
+    // All users need to be able to read the passlist for rules to work.
+    match /users/{userId} {
+      allow read, create, write: if userId == request.auth.uid;
+    }
+
+    // All users need to be able to read the passlist for rules to work.
+    match /passlist/{email} {
+      allow read;
+    }
+
+    // Apply project-level ACLs and passlist to project documents.
+    match /projects/{projectId} {
+    	allow read: if canViewProject(projectId, email())
+    	allow read, write: if canManageProject(projectId, email())
+      allow read, write, create: if canAccess(email())
+    }
+
+    // Apply project-level ACLs and passlist to feature documents.
+    match /projects/{projectId}/features/{featureId} {
+    	allow read: if canViewProject(projectId, email())
+    	allow read, write, create: if canContributeToProject(projectId, email())
+    }
+
+    // Apply project-level ACLs and passlist to observation documents.
+    match /projects/{projectId}/observations/{observationId} {
+    	allow read: if canViewProject(projectId, email())
+    	allow read, write, create: if canContributeToProject(projectId, email())
     }
   }
 }
