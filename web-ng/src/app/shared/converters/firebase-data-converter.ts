@@ -71,6 +71,8 @@ export class FirebaseDataConverter {
   private static toLayer(id: string, data: DocumentData): Layer {
     return new Layer(
       id,
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1,
       data.color,
       StringMap(data.name),
       Map<string, Form>(
