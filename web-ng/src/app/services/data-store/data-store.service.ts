@@ -44,10 +44,10 @@ export class DataStoreService {
     return this.db
       .collection('projects')
       .doc(id)
-      .get()
+      .valueChanges()
       .pipe(
         // Convert object to Project instance.
-        map(doc => FirebaseDataConverter.toProject(doc.id, doc.data()!))
+        map(data => FirebaseDataConverter.toProject(id, data as DocumentData))
       );
   }
 
