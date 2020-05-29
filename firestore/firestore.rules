@@ -81,7 +81,7 @@
      * project (i.e., modify the project document).
      */
     function canManageProject(projectId, email) {
-      return canAccess(email) && ['owner', 'manager'].includes(role(projectId, email));
+      return canAccess(email) && role(projectId, email) in ['owner', 'manager'];
     }
 
     /**
@@ -89,8 +89,8 @@
      * and observations to the specified project (i.e., add/edit features and
      * observations).
      */
-    function canContributeToProject(role, email) {
-      return canAccess(email) && ['owner', 'manager', 'contributor'].includes(role(projectId, email));
+    function canContributeToProject(projectId, email) {
+      return canAccess(email) && role(projectId, email) in ['owner', 'manager', 'contributor'];
     }
 
     // All users need to be able to read the passlist for rules to work.
