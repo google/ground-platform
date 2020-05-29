@@ -36,8 +36,7 @@ import { Role } from '../models/role.model';
  * Helper to return either the keys of a dictionary, or if missing, returns an
  * empty array.
  */
-// tslint:disable-next-line:no-any
-function keys(dict?: any): any[] {
+function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
 }
 
