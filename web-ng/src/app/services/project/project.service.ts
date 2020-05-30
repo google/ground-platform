@@ -37,9 +37,9 @@ export class ProjectService {
           // Asynchronously load project. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => this.dataStore.loadProject$(id)),
-          shareReplay(1)
           // Cache last loaded project so that late subscribers don't cause
           // project to be reloaded.
+          shareReplay(1)
         )
       )
     );
