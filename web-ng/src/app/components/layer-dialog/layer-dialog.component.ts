@@ -135,7 +135,7 @@ export class LayerDialogComponent implements OnDestroy {
   onProjectLoaded(project: Project) {
     if (this.layerId === ':new') {
       this.layerId = this.dataStoreService.generateId();
-      this.layer = new Layer(this.layerId);
+      this.layer = new Layer(this.layerId, /* index */ -1);
     } else {
       this.layer = project.layers.get(this.layerId);
     }
@@ -175,6 +175,7 @@ export class LayerDialogComponent implements OnDestroy {
     const formId = form ? form.id : this.dataStoreService.generateId();
     const layer = new Layer(
       this.layerId,
+      /* index */ -1,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
