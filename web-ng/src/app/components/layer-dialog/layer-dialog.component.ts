@@ -53,7 +53,7 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) data: { layerId: string; project: Project },
+    @Inject(MAT_DIALOG_DATA) data: { layerId: string; projectId: string; layers: Map<string,Layer> },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
@@ -64,7 +64,7 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.fields = List<Field>();
     this.layerId = data.layerId;
-    this.onProjectLoaded(data.project);
+    this.initProject(data.projectId, data.layers);
   }
 
   addQuestion() {
@@ -110,7 +110,7 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  onProjectLoaded(project: Project) {
+  initProject(projectId: string, layers: Map<string, Layer>) {
     if (this.layerId === ':new') {
       this.layerId = this.dataStoreService.generateId();
       const fieldId = this.dataStoreService.generateId();
@@ -128,7 +128,7 @@ export class LayerDialogComponent implements OnDestroy {
       );
       this.layer = new Layer(this.layerId, /* index */ -1);
     } else {
-      this.layer = project?.layers?.get(this.layerId);
+      this.layer = layers?.get(this.layerId);
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
@@ -138,7 +138,7 @@ export class LayerDialogComponent implements OnDestroy {
           ?.fields.toList()
           .sortBy(field => field.index) || List<Field>();
     }
-    this.projectId = project?.id;
+    this.projectId = projectId;
   }
 
   private getForms(): Form | undefined {
