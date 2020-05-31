@@ -20,7 +20,6 @@ import {
   MAT_DIALOG_DATA,
   MatDialog,
 } from '@angular/material/dialog';
-import { Project } from '../../shared/models/project.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
@@ -54,7 +53,12 @@ export class LayerDialogComponent implements OnDestroy {
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    data: { layerId: string; projectId: string; layers: Map<string, Layer> },
+    data: {
+      layerId: string;
+      projectId: string;
+      layers: Map<string, Layer>;
+      createLayer: boolean;
+    },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
@@ -65,7 +69,12 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.fields = List<Field>();
     this.layerId = data.layerId;
-    this.initProject(data.projectId, data.layers);
+    if (data.layers) {
+      this.initProject(data.projectId, false, data.layers);
+    }
+    if (data.createLayer) {
+      this.initProject(data.projectId, true);
+    }
   }
 
   addQuestion() {
@@ -112,8 +121,13 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  initProject(projectId: string, layers: Map<string, Layer>) {
-    if (this.layerId === ':new') {
+  initProject(
+    projectId: string,
+    createLayer: boolean,
+    layers?: Map<string, Layer>
+  ) {
+    this.projectId = projectId;
+    if (createLayer) {
       this.layerId = this.dataStoreService.generateId();
       const fieldId = this.dataStoreService.generateId();
       this.fields = this.fields.push(
@@ -133,6 +147,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.layer = new Layer(this.layerId, /* index */ -1);
     } else {
       this.layer = layers?.get(this.layerId);
+      if (!this.layer) {
+        // Close the layer if it doesn't exist.
+        this.onClose();
+      }
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
@@ -142,7 +160,6 @@ export class LayerDialogComponent implements OnDestroy {
           ?.fields.toList()
           .sortBy(field => field.index) || List<Field>();
     }
-    this.projectId = projectId;
   }
 
   private getForms(): Form | undefined {

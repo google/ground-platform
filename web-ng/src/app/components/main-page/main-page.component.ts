@@ -70,6 +70,11 @@ export class MainPageComponent implements OnInit {
       return;
     }
     const params = new HttpParams({ fromString: fragment });
+    // The 'l' param with value ':new" is used to create new layer.
+    if (params.get('l') === ':new') {
+      this.showEditLayerDialog();
+      return;
+    }
     // The 'l' param is used to represent the layer id being
     // edited.
     if (params.get('l')) {
@@ -87,11 +92,24 @@ export class MainPageComponent implements OnInit {
     }
   }
 
-  private showEditLayerDialog(layerId: string) {
-    this.activeProject$.pipe(take(1)).subscribe(project =>
-      this.dialog.open(LayerDialogComponent, {
-        data: { layerId, projectId: project.id, layers: project.layers },
-      })
-    );
+  private showEditLayerDialog(layerId?: string) {
+    this.activeProject$.pipe(take(1)).subscribe(project => {
+      let layerDialogData = {};
+      if (layerId) {
+        layerDialogData = {
+          ...layerDialogData,
+          layerId,
+          projectId: project.id,
+          layers: project.layers,
+        };
+      } else {
+        layerDialogData = {
+          ...layerDialogData,
+          createLayer: true,
+          projectId: project.id,
+        };
+      }
+      this.dialog.open(LayerDialogComponent, { data: layerDialogData });
+    });
   }
 }
