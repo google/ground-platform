@@ -54,7 +54,7 @@ export class LayerDialogComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     data: {
       projectId: string;
-      layer: Layer;
+      layer?: Layer;
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
@@ -112,10 +112,10 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  init(projectId: string, createLayer: boolean, layer: Layer) {
+  init(projectId: string, createLayer: boolean, layer: Layer | undefined) {
     this.projectId = projectId;
     if (!createLayer && !layer) {
-      throw Error('No layer exists.');
+      throw Error('Layer not found');
     }
     if (createLayer) {
       const layerId = this.dataStoreService.generateId();
