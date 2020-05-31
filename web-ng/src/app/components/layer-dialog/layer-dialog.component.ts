@@ -89,7 +89,6 @@ export class LayerDialogComponent implements OnDestroy {
         /* required= */
         false,
         this.fields.size,
-        undefined
       )
     );
   }
@@ -141,7 +140,6 @@ export class LayerDialogComponent implements OnDestroy {
           false,
           /* index= */
           0,
-          undefined
         )
       );
       this.layer = new Layer(this.layerId, /* index */ -1);
