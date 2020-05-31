@@ -88,11 +88,9 @@ export class MainPageComponent implements OnInit {
   }
 
   private showEditLayerDialog(layerId: string) {
-    this.subscription.add(
-      this.activeProject$.pipe(take(1)).subscribe(project => {
-        this.dialog.open(LayerDialogComponent, {
-          data: { layerId, project },
-        });
+    this.activeProject$.pipe(take(1)).subscribe(project =>
+      this.dialog.open(LayerDialogComponent, {
+        data: { layerId, project },
       })
     );
   }
