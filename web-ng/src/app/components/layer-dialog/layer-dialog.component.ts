@@ -112,7 +112,7 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  init(projectId: string, createLayer: boolean, layer: Layer | undefined) {
+  init(projectId: string, createLayer: boolean, layer?: Layer) {
     this.projectId = projectId;
     if (!createLayer && !layer) {
       throw Error('Layer not found');
