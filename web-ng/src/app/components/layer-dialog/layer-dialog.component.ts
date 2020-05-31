@@ -53,7 +53,8 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) data: { layerId: string; projectId: string; layers: Map<string,Layer> },
+    @Inject(MAT_DIALOG_DATA)
+    data: { layerId: string; projectId: string; layers: Map<string, Layer> },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
@@ -76,6 +77,7 @@ export class LayerDialogComponent implements OnDestroy {
         StringMap({
           en: '',
         }),
+        /* required= */
         false,
         this.fields.size,
         undefined
@@ -121,7 +123,9 @@ export class LayerDialogComponent implements OnDestroy {
           StringMap({
             en: '',
           }),
+          /* required= */
           false,
+          /* index= */
           0,
           undefined
         )
