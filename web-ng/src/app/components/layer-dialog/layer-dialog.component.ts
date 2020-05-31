@@ -43,7 +43,6 @@ const DEFAULT_LAYER_COLOR = '#ff9131';
 })
 export class LayerDialogComponent implements OnDestroy {
   lang: string;
-  layerId: string;
   layer?: Layer;
   layerName!: string;
   projectId?: string;
@@ -54,9 +53,8 @@ export class LayerDialogComponent implements OnDestroy {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     data: {
-      layerId: string;
       projectId: string;
-      layers: Map<string, Layer>;
+      layer: Layer;
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
@@ -68,13 +66,7 @@ export class LayerDialogComponent implements OnDestroy {
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
-    this.layerId = data.layerId;
-    if (data.layers) {
-      this.initProject(data.projectId, false, data.layers);
-    }
-    if (data.createLayer) {
-      this.initProject(data.projectId, true);
-    }
+    this.init(data.projectId, data.createLayer, data.layer);
   }
 
   addQuestion() {
@@ -88,7 +80,7 @@ export class LayerDialogComponent implements OnDestroy {
         }),
         /* required= */
         false,
-        this.fields.size,
+        this.fields.size
       )
     );
   }
@@ -120,14 +112,13 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  initProject(
-    projectId: string,
-    createLayer: boolean,
-    layers?: Map<string, Layer>
-  ) {
+  init(projectId: string, createLayer: boolean, layer: Layer) {
     this.projectId = projectId;
+    if (!createLayer && !layer) {
+      throw Error('No layer exists.');
+    }
     if (createLayer) {
-      this.layerId = this.dataStoreService.generateId();
+      const layerId = this.dataStoreService.generateId();
       const fieldId = this.dataStoreService.generateId();
       this.fields = this.fields.push(
         new Field(
@@ -139,16 +130,12 @@ export class LayerDialogComponent implements OnDestroy {
           /* required= */
           false,
           /* index= */
-          0,
+          0
         )
       );
-      this.layer = new Layer(this.layerId, /* index */ -1);
+      this.layer = new Layer(layerId, /* index */ -1);
     } else {
-      this.layer = layers?.get(this.layerId);
-      if (!this.layer) {
-        // Close the layer if it doesn't exist.
-        this.onClose();
-      }
+      this.layer = layer;
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
@@ -181,7 +168,7 @@ export class LayerDialogComponent implements OnDestroy {
     const form = this.getForms();
     const formId = form ? form.id : this.dataStoreService.generateId();
     const layer = new Layer(
-      this.layerId,
+      this.layer?.id || '',
       /* index */ -1,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
