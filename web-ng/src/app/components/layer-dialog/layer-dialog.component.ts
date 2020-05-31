@@ -72,7 +72,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.fields = this.fields.push(
       new Field(
         fieldId,
-        1,
+        FieldType.TEXT,
         StringMap({
           en: '',
         }),
@@ -117,7 +117,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields = this.fields.push(
         new Field(
           fieldId,
-          1,
+          FieldType.TEXT,
           StringMap({
             en: '',
           }),
