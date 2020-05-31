@@ -31,9 +31,14 @@ import { Project } from '../../shared/models/project.model';
 export class ShareDialogComponent {
   addUserForm = new FormGroup({
     email: new FormControl('', [Validators.email]),
+    role: new FormControl(Role.CONTRIBUTOR),
   });
 
+  /** The id of the currently active project. */
   private projectId?: string;
+
+  /** Exposes the Role enum to the template. */
+  roles = Role;
 
   /** List of acl entries. Each entry consists of an email and a Role. */
   acl = new ReplaySubject<List<[string, Role]>>();
@@ -76,10 +81,10 @@ export class ShareDialogComponent {
     this.projectService.updateRole(
       this.projectId,
       this.addUserForm.value['email'],
-      Role.MANAGER
+      this.addUserForm.value['role']
     );
     // TODO: Show saving / saved status.
-    this.addUserForm.reset();
+    this.addUserForm.setValue({ email: '', role: Role.CONTRIBUTOR });
   }
 
   /**

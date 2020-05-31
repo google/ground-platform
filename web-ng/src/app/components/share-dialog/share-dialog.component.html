@@ -21,6 +21,19 @@
       <mat-label>Email address</mat-label>
       <input matInput formControlName="email" autocomplete="off" />
     </mat-form-field>
+    <mat-form-field class="role-select">
+      <mat-select formControlName="role">
+        <mat-option [value]="roles.VIEWER">
+          Viewer
+        </mat-option>
+        <mat-option [value]="roles.CONTRIBUTOR">
+          Contributor
+        </mat-option>
+        <mat-option [value]="roles.MANAGER">
+          Manager
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
     <button
       mat-flat-button
       color="primary"
