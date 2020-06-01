@@ -37,8 +37,12 @@ export class ShareDialogComponent {
   /** The id of the currently active project. */
   private projectId?: string;
 
-  /** Exposes the Role enum to the template. */
-  roles = Role;
+  /** Roles and labels for select drop-downs. */
+  readonly ROLE_OPTIONS = [
+    { label: 'Viewer', value: Role.VIEWER },
+    { label: 'Contributor', value: Role.CONTRIBUTOR },
+    { label: 'Manager', value: Role.MANAGER },
+  ];
 
   /** List of acl entries. Each entry consists of an email and a Role. */
   acl = new ReplaySubject<List<[string, Role]>>();
