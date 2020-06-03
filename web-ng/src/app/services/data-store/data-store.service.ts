@@ -25,6 +25,7 @@ import { Feature } from '../../shared/models/feature.model';
 import { Layer } from './../../shared/models/layer.model';
 import { List } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
+import { Role } from '../../shared/models/role.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -57,12 +58,11 @@ export class DataStoreService {
    * @param projectId the id of the project.
    * @param newTitle the new title of the project.
    */
-  updateProjectTitle(projectId: string, newTitle: string) {
+  updateProjectTitle(projectId: string, newTitle: string): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)
-      .set({ title: { en: newTitle } }, { merge: true })
-      .then(() => projectId);
+      .set({ title: { en: newTitle } }, { merge: true });
   }
 
   // TODO: Define return types for methods in this class
@@ -157,6 +157,23 @@ export class DataStoreService {
             doc.data()!
           );
         })
+      );
+  }
+
+  /**
+   * Adds or overwrites the role of the specified user in the project with the
+   * specified id.
+   * @param projectId the id of the project to be updated.
+   * @param email the email of the user whose role is to be updated.
+   * @param role the new role of the specified user.
+   */
+  updateRole(projectId: string, email: string, role: Role): Promise<void> {
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .set(
+        { acl: { [email]: FirebaseDataConverter.toRoleId(role) } },
+        { merge: true }
       );
   }
 

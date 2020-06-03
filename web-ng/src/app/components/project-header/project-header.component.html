@@ -22,8 +22,8 @@
   </div>
   <div>
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
-      <button mat-flat-button color="primary">
-        <mat-icon>share</mat-icon>
+      <button mat-flat-button color="primary" (click)="openShareDialog($event)">
+        <mat-icon>people_alt</mat-icon>
         <label>Share</label>
       </button>
       <button mat-icon-button aria-label="More project settings">
@@ -33,7 +33,7 @@
         src="{{ user.photoURL }}=s64"
         alt="{{ user.displayName }}"
         class="user-thumb"
-        style="cursor: pointer"
+        style="cursor: pointer;"
         (click)="openProfileDialog($event)"
       />
     </div>

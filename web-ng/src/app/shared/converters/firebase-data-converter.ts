@@ -30,6 +30,7 @@ import { Option } from '../../shared/models/form/option.model';
 import { List, Map } from 'immutable';
 import { AuditInfo } from '../models/audit-info.model';
 import { Response } from '../../shared/models/observation/response.model';
+import { Role } from '../models/role.model';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -57,8 +58,29 @@ export class FirebaseDataConverter {
           id as string,
           FirebaseDataConverter.toLayer(id, data.layers[id]),
         ])
+      ),
+      Map<string, Role>(
+        keys(data.acl).map((id: string) => [
+          id as string,
+          FirebaseDataConverter.toRole(data.acl[id]),
+        ])
       )
     );
+  }
+  private static toRole(roleString: string) {
+    switch (roleString) {
+      case 'owner':
+        return Role.OWNER;
+      case 'manager':
+        return Role.MANAGER;
+      case 'contributor':
+        return Role.CONTRIBUTOR;
+      case 'viewer':
+        return Role.VIEWER;
+      default:
+        console.log('User has unsupported role: ', roleString);
+        return Role.VIEWER;
+    }
   }
 
   /**
@@ -432,5 +454,13 @@ export class FirebaseDataConverter {
       clientTimestamp: auditInfo.clientTime,
       serverTimestamp: auditInfo.serverTime,
     };
+  }
+
+  /**
+   * Returns the string used to represent the specified role in the database.
+   * @param role the Role to be converted.
+   */
+  static toRoleId(role: Role): string {
+    return Role[role].toLowerCase();
   }
 }

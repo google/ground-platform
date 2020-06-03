@@ -1,0 +1,51 @@
+<!--
+  Copyright 2020 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<h1 mat-dialog-title>Share with collaborators</h1>
+<div mat-dialog-content>
+  <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
+    <mat-form-field class="email-input">
+      <mat-label>Email address</mat-label>
+      <input matInput formControlName="email" autocomplete="off" />
+    </mat-form-field>
+    <mat-form-field class="role-select">
+      <mat-select formControlName="role">
+        <mat-option
+          *ngFor="let option of ROLE_OPTIONS"
+          [value]="option.value"
+          >{{ option.label }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
+    >
+      <label>Add</label>
+    </button>
+  </form>
+  <h4>Collaborators</h4>
+  <div *ngFor="let entry of acl | async">
+    <!-- TODO: Format list, role names, allow edit role, delete. -->
+    <div>Email: {{ entry[0] }} Role: {{ entry[1] }}</div>
+  </div>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="onDoneClicked()">
+    <label>Done</label>
+  </button>
+</div>
