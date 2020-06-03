@@ -65,7 +65,7 @@ describe('LayerDialogComponent', () => {
         MatIconModule,
       ],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: Router, useValue: routerSpy },
       ],

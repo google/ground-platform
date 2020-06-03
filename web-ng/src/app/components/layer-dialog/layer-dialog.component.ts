@@ -15,14 +15,11 @@
  */
 
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ProjectService } from '../../services/project/project.service';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
   MatDialog,
 } from '@angular/material/dialog';
-import { Project } from '../../shared/models/project.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
@@ -46,19 +43,21 @@ const DEFAULT_LAYER_COLOR = '#ff9131';
 })
 export class LayerDialogComponent implements OnDestroy {
   lang: string;
-  layerId: string;
   layer?: Layer;
   layerName!: string;
   projectId?: string;
-  activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) data: { layerId: string },
+    @Inject(MAT_DIALOG_DATA)
+    data: {
+      projectId: string;
+      layer?: Layer;
+      createLayer: boolean;
+    },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private projectService: ProjectService,
     private dataStoreService: DataStoreService,
     private router: Router,
     private confirmationDialog: MatDialog
@@ -66,27 +65,8 @@ export class LayerDialogComponent implements OnDestroy {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
-    this.layerId = data.layerId;
-    this.activeProject$ = this.projectService.getActiveProject$();
-    this.subscription.add(
-      this.activeProject$.subscribe(project => {
-        this.onProjectLoaded(project);
-      })
-    );
-    const fields = List<Field>();
-    const fieldId = this.dataStoreService.generateId();
-    this.fields = fields.push(
-      new Field(
-        fieldId,
-        1,
-        StringMap({
-          en: '',
-        }),
-        false,
-        0,
-        undefined
-      )
-    );
+    this.fields = List<Field>();
+    this.init(data.projectId, data.createLayer, data.layer);
   }
 
   addQuestion() {
@@ -94,13 +74,13 @@ export class LayerDialogComponent implements OnDestroy {
     this.fields = this.fields.push(
       new Field(
         fieldId,
-        1,
+        FieldType.TEXT,
         StringMap({
           en: '',
         }),
+        /* required= */
         false,
-        this.fields.size,
-        undefined
+        this.fields.size
       )
     );
   }
@@ -132,12 +112,30 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  onProjectLoaded(project: Project) {
-    if (this.layerId === ':new') {
-      this.layerId = this.dataStoreService.generateId();
-      this.layer = new Layer(this.layerId);
+  init(projectId: string, createLayer: boolean, layer?: Layer) {
+    this.projectId = projectId;
+    if (!createLayer && !layer) {
+      throw Error('Layer not found');
+    }
+    if (createLayer) {
+      const layerId = this.dataStoreService.generateId();
+      const fieldId = this.dataStoreService.generateId();
+      this.fields = this.fields.push(
+        new Field(
+          fieldId,
+          FieldType.TEXT,
+          StringMap({
+            en: '',
+          }),
+          /* required= */
+          false,
+          /* index= */
+          0
+        )
+      );
+      this.layer = new Layer(layerId, /* index */ -1);
     } else {
-      this.layer = project.layers.get(this.layerId);
+      this.layer = layer;
     }
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
@@ -147,10 +145,6 @@ export class LayerDialogComponent implements OnDestroy {
           ?.fields.toList()
           .sortBy(field => field.index) || List<Field>();
     }
-    if (!this.layer) {
-      throw Error('No layer exists');
-    }
-    this.projectId = project.id;
   }
 
   private getForms(): Form | undefined {
@@ -174,7 +168,8 @@ export class LayerDialogComponent implements OnDestroy {
     const form = this.getForms();
     const formId = form ? form.id : this.dataStoreService.generateId();
     const layer = new Layer(
-      this.layerId,
+      this.layer?.id || '',
+      /* index */ -1,
       this.layer?.color || DEFAULT_LAYER_COLOR,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
