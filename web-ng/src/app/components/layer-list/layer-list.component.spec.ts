@@ -40,7 +40,7 @@ const mockProject = new Project(
       Map()
     ),
   }),
-  Map()    
+  Map()
 );
 
 class MockProjectService {
