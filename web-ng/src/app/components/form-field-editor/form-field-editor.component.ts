@@ -33,6 +33,8 @@ import {
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
 import { DataStoreService } from '../../services/data-store/data-store.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -70,7 +72,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   constructor(
     private formBuilder: FormBuilder,
-    private dataStoreService: DataStoreService
+    private dataStoreService: DataStoreService,
+    private confirmationDialog: MatDialog
   ) {
     this.formFieldGroup = this.formBuilder.group({
       label: [''],
@@ -157,6 +160,36 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       required: this.required,
       type: this.type,
       multipleChoice: this.formOptions,
+    });
+  }
+
+  onOptionDelete(index: number) {
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this option? Any associated data will be lost. This cannot be undone.',
+        },
+      }
+    );
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (dialogResult) {
+        let options = this.formOptions?.options;
+        if (!options) return;
+        options = options.delete(index);
+        const cardinality =
+          this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
+        this.formOptions = new MultipleChoice(cardinality, options);
+        this.update.emit({
+          label: StringMap({ en: this.label }),
+          required: this.required,
+          type: this.type,
+          multipleChoice: this.formOptions,
+        });
+      }
     });
   }
 

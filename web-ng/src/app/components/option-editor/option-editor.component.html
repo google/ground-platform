@@ -29,5 +29,13 @@
         <input matInput formControlName="code" autocomplete="off" />
       </mat-form-field>
     </div>
+    <button
+      mat-icon-button
+      (click)="onDeleteOption()"
+      fxFlexAlign="center"
+      matTooltip="Delete Option"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 </form>

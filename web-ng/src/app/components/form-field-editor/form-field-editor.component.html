@@ -50,6 +50,7 @@
         [label]="option.label?.get('en')"
         [code]="option.code"
         (update)="onOptionUpdate($event, i)"
+        (delete)="onOptionDelete(i)"
       ></app-option-editor>
     </div>
     <button mat-button (click)="onAddOption()" class="add-option">
