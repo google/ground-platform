@@ -164,17 +164,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   onOptionDelete(index: number) {
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this option? Any associated data will be lost. This cannot be undone.',
-        },
-      }
-    );
+    const dialogRef = this.openConfirmationDialog();
     dialogRef.afterClosed().subscribe(dialogResult => {
       if (dialogResult) {
         let options = this.formOptions?.options;
@@ -190,6 +180,17 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
           multipleChoice: this.formOptions,
         });
       }
+    });
+  }
+
+  openConfirmationDialog() {
+    return this.confirmationDialog.open(ConfirmationDialogComponent, {
+      maxWidth: '500px',
+      data: {
+        title: 'Warning',
+        message:
+          'Are you sure you wish to delete this option? Any associated data will be lost. This cannot be undone.',
+      },
     });
   }
 
