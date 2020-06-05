@@ -32,6 +32,7 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() code?: string;
   @Input() label?: string;
+  @Input() index?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
 
