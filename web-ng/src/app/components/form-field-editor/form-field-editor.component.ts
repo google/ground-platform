@@ -35,6 +35,7 @@ import {
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -100,6 +101,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
+      const options = this.formOptions?.options;
+      options?.sortBy(option => option.index);
     }
     this.formFieldGroup.setValue({
       label: this.label,
@@ -153,7 +156,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    */
 
   onOptionUpdate(event: { label: string; code: string }, index: number) {
-    const option = this.createOption(event.code, event.label);
+    const option = this.createOption(event.code, event.label, index);
     this.setFormOptions(index, option);
     this.update.emit({
       label: StringMap({ en: this.label }),
@@ -195,8 +198,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   onAddOption() {
-    const option = this.createOption('', '');
     const index = this.formOptions?.options.size || 0;
+    const option = this.createOption('', '', index);
     this.setFormOptions(index, option);
     this.update.emit({
       label: StringMap({ en: this.label }),
@@ -206,9 +209,14 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     });
   }
 
-  createOption(code: string, label: string) {
+  createOption(code: string, label: string, index: number) {
     const optionId = this.dataStoreService.generateId();
-    const option = new Option(optionId || '', code, StringMap({ en: label }));
+    const option = new Option(
+      optionId || '',
+      code,
+      StringMap({ en: label }),
+      index
+    );
     return option;
   }
 
@@ -218,5 +226,25 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     let options = this.formOptions?.options || List<Option>();
     options = options?.set(index, option);
     this.formOptions = new MultipleChoice(cardinality, options);
+  }
+
+  drop(event: CdkDragDrop<string[]>) {
+    if (!this.formOptions) return;
+    let options = this.formOptions.options;
+    const optionAtPrevIndex = options.get(event.previousIndex);
+    const optionAtCurrentIndex = options.get(event.currentIndex);
+    if (optionAtPrevIndex && optionAtCurrentIndex) {
+      options = options.set(event.previousIndex, optionAtCurrentIndex);
+      options = options.set(event.currentIndex, optionAtPrevIndex);
+    }
+    const cardinality =
+      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
+    this.formOptions = new MultipleChoice(cardinality, options);
+    this.update.emit({
+      label: StringMap({ en: this.label }),
+      required: this.required,
+      type: this.type,
+      multipleChoice: this.formOptions,
+    });
   }
 }
