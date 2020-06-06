@@ -72,8 +72,8 @@ class MockModel {
     new MultipleChoice(
       Cardinality.SELECT_MULTIPLE,
       List([
-        new Option('option001', 'code001', StringMap({ en: 'option 1' })),
-        new Option('option002', 'code002', StringMap({ en: 'option 2' })),
+        new Option('option001', 'code001', StringMap({ en: 'option 1' }), 0),
+        new Option('option002', 'code002', StringMap({ en: 'option 2' }), 0),
       ])
     )
   );
