@@ -23,7 +23,7 @@
 ></inline-editor>
 <form (ngSubmit)="onSave($event)">
   <mat-dialog-content>
-    <div>Layer id: {{ layerId }}</div>
+    <div>Layer id: {{ layer?.id }}</div>
     <div cdkDropList (cdkDropListDropped)="drop($event)">
       <div
         *ngFor="let field of fields; let i = index; trackBy: trackByFn"
