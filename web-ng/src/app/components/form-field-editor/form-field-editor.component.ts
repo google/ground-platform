@@ -157,13 +157,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   onOptionUpdate(event: { label: string; code: string }, index: number) {
     const option = this.createOption(event.code, event.label, index);
-    this.setFormOptions(index, option);
-    this.update.emit({
-      label: StringMap({ en: this.label }),
-      required: this.required,
-      type: this.type,
-      multipleChoice: this.formOptions,
-    });
+    const options = this.setFormOptions(index, option);
+    this.emitFormOptions(options);
   }
 
   onOptionDelete(index: number) {
@@ -173,15 +168,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
         let options = this.formOptions?.options;
         if (!options) return;
         options = options.delete(index);
-        const cardinality =
-          this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
-        this.formOptions = new MultipleChoice(cardinality, options);
-        this.update.emit({
-          label: StringMap({ en: this.label }),
-          required: this.required,
-          type: this.type,
-          multipleChoice: this.formOptions,
-        });
+        this.emitFormOptions(options);
       }
     });
   }
@@ -200,13 +187,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   onAddOption() {
     const index = this.formOptions?.options.size || 0;
     const option = this.createOption('', '', index);
-    this.setFormOptions(index, option);
-    this.update.emit({
-      label: StringMap({ en: this.label }),
-      required: this.required,
-      type: this.type,
-      multipleChoice: this.multipleChoice,
-    });
+    const options = this.setFormOptions(index, option);
+    this.emitFormOptions(options);
   }
 
   createOption(code: string, label: string, index: number) {
@@ -221,11 +203,21 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   setFormOptions(index: number, option: Option) {
-    const cardinality =
-      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
     let options = this.formOptions?.options || List<Option>();
     options = options?.set(index, option);
+    return options;
+  }
+
+  emitFormOptions(options: List<Option>) {
+    const cardinality =
+      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
     this.formOptions = new MultipleChoice(cardinality, options);
+    this.update.emit({
+      label: StringMap({ en: this.label }),
+      required: this.required,
+      type: this.type,
+      multipleChoice: this.formOptions,
+    });
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -237,14 +229,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       options = options.set(event.previousIndex, optionAtCurrentIndex);
       options = options.set(event.currentIndex, optionAtPrevIndex);
     }
-    const cardinality =
-      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
-    this.formOptions = new MultipleChoice(cardinality, options);
-    this.update.emit({
-      label: StringMap({ en: this.label }),
-      required: this.required,
-      type: this.type,
-      multipleChoice: this.formOptions,
-    });
+    this.emitFormOptions(options);
   }
 }
