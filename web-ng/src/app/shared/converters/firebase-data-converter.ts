@@ -298,7 +298,7 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   private static toOption(id: string, data: DocumentData): Option {
-    return new Option(id, data.code, StringMap(data.label));
+    return new Option(id, data.code, StringMap(data.label), data.index);
   }
 
   private static optionToJS(option: Option): {} {
