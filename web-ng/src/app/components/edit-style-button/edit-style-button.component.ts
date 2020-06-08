@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
 import { ColorEvent } from 'ngx-color';
@@ -25,14 +31,13 @@ import { ColorEvent } from 'ngx-color';
   styleUrls: ['./edit-style-button.component.css'],
 })
 export class EditStyleButtonComponent {
-  bgColor: string;
+  @Input() markerColor = 'black';
+  @Output() markerColorChange = new EventEmitter<MarkerColorEvent>();
 
   constructor(
     // tslint:disable-next-line:no-any
     private dialog: MatDialog
-  ) {
-    this.bgColor = 'black';
-  }
+  ) {}
 
   openColorPickerDialog(evt: MouseEvent): void {
     const target = new ElementRef(evt.currentTarget);
@@ -41,7 +46,16 @@ export class EditStyleButtonComponent {
         data: { trigger: target },
       })
       .componentInstance.onColorPicked.subscribe((evt: ColorEvent) => {
-        this.bgColor = evt.color.hex;
+        this.markerColor = evt.color.hex;
+        this.markerColorChange.emit(new MarkerColorEvent(this.markerColor));
       });
+  }
+}
+
+export class MarkerColorEvent {
+  color: string;
+
+  constructor(newColor: string) {
+    this.color = newColor;
   }
 }
