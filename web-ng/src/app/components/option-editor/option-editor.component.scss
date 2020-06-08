@@ -16,6 +16,10 @@
 
 @import '~src/custom-theme';
 
+:host {
+  display: flex;
+}
+
 .dot {
   height: 15px;
   width: 15px;
@@ -23,5 +27,21 @@
   align-self: center;
   border-radius: 50%;
   display: inline-block;
-  margin-left: 15px;
+}
+
+.drag-icon {
+  display: block;
+  margin: 0px auto;
+  cursor: move;
+  align-self: center;
+  color: mat-color($foreground, light);
+  margin-right: 5px !important;
+}
+
+.field-option {
+  width: 300px;
+}
+
+.code-option {
+  width: 100px;
 }

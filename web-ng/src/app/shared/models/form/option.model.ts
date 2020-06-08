@@ -20,6 +20,7 @@ export class Option {
   constructor(
     readonly id: string,
     readonly code: string,
-    readonly label: StringMap
+    readonly label: StringMap,
+    readonly index: number
   ) {}
 }
