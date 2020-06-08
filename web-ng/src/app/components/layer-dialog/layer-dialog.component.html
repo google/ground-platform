@@ -21,6 +21,10 @@
   placeholder="Unnamed layer"
   (focusOut)="setLayerName($event)"
 ></inline-editor>
+<div class="default-style">
+  <div class="default-style-tag">Default style</div>
+  <app-edit-style-button [markerColor]="layer.color" (markerColorChange)="onMarkerColorChange($event)"></app-edit-style-button>
+</div>
 <form (ngSubmit)="onSave($event)">
   <mat-dialog-content>
     <div cdkDropList (cdkDropListDropped)="drop($event)">

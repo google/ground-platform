@@ -29,6 +29,7 @@ import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 // To make ESLint happy:
@@ -49,6 +50,7 @@ export class LayerDialogComponent implements OnDestroy {
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
+  color = DEFAULT_LAYER_COLOR;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -170,7 +172,7 @@ export class LayerDialogComponent implements OnDestroy {
     const layer = new Layer(
       this.layer?.id || '',
       /* index */ -1,
-      this.layer?.color || DEFAULT_LAYER_COLOR,
+      this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
       this.fields && this.fields.size > 0
@@ -235,5 +237,9 @@ export class LayerDialogComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  onMarkerColorChange(event: MarkerColorEvent) {
+    this.color = event.color;
   }
 }

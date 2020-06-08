@@ -151,3 +151,12 @@
 .trash-icon {
   color: #707074;
 }
+
+.default-style {
+  display: flex;
+}
+
+.default-style-tag {
+  padding: 7px 0;
+  margin-right: 10px;
+}
