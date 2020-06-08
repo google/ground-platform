@@ -22,6 +22,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { ColorPickerModule } from '../color-picker/color-picker.module';
+import { EditStyleButtonModule } from '../edit-style-button/edit-style-button.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,6 +40,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     FormsModule,
     ReactiveFormsModule,
     InlineEditorModule,
+    ColorPickerModule,
+    EditStyleButtonModule,
     MatInputModule,
     FlexLayoutModule,
     MatButtonModule,
