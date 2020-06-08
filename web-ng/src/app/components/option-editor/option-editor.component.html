@@ -16,15 +16,16 @@
 
 <form [formGroup]="optionGroup">
   <div fxLayout fxLayoutGap="15px">
+    <mat-icon cdkDragHandle class="drag-icon">drag_indicator</mat-icon>
     <span class="dot"></span>
-    <div fxFlex="2 1 auto">
+    <div fxFlex>
       <mat-form-field class="field-option">
         <mat-label>Option</mat-label>
         <input matInput formControlName="label" autocomplete="off" />
       </mat-form-field>
     </div>
     <div fxFlex>
-      <mat-form-field>
+      <mat-form-field class="code-option">
         <mat-label>Code</mat-label>
         <input matInput formControlName="code" autocomplete="off" />
       </mat-form-field>
