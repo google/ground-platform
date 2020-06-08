@@ -37,13 +37,18 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div *ngIf="formOptions?.options">
+  <div
+    *ngIf="formOptions?.options"
+    cdkDropList
+    (cdkDropListDropped)="drop($event)"
+  >
     <div
       *ngFor="
         let option of formOptions.options;
         let i = index;
         trackBy: trackByFn
       "
+      cdkDrag
       fxLayout
     >
       <app-option-editor
