@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
@@ -29,11 +29,15 @@ export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
 
-  constructor(private projectService: ProjectService) {
+  constructor(projectService: ProjectService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layers$ = projectService
       .getActiveProject$()
-      .pipe(map(project => List(project.layers.valueSeq().toArray())));
+      .pipe(
+        map(project =>
+          List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
+        )
+      );
   }
 }

@@ -15,27 +15,20 @@
  */
 
 import { Layer } from './layer.model';
-import { Form } from './form/form.model';
 import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
+import { Role } from './role.model';
 
 export class Project {
   constructor(
     readonly id: string,
     readonly title: StringMap,
     readonly description: StringMap,
-    readonly layers: Map<string, Layer>
+    readonly layers: Map<string, Layer>,
+    readonly acl: Map<string, Role>
   ) {}
 
-  getForm(layerId: string, formId: string): Form {
-    const layer = this.layers.get(layerId);
-    if (!layer) {
-      throw Error('Layer not found.');
-    }
-    const form = layer.forms?.get(formId);
-    if (!form) {
-      throw Error('Form not found.');
-    }
-    return form;
+  getLayer(layerId: string): Layer | undefined {
+    return this.layers.get(layerId);
   }
 }

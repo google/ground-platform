@@ -19,6 +19,8 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap, shareReplay } from 'rxjs/operators';
 import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
+import { AuthService } from '../auth/auth.service';
+import { Role } from '../../shared/models/role.model';
 
 @Injectable({
   providedIn: 'root',
@@ -27,12 +29,17 @@ export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
 
-  constructor(private dataStore: DataStoreService) {
-    //  on each change to project id.
-    this.activeProject$ = this.activeProjectId$.pipe(
-      // Asynchronously load project. switchMap() internally disposes
-      // of previous subscription if present.
-      switchMap(id => this.dataStore.loadProject$(id)),
+  constructor(private dataStore: DataStoreService, authService: AuthService) {
+    // Reload active project each time authenticated user changes.
+    this.activeProject$ = authService.user$.pipe(
+      switchMap(() =>
+        //  on each change to project id.
+        this.activeProjectId$.pipe(
+          // Asynchronously load project. switchMap() internally disposes
+          // of previous subscription if present.
+          switchMap(id => this.dataStore.loadProject$(id))
+        )
+      ),
       // Cache last loaded project so that late subscribers don't cause
       // project to be reloaded.
       shareReplay(1)
@@ -45,5 +52,19 @@ export class ProjectService {
 
   getActiveProject$(): Observable<Project> {
     return this.activeProject$;
+  }
+
+  /**
+   * Updates the project with new title by calling the data-store service.
+   *
+   * @param projectId the id of the project.
+   * @param newTitle the new title of the project.
+   */
+  updateTitle(projectId: string, newTitle: string): Promise<void> {
+    return this.dataStore.updateProjectTitle(projectId, newTitle);
+  }
+
+  updateRole(projectId: string, email: string, role: Role): Promise<void> {
+    return this.dataStore.updateRole(projectId, email, role);
   }
 }

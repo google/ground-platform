@@ -23,6 +23,8 @@ import { Observable, Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
+import { ObservationService } from '../../services/observation/observation.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'ground-main-page',
@@ -37,6 +39,7 @@ export class MainPageComponent implements OnInit {
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private featureService: FeatureService,
+    private observationService: ObservationService,
     private dialog: MatDialog
   ) {
     // TODO: Make dynamic to support i18n.
@@ -77,11 +80,22 @@ export class MainPageComponent implements OnInit {
     if (params.get('f')) {
       this.featureService.selectFeature(params.get('f')!);
     }
+    // The 'o' param is used to represent the observation id that
+    // was selected by e.g. clicking edit observation button.
+    if (params.get('o')) {
+      this.observationService.selectObservation(params.get('o')!);
+    }
   }
 
   private showEditLayerDialog(layerId: string) {
-    this.dialog.open(LayerDialogComponent, {
-      data: { layerId },
-    });
+    this.activeProject$.pipe(take(1)).subscribe(project =>
+      this.dialog.open(LayerDialogComponent, {
+        data: {
+          projectId: project.id,
+          createLayer: layerId === ':new',
+          layer: project.layers?.get(layerId),
+        },
+      })
+    );
   }
 }

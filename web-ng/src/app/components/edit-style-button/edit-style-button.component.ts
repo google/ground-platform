@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef } from '@angular/core';
-import { MatDialog } from '@angular/material';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+} from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
+import { getPinImageSource } from '../map/ground-pin';
 import { ColorEvent } from 'ngx-color';
 
 @Component({
@@ -24,14 +33,25 @@ import { ColorEvent } from 'ngx-color';
   templateUrl: './edit-style-button.component.html',
   styleUrls: ['./edit-style-button.component.css'],
 })
-export class EditStyleButtonComponent {
-  bgColor: string;
+export class EditStyleButtonComponent implements OnInit {
+  @Input() markerColor = 'black';
+  @Output() markerColorChange = new EventEmitter<MarkerColorEvent>();
+  markerPinUrl: SafeUrl;
 
   constructor(
     // tslint:disable-next-line:no-any
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private sanitizer: DomSanitizer
   ) {
-    this.bgColor = 'black';
+    this.markerPinUrl = sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.markerColor)
+    );
+  }
+
+  ngOnInit() {
+    this.markerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.markerColor)
+    );
   }
 
   openColorPickerDialog(evt: MouseEvent): void {
@@ -41,7 +61,19 @@ export class EditStyleButtonComponent {
         data: { trigger: target },
       })
       .componentInstance.onColorPicked.subscribe((evt: ColorEvent) => {
-        this.bgColor = evt.color.hex;
+        this.markerColor = evt.color.hex;
+        this.markerColorChange.emit(new MarkerColorEvent(this.markerColor));
+        this.markerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+          getPinImageSource(this.markerColor)
+        );
       });
+  }
+}
+
+export class MarkerColorEvent {
+  color: string;
+
+  constructor(newColor: string) {
+    this.color = newColor;
   }
 }

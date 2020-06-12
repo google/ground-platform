@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
+ @import '~src/custom-theme';
+ 
+/* Relative top used to push title input field in line with flex row. */
 .inline-edit {
+  position: relative;
+  top: 2px;
+}
+
+input {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -23,23 +31,21 @@
   padding: 2px 1px 2px 4px;
   border-radius: 3px;
   border: none;
-  font-size: 13pt;
-  margin-top: 10px;
-  margin-right: 10px;
-  margin-bottom: 5px;
-  border: 1px solid white;
-  color: #696969
+  font-size: 14pt;
+  margin: 10px 10px 5px 0;
+  border: 2px solid transparent;
 }
 
+// !important used to override hover border color.
 .inline-edit:focus {
   padding: 2px 1px 2px 4px;
-  background: #fafafa;
   -webkit-box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
   box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+  border: 2px solid mat-color($primary) !important;
 }
 
 .inline-edit:hover {
   padding: 2px 1px 2px 4px;
-  border: 1px solid #e0e0e0;
+  border: 2px solid mat-color($background, hover);
 }

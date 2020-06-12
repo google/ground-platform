@@ -17,7 +17,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { LayerDialogComponent } from './layer-dialog.component';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
@@ -25,12 +29,12 @@ import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
 
@@ -55,13 +59,13 @@ describe('LayerDialogComponent', () => {
         ReactiveFormsModule,
         BrowserAnimationsModule,
         FlexLayoutModule,
-        MatSelectModule,
         MatFormFieldModule,
         MatInputModule,
+        MatDialogModule,
         MatIconModule,
       ],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: Router, useValue: routerSpy },
       ],

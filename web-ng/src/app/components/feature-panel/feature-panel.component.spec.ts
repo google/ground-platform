@@ -22,7 +22,6 @@ import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import { firestore } from 'firebase/app';
 import { Feature } from '../../shared/models/feature.model';
-import { Form } from '../../shared/models/form/form.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Project } from '../../shared/models/project.model';
@@ -30,22 +29,22 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
+import { Router } from '@angular/router';
 
 const mockProject = new Project(
   'project001',
-  StringMap([['en', 'title']]),
-  StringMap([['en', 'description']]),
-  Map<string, Layer>([
-    [
+  StringMap({ en: 'title' }),
+  StringMap({ en: 'description' }),
+  /* layers= */ Map({
+    layer001: new Layer(
       'layer001',
-      new Layer(
-        'layer001',
-        'red',
-        StringMap([['en', 'name']]),
-        Map<string, Form>([])
-      ),
-    ],
-  ])
+      /* index */ -1,
+      'red',
+      StringMap({ en: 'name' }),
+      /* forms= */ Map()
+    ),
+  }),
+  /* acl= */ Map()
 );
 
 const mockFeature = new Feature(
@@ -83,12 +82,14 @@ describe('FeaturePanelComponent', () => {
   let fixture: ComponentFixture<FeaturePanelComponent>;
 
   beforeEach(async(() => {
+    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [FeaturePanelComponent],
       providers: [
         { provide: FeatureService, useValue: featureService },
         { provide: ProjectService, useValue: projectService },
         { provide: ObservationService, useValue: observationService },
+        { provide: Router, useValue: routerSpy },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -104,3 +105,7 @@ describe('FeaturePanelComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}

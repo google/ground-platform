@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
-
-html,
-body {
-  height: 100%;
+.email-input {
+  margin-right: 10px;
+  width: 250px;
 }
 
-body {
-  margin: 0;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+.role-select {
+  margin-right: 10px;
+  width: 114px;
 }

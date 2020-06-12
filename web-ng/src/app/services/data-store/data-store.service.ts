@@ -16,33 +16,16 @@
 
 import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
+import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
-import { AuditInfo } from '../../shared/models/audit-info.model';
 import { Feature } from '../../shared/models/feature.model';
-import { Form } from '../../shared/models/form/form.model';
-import { Field, FieldType } from '../../shared/models/form/field.model';
-import {
-  MultipleChoice,
-  Cardinality,
-} from '../../shared/models/form/multiple-choice.model';
-import { Option } from '../../shared/models/form/option.model';
 import { Layer } from './../../shared/models/layer.model';
-import { List, Map } from 'immutable';
+import { List } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
-import { Response } from '../../shared/models/observation/response.model';
-import { StringMap } from './../../shared/models/string-map.model';
-
-/**
- * Helper to return either the keys of a dictionary, or if missing, returns an
- * empty array.
- */
-// tslint:disable-next-line:no-any
-function keys(dict?: any): any[] {
-  return Object.keys(dict || {});
-}
+import { Role } from '../../shared/models/role.model';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -62,19 +45,24 @@ export class DataStoreService {
     return this.db
       .collection('projects')
       .doc(id)
-      .get()
+      .valueChanges()
       .pipe(
         // Convert object to Project instance.
-        map(doc => DataStoreService.toProject(doc.id, doc.data()!))
+        map(data => FirebaseDataConverter.toProject(id, data as DocumentData))
       );
   }
 
-  updateProjectTitle(projectId: string, newTitle: string) {
+  /**
+   * Updates the project with new title.
+   *
+   * @param projectId the id of the project.
+   * @param newTitle the new title of the project.
+   */
+  updateProjectTitle(projectId: string, newTitle: string): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)
-      .set({ title: { en: newTitle } }, { merge: true })
-      .then(() => projectId);
+      .set({ title: { en: newTitle } }, { merge: true });
   }
 
   // TODO: Define return types for methods in this class
@@ -83,7 +71,7 @@ export class DataStoreService {
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layer.id}`]: DataStoreService.layerToJS(layer),
+        [`layers.${layer.id}`]: FirebaseDataConverter.layerToJS(layer),
       });
   }
 
@@ -99,7 +87,7 @@ export class DataStoreService {
       .collection(`projects/${projectId}/features`)
       .doc(featureId)
       .get()
-      .pipe(map(doc => DataStoreService.toFeature(doc.id, doc.data()!)));
+      .pipe(map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)));
   }
 
   /**
@@ -118,7 +106,7 @@ export class DataStoreService {
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
-          List(array.map(obj => DataStoreService.toFeature(obj.id, obj)))
+          List(array.map(obj => FirebaseDataConverter.toFeature(obj.id, obj)))
         )
       );
   }
@@ -142,359 +130,51 @@ export class DataStoreService {
       .pipe(
         map(array =>
           List(
-            array.map(obj =>
-              DataStoreService.toObservation(project, feature, obj.id, obj)
-            )
+            array.map(obj => {
+              return FirebaseDataConverter.toObservation(
+                project
+                  .getLayer(feature.layerId)!
+                  .getForm((obj as DocumentData).formId)!,
+                obj.id,
+                obj
+              );
+            })
           )
         )
       );
   }
 
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Project instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  private static toProject(id: string, data: DocumentData): Project {
-    return new Project(
-      id,
-      StringMap(data.title),
-      StringMap(data.description),
-      Map<string, Layer>(
-        keys(data.layers).map((id: string) => [
-          id as string,
-          DataStoreService.toLayer(id, data.layers[id]),
-        ])
-      )
-    );
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Layer instance.
-   *
-   * @param id the uuid of the layer instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  private static toLayer(id: string, data: DocumentData): Layer {
-    return new Layer(
-      id,
-      data.color,
-      StringMap(data.name),
-      Map<string, Form>(
-        keys(data.forms).map((id: string) => [
-          id as string,
-          DataStoreService.toForm(id, data.forms[id]),
-        ])
-      )
-    );
-  }
-
-  private static layerToJS(layer: Layer): {} {
-    const { id: layerId, name, forms, ...layerDoc } = layer;
-    return {
-      name: name?.toJS() || {},
-      forms:
-        forms
-          ?.valueSeq()
-          .reduce(
-            (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
-            {}
-          ) || {},
-      ...layerDoc,
-    };
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Form instance.
-   *
-   * @param id the uuid of the form instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  private static toForm(id: string, data: DocumentData): Form {
-    return new Form(
-      id,
-      Map<string, Field>(
-        keys(data.elements).map((id: string) => [
-          id as string,
-          DataStoreService.toField(id, data.elements[id]),
-        ])
-      )
-    );
-  }
-
-  private static formToJS(form: Form): {} {
-    const { fields, ...formDoc } = form;
-    return {
-      fields:
-        fields?.reduce(
-          (map, field: Field) => ({
-            ...map,
-            [field.id]: this.fieldToJS(field),
-          }),
-          {}
-        ) || {},
-      ...formDoc,
-    };
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Field instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *   index: 0,
-   *   label: { 'en': 'Question 1' },
-   *   required: true,
-   *   type: 'text_field'
-   * }
-   * </code></pre>
-   * or
-   * <pre><code>
-   * {
-   *   index: 1,
-   *   label: { 'en': 'Question 2' },
-   *   required: false,
-   *   type: 'multiple_choice',
-   *   cardinality: 'select_one',
-   *   options: {
-   *     option001: {
-   *       index: 0,
-   *       code: 'A',
-   *       label: { 'en': 'Option A' }
-   *     },
-   *     // ...
-   *   }
-   * </code></pre>
-   */
-  private static toField(id: string, data: DocumentData): Field {
-    return new Field(
-      id,
-      DataStoreService.stringToFieldType(data.type),
-      StringMap(data.label),
-      data.required,
-      data.options &&
-        new MultipleChoice(
-          DataStoreService.stringToCardinality(data.cardinality),
-          Map<string, Option>(
-            keys(data.options).map((id: string) => [
-              id as string,
-              DataStoreService.toOption(id, data.options[id]),
-            ])
-          )
-        )
-    );
-  }
-
-  private static fieldToJS(field: Field): {} {
-    const { type, label, multipleChoice, ...fieldDoc } = field;
-    if (multipleChoice === undefined) {
-      return {
-        type: DataStoreService.fieldTypeToString(type),
-        label: label.toJS(),
-        ...fieldDoc,
-      };
-    } else {
-      return {
-        type: DataStoreService.fieldTypeToString(type),
-        label: label.toJS(),
-        cardinality: DataStoreService.cardinalityToString(
-          multipleChoice.cardinality
-        ),
-        // convert list of options to map of optionId: option.
-        options:
-          multipleChoice?.options?.reduce(
-            (map, option: Option) => ({
-              ...map,
-              [option.id]: DataStoreService.optionToJS(option),
-            }),
-            {}
-          ) || {},
-        ...fieldDoc,
-      };
-    }
-  }
-
-  private static stringToCardinality(cardinality: string): Cardinality {
-    switch (cardinality) {
-      case 'select_one':
-        return Cardinality.SELECT_ONE;
-      case 'select_multiple':
-        return Cardinality.SELECT_MULTIPLE;
-      default:
-        throw Error(`Unsupported cardinality ${cardinality}`);
-    }
-  }
-
-  private static cardinalityToString(cardinality: Cardinality): string {
-    switch (cardinality) {
-      case Cardinality.SELECT_ONE:
-        return 'select_one';
-      case Cardinality.SELECT_MULTIPLE:
-        return 'select_multiple';
-      default:
-        throw Error(`Unsupported cardinality ${cardinality}`);
-    }
-  }
-
-  private static stringToFieldType(fieldType: string): FieldType {
-    switch (fieldType) {
-      case 'text_field':
-        return FieldType.TEXT;
-      case 'multiple_choice':
-        return FieldType.MULTIPLE_CHOICE;
-      case 'photo':
-        return FieldType.PHOTO;
-      default:
-        throw Error(`Unsupported field type ${fieldType}`);
-    }
-  }
-
-  private static fieldTypeToString(fieldType: FieldType): string {
-    switch (fieldType) {
-      case FieldType.TEXT:
-        return 'text_field';
-      case FieldType.MULTIPLE_CHOICE:
-        return 'multiple_choice';
-      case FieldType.PHOTO:
-        return 'photo';
-      default:
-        throw Error(`Unsupported field type ${fieldType}`);
-    }
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Field instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *    index: 0,
-   *    code: 'A',
-   *    label: { 'en': 'Option A' }
-   *  }
-   * </code></pre>
-   */
-  private static toOption(id: string, data: DocumentData): Option {
-    return new Option(id, data.code, StringMap(data.label));
-  }
-
-  private static optionToJS(option: Option): {} {
-    const { label, ...optionDoc } = option;
-    return {
-      label: label.toJS(),
-      ...optionDoc,
-    };
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Feature instance.
-   *
-   * @param id the uuid of the project instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  private static toFeature(id: string, data: DocumentData): Feature {
-    if (data === undefined) {
-      throw Error(`Feature ${id} does not have document data.`);
-    }
-    return new Feature(id, data.layerId, data.location);
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Observation instance.
-   *
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *   featureId: 'feature123'
-   *   formId: 'form001',
-   *   responses: {
-   *     'element001': 'Response text',  // For 'text_field  elements.
-   *     'element002': ['A', 'B'],       // For 'multiple_choice' elements.
-   *      // ...
-   *   }
-   *   created: <AUDIT_INFO>,
-   *   lastModified: <AUDIT_INFO>
-   * }
-   * </code></pre>
-   */
-  private static toObservation(
-    project: Project,
-    feature: Feature,
-    id: string,
-    data: DocumentData
-  ): Observation {
-    if (data === undefined) {
-      throw Error(`Observation ${id} does not have document data.`);
-    }
-    const form = project.getForm(feature.layerId, data.formId);
-    return new Observation(
-      id,
-      form,
-      DataStoreService.toAuditInfo(data.created),
-      DataStoreService.toAuditInfo(data.lastModified),
-      Map<string, Response>(
-        keys(data.responses).map((fieldId: string) => [
-          fieldId as string,
-          DataStoreService.toResponse(form, fieldId, data.responses[fieldId]),
-        ])
-      )
-    );
-  }
-
-  private static toResponse(
-    form: Form,
-    fieldID: string,
-    responseValue: string | List<string>
-  ): Response {
-    if (typeof responseValue === 'string') {
-      return new Response(responseValue as string);
-    }
-    if (responseValue instanceof Array) {
-      return new Response(
-        List(
-          responseValue.map(optionId =>
-            form.getMultipleChoiceFieldOption(fieldID, optionId)
-          )
-        )
+  loadObservation$(project: Project, feature: Feature, observationId: string) {
+    return this.db
+      .collection(`projects/${project.id}/observations`)
+      .doc(observationId)
+      .get()
+      .pipe(
+        map(doc => {
+          return FirebaseDataConverter.toObservation(
+            project.getLayer(feature.layerId)!.getForm(doc.data()!.formId)!,
+            doc.id,
+            doc.data()!
+          );
+        })
       );
-    }
-    throw Error(`Unknown value type ${typeof responseValue}`);
   }
 
   /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable AuditInfo instance.
-   *
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *   user: {
-   *     id: ...,
-   *     displayName: ...,
-   *     email: ...
-   *   },
-   *   clientTimestamp: ...,
-   *   serverTimestamp: ...
-   * }
-   * </code></pre>
+   * Adds or overwrites the role of the specified user in the project with the
+   * specified id.
+   * @param projectId the id of the project to be updated.
+   * @param email the email of the user whose role is to be updated.
+   * @param role the new role of the specified user.
    */
-  private static toAuditInfo(data: DocumentData): AuditInfo {
-    return new AuditInfo(
-      data.user,
-      data.clientTimestamp?.toDate(),
-      data.serverTimestamp?.toDate()
-    );
+  updateRole(projectId: string, email: string, role: Role): Promise<void> {
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .set(
+        { acl: { [email]: FirebaseDataConverter.toRoleId(role) } },
+        { merge: true }
+      );
   }
 
   generateId() {

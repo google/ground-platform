@@ -33,6 +33,6 @@ import { MatIconModule } from '@angular/material/icon';
     ReactiveFormsModule,
     MatIconModule,
   ],
-  entryComponents: [ColorPickerComponent],
+  exports: [ColorPickerComponent],
 })
 export class ColorPickerModule {}

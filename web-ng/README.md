@@ -92,8 +92,8 @@ Run `ng build` to build the project. The build artifacts will be stored in the
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via
-[Karma](https://karma-runner.github.io).
+Run `ng test` to execute run tests locally in Chrome using
+[Karma](https://karma-runner.github.io) test runner.
 
 ## Running end-to-end tests
 

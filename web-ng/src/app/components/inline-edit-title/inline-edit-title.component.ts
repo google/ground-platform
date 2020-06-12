@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy } from '@angular/core';
-import { DataStoreService } from '../../services/data-store/data-store.service';
+import { Component, OnDestroy } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
-import { MainPageComponent } from '../main-page/main-page.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-inline-edit-title',
   templateUrl: './inline-edit-title.component.html',
-  styleUrls: ['./inline-edit-title.component.css'],
+  styleUrls: ['./inline-edit-title.component.scss'],
 })
 export class InlineEditTitleComponent implements OnDestroy {
   readonly activeProject$: Observable<Project>;
@@ -34,10 +32,7 @@ export class InlineEditTitleComponent implements OnDestroy {
   projectId!: string;
 
   subscription: Subscription = new Subscription();
-  constructor(
-    private dataStoreService: DataStoreService,
-    private projectService: ProjectService
-  ) {
+  constructor(private projectService: ProjectService) {
     this.lang = 'en';
     this.activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
@@ -52,15 +47,17 @@ export class InlineEditTitleComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  /**
+   * Updates the project title with input element value.
+   *
+   * @param evt the event emitted from the input element on blur.
+   */
   updateProjectTitle(evt: { target: HTMLInputElement }) {
     if (!this.projectId) {
       return Promise.reject(new Error('Project not loaded'));
     }
     if (evt.target.value === this.title) return;
-    return this.dataStoreService.updateProjectTitle(
-      this.projectId,
-      evt.target.value
-    );
+    return this.projectService.updateTitle(this.projectId, evt.target.value);
   }
 
   handleKeyPress(evt: { key: string; target: HTMLInputElement }) {

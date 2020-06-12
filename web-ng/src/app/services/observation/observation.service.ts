@@ -15,23 +15,63 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { Feature } from './../../shared/models/feature.model';
 import { Project } from './../../shared/models/project.model';
 import { Injectable } from '@angular/core';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { List } from 'immutable';
+import { switchMap } from 'rxjs/operators';
+import { ProjectService } from '../project/project.service';
+import { FeatureService } from '../feature/feature.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ObservationService {
-  constructor(private dataStore: DataStoreService) {}
+  private selectedObservationId$ = new ReplaySubject<string>(1);
+  private selectedObservation$: Observable<Observation>;
+
+  constructor(
+    private dataStore: DataStoreService,
+    projectService: ProjectService,
+    featureService: FeatureService
+  ) {
+    this.selectedObservation$ = this.selectedObservationId$.pipe(
+      switchMap(observationId =>
+        projectService
+          .getActiveProject$()
+          .pipe(
+            switchMap(project =>
+              featureService
+                .getSelectedFeature$()
+                .pipe(
+                  switchMap(feature =>
+                    this.dataStore.loadObservation$(
+                      project,
+                      feature,
+                      observationId
+                    )
+                  )
+                )
+            )
+          )
+      )
+    );
+  }
 
   observations$(
     project: Project,
     feature: Feature
   ): Observable<List<Observation>> {
     return this.dataStore.observations$(project, feature);
+  }
+
+  selectObservation(observationId: string) {
+    this.selectedObservationId$.next(observationId);
+  }
+
+  getSelectedObservation$(): Observable<Observation> {
+    return this.selectedObservation$;
   }
 }
