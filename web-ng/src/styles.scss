@@ -36,4 +36,5 @@ button label {
 /* Space between button icon and label. */
 button .mat-icon + label {
   padding-left: 6px;
+  cursor: pointer;
 }
