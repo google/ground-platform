@@ -46,3 +46,7 @@
   right: 0;
   transition: 0.5s;
 }
+
+.mat-sidenav-content {
+  overflow: hidden;
+}

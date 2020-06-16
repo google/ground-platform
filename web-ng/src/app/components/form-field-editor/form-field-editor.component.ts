@@ -33,6 +33,9 @@ import {
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
 import { DataStoreService } from '../../services/data-store/data-store.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -70,7 +73,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   constructor(
     private formBuilder: FormBuilder,
-    private dataStoreService: DataStoreService
+    private dataStoreService: DataStoreService,
+    private confirmationDialog: MatDialog
   ) {
     this.formFieldGroup = this.formBuilder.group({
       label: [''],
@@ -97,6 +101,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
+      const options = this.formOptions?.options;
+      options?.sortBy(option => option.index);
     }
     this.formFieldGroup.setValue({
       label: this.label,
@@ -150,8 +156,62 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    */
 
   onOptionUpdate(event: { label: string; code: string }, index: number) {
-    const option = this.createOption(event.code, event.label);
-    this.setFormOptions(index, option);
+    const option = this.createOption(event.code, event.label, index);
+    const options = this.setFormOptions(index, option);
+    this.emitFormOptions(options);
+  }
+
+  onOptionDelete(index: number) {
+    const dialogRef = this.openConfirmationDialog();
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (dialogResult) {
+        let options = this.formOptions?.options;
+        if (!options) return;
+        options = options.delete(index);
+        this.emitFormOptions(options);
+      }
+    });
+  }
+
+  openConfirmationDialog() {
+    return this.confirmationDialog.open(ConfirmationDialogComponent, {
+      maxWidth: '500px',
+      data: {
+        title: 'Warning',
+        message:
+          'Are you sure you wish to delete this option? Any associated data will be lost. This cannot be undone.',
+      },
+    });
+  }
+
+  onAddOption() {
+    const index = this.formOptions?.options.size || 0;
+    const option = this.createOption('', '', index);
+    const options = this.setFormOptions(index, option);
+    this.emitFormOptions(options);
+  }
+
+  createOption(code: string, label: string, index: number) {
+    const optionId = this.dataStoreService.generateId();
+    const option = new Option(
+      optionId || '',
+      code,
+      StringMap({ en: label }),
+      index
+    );
+    return option;
+  }
+
+  setFormOptions(index: number, option: Option) {
+    let options = this.formOptions?.options || List<Option>();
+    options = options?.set(index, option);
+    return options;
+  }
+
+  emitFormOptions(options: List<Option>) {
+    const cardinality =
+      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
+    this.formOptions = new MultipleChoice(cardinality, options);
     this.update.emit({
       label: StringMap({ en: this.label }),
       required: this.required,
@@ -160,29 +220,15 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     });
   }
 
-  onAddOption() {
-    const option = this.createOption('', '');
-    const index = this.formOptions?.options.size || 0;
-    this.setFormOptions(index, option);
-    this.update.emit({
-      label: StringMap({ en: this.label }),
-      required: this.required,
-      type: this.type,
-      multipleChoice: this.multipleChoice,
-    });
-  }
-
-  createOption(code: string, label: string) {
-    const optionId = this.dataStoreService.generateId();
-    const option = new Option(optionId || '', code, StringMap({ en: label }));
-    return option;
-  }
-
-  setFormOptions(index: number, option: Option) {
-    const cardinality =
-      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
-    let options = this.formOptions?.options || List<Option>();
-    options = options?.set(index, option);
-    this.formOptions = new MultipleChoice(cardinality, options);
+  drop(event: CdkDragDrop<string[]>) {
+    if (!this.formOptions) return;
+    let options = this.formOptions.options;
+    const optionAtPrevIndex = options.get(event.previousIndex);
+    const optionAtCurrentIndex = options.get(event.currentIndex);
+    if (optionAtPrevIndex && optionAtCurrentIndex) {
+      options = options.set(event.previousIndex, optionAtCurrentIndex);
+      options = options.set(event.currentIndex, optionAtPrevIndex);
+    }
+    this.emitFormOptions(options);
   }
 }

@@ -22,5 +22,6 @@ import { MatIconModule } from '@angular/material/icon';
 @NgModule({
   declarations: [EditStyleButtonComponent],
   imports: [MatDialogModule, MatIconModule],
+  exports: [EditStyleButtonComponent],
 })
 export class EditStyleButtonModule {}

@@ -15,8 +15,6 @@
 -->
 
 <button style="cursor: pointer" (click)="openColorPickerDialog($event)">
-  <mat-icon [style.color]="bgColor">
-    place
-  </mat-icon>
+  <img [src]="markerPinUrl" />
   <mat-icon>expand_less</mat-icon>
 </button>

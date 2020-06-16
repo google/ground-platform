@@ -19,7 +19,7 @@
   <div fxLayout>
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
-      <input matInput formControlName="label" />
+      <input matInput formControlName="label" autocomplete="off" />
     </mat-form-field>
     <mat-form-field fxFlex class="field-type" appearance="outline">
       <mat-select
@@ -37,19 +37,26 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div *ngIf="formOptions?.options">
+  <div
+    *ngIf="formOptions?.options"
+    cdkDropList
+    (cdkDropListDropped)="drop($event)"
+  >
     <div
       *ngFor="
         let option of formOptions.options;
         let i = index;
         trackBy: trackByFn
       "
+      cdkDrag
       fxLayout
     >
       <app-option-editor
         [label]="option.label?.get('en')"
         [code]="option.code"
+        [index]="i"
         (update)="onOptionUpdate($event, i)"
+        (delete)="onOptionDelete(i)"
       ></app-option-editor>
     </div>
     <button mat-button (click)="onAddOption()" class="add-option">

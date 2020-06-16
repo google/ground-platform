@@ -26,6 +26,7 @@ import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
+import { MatDialogModule } from '@angular/material/dialog';
 
 const firestoreStub = {
   collection: () => ({
@@ -52,6 +53,7 @@ describe('FormFieldEditorComponent', () => {
         MatFormFieldModule,
         MatInputModule,
         BrowserAnimationsModule,
+        MatDialogModule,
       ],
       providers: [{ provide: AngularFirestore, useValue: firestoreStub }],
     }).compileComponents();

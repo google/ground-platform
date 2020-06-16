@@ -25,6 +25,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { SideNavContentType } from '../side-panel/side-panel.component';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'ground-main-page',
@@ -94,8 +95,14 @@ export class MainPageComponent implements OnInit {
   }
 
   private showEditLayerDialog(layerId: string) {
-    this.dialog.open(LayerDialogComponent, {
-      data: { layerId },
-    });
+    this.activeProject$.pipe(take(1)).subscribe(project =>
+      this.dialog.open(LayerDialogComponent, {
+        data: {
+          projectId: project.id,
+          createLayer: layerId === ':new',
+          layer: project.layers?.get(layerId),
+        },
+      })
+    );
   }
 }

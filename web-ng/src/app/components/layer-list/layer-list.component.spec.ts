@@ -31,9 +31,16 @@ const mockProject = new Project(
   'project001',
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
-  Map({
-    layer001: new Layer('layer001', 'red', StringMap({ en: 'name' }), Map()),
-  })
+  /* layers= */ Map({
+    layer001: new Layer(
+      'layer001',
+      /* index */ -1,
+      'red',
+      StringMap({ en: 'name' }),
+      /* forms= */ Map()
+    ),
+  }),
+  /* acl= */ Map()
 );
 
 class MockProjectService {

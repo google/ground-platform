@@ -16,23 +16,23 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ColorPickerComponent } from './color-picker.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { ColorCircleModule } from 'ngx-color/circle';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
+import { ShareDialogComponent } from './share-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
-  declarations: [ColorPickerComponent],
+  declarations: [ShareDialogComponent],
   imports: [
     CommonModule,
+    MatButtonModule,
     MatDialogModule,
-    MatFormFieldModule,
-    ColorCircleModule,
+    MatInputModule,
+    MatSelectModule,
+    FormsModule,
     ReactiveFormsModule,
-    MatIconModule,
   ],
-  exports: [ColorPickerComponent],
 })
-export class ColorPickerModule {}
+export class ShareDialogModule {}

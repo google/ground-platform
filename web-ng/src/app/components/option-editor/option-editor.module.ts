@@ -21,6 +21,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { OptionEditorComponent } from './option-editor.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [OptionEditorComponent],
@@ -31,6 +34,9 @@ import { OptionEditorComponent } from './option-editor.component';
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
   ],
   exports: [OptionEditorComponent],
 })
