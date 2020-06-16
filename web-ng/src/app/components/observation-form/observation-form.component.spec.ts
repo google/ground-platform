@@ -48,13 +48,15 @@ class MockModel {
   static option001 = new Option(
     'option001',
     'code001',
-    StringMap({ en: 'option 1' })
+    StringMap({ en: 'option 1' }),
+    1
   );
 
   static option002 = new Option(
     'option002',
     'code002',
-    StringMap({ en: 'option 2' })
+    StringMap({ en: 'option 2' }),
+    2
   );
 
   static element002: Field = new Field(
@@ -79,6 +81,7 @@ class MockModel {
 
   static layer001 = new Layer(
     'layer001',
+    1,
     'red',
     StringMap({ en: 'name' }),
     Map({ form001: MockModel.form001 })
@@ -88,7 +91,8 @@ class MockModel {
     'project001',
     StringMap({ en: 'title' }),
     StringMap({ en: 'description' }),
-    Map({ layer001: MockModel.layer001 })
+    Map({ layer001: MockModel.layer001 }),
+    /*acl=*/ Map({})
   );
 
   static feature001 = new Feature(
