@@ -14,7 +14,11 @@
   limitations under the License.
 -->
 
+<mat-list *ngIf="layer$ | async as layer">
+  <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
+</mat-list>
 <div *ngIf="observationForm" class="observation">
+  <h3>Add/edit observation</h3>
   <form [formGroup]="observationForm" (ngSubmit)="onSave()">
     <div *ngFor="let field of observationFields">
       <label class="field-label" [attr.for]="field.id">
@@ -34,16 +38,23 @@
             </mat-radio-button>
           </mat-radio-group>
           <div *ngIf="field.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE">
-            <mat-checkbox [formControlName]="option.id" *ngFor="let option of field.multipleChoice.options" [value]="option.id">
+            <mat-checkbox [formControlName]="option.id"
+             *ngFor="let option of field.multipleChoice.options" [value]="option.id">
               {{option.label.get(lang)}}
             </mat-checkbox>
           </div>
         </div>
       </div>
     </div>
-    <button type="submit" [disabled]="!observationForm.valid">Save</button>
+    <button mat-raised-button color="primary"
+     type="submit" class="btn-save" 
+     [disabled]="!observationForm.valid">
+      Save
+    </button>
+    <button mat-raised-button color="secondary" class="btn-cancel"    
+    (click)="onCancel()"
+    type="button">
+      Cancel
+   </button>
   </form>
-</div>
-<div *ngIf="payLoad">
-  <strong>Saved the following values</strong><br>{{payLoad}}
 </div>

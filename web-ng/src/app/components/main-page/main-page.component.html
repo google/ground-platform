@@ -26,8 +26,10 @@
           <span *ngIf='!sideNavOpened'><</span>
         </button>
       </mat-sidenav-content>
-      <mat-sidenav #sidenav mode="side" position="end" [(opened)]="sideNavOpened">
-        <ground-side-panel></ground-side-panel>
+      <mat-sidenav #sidenav mode="side" position="end"
+       [(opened)]="sideNavOpened">
+        <ground-side-panel 
+        [contentType]="sideNavContentType"></ground-side-panel>
       </mat-sidenav>
     </mat-sidenav-container>
   </div>

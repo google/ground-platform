@@ -77,13 +77,9 @@ export class DataStoreService {
 
   updateObservation(projectId: string, observation: Observation) {
     return this.db
-      .collection('projects')
-      .doc(projectId)
-      .update({
-        [`observations.${observation.id}`]: FirebaseDataConverter.observationToJS(
-          observation
-        ),
-      });
+      .collection(`projects/${projectId}/observations`)
+      .doc(observation.id)
+      .update(FirebaseDataConverter.observationToJS(observation));
   }
 
   /**

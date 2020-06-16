@@ -16,7 +16,6 @@ limitations under the License.
 <mat-list *ngIf="layer$ | async as layer">
   <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
 </mat-list>
-
 <div *ngIf="observations$ | async as observations">
   <mat-card class="observation card" *ngFor="let observation of observations">
     <mat-card-header>

@@ -19,18 +19,26 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ObservationFormComponent } from './observation-form.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
+import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 
 @NgModule({
   imports: [
     BrowserModule,
     ReactiveFormsModule,
+    MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
     MatRadioModule,
     MatCheckboxModule,
+    MatIconModule,
+    MatListModule,
+    LayerListItemModule,
   ],
   exports: [ObservationFormComponent],
   declarations: [ObservationFormComponent],

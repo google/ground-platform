@@ -28,4 +28,15 @@ export class Observation {
     readonly lastModified: AuditInfo,
     readonly responses: Map<string, Response>
   ) {}
+
+  copy(responses: Map<string, Response>) {
+    return new Observation(
+      this.id,
+      this.featureId,
+      this.form,
+      this.created,
+      this.lastModified,
+      responses
+    );
+  }
 }

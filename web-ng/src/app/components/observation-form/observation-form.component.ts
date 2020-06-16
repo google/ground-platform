@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -11,38 +11,70 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
+import { DataStoreService } from '../../services/data-store/data-store.service';
+import { Project } from '../../shared/models/project.model';
+import { ProjectService } from '../../services/project/project.service';
+import { Router, NavigationExtras } from '@angular/router';
+import { LoadingState } from '../../services/loading-state.model';
+import { Observable } from 'rxjs';
+import { Layer } from '../../shared/models/layer.model';
+import { FeatureService } from '../../services/feature/feature.service';
+import { switchMap, map } from 'rxjs/operators';
+
+// To make ESLint happy:
+/*global alert*/
 
 @Component({
   selector: 'ground-observation-form',
   templateUrl: './observation-form.component.html',
   styleUrls: ['./observation-form.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ObservationFormComponent {
   readonly lang: string;
   readonly fieldTypes = FieldType;
   readonly cardinality = Cardinality;
+  readonly layer$: Observable<Layer>;
+  projectId?: string;
   observation?: Observation;
   observationForm?: FormGroup;
   observationFields?: List<Field>;
-  payLoad = '';
 
   constructor(
+    private dataStoreService: DataStoreService,
     private observationService: ObservationService,
-    private formBuilder: FormBuilder
+    private projectService: ProjectService,
+    private featureService: FeatureService,
+    private formBuilder: FormBuilder,
+    private router: Router
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
+    projectService.getActiveProject$().subscribe((project?: Project) => {
+      this.projectId = project?.id;
+    });
     observationService
       .getSelectedObservation$()
-      .subscribe((observation?: Observation) => {
-        this.observation = observation;
-        this.observationFields = observation!
-          .form!.fields.toOrderedMap()
-          .sortBy((k, v) => k.label)
-          .toList();
-        this.initForm();
+      .subscribe((observation?: Observation | LoadingState) => {
+        if (observation instanceof Observation) {
+          this.observation = observation;
+          this.observationFields = observation!
+            .form!.fields.toOrderedMap()
+            .sortBy(entry => entry.label)
+            .toList();
+          this.initForm();
+        }
       });
+    this.layer$ = projectService
+      .getActiveProject$()
+      .pipe(
+        switchMap(project =>
+          featureService
+            .getSelectedFeature$()
+            .pipe(map(feature => project.layers.get(feature.layerId)!))
+        )
+      );
   }
 
   initForm() {
@@ -54,9 +86,30 @@ export class ObservationFormComponent {
     );
   }
 
+  onCancel() {
+    this.navigateToFeature(this.observation!);
+  }
+
   onSave() {
-    this.payLoad = JSON.stringify(this.observationForm?.getRawValue());
-    console.log(this.extractResponses());
+    const updatedResponses: Map<string, Response> = this.extractResponses();
+    const updatedObservation = this.observation!.copy(updatedResponses);
+    this.dataStoreService
+      .updateObservation(this.projectId!, updatedObservation)
+      .then(() => this.navigateToFeature(updatedObservation))
+      .catch(() => {
+        alert('Observation update failed.');
+      });
+  }
+
+  navigateToFeature(observation: Observation) {
+    // TODO: refactor URL read/write logic into its own service.
+    const primaryUrl = this.router
+      .parseUrl(this.router.url)
+      .root.children['primary'].toString();
+    const navigationExtras: NavigationExtras = {
+      fragment: `f=${observation.featureId}`,
+    };
+    this.router.navigate([primaryUrl], navigationExtras);
   }
 
   convertObservationToFormGroup(observation: Observation): FormGroup {
@@ -81,7 +134,7 @@ export class ObservationFormComponent {
   }
 
   extractResponses(): Map<string, Response> {
-    return new Map<string, Response>(
+    return Map<string, Response>(
       this.observationFields!.map(field => [
         field.id,
         this.extractResponseForField(field),
