@@ -1,4 +1,20 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+/**
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { Component } from '@angular/core';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -29,7 +45,6 @@ import { switchMap, map } from 'rxjs/operators';
   selector: 'ground-observation-form',
   templateUrl: './observation-form.component.html',
   styleUrls: ['./observation-form.component.css'],
-  encapsulation: ViewEncapsulation.None,
 })
 export class ObservationFormComponent {
   readonly lang: string;
@@ -92,7 +107,9 @@ export class ObservationFormComponent {
 
   onSave() {
     const updatedResponses: Map<string, Response> = this.extractResponses();
-    const updatedObservation = this.observation!.copy(updatedResponses);
+    const updatedObservation = this.observation!.withResponses(
+      updatedResponses
+    );
     this.dataStoreService
       .updateObservation(this.projectId!, updatedObservation)
       .then(() => this.navigateToFeature(updatedObservation))

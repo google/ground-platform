@@ -29,7 +29,8 @@ export class Observation {
     readonly responses: Map<string, Response>
   ) {}
 
-  copy(responses: Map<string, Response>) {
+  // Returns copy of Observation with responses replaced.
+  withResponses(responses: Map<string, Response>): Observation {
     return new Observation(
       this.id,
       this.featureId,

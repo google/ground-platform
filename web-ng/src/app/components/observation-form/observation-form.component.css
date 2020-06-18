@@ -20,13 +20,11 @@
 .observation .field-label {
     font-size: 12px;
     line-height: 16px;
-    color: #70757A;
     margin-bottom: 3px;
 }
 .observation .field-response {
     font-size: 14px;
     line-height: 20px;
-    color: #3C4043;
     margin-bottom: 12px;
 }
 .observation .btn-save, .observation .btn-cancel{
@@ -34,17 +32,6 @@
     width: 70px;
     margin-left: 17px;
 }
-/* Below material component adjustments */
-.observation .mat-radio-label-content, .observation .mat-checkbox-label {
-    font-size: 12px;
-    line-height: 16px;
-    letter-spacing: 0.245px;
-    color: #3C4043;
-    margin-right: 17px;
-}
-.observation .mat-form-field {
+.field-response .mat-form-field {
     width: 100%;
-}
-.observation .mat-form-field-wrapper {
-    margin-bottom: -1.34em;
 }
