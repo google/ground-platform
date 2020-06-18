@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FeatureService } from '../../services/feature/feature.service';
-import { ProjectService } from '../../services/project/project.service';
-import { Feature } from '../../shared/models/feature.model';
+import { Component, Input } from '@angular/core';
+import { LoadingState } from '../../services/loading-state.model';
 
 @Component({
   selector: 'ground-side-panel',
@@ -26,15 +23,19 @@ import { Feature } from '../../shared/models/feature.model';
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
-  readonly selectedFeature$: Observable<Feature>;
+  @Input() contentType: SideNavContentType = SideNavContentType.LAYER_LIST;
+  sideNavContentType = SideNavContentType;
+  readonly loadingState = LoadingState;
   readonly lang: string;
 
-  constructor(
-    private projectService: ProjectService,
-    private featureService: FeatureService
-  ) {
+  constructor() {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.selectedFeature$ = this.featureService.getSelectedFeature$();
   }
+}
+
+export enum SideNavContentType {
+  LAYER_LIST = 0,
+  OBSERVATION = 1,
+  FEATURE = 2,
 }

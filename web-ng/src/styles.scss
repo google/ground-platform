@@ -38,3 +38,16 @@ button .mat-icon + label {
   padding-left: 6px;
   cursor: pointer;
 }
+
+/**
+ * Make sure that inline items have proper spacing between them,
+ * e.g. on Observation Form page.
+ */
+.mat-radio-label-content, .mat-checkbox-label {
+  margin-right: 17px;
+}
+
+/* The spacing below text box should be smaller. */
+.mat-form-field-wrapper {
+  margin-bottom: -1.34em;
+}

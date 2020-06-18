@@ -19,9 +19,15 @@ import { NgModule } from '@angular/core';
 import { SidePanelComponent } from './side-panel.component';
 import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
 import { LayerListModule } from '../layer-list/layer-list.module';
+import { ObservationFormModule } from '../observation-form/observation-form.module';
 
 @NgModule({
-  imports: [BrowserModule, FeaturePanelModule, LayerListModule],
+  imports: [
+    BrowserModule,
+    FeaturePanelModule,
+    LayerListModule,
+    ObservationFormModule,
+  ],
   exports: [SidePanelComponent],
   declarations: [SidePanelComponent],
 })
