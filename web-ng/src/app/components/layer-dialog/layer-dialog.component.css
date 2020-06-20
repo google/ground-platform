@@ -50,7 +50,6 @@
 
 .link-add-question {
   color: #009113;
-  cursor: pointer;
 }
 
 .add-question {
@@ -58,13 +57,15 @@
   border: 1px solid #e6e7ea;
   border-radius: 10px;
   margin-top: 20px;
+  width: 100%;
+  text-align: left;
 }
 
 .plus-icon {
   display: inline-block;
   width: 20px;
   height: 20px;
-  vertical-align: top;
+  vertical-align: middle;
   background: linear-gradient(#009113, #009113),
     linear-gradient(#009113, #009113);
   background-position: center;
