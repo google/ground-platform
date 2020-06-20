@@ -116,7 +116,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   init(projectId: string, createLayer: boolean, layer?: Layer) {
     this.projectId = projectId;
-    if (!createLayer && !layer || createLayer) {
+    if ((!createLayer && !layer) || createLayer) {
       const layerId = this.dataStoreService.generateId();
       const fieldId = this.dataStoreService.generateId();
       this.fields = this.fields.push(
