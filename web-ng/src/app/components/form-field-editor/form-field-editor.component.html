@@ -19,12 +19,18 @@
   <div fxLayout>
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
-      <input matInput formControlName="label" autocomplete="off" />
+      <input
+        matInput
+        formControlName="label"
+        autocomplete="off"
+        (keyup.enter)="onEnterKeyPress()"
+      />
     </mat-form-field>
     <mat-form-field fxFlex class="field-type" appearance="outline">
       <mat-select
         formControlName="type"
         (selectionChange)="onFieldTypeSelect($event.value)"
+        #type
       >
         <mat-select-trigger>
           <mat-icon class="icon-field-type">{{ getFieldType().icon }}</mat-icon>
@@ -59,12 +65,12 @@
         (delete)="onOptionDelete(i)"
       ></app-option-editor>
     </div>
-    <button mat-button (click)="onAddOption()" class="add-option">
+    <button mat-button type="button" (click)="onAddOption()" class="add-option">
       Add option
     </button>
   </div>
   <div fxLayout fxLayoutAlign="end" class="question-actions">
-    <button mat-icon-button (click)="onFieldDelete()">
+    <button mat-icon-button type="button" (click)="onFieldDelete()">
       <mat-icon>delete_forever</mat-icon>
     </button>
     <span class="vertical-divider"></span>
