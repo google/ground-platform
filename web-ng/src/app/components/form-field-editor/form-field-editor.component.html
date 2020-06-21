@@ -19,7 +19,12 @@
   <div fxLayout>
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
-      <input matInput formControlName="label" autocomplete="off" />
+      <input matInput formControlName="label" autocomplete="off" required />
+      <mat-error *ngIf="labelControl.touched && labelControl.invalid">
+        <ng-container *ngIf="labelControl.getError('required')">
+          Question field is required
+        </ng-container>
+      </mat-error>
     </mat-form-field>
     <mat-form-field fxFlex class="field-type" appearance="outline">
       <mat-select

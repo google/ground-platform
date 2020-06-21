@@ -160,6 +160,11 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
+    // Check if there are empty fields, if empty return.
+    const emptyFields = this.fields.filter(field => !field.label.get('en'));
+    if (emptyFields.size) {
+      return;
+    }
     this.fields.forEach((field: Field, index: number) => {
       const layerFieldId = this.fields && this.fields.get(index)?.id;
       const fieldId = layerFieldId
