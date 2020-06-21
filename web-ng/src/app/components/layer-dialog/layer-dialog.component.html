@@ -45,9 +45,9 @@
         </app-form-field-editor>
       </div>
     </div>
-    <button mat-button class="add-question">
+    <button mat-button class="add-question" type="button" (click)="addQuestion()">
       <span class="plus-icon"></span>
-      <a class="link-add-question" (click)="addQuestion()"> Add question </a>
+      <span class="link-add-question">Add question</span>
     </button>
   </mat-dialog-content>
   <mat-dialog-actions fxLayout fxLayoutAlign="end">
