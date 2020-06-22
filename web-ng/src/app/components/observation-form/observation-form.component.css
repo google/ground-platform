@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,24 @@
  * limitations under the License.
  */
 
-.container {
-  display: flex;
-  flex-flow: column;
-  height: 100%;
+.observation {
+    margin: 16px;
 }
-
-.header{
-  flex: 0 1 auto;
+.observation .field-label {
+    font-size: 12px;
+    line-height: 16px;
+    margin-bottom: 3px;
 }
-
-.content{
-  flex: 1 1 auto;
+.observation .field-response {
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 12px;
 }
-
-.main-page-container{
-  height: 100%;
+.observation .btn-save, .observation .btn-cancel{
+    float: right;
+    width: 70px;
+    margin-left: 17px;
 }
-
-.mat-sidenav {
-  width: 300px;
-}
-
-.sidenav-toggle {
-  top: 10px;
-  right: -30px;
-  position: absolute;
-}
-
-.sidenav-toggle:hover {
-  right: 0;
-  transition: 0.5s;
-}
-
-.mat-sidenav-content {
-  overflow: hidden;
+.field-response .mat-form-field {
+    width: 100%;
 }

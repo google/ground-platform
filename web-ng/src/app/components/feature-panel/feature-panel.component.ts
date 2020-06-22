@@ -71,7 +71,6 @@ export class FeaturePanelComponent {
 
   onEditObservationClick(observation: Observation) {
     // TODO: refactor URL read/write logic into its own service.
-    console.log('click' + observation.id);
     const primaryUrl = this.router
       .parseUrl(this.router.url)
       .root.children['primary'].toString();

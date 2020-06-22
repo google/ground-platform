@@ -13,12 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div>
-  <div *ngIf="selectedFeature$ | async as feature; else layers">
-    <ground-feature-panel></ground-feature-panel>
-  </div>
+<div *ngIf="contentType == sideNavContentType.OBSERVATION">
+  <ground-observation-form></ground-observation-form>
 </div>
 
-<ng-template #layers>
+<div *ngIf="contentType == sideNavContentType.FEATURE">
+    <ground-feature-panel></ground-feature-panel>
+  </div>
+
+<div *ngIf="contentType == sideNavContentType.LAYER_LIST">
   <ground-layer-list></ground-layer-list>
-</ng-template>
+</div>

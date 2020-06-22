@@ -75,6 +75,13 @@ export class DataStoreService {
       });
   }
 
+  updateObservation(projectId: string, observation: Observation) {
+    return this.db
+      .collection(`projects/${projectId}/observations`)
+      .doc(observation.id)
+      .update(FirebaseDataConverter.observationToJS(observation));
+  }
+
   /**
    * Returns an Observable that loads and emits the feature with the specified
    * uuid.

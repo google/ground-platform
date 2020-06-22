@@ -15,7 +15,7 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, Subscription, BehaviorSubject } from 'rxjs';
 import { Feature } from './../../shared/models/feature.model';
 import { Project } from './../../shared/models/project.model';
 import { Injectable } from '@angular/core';
@@ -24,39 +24,47 @@ import { List } from 'immutable';
 import { switchMap } from 'rxjs/operators';
 import { ProjectService } from '../project/project.service';
 import { FeatureService } from '../feature/feature.service';
+import { LoadingState } from '../loading-state.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ObservationService {
   private selectedObservationId$ = new ReplaySubject<string>(1);
-  private selectedObservation$: Observable<Observation>;
+  private selectedObservation$ = new BehaviorSubject<
+    Observation | LoadingState
+  >(LoadingState.NOT_LOADED);
+  private subscription = new Subscription();
 
   constructor(
     private dataStore: DataStoreService,
     projectService: ProjectService,
     featureService: FeatureService
   ) {
-    this.selectedObservation$ = this.selectedObservationId$.pipe(
-      switchMap(observationId =>
-        projectService
-          .getActiveProject$()
-          .pipe(
-            switchMap(project =>
-              featureService
-                .getSelectedFeature$()
-                .pipe(
-                  switchMap(feature =>
-                    this.dataStore.loadObservation$(
-                      project,
-                      feature,
-                      observationId
+    this.subscription.add(
+      this.selectedObservationId$
+        .pipe(
+          switchMap(observationId =>
+            projectService
+              .getActiveProject$()
+              .pipe(
+                switchMap(project =>
+                  featureService
+                    .getSelectedFeature$()
+                    .pipe(
+                      switchMap(feature =>
+                        this.dataStore.loadObservation$(
+                          project,
+                          feature,
+                          observationId
+                        )
+                      )
                     )
-                  )
                 )
-            )
+              )
           )
-      )
+        )
+        .subscribe(o => this.selectedObservation$.next(o))
     );
   }
 
@@ -68,10 +76,19 @@ export class ObservationService {
   }
 
   selectObservation(observationId: string) {
+    this.selectedObservation$.next(LoadingState.LOADING);
     this.selectedObservationId$.next(observationId);
   }
 
-  getSelectedObservation$(): Observable<Observation> {
+  deselectObservation() {
+    this.selectedObservation$.next(LoadingState.NOT_LOADED);
+  }
+
+  getSelectedObservation$(): BehaviorSubject<Observation | LoadingState> {
     return this.selectedObservation$;
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

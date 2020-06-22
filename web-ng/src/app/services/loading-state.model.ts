@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,7 @@
  * limitations under the License.
  */
 
-.container {
-  display: flex;
-  flex-flow: column;
-  height: 100%;
-}
-
-.header{
-  flex: 0 1 auto;
-}
-
-.content{
-  flex: 1 1 auto;
-}
-
-.main-page-container{
-  height: 100%;
-}
-
-.mat-sidenav {
-  width: 300px;
-}
-
-.sidenav-toggle {
-  top: 10px;
-  right: -30px;
-  position: absolute;
-}
-
-.sidenav-toggle:hover {
-  right: 0;
-  transition: 0.5s;
-}
-
-.mat-sidenav-content {
-  overflow: hidden;
+export enum LoadingState {
+  LOADING,
+  NOT_LOADED,
 }

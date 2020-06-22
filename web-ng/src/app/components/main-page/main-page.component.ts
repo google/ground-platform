@@ -24,6 +24,7 @@ import { Project } from '../../shared/models/project.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
+import { SideNavContentType } from '../side-panel/side-panel.component';
 import { take } from 'rxjs/operators';
 
 @Component({
@@ -35,6 +36,7 @@ export class MainPageComponent implements OnInit {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
+  sideNavContentType: SideNavContentType = SideNavContentType.LAYER_LIST;
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
@@ -74,16 +76,21 @@ export class MainPageComponent implements OnInit {
     // edited.
     if (params.get('l')) {
       this.showEditLayerDialog(params.get('l')!);
+      this.sideNavContentType = SideNavContentType.LAYER_LIST;
     }
     // The 'f' param is used to represent the feature id that
     // was selected by e.g. clicking the marker.
     if (params.get('f')) {
       this.featureService.selectFeature(params.get('f')!);
+      this.sideNavContentType = SideNavContentType.FEATURE;
     }
     // The 'o' param is used to represent the observation id that
     // was selected by e.g. clicking edit observation button.
     if (params.get('o')) {
       this.observationService.selectObservation(params.get('o')!);
+      this.sideNavContentType = SideNavContentType.OBSERVATION;
+    } else {
+      this.observationService.deselectObservation();
     }
   }
 

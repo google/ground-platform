@@ -19,15 +19,17 @@
   </div>
   <div class="content">
     <mat-sidenav-container class="main-page-container">
-      <mat-sidenav-content>
+      <mat-sidenav-content class="mat-sidenav-content">
         <ground-map></ground-map>
         <button mat-raised-button class="sidenav-toggle" (click)="sideNavOpened = !sideNavOpened;">
           <span *ngIf='sideNavOpened'>></span>
           <span *ngIf='!sideNavOpened'><</span>
         </button>
       </mat-sidenav-content>
-      <mat-sidenav #sidenav mode="side" position="end" [(opened)]="sideNavOpened">
-        <ground-side-panel></ground-side-panel>
+      <mat-sidenav #sidenav mode="side" position="end"
+       [(opened)]="sideNavOpened">
+        <ground-side-panel 
+        [contentType]="sideNavContentType"></ground-side-panel>
       </mat-sidenav>
     </mat-sidenav-container>
   </div>
