@@ -25,6 +25,7 @@ const updateColumns = require('./update-columns')
 const onCreateRecord = require('./on-create-record')
 const onUpdateRecord = require('./on-update-record')
 const importCsv = require('./import-csv')
+const hardcodedInsert = require('./hardcoded')
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
@@ -57,3 +58,16 @@ exports.onUpdateRecord =
         .document(
             'projects/{projectId}/features/{featureId}/records/{recordId}')
         .onUpdate((change, context) => onUpdateRecord(change, context));
+
+// TODO(tiyara): Toy test via shell (do not submit).
+exports.test = functions.https.onRequest(
+    (req, res) => res.status(200).send(`Hello World`));
+
+// Test via shell:
+// importCsv(projectId: '', layerId: '' , csvString: 'Ferrera, GR, 8.986493, 46.743506')
+exports.importCsv = functions.https.onRequest(
+    (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+
+// Just to test local firestore setup
+exports.hardcodedInsert = functions.https.onRequest(
+    (req, res) => hardcodedInsert(req, res).catch(err => res.status(500).send(`${err}`)));

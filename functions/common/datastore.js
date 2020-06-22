@@ -17,6 +17,8 @@
 
 'use strict';
 
+const { firestore } = require('firebase-admin');
+
 class Datastore {
   constructor(db) {
     this.db_ = db;
@@ -26,9 +28,9 @@ class Datastore {
    * Stores user email, name, and avatar to db for use in application features.
    * These attributes are merged with other existing ones if already present.
    */
-  mergeUserProfile({uid, email, displayName, photoURL}) {
+  mergeUserProfile({ uid, email, displayName, photoURL }) {
     return this.db_.doc(`users/${uid}`)
-        .set({uid, email, displayName, photoURL}, {merge: true});
+      .set({ uid, email, displayName, photoURL }, { merge: true });
   }
 
   fetch_(docRef) {
@@ -49,7 +51,7 @@ class Datastore {
 
   fetchRecord(projectId, featureId, recordId) {
     return this.fetchDoc_(
-        `projects/${projectId}/features/${featureId}/records/${recordId}`);
+      `projects/${projectId}/features/${featureId}/records/${recordId}`);
   }
 
   fetchRecords(projectId, featureId) {
@@ -66,11 +68,44 @@ class Datastore {
 
   fetchForm(projectId, featureTypeId, formId) {
     return this.fetchDoc_(
-        `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
+      `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
   }
 
   fetchSheetsConfig(projectId) {
     return this.fetchDoc_(`projects/${projectId}/sheets/config`);
+  }
+
+  insertFeature(projectId, { layerId, featureCaption, featureLat, featureLong }) {
+    var docRef = this.db_.collection('projects').doc(projectId);
+    return docRef.get().then((docSnapshot) => {
+      if (docSnapshot.exists) {
+        docRef.collection('features').add({
+          layerId: layerId,
+          caption: featureCaption,
+          location: new firestore.GeoPoint(Number.parseFloat(featureLat)
+            , Number.parseFloat(featureLong))
+        })
+        console.log("Feature successfully written!");
+      } else {
+        console.log("Project " + projectId + 
+          " does not exist! Please make sure project exists before adding features!");
+        // For debug/test reasons uncomment below to add the project.
+        // docRef.set({project: projectId}); 
+      }
+    }).catch(function (error) {
+      console.log("Error getting document:", error);
+    });
+  }
+
+  // Function to test local firestore instance.
+  hardcodedInsert() {
+    return this.db_.collection('test').doc('1234').set({ testdoc: 123 })
+      .then(function () {
+        console.log("Hardcoded value inserted successfully!");
+      })
+      .catch(function (error) {
+        console.error("Error writing feature: ", error);
+      });
   }
 }
 

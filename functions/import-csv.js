@@ -17,99 +17,43 @@
 
 'use strict';
 
-const {db} = require('./common/context');
-const KmlReader = require('./common/kml-reader');
+const { db } = require('./common/context');
 
+// TODO(tiyara): First read a comma-separated string and test the function. Then enable file upload.
 function importCsv(req, res) {
-  console.log('Importing new csv file.');
-  await admin.firestore().collection('projects').document('riverwarch').collection('features').add({
-    name: `HPS ${csv.name}`,
-    layerId: '/images/firebase-logo.png', // Firebase logo
-    location.latitude: `${fullName} signed in for the first time! Welcome!`,
-    location.longitude: ${csv.longitude},
-  });
-  console.log('CSV file imported');
-
-
-  // The rest Belongs to export KML, kept just for terminology
+  //serverLocation = uploadCsv(fileLocation);
   const {
-    project: providedProjectId,
-    featureType: providedFeatureTypeId,
-    lang: desiredLanguage,
+    project: projectId,
+    csv: csvString,
+    layer: layerId,
   } = req.query;
-
-  let data = {};
-  return db.fetchProject(providedProjectId).then(
-    project => {
-      if (!project.exists) {
-        res.status(404).send('not found');
-        return Promise.reject(new Error('project not found: ' + providedProjectId));
-      }
-      data['projects'] = {};
-      data['projects'][project.id] = {}
-      data['projects'][project.id]['title'] = project.get('title');
-      data['projects'][project.id]['featureTypes'] = {};
-      const featureTypes = project.get('featureTypes');
-      for (var featureTypeIdVar in featureTypes) {
-        const featureType = featureTypes[featureTypeIdVar];
-        data['projects'][project.id]['featureTypes'][featureTypeIdVar] = {};
-        data['projects'][project.id]['featureTypes'][featureTypeIdVar]['definition'] = featureType;
-        data['projects'][project.id]['featureTypes'][featureTypeIdVar]['features'] = {};
-      }
-      return Promise.all([
-        project.ref.collection('features').get(),
-        // TODO: Filter records by featureType where specified with something like:
-        // project.ref.collection('records').where('featureTypeId', '==', providedFeatureTypeId).get()
-        project.ref.collection('records').get()
-      ]);
-    }
-  ).then(
-    results => {
-      const features = results[0];
-      features.forEach(
-        feature => {
-          const featureTypeId = feature.get('featureTypeId');
-          if (providedFeatureTypeId && featureTypeId != providedFeatureTypeId) {
-            return;
-          }
-          const projectId = feature.ref.parent.parent.id;
-          let featureTypeMap = data['projects'][projectId]['featureTypes'][featureTypeId];
-          featureTypeMap['features'][feature.id] = {};
-          featureTypeMap['features'][feature.id]['data'] = feature.data();
-          featureTypeMap['features'][feature.id]['records'] = {};
-        }
-      );
-      const records = results[1];
-      records.forEach(
-        record => {
-          const featureTypeId = record.get('featureTypeId');
-          if (providedFeatureTypeId && featureTypeId != providedFeatureTypeId) {
-            return;
-          }
-          const featureId = record.get('featureId');
-          const projectId = record.ref.parent.parent.id;
-          let featureMap = data['projects'][projectId]['featureTypes'][featureTypeId]['features'][featureId];
-          if (Object.keys(featureMap).length == 0) {
-            // If the related feature itself doesn't exist, skip
-            return;
-          }
-          featureMap['records'][record.id] = record.data();
-        }
-      );
-      let kmlWriter = new KmlWriter(providedProjectId, data, desiredLanguage ? desiredLanguage : '');
-      return kmlWriter.getTmpKmlFile();
-    }
-  ).then(
-    tmpKmlFilePath => {
-      return res.download(tmpKmlFilePath);
-    }
-  ).catch(
-    err => {
-      console.log(err);
-      //return res.status(500).end();
-      return res.send(data);
-    }
-  )
+  return insertCsv(projectId, layerId, csvString).then(() => res.status(200).send(`Hello World`));
 }
 
-module.exports = exportKml;
+function uploadCsv(fileLocation) {
+  console.log('Importing new csv file from ' + fileLocation);
+  var csvFile = new XMLHttpRequest();
+  csvFile.open("GET", fileLocation, true);
+  csvFile.onreadystatechange = function () {
+    if (csvFile.readyState === 4) {
+      if (csvFile.status === 200 || csvFile.status == 0) {
+        // TODO: do something if file upload is successful.
+      }
+    }
+  }
+  csvFile.send(null);
+  console.log('CSV file successfully imported');
+}
+
+// TODO(tiyara): Read the text file in a streaming fashion, read one (a few) line and insert and then next.
+function insertCsv(projectId, layerId, csvString) {
+  //var allTextLines = txtFile.split(/\r\n|\n/);
+  const columns = csvString.split(','); // "Name, State, Lat, Long"
+  const featureCaption = columns[0] + ", " + columns[1];
+  const featureLat = columns[2];
+  const featureLong = columns[3];
+  return db.insertFeature(projectId,
+    { layerId, featureCaption, featureLat, featureLong });
+}
+
+module.exports = importCsv;
