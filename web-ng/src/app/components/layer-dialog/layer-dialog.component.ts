@@ -114,28 +114,31 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
+  createNewLayer() {
+    const layerId = this.dataStoreService.generateId();
+    const fieldId = this.dataStoreService.generateId();
+    this.fields = this.fields.push(
+      new Field(
+        fieldId,
+        FieldType.TEXT,
+        StringMap({
+          en: '',
+        }),
+        /* required= */
+        false,
+        /* index= */
+        0
+      )
+    );
+    return new Layer(layerId, /* index */ -1);
+  }
+
   init(projectId: string, createLayer: boolean, layer?: Layer) {
-    this.projectId = projectId;
-    if ((!createLayer && !layer) || createLayer) {
-      const layerId = this.dataStoreService.generateId();
-      const fieldId = this.dataStoreService.generateId();
-      this.fields = this.fields.push(
-        new Field(
-          fieldId,
-          FieldType.TEXT,
-          StringMap({
-            en: '',
-          }),
-          /* required= */
-          false,
-          /* index= */
-          0
-        )
-      );
-      this.layer = new Layer(layerId, /* index */ -1);
-    } else {
-      this.layer = layer;
+    if (!createLayer && !layer) {
+      console.warn('User passed an invalid layer id');
     }
+    this.projectId = projectId;
+    this.layer = layer ? layer : this.createNewLayer();
     this.layerName = this.layer?.name?.get(this.lang) || '';
     const form = this.getForms();
     if (form) {
