@@ -22,7 +22,6 @@ import {
   EventEmitter,
   OnChanges,
   SimpleChanges,
-  ViewChild,
 } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
@@ -37,7 +36,6 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { MatSelect } from '@angular/material/select';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -57,7 +55,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() multipleChoice?: MultipleChoice;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
-  @ViewChild('type') typeSelect?: MatSelect;
   formOptions: MultipleChoice | undefined;
   fieldTypes: FieldTypeSelectOption[] = [
     {
@@ -233,9 +230,5 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       options = options.set(event.currentIndex, optionAtPrevIndex);
     }
     this.emitFormOptions(options);
-  }
-
-  onEnterKeyPress() {
-    this.typeSelect?.focus();
   }
 }
