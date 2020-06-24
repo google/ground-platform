@@ -39,10 +39,32 @@
     </button>
   </form>
   <h4>Collaborators</h4>
-  <div *ngFor="let entry of acl | async">
+  <div>[Active work in progress...]</div>
+  <table mat-table role="list" class="user-list">
     <!-- TODO: Format list, role names, allow edit role, delete. -->
-    <div>Email: {{ entry[0] }} Role: {{ entry[1] }}</div>
-  </div>
+    <tr
+      mat-row
+      *ngFor="let entry of acl | async"
+      class="user-list-item"
+      role="listitem"
+    >
+      <td class="user-email">{{ entry[0] }}</td>
+      <td class="user-role">
+        <mat-form-field class="role-select">
+          <mat-select
+            (selectionChange)="onRoleChange($event, entry[0])"
+            [value]="entry[1]"
+          >
+            <mat-option
+              *ngFor="let option of ROLE_OPTIONS"
+              [value]="option.value"
+              >{{ option.label }}</mat-option
+            >
+          </mat-select>
+        </mat-form-field>
+      </td>
+    </tr>
+  </table>
 </div>
 <div mat-dialog-actions align="end">
   <button mat-flat-button color="primary" (click)="onDoneClicked()">

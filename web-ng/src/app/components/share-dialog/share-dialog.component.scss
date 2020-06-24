@@ -21,5 +21,27 @@
 
 .role-select {
   margin-right: 10px;
-  width: 114px;
+  width: 106px;
+}
+
+.user-list {
+  width: 100%;
+  height: 200px;
+  overflow-y: scroll;
+  padding-bottom: 6px;
+}
+
+.user-list-item {
+  white-space: nowrap;
+}
+.user-list-item .mat-form-field-infix {
+  border-top: none !important;
+}
+
+.user-email {
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  width: 80px;
 }

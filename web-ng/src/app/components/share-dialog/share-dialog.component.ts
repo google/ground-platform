@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Validators, FormControl, FormGroup } from '@angular/forms';
 import { ProjectService } from '../../services/project/project.service';
@@ -22,6 +22,7 @@ import { Role } from '../../shared/models/role.model';
 import { Subscription, ReplaySubject } from 'rxjs';
 import { List } from 'immutable';
 import { Project } from '../../shared/models/project.model';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'app-share-dialog',
@@ -37,6 +38,8 @@ export class ShareDialogComponent {
   /** The id of the currently active project. */
   private projectId?: string;
 
+  roles = Role;
+
   /** Roles and labels for select drop-downs. */
   readonly ROLE_OPTIONS = [
     { label: 'Viewer', value: Role.VIEWER },
@@ -46,7 +49,7 @@ export class ShareDialogComponent {
 
   /** List of acl entries. Each entry consists of an email and a Role. */
   acl = new ReplaySubject<List<[string, Role]>>();
-
+  test = 1;
   private subscription = new Subscription();
 
   constructor(
@@ -89,6 +92,10 @@ export class ShareDialogComponent {
     );
     // TODO: Show saving / saved status.
     this.addUserForm.setValue({ email: '', role: Role.CONTRIBUTOR });
+  }
+
+  onRoleChange(event: MatSelectChange, email: string) {
+    console.log(event, email);
   }
 
   /**
