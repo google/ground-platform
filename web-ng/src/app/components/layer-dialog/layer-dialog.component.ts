@@ -72,19 +72,8 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const fieldId = this.dataStoreService.generateId();
-    this.fields = this.fields.push(
-      new Field(
-        fieldId,
-        FieldType.TEXT,
-        StringMap({
-          en: '',
-        }),
-        /* required= */
-        false,
-        this.fields.size
-      )
-    );
+    const newField = this.createNewField();
+    this.fields = this.fields.push(newField);
   }
 
   /**
@@ -116,21 +105,22 @@ export class LayerDialogComponent implements OnDestroy {
 
   createNewLayer() {
     const layerId = this.dataStoreService.generateId();
-    const fieldId = this.dataStoreService.generateId();
-    this.fields = this.fields.push(
-      new Field(
-        fieldId,
-        FieldType.TEXT,
-        StringMap({
-          en: '',
-        }),
-        /* required= */
-        false,
-        /* index= */
-        0
-      )
-    );
     return new Layer(layerId, /* index */ -1);
+  }
+
+  createNewField() {
+    const fieldId = this.dataStoreService.generateId();
+    return new Field(
+      fieldId,
+      FieldType.TEXT,
+      StringMap({
+        en: '',
+      }),
+      /* required= */
+      false,
+      /* index= */
+      this.fields.size
+    );
   }
 
   init(projectId: string, createLayer: boolean, layer?: Layer) {
@@ -138,8 +128,14 @@ export class LayerDialogComponent implements OnDestroy {
       console.warn('User passed an invalid layer id');
     }
     this.projectId = projectId;
-    this.layer = layer ? layer : this.createNewLayer();
     this.layerName = this.layer?.name?.get(this.lang) || '';
+    if (!layer) {
+      this.layer = this.createNewLayer();
+      const newField = this.createNewField();
+      this.fields = this.fields.push(newField);
+      return;
+    }
+    this.layer = layer;
     const form = this.getForms();
     if (form) {
       this.fields =
