@@ -17,8 +17,12 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
+
+interface ParamMap {
+  [key: string]: string;
+}
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -31,16 +35,21 @@ export class RouterService {
   private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
+
+  private activatedRoute?: ActivatedRoute;
   private projectId$?: Observable<string | null>;
   private layerId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
+
+  constructor(private router: Router) {}
 
   /**
    * Set up streams using provided route. This must be called before any of
    * the accessors are called.
    */
   init(route: ActivatedRoute) {
+    this.activatedRoute = route;
     // Pipe values from URL query parameters.
     this.projectId$ = route.paramMap.pipe(
       map(params => params.get('projectId'))
@@ -74,5 +83,51 @@ export class RouterService {
 
   getObservationId$(): Observable<string | null> {
     return this.observationId$!;
+  }
+
+  /**
+   * Returns the current URL fragment, parsed as if their were normal HTTP
+   * query parameter key/value pairs.
+   */
+  private getFragmentParams(): HttpParams {
+    const fragment = this.activatedRoute!.snapshot.fragment;
+    return new HttpParams({ fromString: fragment || '' });
+  }
+
+  /**
+   * Navigate to the current URL, replacing the URL fragment with the specified
+   * params.
+   */
+  private setFragmentParams(params: HttpParams) {
+    const primaryUrl = this.router
+      .parseUrl(this.router.url)
+      .root.children['primary'].toString();
+    const navigationExtras: NavigationExtras = {
+      fragment: params.toString(),
+    };
+    this.router.navigate([primaryUrl], navigationExtras);
+  }
+
+  /**
+   * Navigate to the current URL, replacing the single URL fragment param
+   * with the specified value.
+   */
+  private setFragmentParam(key: string, value: string) {
+    this.setFragmentParams(this.getFragmentParams().set(key, value));
+  }
+
+  /**
+   * Navigate to the current URL, updating the feature id in the URL fragment.
+   */
+  setFeatureId(id: string) {
+    this.setFragmentParam(RouterService.FEATURE_ID_FRAGMENT_PARAM, id);
+  }
+
+  /**
+   * Navigate to the current URL, updating the observation id in the URL
+   * fragment.
+   */
+  setObservationId(id: string) {
+    this.setFragmentParam(RouterService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
 }

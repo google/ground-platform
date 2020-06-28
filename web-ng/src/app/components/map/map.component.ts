@@ -50,7 +50,6 @@ export class MapComponent implements OnInit {
   constructor(
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private router: Router,
     private routerService: RouterService
   ) {
     this.features$ = this.featureService.getFeatures$();
@@ -68,12 +67,7 @@ export class MapComponent implements OnInit {
   }
 
   onFeatureClick(featureId: string) {
-    // TODO: refactor URL read/write logic into its own service.
-    const primaryUrl = this.router
-      .parseUrl(this.router.url)
-      .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = { fragment: `f=${featureId}` };
-    this.router.navigate([primaryUrl], navigationExtras);
+    this.routerService.setFeatureId(featureId);
   }
 
   createMarkerOptions(
