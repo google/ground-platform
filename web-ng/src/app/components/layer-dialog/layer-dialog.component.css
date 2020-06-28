@@ -38,33 +38,24 @@
   color: #009113;
 }
 
-.layer-name {
-  display: block;
-  font-size: 1.5em;
-  margin-top: 0.83em;
-  margin-bottom: 0.83em;
-  margin-left: 0;
-  margin-right: 0;
-  font-weight: bold;
-}
-
 .link-add-question {
   color: #009113;
-  cursor: pointer;
 }
 
 .add-question {
-  padding: 20px;
+  padding: 10px;
   border: 1px solid #e6e7ea;
   border-radius: 10px;
   margin-top: 20px;
+  width: 100%;
+  text-align: left;
 }
 
 .plus-icon {
   display: inline-block;
   width: 20px;
   height: 20px;
-  vertical-align: top;
+  vertical-align: middle;
   background: linear-gradient(#009113, #009113),
     linear-gradient(#009113, #009113);
   background-position: center;
@@ -98,6 +89,7 @@
 
 .mat-dialog-actions {
   margin-top: 10px;
+  margin-bottom: 0.83em;
 }
 
 .container-option {
