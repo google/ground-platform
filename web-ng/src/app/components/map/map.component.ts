@@ -24,6 +24,7 @@ import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
 import { getPinImageSource } from './ground-pin';
+import { RouterService } from '../../services/router/router.service';
 
 // To make ESLint happy:
 /*global google*/
@@ -51,7 +52,7 @@ export class MapComponent implements OnInit {
     private projectService: ProjectService,
     private featureService: FeatureService,
     private router: Router,
-    private route: ActivatedRoute
+    private routerService: RouterService
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -59,10 +60,9 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.subscription.add(
-      this.route.fragment.subscribe(fragment => {
-        const params = new HttpParams({ fromString: fragment });
-        if (params.get('f')) {
-          this.focusedFeatureId = params.get('f')!;
+      this.routerService.getFeatureId$().subscribe(id => {
+        if (id) {
+          this.focusedFeatureId = id;
         }
       })
     );
