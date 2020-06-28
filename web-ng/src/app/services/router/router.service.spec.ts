@@ -17,12 +17,15 @@
 import { TestBed } from '@angular/core/testing';
 
 import { RouterService } from './router.service';
+import { Router } from '@angular/router';
 
 describe('RouterService', () => {
   let service: RouterService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: Router, useValue: {} }],
+    });
     service = TestBed.inject(RouterService);
   });
 
