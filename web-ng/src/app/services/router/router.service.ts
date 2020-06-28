@@ -109,11 +109,25 @@ export class RouterService {
   }
 
   /**
+   * Navigate to the current URL, replacing the single URL fragment param
+   * with the specified value.
+   */
+  private setFragmentParam(key: string, value: string) {
+    this.setFragmentParams(this.getFragmentParams().set(key, value));
+  }
+
+  /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
   setFeatureId(id: string) {
-    let params = this.getFragmentParams();
-    params = params.set(RouterService.FEATURE_ID_FRAGMENT_PARAM, id);
-    this.setFragmentParams(params);
+    this.setFragmentParam(RouterService.FEATURE_ID_FRAGMENT_PARAM, id);
+  }
+
+  /**
+   * Navigate to the current URL, updating the observation id in the URL
+   * fragment.
+   */
+  setObservationId(id: string) {
+    this.setFragmentParam(RouterService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
 }
