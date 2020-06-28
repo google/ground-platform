@@ -23,7 +23,7 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -77,7 +77,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     private confirmationDialog: MatDialog
   ) {
     this.formFieldGroup = this.formBuilder.group({
-      label: [''],
+      label: ['', Validators.required],
       required: [false],
       type: this.fieldTypes[0],
     });
@@ -230,5 +230,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       options = options.set(event.currentIndex, optionAtPrevIndex);
     }
     this.emitFormOptions(options);
+  }
+
+  get labelControl() {
+    return this.formFieldGroup.get('label');
   }
 }
