@@ -65,12 +65,12 @@
         (delete)="onOptionDelete(i)"
       ></app-option-editor>
     </div>
-    <button mat-button (click)="onAddOption()" class="add-option">
+    <button mat-button type="button" (click)="onAddOption()" class="add-option">
       Add option
     </button>
   </div>
   <div fxLayout fxLayoutAlign="end" class="question-actions">
-    <button mat-icon-button (click)="onFieldDelete()">
+    <button mat-icon-button type="button" (click)="onFieldDelete()">
       <mat-icon>delete_forever</mat-icon>
     </button>
     <span class="vertical-divider"></span>
