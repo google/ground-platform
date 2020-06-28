@@ -14,13 +14,11 @@
   limitations under the License.
 -->
 
-<span>
-  <input
-    value="{{ this.title }}"
-    placeholder="Untitled project"
-    (keydown)="handleKeyPress($event)"
-    (blur)="updateProjectTitle($event)"
-    AutoSizeInput
-    class="inline-edit"
-  />
-</span>
+<input
+  value="{{ this.title }}"
+  placeholder="Untitled project"
+  (keydown)="handleKeyPress($event)"
+  (blur)="updateProjectTitle($event)"
+  AutoSizeInput
+  class="inline-edit"
+/>
