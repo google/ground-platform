@@ -26,6 +26,7 @@ import { Layer } from '../../shared/models/layer.model';
 import { FieldType } from '../../shared/models/form/field.model';
 import { Router, NavigationExtras } from '@angular/router';
 
+// TODO: Rename "FeatureDetailsComponent".
 @Component({
   selector: 'ground-feature-panel',
   templateUrl: './feature-panel.component.html',
