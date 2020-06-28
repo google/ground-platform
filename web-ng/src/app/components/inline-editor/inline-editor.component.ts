@@ -21,15 +21,14 @@ import {
   EventEmitter,
   ViewChild,
   ElementRef,
-  AfterViewChecked,
 } from '@angular/core';
 
 @Component({
   selector: 'inline-editor',
   templateUrl: './inline-editor.component.html',
-  styleUrls: ['./inline-editor.component.css'],
+  styleUrls: ['./inline-editor.component.scss'],
 })
-export class InlineEditorComponent implements AfterViewChecked {
+export class InlineEditorComponent {
   @Input() data = '';
   @Input() placeholder = '';
   @Output() focusOut: EventEmitter<string> = new EventEmitter<string>();
@@ -37,18 +36,9 @@ export class InlineEditorComponent implements AfterViewChecked {
   @ViewChild('input')
   inputElement!: ElementRef;
 
-  editMode = false;
-
   constructor() {}
 
-  ngAfterViewChecked() {
-    if (this.editMode) {
-      this.inputElement.nativeElement.focus();
-    }
-  }
-
   onFocusOut(event: { target: HTMLInputElement }) {
-    this.editMode = false;
     this.focusOut.emit(event.target.value);
   }
 
@@ -64,9 +54,5 @@ export class InlineEditorComponent implements AfterViewChecked {
       default:
       // n/a.
     }
-  }
-
-  enterEditMode() {
-    this.editMode = true;
   }
 }
