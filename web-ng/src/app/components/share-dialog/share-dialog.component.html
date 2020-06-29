@@ -45,7 +45,7 @@
     <!-- TODO: Format list, role names, allow edit role, delete. -->
     <tr
       mat-row
-      *ngFor="let entry of acl"
+      *ngFor="let entry of acl; let i = index"
       class="user-list-item"
       role="listitem"
     >
@@ -53,7 +53,7 @@
       <td class="user-role">
         <mat-form-field class="role-select">
           <mat-select
-            (selectionChange)="onRoleChange($event, entry[0])"
+            (selectionChange)="onRoleChange($event, i)"
             [value]="entry[1]"
           >
             <!-- TODO: Present OWNER as read-only -->

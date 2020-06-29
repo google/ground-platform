@@ -96,9 +96,12 @@ export class ShareDialogComponent {
     this.addUserForm.setValue({ email: '', role: Role.CONTRIBUTOR });
   }
 
-  onRoleChange(event: MatSelectChange, email: string) {
-    // TODO: Implement in follow-up commit.
-    console.log(event, email);
+  onRoleChange(event: MatSelectChange, index: number) {
+    if (!this.acl) {
+      return;
+    }
+    this.acl[index][1] = event.value;
+    this.updateChangeState();
   }
 
   /**
