@@ -15,8 +15,11 @@ limitations under the License.
 -->
 
 <mat-list *ngIf="layers$ | async as layers">
+  <div class="layer-list-title">
+    Layers
+  </div>
+  <mat-divider></mat-divider>
   <div *ngFor="let entry of layers">
-    <ground-layer-list-item [layer]="entry">
-    </ground-layer-list-item>
+    <ground-layer-list-item [layer]="entry"> </ground-layer-list-item>
   </div>
 </mat-list>
