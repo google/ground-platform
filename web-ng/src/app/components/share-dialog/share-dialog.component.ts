@@ -78,28 +78,6 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Update ACL and projectId when project is loaded.
-   */
-  private onProjectLoaded(project: Project): void {
-    this.projectId = project.id;
-    this.originalAcl = project.acl;
-    // Sort users by email address.
-    this.acl = project.acl
-      .entrySeq()
-      .toList()
-      .sortBy(pair => pair[0])
-      .toArray();
-  }
-
-  private updateChangeState() {
-    if (!this.acl || !this.originalAcl) {
-      this.hasChanges = false;
-    } else {
-      this.hasChanges = !Map(this.acl).equals(this.originalAcl);
-    }
-  }
-
-  /**
    * Add/update user role when email address is entered and add is clicked or
    * enter is pressed.
    */
@@ -146,6 +124,28 @@ export class ShareDialogComponent {
    */
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  /**
+   * Update ACL and projectId when project is loaded.
+   */
+  private onProjectLoaded(project: Project): void {
+    this.projectId = project.id;
+    this.originalAcl = project.acl;
+    // Sort users by email address.
+    this.acl = project.acl
+      .entrySeq()
+      .toList()
+      .sortBy(pair => pair[0])
+      .toArray();
+  }
+
+  private updateChangeState() {
+    if (!this.acl || !this.originalAcl) {
+      this.hasChanges = false;
+    } else {
+      this.hasChanges = !Map(this.acl).equals(this.originalAcl);
+    }
   }
 
   private notInListValidator(): ValidatorFn {
