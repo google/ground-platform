@@ -37,16 +37,6 @@ import { Map } from 'immutable';
   styleUrls: ['./share-dialog.component.scss'],
 })
 export class ShareDialogComponent {
-  addUserForm = new FormGroup({
-    email: new FormControl('', [Validators.email, this.notInListValidator()]),
-    role: new FormControl(Role.CONTRIBUTOR),
-  });
-
-  /** The id of the currently active project. */
-  private projectId?: string;
-
-  roles = Role;
-
   /** Roles and labels for select drop-downs. */
   readonly ROLE_OPTIONS = [
     { label: 'Contributor', value: Role.CONTRIBUTOR },
@@ -54,6 +44,13 @@ export class ShareDialogComponent {
     { label: 'Owner', value: Role.OWNER },
     { label: 'Viewer', value: Role.VIEWER },
   ];
+
+  addUserForm = new FormGroup({
+    email: new FormControl('', [Validators.email, this.notInListValidator()]),
+    role: new FormControl(Role.CONTRIBUTOR),
+  });
+
+  roles = Role;
 
   /** List of ACL entries. Each entry consists of an email and a Role. */
   acl?: [string, Role][];
@@ -63,6 +60,8 @@ export class ShareDialogComponent {
 
   hasChanges = false;
 
+  /** The id of the currently active project. */
+  private projectId?: string;
   private subscription = new Subscription();
 
   constructor(
