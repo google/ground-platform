@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
@@ -26,7 +24,14 @@ import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { SideNavContentType } from '../side-panel/side-panel.component';
 import { take } from 'rxjs/operators';
+import { RouterService } from '../../services/router/router.service';
+import { ActivatedRoute } from '@angular/router';
 
+/**
+ * Root component for main application page showing map, layers list, and
+ * project header. Responsible for coordinating page-level URL states with
+ * various services.
+ */
 @Component({
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
@@ -38,28 +43,43 @@ export class MainPageComponent implements OnInit {
   sideNavOpened: boolean;
   sideNavContentType: SideNavContentType = SideNavContentType.LAYER_LIST;
   constructor(
-    private route: ActivatedRoute,
+    private routerService: RouterService,
     private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    route: ActivatedRoute
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
     this.activeProject$ = this.projectService.getActiveProject$();
+    routerService.init(route);
   }
 
   ngOnInit() {
     // Activate new project on route changes.
     this.subscription.add(
-      this.route.paramMap.subscribe(params => {
-        this.projectService.activateProject(params.get('projectId')!);
+      this.routerService.getProjectId$().subscribe(id => {
+        id && this.projectService.activateProject(id);
       })
     );
+    // Show layer dialog when non-null layer id set in URL.
     this.subscription.add(
-      this.route.fragment.subscribe(fragment => {
-        this.onFragmentChange(fragment);
-      })
+      this.routerService
+        .getLayerId$()
+        .subscribe(id => id && this.showEditLayerDialog(id))
+    );
+    // Show feature details when non-null feature id set in URL.
+    this.subscription.add(
+      this.routerService
+        .getFeatureId$()
+        .subscribe(id => id && this.loadFeatureDetails(id))
+    );
+    // Show/hide observation when observation id set in URL.
+    this.subscription.add(
+      this.routerService
+        .getObservationId$()
+        .subscribe(id => this.editObservation(id))
     );
   }
 
@@ -67,34 +87,8 @@ export class MainPageComponent implements OnInit {
     this.subscription.unsubscribe();
   }
 
-  private onFragmentChange(fragment?: string) {
-    if (!fragment) {
-      return;
-    }
-    const params = new HttpParams({ fromString: fragment });
-    // The 'l' param is used to represent the layer id being
-    // edited.
-    if (params.get('l')) {
-      this.showEditLayerDialog(params.get('l')!);
-      this.sideNavContentType = SideNavContentType.LAYER_LIST;
-    }
-    // The 'f' param is used to represent the feature id that
-    // was selected by e.g. clicking the marker.
-    if (params.get('f')) {
-      this.featureService.selectFeature(params.get('f')!);
-      this.sideNavContentType = SideNavContentType.FEATURE;
-    }
-    // The 'o' param is used to represent the observation id that
-    // was selected by e.g. clicking edit observation button.
-    if (params.get('o')) {
-      this.observationService.selectObservation(params.get('o')!);
-      this.sideNavContentType = SideNavContentType.OBSERVATION;
-    } else {
-      this.observationService.deselectObservation();
-    }
-  }
-
   private showEditLayerDialog(layerId: string) {
+    this.sideNavContentType = SideNavContentType.LAYER_LIST;
     this.activeProject$.pipe(take(1)).subscribe(project =>
       this.dialog.open(LayerDialogComponent, {
         data: {
@@ -104,5 +98,19 @@ export class MainPageComponent implements OnInit {
         },
       })
     );
+  }
+
+  private loadFeatureDetails(featureId: string) {
+    this.featureService.selectFeature(featureId);
+    this.sideNavContentType = SideNavContentType.FEATURE;
+  }
+
+  private editObservation(observationId: string | null) {
+    if (observationId) {
+      this.sideNavContentType = SideNavContentType.OBSERVATION;
+      this.observationService.selectObservation(observationId);
+    } else {
+      this.observationService.deselectObservation();
+    }
   }
 }

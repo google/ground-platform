@@ -30,6 +30,8 @@ import { LoadingState } from '../loading-state.model';
   providedIn: 'root',
 })
 export class ObservationService {
+  // TODO: Move selected observation into side panel component where it is
+  // used.
   private selectedObservationId$ = new ReplaySubject<string>(1);
   private selectedObservation$ = new BehaviorSubject<
     Observation | LoadingState

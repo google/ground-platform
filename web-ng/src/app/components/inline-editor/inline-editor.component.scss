@@ -17,13 +17,11 @@
 @import '~src/custom-theme';
 
 :host {
-  display: inline;
-}
-
-/* Relative top used to push title input field in line with flex row. */
-.inline-edit {
-  position: relative;
-  top: 2px;
-  font-size: 14pt;
-  margin: 10px 10px 5px 0;
+  display: block;
+  font-size: 1.5em;
+  margin-top: 0.83em;
+  margin-bottom: 0.83em;
+  margin-left: -8px;
+  margin-right: 0;
+  font-weight: bold;
 }
