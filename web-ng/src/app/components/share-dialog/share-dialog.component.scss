@@ -16,36 +16,25 @@
 
 @import '~src/custom-theme';
 
-.email-input {
-  margin-right: 10px;
-  width: 250px;
+.list-heading {
+  font-size: medium;
+  font-weight: 500;
+  color: mat-color($foreground, secondary-text);
+  padding: 16px 0 12px 0;
 }
 
-.role-select {
-  margin-right: 10px;
-  width: 106px;
-}
-
-.user-list {
-  width: 100%;
-  height: 200px;
-  overflow-y: scroll;
-  padding-bottom: 6px;
-}
-
-.user-list-item {
-  white-space: nowrap;
-}
-.user-list-item .mat-form-field-infix {
-  border-top: none !important;
+mat-divider.full-bleed {
+  margin: 0 -24px;
 }
 
 .user-email {
   text-overflow: ellipsis;
+  color: mat-color($foreground, dark-secondary-text);
 }
 
-.user-role {
-  width: 80px;
+.role-select {
+  margin: -4px 0;
+  color: mat-color($foreground, dark-secondary-text);
 }
 
 .pending-changes {

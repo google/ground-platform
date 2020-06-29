@@ -18,39 +18,46 @@
 <!-- TODO(#296): Remove check that acl is loaded. -->
 <div mat-dialog-content *ngIf="acl">
   <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
-    <mat-form-field class="email-input">
-      <mat-label>Email address</mat-label>
-      <input matInput formControlName="email" autocomplete="off" />
-    </mat-form-field>
-    <mat-form-field class="role-select">
-      <mat-select formControlName="role">
-        <mat-option
-          *ngFor="let option of ROLE_OPTIONS"
-          [value]="option.value"
-          >{{ option.label }}</mat-option
+    <div fxLayout="row" fxLayoutGap="8px">
+      <mat-form-field class="email-input" fxFlex="fill" fxFlexAlign="baseline">
+        <mat-label>Email address</mat-label>
+        <input matInput formControlName="email" autocomplete="off" />
+      </mat-form-field>
+      <mat-form-field fxFlexAlign="baseline">
+        <mat-select formControlName="role">
+          <mat-option
+            *ngFor="let option of ROLE_OPTIONS"
+            [value]="option.value"
+            >{{ option.label }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+      <span fxFlexAlign="baseline">
+        <button
+          mat-flat-button
+          color="primary"
+          [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
         >
-      </mat-select>
-    </mat-form-field>
-    <button
-      mat-flat-button
-      color="primary"
-      [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
-    >
-      <label>Add</label>
-    </button>
+          <label>Add</label>
+        </button>
+      </span>
+    </div>
   </form>
-  <h4>Collaborators</h4>
-  <div>[Active work in progress...]</div>
-  <table mat-table role="list" class="user-list">
+  <div class="list-heading">Collaborators</div>
+  <mat-divider class="full-bleed"></mat-divider>
+  <table mat-table role="list" fxFill>
     <!-- TODO: Format list, role names, allow edit role, delete. -->
     <tr
       mat-row
       *ngFor="let entry of acl; let i = index"
-      class="user-list-item"
       role="listitem"
+      fxLayout="row"
+      fxLayoutGap="8px"
     >
-      <td class="user-email">{{ entry.email }}</td>
-      <td class="user-role">
+      <td class="user-email" fxFlex="fill" fxFlexAlign="center">
+        {{ entry.email }}
+      </td>
+      <td class="user-role" fxFlexAlign="center">
         <mat-form-field class="role-select">
           <mat-select
             (selectionChange)="onRoleChange($event, i)"
@@ -67,6 +74,7 @@
       </td>
     </tr>
   </table>
+  <mat-divider class="full-bleed"></mat-divider>
 </div>
 <div mat-dialog-actions align="end">
   <div *ngIf="hasChanges">
