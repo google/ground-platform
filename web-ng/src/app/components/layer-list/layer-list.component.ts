@@ -24,6 +24,7 @@ import { List } from 'immutable';
 @Component({
   selector: 'ground-layer-list',
   templateUrl: './layer-list.component.html',
+  styleUrls: ['./layer-list.component.scss'],
 })
 export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;

@@ -72,19 +72,8 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const fieldId = this.dataStoreService.generateId();
-    this.fields = this.fields.push(
-      new Field(
-        fieldId,
-        FieldType.TEXT,
-        StringMap({
-          en: '',
-        }),
-        /* required= */
-        false,
-        this.fields.size
-      )
-    );
+    const newField = this.createNewField();
+    this.fields = this.fields.push(newField);
   }
 
   /**
@@ -114,32 +103,39 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
+  createNewLayer() {
+    const layerId = this.dataStoreService.generateId();
+    return new Layer(layerId, /* index */ -1);
+  }
+
+  createNewField() {
+    const fieldId = this.dataStoreService.generateId();
+    return new Field(
+      fieldId,
+      FieldType.TEXT,
+      StringMap({
+        en: '',
+      }),
+      /* required= */
+      false,
+      /* index= */
+      this.fields.size
+    );
+  }
+
   init(projectId: string, createLayer: boolean, layer?: Layer) {
-    this.projectId = projectId;
     if (!createLayer && !layer) {
-      throw Error('Layer not found');
+      console.warn('User passed an invalid layer id');
     }
-    if (createLayer) {
-      const layerId = this.dataStoreService.generateId();
-      const fieldId = this.dataStoreService.generateId();
-      this.fields = this.fields.push(
-        new Field(
-          fieldId,
-          FieldType.TEXT,
-          StringMap({
-            en: '',
-          }),
-          /* required= */
-          false,
-          /* index= */
-          0
-        )
-      );
-      this.layer = new Layer(layerId, /* index */ -1);
-    } else {
-      this.layer = layer;
-    }
+    this.projectId = projectId;
     this.layerName = this.layer?.name?.get(this.lang) || '';
+    if (!layer) {
+      this.layer = this.createNewLayer();
+      const newField = this.createNewField();
+      this.fields = this.fields.push(newField);
+      return;
+    }
+    this.layer = layer;
     const form = this.getForms();
     if (form) {
       this.fields =
@@ -160,6 +156,11 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Project not yet loaded');
     }
     let fields = Map<string, Field>();
+    // Check if there are empty fields, if empty return.
+    const emptyFields = this.fields.filter(field => !field.label.get('en'));
+    if (emptyFields.size) {
+      return;
+    }
     this.fields.forEach((field: Field, index: number) => {
       const layerFieldId = this.fields && this.fields.get(index)?.id;
       const fieldId = layerFieldId

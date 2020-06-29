@@ -39,15 +39,29 @@ button .mat-icon + label {
   cursor: pointer;
 }
 
-/**
- * Make sure that inline items have proper spacing between them,
- * e.g. on Observation Form page.
- */
-.mat-radio-label-content, .mat-checkbox-label {
-  margin-right: 17px;
+// Share styling of inline edit with inline-edit-title and inline-editor component.
+.inline-edit {
+  font-family: inherit;
+  font-size: inherit;
+  border: 2px solid transparent;
+  outline: none;
+  border-radius: 3px;
+  padding: 2px 1px 2px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* The spacing below text box should be smaller. */
-.mat-form-field-wrapper {
-  margin-bottom: -1.34em;
+// !important used to override hover border color.
+.inline-edit:focus {
+  padding: 2px 1px 2px 4px;
+  -webkit-box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.1);
+  border: 2px solid mat-color($primary) !important;
+}
+
+.inline-edit:hover {
+  padding: 2px 1px 2px 4px;
+  border: 2px solid mat-color($background, hover);
 }
