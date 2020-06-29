@@ -16,7 +16,13 @@
 
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { Validators, FormControl, FormGroup } from '@angular/forms';
+import {
+  Validators,
+  FormControl,
+  FormGroup,
+  AbstractControl,
+  ValidatorFn,
+} from '@angular/forms';
 import { ProjectService } from '../../services/project/project.service';
 import { Role } from '../../shared/models/role.model';
 import { Subscription } from 'rxjs';
@@ -32,7 +38,7 @@ import { Map } from 'immutable';
 })
 export class ShareDialogComponent {
   addUserForm = new FormGroup({
-    email: new FormControl('', [Validators.email]),
+    email: new FormControl('', [Validators.email, this.notInListValidator()]),
     role: new FormControl(Role.CONTRIBUTOR),
   });
 
@@ -104,9 +110,9 @@ export class ShareDialogComponent {
     }
     const { email, role } = this.addUserForm.value;
 
-    // TODO: Check if email is already in list.
+    // Add new email/role and update change state. Validation rules prevent
+    // the same email from being added twice.
     this.acl.push([email, role]);
-
     this.updateChangeState();
 
     // Clear "Add contributor" field.
@@ -140,5 +146,16 @@ export class ShareDialogComponent {
    */
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  private notInListValidator(): ValidatorFn {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const emailsInAcl = this.acl?.map(pair => pair[0]) || [];
+      const newEmail = control.value;
+      return emailsInAcl.includes(newEmail)
+        ? { forbiddenName: { value: control.value } }
+        : null;
+    };
   }
 }
