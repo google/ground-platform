@@ -49,12 +49,12 @@
       class="user-list-item"
       role="listitem"
     >
-      <td class="user-email">{{ entry[0] }}</td>
+      <td class="user-email">{{ entry.email }}</td>
       <td class="user-role">
         <mat-form-field class="role-select">
           <mat-select
             (selectionChange)="onRoleChange($event, i)"
-            [value]="entry[1]"
+            [value]="entry.role"
           >
             <!-- TODO: Present OWNER as read-only -->
             <mat-option

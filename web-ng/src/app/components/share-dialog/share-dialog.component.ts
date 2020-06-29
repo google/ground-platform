@@ -31,6 +31,13 @@ import { MatSelectChange } from '@angular/material/select';
 import { take } from 'rxjs/operators';
 import { Map } from 'immutable';
 
+/**
+ * Represents a single entry in the sharing dialog.
+ */
+class AclEntry {
+  constructor(readonly email: string, readonly role: Role) {}
+}
+
 @Component({
   selector: 'app-share-dialog',
   templateUrl: './share-dialog.component.html',
@@ -53,7 +60,7 @@ export class ShareDialogComponent {
   roles = Role;
 
   /** List of ACL entries. Each entry consists of an email and a Role. */
-  acl?: [string, Role][];
+  acl?: AclEntry[];
 
   /** ACL before any changes were made by the user. **/
   originalAcl?: Map<string, Role>;
@@ -89,7 +96,7 @@ export class ShareDialogComponent {
 
     // Add new email/role and update change state. Validation rules prevent
     // the same email from being added twice.
-    this.acl.push([email, role]);
+    this.acl.push(new AclEntry(email, role));
     this.updateChangeState();
 
     // Clear "Add contributor" field.
@@ -100,7 +107,7 @@ export class ShareDialogComponent {
     if (!this.acl) {
       return;
     }
-    this.acl[index][1] = event.value;
+    this.acl[index] = new AclEntry(this.acl[index].email, event.value);
     this.updateChangeState();
   }
 
@@ -117,7 +124,7 @@ export class ShareDialogComponent {
   onSaveClicked(): void {
     // TODO: Show saving spinner.
     this.projectService
-      .updateAcl(this.projectId!, Map(this.acl!))
+      .updateAcl(this.projectId!, this.getAclMap())
       .then(() => this.dialogRef.close());
   }
 
@@ -137,8 +144,9 @@ export class ShareDialogComponent {
     // Sort users by email address.
     this.acl = project.acl
       .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()
-      .sortBy(pair => pair[0])
+      .sortBy(entry => entry.email)
       .toArray();
   }
 
@@ -146,14 +154,21 @@ export class ShareDialogComponent {
     if (!this.acl || !this.originalAcl) {
       this.hasChanges = false;
     } else {
-      this.hasChanges = !Map(this.acl).equals(this.originalAcl);
+      this.hasChanges = !this.getAclMap().equals(this.originalAcl);
     }
+  }
+
+  private getAclMap(): Map<string, Role> {
+    if (!this.acl) {
+      return Map();
+    }
+    return Map(this.acl.map(entry => [entry.email, entry.role]));
   }
 
   private notInListValidator(): ValidatorFn {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (control: AbstractControl): { [key: string]: any } | null => {
-      const emailsInAcl = this.acl?.map(pair => pair[0]) || [];
+      const emailsInAcl = this.acl?.map(entry => entry.email) || [];
       const newEmail = control.value;
       return emailsInAcl.includes(newEmail)
         ? { forbiddenName: { value: control.value } }
