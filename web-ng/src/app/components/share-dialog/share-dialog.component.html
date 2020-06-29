@@ -15,7 +15,8 @@
 -->
 
 <h1 mat-dialog-title>Share with collaborators</h1>
-<div mat-dialog-content>
+<!-- TODO(#296): Remove check that acl is loaded. -->
+<div mat-dialog-content *ngIf="acl">
   <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
     <mat-form-field class="email-input">
       <mat-label>Email address</mat-label>
@@ -44,7 +45,7 @@
     <!-- TODO: Format list, role names, allow edit role, delete. -->
     <tr
       mat-row
-      *ngFor="let entry of acl | async"
+      *ngFor="let entry of acl"
       class="user-list-item"
       role="listitem"
     >
@@ -55,6 +56,7 @@
             (selectionChange)="onRoleChange($event, entry[0])"
             [value]="entry[1]"
           >
+            <!-- TODO: Present OWNER as read-only -->
             <mat-option
               *ngFor="let option of ROLE_OPTIONS"
               [value]="option.value"
@@ -67,7 +69,15 @@
   </table>
 </div>
 <div mat-dialog-actions align="end">
-  <button mat-flat-button color="primary" (click)="onDoneClicked()">
-    <label>Done</label>
-  </button>
+  <div *ngIf="hasChanges">
+    <span class="pending-changes">Pending changes</span>
+    <button mat-flat-button color="primary" (click)="onSaveClicked()">
+      <label>Save</label>
+    </button>
+  </div>
+  <div *ngIf="!hasChanges">
+    <button mat-flat-button color="primary" (click)="onDoneClicked()">
+      <label>Done</label>
+    </button>
+  </div>
 </div>

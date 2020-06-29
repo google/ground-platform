@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Validators, FormControl, FormGroup } from '@angular/forms';
 import { ProjectService } from '../../services/project/project.service';
 import { Role } from '../../shared/models/role.model';
-import { Subscription, ReplaySubject } from 'rxjs';
-import { List } from 'immutable';
+import { Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { MatSelectChange } from '@angular/material/select';
+import { take } from 'rxjs/operators';
+import { Map } from 'immutable';
 
 @Component({
   selector: 'app-share-dialog',
@@ -42,14 +43,20 @@ export class ShareDialogComponent {
 
   /** Roles and labels for select drop-downs. */
   readonly ROLE_OPTIONS = [
-    { label: 'Viewer', value: Role.VIEWER },
     { label: 'Contributor', value: Role.CONTRIBUTOR },
     { label: 'Manager', value: Role.MANAGER },
+    { label: 'Owner', value: Role.OWNER },
+    { label: 'Viewer', value: Role.VIEWER },
   ];
 
-  /** List of acl entries. Each entry consists of an email and a Role. */
-  acl = new ReplaySubject<List<[string, Role]>>();
-  test = 1;
+  /** List of ACL entries. Each entry consists of an email and a Role. */
+  acl?: [string, Role][];
+
+  /** ACL before any changes were made by the user. **/
+  originalAcl?: Map<string, Role>;
+
+  hasChanges = false;
+
   private subscription = new Subscription();
 
   constructor(
@@ -59,6 +66,7 @@ export class ShareDialogComponent {
     this.subscription.add(
       this.projectService
         .getActiveProject$()
+        .pipe(take(1))
         .subscribe(p => this.onProjectLoaded(p))
     );
   }
@@ -68,12 +76,21 @@ export class ShareDialogComponent {
    */
   private onProjectLoaded(project: Project): void {
     this.projectId = project.id;
-    this.acl.next(
-      project.acl
-        .entrySeq()
-        .toList()
-        .sortBy(pair => pair[0])
-    );
+    this.originalAcl = project.acl;
+    // Sort users by email address.
+    this.acl = project.acl
+      .entrySeq()
+      .toList()
+      .sortBy(pair => pair[0])
+      .toArray();
+  }
+
+  private updateChangeState() {
+    if (!this.acl || !this.originalAcl) {
+      this.hasChanges = false;
+    } else {
+      this.hasChanges = !Map(this.acl).equals(this.originalAcl);
+    }
   }
 
   /**
@@ -81,20 +98,23 @@ export class ShareDialogComponent {
    * enter is pressed.
    */
   onAddUserSubmit(): void {
-    if (!this.projectId) {
+    // UI is hidden until project is loaded, so this should never happen.
+    if (!this.projectId || !this.acl) {
       return;
     }
-    // TODO: Allow setting role.
-    this.projectService.updateRole(
-      this.projectId,
-      this.addUserForm.value['email'],
-      this.addUserForm.value['role']
-    );
-    // TODO: Show saving / saved status.
+    const { email, role } = this.addUserForm.value;
+
+    // TODO: Check if email is already in list.
+    this.acl.push([email, role]);
+
+    this.updateChangeState();
+
+    // Clear "Add contributor" field.
     this.addUserForm.setValue({ email: '', role: Role.CONTRIBUTOR });
   }
 
   onRoleChange(event: MatSelectChange, email: string) {
+    // TODO: Implement in follow-up commit.
     console.log(event, email);
   }
 
@@ -103,6 +123,16 @@ export class ShareDialogComponent {
    */
   onDoneClicked(): void {
     this.dialogRef.close();
+  }
+
+  /**
+   * Store the ACL associated with the project.
+   */
+  onSaveClicked(): void {
+    // TODO: Show saving spinner.
+    this.projectService
+      .updateAcl(this.projectId!, Map(this.acl!))
+      .then(() => this.dialogRef.close());
   }
 
   /**

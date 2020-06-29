@@ -23,7 +23,7 @@ import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Feature } from '../../shared/models/feature.model';
 import { Layer } from './../../shared/models/layer.model';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
 
@@ -174,14 +174,12 @@ export class DataStoreService {
    * @param email the email of the user whose role is to be updated.
    * @param role the new role of the specified user.
    */
-  updateRole(projectId: string, email: string, role: Role): Promise<void> {
+  updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
+    debugger;
     return this.db
       .collection('projects')
       .doc(projectId)
-      .set(
-        { acl: { [email]: FirebaseDataConverter.toRoleId(role) } },
-        { merge: true }
-      );
+      .set({ acl: FirebaseDataConverter.aclToJs(acl) }, { merge: true });
   }
 
   generateId() {

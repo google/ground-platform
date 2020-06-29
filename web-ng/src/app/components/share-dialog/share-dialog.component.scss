@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import '~src/custom-theme';
+
 .email-input {
   margin-right: 10px;
   width: 250px;
@@ -44,4 +46,10 @@
 
 .user-role {
   width: 80px;
+}
+
+.pending-changes {
+  font-style: italic;
+  color: mat-color($foreground, hint-text);
+  margin: 16px;
 }
