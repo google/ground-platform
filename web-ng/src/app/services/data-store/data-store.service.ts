@@ -175,7 +175,6 @@ export class DataStoreService {
    * @param role the new role of the specified user.
    */
   updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
-    debugger;
     return this.db
       .collection('projects')
       .doc(projectId)

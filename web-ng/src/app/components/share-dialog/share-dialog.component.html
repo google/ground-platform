@@ -61,8 +61,10 @@
         {{ entry.email }}
       </td>
       <td class="user-role" fxFlexAlign="center">
-        <mat-form-field class="role-select">
+        <mat-form-field>
           <mat-select
+            *ngIf="entry.role != roles.OWNER; else ownerText"
+            class="role-select"
             (selectionChange)="onRoleChange($event, i)"
             [value]="entry.role"
           >
@@ -74,6 +76,9 @@
             >
             <mat-option value="-1" class="remove-option">Remove</mat-option>
           </mat-select>
+          <ng-template #ownerText>
+            <input matInput disabled value="Owner" />
+          </ng-template>
         </mat-form-field>
       </td>
     </tr>

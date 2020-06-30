@@ -48,7 +48,6 @@ export class ShareDialogComponent {
   readonly ROLE_OPTIONS = [
     { label: 'Contributor', value: Role.CONTRIBUTOR },
     { label: 'Manager', value: Role.MANAGER },
-    { label: 'Owner', value: Role.OWNER },
     { label: 'Viewer', value: Role.VIEWER },
   ];
 
