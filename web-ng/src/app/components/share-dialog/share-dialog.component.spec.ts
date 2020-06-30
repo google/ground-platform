@@ -20,6 +20,7 @@ import { ShareDialogComponent } from './share-dialog.component';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { of } from 'rxjs';
+import { Map } from 'immutable';
 
 describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
@@ -32,7 +33,7 @@ describe('ShareDialogComponent', () => {
         { provide: MatDialogRef, useValue: {} },
         {
           provide: ProjectService,
-          useValue: { getActiveProject$: () => of() },
+          useValue: { getActiveProject$: () => of({ acl: Map() }) },
         },
       ],
     }).compileComponents();
