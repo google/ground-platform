@@ -107,10 +107,11 @@ export class ShareDialogComponent {
     if (!this.acl) {
       return;
     }
-    console.log(typeof event.value);
     if (event.value < 0) {
+      // Remove contributor.
       this.acl.splice(index, 1);
     } else {
+      // Update contributor role.
       this.acl[index] = new AclEntry(this.acl[index].email, event.value);
     }
     this.updateChangeState();

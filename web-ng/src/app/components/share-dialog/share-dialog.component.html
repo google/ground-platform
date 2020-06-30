@@ -16,7 +16,7 @@
 
 <h1 mat-dialog-title>Share with collaborators</h1>
 <!-- TODO(#296): Remove check that acl is loaded. -->
-<div mat-dialog-content *ngIf="acl">
+<div *ngIf="acl">
   <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
     <div fxLayout="row" fxLayoutGap="8px">
       <mat-form-field class="email-input" fxFlex="fill" fxFlexAlign="baseline">
@@ -45,39 +45,39 @@
   </form>
   <div *ngIf="acl.length > 0">
     <div class="list-heading">Collaborators</div>
-    <mat-divider class="full-bleed"></mat-divider>
-    <table mat-table role="list" fxFill>
-      <!-- TODO: Format list, role names, allow edit role, delete. -->
-      <tr
-        mat-row
-        *ngFor="let entry of acl; let i = index"
-        role="listitem"
-        fxLayout="row"
-        fxLayoutGap="8px"
-      >
-        <td class="user-email" fxFlex="fill" fxFlexAlign="center">
-          {{ entry.email }}
-        </td>
-        <td class="user-role" fxFlexAlign="center">
-          <mat-form-field class="role-select">
-            <mat-select
-              (selectionChange)="onRoleChange($event, i)"
-              [value]="entry.role"
-            >
-              <!-- TODO: Present OWNER as read-only -->
-              <mat-option
-                *ngFor="let option of ROLE_OPTIONS"
-                [value]="option.value"
-                >{{ option.label }}</mat-option
-              >
-              <mat-option value="-1" class="remove-option">Remove</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </td>
-      </tr>
-    </table>
-    <mat-divider class="full-bleed"></mat-divider>
   </div>
+</div>
+<div mat-dialog-content *ngIf="acl.length > 0">
+  <table mat-table role="list" fxFill>
+    <!-- TODO: Format list, role names, allow edit role, delete. -->
+    <tr
+      mat-row
+      *ngFor="let entry of acl; let i = index"
+      role="listitem"
+      fxLayout="row"
+      fxLayoutGap="8px"
+    >
+      <td class="user-email" fxFlex="fill" fxFlexAlign="center">
+        {{ entry.email }}
+      </td>
+      <td class="user-role" fxFlexAlign="center">
+        <mat-form-field class="role-select">
+          <mat-select
+            (selectionChange)="onRoleChange($event, i)"
+            [value]="entry.role"
+          >
+            <!-- TODO: Present OWNER as read-only -->
+            <mat-option
+              *ngFor="let option of ROLE_OPTIONS"
+              [value]="option.value"
+              >{{ option.label }}</mat-option
+            >
+            <mat-option value="-1" class="remove-option">Remove</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </td>
+    </tr>
+  </table>
 </div>
 <div mat-dialog-actions align="end">
   <div *ngIf="hasChanges">

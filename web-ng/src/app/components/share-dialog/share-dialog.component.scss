@@ -23,8 +23,12 @@
   padding: 16px 0 12px 0;
 }
 
-mat-divider.full-bleed {
-  margin: 0 -24px;
+.mat-dialog-content {
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: mat-color($foreground, disabled-button);
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .user-email {
@@ -33,7 +37,7 @@ mat-divider.full-bleed {
 }
 
 .role-select {
-  margin: -2px 0;
+  margin: -4px 0;
   color: mat-color($foreground, dark-secondary-text);
 }
 
@@ -42,6 +46,6 @@ mat-divider.full-bleed {
 }
 .pending-changes {
   font-style: italic;
-  color: mat-color($foreground, hint-text);
+  color: mat-color($foreground, secondary-text);
   margin: 16px;
 }
