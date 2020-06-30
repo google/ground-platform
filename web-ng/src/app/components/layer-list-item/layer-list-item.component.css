@@ -18,6 +18,10 @@ img {
     min-width: 24px;
 }
 
+.side-layer-list {
+    padding: 5px;
+}
+
 .layer-list-spacing {
     padding-left: 10px;
 }
