@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-@import '~src/custom-theme';
+import { TestBed } from '@angular/core/testing';
 
-:host {
-  display: inline;
-}
+import { RouterService } from './router.service';
+import { Router } from '@angular/router';
 
-/* Relative top used to push title input field in line with flex row. */
-.inline-edit {
-  position: relative;
-  top: 2px;
-  font-size: 14pt;
-  margin: 10px 10px 5px 0;
-}
+describe('RouterService', () => {
+  let service: RouterService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{ provide: Router, useValue: {} }],
+    });
+    service = TestBed.inject(RouterService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});

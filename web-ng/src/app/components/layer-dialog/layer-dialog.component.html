@@ -16,7 +16,6 @@
 
 <inline-editor
   mat-dialog-title
-  class="layer-name"
   [data]="layerName"
   placeholder="Unnamed layer"
   (focusOut)="setLayerName($event)"
@@ -45,10 +44,10 @@
         </app-form-field-editor>
       </div>
     </div>
-    <div class="add-question">
+    <button mat-button class="add-question" type="button" (click)="addQuestion()">
       <span class="plus-icon"></span>
-      <a class="link-add-question" (click)="addQuestion()"> Add question </a>
-    </div>
+      <span class="link-add-question">Add question</span>
+    </button>
   </mat-dialog-content>
   <mat-dialog-actions fxLayout fxLayoutAlign="end">
     <button

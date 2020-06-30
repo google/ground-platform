@@ -13,12 +13,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div *ngIf='!editMode' (click)='enterEditMode()'>{{ data || placeholder }}</div>
+
 <input
-  *ngIf='editMode'
-  [value]='data'
-  [placeholder]='placeholder'
+  [value]="data"
+  [placeholder]="placeholder"
   (keyup)="handleKeyPress($event)"
   (focusout)="onFocusOut($event)"
+  class="inline-edit"
   #input
 />
