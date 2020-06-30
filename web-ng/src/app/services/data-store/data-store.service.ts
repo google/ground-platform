@@ -178,7 +178,7 @@ export class DataStoreService {
     return this.db
       .collection('projects')
       .doc(projectId)
-      .set({ acl: FirebaseDataConverter.aclToJs(acl) }, { merge: true });
+      .update({ acl: FirebaseDataConverter.aclToJs(acl) });
   }
 
   generateId() {
