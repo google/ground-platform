@@ -106,6 +106,7 @@ export class ShareDialogComponent {
     if (!this.acl) {
       return;
     }
+    // value holds the selected Role enum value, or -1 if "Remove" was selected.
     if (event.value < 0) {
       // Remove contributor.
       this.acl.splice(index, 1);
