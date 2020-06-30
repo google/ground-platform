@@ -17,3 +17,7 @@
 img {
     min-width: 24px;
 }
+
+.layer-list-spacing {
+    padding-left: 10px;
+}
