@@ -75,6 +75,9 @@ export class ShareDialogComponent {
     private projectService: ProjectService
   ) {
     this.subscription.add(
+      // Grab only the first value from getActiveProject$() so that
+      // successive changes to the remote project config don't overwrite the
+      // contents of the contributors list in the dialog.
       this.projectService
         .getActiveProject$()
         .pipe(take(1))
