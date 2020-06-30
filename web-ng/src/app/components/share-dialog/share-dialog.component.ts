@@ -107,7 +107,12 @@ export class ShareDialogComponent {
     if (!this.acl) {
       return;
     }
-    this.acl[index] = new AclEntry(this.acl[index].email, event.value);
+    console.log(typeof event.value);
+    if (event.value < 0) {
+      this.acl.splice(index, 1);
+    } else {
+      this.acl[index] = new AclEntry(this.acl[index].email, event.value);
+    }
     this.updateChangeState();
   }
 

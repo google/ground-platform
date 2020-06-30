@@ -33,10 +33,13 @@ mat-divider.full-bleed {
 }
 
 .role-select {
-  margin: -4px 0;
+  margin: -2px 0;
   color: mat-color($foreground, dark-secondary-text);
 }
 
+.remove-option {
+  border-top: 1px solid mat-color($background, disabled-list-option);
+}
 .pending-changes {
   font-style: italic;
   color: mat-color($foreground, hint-text);
