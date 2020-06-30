@@ -19,6 +19,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
+import { ProjectService } from '../project/project.service';
+import { DataStoreService } from '../data-store/data-store.service';
 
 interface ParamMap {
   [key: string]: string;
@@ -42,7 +44,11 @@ export class RouterService {
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private projectService: ProjectService,
+    private dataStoreService: DataStoreService
+  ) {}
 
   /**
    * Set up streams using provided route. This must be called before any of
@@ -52,7 +58,17 @@ export class RouterService {
     this.activatedRoute = route;
     // Pipe values from URL query parameters.
     this.projectId$ = route.paramMap.pipe(
-      map(params => params.get('projectId'))
+      map(params => {
+        if (params.get('projectId') === ':new') {
+          const projectId = this.dataStoreService.generateId();
+          this.projectService.createProject(projectId).then(() => {
+            this.router.navigate([`../${projectId}`], {
+              relativeTo: this.activatedRoute,
+            });
+          });
+        }
+        return params.get('projectId');
+      })
     );
     // Pipe values from URL fragment.
     const fragmentParams$ = route.fragment.pipe(

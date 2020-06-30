@@ -67,4 +67,8 @@ export class ProjectService {
   updateRole(projectId: string, email: string, role: Role): Promise<void> {
     return this.dataStore.updateRole(projectId, email, role);
   }
+
+  createProject(projectId: string) {
+    return this.dataStore.updateProjectTitle(projectId, '');
+  }
 }
