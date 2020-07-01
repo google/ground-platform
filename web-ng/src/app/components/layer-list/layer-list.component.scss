@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+ @import '~src/custom-theme';
+
 .layer-list-title {
   padding: 20px;
+}
+
+.add-layer {
+  padding: 10px;
+}
+
+.add-layer-btn {
+  text-align: left;
+  width: 100%;
+}
+
+.add-layer-text {
+  color: mat-color($primary);
+  padding: 10px;
 }

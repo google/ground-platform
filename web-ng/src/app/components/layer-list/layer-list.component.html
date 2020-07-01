@@ -22,4 +22,10 @@ limitations under the License.
   <div *ngFor="let entry of layers">
     <ground-layer-list-item [layer]="entry"> </ground-layer-list-item>
   </div>
+  <div class="add-layer">
+    <button mat-raised-button class="add-layer-btn">
+      <mat-icon class="add-layer-text">add</mat-icon>
+      Add Layer
+    </button>
+  </div>
 </mat-list>
