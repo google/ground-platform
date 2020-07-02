@@ -18,12 +18,14 @@ import { TestBed } from '@angular/core/testing';
 
 import { RouterService } from './router.service';
 import { Router } from '@angular/router';
+import { AngularFireModule } from '@angular/fire';
 
 describe('RouterService', () => {
   let service: RouterService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [AngularFireModule.initializeApp({})],
       providers: [{ provide: Router, useValue: {} }],
     });
     service = TestBed.inject(RouterService);
