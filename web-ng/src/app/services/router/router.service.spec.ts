@@ -25,7 +25,7 @@ describe('RouterService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [AngularFireModule.initializeApp({})],
+      imports: [AngularFireModule.initializeApp({ projectId: '' })],
       providers: [{ provide: Router, useValue: {} }],
     });
     service = TestBed.inject(RouterService);
