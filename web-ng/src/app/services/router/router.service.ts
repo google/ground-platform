@@ -130,4 +130,8 @@ export class RouterService {
   setObservationId(id: string) {
     this.setFragmentParam(RouterService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
+
+  setLayerId(id: string) {
+    this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM,id)
+  }
 }

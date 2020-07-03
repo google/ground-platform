@@ -21,6 +21,7 @@ import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import { MatIconModule } from '@angular/material/icon';
     LayerListItemModule,
     MatButtonModule,
     MatIconModule,
+    FlexLayoutModule
   ],
   exports: [LayerListComponent],
   declarations: [LayerListComponent],
