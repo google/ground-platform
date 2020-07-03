@@ -31,8 +31,10 @@ export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
 
-  constructor(projectService: ProjectService,
-              private routerService: RouterService) {
+  constructor(
+    projectService: ProjectService,
+    private routerService: RouterService
+  ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layers$ = projectService

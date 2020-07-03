@@ -132,6 +132,6 @@ export class RouterService {
   }
 
   setLayerId(id: string) {
-    this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM,id)
+    this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM, id);
   }
 }

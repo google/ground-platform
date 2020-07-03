@@ -30,7 +30,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     LayerListItemModule,
     MatButtonModule,
     MatIconModule,
-    FlexLayoutModule
+    FlexLayoutModule,
   ],
   exports: [LayerListComponent],
   declarations: [LayerListComponent],
