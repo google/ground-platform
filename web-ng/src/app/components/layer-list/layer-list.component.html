@@ -20,19 +20,18 @@ limitations under the License.
   </div>
   <mat-divider></mat-divider>
   <div *ngFor="let entry of layers">
-    <ground-layer-list-item [layer]="entry"> </ground-layer-list-item>
+    <ground-layer-list-item [layer]="entry"></ground-layer-list-item>
   </div>
-
   <div fxLayout="row" class="add-Layer">
-    <div fxLayout="column" fxFlex="fill">
-      <button
-        mat-stroked-button
-        class="add-Layer-btn"
-        (click)="onAddLayerClick(layerId)"
-      >
-        <mat-icon color="primary" class="add-Layer-icon">add</mat-icon>
-        Add Layer
-      </button>
-    </div>
+    <button
+      fxFlex="fill"
+      mat-stroked-button
+      color="primary"
+      class="add-Layer-btn"
+      (click)="onAddLayer(':new')"
+    >
+      <mat-icon class="add-Layer-icon">add</mat-icon>
+      Add Layer
+    </button>
   </div>
 </mat-list>
