@@ -24,7 +24,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
-  imports: [BrowserModule, MatListModule, LayerListItemModule, MatButtonModule, MatIconModule, FlexLayoutModule],
+  imports: [
+    BrowserModule,
+    MatListModule,
+    LayerListItemModule,
+    MatButtonModule,
+    MatIconModule,
+    FlexLayoutModule,
+  ],
   exports: [LayerListComponent],
   declarations: [LayerListComponent],
 })
