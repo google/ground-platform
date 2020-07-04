@@ -35,6 +35,7 @@ export class RouterService {
   private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
+  static readonly LAYER_ID_NEW = ':new';
 
   private activatedRoute?: ActivatedRoute;
   private projectId$?: Observable<string | null>;

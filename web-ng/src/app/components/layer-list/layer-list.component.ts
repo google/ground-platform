@@ -47,6 +47,6 @@ export class LayerListComponent {
   }
 
   onAddLayer() {
-    this.routerService.setLayerId(':new');
+    this.routerService.setLayerId(RouterService.LAYER_ID_NEW);
   }
 }
