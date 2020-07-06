@@ -59,9 +59,7 @@ export class MapComponent implements OnInit {
   ngOnInit() {
     this.subscription.add(
       this.routerService.getFeatureId$().subscribe(id => {
-        if (id) {
-          this.focusedFeatureId = id;
-        }
+        this.focusedFeatureId = id || '';
       })
     );
   }

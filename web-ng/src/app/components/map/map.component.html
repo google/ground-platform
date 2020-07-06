@@ -17,7 +17,8 @@ limitations under the License.
 <google-map
   height="100%"
   width="100%"
-  [options]="mapOptions">
+  [options]="mapOptions"
+  (mapClick)="onFeatureClick('')">
   <map-marker
     *ngFor="let feature of (features$ | async)"
     [options]="createMarkerOptions(feature, focusedFeatureId, activeProject$ | async)"
