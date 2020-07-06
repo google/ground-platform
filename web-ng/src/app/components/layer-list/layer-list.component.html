@@ -19,7 +19,10 @@ limitations under the License.
     Layers
   </div>
   <mat-divider></mat-divider>
-  <div *ngFor="let entry of layers">
-    <ground-layer-list-item [layer]="entry"> </ground-layer-list-item>
+  <div *ngFor="let entry of layers" fxLayout="row" fxLayoutAlign="center center">
+    <ground-layer-list-item [layer]="entry" fxFlex="fill"></ground-layer-list-item>
+    <button mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
   </div>
 </mat-list>
