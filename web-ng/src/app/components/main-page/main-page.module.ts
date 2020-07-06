@@ -26,6 +26,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { SidePanelModule } from '../side-panel/side-panel.module';
 import { ProjectHeaderModule } from '../project-header/project-header.module';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   entryComponents: [LayerDialogComponent],
@@ -40,6 +41,7 @@ import { ProjectHeaderModule } from '../project-header/project-header.module';
     RouterModule,
     SidePanelModule,
     ProjectHeaderModule,
+    MatIconModule,
   ],
 })
 export class MainPageModule {}
