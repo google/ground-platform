@@ -102,10 +102,15 @@ export class RouterService {
     const primaryUrl = this.router
       .parseUrl(this.router.url)
       .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = {
-      fragment: params.toString(),
-    };
-    this.router.navigate([primaryUrl], navigationExtras);
+
+    if (params.toString()) {
+      const navigationExtras: NavigationExtras = {
+        fragment: params.toString(),
+      };
+      this.router.navigate([primaryUrl], navigationExtras);
+    } else {
+      this.router.navigate([primaryUrl]);
+    }
   }
 
   /**
