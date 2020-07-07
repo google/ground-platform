@@ -18,7 +18,7 @@ limitations under the License.
   height="100%"
   width="100%"
   [options]="mapOptions"
-  (mapClick)="onFeatureClick('')">
+  (mapClick)="onFeatureBlur()">
   <map-marker
     *ngFor="let feature of (features$ | async)"
     [options]="createMarkerOptions(feature, focusedFeatureId, activeProject$ | async)"
