@@ -50,7 +50,7 @@ export class LayerDialogComponent implements OnDestroy {
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
-  color = DEFAULT_LAYER_COLOR;
+  color!: string;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -128,7 +128,6 @@ export class LayerDialogComponent implements OnDestroy {
       console.warn('User passed an invalid layer id');
     }
     this.projectId = projectId;
-    this.layerName = this.layer?.name?.get(this.lang) || '';
     if (!layer) {
       this.layer = this.createNewLayer();
       const newField = this.createNewField();
@@ -136,6 +135,8 @@ export class LayerDialogComponent implements OnDestroy {
       return;
     }
     this.layer = layer;
+    this.layerName = this.layer?.name?.get(this.lang) || '';
+    this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     const form = this.getForms();
     if (form) {
       this.fields =

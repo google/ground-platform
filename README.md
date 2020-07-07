@@ -1,4 +1,5 @@
 # Ground Platform
+[![Open Source Helpers](https://www.codetriage.com/google/ground-platform/badges/users.svg)](https://www.codetriage.com/google/ground-platform)
 
 Ground is an open-source, map-first data collection and analysis platform built
 to seamlessly connect the offline world with cloud-based storage and

@@ -38,6 +38,9 @@ export class ProjectHeaderComponent implements OnInit {
   }
 
   private openShareDialog(): void {
-    this.dialog.open(ShareDialogComponent, { autoFocus: false });
+    this.dialog.open(ShareDialogComponent, {
+      width: '580px',
+      autoFocus: false,
+    });
   }
 }
