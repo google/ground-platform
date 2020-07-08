@@ -38,6 +38,12 @@
 
 .sidenav-toggle {
   top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: unset;
+  right: -5px;
+  width: 5px;
   height: 50px;
   background-color: #D6D6D2;
   position: absolute;
