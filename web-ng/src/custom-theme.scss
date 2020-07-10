@@ -14,30 +14,7 @@
  * limitations under the License.
  */
 
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-@import '~@angular/material/theming';
-
-// Include the common styles for Angular Material. This allows us to only
-// have to load a single css file for Angular Material in your app.
-// This mixin but be included exactly once!
-@include mat-core();
-
-// Define Material palettes, including default, lighter, and darker hue.
-// Available color palettes: https://material.io/design/color/
-// TODO: Use custom color theme slightly with more saturated colors used in
-// Ground Android app.
-$primary: mat-palette($mat-green, 700, 600, 800);
-$accent: mat-palette($mat-amber, 700, 600, 800);
-$warn: mat-palette($mat-pink, 600, 500, 700);
-
-// Create the theme object (a Sass map containing all of the palettes).
-$theme: mat-light-theme($primary, $accent, $warn);
-
-// Get generated palettes from theme. Sub-palettes listed in:
-// https://github.com/angular/components/blob/16f5f793dea3d83a6f08de14e3787ce97d82ff15/src/material/core/theming/_palette.scss#L674
-$foreground: map-get($theme, foreground);
-$background: map-get($theme, background);
+@import '~src/_variables';
 
 // Include theme styles for core and each component used in the app.
 @include angular-material-theme($theme);

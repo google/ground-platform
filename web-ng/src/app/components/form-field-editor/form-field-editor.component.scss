@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@import '~src/custom-theme';
-
 .field-type {
   margin-left: 30px;
   font-size: 12px;
@@ -63,7 +61,6 @@
 
 .add-option {
   margin-left: 30px;
-  color: mat-color($mat-green, 700);
 }
 
 .field-type-select {
