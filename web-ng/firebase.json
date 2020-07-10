@@ -3,11 +3,7 @@
     {
       "target": "web-ng",
       "public": "dist/web-ng",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
           "source": "**",
