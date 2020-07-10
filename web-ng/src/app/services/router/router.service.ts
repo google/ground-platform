@@ -103,24 +103,33 @@ export class RouterService {
     const primaryUrl = this.router
       .parseUrl(this.router.url)
       .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = {
-      fragment: params.toString(),
-    };
-    this.router.navigate([primaryUrl], navigationExtras);
+
+    if (params.toString()) {
+      const navigationExtras: NavigationExtras = {
+        fragment: params.toString(),
+      };
+      this.router.navigate([primaryUrl], navigationExtras);
+    } else {
+      this.router.navigate([primaryUrl]);
+    }
   }
 
   /**
    * Navigate to the current URL, replacing the single URL fragment param
    * with the specified value.
    */
-  private setFragmentParam(key: string, value: string) {
-    this.setFragmentParams(this.getFragmentParams().set(key, value));
+  private setFragmentParam(key: string, value: string | null) {
+    if (value) {
+      this.setFragmentParams(this.getFragmentParams().set(key, value));
+    } else {
+      this.setFragmentParams(this.getFragmentParams().delete(key));
+    }
   }
 
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string) {
+  setFeatureId(id: string | null) {
     this.setFragmentParam(RouterService.FEATURE_ID_FRAGMENT_PARAM, id);
   }
 
