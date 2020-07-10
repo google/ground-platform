@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import '~src/custom-theme';
+@import '~src/_variables';
 
 .list-heading {
   font-size: medium;
@@ -44,6 +44,7 @@
 .remove-option {
   border-top: 1px solid mat-color($background, disabled-list-option);
 }
+
 .pending-changes {
   font-style: italic;
   color: mat-color($foreground, secondary-text);
