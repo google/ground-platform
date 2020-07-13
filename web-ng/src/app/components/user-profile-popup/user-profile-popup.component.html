@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 <mat-dialog-content>
-  <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
+  <div *ngIf="auth.user$ | async as user" class="rhs-widgets">
     <img
       src="{{ user.photoURL }}=s64"
       alt="{{ user.displayName }}"
@@ -27,7 +27,8 @@
         class="btn-signout"
         mat-flat-button
         color="primary"
-        (click)="onSignOut($event)">
+        (click)="onSignOut($event)"
+      >
         Sign out
       </button>
     </div>

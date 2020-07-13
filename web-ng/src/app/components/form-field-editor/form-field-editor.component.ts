@@ -233,6 +233,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   get labelControl() {
-    return this.formFieldGroup.get('label');
+    return this.formFieldGroup.get('label')!;
   }
 }
