@@ -22,9 +22,12 @@
 ></inline-editor>
 <div class="default-style">
   <div class="default-style-tag">Default style</div>
-  <app-edit-style-button [markerColor]="layer.color" (markerColorChange)="onMarkerColorChange($event)"></app-edit-style-button>
+  <app-edit-style-button
+    [markerColor]="layer!.color || '#000'"
+    (markerColorChange)="onMarkerColorChange($event)"
+  ></app-edit-style-button>
 </div>
-<form (ngSubmit)="onSave($event)">
+<form (ngSubmit)="onSave()">
   <mat-dialog-content>
     <div cdkDropList (cdkDropListDropped)="drop($event)">
       <div
@@ -44,7 +47,12 @@
         </app-form-field-editor>
       </div>
     </div>
-    <button mat-button class="add-question" type="button" (click)="addQuestion()">
+    <button
+      mat-button
+      class="add-question"
+      type="button"
+      (click)="addQuestion()"
+    >
       <span class="plus-icon"></span>
       <span class="link-add-question">Add question</span>
     </button>

@@ -4,13 +4,13 @@
     "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/build",
+    "public": "web-ng/dist/web-ng",
     "rewrites": [
       {
         "source": "**/!(*.*)",
         "destination": "/index.html"
-      }      
-    ]      
+      }
+    ]
   },
   "functions": {
     "source": "functions"
