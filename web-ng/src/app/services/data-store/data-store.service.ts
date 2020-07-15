@@ -26,6 +26,7 @@ import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
+import { firestore } from 'firebase';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -79,7 +80,7 @@ export class DataStoreService {
     return this.db
       .collection(`projects/${projectId}/observations`)
       .doc(observation.id)
-      .update(FirebaseDataConverter.observationToJS(observation));
+      .set(FirebaseDataConverter.observationToJS(observation));
   }
 
   /**
@@ -183,5 +184,9 @@ export class DataStoreService {
 
   generateId() {
     return this.db.collection('ids').ref.doc().id;
+  }
+
+  getServerTimestamp() {
+    return firestore.FieldValue.serverTimestamp();
   }
 }

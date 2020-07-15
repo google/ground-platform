@@ -42,7 +42,7 @@ class MockFirebaseData {
       user: {
         displayName: 'Modifier',
         email: 'modifier@test.com',
-        id: 'modifier001',
+        uid: 'modifier001',
       },
     },
     featureId: 'feature001',

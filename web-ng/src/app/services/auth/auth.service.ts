@@ -44,6 +44,10 @@ export class AuthService {
     );
   }
 
+  getUser$(): Observable<User | null | undefined> {
+    return this.user$;
+  }
+
   async signIn() {
     const provider = new auth.GoogleAuthProvider();
     await this.afAuth.signInWithPopup(provider);
