@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import '~src/_variables';
+@import 'variables';
 
 // Include theme styles for core and each component used in the app.
 @include angular-material-theme($theme);
