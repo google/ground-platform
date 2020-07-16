@@ -60,3 +60,9 @@ app-inline-edit-title {
   border-radius: 32px;
   margin-right: 8px;
 }
+
+/* Relative top used to push title input field in line with flex row. */
+.inline-editor {
+  position: relative;
+  top: 2px;
+}
