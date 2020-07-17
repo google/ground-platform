@@ -17,12 +17,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
+import { RouterService } from '../../services/router/router.service';
+import { never } from 'rxjs';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
@@ -39,7 +41,6 @@ describe('MainPageComponent', () => {
   const dialog: Partial<MatDialog> = {};
 
   beforeEach(async(() => {
-    const routerSpy = createRouterSpy();
     route = new ActivatedRouteStub();
 
     const projectService = jasmine.createSpyObj('ProjectService', [
@@ -55,6 +56,14 @@ describe('MainPageComponent', () => {
       'selectObservation$',
     ]);
 
+    const routerService = {
+      init: () => {},
+      getProjectId$: never,
+      getLayerId$: never,
+      getFeatureId$: never,
+      getObservationId$: never,
+    };
+
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
       providers: [
@@ -63,7 +72,7 @@ describe('MainPageComponent', () => {
         { provide: FeatureService, useValue: featureService },
         { provide: ObservationService, useValue: observationService },
         { provide: ProjectService, useValue: projectService },
-        { provide: Router, useValue: routerSpy },
+        { provide: RouterService, useValue: routerService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -77,7 +86,3 @@ describe('MainPageComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-
-function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
-}

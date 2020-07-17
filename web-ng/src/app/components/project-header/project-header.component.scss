@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
- @import '~src/custom-theme';
+@import 'variables';
 
 .header {
   padding: 16px;
   white-space: nowrap;
 }
 
-.header div, img, .header span, mat-icon {
+.header div,
+img,
+.header span,
+mat-icon {
   vertical-align: middle;
 }
 

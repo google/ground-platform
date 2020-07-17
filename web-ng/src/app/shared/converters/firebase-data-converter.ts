@@ -67,6 +67,7 @@ export class FirebaseDataConverter {
       )
     );
   }
+
   private static toRole(roleString: string) {
     switch (roleString) {
       case 'owner':
@@ -454,6 +455,10 @@ export class FirebaseDataConverter {
       clientTimestamp: auditInfo.clientTime,
       serverTimestamp: auditInfo.serverTime,
     };
+  }
+
+  static aclToJs(acl: Map<string, Role>): {} {
+    return acl.map(FirebaseDataConverter.toRoleId).toJS();
   }
 
   /**

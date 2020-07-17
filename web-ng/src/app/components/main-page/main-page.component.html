@@ -21,10 +21,12 @@
     <mat-sidenav-container class="main-page-container">
       <mat-sidenav-content class="mat-sidenav-content">
         <ground-map></ground-map>
+        <div fxLayout="row"> 
         <button mat-raised-button class="sidenav-toggle" (click)="sideNavOpened = !sideNavOpened;">
-          <span *ngIf='sideNavOpened'>></span>
-          <span *ngIf='!sideNavOpened'><</span>
+          <mat-icon *ngIf='sideNavOpened'>navigate_next</mat-icon>
+          <mat-icon *ngIf='!sideNavOpened'>navigate_before</mat-icon>
         </button>
+      </div>
       </mat-sidenav-content>
       <mat-sidenav #sidenav mode="side" position="end"
        [(opened)]="sideNavOpened">

@@ -19,11 +19,17 @@
   <div fxLayout>
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
-      <input matInput formControlName="label" autocomplete="off" />
+      <input matInput formControlName="label" autocomplete="off" required />
+      <mat-error *ngIf="labelControl.touched && labelControl.invalid">
+        <ng-container *ngIf="labelControl.getError('required')">
+          Question is required
+        </ng-container>
+      </mat-error>
     </mat-form-field>
     <mat-form-field fxFlex class="field-type" appearance="outline">
       <mat-select
         formControlName="type"
+        class="field-type-select"
         (selectionChange)="onFieldTypeSelect($event.value)"
       >
         <mat-select-trigger>
@@ -59,12 +65,18 @@
         (delete)="onOptionDelete(i)"
       ></app-option-editor>
     </div>
-    <button mat-button (click)="onAddOption()" class="add-option">
+    <button
+      mat-button
+      type="button"
+      (click)="onAddOption()"
+      color="primary"
+      class="add-option"
+    >
       Add option
     </button>
   </div>
   <div fxLayout fxLayoutAlign="end" class="question-actions">
-    <button mat-icon-button (click)="onFieldDelete()">
+    <button mat-icon-button type="button" (click)="onFieldDelete()">
       <mat-icon>delete_forever</mat-icon>
     </button>
     <span class="vertical-divider"></span>

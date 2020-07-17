@@ -26,6 +26,7 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { MatListModule } from '@angular/material/list';
+import { Router } from '@angular/router';
 
 const mockProject = new Project(
   'project001',
@@ -56,10 +57,17 @@ describe('LayerListComponent', () => {
   let fixture: ComponentFixture<LayerListComponent>;
 
   beforeEach(async(() => {
+    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [LayerListComponent],
       imports: [LayerListItemModule, MatListModule],
-      providers: [{ provide: ProjectService, useValue: projectService }],
+      providers: [
+        { provide: ProjectService, useValue: projectService },
+        {
+          provide: Router,
+          useValue: routerSpy,
+        },
+      ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   }));
@@ -74,3 +82,7 @@ describe('LayerListComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}

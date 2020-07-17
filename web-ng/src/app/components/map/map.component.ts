@@ -15,15 +15,15 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { Project } from '../../shared/models/project.model';
 import { Feature } from '../../shared/models/feature.model';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
-import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
 import { getPinImageSource } from './ground-pin';
+import { RouterService } from '../../services/router/router.service';
 
 // To make ESLint happy:
 /*global google*/
@@ -35,7 +35,7 @@ import { getPinImageSource } from './ground-pin';
 })
 export class MapComponent implements OnInit {
   private subscription: Subscription = new Subscription();
-  focusedFeatureId = '';
+  focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
   activeProject$: Observable<Project>;
   mapOptions: google.maps.MapOptions = {
@@ -50,8 +50,7 @@ export class MapComponent implements OnInit {
   constructor(
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private router: Router,
-    private route: ActivatedRoute
+    private routerService: RouterService
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -59,22 +58,18 @@ export class MapComponent implements OnInit {
 
   ngOnInit() {
     this.subscription.add(
-      this.route.fragment.subscribe(fragment => {
-        const params = new HttpParams({ fromString: fragment });
-        if (params.get('f')) {
-          this.focusedFeatureId = params.get('f')!;
-        }
+      this.routerService.getFeatureId$().subscribe(id => {
+        this.focusedFeatureId = id;
       })
     );
   }
 
-  onFeatureClick(featureId: string) {
-    // TODO: refactor URL read/write logic into its own service.
-    const primaryUrl = this.router
-      .parseUrl(this.router.url)
-      .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = { fragment: `f=${featureId}` };
-    this.router.navigate([primaryUrl], navigationExtras);
+  onFeatureBlur() {
+    this.onFeatureClick(null);
+  }
+
+  onFeatureClick(featureId: string | null) {
+    this.routerService.setFeatureId(featureId);
   }
 
   createMarkerOptions(

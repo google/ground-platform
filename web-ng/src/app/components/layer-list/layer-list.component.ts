@@ -20,16 +20,21 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
+import { RouterService } from '../../services/router/router.service';
 
 @Component({
   selector: 'ground-layer-list',
   templateUrl: './layer-list.component.html',
+  styleUrls: ['./layer-list.component.scss'],
 })
 export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
 
-  constructor(projectService: ProjectService) {
+  constructor(
+    projectService: ProjectService,
+    private routerService: RouterService
+  ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layers$ = projectService
@@ -39,5 +44,9 @@ export class LayerListComponent {
           List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
+  }
+
+  onAddLayer() {
+    this.routerService.setLayerId(RouterService.LAYER_ID_NEW);
   }
 }

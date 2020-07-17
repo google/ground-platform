@@ -15,23 +15,36 @@
  */
 
 .observation {
-    margin: 16px;
+  margin: 16px;
 }
 .observation .field-label {
-    font-size: 12px;
-    line-height: 16px;
-    margin-bottom: 3px;
+  font-size: 12px;
+  line-height: 16px;
+  margin-bottom: 3px;
 }
 .observation .field-response {
-    font-size: 14px;
-    line-height: 20px;
-    margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 20px;
+  margin-bottom: 12px;
 }
-.observation .btn-save, .observation .btn-cancel{
-    float: right;
-    width: 70px;
-    margin-left: 17px;
+.observation .btn-save,
+.observation .btn-cancel {
+  float: right;
+  width: 70px;
+  margin-left: 17px;
 }
 .field-response .mat-form-field {
-    width: 100%;
+  width: 100%;
+}
+/**
+ * Make sure that inline items have proper spacing between them,
+ * e.g. on Observation Form page.
+ */
+.mat-radio-label-content,
+.mat-checkbox-label {
+  margin-right: 17px;
+}
+/* The spacing below text box should be smaller. */
+.mat-form-field-wrapper {
+  margin-bottom: -1.34em;
 }

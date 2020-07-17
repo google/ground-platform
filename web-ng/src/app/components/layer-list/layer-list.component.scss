@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-:host {
-  display: inline;
+.layer-list-title {
+  padding: 20px;
 }
 
-/* Relative top used to push title input field in line with flex row. */
-.inline-edit {
-  position: relative;
-  top: 2px;
-  font-size: 14pt;
-  margin: 10px 10px 5px 0;
+.add-layer {
+  padding: 10px;
+}
+
+.add-layer-btn {
+  text-align: left;
+}
+
+.add-layer-icon {
+  padding: 10px;
 }

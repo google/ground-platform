@@ -15,8 +15,33 @@ limitations under the License.
 -->
 
 <mat-list *ngIf="layers$ | async as layers">
-  <div *ngFor="let entry of layers">
-    <ground-layer-list-item [layer]="entry">
-    </ground-layer-list-item>
+  <div class="layer-list-title">
+    Layers
+  </div>
+  <mat-divider></mat-divider>
+  <div
+    *ngFor="let entry of layers"
+    fxLayout="row"
+    fxLayoutAlign="center center"
+  >
+    <ground-layer-list-item
+      [layer]="entry"
+      fxFlex="fill"
+    ></ground-layer-list-item>
+    <button mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </div>
+  <div fxLayout="row" class="add-layer">
+    <button
+      fxFlex="fill"
+      mat-stroked-button
+      color="primary"
+      class="add-layer-btn"
+      (click)="onAddLayer()"
+    >
+      <mat-icon class="add-layer-icon">add</mat-icon>
+      Add layer
+    </button>
   </div>
 </mat-list>

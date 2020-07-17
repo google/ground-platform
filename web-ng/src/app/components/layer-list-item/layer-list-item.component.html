@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<mat-list-item>
-    <img [src]="layerPinUrl" />{{ layer?.name?.get(lang) }}
+<mat-list-item class="layer-list-item">
+  <img [src]="layerPinUrl" />
+  <div class="layer-list-spacing">
+    {{ layer?.name?.get(lang) }}
+  </div>
 </mat-list-item>
-<mat-divider></mat-divider>
