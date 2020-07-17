@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
- :host {
+@import 'variables';
+
+:host {
   display: block;
   width: 250px;
- }
+  text-align: center;
+}
 
 .user-thumb {
   display: block;
@@ -42,10 +45,24 @@
 
 .user-description {
   margin: 0px auto;
-  margin-top: 10px ;
+  margin-top: 10px;
   text-align: center;
 }
 
 .btn-signout {
   margin-top: 20px;
+}
+
+[data-letters]:before {
+  content: attr(data-letters);
+  display: inline-block;
+  font-size: 1.8em;
+  width: 2.5em;
+  height: 2.5em;
+  line-height: 2.5em;
+  text-align: center;
+  border-radius: 50%;
+  background: mat-color($primary);
+  vertical-align: middle;
+  color: white;
 }

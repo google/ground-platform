@@ -16,10 +16,13 @@
 <mat-dialog-content>
   <div *ngIf="auth.user$ | async as user" class="rhs-widgets">
     <img
+      *ngIf="user.photoURL; else defaultPhoto"
       src="{{ user.photoURL }}=s64"
-      alt="{{ user.displayName }}"
       class="user-thumb"
     />
+    <ng-template #defaultPhoto>
+      <span [attr.data-letters]="user.displayName.charAt(0)"></span>
+    </ng-template>
     <div class="user-description">
       <div class="user-display-name">{{ user.displayName }}</div>
       <div class="user-email">{{ user.email }}</div>

@@ -30,12 +30,18 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <img
+        *ngIf="user.photoURL; else defaultPhoto"
         src="{{ user.photoURL }}=s64"
-        alt="{{ user.displayName }}"
         class="user-thumb"
-        style="cursor: pointer;"
         (click)="openProfileDialog($event)"
       />
+      <ng-template #defaultPhoto>
+        <span
+          [attr.data-letters]="user.displayName.charAt(0)"
+          (click)="openProfileDialog($event)"
+        >
+        </span>
+      </ng-template>
     </div>
     <ng-template #login>
       <!-- TODO: Hide sign in button and show once page is initialized. -->
