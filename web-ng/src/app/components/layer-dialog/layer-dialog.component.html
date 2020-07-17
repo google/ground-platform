@@ -57,17 +57,24 @@
       <span class="link-add-question">Add question</span>
     </button>
   </mat-dialog-content>
-  <mat-dialog-actions fxLayout fxLayoutAlign="end">
-    <button
-      mat-raised-button
-      (click)="onClose()"
-      type="button"
-      class="btn-cancel"
-    >
-      Cancel
-    </button>
-    <button mat-raised-button color="primary" type="submit" class="btn-save">
-      Save
-    </button>
+  <mat-dialog-actions fxLayout fxLayoutAlign="space-between">
+    <div>
+      <button fxFlex="none" mat-icon-button type="button" (click)="onDeleteLayer()">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+    </div>
+    <div fxLayoutAlign="end">
+      <button
+        mat-raised-button
+        (click)="onClose()"
+        type="button"
+        class="btn-cancel"
+      >
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" type="submit" class="btn-save">
+        Save
+      </button>
+    </div>
   </mat-dialog-actions>
 </form>
