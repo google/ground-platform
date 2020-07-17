@@ -128,15 +128,15 @@ export class LayerDialogComponent implements OnDestroy {
       console.warn('User passed an invalid layer id');
     }
     this.projectId = projectId;
+    this.layer = layer;
+    this.layerName = this.layer?.name?.get(this.lang) || '';
+    this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     if (!layer) {
       this.layer = this.createNewLayer();
       const newField = this.createNewField();
       this.fields = this.fields.push(newField);
       return;
     }
-    this.layer = layer;
-    this.layerName = this.layer?.name?.get(this.lang) || '';
-    this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     const form = this.getForms();
     if (form) {
       this.fields =
