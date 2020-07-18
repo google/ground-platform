@@ -31,6 +31,7 @@ import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { LayerService } from '../../services/layer/layer.service';
 
 // To make ESLint happy:
 /*global alert*/
@@ -62,7 +63,8 @@ export class LayerDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private confirmationDialog: MatDialog
+    private confirmationDialog: MatDialog,
+    private layerService: LayerService
   ) {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
@@ -72,7 +74,15 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const newField = this.createNewField();
+    const newField = this.layerService.createField(
+      FieldType.TEXT,
+      /* label= */
+      '',
+      /* required= */
+      false,
+      /* index= */
+      this.fields.size
+    );
     this.fields = this.fields.push(newField);
   }
 
@@ -103,26 +113,6 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  createNewLayer() {
-    const layerId = this.dataStoreService.generateId();
-    return new Layer(layerId, /* index */ -1);
-  }
-
-  createNewField() {
-    const fieldId = this.dataStoreService.generateId();
-    return new Field(
-      fieldId,
-      FieldType.TEXT,
-      StringMap({
-        en: '',
-      }),
-      /* required= */
-      false,
-      /* index= */
-      this.fields.size
-    );
-  }
-
   init(projectId: string, createLayer: boolean, layer?: Layer) {
     if (!createLayer && !layer) {
       console.warn('User passed an invalid layer id');
@@ -132,23 +122,24 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerName = this.layer?.name?.get(this.lang) || '';
     this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     if (!layer) {
-      this.layer = this.createNewLayer();
-      const newField = this.createNewField();
+      this.layer = this.layerService.createNewLayer();
+      const newField = this.layerService.createField(
+        FieldType.TEXT,
+        /* label= */
+        '',
+        /* required= */
+        false,
+        /* index= */
+        this.fields.size
+      );
       this.fields = this.fields.push(newField);
       return;
     }
-    const form = this.getForms();
+    const form = this.layerService.getForm(this.layer);
     if (form) {
       this.fields =
-        this.getForms()
-          ?.fields.toList()
-          .sortBy(field => field.index) || List<Field>();
+        form?.fields.toList().sortBy(field => field.index) || List<Field>();
     }
-  }
-
-  private getForms(): Form | undefined {
-    const forms = this.layer?.forms;
-    return forms ? forms.valueSeq().first() : undefined;
   }
 
   onSave() {
@@ -156,36 +147,27 @@ export class LayerDialogComponent implements OnDestroy {
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
-    let fields = Map<string, Field>();
     // Check if there are empty fields, if empty return.
     const emptyFields = this.fields.filter(field => !field.label.get('en'));
     if (emptyFields.size) {
       return;
     }
-    this.fields.forEach((field: Field, index: number) => {
-      const layerFieldId = this.fields && this.fields.get(index)?.id;
-      const fieldId = layerFieldId
-        ? layerFieldId
-        : this.dataStoreService.generateId();
-      fields = fields.set(fieldId, field);
-    });
-    const form = this.getForms();
-    const formId = form ? form.id : this.dataStoreService.generateId();
+    const fields = this.layerService.convertFieldsListToMap(this.fields);
+    const form = this.layerService.getForm(this.layer);
+    const forms = form
+      ? this.layerService.setForms(form.id, new Form(form.id, fields))
+      : this.layerService.createForm(fields);
     const layer = new Layer(
       this.layer?.id || '',
       /* index */ -1,
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      this.fields && this.fields.size > 0
-        ? Map({
-            [formId]: new Form(formId, fields),
-          })
-        : Map<string, Form>()
+      forms ? forms : Map<string, Form>()
     );
 
     // TODO: Inform user layer was saved
-    this.dataStoreService
+    this.layerService
       .updateLayer(this.projectId, layer)
       .then(() => this.onClose())
       .catch(() => {
