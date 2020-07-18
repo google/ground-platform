@@ -74,7 +74,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     if (!this.projectId) {
       return Promise.reject(new Error('Project not loaded'));
     }
-    if (value === this.title) return;
+    if (value === this.title) return Promise.resolve();
     return this.projectService.updateTitle(this.projectId, value);
   }
 
