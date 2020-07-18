@@ -21,7 +21,6 @@ import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
-import { Router, NavigationExtras } from '@angular/router';
 import { getPinImageSource } from './ground-pin';
 import { RouterService } from '../../services/router/router.service';
 
