@@ -20,8 +20,7 @@ import { UserProfilePopupComponent } from '../../components/user-profile-popup/u
 import { MatDialog } from '@angular/material/dialog';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 import { ProjectService } from '../../services/project/project.service';
-import { Observable, Subscription } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-project-header',
@@ -29,7 +28,6 @@ import { Project } from '../../shared/models/project.model';
   styleUrls: ['./project-header.component.scss'],
 })
 export class ProjectHeaderComponent implements OnInit, OnDestroy {
-  readonly activeProject$: Observable<Project>;
   lang: string;
   title: string;
   projectId!: string;
@@ -42,9 +40,9 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   ) {
     this.lang = 'en';
     this.title = '';
-    this.activeProject$ = this.projectService.getActiveProject$();
+    const activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
-      this.activeProject$.subscribe(project => {
+      activeProject$.subscribe(project => {
         this.title = project.title.get(this.lang)!;
         this.projectId = project.id;
       })
