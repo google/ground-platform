@@ -18,7 +18,6 @@ import { Component, OnInit, ElementRef } from '@angular/core';
 import { AuthService } from './../../services/auth/auth.service';
 import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
   selector: 'app-project-header',
@@ -34,13 +33,6 @@ export class ProjectHeaderComponent implements OnInit {
     const target = new ElementRef(evt.currentTarget);
     this.dialog.open(UserProfilePopupComponent, {
       data: { trigger: target },
-    });
-  }
-
-  private openShareDialog(): void {
-    this.dialog.open(ShareDialogComponent, {
-      width: '580px',
-      autoFocus: false,
     });
   }
 }

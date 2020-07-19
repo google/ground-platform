@@ -53,16 +53,6 @@
   margin-top: 20px;
 }
 
-[data-letters]:before {
-  content: attr(data-letters);
-  display: inline-block;
+.user-avatar {
   font-size: 1.8em;
-  width: 2.5em;
-  height: 2.5em;
-  line-height: 2.5em;
-  text-align: center;
-  border-radius: 50%;
-  background: mat-color($primary);
-  vertical-align: middle;
-  color: white;
 }

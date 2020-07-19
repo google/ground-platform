@@ -36,11 +36,10 @@
         (click)="openProfileDialog($event)"
       />
       <ng-template #defaultPhoto>
-        <span
-          [attr.data-letters]="user.displayName.charAt(0)"
+        <user-avatar
           (click)="openProfileDialog($event)"
-        >
-        </span>
+          [displayText]="user.displayName.charAt(0)"
+        ></user-avatar>
       </ng-template>
     </div>
     <ng-template #login>

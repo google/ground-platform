@@ -21,7 +21,7 @@
       class="user-thumb"
     />
     <ng-template #defaultPhoto>
-      <span [attr.data-letters]="user.displayName.charAt(0)"></span>
+      <user-avatar class="user-avatar" [displayText]="user.displayName.charAt(0)"></user-avatar>
     </ng-template>
     <div class="user-description">
       <div class="user-display-name">{{ user.displayName }}</div>
