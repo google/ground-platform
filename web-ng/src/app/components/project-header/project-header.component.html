@@ -18,7 +18,13 @@
     <img class="logo" src="/assets/img/logo.png" />
     <span class="app-title">Ground</span>
     <span class="header-divider"></span>
-    <app-inline-edit-title></app-inline-edit-title>
+    <inline-editor
+      [data]="title"
+      [placeholder]="'Untitled project'"
+      (focusOut)="updateProjectTitle($event)"
+      AutoSizeInput
+      class="inline-editor"
+    ></inline-editor>
   </div>
   <div>
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">

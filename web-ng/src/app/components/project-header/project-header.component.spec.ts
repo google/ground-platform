@@ -21,7 +21,6 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ProjectHeaderComponent } from './project-header.component';
 import { environment } from '../../../environments/environment';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -38,7 +37,6 @@ describe('ProjectHeaderComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        InlineEditTitleModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
         AngularFireAuthModule,
         AngularFirestoreModule,

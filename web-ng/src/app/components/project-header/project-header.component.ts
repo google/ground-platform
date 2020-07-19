@@ -14,18 +14,39 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, OnDestroy } from '@angular/core';
 import { AuthService } from './../../services/auth/auth.service';
 import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
 import { MatDialog } from '@angular/material/dialog';
+import { ProjectService } from '../../services/project/project.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-project-header',
   templateUrl: './project-header.component.html',
   styleUrls: ['./project-header.component.scss'],
 })
-export class ProjectHeaderComponent implements OnInit {
-  constructor(public auth: AuthService, private dialog: MatDialog) {}
+export class ProjectHeaderComponent implements OnInit, OnDestroy {
+  lang: string;
+  title: string;
+  projectId!: string;
+
+  subscription: Subscription = new Subscription();
+  constructor(
+    public auth: AuthService,
+    private dialog: MatDialog,
+    private projectService: ProjectService
+  ) {
+    this.lang = 'en';
+    this.title = '';
+    const activeProject$ = this.projectService.getActiveProject$();
+    this.subscription.add(
+      activeProject$.subscribe(project => {
+        this.title = project.title.get(this.lang)!;
+        this.projectId = project.id;
+      })
+    );
+  }
 
   ngOnInit() {}
 
@@ -34,5 +55,22 @@ export class ProjectHeaderComponent implements OnInit {
     this.dialog.open(UserProfilePopupComponent, {
       data: { trigger: target },
     });
+  }
+
+  /**
+   * Updates the project title with input element value.
+   *
+   * @param evt the event emitted from the input element on blur.
+   */
+  updateProjectTitle(value: string) {
+    if (!this.projectId) {
+      return Promise.reject(new Error('Project not loaded'));
+    }
+    if (value === this.title) return Promise.resolve();
+    return this.projectService.updateTitle(this.projectId, value);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
