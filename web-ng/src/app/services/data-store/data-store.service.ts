@@ -26,6 +26,7 @@ import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
+import { firestore } from 'firebase/app';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -73,6 +74,25 @@ export class DataStoreService {
       .update({
         [`layers.${layer.id}`]: FirebaseDataConverter.layerToJS(layer),
       });
+  }
+
+  async deleteLayer(projectId: string, layerId: string) {
+    await this.deleteAllFeaturesInLayer(projectId, layerId);
+    return await this.db
+      .collection('projects')
+      .doc(projectId)
+      .update({
+        [`layers.${layerId}`]: firestore.FieldValue.delete(),
+      });
+  }
+
+  private async deleteAllFeaturesInLayer(projectId: string, layerId: string) {
+    const featuresInLayer = this.db.collection(
+      `projects/${projectId}/features`,
+      ref => ref.where('layerId', '==', layerId)
+    );
+    const querySnapshot = await featuresInLayer.get().toPromise();
+    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
   updateObservation(projectId: string, observation: Observation) {
