@@ -226,4 +226,29 @@ export class LayerDialogComponent implements OnDestroy {
   onMarkerColorChange(event: MarkerColorEvent) {
     this.color = event.color;
   }
+
+  onDeleteLayer() {
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(async dialogResult => {
+      if (dialogResult) {
+        await this.deleteLayer();
+      }
+    });
+  }
+
+  async deleteLayer() {
+    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
+    this.onClose();
+  }
 }
