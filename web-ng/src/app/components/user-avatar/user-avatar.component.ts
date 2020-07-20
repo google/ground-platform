@@ -14,38 +14,17 @@
  * limitations under the License.
  */
 
- :host {
-  display: block;
-  width: 250px;
- }
+import { Component, OnInit, Input } from '@angular/core';
 
-.user-thumb {
-  display: block;
-  margin: 0px auto;
-  border-radius: 32px;
-}
+@Component({
+  selector: 'user-avatar',
+  templateUrl: './user-avatar.component.html',
+  styleUrls: ['./user-avatar.component.scss'],
+})
+export class UserAvatarComponent implements OnInit {
+  @Input() displayText?: string;
 
-.user-email {
-  font-size: 14px;
-  color: grey;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
+  constructor() {}
 
-.user-display-name {
-  font-size: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.user-description {
-  margin: 0px auto;
-  margin-top: 10px ;
-  text-align: center;
-}
-
-.btn-signout {
-  margin-top: 20px;
+  ngOnInit(): void {}
 }
