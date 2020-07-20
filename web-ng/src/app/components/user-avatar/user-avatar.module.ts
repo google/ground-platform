@@ -14,38 +14,13 @@
  * limitations under the License.
  */
 
- :host {
-  display: block;
-  width: 250px;
- }
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { UserAvatarComponent } from './user-avatar.component';
 
-.user-thumb {
-  display: block;
-  margin: 0px auto;
-  border-radius: 32px;
-}
-
-.user-email {
-  font-size: 14px;
-  color: grey;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.user-display-name {
-  font-size: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.user-description {
-  margin: 0px auto;
-  margin-top: 10px ;
-  text-align: center;
-}
-
-.btn-signout {
-  margin-top: 20px;
-}
+@NgModule({
+  declarations: [UserAvatarComponent],
+  imports: [CommonModule],
+  exports: [UserAvatarComponent],
+})
+export class UserAvatarModule {}

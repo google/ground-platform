@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-:host {
-  display: inline;
-}
+import { Component, OnInit, Input } from '@angular/core';
 
-/* Relative top used to push title input field in line with flex row. */
-.inline-edit {
-  position: relative;
-  top: 2px;
-  font-size: 14pt;
-  margin: 10px 10px 5px 0;
+@Component({
+  selector: 'user-avatar',
+  templateUrl: './user-avatar.component.html',
+  styleUrls: ['./user-avatar.component.scss'],
+})
+export class UserAvatarComponent implements OnInit {
+  @Input() displayText?: string;
+
+  constructor() {}
+
+  ngOnInit(): void {}
 }

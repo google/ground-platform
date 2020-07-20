@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-@import '~src/_variables';
+// Include Angular Material theme mixins globally using shared Ground palette
+// defined in src/app/shared/styles.
+
+@import '~@angular/material/theming';
+@import 'variables';
+
+// Include the common styles for Angular Material. This allows us to only
+// have to load a single css file for Angular Material in your app.
+// This mixin but be included exactly once!
+@include mat-core();
 
 // Include theme styles for core and each component used in the app.
 @include angular-material-theme($theme);

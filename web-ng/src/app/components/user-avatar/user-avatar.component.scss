@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { InlineEditorComponent } from './inline-editor.component';
-import { AutoSizeInputModule } from 'ngx-autosize-input';
+@import 'variables';
 
-@NgModule({
-  declarations: [InlineEditorComponent],
-  imports: [CommonModule, AutoSizeInputModule],
-  exports: [InlineEditorComponent],
-})
-export class InlineEditorModule {}
+.user-default-thumb {
+  display: inline-block;
+  font-size: 1em;
+  width: 2.5em;
+  height: 2.5em;
+  line-height: 2.5em;
+  text-align: center;
+  border-radius: 50%;
+  background: mat-color($primary);
+  vertical-align: middle;
+  color: white;
+  cursor: pointer;
+}
