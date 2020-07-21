@@ -118,7 +118,7 @@ export class DataStoreService {
         // Fail with error if feature could not be loaded.
         map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)),
         // Cast to Feature to remove undefined from type. Done as separate
-        // map() operation since compiler does recognize cast when defined in
+        // map() operation since compiler doesn't recognize cast when defined in
         // previous map() step.
         map(f => f as Feature)
       );
