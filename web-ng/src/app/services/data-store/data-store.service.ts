@@ -109,12 +109,19 @@ export class DataStoreService {
    * @param projectId the id of the project in which requested feature is.
    * @param featureId the id of the requested feature.
    */
-  loadFeature$(projectId: string, featureId: string) {
+  loadFeature$(projectId: string, featureId: string): Observable<Feature> {
     return this.db
       .collection(`projects/${projectId}/features`)
       .doc(featureId)
       .get()
-      .pipe(map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)));
+      .pipe(
+        // Fail with error if feature could not be loaded.
+        map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)),
+        // Cast to Feature to remove undefined from type. Done as separate
+        // map() operation since compiler does recognize cast when defined in
+        // previous map() step.
+        map(f => f as Feature)
+      );
   }
 
   /**
@@ -133,7 +140,14 @@ export class DataStoreService {
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
-          List(array.map(obj => FirebaseDataConverter.toFeature(obj.id, obj)))
+          List(
+            array
+              .map(obj => FirebaseDataConverter.toFeature(obj.id, obj))
+              // Filter out features that could not be loaded (i.e., undefined).
+              .filter(f => !!f)
+              // Cast items in List to Feature to remove undefined from type.
+              .map(f => f as Feature)
+          )
         )
       );
   }
