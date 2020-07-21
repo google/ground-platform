@@ -17,5 +17,4 @@
 export enum LoadingState {
   LOADING,
   NOT_LOADED,
-  LOADING_FAILED,
 }

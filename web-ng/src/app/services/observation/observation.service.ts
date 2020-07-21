@@ -92,14 +92,14 @@ export class ObservationService {
     project: Project,
     feature: Feature
   ): Observation | LoadingState {
-    if (user === null || user === undefined) {
-      return LoadingState.LOADING_FAILED;
+    if (!user) {  
+      throw Error(`Login required to create new observation.`)
     }
-    const form: Form | undefined = project
+    const form = project
       .getLayer(feature.layerId)!
-      .forms?.first();
-    if (form === undefined) {
-      return LoadingState.LOADING_FAILED;
+      .forms?.first(/*notSetValue=*/null);
+    if (!form) {
+      throw Error(`Layer ${feature.layerId} does not contain any forms -> Can not create new observation.`)
     }
     const newObservationId = this.dataStore.generateId();
     const auditInfo = new AuditInfo(
@@ -110,7 +110,7 @@ export class ObservationService {
     return new Observation(
       newObservationId,
       feature.id,
-      form,
+      form!,
       auditInfo,
       auditInfo,
       Map<string, Response>([])
