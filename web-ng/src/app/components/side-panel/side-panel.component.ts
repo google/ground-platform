@@ -16,6 +16,10 @@
 
 import { Component, Input } from '@angular/core';
 import { LoadingState } from '../../services/loading-state.model';
+import { RouterService } from '../../services/router/router.service';
+import { ActivatedRoute } from '@angular/router';
+import { switchMap } from 'rxjs/operators';
+import { of, Observable } from 'rxjs';
 
 @Component({
   selector: 'ground-side-panel',
@@ -23,14 +27,33 @@ import { LoadingState } from '../../services/loading-state.model';
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
-  @Input() contentType: SideNavContentType = SideNavContentType.LAYER_LIST;
-  sideNavContentType = SideNavContentType;
+  readonly sideNavContentType$: Observable<SideNavContentType>;
   readonly loadingState = LoadingState;
   readonly lang: string;
 
-  constructor() {
+  constructor(
+    private routerService: RouterService,
+    route: ActivatedRoute) {
+    routerService.init(route);
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
+
+    this.sideNavContentType$ =
+      routerService.getObservationId$().pipe(
+        switchMap(observationId => {
+          if (observationId) {
+            return of(SideNavContentType.OBSERVATION);
+          }
+          return routerService.getFeatureId$().pipe(
+            switchMap(featureId => {
+              if (featureId) {
+                return of(SideNavContentType.FEATURE);
+              }
+              return of(SideNavContentType.LAYER_LIST);
+            })
+          );
+        })
+      );
   }
 }
 
