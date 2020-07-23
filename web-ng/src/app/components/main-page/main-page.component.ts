@@ -22,7 +22,6 @@ import { Project } from '../../shared/models/project.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
-import { SideNavContentType } from '../side-panel/side-panel.component';
 import { take } from 'rxjs/operators';
 import { RouterService } from '../../services/router/router.service';
 import { ActivatedRoute } from '@angular/router';

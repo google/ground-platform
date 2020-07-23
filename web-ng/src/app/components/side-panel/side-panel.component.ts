@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
-import { LoadingState } from '../../services/loading-state.model';
-import { RouterService } from '../../services/router/router.service';
+import { Component } from '@angular/core';
+import {
+  RouterService,
+  SideNavContentMode,
+} from '../../services/router/router.service';
 import { ActivatedRoute } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
-import { of, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'ground-side-panel',
@@ -27,23 +28,15 @@ import { of, Observable } from 'rxjs';
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
-  readonly sideNavContentType = SideNavContentType;
-  readonly sideNavContentType$: Observable<SideNavContentType>;
+  readonly sideNavContentMode = SideNavContentMode;
+  readonly sideNavContentMode$: Observable<SideNavContentMode>;
   readonly lang: string;
 
-  constructor(
-    private routerService: RouterService,
-    route: ActivatedRoute) {
+  constructor(private routerService: RouterService, route: ActivatedRoute) {
     routerService.init(route);
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
 
-    this.sideNavContentType$ = routerService.getSideNavContentType$();
+    this.sideNavContentMode$ = routerService.getSideNavContentMode$();
   }
-}
-
-export enum SideNavContentType {
-  LAYER_LIST = 0,
-  OBSERVATION = 1,
-  FEATURE = 2,
 }

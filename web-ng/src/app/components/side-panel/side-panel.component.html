@@ -13,16 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div *ngIf="sideNavContentType$ | async as contentType">
-  <div *ngIf="contentType == sideNavContentType.OBSERVATION">
+<div [ngSwitch]="sideNavContentMode$ | async">
+  <div *ngSwitchCase="sideNavContentMode.OBSERVATION">
     <ground-observation-form></ground-observation-form>
   </div>
 
-  <div *ngIf="contentType == sideNavContentType.FEATURE">
+  <div *ngSwitchCase="sideNavContentMode.FEATURE">
     <ground-feature-panel></ground-feature-panel>
   </div>
 
-  <div *ngIf="contentType == sideNavContentType.LAYER_LIST">
+  <div *ngSwitchCase="sideNavContentMode.LAYER_LIST">
     <ground-layer-list></ground-layer-list>
   </div>
 </div>

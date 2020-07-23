@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
@@ -42,7 +42,7 @@ export class RouterService {
   private layerId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
-  private sideNavContentType$?: Observable<SideNavContentType>;
+  private sideNavContentMode$?: Observable<SideNavContentMode>;
 
   constructor(private router: Router) {}
 
@@ -69,19 +69,17 @@ export class RouterService {
     this.observationId$ = fragmentParams$.pipe(
       map(params => params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM))
     );
-    this.sideNavContentType$ = fragmentParams$.pipe(
-      map(params => { 
-        console.log(params);
-        console.log(params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM));
+    this.sideNavContentMode$ = fragmentParams$.pipe(
+      map(params => {
         if (params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM)) {
-          return SideNavContentType.OBSERVATION;
+          return SideNavContentMode.OBSERVATION;
         }
-        console.log(params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM));
         if (params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM)) {
-          return SideNavContentType.FEATURE;
+          return SideNavContentMode.FEATURE;
         }
-        return SideNavContentType.LAYER_LIST;
-      }));
+        return SideNavContentMode.LAYER_LIST;
+      })
+    );
   }
 
   getProjectId$(): Observable<string | null> {
@@ -100,8 +98,8 @@ export class RouterService {
     return this.observationId$!;
   }
 
-  getSideNavContentType$(): Observable<SideNavContentType> {
-    return this.sideNavContentType$!;
+  getSideNavContentMode$(): Observable<SideNavContentMode> {
+    return this.sideNavContentMode$!;
   }
 
   /**
@@ -164,8 +162,8 @@ export class RouterService {
   }
 }
 
-export enum SideNavContentType {
-  LAYER_LIST = 0,
-  OBSERVATION = 1,
-  FEATURE = 2,
+export enum SideNavContentMode {
+  LAYER_LIST = 1,
+  OBSERVATION = 2,
+  FEATURE = 3,
 }
