@@ -21,6 +21,7 @@ import { ProjectHeaderComponent } from './project-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { UserAvatarModule } from '../user-avatar/user-avatar.module';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 
 @NgModule({
@@ -31,6 +32,7 @@ import { InlineEditorModule } from '../inline-editor/inline-editor.module';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
+    UserAvatarModule,
     InlineEditorModule,
   ],
   exports: [ProjectHeaderComponent],

@@ -14,16 +14,45 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from './user-profile-popup.component';
-import { UserAvatarModule } from '../user-avatar/user-avatar.module';
+@import 'variables';
 
-@NgModule({
-  declarations: [UserProfilePopupComponent],
-  imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
-  entryComponents: [UserProfilePopupComponent],
-})
-export class UserProfilePopupModule {}
+:host {
+  display: block;
+  width: 250px;
+  text-align: center;
+}
+
+.user-thumb {
+  display: block;
+  margin: 0px auto;
+  border-radius: 32px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: grey;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.user-display-name {
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.user-description {
+  margin: 0px auto;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.btn-signout {
+  margin-top: 20px;
+}
+
+.user-avatar {
+  font-size: 1.8em;
+}
