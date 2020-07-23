@@ -27,8 +27,8 @@ import { of, Observable } from 'rxjs';
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
+  readonly sideNavContentType = SideNavContentType;
   readonly sideNavContentType$: Observable<SideNavContentType>;
-  readonly loadingState = LoadingState;
   readonly lang: string;
 
   constructor(
@@ -38,22 +38,7 @@ export class SidePanelComponent {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
 
-    this.sideNavContentType$ =
-      routerService.getObservationId$().pipe(
-        switchMap(observationId => {
-          if (observationId) {
-            return of(SideNavContentType.OBSERVATION);
-          }
-          return routerService.getFeatureId$().pipe(
-            switchMap(featureId => {
-              if (featureId) {
-                return of(SideNavContentType.FEATURE);
-              }
-              return of(SideNavContentType.LAYER_LIST);
-            })
-          );
-        })
-      );
+    this.sideNavContentType$ = routerService.getSideNavContentType$();
   }
 }
 

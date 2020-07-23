@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
@@ -42,6 +42,7 @@ export class RouterService {
   private layerId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
+  private sideNavContentType$?: Observable<SideNavContentType>;
 
   constructor(private router: Router) {}
 
@@ -68,6 +69,19 @@ export class RouterService {
     this.observationId$ = fragmentParams$.pipe(
       map(params => params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM))
     );
+    this.sideNavContentType$ = fragmentParams$.pipe(
+      map(params => { 
+        console.log(params);
+        console.log(params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM));
+        if (params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM)) {
+          return SideNavContentType.OBSERVATION;
+        }
+        console.log(params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM));
+        if (params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM)) {
+          return SideNavContentType.FEATURE;
+        }
+        return SideNavContentType.LAYER_LIST;
+      }));
   }
 
   getProjectId$(): Observable<string | null> {
@@ -84,6 +98,10 @@ export class RouterService {
 
   getObservationId$(): Observable<string | null> {
     return this.observationId$!;
+  }
+
+  getSideNavContentType$(): Observable<SideNavContentType> {
+    return this.sideNavContentType$!;
   }
 
   /**
@@ -144,4 +162,10 @@ export class RouterService {
   setLayerId(id: string) {
     this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM, id);
   }
+}
+
+export enum SideNavContentType {
+  LAYER_LIST = 0,
+  OBSERVATION = 1,
+  FEATURE = 2,
 }
