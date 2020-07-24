@@ -90,7 +90,15 @@ class Datastore {
         console.log("Project " + projectId + 
           " does not exist! Please make sure project exists before adding features!");
         // For debug/test reasons uncomment below to add the project.
-        // docRef.set({project: projectId}); 
+        docRef.set({project: projectId}); 
+        docRef.collection('features').add({
+          layerId: layerId,
+          caption: featureCaption,
+          location: new firestore.GeoPoint(Number.parseFloat(featureLat)
+            , Number.parseFloat(featureLong))
+        })
+        console.log("Feature successfully written!");
+        // TODO(tiyara): For prod throw a 404 error.
       }
     }).catch(function (error) {
       console.log("Error getting document:", error);

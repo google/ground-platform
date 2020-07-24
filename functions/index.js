@@ -26,6 +26,36 @@ const onCreateRecord = require('./on-create-record')
 const onUpdateRecord = require('./on-update-record')
 const importCsv = require('./import-csv')
 const hardcodedInsert = require('./hardcoded')
+const express = require('express');
+const bodyParser = require("body-parser");
+require("body-parser-csv")(bodyParser);
+
+const app = express();
+
+/*
+app.use(
+    bodyParser.csv({
+        csvParseOptions: {
+            fastcsvParams: {
+                headers: true,
+                trim: true,
+            },
+            subscribe: ((json) => {
+                // some line transformation
+                transform(data => ({
+                    featureCaption: data.name + data.state,
+                    featureLat: data.lat,
+                    featureLong: data.long,
+                }))
+                .on('error', error => console.error(error))
+                .on('data', row => console.log(JSON.stringify(row)))
+                .on('end', rowCount => console.log(`Parsed ${rowCount} rows`));
+                return json;
+            }),
+        },
+        limit: "15MB",
+    })
+); */
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
@@ -63,8 +93,17 @@ exports.onUpdateRecord =
 exports.test = functions.https.onRequest(
     (req, res) => res.status(200).send(`Hello World`));
 
-// Test via shell:
+    /*
+// Test csv streaming to firebase
 // importCsv(projectId: '', layerId: '' , csvString: 'Ferrera, GR, 8.986493, 46.743506')
+// https://firebase.google.com/docs/functions/http-events#using_existing_express_apps
+// Double-check whether multer is good to pick csv file from the storage.
+var upload = multer({ storage: storage }).single('csvfile');
+app.post('/csv', upload, (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+exports.importCsv = functions.https.onRequest(app);
+*/
+
+// TODO(tiyara): Another library
 exports.importCsv = functions.https.onRequest(
     (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
 
