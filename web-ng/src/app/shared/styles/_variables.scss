@@ -25,6 +25,8 @@
 $primary: mat-palette($mat-green, 700, 600, 800);
 $accent: mat-palette($mat-amber, 700, 600, 800);
 $warn: mat-palette($mat-pink, 600, 500, 700);
+$grey: mat-palette($mat-grey, 500);
+$light-grey: mat-palette($mat-grey, 200);
 
 // Create the theme object (a Sass map containing all of the palettes).
 $theme: mat-light-theme($primary, $accent, $warn);

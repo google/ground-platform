@@ -20,12 +20,20 @@
   placeholder="Unnamed layer"
   (focusOut)="setLayerName($event)"
 ></inline-editor>
+<hr class="horizontal-line" />
 <div class="default-style">
   <div class="default-style-tag">Default style</div>
   <app-edit-style-button
     [markerColor]="layer!.color || '#000'"
     (markerColorChange)="onMarkerColorChange($event)"
   ></app-edit-style-button>
+</div>
+<div>
+  <h3>Form Layout</h3>
+  <div class="label-helper-text">
+    Add question that observers should answer about this feature.<br />
+    For example, "What species of tree is it?"
+  </div>
 </div>
 <form (ngSubmit)="onSave()">
   <mat-dialog-content>
@@ -59,7 +67,12 @@
   </mat-dialog-content>
   <mat-dialog-actions fxLayout fxLayoutAlign="space-between">
     <div>
-      <button fxFlex="none" mat-icon-button type="button" (click)="onDeleteLayer()">
+      <button
+        fxFlex="none"
+        mat-icon-button
+        type="button"
+        (click)="onDeleteLayer()"
+      >
         <mat-icon>delete_forever</mat-icon>
       </button>
     </div>
@@ -67,12 +80,11 @@
       <button
         mat-raised-button
         (click)="onClose()"
-        type="button"
         class="btn-cancel"
       >
         Cancel
       </button>
-      <button mat-raised-button color="primary" type="submit" class="btn-save">
+      <button mat-raised-button type="submit" class="btn-save">
         Save
       </button>
     </div>

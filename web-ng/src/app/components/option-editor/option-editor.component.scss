@@ -21,12 +21,8 @@
 }
 
 .dot {
-  height: 15px;
-  width: 15px;
-  border: 1px solid mat-color($foreground, light);
+  color: mat-color($grey);
   align-self: center;
-  border-radius: 50%;
-  display: inline-block;
 }
 
 .drag-icon {
@@ -34,7 +30,7 @@
   margin: 0px auto;
   cursor: move;
   align-self: center;
-  color: mat-color($foreground, light);
+  color: mat-color($grey);
   margin-right: 5px !important;
 }
 
