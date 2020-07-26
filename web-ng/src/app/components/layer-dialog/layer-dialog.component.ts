@@ -27,7 +27,7 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Map, List } from 'immutable';
+import { List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -163,7 +163,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      forms ? forms : Map<string, Form>()
+      forms
     );
 
     // TODO: Inform user layer was saved
