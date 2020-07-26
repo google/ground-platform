@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from './user-profile-popup.component';
-import { UserAvatarModule } from '../user-avatar/user-avatar.module';
+@import 'variables';
 
-@NgModule({
-  declarations: [UserProfilePopupComponent],
-  imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
-  entryComponents: [UserProfilePopupComponent],
-})
-export class UserProfilePopupModule {}
+.user-default-thumb {
+  display: inline-block;
+  font-size: 1em;
+  width: 2.5em;
+  height: 2.5em;
+  line-height: 2.5em;
+  text-align: center;
+  border-radius: 50%;
+  background: mat-color($primary);
+  vertical-align: middle;
+  color: white;
+  cursor: pointer;
+}
