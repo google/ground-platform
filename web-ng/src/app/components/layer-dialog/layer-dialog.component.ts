@@ -50,7 +50,7 @@ export class LayerDialogComponent implements OnDestroy {
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
-  color = DEFAULT_LAYER_COLOR;
+  color!: string;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -128,14 +128,15 @@ export class LayerDialogComponent implements OnDestroy {
       console.warn('User passed an invalid layer id');
     }
     this.projectId = projectId;
+    this.layer = layer;
     this.layerName = this.layer?.name?.get(this.lang) || '';
+    this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     if (!layer) {
       this.layer = this.createNewLayer();
       const newField = this.createNewField();
       this.fields = this.fields.push(newField);
       return;
     }
-    this.layer = layer;
     const form = this.getForms();
     if (form) {
       this.fields =
@@ -242,5 +243,30 @@ export class LayerDialogComponent implements OnDestroy {
 
   onMarkerColorChange(event: MarkerColorEvent) {
     this.color = event.color;
+  }
+
+  onDeleteLayer() {
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(async dialogResult => {
+      if (dialogResult) {
+        await this.deleteLayer();
+      }
+    });
+  }
+
+  async deleteLayer() {
+    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
+    this.onClose();
   }
 }

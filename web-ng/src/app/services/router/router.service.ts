@@ -37,6 +37,7 @@ export class RouterService {
   private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
+  static readonly LAYER_ID_NEW = ':new';
 
   private activatedRoute?: ActivatedRoute;
   private projectId$?: Observable<string | null>;
@@ -118,24 +119,33 @@ export class RouterService {
     const primaryUrl = this.router
       .parseUrl(this.router.url)
       .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = {
-      fragment: params.toString(),
-    };
-    this.router.navigate([primaryUrl], navigationExtras);
+
+    if (params.toString()) {
+      const navigationExtras: NavigationExtras = {
+        fragment: params.toString(),
+      };
+      this.router.navigate([primaryUrl], navigationExtras);
+    } else {
+      this.router.navigate([primaryUrl]);
+    }
   }
 
   /**
    * Navigate to the current URL, replacing the single URL fragment param
    * with the specified value.
    */
-  private setFragmentParam(key: string, value: string) {
-    this.setFragmentParams(this.getFragmentParams().set(key, value));
+  private setFragmentParam(key: string, value: string | null) {
+    if (value) {
+      this.setFragmentParams(this.getFragmentParams().set(key, value));
+    } else {
+      this.setFragmentParams(this.getFragmentParams().delete(key));
+    }
   }
 
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string) {
+  setFeatureId(id: string | null) {
     this.setFragmentParam(RouterService.FEATURE_ID_FRAGMENT_PARAM, id);
   }
 
@@ -145,5 +155,9 @@ export class RouterService {
    */
   setObservationId(id: string) {
     this.setFragmentParam(RouterService.OBSERVATION_ID_FRAGMENT_PARAM, id);
+  }
+
+  setLayerId(id: string) {
+    this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM, id);
   }
 }

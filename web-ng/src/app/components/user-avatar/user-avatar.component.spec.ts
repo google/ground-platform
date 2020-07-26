@@ -16,31 +16,20 @@
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ShareDialogComponent } from './share-dialog.component';
-import { MatDialogRef } from '@angular/material/dialog';
-import { ProjectService } from '../../services/project/project.service';
-import { of } from 'rxjs';
-import { Map } from 'immutable';
+import { UserAvatarComponent } from './user-avatar.component';
 
-describe('ShareDialogComponent', () => {
-  let component: ShareDialogComponent;
-  let fixture: ComponentFixture<ShareDialogComponent>;
+describe('UserAvatarComponent', () => {
+  let component: UserAvatarComponent;
+  let fixture: ComponentFixture<UserAvatarComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ShareDialogComponent],
-      providers: [
-        { provide: MatDialogRef, useValue: {} },
-        {
-          provide: ProjectService,
-          useValue: { getActiveProject$: () => of({ acl: Map() }) },
-        },
-      ],
+      declarations: [UserAvatarComponent],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ShareDialogComponent);
+    fixture = TestBed.createComponent(UserAvatarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

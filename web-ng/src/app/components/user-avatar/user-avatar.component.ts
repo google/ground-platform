@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { InlineEditTitleComponent } from './inline-edit-title.component';
-import { AutoSizeInputModule } from 'ngx-autosize-input';
+import { Component, OnInit, Input } from '@angular/core';
 
-@NgModule({
-  declarations: [InlineEditTitleComponent],
-  imports: [AutoSizeInputModule],
-  exports: [InlineEditTitleComponent],
+@Component({
+  selector: 'user-avatar',
+  templateUrl: './user-avatar.component.html',
+  styleUrls: ['./user-avatar.component.scss'],
 })
-export class InlineEditTitleModule {}
+export class UserAvatarComponent implements OnInit {
+  @Input() displayText?: string;
+
+  constructor() {}
+
+  ngOnInit(): void {}
+}

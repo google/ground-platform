@@ -14,16 +14,45 @@
  * limitations under the License.
  */
 
-@import '~src/custom-theme';
+@import 'variables';
 
 :host {
-  display: inline;
+  display: block;
+  width: 250px;
+  text-align: center;
 }
 
-/* Relative top used to push title input field in line with flex row. */
-.inline-edit {
-  position: relative;
-  top: 2px;
-  font-size: 14pt;
-  margin: 10px 10px 5px 0;
+.user-thumb {
+  display: block;
+  margin: 0px auto;
+  border-radius: 32px;
+}
+
+.user-email {
+  font-size: 14px;
+  color: grey;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.user-display-name {
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.user-description {
+  margin: 0px auto;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.btn-signout {
+  margin-top: 20px;
+}
+
+.user-avatar {
+  font-size: 1.8em;
 }

@@ -21,7 +21,6 @@ import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
-import { Router, NavigationExtras } from '@angular/router';
 import { getPinImageSource } from './ground-pin';
 import { RouterService } from '../../services/router/router.service';
 
@@ -35,7 +34,7 @@ import { RouterService } from '../../services/router/router.service';
 })
 export class MapComponent implements OnInit {
   private subscription: Subscription = new Subscription();
-  focusedFeatureId = '';
+  focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
   activeProject$: Observable<Project>;
   mapOptions: google.maps.MapOptions = {
@@ -59,14 +58,16 @@ export class MapComponent implements OnInit {
   ngOnInit() {
     this.subscription.add(
       this.routerService.getFeatureId$().subscribe(id => {
-        if (id) {
-          this.focusedFeatureId = id;
-        }
+        this.focusedFeatureId = id;
       })
     );
   }
 
-  onFeatureClick(featureId: string) {
+  onFeatureBlur() {
+    this.onFeatureClick(null);
+  }
+
+  onFeatureClick(featureId: string | null) {
     this.routerService.setFeatureId(featureId);
   }
 

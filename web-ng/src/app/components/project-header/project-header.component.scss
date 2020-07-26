@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
- @import '~src/custom-theme';
+@import 'variables';
 
 .header {
   padding: 16px;
   white-space: nowrap;
 }
 
-.header div, img, .header span, mat-icon {
+.header div,
+img,
+.header span,
+mat-icon {
   vertical-align: middle;
 }
 
@@ -56,4 +59,10 @@ app-inline-edit-title {
   height: 32px;
   border-radius: 32px;
   margin-right: 8px;
+}
+
+/* Relative top used to push title input field in line with flex row. */
+.inline-editor {
+  position: relative;
+  top: 2px;
 }

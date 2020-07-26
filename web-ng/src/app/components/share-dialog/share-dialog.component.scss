@@ -14,12 +14,39 @@
  * limitations under the License.
  */
 
-.email-input {
-  margin-right: 10px;
-  width: 250px;
+@import 'variables';
+
+.list-heading {
+  font-size: medium;
+  font-weight: 500;
+  color: mat-color($foreground, secondary-text);
+  padding: 16px 0 12px 0;
+}
+
+.mat-dialog-content {
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: mat-color($foreground, disabled-button);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.user-email {
+  text-overflow: ellipsis;
+  color: mat-color($foreground, dark-secondary-text);
 }
 
 .role-select {
-  margin-right: 10px;
-  width: 114px;
+  margin: -4px 0;
+  color: mat-color($foreground, dark-secondary-text);
+}
+
+.remove-option {
+  border-top: 1px solid mat-color($background, disabled-list-option);
+}
+
+.pending-changes {
+  font-style: italic;
+  color: mat-color($foreground, secondary-text);
+  margin: 16px;
 }

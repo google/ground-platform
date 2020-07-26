@@ -23,9 +23,10 @@ import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Feature } from '../../shared/models/feature.model';
 import { Layer } from './../../shared/models/layer.model';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
+import { firestore } from 'firebase/app';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -75,6 +76,25 @@ export class DataStoreService {
       });
   }
 
+  async deleteLayer(projectId: string, layerId: string) {
+    await this.deleteAllFeaturesInLayer(projectId, layerId);
+    return await this.db
+      .collection('projects')
+      .doc(projectId)
+      .update({
+        [`layers.${layerId}`]: firestore.FieldValue.delete(),
+      });
+  }
+
+  private async deleteAllFeaturesInLayer(projectId: string, layerId: string) {
+    const featuresInLayer = this.db.collection(
+      `projects/${projectId}/features`,
+      ref => ref.where('layerId', '==', layerId)
+    );
+    const querySnapshot = await featuresInLayer.get().toPromise();
+    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+  }
+
   updateObservation(projectId: string, observation: Observation) {
     return this.db
       .collection(`projects/${projectId}/observations`)
@@ -89,12 +109,19 @@ export class DataStoreService {
    * @param projectId the id of the project in which requested feature is.
    * @param featureId the id of the requested feature.
    */
-  loadFeature$(projectId: string, featureId: string) {
+  loadFeature$(projectId: string, featureId: string): Observable<Feature> {
     return this.db
       .collection(`projects/${projectId}/features`)
       .doc(featureId)
       .get()
-      .pipe(map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)));
+      .pipe(
+        // Fail with error if feature could not be loaded.
+        map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)),
+        // Cast to Feature to remove undefined from type. Done as separate
+        // map() operation since compiler doesn't recognize cast when defined in
+        // previous map() step.
+        map(f => f as Feature)
+      );
   }
 
   /**
@@ -113,7 +140,14 @@ export class DataStoreService {
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
-          List(array.map(obj => FirebaseDataConverter.toFeature(obj.id, obj)))
+          List(
+            array
+              .map(obj => FirebaseDataConverter.toFeature(obj.id, obj))
+              // Filter out features that could not be loaded (i.e., undefined).
+              .filter(f => !!f)
+              // Cast items in List to Feature to remove undefined from type.
+              .map(f => f as Feature)
+          )
         )
       );
   }
@@ -174,14 +208,11 @@ export class DataStoreService {
    * @param email the email of the user whose role is to be updated.
    * @param role the new role of the specified user.
    */
-  updateRole(projectId: string, email: string, role: Role): Promise<void> {
+  updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)
-      .set(
-        { acl: { [email]: FirebaseDataConverter.toRoleId(role) } },
-        { merge: true }
-      );
+      .update({ acl: FirebaseDataConverter.aclToJs(acl) });
   }
 
   generateId() {

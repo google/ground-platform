@@ -67,6 +67,7 @@ export class FirebaseDataConverter {
       )
     );
   }
+
   private static toRole(roleString: string) {
     switch (roleString) {
       case 'owner':
@@ -316,9 +317,14 @@ export class FirebaseDataConverter {
    * @param id the uuid of the project instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  static toFeature(id: string, data: DocumentData): Feature {
-    if (data === undefined) {
-      throw Error(`Feature ${id} does not have document data.`);
+  static toFeature(id: string, data: DocumentData): Feature | undefined {
+    if (
+      !data?.layerId ||
+      !data?.location?.latitude ||
+      !data?.location?.longitude
+    ) {
+      console.warn(`Invalid feature ${id} in remote data store ignored`);
+      return;
     }
     return new Feature(id, data.layerId, data.location);
   }
@@ -454,6 +460,10 @@ export class FirebaseDataConverter {
       clientTimestamp: auditInfo.clientTime,
       serverTimestamp: auditInfo.serverTime,
     };
+  }
+
+  static aclToJs(acl: Map<string, Role>): {} {
+    return acl.map(FirebaseDataConverter.toRoleId).toJS();
   }
 
   /**
