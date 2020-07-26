@@ -52,6 +52,7 @@ export class LayerDialogComponent implements OnDestroy {
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
+  form?: Form;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -135,10 +136,11 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields = this.fields.push(newField);
       return;
     }
-    const form = this.layerService.getForm(this.layer);
-    if (form) {
+    this.form = this.layerService.getForm(this.layer);
+    if (this.form) {
       this.fields =
-        form?.fields.toList().sortBy(field => field.index) || List<Field>();
+        this.form?.fields.toList().sortBy(field => field.index) ||
+        List<Field>();
     }
   }
 
@@ -153,10 +155,8 @@ export class LayerDialogComponent implements OnDestroy {
       return;
     }
     const fields = this.layerService.convertFieldsListToMap(this.fields);
-    const form = this.layerService.getForm(this.layer);
-    const forms = form
-      ? this.layerService.setForms(form.id, new Form(form.id, fields))
-      : this.layerService.createForm(fields);
+    const formId = this.form?.id;
+    const forms = this.layerService.createForm(formId, fields);
     const layer = new Layer(
       this.layer?.id || '',
       /* index */ -1,

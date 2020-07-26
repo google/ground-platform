@@ -82,8 +82,11 @@ export class LayerService {
     return fieldsMap;
   }
 
-  createForm(fields: Map<string, Field>): Map<string, Form> {
-    const formId = this.dataStoreService.generateId();
+  createForm(
+    id: string | undefined,
+    fields: Map<string, Field>
+  ): Map<string, Form> {
+    const formId = id || this.dataStoreService.generateId();
     return this.setForms(formId, new Form(formId, fields));
   }
 
