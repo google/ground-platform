@@ -22,7 +22,7 @@ import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
 import { Map } from 'immutable';
-import { empty } from "rxjs";
+import { empty } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -77,10 +77,12 @@ export class ProjectService {
   createProject(title: string) {
     const projectId = this.dataStore.generateId();
     return new Promise((resolve, reject) => {
-      this.dataStore.updateProjectTitle(projectId, title).then(() => {
-        resolve(projectId);
-      })
-      .catch(error => reject(error))
-    })
+      this.dataStore
+        .updateProjectTitle(projectId, title)
+        .then(() => {
+          resolve(projectId);
+        })
+        .catch(error => reject(error));
+    });
   }
 }
