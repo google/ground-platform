@@ -40,4 +40,10 @@ export class LayerListItemComponent implements OnInit {
       getPinImageSource(this.layer?.color)
     );
   }
+
+  ngOnChanges() {
+    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.layer?.color)
+    );
+  }
 }
