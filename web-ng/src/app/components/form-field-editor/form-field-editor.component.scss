@@ -71,9 +71,9 @@
 }
 
 .delete-btn {
-  color: mat-color($grey);
+  color: mat-color($foreground, icon);
 }
 
 .horizontal-line {
-  border: 1px solid mat-color($light-grey);
+  border: 1px solid mat-color($foreground, divider);
 }

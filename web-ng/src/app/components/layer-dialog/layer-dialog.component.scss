@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- @import '_variables';
+@import '_variables';
 
 .mat-dialog-content {
   width: 600px;
@@ -155,11 +155,11 @@
   margin-right: 10px;
 }
 
-.horizontal-line{
-  border: 1px solid mat-color($light-grey);
+.horizontal-line {
+  border: 1px solid mat-color($foreground, divider);
   margin: -20px 0 20px 0;
 }
 
-.label-helper-text{
-  color: mat-color($grey);
+.label-helper-text {
+  color: mat-color($foreground, secondary-text);
 }

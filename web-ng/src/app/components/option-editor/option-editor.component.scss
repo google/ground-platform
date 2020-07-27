@@ -21,7 +21,7 @@
 }
 
 .dot {
-  color: mat-color($grey);
+  color: mat-color($foreground, icon);
   align-self: center;
 }
 
@@ -30,7 +30,7 @@
   margin: 0px auto;
   cursor: move;
   align-self: center;
-  color: mat-color($grey);
+  color: mat-color($foreground, icon);
   margin-right: 5px !important;
 }
 
