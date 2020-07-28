@@ -37,12 +37,22 @@ export class RouterService {
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
   static readonly LAYER_ID_NEW = ':new';
 
+  private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
+    if (params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.OBSERVATION;
+    }
+    if (params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.FEATURE;
+    }
+    return SideNavMode.LAYER_LIST;
+  }
+
   private activatedRoute?: ActivatedRoute;
   private projectId$?: Observable<string | null>;
   private layerId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
-  private sideNavContentMode$?: Observable<SideNavContentMode>;
+  private sideNavMode$?: Observable<SideNavMode>;
 
   constructor(private router: Router) {}
 
@@ -69,16 +79,8 @@ export class RouterService {
     this.observationId$ = fragmentParams$.pipe(
       map(params => params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM))
     );
-    this.sideNavContentMode$ = fragmentParams$.pipe(
-      map(params => {
-        if (params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM)) {
-          return SideNavContentMode.OBSERVATION;
-        }
-        if (params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM)) {
-          return SideNavContentMode.FEATURE;
-        }
-        return SideNavContentMode.LAYER_LIST;
-      })
+    this.sideNavMode$ = fragmentParams$.pipe(
+      map(params => RouterService.fragmentParamsToSideNavMode(params))
     );
   }
 
@@ -98,8 +100,8 @@ export class RouterService {
     return this.observationId$!;
   }
 
-  getSideNavContentMode$(): Observable<SideNavContentMode> {
-    return this.sideNavContentMode$!;
+  getSideNavMode$(): Observable<SideNavMode> {
+    return this.sideNavMode$!;
   }
 
   /**
@@ -162,7 +164,7 @@ export class RouterService {
   }
 }
 
-export enum SideNavContentMode {
+export enum SideNavMode {
   LAYER_LIST = 1,
   OBSERVATION = 2,
   FEATURE = 3,

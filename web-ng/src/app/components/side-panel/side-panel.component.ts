@@ -17,9 +17,8 @@
 import { Component } from '@angular/core';
 import {
   RouterService,
-  SideNavContentMode,
+  SideNavMode,
 } from '../../services/router/router.service';
-import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -28,15 +27,14 @@ import { Observable } from 'rxjs';
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
-  readonly sideNavContentMode = SideNavContentMode;
-  readonly sideNavContentMode$: Observable<SideNavContentMode>;
+  readonly sideNavMode = SideNavMode;
+  readonly sideNavMode$: Observable<SideNavMode>;
   readonly lang: string;
 
-  constructor(private routerService: RouterService, route: ActivatedRoute) {
-    routerService.init(route);
+  constructor(private routerService: RouterService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
 
-    this.sideNavContentMode$ = routerService.getSideNavContentMode$();
+    this.sideNavMode$ = routerService.getSideNavMode$();
   }
 }
