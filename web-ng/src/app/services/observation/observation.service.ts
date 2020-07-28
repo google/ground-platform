@@ -35,7 +35,6 @@ import { AuditInfo } from '../../shared/models/audit-info.model';
 import { AuthService } from './../../services/auth/auth.service';
 import { User } from '../../shared/models/user.model';
 import { Response } from '../../shared/models/observation/response.model';
-import { Form } from '../../shared/models/form/form.model';
 
 @Injectable({
   providedIn: 'root',
@@ -92,14 +91,16 @@ export class ObservationService {
     project: Project,
     feature: Feature
   ): Observation | LoadingState {
-    if (!user) {  
-      throw Error(`Login required to create new observation.`)
+    if (!user) {
+      throw Error('Login required to create new observation.');
     }
     const form = project
       .getLayer(feature.layerId)!
-      .forms?.first(/*notSetValue=*/null);
+      .forms?.first(/*notSetValue=*/ null);
     if (!form) {
-      throw Error(`Layer ${feature.layerId} does not contain any forms -> Can not create new observation.`)
+      throw Error(
+        `Layer ${feature.layerId} does not contain any forms -> Can not create new observation.`
+      );
     }
     const newObservationId = this.dataStore.generateId();
     const auditInfo = new AuditInfo(
