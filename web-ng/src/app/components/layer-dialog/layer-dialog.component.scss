@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+@import '_variables';
+
 .mat-dialog-content {
   width: 600px;
 }
 
 .btn-save {
   color: white;
-  background-color: rgb(0, 145, 19);
+  background-color: #188038;
   height: 36px;
   width: 82px;
   border-radius: 5px;
@@ -151,4 +153,13 @@
 .default-style-tag {
   padding: 7px 0;
   margin-right: 10px;
+}
+
+.horizontal-line {
+  border: 1px solid mat-color($foreground, divider);
+  margin: -20px 0 20px 0;
+}
+
+.label-helper-text {
+  color: mat-color($foreground, secondary-text);
 }
