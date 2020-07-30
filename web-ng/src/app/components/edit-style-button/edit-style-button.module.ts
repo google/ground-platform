@@ -18,10 +18,11 @@ import { NgModule } from '@angular/core';
 import { EditStyleButtonComponent } from './edit-style-button.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [EditStyleButtonComponent],
-  imports: [MatDialogModule, MatIconModule],
+  imports: [MatDialogModule, MatIconModule, MatButtonModule],
   exports: [EditStyleButtonComponent],
 })
 export class EditStyleButtonModule {}
