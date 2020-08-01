@@ -44,7 +44,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     const activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
       activeProject$.subscribe(project => {
-        this.title = project.title.get(this.lang)!;
+        this.title = project.title.get(this.lang)! || '';
         this.projectId = project.id;
       })
     );
@@ -78,7 +78,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
       .then(projectId => {
         this.router.navigateByUrl(`/p/${projectId}`);
       })
-      .catch(error => {
+      .catch(() => {
         console.warn('Project creation failed');
       });
   }

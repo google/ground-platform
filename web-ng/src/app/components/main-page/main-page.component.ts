@@ -92,7 +92,7 @@ export class MainPageComponent implements OnInit {
     this.activeProject$.pipe(take(1)).subscribe(project =>
       this.dialog.open(LayerDialogComponent, {
         data: {
-          projectId: project.id,
+          projectId: project.isEmpty() ? ':new' : project.id,
           createLayer: layerId === ':new',
           layer: project.layers?.get(layerId),
         },

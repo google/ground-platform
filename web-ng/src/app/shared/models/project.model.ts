@@ -20,6 +20,14 @@ import { Map } from 'immutable';
 import { Role } from './role.model';
 
 export class Project {
+  static readonly EMPTY = new Project(
+    '',
+    StringMap({}),
+    StringMap({}),
+    Map<string, Layer>(),
+    Map<string, Role>()
+  );
+
   constructor(
     readonly id: string,
     readonly title: StringMap,
@@ -30,5 +38,15 @@ export class Project {
 
   getLayer(layerId: string): Layer | undefined {
     return this.layers.get(layerId);
+  }
+
+  isEmpty() {
+    return (
+      !this.id &&
+      !this.title.size &&
+      !this.description.size &&
+      !this.layers.size &&
+      !this.acl.size
+    );
   }
 }
