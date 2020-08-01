@@ -21,10 +21,15 @@ import { Role } from './role.model';
 
 export class Project {
   static readonly EMPTY = new Project(
+    /* id= */
     '',
+    /* title= */
     StringMap({}),
+    /* description= */
     StringMap({}),
+    /* layers= */
     Map<string, Layer>(),
+    /* acl= */
     Map<string, Role>()
   );
 
