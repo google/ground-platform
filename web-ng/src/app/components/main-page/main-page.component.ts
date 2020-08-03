@@ -22,7 +22,6 @@ import { Project } from '../../shared/models/project.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
-import { SideNavContentType } from '../side-panel/side-panel.component';
 import { take } from 'rxjs/operators';
 import { RouterService } from '../../services/router/router.service';
 import { ActivatedRoute } from '@angular/router';
@@ -41,7 +40,6 @@ export class MainPageComponent implements OnInit {
   activeProject$: Observable<Project>;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
-  sideNavContentType: SideNavContentType = SideNavContentType.LAYER_LIST;
   constructor(
     private routerService: RouterService,
     private projectService: ProjectService,
@@ -88,7 +86,6 @@ export class MainPageComponent implements OnInit {
   }
 
   private showEditLayerDialog(layerId: string) {
-    this.sideNavContentType = SideNavContentType.LAYER_LIST;
     this.activeProject$.pipe(take(1)).subscribe(project =>
       this.dialog.open(LayerDialogComponent, {
         data: {
@@ -102,12 +99,10 @@ export class MainPageComponent implements OnInit {
 
   private loadFeatureDetails(featureId: string) {
     this.featureService.selectFeature(featureId);
-    this.sideNavContentType = SideNavContentType.FEATURE;
   }
 
   private editObservation(observationId: string | null) {
     if (observationId) {
-      this.sideNavContentType = SideNavContentType.OBSERVATION;
       this.observationService.selectObservation(observationId);
     } else {
       this.observationService.deselectObservation();
