@@ -31,7 +31,7 @@ export class LayerService {
   constructor(private dataStoreService: DataStoreService) {}
 
   /**
-   * Creates a new layer with a generated uuid.
+   * Creates and returns a new layer with a generated unique identifier.
    */
   createNewLayer(): Layer {
     const layerId = this.dataStoreService.generateId();
@@ -39,13 +39,7 @@ export class LayerService {
   }
 
   /**
-   * Creates a new field with a given type, label, required, index and multipleChoice values.
-   *
-   * @param type the type of the new field.
-   * @param label the label of the new field.
-   * @param required the required value of the new field.
-   * @param index the index of the new field.
-   * @param multipleChoice the multipleChoice value of the new field.
+   * Creates and returns a new field with a generated unique identifier and a single English label.
    */
   createField(
     type: FieldType,
@@ -68,11 +62,7 @@ export class LayerService {
   }
 
   /**
-   * Creates a new option with a given code, label and index.
-   *
-   * @param code the code of the new option.
-   * @param label the label of the new option.
-   * @param index the index of the new option.
+   * Creates and returns a new option with a generated unique identifier, a single English label and code.
    */
   createOption(code: string, label: string, index: number): Option {
     const optionId = this.dataStoreService.generateId();
@@ -87,9 +77,6 @@ export class LayerService {
 
   /**
    * Updates layer of a project with a given layer value.
-   *
-   * @param projectId the id of the project
-   * @param layer the layer of the project
    */
   updateLayer(projectId: string, layer: Layer): Promise<void> {
     return this.dataStoreService.updateLayer(projectId, layer);
@@ -97,8 +84,6 @@ export class LayerService {
 
   /**
    * Converts list of fields to map.
-   *
-   * @param fields the fields that are going to be converted to map type.
    */
   convertFieldsListToMap(fields: List<Field>): Map<string, Field> {
     let fieldsMap = Map<string, Field>();
@@ -113,7 +98,7 @@ export class LayerService {
   }
 
   /**
-   * Creates a new form with a given id and fields value.
+   * Creates and returns a new form map with a with a generated unique identifier and fields value.
    *
    * @param id the id of the new form.
    * @param fields the fields of the new form.
@@ -127,10 +112,7 @@ export class LayerService {
   }
 
   /**
-   * Creates a form map with a given id and form value.
-   *
-   * @param id the id of the forms that need to be set.
-   * @param form the value of the form that will be set at a given index.
+   * Creates and returns a form map with a given id and form value.
    */
   private static createFormMap(id: string, form: Form): Map<string, Form> {
     let forms = Map<string, Form>();
@@ -140,8 +122,6 @@ export class LayerService {
 
   /**
    * Returns the form value from a layer passed.
-   *
-   * @param layer the layer from which form values are returned.
    */
   getForm(layer?: Layer): Form | undefined {
     const forms = layer?.forms;
