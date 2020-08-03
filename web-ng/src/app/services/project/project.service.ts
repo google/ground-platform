@@ -39,7 +39,7 @@ export class ProjectService {
           // Asynchronously load project. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => {
-            if (id === ':new') {
+            if (id === Project.PROJECT_ID_NEW) {
               return of(Project.UNSAVED_NEW);
             }
             return this.dataStore.loadProject$(id);

@@ -32,6 +32,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ProjectService } from '../../services/project/project.service';
+import { Project } from '../../shared/models/project.model';
 
 // To make ESLint happy:
 /*global alert*/
@@ -186,7 +187,7 @@ export class LayerDialogComponent implements OnDestroy {
         : Map<string, Form>()
     );
 
-    if (this.projectId === ':new') {
+    if (this.projectId === Project.PROJECT_ID_NEW) {
       this.projectService.createProject(/* title= */ '').then(projectId => {
         this.projectId = projectId;
         this.updateLayer(this.projectId, layer);
