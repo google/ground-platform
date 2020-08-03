@@ -41,7 +41,7 @@ const DEFAULT_LAYER_COLOR = '#ff9131';
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
-  styleUrls: ['./layer-dialog.component.css'],
+  styleUrls: ['./layer-dialog.component.scss'],
 })
 export class LayerDialogComponent implements OnDestroy {
   lang: string;
