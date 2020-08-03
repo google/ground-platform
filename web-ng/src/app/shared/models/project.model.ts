@@ -20,7 +20,8 @@ import { Map } from 'immutable';
 import { Role } from './role.model';
 
 export class Project {
-  static readonly EMPTY = new Project(
+  static readonly PROJECT_ID_NEW = ':new';
+  static readonly UNSAVED_NEW = new Project(
     /* id= */
     '',
     /* title= */
@@ -45,7 +46,7 @@ export class Project {
     return this.layers.get(layerId);
   }
 
-  isEmpty() {
+  isUnsavedNew() {
     return (
       !this.id &&
       !this.title.size &&

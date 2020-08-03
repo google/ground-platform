@@ -38,7 +38,7 @@ export class FeatureService {
       .getActiveProject$()
       .pipe(
         switchMap(project =>
-          project.isEmpty() ? List() : dataStore.features$(project)
+          project.isUnsavedNew() ? List() : dataStore.features$(project)
         )
       );
 

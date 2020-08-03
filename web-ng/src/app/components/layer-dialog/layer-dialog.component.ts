@@ -187,12 +187,10 @@ export class LayerDialogComponent implements OnDestroy {
     );
 
     if (this.projectId === ':new') {
-      this.projectService
-        .createProject(/* title= */ '')
-        .then((projectId: string) => {
-          this.projectId = projectId;
-          this.updateLayer(this.projectId, layer);
-        });
+      this.projectService.createProject(/* title= */ '').then(projectId => {
+        this.projectId = projectId;
+        this.updateLayer(this.projectId, layer);
+      });
     } else {
       this.updateLayer(this.projectId, layer);
     }

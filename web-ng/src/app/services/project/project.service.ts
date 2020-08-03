@@ -40,7 +40,7 @@ export class ProjectService {
           // of previous subscription if present.
           switchMap(id => {
             if (id === ':new') {
-              return of(Project.EMPTY);
+              return of(Project.UNSAVED_NEW);
             }
             return this.dataStore.loadProject$(id);
           })
