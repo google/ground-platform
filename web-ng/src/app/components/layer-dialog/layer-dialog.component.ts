@@ -31,6 +31,8 @@ import { Map, List } from 'immutable';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { ProjectService } from '../../services/project/project.service';
+import { Project } from '../../shared/models/project.model';
 
 // To make ESLint happy:
 /*global alert*/
@@ -62,7 +64,8 @@ export class LayerDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private confirmationDialog: MatDialog
+    private confirmationDialog: MatDialog,
+    private projectService: ProjectService
   ) {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
@@ -184,9 +187,20 @@ export class LayerDialogComponent implements OnDestroy {
         : Map<string, Form>()
     );
 
+    if (this.projectId === Project.PROJECT_ID_NEW) {
+      this.projectService.createProject(/* title= */ '').then(projectId => {
+        this.projectId = projectId;
+        this.updateLayer(this.projectId, layer);
+      });
+    } else {
+      this.updateLayer(this.projectId, layer);
+    }
+  }
+
+  private updateLayer(projectId: string, layer: Layer) {
     // TODO: Inform user layer was saved
     this.dataStoreService
-      .updateLayer(this.projectId, layer)
+      .updateLayer(projectId, layer)
       .then(() => this.onClose())
       .catch(() => {
         alert('Layer update failed.');

@@ -30,6 +30,7 @@ import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
+import { AngularFireModule } from '@angular/fire';
 
 const mockProject = new Project(
   'project001',
@@ -85,6 +86,7 @@ describe('FeaturePanelComponent', () => {
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [FeaturePanelComponent],
+      imports: [AngularFireModule.initializeApp({})],
       providers: [
         { provide: FeatureService, useValue: featureService },
         { provide: ProjectService, useValue: projectService },

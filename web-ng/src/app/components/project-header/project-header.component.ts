@@ -20,6 +20,7 @@ import { UserProfilePopupComponent } from '../../components/user-profile-popup/u
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-project-header',
@@ -35,14 +36,15 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private dialog: MatDialog,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private router: Router
   ) {
     this.lang = 'en';
     this.title = '';
     const activeProject$ = this.projectService.getActiveProject$();
     this.subscription.add(
       activeProject$.subscribe(project => {
-        this.title = project.title.get(this.lang)!;
+        this.title = project.title.get(this.lang)! || '';
         this.projectId = project.id;
       })
     );
@@ -64,10 +66,21 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
    */
   updateProjectTitle(value: string) {
     if (!this.projectId) {
-      return Promise.reject(new Error('Project not loaded'));
+      return this.createProject(value);
     }
     if (value === this.title) return Promise.resolve();
     return this.projectService.updateTitle(this.projectId, value);
+  }
+
+  createProject(title: string) {
+    this.projectService
+      .createProject(title)
+      .then(projectId => {
+        this.router.navigateByUrl(`/p/${projectId}`);
+      })
+      .catch(() => {
+        console.warn('Project creation failed');
+      });
   }
 
   ngOnDestroy() {

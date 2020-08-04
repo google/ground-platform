@@ -22,7 +22,7 @@ import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
 import { Map } from 'immutable';
-
+import { of } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -38,7 +38,12 @@ export class ProjectService {
         this.activeProjectId$.pipe(
           // Asynchronously load project. switchMap() internally disposes
           // of previous subscription if present.
-          switchMap(id => this.dataStore.loadProject$(id))
+          switchMap(id => {
+            if (id === Project.PROJECT_ID_NEW) {
+              return of(Project.UNSAVED_NEW);
+            }
+            return this.dataStore.loadProject$(id);
+          })
         )
       ),
       // Cache last loaded project so that late subscribers don't cause
@@ -67,5 +72,17 @@ export class ProjectService {
 
   updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
     return this.dataStore.updateAcl(projectId, acl);
+  }
+
+  createProject(title: string): Promise<string> {
+    const projectId = this.dataStore.generateId();
+    return new Promise((resolve, reject) => {
+      this.dataStore
+        .updateProjectTitle(projectId, title)
+        .then(() => {
+          resolve(projectId);
+        })
+        .catch(error => reject(error));
+    });
   }
 }
