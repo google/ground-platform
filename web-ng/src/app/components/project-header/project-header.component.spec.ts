@@ -27,6 +27,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
+import { Router } from '@angular/router';
 
 describe('ProjectHeaderComponent', () => {
   let component: ProjectHeaderComponent;
@@ -53,6 +54,7 @@ describe('ProjectHeaderComponent', () => {
         },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: {} },
       ],
     }).compileComponents();
   }));
