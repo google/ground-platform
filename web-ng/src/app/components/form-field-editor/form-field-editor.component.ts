@@ -36,6 +36,7 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { LayerService } from '../../services/layer/layer.service';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -74,7 +75,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   constructor(
     private formBuilder: FormBuilder,
     private dataStoreService: DataStoreService,
-    private confirmationDialog: MatDialog
+    private confirmationDialog: MatDialog,
+    private layerService: LayerService
   ) {
     this.formFieldGroup = this.formBuilder.group({
       label: ['', Validators.required],
@@ -156,7 +158,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    */
 
   onOptionUpdate(event: { label: string; code: string }, index: number) {
-    const option = this.createOption(event.code, event.label, index);
+    const option = this.layerService.createOption(
+      event.code,
+      event.label,
+      index
+    );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
   }
@@ -186,20 +192,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   onAddOption() {
     const index = this.formOptions?.options.size || 0;
-    const option = this.createOption('', '', index);
+    const option = this.layerService.createOption('', '', index);
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
-  }
-
-  createOption(code: string, label: string, index: number) {
-    const optionId = this.dataStoreService.generateId();
-    const option = new Option(
-      optionId || '',
-      code,
-      StringMap({ en: label }),
-      index
-    );
-    return option;
   }
 
   setFormOptions(index: number, option: Option) {
