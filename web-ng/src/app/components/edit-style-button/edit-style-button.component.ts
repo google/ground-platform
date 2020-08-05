@@ -31,7 +31,6 @@ import { ColorEvent } from 'ngx-color';
 @Component({
   selector: 'app-edit-style-button',
   templateUrl: './edit-style-button.component.html',
-  styleUrls: ['./edit-style-button.component.css'],
 })
 export class EditStyleButtonComponent implements OnInit {
   @Input() markerColor = 'black';

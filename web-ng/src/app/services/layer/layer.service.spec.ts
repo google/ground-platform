@@ -13,3 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { TestBed } from '@angular/core/testing';
+import { DataStoreService } from '../data-store/data-store.service';
+import { LayerService } from './layer.service';
+
+describe('LayerService', () => {
+  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: DataStoreService, useValue: dataStoreServiceStub },
+      ],
+    })
+  );
+
+  it('should be created', () => {
+    const service: LayerService = TestBed.inject(LayerService);
+    expect(service).toBeTruthy();
+  });
+});
