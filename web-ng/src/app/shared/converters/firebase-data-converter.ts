@@ -31,6 +31,7 @@ import { List, Map } from 'immutable';
 import { AuditInfo } from '../models/audit-info.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { Role } from '../models/role.model';
+import { User } from '../models/user.model';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -456,9 +457,17 @@ export class FirebaseDataConverter {
 
   private static auditInfoToJs(auditInfo: AuditInfo): {} {
     return {
-      user: auditInfo.user,
+      user: FirebaseDataConverter.userToJs(auditInfo.user),
       clientTimestamp: auditInfo.clientTime,
       serverTimestamp: auditInfo.serverTime,
+    };
+  }
+
+  private static userToJs(user: User): {} {
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
     };
   }
 

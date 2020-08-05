@@ -33,7 +33,7 @@ class MockFirebaseData {
       user: {
         displayName: 'Creator',
         email: 'creator@test.com',
-        id: 'creator001',
+        uid: 'creator001',
       },
     },
     lastModified: {
@@ -42,7 +42,7 @@ class MockFirebaseData {
       user: {
         displayName: 'Modifier',
         email: 'modifier@test.com',
-        id: 'modifier001',
+        uid: 'modifier001',
       },
     },
     featureId: 'feature001',

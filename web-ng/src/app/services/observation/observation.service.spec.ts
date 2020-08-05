@@ -19,14 +19,25 @@ import { ObservationService } from './observation.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { ProjectService } from '../project/project.service';
 import { FeatureService } from '../feature/feature.service';
+import { AuthService } from './../../services/auth/auth.service';
+import { Subject } from 'rxjs';
+import { User } from '../../shared/models/user.model';
 
 describe('ObservationService', () => {
+  const user$ = new Subject<User | null>();
+
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: {} },
         { provide: ProjectService, useValue: {} },
         { provide: FeatureService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: {
+            user$,
+          },
+        },
       ],
     })
   );

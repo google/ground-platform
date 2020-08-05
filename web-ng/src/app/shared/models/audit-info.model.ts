@@ -15,11 +15,12 @@
  */
 
 import { User } from './user.model';
+import { firestore } from 'firebase';
 
 export class AuditInfo {
   constructor(
     readonly user: User,
     readonly clientTime: Date,
-    readonly serverTime: Date
+    readonly serverTime: Date | firestore.FieldValue
   ) {}
 }

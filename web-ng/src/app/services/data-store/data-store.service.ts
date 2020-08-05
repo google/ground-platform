@@ -99,7 +99,7 @@ export class DataStoreService {
     return this.db
       .collection(`projects/${projectId}/observations`)
       .doc(observation.id)
-      .update(FirebaseDataConverter.observationToJS(observation));
+      .set(FirebaseDataConverter.observationToJS(observation));
   }
 
   /**
@@ -217,5 +217,9 @@ export class DataStoreService {
 
   generateId() {
     return this.db.collection('ids').ref.doc().id;
+  }
+
+  getServerTimestamp() {
+    return firestore.FieldValue.serverTimestamp();
   }
 }
