@@ -36,7 +36,11 @@ export class FeatureService {
   ) {
     this.features$ = projectService
       .getActiveProject$()
-      .pipe(switchMap(project => dataStore.features$(project)));
+      .pipe(
+        switchMap(project =>
+          project.isUnsavedNew() ? List() : dataStore.features$(project)
+        )
+      );
 
     this.selectedFeature$ = this.selectedFeatureId$.pipe(
       switchMap(featureId =>

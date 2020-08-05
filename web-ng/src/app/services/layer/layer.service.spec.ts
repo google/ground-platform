@@ -15,23 +15,21 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { DataStoreService } from '../data-store/data-store.service';
+import { LayerService } from './layer.service';
 
-import { RouterService } from './router.service';
-import { Router } from '@angular/router';
-import { AngularFireModule } from '@angular/fire';
-
-describe('RouterService', () => {
-  let service: RouterService;
-
-  beforeEach(() => {
+describe('LayerService', () => {
+  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  beforeEach(() =>
     TestBed.configureTestingModule({
-      imports: [AngularFireModule.initializeApp({ projectId: '' })],
-      providers: [{ provide: Router, useValue: {} }],
-    });
-    service = TestBed.inject(RouterService);
-  });
+      providers: [
+        { provide: DataStoreService, useValue: dataStoreServiceStub },
+      ],
+    })
+  );
 
   it('should be created', () => {
+    const service: LayerService = TestBed.inject(LayerService);
     expect(service).toBeTruthy();
   });
 });
