@@ -157,6 +157,14 @@ export class FirebaseDataConverter {
     };
   }
 
+  public static featureToJS(feature: Feature): {} {
+    const { layerId, location } = feature;
+    return {
+      // TODO: Set audit info (created / last modified user and timestamp).
+      layerId,
+      location,
+    };
+  }
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Field instance.
