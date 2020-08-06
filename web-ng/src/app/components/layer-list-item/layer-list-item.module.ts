@@ -1,3 +1,6 @@
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 /**
  * Copyright 2020 Google LLC
  *
@@ -20,7 +23,13 @@ import { LayerListItemComponent } from './layer-list-item.component';
 import { MatListModule } from '@angular/material/list';
 
 @NgModule({
-  imports: [BrowserModule, MatListModule],
+  imports: [
+    BrowserModule,
+    FlexLayoutModule,
+    MatListModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   exports: [LayerListItemComponent],
   declarations: [LayerListItemComponent],
 })

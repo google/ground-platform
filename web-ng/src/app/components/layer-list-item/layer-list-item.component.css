@@ -13,15 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-img {
-    min-width: 24px;
-}
-
-.layer-list-item {
-    padding: 5px;
-}
-
-.layer-list-spacing {
-    padding-left: 10px;
-}
