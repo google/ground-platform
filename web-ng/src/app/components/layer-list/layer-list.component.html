@@ -14,7 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<mat-list *ngIf="layers$ | async as layers" role="list" fxLayoutRow>
+<mat-list
+  *ngIf="layers$ | async as layers"
+  role="list"
+  fxLayoutRow
+  class="list-item"
+>
   <h3 matSubheader>Layers</h3>
   <mat-divider></mat-divider>
   <ground-layer-list-item

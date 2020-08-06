@@ -13,3 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+  Workaround to eliminate double-padding between right-hand side overflow
+  menu control and list item.
+*/
+:host ::ng-deep .mat-list-item-content {
+  padding-right: 8px !important;
+}
