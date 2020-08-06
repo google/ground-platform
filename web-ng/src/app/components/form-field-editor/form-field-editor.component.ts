@@ -59,6 +59,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   formOptions: MultipleChoice | undefined;
   fieldTypes: FieldTypeSelectOption[] = [
     {
+      icon:'radio_button_checked',
+      label:'Select One',
+      type:FieldType.MULTIPLE_CHOICE,
+    },
+    {
       icon: 'short_text',
       label: 'Text',
       type: FieldType.TEXT,
