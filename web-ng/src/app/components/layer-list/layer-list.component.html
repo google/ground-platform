@@ -21,16 +21,16 @@ limitations under the License.
     *ngFor="let entry of layers"
     [layer]="entry"
   ></ground-layer-list-item>
+  <div matLine class="add-layer">
+    <button
+      fxFill
+      mat-stroked-button
+      color="primary"
+      class="add-layer-btn"
+      (click)="onAddLayer()"
+    >
+      <mat-icon class="add-layer-icon">add</mat-icon>
+      Add layer
+    </button>
+  </div>
 </mat-list>
-<div fxFill class="add-layer">
-  <button
-    fxFill
-    mat-stroked-button
-    color="primary"
-    class="add-layer-btn"
-    (click)="onAddLayer()"
-  >
-    <mat-icon class="add-layer-icon">add</mat-icon>
-    Add layer
-  </button>
-</div>
