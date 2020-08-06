@@ -15,9 +15,10 @@
  */
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { LayerListItemComponent } from './layer-list-item.component';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
+import { RouterService } from './../../services/router/router.service';
 
 describe('LayerListItemComponent', () => {
   let component: LayerListItemComponent;
@@ -26,7 +27,10 @@ describe('LayerListItemComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [LayerListItemComponent],
-      imports: [MatListModule],
+      imports: [MatListModule, MatMenuModule],
+      providers: [
+        { provide: RouterService, useValue: { setLayerId: () => {} } },
+      ],
     }).compileComponents();
   }));
 

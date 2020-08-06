@@ -1,5 +1,3 @@
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 /**
  * Copyright 2020 Google LLC
  *
@@ -20,9 +18,18 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { LayerListItemComponent } from './layer-list-item.component';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  imports: [BrowserModule, MatListModule, MatButtonModule, MatIconModule],
+  imports: [
+    BrowserModule,
+    MatListModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+  ],
   exports: [LayerListItemComponent],
   declarations: [LayerListItemComponent],
 })

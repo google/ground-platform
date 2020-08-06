@@ -19,7 +19,10 @@ limitations under the License.
   <div class="layer-list-spacing">
     {{ layer?.name?.get(lang) }}
   </div>
-  <button mat-icon-button>
+  <button mat-icon-button [matMenuTriggerFor]="layerMenu">
     <mat-icon>more_vert</mat-icon>
   </button>
+  <mat-menu #layerMenu="matMenu">
+    <button mat-menu-item (click)="onCustomizeLayer()">Customize layer</button>
+  </mat-menu>
 </mat-list-item>
