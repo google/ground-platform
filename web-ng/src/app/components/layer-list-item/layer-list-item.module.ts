@@ -1,3 +1,5 @@
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 /**
  * Copyright 2020 Google LLC
  *
@@ -20,7 +22,7 @@ import { LayerListItemComponent } from './layer-list-item.component';
 import { MatListModule } from '@angular/material/list';
 
 @NgModule({
-  imports: [BrowserModule, MatListModule],
+  imports: [BrowserModule, MatListModule, MatButtonModule, MatIconModule],
   exports: [LayerListItemComponent],
   declarations: [LayerListItemComponent],
 })
