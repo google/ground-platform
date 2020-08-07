@@ -88,6 +88,7 @@ export class MainPageComponent implements OnInit {
   private showEditLayerDialog(layerId: string) {
     this.activeProject$.pipe(take(1)).subscribe(project =>
       this.dialog.open(LayerDialogComponent, {
+        autoFocus: layerId === ':new',
         data: {
           projectId: project.isUnsavedNew()
             ? Project.PROJECT_ID_NEW
