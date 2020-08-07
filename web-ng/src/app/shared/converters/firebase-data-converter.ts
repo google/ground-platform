@@ -203,7 +203,8 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
-      data.index,
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1,
       data.options &&
         new MultipleChoice(
           FirebaseDataConverter.stringToCardinality(data.cardinality),
@@ -308,7 +309,13 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   private static toOption(id: string, data: DocumentData): Option {
-    return new Option(id, data.code, StringMap(data.label), data.index);
+    return new Option(
+      id,
+      data.code,
+      StringMap(data.label),
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1
+    );
   }
 
   private static optionToJS(option: Option): {} {
