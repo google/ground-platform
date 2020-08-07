@@ -85,6 +85,7 @@ export class FeatureService {
     }
     const newFeature = new Feature(
       this.dataStore.generateId(),
+      // TODO(#251): When we implement the real "add point" flow, use selected layer instead of first.
       project.layers.keySeq().first(),
       new firestore.GeoPoint(lat, lng)
     );
