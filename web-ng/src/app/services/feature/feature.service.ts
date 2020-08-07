@@ -1,3 +1,5 @@
+import { Project } from './../../shared/models/project.model';
+import { firestore } from 'firebase/app';
 /**
  * Copyright 2020 Google LLC
  *
@@ -15,7 +17,7 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import { Observable, ReplaySubject } from 'rxjs';
 import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
@@ -32,7 +34,7 @@ export class FeatureService {
 
   constructor(
     private dataStore: DataStoreService,
-    projectService: ProjectService
+    private projectService: ProjectService
   ) {
     this.features$ = projectService
       .getActiveProject$()
@@ -65,5 +67,30 @@ export class FeatureService {
 
   getSelectedFeature$(): Observable<Feature> {
     return this.selectedFeature$;
+  }
+
+  addPoint(lat: number, lng: number): Promise<void> {
+    // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
+    // upgrading to RxJS 7.
+    return this.projectService
+      .getActiveProject$()
+      .pipe(take(1))
+      .toPromise()
+      .then(project => this.addPointInternal(project, lat, lng));
+  }
+
+  private addPointInternal(project: Project, lat: number, lng: number) {
+    if (project.layers.isEmpty()) {
+      return Promise.resolve();
+    }
+    const newFeature = new Feature(
+      this.dataStore.generateId(),
+      // TODO(#251): When we implement the real "add point" flow, use selected layer instead of first.
+      project.layers.keySeq().first(),
+      new firestore.GeoPoint(lat, lng)
+    );
+    return this.dataStore
+      .updateFeature(project.id, newFeature)
+      .then(() => this.selectFeature(newFeature.id));
   }
 }
