@@ -63,8 +63,19 @@ export class MapComponent implements OnInit {
     );
   }
 
-  onFeatureBlur() {
-    this.onFeatureClick(null);
+  onMapClick(event: google.maps.MouseEvent): Promise<void> {
+    if (this.focusedFeatureId) {
+      // Deselect feature if selected.
+      this.onFeatureClick(null);
+      return Promise.resolve();
+    } else {
+      // Otherwise add a point at the clicked location.
+      // TODO(#251): Remove once we implement the real "add point" flow.
+      return this.featureService.addPoint(
+        event.latLng.lat(),
+        event.latLng.lng()
+      );
+    }
   }
 
   onFeatureClick(featureId: string | null) {

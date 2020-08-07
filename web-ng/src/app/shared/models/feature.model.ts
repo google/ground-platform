@@ -20,6 +20,7 @@ export class Feature {
   constructor(
     readonly id: string,
     readonly layerId: string,
+    // TODO: User custom type instead of exposing types from data layer.
     readonly location: firestore.GeoPoint
   ) {}
 }
