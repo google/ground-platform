@@ -157,6 +157,14 @@ export class FirebaseDataConverter {
     };
   }
 
+  public static featureToJS(feature: Feature): {} {
+    const { layerId, location } = feature;
+    return {
+      // TODO: Set audit info (created / last modified user and timestamp).
+      layerId,
+      location,
+    };
+  }
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Field instance.
@@ -195,7 +203,8 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
-      data.index,
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1,
       data.options &&
         new MultipleChoice(
           FirebaseDataConverter.stringToCardinality(data.cardinality),
@@ -300,7 +309,13 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   private static toOption(id: string, data: DocumentData): Option {
-    return new Option(id, data.code, StringMap(data.label), data.index);
+    return new Option(
+      id,
+      data.code,
+      StringMap(data.label),
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1
+    );
   }
 
   private static optionToJS(option: Option): {} {
