@@ -18,10 +18,13 @@ limitations under the License.
   height="100%"
   width="100%"
   [options]="mapOptions"
-  (mapClick)="onFeatureBlur()">
+  (mapClick)="onMapClick($event)"
+>
   <map-marker
-    *ngFor="let feature of (features$ | async)"
-    [options]="createMarkerOptions(feature, focusedFeatureId, activeProject$ | async)"
+    *ngFor="let feature of features$ | async"
+    [options]="
+      createMarkerOptions(feature, focusedFeatureId, activeProject$ | async)
+    "
     (mapClick)="onFeatureClick(feature.id)"
-    ></map-marker>
+  ></map-marker>
 </google-map>

@@ -185,6 +185,7 @@ export class DataStoreService {
       );
   }
 
+  // TODO: Define return type here and throughout.
   loadObservation$(project: Project, feature: Feature, observationId: string) {
     return this.db
       .collection(`projects/${project.id}/observations`)
@@ -221,5 +222,14 @@ export class DataStoreService {
 
   getServerTimestamp() {
     return firestore.FieldValue.serverTimestamp();
+  }
+
+  updateFeature(projectId: string, feature: Feature): Promise<void> {
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .collection('features')
+      .doc(feature.id)
+      .set(FirebaseDataConverter.featureToJS(feature));
   }
 }
