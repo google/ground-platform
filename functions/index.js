@@ -26,11 +26,7 @@ const onCreateRecord = require('./on-create-record')
 const onUpdateRecord = require('./on-update-record')
 const importCsv = require('./import-csv')
 const hardcodedInsert = require('./hardcoded')
-const express = require('express');
-const bodyParser = require("body-parser");
-require("body-parser-csv")(bodyParser);
 
-const app = express();
 
 /*
 app.use(
@@ -98,14 +94,45 @@ exports.test = functions.https.onRequest(
 // importCsv(projectId: '', layerId: '' , csvString: 'Ferrera, GR, 8.986493, 46.743506')
 // https://firebase.google.com/docs/functions/http-events#using_existing_express_apps
 // Double-check whether multer is good to pick csv file from the storage.
-var upload = multer({ storage: storage }).single('csvfile');
+
 app.post('/csv', upload, (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
 exports.importCsv = functions.https.onRequest(app);
 */
 
+// Simple Testing express:
+//app.get('/', (req, res) => res.status(200).send(`Hello World!`));
+//exports.helloWorld = functions.https.onRequest(app);
+
+// Simple import test
+// app.post('/', (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+// exports.import = functions.https.onRequest(app);
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const multer  = require('multer');
+
+const upload  = multer({ storage: multer.memoryStorage() });
+
+const app = express();
+app.use(bodyParser.urlencoded({extended: true}));
+
+app.post('/', upload.single('profile_pic'), (req, res, next) => {
+    console.log(req.headers);
+    const file = req.file;
+    if (!file) {
+        const error = new Error('Please upload a file');
+    error.httpStatusCode = 400;
+    return next(error);
+    }
+    console.log(req.body);
+    console.log("Reqfile is " + file);
+    res.send(file);
+})
+exports.import = functions.https.onRequest(app);
+
 // TODO(tiyara): Another library
-exports.importCsv = functions.https.onRequest(
-    (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+//exports.importCsv = functions.https.onRequest(
+  //(req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
 
 // Just to test local firestore setup
 exports.hardcodedInsert = functions.https.onRequest(

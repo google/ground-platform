@@ -27,27 +27,49 @@ function importCsv(req, res) {
   var promises = [];
   // Catch the URL params.
   const {
-    projectId = projectId,
-    layerId = layerId,
-    csvFile = csvFile,
+    projectId,
+    layerId,
   } = req.query
-
+  console.log(req.headers);
+  console.log("\nProject Id is " + req.body[projectId]);
   // Stream the csv file.
   var csvData = [];
-  fs.createReadStream(csvFile)
-  .pipe(parse({ delimiter: ',' , from_line: 2}))
-  .on('data', function(csvrow) {
-    console.log(csvrow);
-    const featureCaption = csvrow[0] + ":" + csvrow[1];
-    const featureLat = csvrow[2];
-    const featureLong = csvrow[3];
-    db.insertFeature(projectId, {layerId, featureCaption, featureLat, featureLong});
-    csvData.push(csvrow); 
-  })
-  .on('end', () => {
-    console.log(csvData);
+  req.on('data', (data) => {
+    console.log(data.toString());
   });
-  return Promise.all(promises);
+  req.on('end', () => {
+    res.send('ok');
+  });
+  return Promise.resolve();
 }
+
+
+
+// function importCsv(req, res) {
+//   var promises = [];
+//   // Catch the URL params.
+//   const {
+//     projectId = projectId,
+//     layerId = layerId,
+//     csvFile = csvFile,
+//   } = req.query
+
+//   // Stream the csv file.
+//   var csvData = [];
+//   fs.createReadStream(csvFile)
+//     .pipe(parse({ delimiter: ',', from_line: 2 }))
+//     .on('data', function (csvrow) {
+//       console.log(csvrow);
+//       const featureCaption = csvrow[0] + ":" + csvrow[1];
+//       const featureLat = csvrow[2];
+//       const featureLong = csvrow[3];
+//       promises.push(db.insertFeature(projectId, { layerId, featureCaption, featureLat, featureLong }));
+//       csvData.push(csvrow);
+//     })
+//     .on('end', () => {
+//       console.log(csvData);
+//     });
+//   return Promise.all(promises);
+// }
 
 module.exports = importCsv;

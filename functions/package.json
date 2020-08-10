@@ -12,10 +12,12 @@
     "body-parser-csv": "^1.0.0",
     "csv": "^5.3.2",
     "csv-parser": "^2.3.3",
-    "firebase-admin": "^8.12.1",
-    "firebase-functions": "^3.7.0",
+    "express": "^4.17.1",
+    "firebase-admin": "^9.0.0",
+    "firebase-functions": "^3.9.0",
     "google-auth-library": "^4.2.5",
     "googleapis": "^42.0.0",
+    "multer": "^1.4.2",
     "split": "^1.0.1"
   },
   "engines": {
