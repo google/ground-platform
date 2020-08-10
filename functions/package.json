@@ -9,10 +9,15 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "firebase-admin": "^8.4.0",
-    "firebase-functions": "^3.2.0",
+    "busboy": "^0.3.1",
+    "csv-parser": "^2.3.3",
+    "express": "^4.17.1",
+    "firebase-admin": "^9.0.0",
+    "firebase-functions": "^3.9.0",
     "google-auth-library": "^4.2.5",
-    "googleapis": "^42.0.0"
+    "googleapis": "^42.0.0",
+    "http-status-codes": "^1.4.0",
+    "requests": "^0.3.0"
   },
   "engines": {
     "node": "13"

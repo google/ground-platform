@@ -21,12 +21,15 @@ const functions = require("firebase-functions");
 const onCreateUser = require("./on-create-user");
 const exportCsv = require("./export-csv");
 const exportKml = require("./export-kml");
+const importCsv = require("./import-csv");
 const updateColumns = require("./update-columns");
 const onCreateRecord = require("./on-create-record");
 const onUpdateRecord = require("./on-update-record");
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
+
+exports.importCsv = functions.https.onRequest(importCsv);
 
 exports.exportCsv = functions.https.onRequest((req, res) =>
   exportCsv(req, res).catch((err) => res.status(500).send(`${err}`))
