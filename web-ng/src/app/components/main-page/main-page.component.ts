@@ -32,8 +32,6 @@ import { ActivatedRoute } from '@angular/router';
  * various services.
  */
 
-const LAYER_ID_NEW = ':new';
-
 @Component({
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
@@ -91,7 +89,7 @@ export class MainPageComponent implements OnInit {
   private showEditLayerDialog(layerId: string) {
     this.activeProject$.pipe(take(1)).subscribe(project =>
       this.dialog.open(LayerDialogComponent, {
-        autoFocus: layerId === LAYER_ID_NEW,
+        autoFocus: layerId === RouterService.LAYER_ID_NEW,
         data: {
           projectId: project.isUnsavedNew()
             ? Project.PROJECT_ID_NEW
