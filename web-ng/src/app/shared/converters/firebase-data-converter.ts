@@ -176,8 +176,9 @@ export class FirebaseDataConverter {
         geoJson,
       };
     } else {
-      const { layerId } = feature;
-      return { layerId };
+      throw new Error(
+        `Cannot convert unexpected feature class ${feature.constructor.name} to json.`
+      );
     }
   }
   /**
