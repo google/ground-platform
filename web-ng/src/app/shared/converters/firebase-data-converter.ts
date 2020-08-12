@@ -89,6 +89,14 @@ export class FirebaseDataConverter {
     }
   }
 
+  static newProjectJS(ownerEmail: string, title: string): {} {
+    return {
+      // TODO(i18n): Make title language dynamic.
+      title: { en: title },
+      acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
+    };
+  }
+
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Layer instance.
