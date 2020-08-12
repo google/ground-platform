@@ -21,7 +21,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import { firestore } from 'firebase/app';
-import { Feature } from '../../shared/models/feature.model';
+import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Project } from '../../shared/models/project.model';
@@ -48,7 +48,7 @@ const mockProject = new Project(
   /* acl= */ Map()
 );
 
-const mockFeature = new Feature(
+const mockFeature = new LocationFeature(
   'feature001',
   'layer001',
   new firestore.GeoPoint(0.0, 0.0)
