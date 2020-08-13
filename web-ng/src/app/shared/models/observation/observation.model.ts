@@ -29,14 +29,16 @@ export class Observation {
     readonly responses: Map<string, Response>
   ) {}
 
-  // Returns copy of Observation with responses replaced.
-  withResponses(responses: Map<string, Response>): Observation {
+  // Returns copy of Observation with responses and lastModified replaced.
+  withResponsesAndLastModified(
+    responses: Map<string, Response>,
+    lastModified: AuditInfo): Observation {
     return new Observation(
       this.id,
       this.featureId,
       this.form,
       this.created,
-      this.lastModified,
+      lastModified,
       responses
     );
   }
