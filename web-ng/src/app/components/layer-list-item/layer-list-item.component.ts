@@ -18,6 +18,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { RouterService } from './../../services/router/router.service';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -29,7 +30,10 @@ export class LayerListItemComponent implements OnInit {
   layerPinUrl: SafeUrl;
   readonly lang: string;
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor(
+    private routerService: RouterService,
+    private sanitizer: DomSanitizer
+  ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
@@ -39,5 +43,17 @@ export class LayerListItemComponent implements OnInit {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
+  }
+
+  ngOnChanges() {
+    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.layer?.color)
+    );
+  }
+
+  onCustomizeLayer() {
+    if (this.layer?.id) {
+      this.routerService.setLayerId(this.layer?.id);
+    }
   }
 }

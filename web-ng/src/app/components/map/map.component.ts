@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { Project } from '../../shared/models/project.model';
-import { Feature } from '../../shared/models/feature.model';
+import {
+  Feature,
+  LocationFeature,
+  GeoJsonFeature,
+} from '../../shared/models/feature.model';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
-import { Router, NavigationExtras } from '@angular/router';
 import { getPinImageSource } from './ground-pin';
 import { RouterService } from '../../services/router/router.service';
+import { GoogleMap } from '@angular/google-maps';
 
 // To make ESLint happy:
 /*global google*/
@@ -33,7 +37,7 @@ import { RouterService } from '../../services/router/router.service';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, AfterViewInit {
   private subscription: Subscription = new Subscription();
   focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
@@ -46,6 +50,8 @@ export class MapComponent implements OnInit {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
+
+  @ViewChild(GoogleMap) map!: GoogleMap;
 
   constructor(
     private projectService: ProjectService,
@@ -64,16 +70,57 @@ export class MapComponent implements OnInit {
     );
   }
 
-  onFeatureBlur() {
-    this.onFeatureClick(null);
+  ngAfterViewInit() {
+    this.features$.subscribe(features => {
+      this.clearGoogleMapDataLayer();
+      features.forEach(feature => {
+        if (feature instanceof GeoJsonFeature) {
+          const addedFeatures = this.map.data.addGeoJson(
+            (feature as GeoJsonFeature).geoJson
+          );
+          addedFeatures.forEach(f => {
+            f.setProperty('layerId', feature.layerId);
+          });
+        }
+      });
+    });
+
+    this.activeProject$.subscribe(project =>
+      this.map.data.setStyle(feature => {
+        const layerId = feature.getProperty('layerId');
+        const color = project.layers.get(layerId)?.color;
+        return {
+          fillColor: color,
+        };
+      })
+    );
+  }
+
+  onMapClick(event: google.maps.MouseEvent): Promise<void> {
+    if (this.focusedFeatureId) {
+      // Deselect feature if selected.
+      this.onFeatureClick(null);
+      return Promise.resolve();
+    } else {
+      // Otherwise add a point at the clicked location.
+      // TODO(#251): Remove once we implement the real "add point" flow.
+      return this.featureService.addPoint(
+        event.latLng.lat(),
+        event.latLng.lng()
+      );
+    }
   }
 
   onFeatureClick(featureId: string | null) {
     this.routerService.setFeatureId(featureId);
   }
 
+  isLocationFeature(feature: Feature) {
+    return feature instanceof LocationFeature;
+  }
+
   createMarkerOptions(
-    feature: Feature,
+    feature: LocationFeature,
     focusedFeatureId: string,
     project: Project
   ): google.maps.MarkerOptions {
@@ -97,5 +144,9 @@ export class MapComponent implements OnInit {
       ),
       icon,
     } as google.maps.MarkerOptions;
+  }
+
+  private clearGoogleMapDataLayer() {
+    this.map.data.forEach(f => this.map.data.remove(f));
   }
 }

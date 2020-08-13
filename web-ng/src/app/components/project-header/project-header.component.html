@@ -18,7 +18,13 @@
     <img class="logo" src="/assets/img/logo.png" />
     <span class="app-title">Ground</span>
     <span class="header-divider"></span>
-    <app-inline-edit-title></app-inline-edit-title>
+    <inline-editor
+      [data]="title"
+      [placeholder]="'Untitled project'"
+      (focusOut)="updateProjectTitle($event)"
+      AutoSizeInput
+      class="inline-editor"
+    ></inline-editor>
   </div>
   <div>
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
@@ -30,12 +36,17 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       <img
+        *ngIf="user.photoURL; else defaultPhoto"
         src="{{ user.photoURL }}=s64"
-        alt="{{ user.displayName }}"
         class="user-thumb"
-        style="cursor: pointer;"
         (click)="openProfileDialog($event)"
       />
+      <ng-template #defaultPhoto>
+        <user-avatar
+          (click)="openProfileDialog($event)"
+          [displayText]="user.displayName.charAt(0)"
+        ></user-avatar>
+      </ng-template>
     </div>
     <ng-template #login>
       <!-- TODO: Hide sign in button and show once page is initialized. -->

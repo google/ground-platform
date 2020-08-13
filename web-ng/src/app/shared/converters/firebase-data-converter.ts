@@ -24,13 +24,18 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../models/form/multiple-choice.model';
-import { Feature } from '../models/feature.model';
+import {
+  Feature,
+  LocationFeature,
+  GeoJsonFeature,
+} from '../models/feature.model';
 import { Observation } from '../models/observation/observation.model';
 import { Option } from '../../shared/models/form/option.model';
 import { List, Map } from 'immutable';
 import { AuditInfo } from '../models/audit-info.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { Role } from '../models/role.model';
+import { User } from '../models/user.model';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -82,6 +87,14 @@ export class FirebaseDataConverter {
         console.log('User has unsupported role: ', roleString);
         return Role.VIEWER;
     }
+  }
+
+  static newProjectJS(ownerEmail: string, title: string): {} {
+    return {
+      // TODO(i18n): Make title language dynamic.
+      title: { en: title },
+      acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
+    };
   }
 
   /**
@@ -156,6 +169,26 @@ export class FirebaseDataConverter {
     };
   }
 
+  public static featureToJS(feature: Feature): {} {
+    // TODO: Set audit info (created / last modified user and timestamp).
+    if (feature instanceof LocationFeature) {
+      const { layerId, location } = feature;
+      return {
+        layerId,
+        location,
+      };
+    } else if (feature instanceof GeoJsonFeature) {
+      const { layerId, geoJson } = feature;
+      return {
+        layerId,
+        geoJson,
+      };
+    } else {
+      throw new Error(
+        `Cannot convert unexpected feature class ${feature.constructor.name} to json.`
+      );
+    }
+  }
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Field instance.
@@ -194,7 +227,8 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.stringToFieldType(data.type),
       StringMap(data.label),
       data.required,
-      data.index,
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1,
       data.options &&
         new MultipleChoice(
           FirebaseDataConverter.stringToCardinality(data.cardinality),
@@ -299,7 +333,13 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   private static toOption(id: string, data: DocumentData): Option {
-    return new Option(id, data.code, StringMap(data.label), data.index);
+    return new Option(
+      id,
+      data.code,
+      StringMap(data.label),
+      // Fall back to constant so old dev databases do not break.
+      data.index || -1
+    );
   }
 
   private static optionToJS(option: Option): {} {
@@ -317,11 +357,20 @@ export class FirebaseDataConverter {
    * @param id the uuid of the project instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  static toFeature(id: string, data: DocumentData): Feature {
-    if (data === undefined) {
-      throw Error(`Feature ${id} does not have document data.`);
+  static toFeature(id: string, data: DocumentData): Feature | undefined {
+    if (!this.isFeatureValid(data)) {
+      console.warn(`Invalid feature ${id} in remote data store ignored`);
+      return;
     }
-    return new Feature(id, data.layerId, data.location);
+    if (this.isLocationFeature(data)) {
+      return new LocationFeature(id, data.layerId, data.location);
+    }
+    if (this.isGeoJsonFeature(data)) {
+      const geoJson = JSON.parse(data.geoJson);
+      return new GeoJsonFeature(id, data.layerId, geoJson);
+    }
+    console.warn(`Invalid feature ${id} in remote data store ignored`);
+    return;
   }
 
   /**
@@ -451,9 +500,17 @@ export class FirebaseDataConverter {
 
   private static auditInfoToJs(auditInfo: AuditInfo): {} {
     return {
-      user: auditInfo.user,
+      user: FirebaseDataConverter.userToJs(auditInfo.user),
       clientTimestamp: auditInfo.clientTime,
       serverTimestamp: auditInfo.serverTime,
+    };
+  }
+
+  private static userToJs(user: User): {} {
+    return {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
     };
   }
 
@@ -467,5 +524,20 @@ export class FirebaseDataConverter {
    */
   static toRoleId(role: Role): string {
     return Role[role].toLowerCase();
+  }
+
+  private static isFeatureValid(data: DocumentData): boolean {
+    return (
+      data?.layerId &&
+      (this.isLocationFeature(data) || this.isGeoJsonFeature(data))
+    );
+  }
+
+  private static isLocationFeature(data: DocumentData): boolean {
+    return data?.location?.latitude && data?.location?.longitude;
+  }
+
+  private static isGeoJsonFeature(data: DocumentData): boolean {
+    return data?.geoJson;
   }
 }

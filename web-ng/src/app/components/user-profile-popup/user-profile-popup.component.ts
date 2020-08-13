@@ -22,7 +22,7 @@ import { AuthService } from './../../services/auth/auth.service';
 @Component({
   selector: 'app-user-profile-popup',
   templateUrl: './user-profile-popup.component.html',
-  styleUrls: ['./user-profile-popup.component.css'],
+  styleUrls: ['./user-profile-popup.component.scss'],
 })
 export class UserProfilePopupComponent implements OnInit {
   private readonly matDialogRef: MatDialogRef<UserProfilePopupComponent>;

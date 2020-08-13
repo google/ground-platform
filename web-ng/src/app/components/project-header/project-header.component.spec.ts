@@ -21,13 +21,13 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ProjectHeaderComponent } from './project-header.component';
 import { environment } from '../../../environments/environment';
-import { InlineEditTitleModule } from '../inline-edit-title/inline-edit-title.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
+import { Router } from '@angular/router';
 
 describe('ProjectHeaderComponent', () => {
   let component: ProjectHeaderComponent;
@@ -38,7 +38,6 @@ describe('ProjectHeaderComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        InlineEditTitleModule,
         AngularFireModule.initializeApp(environment.firebaseConfig),
         AngularFireAuthModule,
         AngularFirestoreModule,
@@ -55,6 +54,7 @@ describe('ProjectHeaderComponent', () => {
         },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: {} },
       ],
     }).compileComponents();
   }));

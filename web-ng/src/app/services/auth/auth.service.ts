@@ -22,6 +22,7 @@ import { Injectable } from '@angular/core';
 import { auth } from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { shareReplay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -30,8 +31,8 @@ export class AuthService {
   user$: Observable<User | null | undefined>;
   constructor(
     private afAuth: AngularFireAuth,
-    private dataStore: DataStoreService,
-    private router: Router
+    private router: Router,
+    dataStore: DataStoreService
   ) {
     this.user$ = this.afAuth.authState.pipe(
       switchMap(user => {
@@ -40,8 +41,15 @@ export class AuthService {
         } else {
           return of(null);
         }
-      })
+      }),
+      // Cache last authenticated user so that late subscribers will receive
+      // it as well.
+      shareReplay(1)
     );
+  }
+
+  getUser$(): Observable<User | null | undefined> {
+    return this.user$;
   }
 
   async signIn() {

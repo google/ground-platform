@@ -1,4 +1,5 @@
 # Ground Platform
+
 [![Open Source Helpers](https://www.codetriage.com/google/ground-platform/badges/users.svg)](https://www.codetriage.com/google/ground-platform)
 
 Ground is an open-source, map-first data collection and analysis platform built
@@ -19,23 +20,20 @@ website](https://google.github.io/ground-platform).
 
 This repo contains all Ground cloud-based / hosted components:
 
-|Directory               |Component|
-|------------------------|-----------------------------------------------|
-|[docs/](docs/)          |*Public documentation*, including Ground homepage|
-|[firestore/](firestore/)|*Firestore Config* defining Firebase rules and other database settings|
-|[functions/](functions/)|*Firebase Cloud Functions*, used to sync with Google Sheets and import/export data to/from other data sources|
-|[web/](web/)            |*Ground Web Console* used to set up and manage projects, and to view, edit, and analyze collected data online|
+| Directory                | Component                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| [docs/](docs/)           | _Public documentation_, including Ground homepage                                                             |
+| [firestore/](firestore/) | _Firestore config_ defining Firebase rules and other database settings                                        |
+| [functions/](functions/) | _Firebase Cloud Functions_, used to sync with Google Sheets and import/export data to/from other data sources |
+| [web-ng/](web-ng/)       | _Ground web console_ used to set up and manage projects, and to view, edit, and analyze collected data online |
 
-Firestore Cloud Functions currently only supports Node.js v6.11.5, 
+Firestore Cloud Functions currently only supports Node.js v6.11.5,
 while the web dashboard is built using a newer version of Node.js. Contributors should use the appropriate version of Node for the component they are working on. Follow the instructions provided in the README of each subdirectory to set up the proper
-development environment for each component. 
+development environment for each component.
 
 ## Contributing
 
 We'd love to accept your patches and contributions to this project. For more
 information, including details on the required Contributor License Agreement
 (CLA), code reviews, and environment setup, see
-[Contributing to Ground Platform](CONTRIBUTING.md). 
-
-
-
+[Contributing to Ground Platform](CONTRIBUTING.md).

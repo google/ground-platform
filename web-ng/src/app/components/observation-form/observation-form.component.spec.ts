@@ -17,7 +17,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
-import { Feature } from '../../shared/models/feature.model';
+import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from '../../../environments/environment';
 import { of } from 'rxjs';
@@ -111,7 +111,7 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static feature001 = new Feature(
+  static feature001 = new LocationFeature(
     'feature001',
     MockModel.layer001.id,
     new firestore.GeoPoint(0.0, 0.0)

@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { RouterService } from './router.service';
-import { Router } from '@angular/router';
-import { AngularFireModule } from '@angular/fire';
+import { UserAvatarComponent } from './user-avatar.component';
 
-describe('RouterService', () => {
-  let service: RouterService;
+describe('UserAvatarComponent', () => {
+  let component: UserAvatarComponent;
+  let fixture: ComponentFixture<UserAvatarComponent>;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [UserAvatarComponent],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [AngularFireModule.initializeApp({ projectId: '' })],
-      providers: [{ provide: Router, useValue: {} }],
-    });
-    service = TestBed.inject(RouterService);
+    fixture = TestBed.createComponent(UserAvatarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });

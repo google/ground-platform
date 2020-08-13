@@ -15,12 +15,12 @@
  */
 
 import { NgModule } from '@angular/core';
-import { InlineEditTitleComponent } from './inline-edit-title.component';
-import { AutoSizeInputModule } from 'ngx-autosize-input';
+import { CommonModule } from '@angular/common';
+import { UserAvatarComponent } from './user-avatar.component';
 
 @NgModule({
-  declarations: [InlineEditTitleComponent],
-  imports: [AutoSizeInputModule],
-  exports: [InlineEditTitleComponent],
+  declarations: [UserAvatarComponent],
+  imports: [CommonModule],
+  exports: [UserAvatarComponent],
 })
-export class InlineEditTitleModule {}
+export class UserAvatarModule {}

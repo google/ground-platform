@@ -14,27 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<mat-list *ngIf="layers$ | async as layers">
-  <div class="layer-list-title">
-    Layers
-  </div>
+<mat-list *ngIf="layers$ | async as layers" role="list" fxLayoutRow>
+  <h3 matSubheader>Layers</h3>
   <mat-divider></mat-divider>
-  <div
+  <ground-layer-list-item
     *ngFor="let entry of layers"
-    fxLayout="row"
-    fxLayoutAlign="center center"
-  >
-    <ground-layer-list-item
-      [layer]="entry"
-      fxFlex="fill"
-    ></ground-layer-list-item>
-    <button mat-icon-button>
-      <mat-icon>more_vert</mat-icon>
-    </button>
-  </div>
-  <div fxLayout="row" class="add-layer">
+    [layer]="entry"
+  ></ground-layer-list-item>
+  <div matLine class="add-layer">
     <button
-      fxFlex="fill"
+      fxFill
       mat-stroked-button
       color="primary"
       class="add-layer-btn"

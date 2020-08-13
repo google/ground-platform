@@ -15,16 +15,26 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { Observable, ReplaySubject, Subscription, BehaviorSubject } from 'rxjs';
+import {
+  of,
+  Observable,
+  ReplaySubject,
+  Subscription,
+  BehaviorSubject,
+} from 'rxjs';
 import { Feature } from './../../shared/models/feature.model';
 import { Project } from './../../shared/models/project.model';
 import { Injectable } from '@angular/core';
 import { Observation } from '../../shared/models/observation/observation.model';
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { switchMap } from 'rxjs/operators';
 import { ProjectService } from '../project/project.service';
 import { FeatureService } from '../feature/feature.service';
 import { LoadingState } from '../loading-state.model';
+import { AuditInfo } from '../../shared/models/audit-info.model';
+import { AuthService } from './../../services/auth/auth.service';
+import { User } from '../../shared/models/user.model';
+import { Response } from '../../shared/models/observation/response.model';
 
 @Injectable({
   providedIn: 'root',
@@ -41,32 +51,70 @@ export class ObservationService {
   constructor(
     private dataStore: DataStoreService,
     projectService: ProjectService,
-    featureService: FeatureService
+    featureService: FeatureService,
+    authService: AuthService
   ) {
     this.subscription.add(
       this.selectedObservationId$
         .pipe(
           switchMap(observationId =>
-            projectService
-              .getActiveProject$()
-              .pipe(
-                switchMap(project =>
-                  featureService
-                    .getSelectedFeature$()
-                    .pipe(
-                      switchMap(feature =>
-                        this.dataStore.loadObservation$(
+            projectService.getActiveProject$().pipe(
+              switchMap(project =>
+                featureService.getSelectedFeature$().pipe(
+                  switchMap(feature =>
+                    authService.getUser$().pipe(
+                      switchMap(user => {
+                        if (observationId === ':new') {
+                          return of(
+                            this.createNewObservation(user, project, feature)
+                          );
+                        }
+                        return this.dataStore.loadObservation$(
                           project,
                           feature,
                           observationId
-                        )
-                      )
+                        );
+                      })
                     )
+                  )
                 )
               )
+            )
           )
         )
         .subscribe(o => this.selectedObservation$.next(o))
+    );
+  }
+
+  createNewObservation(
+    user: User | null | undefined,
+    project: Project,
+    feature: Feature
+  ): Observation | LoadingState {
+    if (!user) {
+      throw Error('Login required to create new observation.');
+    }
+    const form = project
+      .getLayer(feature.layerId)!
+      .forms?.first(/*notSetValue=*/ null);
+    if (!form) {
+      throw Error(
+        `Layer ${feature.layerId} does not contain any forms -> Can not create new observation.`
+      );
+    }
+    const newObservationId = this.dataStore.generateId();
+    const auditInfo = new AuditInfo(
+      user,
+      new Date(),
+      this.dataStore.getServerTimestamp()
+    );
+    return new Observation(
+      newObservationId,
+      feature.id,
+      form!,
+      auditInfo,
+      auditInfo,
+      Map<string, Response>([])
     );
   }
 

@@ -14,38 +14,18 @@
  * limitations under the License.
  */
 
- :host {
-  display: block;
-  width: 250px;
- }
+@import 'variables';
 
-.user-thumb {
-  display: block;
-  margin: 0px auto;
-  border-radius: 32px;
-}
-
-.user-email {
-  font-size: 14px;
-  color: grey;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.user-display-name {
-  font-size: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.user-description {
-  margin: 0px auto;
-  margin-top: 10px ;
+.user-default-thumb {
+  display: inline-block;
+  font-size: 1em;
+  width: 2.5em;
+  height: 2.5em;
+  line-height: 2.5em;
   text-align: center;
-}
-
-.btn-signout {
-  margin-top: 20px;
+  border-radius: 50%;
+  background: mat-color($primary);
+  vertical-align: middle;
+  color: white;
+  cursor: pointer;
 }

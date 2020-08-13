@@ -26,6 +26,7 @@ import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
+import { firestore } from 'firebase/app';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -66,7 +67,7 @@ export class DataStoreService {
   }
 
   // TODO: Define return types for methods in this class
-  updateLayer(projectId: string, layer: Layer) {
+  updateLayer(projectId: string, layer: Layer): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)
@@ -75,11 +76,30 @@ export class DataStoreService {
       });
   }
 
+  async deleteLayer(projectId: string, layerId: string) {
+    await this.deleteAllFeaturesInLayer(projectId, layerId);
+    return await this.db
+      .collection('projects')
+      .doc(projectId)
+      .update({
+        [`layers.${layerId}`]: firestore.FieldValue.delete(),
+      });
+  }
+
+  private async deleteAllFeaturesInLayer(projectId: string, layerId: string) {
+    const featuresInLayer = this.db.collection(
+      `projects/${projectId}/features`,
+      ref => ref.where('layerId', '==', layerId)
+    );
+    const querySnapshot = await featuresInLayer.get().toPromise();
+    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+  }
+
   updateObservation(projectId: string, observation: Observation) {
     return this.db
       .collection(`projects/${projectId}/observations`)
       .doc(observation.id)
-      .update(FirebaseDataConverter.observationToJS(observation));
+      .set(FirebaseDataConverter.observationToJS(observation));
   }
 
   /**
@@ -89,12 +109,19 @@ export class DataStoreService {
    * @param projectId the id of the project in which requested feature is.
    * @param featureId the id of the requested feature.
    */
-  loadFeature$(projectId: string, featureId: string) {
+  loadFeature$(projectId: string, featureId: string): Observable<Feature> {
     return this.db
       .collection(`projects/${projectId}/features`)
       .doc(featureId)
       .get()
-      .pipe(map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)));
+      .pipe(
+        // Fail with error if feature could not be loaded.
+        map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)),
+        // Cast to Feature to remove undefined from type. Done as separate
+        // map() operation since compiler doesn't recognize cast when defined in
+        // previous map() step.
+        map(f => f as Feature)
+      );
   }
 
   /**
@@ -113,7 +140,14 @@ export class DataStoreService {
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
-          List(array.map(obj => FirebaseDataConverter.toFeature(obj.id, obj)))
+          List(
+            array
+              .map(obj => FirebaseDataConverter.toFeature(obj.id, obj))
+              // Filter out features that could not be loaded (i.e., undefined).
+              .filter(f => !!f)
+              // Cast items in List to Feature to remove undefined from type.
+              .map(f => f as Feature)
+          )
         )
       );
   }
@@ -151,6 +185,7 @@ export class DataStoreService {
       );
   }
 
+  // TODO: Define return type here and throughout.
   loadObservation$(project: Project, feature: Feature, observationId: string) {
     return this.db
       .collection(`projects/${project.id}/observations`)
@@ -183,5 +218,33 @@ export class DataStoreService {
 
   generateId() {
     return this.db.collection('ids').ref.doc().id;
+  }
+
+  getServerTimestamp() {
+    return firestore.FieldValue.serverTimestamp();
+  }
+
+  updateFeature(projectId: string, feature: Feature): Promise<void> {
+    return this.db
+      .collection('projects')
+      .doc(projectId)
+      .collection('features')
+      .doc(feature.id)
+      .set(FirebaseDataConverter.featureToJS(feature));
+  }
+
+  /**
+   * Creates a new project in the remote db using the specified title,
+   * returning the id of the newly created project. ACLs are initialized
+   * to include the specified user email as project owner.
+   */
+  async createProject(ownerEmail: string, title: string): Promise<string> {
+    const projectId = this.generateId();
+    await this.updateProjectTitle(projectId, title);
+    await this.db
+      .collection('projects')
+      .doc(projectId)
+      .set(FirebaseDataConverter.newProjectJS(ownerEmail, title));
+    return Promise.resolve(projectId);
   }
 }

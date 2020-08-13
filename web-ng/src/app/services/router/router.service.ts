@@ -37,11 +37,22 @@ export class RouterService {
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
   static readonly LAYER_ID_NEW = ':new';
 
+  private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
+    if (params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.OBSERVATION;
+    }
+    if (params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.FEATURE;
+    }
+    return SideNavMode.LAYER_LIST;
+  }
+
   private activatedRoute?: ActivatedRoute;
   private projectId$?: Observable<string | null>;
   private layerId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
+  private sideNavMode$?: Observable<SideNavMode>;
 
   constructor(private router: Router) {}
 
@@ -68,6 +79,9 @@ export class RouterService {
     this.observationId$ = fragmentParams$.pipe(
       map(params => params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM))
     );
+    this.sideNavMode$ = fragmentParams$.pipe(
+      map(params => RouterService.fragmentParamsToSideNavMode(params))
+    );
   }
 
   getProjectId$(): Observable<string | null> {
@@ -84,6 +98,10 @@ export class RouterService {
 
   getObservationId$(): Observable<string | null> {
     return this.observationId$!;
+  }
+
+  getSideNavMode$(): Observable<SideNavMode> {
+    return this.sideNavMode$!;
   }
 
   /**
@@ -144,4 +162,10 @@ export class RouterService {
   setLayerId(id: string) {
     this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM, id);
   }
+}
+
+export enum SideNavMode {
+  LAYER_LIST = 1,
+  OBSERVATION = 2,
+  FEATURE = 3,
 }

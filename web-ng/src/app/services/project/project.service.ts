@@ -22,6 +22,8 @@ import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
 import { Map } from 'immutable';
+import { of } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +32,10 @@ export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
 
-  constructor(private dataStore: DataStoreService, authService: AuthService) {
+  constructor(
+    private dataStore: DataStoreService,
+    private authService: AuthService
+  ) {
     // Reload active project each time authenticated user changes.
     this.activeProject$ = authService.user$.pipe(
       switchMap(() =>
@@ -38,7 +43,12 @@ export class ProjectService {
         this.activeProjectId$.pipe(
           // Asynchronously load project. switchMap() internally disposes
           // of previous subscription if present.
-          switchMap(id => this.dataStore.loadProject$(id))
+          switchMap(id => {
+            if (id === Project.PROJECT_ID_NEW) {
+              return of(Project.UNSAVED_NEW);
+            }
+            return this.dataStore.loadProject$(id);
+          })
         )
       ),
       // Cache last loaded project so that late subscribers don't cause
@@ -67,5 +77,16 @@ export class ProjectService {
 
   updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
     return this.dataStore.updateAcl(projectId, acl);
+  }
+
+  async createProject(title: string): Promise<string> {
+    const user = await this.authService.getUser$().pipe(take(1)).toPromise();
+    const email = user?.email;
+    if (!email) {
+      console.log('User email address missing');
+      return Promise.reject();
+    }
+    const projectId = await this.dataStore.createProject(email, title);
+    return Promise.resolve(projectId);
   }
 }
