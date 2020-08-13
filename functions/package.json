@@ -9,7 +9,7 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "body-parser-csv": "^1.0.0",
+    "busboy": "^0.3.1",
     "csv": "^5.3.2",
     "csv-parser": "^2.3.3",
     "express": "^4.17.1",
@@ -17,11 +17,10 @@
     "firebase-functions": "^3.9.0",
     "google-auth-library": "^4.2.5",
     "googleapis": "^42.0.0",
-    "multer": "^1.4.2",
-    "split": "^1.0.1"
+    "http-status-codes": "^1.4.0"
   },
   "engines": {
-    "node": "8"
+    "node": "10"
   },
   "private": true
 }

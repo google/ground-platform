@@ -75,15 +75,14 @@ class Datastore {
     return this.fetchDoc_(`projects/${projectId}/sheets/config`);
   }
 
-  insertFeature(projectId, { layerId, featureCaption, featureLat, featureLong }) {
+  insertFeature(projectId, layerId, {caption, location}) {
     var docRef = this.db_.collection('projects').doc(projectId);
     return docRef.get().then((docSnapshot) => {
       if (docSnapshot.exists) {
         docRef.collection('features').add({
           layerId: layerId,
-          caption: featureCaption,
-          location: new firestore.GeoPoint(Number.parseFloat(featureLat)
-            , Number.parseFloat(featureLong))
+          caption: caption,
+          location: location
         })
         console.log("Feature successfully written!");
       } else {
@@ -93,9 +92,8 @@ class Datastore {
         docRef.set({project: projectId}); 
         docRef.collection('features').add({
           layerId: layerId,
-          caption: featureCaption,
-          location: new firestore.GeoPoint(Number.parseFloat(featureLat)
-            , Number.parseFloat(featureLong))
+          caption: caption,
+          location: location
         })
         console.log("Feature successfully written!");
         // TODO(tiyara): For prod throw a 404 error.

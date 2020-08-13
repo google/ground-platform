@@ -17,59 +17,63 @@
 
 'use strict';
 
-const { db } = require('./common/context');
-var fs = require('fs');
-var parse = require('csv-parse');
+"use strict";
 
-// TODO(tiyara): First read a comma-separated string and test the function. Then enable file upload.
+const HttpStatus = require("http-status-codes");
+const { firestore } = require('firebase-admin');
+const csvParser = require("csv-parser");
+const Busboy = require("busboy");
+const { db } = require("./common/context");
 
 function importCsv(req, res) {
-  var promises = [];
-  // Catch the URL params.
-  const {
-    projectId,
-    layerId,
-  } = req.query
-  console.log(req.headers);
-  console.log("\nProject Id is " + req.body[projectId]);
-  // Stream the csv file.
-  var csvData = [];
-  req.on('data', (data) => {
-    console.log(data.toString());
+  // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
+  if (req.method !== "POST") {
+    return res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
+  }
+  const busboy = new Busboy({ headers: req.headers });
+
+  // Dictionary used to accumulate form field values, keyed by field name.
+  const params = {};
+
+  // Handle non-file fields in the form. projectId and layerId must appear
+  // before the file for the file handler to work properly.
+  busboy.on("field", (key, val) => {
+    params[key] = val;
   });
-  req.on('end', () => {
-    res.send('ok');
+
+  // This code will process each file uploaded.
+  busboy.on("file", (key, file, filename) => {
+    const { projectId, layerId } = params;
+    if (key != "csvfile" || !projectId || !layerId) {
+      return res.status(HttpStatus.BAD_REQUEST).end();
+    }
+    console.log(
+      `Importing features into project '${projectId}', layer '${layerId}'..`
+    );
+
+    // Pipe file through CSV parser lib, inserting each row in the db as it is
+    // received.
+    file.pipe(csvParser()).on("data", (record) => {
+      console.log("Processing row: ", JSON.stringify(record));
+      db.insertFeature(projectId, layerId, csvRowToFeature(record));
+    });
   });
-  return Promise.resolve();
+
+  // Triggered once all uploaded files are processed by Busboy.
+  busboy.on("finish", async () => {
+    res.sendStatus(HttpStatus.OK);
+  });
+
+  busboy.end(req.rawBody);
 }
 
-
-
-// function importCsv(req, res) {
-//   var promises = [];
-//   // Catch the URL params.
-//   const {
-//     projectId = projectId,
-//     layerId = layerId,
-//     csvFile = csvFile,
-//   } = req.query
-
-//   // Stream the csv file.
-//   var csvData = [];
-//   fs.createReadStream(csvFile)
-//     .pipe(parse({ delimiter: ',', from_line: 2 }))
-//     .on('data', function (csvrow) {
-//       console.log(csvrow);
-//       const featureCaption = csvrow[0] + ":" + csvrow[1];
-//       const featureLat = csvrow[2];
-//       const featureLong = csvrow[3];
-//       promises.push(db.insertFeature(projectId, { layerId, featureCaption, featureLat, featureLong }));
-//       csvData.push(csvrow);
-//     })
-//     .on('end', () => {
-//       console.log(csvData);
-//     });
-//   return Promise.all(promises);
-// }
+function csvRowToFeature(record) {
+  var feature = {
+    caption: record.name + "," + record.state,
+    location: new firestore.GeoPoint(Number.parseFloat(record.lat)
+    , Number.parseFloat(record.long))
+  };
+ return feature;
+}
 
 module.exports = importCsv;

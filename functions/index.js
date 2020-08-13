@@ -17,41 +17,14 @@
 
 'use strict';
 
-const functions = require('firebase-functions');
-const onCreateUser = require('./on-create-user')
-const exportCsv = require('./export-csv')
-const exportKml = require('./export-kml')
-const updateColumns = require('./update-columns')
-const onCreateRecord = require('./on-create-record')
-const onUpdateRecord = require('./on-update-record')
-const importCsv = require('./import-csv')
-const hardcodedInsert = require('./hardcoded')
-
-
-/*
-app.use(
-    bodyParser.csv({
-        csvParseOptions: {
-            fastcsvParams: {
-                headers: true,
-                trim: true,
-            },
-            subscribe: ((json) => {
-                // some line transformation
-                transform(data => ({
-                    featureCaption: data.name + data.state,
-                    featureLat: data.lat,
-                    featureLong: data.long,
-                }))
-                .on('error', error => console.error(error))
-                .on('data', row => console.log(JSON.stringify(row)))
-                .on('end', rowCount => console.log(`Parsed ${rowCount} rows`));
-                return json;
-            }),
-        },
-        limit: "15MB",
-    })
-); */
+const functions = require("firebase-functions");
+const onCreateUser = require("./on-create-user");
+const exportCsv = require("./export-csv");
+const exportKml = require("./export-kml");
+const importCsv = require("./import-csv");
+const updateColumns = require("./update-columns");
+const onCreateRecord = require("./on-create-record");
+const onUpdateRecord = require("./on-update-record");
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
@@ -99,40 +72,7 @@ app.post('/csv', upload, (req, res) => importCsv(req, res).catch(err => res.stat
 exports.importCsv = functions.https.onRequest(app);
 */
 
-// Simple Testing express:
-//app.get('/', (req, res) => res.status(200).send(`Hello World!`));
-//exports.helloWorld = functions.https.onRequest(app);
-
-// Simple import test
-// app.post('/', (req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
-// exports.import = functions.https.onRequest(app);
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const multer  = require('multer');
-
-const upload  = multer({ storage: multer.memoryStorage() });
-
-const app = express();
-app.use(bodyParser.urlencoded({extended: true}));
-
-app.post('/', upload.single('profile_pic'), (req, res, next) => {
-    console.log(req.headers);
-    const file = req.file;
-    if (!file) {
-        const error = new Error('Please upload a file');
-    error.httpStatusCode = 400;
-    return next(error);
-    }
-    console.log(req.body);
-    console.log("Reqfile is " + file);
-    res.send(file);
-})
-exports.import = functions.https.onRequest(app);
-
-// TODO(tiyara): Another library
-//exports.importCsv = functions.https.onRequest(
-  //(req, res) => importCsv(req, res).catch(err => res.status(500).send(`${err}`)));
+exports.importCsv = functions.https.onRequest(importCsv);
 
 // Just to test local firestore setup
 exports.hardcodedInsert = functions.https.onRequest(
