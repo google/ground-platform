@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <mat-list *ngIf="layer$ | async as layer">
-  <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
+  <ground-layer-list-item [layer]="layer" [actionsType]="layerListItemActionsType.BACK"></ground-layer-list-item>
 </mat-list>
 <div *ngIf="observations$ | async as observations">
   <mat-card class="observation card" *ngFor="let observation of observations">
