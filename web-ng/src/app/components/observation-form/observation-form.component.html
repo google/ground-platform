@@ -15,7 +15,7 @@
 -->
 
 <mat-list *ngIf="layer$ | async as layer">
-  <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
+  <ground-layer-list-item [layer]="layer" [actionsType]="layerListItemActionsType.BACK"></ground-layer-list-item>
 </mat-list>
 <div *ngIf="observationForm" class="observation">
   <h3>Add/edit observation</h3>
