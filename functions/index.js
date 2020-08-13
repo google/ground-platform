@@ -17,10 +17,11 @@
 
 'use strict';
 
-const functions = require('firebase-functions');
+const functions = require('firebase-functions')
 const onCreateUser = require('./on-create-user')
 const exportCsv = require('./export-csv')
 const exportKml = require('./export-kml')
+const importCsv = require("./import-csv")
 const updateColumns = require('./update-columns')
 const onCreateRecord = require('./on-create-record')
 const onUpdateRecord = require('./on-update-record')
@@ -56,3 +57,5 @@ exports.onUpdateRecord =
         .document(
             'projects/{projectId}/features/{featureId}/records/{recordId}')
         .onUpdate((change, context) => onUpdateRecord(change, context));
+
+exports.importCsv = functions.https.onRequest(importCsv);
