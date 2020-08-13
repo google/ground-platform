@@ -21,7 +21,7 @@ import { switchMap, take } from 'rxjs/operators';
 import { Observable, ReplaySubject } from 'rxjs';
 import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
-import { Feature } from '../../shared/models/feature.model';
+import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
 
 @Injectable({
@@ -83,7 +83,7 @@ export class FeatureService {
     if (project.layers.isEmpty()) {
       return Promise.resolve();
     }
-    const newFeature = new Feature(
+    const newFeature = new LocationFeature(
       this.dataStore.generateId(),
       // TODO(#251): When we implement the real "add point" flow, use selected layer instead of first.
       project.layers.keySeq().first(),
