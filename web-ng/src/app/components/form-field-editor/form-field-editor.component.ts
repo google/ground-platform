@@ -42,6 +42,7 @@ export interface FieldTypeSelectOption {
   icon: string;
   label: string;
   type: FieldType;
+  cardinality?: Cardinality;
 }
 
 @Component({
@@ -54,6 +55,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() required?: boolean;
   @Input() type?: string;
   @Input() multipleChoice?: MultipleChoice;
+  @Input() cardinality?: Cardinality;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
@@ -62,6 +64,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       icon: 'radio_button_checked',
       label: 'Select One',
       type: FieldType.MULTIPLE_CHOICE,
+      cardinality: Cardinality.SELECT_ONE,
     },
     {
       icon: 'short_text',
@@ -72,6 +75,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       icon: 'library_add_check',
       label: 'Select multiple',
       type: FieldType.MULTIPLE_CHOICE,
+      cardinality: Cardinality.SELECT_MULTIPLE,
     },
   ];
 
@@ -103,9 +107,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const type = this.fieldTypes.find(
-      fieldType => fieldType.type === Number(this.type)
-    );
+    const type = !this.cardinality
+      ? this.fieldTypes[1]
+      : this.fieldTypes.find(
+          fieldType =>
+            fieldType.type === Number(this.type) &&
+            fieldType.cardinality === this.cardinality
+        );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
       const options = this.formOptions?.options;
@@ -141,9 +149,18 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
     this.type = event.type.toString();
+    this.cardinality = event.cardinality;
+    if (this.cardinality && this.formOptions?.options) {
+      this.formOptions = new MultipleChoice(
+        this.cardinality,
+        this.formOptions.options
+      );
+    }
     this.formFieldGroup.patchValue({ type: event });
     if (event.type === FieldType.MULTIPLE_CHOICE) {
-      this.onAddOption();
+      if (!this.formOptions?.options?.size) {
+        this.onAddOption();
+      }
     } else {
       this.formOptions = undefined;
     }
@@ -210,7 +227,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   emitFormOptions(options: List<Option>) {
     const cardinality =
-      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
+      this.formOptions?.cardinality ||
+      this.cardinality ||
+      Cardinality.SELECT_MULTIPLE;
     this.formOptions = new MultipleChoice(cardinality, options);
     this.update.emit({
       label: StringMap({ en: this.label }),
