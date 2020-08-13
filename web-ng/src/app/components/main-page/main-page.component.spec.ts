@@ -23,7 +23,7 @@ import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
-import { RouterService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 import { never } from 'rxjs';
 
 @Component({ selector: 'ground-map', template: '' })
@@ -56,7 +56,7 @@ describe('MainPageComponent', () => {
       'selectObservation$',
     ]);
 
-    const routerService = {
+    const navigationService = {
       init: () => {},
       getProjectId$: never,
       getLayerId$: never,
@@ -72,7 +72,7 @@ describe('MainPageComponent', () => {
         { provide: FeatureService, useValue: featureService },
         { provide: ObservationService, useValue: observationService },
         { provide: ProjectService, useValue: projectService },
-        { provide: RouterService, useValue: routerService },
+        { provide: NavigationService, useValue: navigationService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

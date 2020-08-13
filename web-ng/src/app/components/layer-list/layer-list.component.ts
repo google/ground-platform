@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
-import { RouterService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 
 @Component({
   selector: 'ground-layer-list',
@@ -33,7 +33,7 @@ export class LayerListComponent {
 
   constructor(
     projectService: ProjectService,
-    private routerService: RouterService
+    private navigationService: NavigationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -47,6 +47,6 @@ export class LayerListComponent {
   }
 
   onAddLayer() {
-    this.routerService.setLayerId(RouterService.LAYER_ID_NEW);
+    this.navigationService.setLayerId(NavigationService.LAYER_ID_NEW);
   }
 }

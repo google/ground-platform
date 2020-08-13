@@ -18,7 +18,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { RouterService } from './../../services/router/router.service';
+import { NavigationService } from './../../services/router/router.service';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -31,7 +31,7 @@ export class LayerListItemComponent implements OnInit {
   readonly lang: string;
 
   constructor(
-    private routerService: RouterService,
+    private navigationService: NavigationService,
     private sanitizer: DomSanitizer
   ) {
     // TODO: Make dynamic to support i18n.
@@ -53,7 +53,7 @@ export class LayerListItemComponent implements OnInit {
 
   onCustomizeLayer() {
     if (this.layer?.id) {
-      this.routerService.setLayerId(this.layer?.id);
+      this.navigationService.setLayerId(this.layer?.id);
     }
   }
 }

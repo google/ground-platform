@@ -24,7 +24,7 @@ import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { FieldType } from '../../shared/models/form/field.model';
-import { RouterService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 
 // TODO: Rename "FeatureDetailsComponent".
 @Component({
@@ -39,7 +39,7 @@ export class FeaturePanelComponent {
   readonly fieldTypes = FieldType;
 
   constructor(
-    private routerService: RouterService,
+    private navigationService: NavigationService,
     projectService: ProjectService,
     featureService: FeatureService,
     observationService: ObservationService
@@ -71,6 +71,6 @@ export class FeaturePanelComponent {
   }
 
   onEditObservationClick(observation: Observation) {
-    this.routerService.setObservationId(observation.id);
+    this.navigationService.setObservationId(observation.id);
   }
 }
