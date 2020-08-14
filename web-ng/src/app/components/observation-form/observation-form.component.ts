@@ -40,6 +40,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { switchMap, map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuditInfo } from '../../shared/models/audit-info.model';
+import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
 
 // To make ESLint happy:
 /*global alert*/
@@ -53,6 +54,7 @@ export class ObservationFormComponent {
   readonly lang: string;
   readonly fieldTypes = FieldType;
   readonly cardinality = Cardinality;
+  readonly layerListItemActionsType = LayerListItemActionsType;
   readonly layer$: Observable<Layer>;
   projectId?: string;
   observation?: Observation;
