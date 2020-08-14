@@ -16,11 +16,24 @@
 
 import { firestore } from 'firebase/app';
 
-export class Feature {
+export interface Feature {
+  readonly id: string;
+  readonly layerId: string;
+}
+
+export class LocationFeature implements Feature {
   constructor(
     readonly id: string,
     readonly layerId: string,
     // TODO: User custom type instead of exposing types from data layer.
     readonly location: firestore.GeoPoint
+  ) {}
+}
+
+export class GeoJsonFeature implements Feature {
+  constructor(
+    readonly id: string,
+    readonly layerId: string,
+    readonly geoJson: object
   ) {}
 }

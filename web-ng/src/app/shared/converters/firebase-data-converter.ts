@@ -24,7 +24,11 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../models/form/multiple-choice.model';
-import { Feature } from '../models/feature.model';
+import {
+  Feature,
+  LocationFeature,
+  GeoJsonFeature,
+} from '../models/feature.model';
 import { Observation } from '../models/observation/observation.model';
 import { Option } from '../../shared/models/form/option.model';
 import { List, Map } from 'immutable';
@@ -83,6 +87,14 @@ export class FirebaseDataConverter {
         console.log('User has unsupported role: ', roleString);
         return Role.VIEWER;
     }
+  }
+
+  static newProjectJS(ownerEmail: string, title: string): {} {
+    return {
+      // TODO(i18n): Make title language dynamic.
+      title: { en: title },
+      acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
+    };
   }
 
   /**
@@ -158,12 +170,24 @@ export class FirebaseDataConverter {
   }
 
   public static featureToJS(feature: Feature): {} {
-    const { layerId, location } = feature;
-    return {
-      // TODO: Set audit info (created / last modified user and timestamp).
-      layerId,
-      location,
-    };
+    // TODO: Set audit info (created / last modified user and timestamp).
+    if (feature instanceof LocationFeature) {
+      const { layerId, location } = feature;
+      return {
+        layerId,
+        location,
+      };
+    } else if (feature instanceof GeoJsonFeature) {
+      const { layerId, geoJson } = feature;
+      return {
+        layerId,
+        geoJson,
+      };
+    } else {
+      throw new Error(
+        `Cannot convert unexpected feature class ${feature.constructor.name} to json.`
+      );
+    }
   }
   /**
    * Converts the raw object representation deserialized from Firebase into an
@@ -334,15 +358,19 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    */
   static toFeature(id: string, data: DocumentData): Feature | undefined {
-    if (
-      !data?.layerId ||
-      !data?.location?.latitude ||
-      !data?.location?.longitude
-    ) {
+    if (!this.isFeatureValid(data)) {
       console.warn(`Invalid feature ${id} in remote data store ignored`);
       return;
     }
-    return new Feature(id, data.layerId, data.location);
+    if (this.isLocationFeature(data)) {
+      return new LocationFeature(id, data.layerId, data.location);
+    }
+    if (this.isGeoJsonFeature(data)) {
+      const geoJson = JSON.parse(data.geoJson);
+      return new GeoJsonFeature(id, data.layerId, geoJson);
+    }
+    console.warn(`Invalid feature ${id} in remote data store ignored`);
+    return;
   }
 
   /**
@@ -496,5 +524,20 @@ export class FirebaseDataConverter {
    */
   static toRoleId(role: Role): string {
     return Role[role].toLowerCase();
+  }
+
+  private static isFeatureValid(data: DocumentData): boolean {
+    return (
+      data?.layerId &&
+      (this.isLocationFeature(data) || this.isGeoJsonFeature(data))
+    );
+  }
+
+  private static isLocationFeature(data: DocumentData): boolean {
+    return data?.location?.latitude && data?.location?.longitude;
+  }
+
+  private static isGeoJsonFeature(data: DocumentData): boolean {
+    return data?.geoJson;
   }
 }
