@@ -109,7 +109,7 @@ export class FirebaseDataConverter {
       id,
       // Fall back to constant so old dev databases do not break.
       data.index || -1,
-      data.color,
+      data.defaultStyle?.color || data.color,
       StringMap(data.name),
       Map<string, Form>(
         keys(data.forms).map((id: string) => [
@@ -121,7 +121,7 @@ export class FirebaseDataConverter {
   }
 
   static layerToJS(layer: Layer): {} {
-    const { name, forms, ...layerDoc } = layer;
+    const { name, forms, color, ...layerDoc } = layer;
     return {
       name: name?.toJS() || {},
       forms:
@@ -131,6 +131,7 @@ export class FirebaseDataConverter {
             (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
             {}
           ) || {},
+      defaultStyle: { color },
       ...layerDoc,
     };
   }
