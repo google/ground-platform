@@ -110,27 +110,30 @@ export class ObservationFormComponent {
   }
 
   onSave() {
-    this.authService.getUser$().pipe(first()).subscribe(user => {
-      if (!user) {
-        throw Error('Login required to update observation.');
-      }
-      const lastModified = new AuditInfo(
-        user,
-        new Date(),
-        this.dataStoreService.getServerTimestamp()
-      );
-      const updatedResponses: Map<string, Response> = this.extractResponses();
-      const updatedObservation = this.observation!.withResponsesAndLastModified(
-        updatedResponses,
-        lastModified
-      );
-      this.dataStoreService
-        .updateObservation(this.projectId!, updatedObservation)
-        .then(() => this.navigateToFeature(updatedObservation))
-        .catch(() => {
-          alert('Observation update failed.');
-        });
-    });
+    this.authService
+      .getUser$()
+      .pipe(first())
+      .subscribe(user => {
+        if (!user) {
+          throw Error('Login required to update observation.');
+        }
+        const lastModified = new AuditInfo(
+          user,
+          /*clientTime=*/ new Date(),
+          /*serverTime=*/ this.dataStoreService.getServerTimestamp()
+        );
+        const updatedResponses: Map<string, Response> = this.extractResponses();
+        const updatedObservation = this.observation!.withResponsesAndLastModified(
+          updatedResponses,
+          lastModified
+        );
+        this.dataStoreService
+          .updateObservation(this.projectId!, updatedObservation)
+          .then(() => this.navigateToFeature(updatedObservation))
+          .catch(() => {
+            alert('Observation update failed.');
+          });
+      });
   }
 
   navigateToFeature(observation: Observation) {

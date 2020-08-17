@@ -32,7 +32,8 @@ export class Observation {
   // Returns copy of Observation with responses and lastModified replaced.
   withResponsesAndLastModified(
     responses: Map<string, Response>,
-    lastModified: AuditInfo): Observation {
+    lastModified: AuditInfo
+  ): Observation {
     return new Observation(
       this.id,
       this.featureId,
