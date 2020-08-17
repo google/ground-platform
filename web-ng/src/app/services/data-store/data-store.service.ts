@@ -232,4 +232,19 @@ export class DataStoreService {
       .doc(feature.id)
       .set(FirebaseDataConverter.featureToJS(feature));
   }
+
+  /**
+   * Creates a new project in the remote db using the specified title,
+   * returning the id of the newly created project. ACLs are initialized
+   * to include the specified user email as project owner.
+   */
+  async createProject(ownerEmail: string, title: string): Promise<string> {
+    const projectId = this.generateId();
+    await this.updateProjectTitle(projectId, title);
+    await this.db
+      .collection('projects')
+      .doc(projectId)
+      .set(FirebaseDataConverter.newProjectJS(ownerEmail, title));
+    return Promise.resolve(projectId);
+  }
 }

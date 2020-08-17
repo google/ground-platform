@@ -17,10 +17,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
-import { Feature } from '../../shared/models/feature.model';
+import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from '../../../environments/environment';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -51,6 +51,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AuthService } from '../../services/auth/auth.service';
+import { User } from '../../shared/models/user.model';
 
 class MockModel {
   static element001: Field = new Field(
@@ -111,7 +113,7 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static feature001 = new Feature(
+  static feature001 = new LocationFeature(
     'feature001',
     MockModel.layer001.id,
     new firestore.GeoPoint(0.0, 0.0)
@@ -160,6 +162,7 @@ const observationService = new MockObservationService();
 describe('ObservationFormComponent', () => {
   let component: ObservationFormComponent;
   let fixture: ComponentFixture<ObservationFormComponent>;
+  const user$ = new Subject<User | null>();
 
   beforeEach(async(() => {
     const routerSpy = createRouterSpy();
@@ -185,6 +188,12 @@ describe('ObservationFormComponent', () => {
         { provide: ProjectService, useValue: projectService },
         { provide: ObservationService, useValue: observationService },
         { provide: Router, useValue: routerSpy },
+        {
+          provide: AuthService,
+          useValue: {
+            user$,
+          },
+        },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
