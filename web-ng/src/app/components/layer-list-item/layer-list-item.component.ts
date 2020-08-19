@@ -27,8 +27,11 @@ import { NavigationService } from './../../services/router/router.service';
 })
 export class LayerListItemComponent implements OnInit {
   @Input() layer: Layer | undefined;
+  @Input() actionsType: LayerListItemActionsType =
+    LayerListItemActionsType.MENU;
   layerPinUrl: SafeUrl;
   readonly lang: string;
+  readonly layerListItemActionsType = LayerListItemActionsType;
 
   constructor(
     private navigationService: NavigationService,
@@ -56,4 +59,13 @@ export class LayerListItemComponent implements OnInit {
       this.navigationService.setLayerId(this.layer?.id);
     }
   }
+
+  onGoBackClick() {
+    this.routerService.setFeatureId(null);
+  }
+}
+
+export enum LayerListItemActionsType {
+  MENU = 1,
+  BACK = 2,
 }
