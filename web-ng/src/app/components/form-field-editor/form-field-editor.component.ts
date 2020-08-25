@@ -111,7 +111,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   */
   ngOnChanges(changes: SimpleChanges) {
     const type =
-      this.type == FieldType.TEXT
+      this.type === FieldType.TEXT
         ? this.fieldTypes[1]
         : this.fieldTypes.find(
             fieldType =>
