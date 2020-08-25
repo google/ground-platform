@@ -53,7 +53,7 @@ export interface FieldTypeSelectOption {
 export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Input() label?: string;
   @Input() required?: boolean;
-  @Input() type?: string;
+  @Input() type?: FieldType;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
   @Output() update = new EventEmitter();
@@ -106,14 +106,18 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     });
   }
 
+  /*
+    Input params change from the parent are handled by this method.
+  */
   ngOnChanges(changes: SimpleChanges) {
-    const type = !this.cardinality
-      ? this.fieldTypes[1]
-      : this.fieldTypes.find(
-          fieldType =>
-            fieldType.type === Number(this.type) &&
-            fieldType.cardinality === this.cardinality
-        );
+    const type =
+      this.type == FieldType.TEXT
+        ? this.fieldTypes[1]
+        : this.fieldTypes.find(
+            fieldType =>
+              fieldType.type === this.type &&
+              fieldType.cardinality === this.cardinality
+          );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
       const options = this.formOptions?.options;
@@ -148,7 +152,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    *
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
-    this.type = event.type.toString();
+    this.type = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
       this.formOptions = new MultipleChoice(
