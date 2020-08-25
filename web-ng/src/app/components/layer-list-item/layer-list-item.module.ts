@@ -22,6 +22,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   imports: [
@@ -31,6 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule,
     MatListModule,
     MatMenuModule,
+    MatDialogModule,
   ],
   exports: [LayerListItemComponent],
   declarations: [LayerListItemComponent],

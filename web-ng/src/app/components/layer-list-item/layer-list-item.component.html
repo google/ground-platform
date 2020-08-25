@@ -28,9 +28,16 @@ limitations under the License.
         <button mat-menu-item (click)="onCustomizeLayer()">Customize layer</button>
       </mat-menu>
     </div>
+    <!--
     <div *ngSwitchCase="layerListItemActionsType.BACK" >
       <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
         <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    -->
+    <div>
+      <button mat-icon-button (click)="onDeleteFeature()">
+        <mat-icon>delete_forever</mat-icon>
       </button>
     </div>
   </div>

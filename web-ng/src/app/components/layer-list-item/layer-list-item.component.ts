@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Inject } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterService } from './../../services/router/router.service';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Feature } from '../../shared/models/feature.model';
+import { Router } from '@angular/router';
+import { DataStoreService } from '../../services/data-store/data-store.service';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -29,13 +34,20 @@ export class LayerListItemComponent implements OnInit {
   @Input() layer: Layer | undefined;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
+  projectId?: string;
+  feature?: Feature;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
 
   constructor(
+    
     private routerService: RouterService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private confirmationDialog: MatDialog,
+    private dialogRef: MatDialogRef<LayerListItemComponent>,
+    private router: Router,
+    private dataStoreService: DataStoreService,
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -62,6 +74,39 @@ export class LayerListItemComponent implements OnInit {
 
   onGoBackClick() {
     this.routerService.setFeatureId(null);
+  }
+
+  onDeleteFeature() {
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this feature? Any associated data including all observations in this feature will be lost. This cannot be undone.',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(async dialogResult => {
+      if (dialogResult) {
+        await this.deleteFeature();
+      }
+    });
+  }
+
+  async deleteFeature() {
+    await this.dataStoreService.deleteFeature(
+      this.projectId!,
+      this.feature!.id
+    );
+    this.onClose();
+  }
+
+  onClose() {
+    this.dialogRef.close();
+    return this.router.navigate([`p/${this.projectId}`]);
   }
 }
 
