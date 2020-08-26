@@ -46,7 +46,7 @@
         <app-form-field-editor
           [label]="field.label.get('en')"
           [required]="field.required"
-          [type]="field.type"
+          [fieldType]="field.type"
           [multipleChoice]="field.multipleChoice"
           (update)="onFieldUpdate($event, i)"
           (delete)="onFieldDelete(i)"

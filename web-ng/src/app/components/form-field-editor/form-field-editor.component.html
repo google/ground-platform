@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formFieldGroup" class="question-container">
+<form [formGroup]="formGroup" class="question-container">
   <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
   <div fxLayout>
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
@@ -28,15 +28,15 @@
     </mat-form-field>
     <mat-form-field fxFlex class="field-type" appearance="outline">
       <mat-select
-        formControlName="type"
+        formControlName="selectFieldOption"
         class="field-type-select"
         (selectionChange)="onFieldTypeSelect($event.value)"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-field-type">{{ getFieldType().icon }}</mat-icon>
-          <span> {{ getFieldType().label }}</span>
+          <mat-icon class="icon-field-type">{{ getSelectedField().icon }}</mat-icon>
+          <span> {{ getSelectedField().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let field of fieldTypes" [value]="field">
+        <mat-option *ngFor="let field of selectFieldOptions" [value]="field">
           <mat-icon>{{ field.icon }}</mat-icon>
           <span>{{ field.label }}</span>
         </mat-option>
