@@ -14,7 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <mat-list *ngIf="layer$ | async as layer">
-  <ground-layer-list-item [layer]="layer"></ground-layer-list-item>
+  <!-- 
+    TODO: create separate component for layer as a header instead of 
+    using LayerListItem here.
+  -->
+  <ground-layer-list-item [layer]="layer" 
+    [actionsType]="layerListItemActionsType.BACK"></ground-layer-list-item>
 </mat-list>
 <div *ngIf="observations$ | async as observations">
   <mat-card class="observation card" *ngFor="let observation of observations">
@@ -26,9 +31,15 @@ limitations under the License.
       <mat-card-subtitle>
         {{ observation.created.clientTime | date:'medium' }}
       </mat-card-subtitle>
-      <button mat-icon-button aria-label="actions" (click)="onEditObservationClick(observation)">
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
         <mat-icon>more_vert</mat-icon>
       </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onEditObservationClick(observation)">
+          <mat-icon>edit</mat-icon>
+          <span>Edit observation</span>
+        </button>
+      </mat-menu>
     </mat-card-header>
     <mat-card-content>
         <div *ngFor="let field_entry of observation.form.fields ">
