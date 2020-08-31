@@ -21,6 +21,7 @@ import {
   LocationFeature,
   GeoJsonFeature,
 } from '../../shared/models/feature.model';
+import { DrawingKitService } from '../../services/drawing-kit/drawing-kit.service';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
@@ -54,6 +55,7 @@ export class MapComponent implements OnInit, AfterViewInit {
   @ViewChild(GoogleMap) map!: GoogleMap;
 
   constructor(
+    private drawingKitService: DrawingKitService,
     private projectService: ProjectService,
     private featureService: FeatureService,
     private routerService: RouterService
@@ -97,7 +99,10 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    if (this.focusedFeatureId) {
+    if (
+      !this.drawingKitService.getIsAddingPoint() ||
+      this.drawingKitService.getLayerId() === ''
+    ) {
       // Deselect feature if selected.
       this.onFeatureClick(null);
       return Promise.resolve();
@@ -106,7 +111,8 @@ export class MapComponent implements OnInit, AfterViewInit {
       // TODO(#251): Remove once we implement the real "add point" flow.
       return this.featureService.addPoint(
         event.latLng.lat(),
-        event.latLng.lng()
+        event.latLng.lng(),
+        this.drawingKitService.getLayerId()
       );
     }
   }
