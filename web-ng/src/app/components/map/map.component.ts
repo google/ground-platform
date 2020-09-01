@@ -21,7 +21,10 @@ import {
   LocationFeature,
   GeoJsonFeature,
 } from '../../shared/models/feature.model';
-import { DrawingKitService } from '../../services/drawing-kit/drawing-kit.service';
+import {
+  DrawingKitService,
+  EditMode,
+} from '../../services/drawing-kit/drawing-kit.service';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
@@ -43,7 +46,7 @@ export class MapComponent implements OnInit, AfterViewInit {
   focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
   activeProject$: Observable<Project>;
-  mapOptions: google.maps.MapOptions = {
+  private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
     fullscreenControl: false,
@@ -51,6 +54,13 @@ export class MapComponent implements OnInit, AfterViewInit {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
+  private crosshairCursorMapOptions: google.maps.MapOptions = {
+    draggableCursor: 'crosshair',
+  };
+  private defaultCursorMapOptions: google.maps.MapOptions = {
+    draggableCursor: '',
+  };
+  mapOptions: google.maps.MapOptions = this.initialMapOptions;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -96,17 +106,20 @@ export class MapComponent implements OnInit, AfterViewInit {
         };
       })
     );
+
+    this.drawingKitService.getEditMode$().subscribe(editMode => {
+      this.mapOptions =
+        editMode === EditMode.AddPoint
+          ? this.crosshairCursorMapOptions
+          : this.defaultCursorMapOptions;
+    });
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    if (
-      !this.drawingKitService.getIsAddingPoint() ||
-      this.drawingKitService.getLayerId() === ''
-    ) {
-      // Deselect feature if selected.
-      this.onFeatureClick(null);
-      return Promise.resolve();
-    } else {
+    // Deselect feature.
+    this.onFeatureClick(null);
+    const editMode = this.drawingKitService.getEditMode$().getValue();
+    if (editMode === EditMode.AddPoint) {
       // Otherwise add a point at the clicked location.
       // TODO(#251): Remove once we implement the real "add point" flow.
       return this.featureService.addPoint(
@@ -114,6 +127,11 @@ export class MapComponent implements OnInit, AfterViewInit {
         event.latLng.lng(),
         this.drawingKitService.getLayerId()
       );
+    } else if (editMode === EditMode.AddPolygon) {
+      // TODO: Implement adding polygon.
+      return Promise.resolve();
+    } else {
+      return Promise.resolve();
     }
   }
 

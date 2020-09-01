@@ -15,30 +15,16 @@
  */
 
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DrawingKitService {
-  private isAddingPoint = false;
-  private isAddingPolygon = false;
+  private editMode$: BehaviorSubject<EditMode> = new BehaviorSubject<EditMode>(
+    EditMode.None
+  );
   private layerId = '';
-
-  getIsAddingPoint(): boolean {
-    return this.isAddingPoint;
-  }
-
-  setIsAddingPoint(isAddingPoint: boolean) {
-    this.isAddingPoint = isAddingPoint;
-  }
-
-  getIsAddingPolygon(): boolean {
-    return this.isAddingPolygon;
-  }
-
-  setIsAddingPolygon(isAddingPolygon: boolean) {
-    this.isAddingPolygon = isAddingPolygon;
-  }
 
   getLayerId(): string {
     return this.layerId;
@@ -47,4 +33,18 @@ export class DrawingKitService {
   setLayerId(layerId: string) {
     this.layerId = layerId;
   }
+
+  getEditMode$(): BehaviorSubject<EditMode> {
+    return this.editMode$;
+  }
+
+  setEditMode(editMode: EditMode) {
+    this.editMode$.next(editMode);
+  }
+}
+
+export enum EditMode {
+  None,
+  AddPoint,
+  AddPolygon,
 }

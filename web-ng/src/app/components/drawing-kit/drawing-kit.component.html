@@ -16,19 +16,19 @@
 <mat-button-toggle-group 
 class="drawing-buttons"
 [(value)] = "selectedValue">
-  <mat-button-toggle value = "{{addPointValue}}" (click)="onButtonClick()">
+  <mat-button-toggle value = "{{pointValue}}" (click)="onButtonClick()">
     add point
   </mat-button-toggle>
-  <mat-button-toggle value = "{{addPolygonValue}}" (click)="onButtonClick()">
+  <mat-button-toggle value = "{{polygonValue}}" (click)="onButtonClick()">
     add polygon
   </mat-button-toggle>
 </mat-button-toggle-group>
 
 <mat-form-field
-*ngIf="showDrawingLayerSelector()"
+*ngIf="selectedValue"
 class="drawing-layer-selector"
 appearance="fill">
-  <mat-label>Adding point for</mat-label>
+  <mat-label>Adding {{selectedValue}} for</mat-label>
   <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
     <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
       <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}

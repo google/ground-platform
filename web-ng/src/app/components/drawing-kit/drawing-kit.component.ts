@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { DrawingKitService } from '../../services/drawing-kit/drawing-kit.service';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  DrawingKitService,
+  EditMode,
+} from '../../services/drawing-kit/drawing-kit.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable } from 'rxjs';
 import { Layer } from '../../shared/models/layer.model';
@@ -28,11 +31,13 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   selector: 'drawing-kit',
   templateUrl: './drawing-kit.component.html',
   styleUrls: ['./drawing-kit.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DrawingKitComponent {
-  selectedValue: string | undefined;
-  addPointValue = 'point';
-  addPolygonValue = 'polygon';
+  pointValue = 'point';
+  polygonValue = 'polygon';
+  selectedValue = '';
+  private lastSelectedValue = '';
   selectedLayerId = '';
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
@@ -44,33 +49,25 @@ export class DrawingKitComponent {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = projectService
-      .getActiveProject$()
-      .pipe(
-        map(project =>
-          List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
-        )
-      );
+    this.layers$ = projectService.getActiveProject$().pipe(
+      map(project => {
+        this.selectedLayerId = project.layers.keySeq().first();
+        this.drawingKitService.setLayerId(this.selectedLayerId);
+        return List(project.layers.valueSeq().toArray()).sortBy(l => l.index);
+      })
+    );
   }
 
   onButtonClick() {
-    if (this.selectedValue === this.addPointValue) {
-      if (this.drawingKitService.getIsAddingPoint()) {
-        this.selectedValue = undefined;
-        this.drawingKitService.setIsAddingPoint(false);
-      } else {
-        this.drawingKitService.setIsAddingPoint(true);
-        this.drawingKitService.setIsAddingPolygon(false);
-      }
-    } else if (this.selectedValue === this.addPolygonValue) {
-      if (this.drawingKitService.getIsAddingPolygon()) {
-        this.selectedValue = undefined;
-        this.drawingKitService.setIsAddingPolygon(false);
-      } else {
-        this.drawingKitService.setIsAddingPolygon(true);
-        this.drawingKitService.setIsAddingPoint(false);
-      }
+    if (this.lastSelectedValue === this.selectedValue) {
+      this.selectedValue = '';
+      this.drawingKitService.setEditMode(EditMode.None);
+    } else if (this.selectedValue === this.pointValue) {
+      this.drawingKitService.setEditMode(EditMode.AddPoint);
+    } else if (this.selectedValue === this.polygonValue) {
+      this.drawingKitService.setEditMode(EditMode.AddPolygon);
     }
+    this.lastSelectedValue = this.selectedValue;
   }
 
   layerPinUrl(layer: Layer): SafeUrl {
@@ -81,9 +78,5 @@ export class DrawingKitComponent {
 
   onLayerIdChange() {
     this.drawingKitService.setLayerId(this.selectedLayerId);
-  }
-
-  showDrawingLayerSelector(): boolean {
-    return this.drawingKitService.getIsAddingPoint();
   }
 }
