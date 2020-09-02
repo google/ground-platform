@@ -20,7 +20,11 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterService } from './../../services/router/router.service';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { Feature } from '../../shared/models/feature.model';
 import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
@@ -35,19 +39,17 @@ export class LayerListItemComponent implements OnInit {
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
   projectId?: string;
-  feature?: Feature;
+  featureId?: string;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
 
   constructor(
-    
     private routerService: RouterService,
     private sanitizer: DomSanitizer,
     private confirmationDialog: MatDialog,
-    private dialogRef: MatDialogRef<LayerListItemComponent>,
     private router: Router,
-    private dataStoreService: DataStoreService,
+    private dataStoreService: DataStoreService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -58,6 +60,12 @@ export class LayerListItemComponent implements OnInit {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
+    this.routerService.getFeatureId$().subscribe(id => {
+      this.featureId = id;
+    });
+    this.routerService.getProjectId$().subscribe(id => {
+      this.projectId = id;
+    });
   }
 
   ngOnChanges() {
@@ -98,14 +106,13 @@ export class LayerListItemComponent implements OnInit {
 
   async deleteFeature() {
     await this.dataStoreService.deleteFeature(
-      this.projectId!,
-      this.feature!.id
+      this.projectId,
+      this.featureId,
     );
     this.onClose();
   }
 
   onClose() {
-    this.dialogRef.close();
     return this.router.navigate([`p/${this.projectId}`]);
   }
 }
