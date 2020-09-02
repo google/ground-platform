@@ -113,7 +113,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       this.formOptions = this.multipleChoice;
       this.formOptions?.options?.sortBy(option => option.index);
     }
-    console.log('reaching this stage');
     this.formGroup.setValue({
       label: this.label,
       required: this.required,
