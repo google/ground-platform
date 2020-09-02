@@ -198,8 +198,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       maxWidth: '500px',
       data: {
         title: 'Warning',
-        message:
-          'Are you sure you wish to delete this option? Any associated data will be lost. This cannot be undone.',
+        message: `Are you sure you wish to delete this option?
+        Any associated data will be lost. This cannot be undone.`,
       },
     });
   }
