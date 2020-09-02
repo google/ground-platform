@@ -58,18 +58,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
-  selectFieldOptions: FieldTypeSelectOption[] = [
-    {
-      icon: 'short_text',
-      label: 'Text',
-      type: FieldType.TEXT,
-    },
-    {
-      icon: 'library_add_check',
-      label: 'Select multiple',
-      type: FieldType.MULTIPLE_CHOICE,
-    },
-  ];
+  selectFieldOptions: FieldTypeSelectOption[];
 
   subscription: Subscription = new Subscription();
 
@@ -80,10 +69,22 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     private confirmationDialog: MatDialog,
     private layerService: LayerService
   ) {
+    this.selectFieldOptions = [
+      {
+        icon: 'short_text',
+        label: 'Text',
+        type: FieldType.TEXT,
+      },
+      {
+        icon: 'library_add_check',
+        label: 'Select multiple',
+        type: FieldType.MULTIPLE_CHOICE,
+      },
+    ];
     this.formGroup = this.formBuilder.group({
       label: ['', Validators.required],
       required: [false],
-      // By default we set the type of be of text field type.
+      // By default we set the select field to be of text type.
       selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
     });
   }
