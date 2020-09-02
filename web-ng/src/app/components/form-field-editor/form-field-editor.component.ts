@@ -130,7 +130,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.delete.emit();
   }
 
-  getSelectedField() {
+  getSelectFieldType() {
     return this.formGroup.get('selectFieldOption')?.value;
   }
 

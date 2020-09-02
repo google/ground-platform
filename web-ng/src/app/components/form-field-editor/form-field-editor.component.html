@@ -33,8 +33,10 @@
         (selectionChange)="onFieldTypeSelect($event.value)"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-field-type">{{ getSelectedField().icon }}</mat-icon>
-          <span> {{ getSelectedField().label }}</span>
+          <mat-icon class="icon-field-type">{{
+            getSelectFieldType().icon
+          }}</mat-icon>
+          <span> {{ getSelectFieldType().label }}</span>
         </mat-select-trigger>
         <mat-option *ngFor="let field of selectFieldOptions" [value]="field">
           <mat-icon>{{ field.icon }}</mat-icon>
