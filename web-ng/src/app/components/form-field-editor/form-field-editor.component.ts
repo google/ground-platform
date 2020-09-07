@@ -59,17 +59,17 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
-  fieldTypes: FieldTypeSelectOption[] = [
+  fieldTypeOptions: FieldTypeSelectOption[] = [
+    {
+      icon: 'short_text',
+      label: 'Text',
+      type: FieldType.TEXT,
+    },
     {
       icon: 'radio_button_checked',
       label: 'Select One',
       type: FieldType.MULTIPLE_CHOICE,
       cardinality: Cardinality.SELECT_ONE,
-    },
-    {
-      icon: 'short_text',
-      label: 'Text',
-      type: FieldType.TEXT,
     },
     {
       icon: 'library_add_check',
@@ -90,7 +90,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     this.formFieldGroup = this.formBuilder.group({
       label: ['', Validators.required],
       required: [false],
-      type: this.fieldTypes[0],
+      type: this.fieldTypeOptions[0],
     });
   }
 
@@ -112,8 +112,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     const type =
       this.type === FieldType.TEXT
-        ? this.fieldTypes[1]
-        : this.fieldTypes.find(
+        ? this.fieldTypeOptions[1]
+        : this.fieldTypeOptions.find(
             fieldType =>
               fieldType.type === this.type &&
               fieldType.cardinality === this.cardinality
@@ -126,8 +126,21 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     this.formFieldGroup.setValue({
       label: this.label,
       required: this.required,
-      type,
+      type: this.getSelectedFieldTypeOption(),
     });
+  }
+
+  getSelectedFieldTypeOption() {
+    switch (this.type) {
+      case FieldType.TEXT:
+        return this.fieldTypeOptions[0];
+      case FieldType.MULTIPLE_CHOICE:
+        return this.fieldTypeOptions[
+          this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
+        ];
+      default:
+        throw new Error(`Unsupported field type${this.type}`);
+    }
   }
 
   /**
