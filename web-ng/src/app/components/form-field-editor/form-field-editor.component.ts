@@ -110,14 +110,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     Input params change from the parent are handled by this method.
   */
   ngOnChanges(changes: SimpleChanges) {
-    const type =
-      this.type === FieldType.TEXT
-        ? this.fieldTypeOptions[1]
-        : this.fieldTypeOptions.find(
-            fieldType =>
-              fieldType.type === this.type &&
-              fieldType.cardinality === this.cardinality
-          );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
       const options = this.formOptions?.options;
