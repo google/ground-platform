@@ -19,6 +19,7 @@ import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterService } from './../../services/router/router.service';
+import { cloudFunctionsHost } from '../../../../.backend-config.json';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -26,12 +27,13 @@ import { RouterService } from './../../services/router/router.service';
   styleUrls: ['./layer-list-item.component.css'],
 })
 export class LayerListItemComponent implements OnInit {
-  @Input() layer: Layer | undefined;
+  @Input() layer?: Layer;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
+  projectId!: string | null;
 
   constructor(
     private routerService: RouterService,
@@ -46,6 +48,9 @@ export class LayerListItemComponent implements OnInit {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
+    this.routerService.getProjectId$().subscribe(id => {
+      this.projectId = id;
+    });
   }
 
   ngOnChanges() {
@@ -62,6 +67,10 @@ export class LayerListItemComponent implements OnInit {
 
   onGoBackClick() {
     this.routerService.setFeatureId(null);
+  }
+
+  onDownloadCsv() {
+    const link = `https://${cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
   }
 }
 
