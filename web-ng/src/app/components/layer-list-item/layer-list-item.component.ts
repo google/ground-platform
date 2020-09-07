@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, Inject } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterService } from './../../services/router/router.service';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import {
-  MatDialog,
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-} from '@angular/material/dialog';
-import { Feature } from '../../shared/models/feature.model';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 
