@@ -38,8 +38,8 @@ export class LayerListItemComponent implements OnInit {
   @Input() layer: Layer | undefined;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
-  projectId?: string;
-  featureId?: string;
+  projectId!: string | null;
+  featureId!: string | null;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
@@ -105,10 +105,10 @@ export class LayerListItemComponent implements OnInit {
   }
 
   async deleteFeature() {
-    await this.dataStoreService.deleteFeature(
-      this.projectId,
-      this.featureId,
-    );
+    if (!this.projectId || !this.featureId) {
+      return;
+    }
+    await this.dataStoreService.deleteFeature(this.projectId, this.featureId);
     this.onClose();
   }
 

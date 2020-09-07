@@ -20,15 +20,21 @@ limitations under the License.
     {{ layer?.name?.get(lang) }}
   </h3>
   <div [ngSwitch]="actionsType">
-    <div *ngSwitchCase="layerListItemActionsType.MENU" >
+    <!--
+    <div *ngSwitchCase="layerListItemActionsType.MENU">
       <button mat-icon-button [matMenuTriggerFor]="layerMenu">
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #layerMenu="matMenu">
-        <button mat-menu-item (click)="onCustomizeLayer()">Customize layer</button>
+        <button mat-menu-item (click)="onCustomizeLayer()">
+          Customize layer
+        </button>
       </mat-menu>
     </div>
-    <!--
+    -->
+    <!-- 
+      Commented the code for testing Delete Feature
+      
     <div *ngSwitchCase="layerListItemActionsType.BACK" >
       <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
         <mat-icon>close</mat-icon>
