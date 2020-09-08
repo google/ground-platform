@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterService } from './../../services/router/router.service';
 import { cloudFunctionsHost } from '../../../../.backend-config.json';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'ground-layer-list-item',
   templateUrl: './layer-list-item.component.html',
   styleUrls: ['./layer-list-item.component.css'],
 })
-export class LayerListItemComponent implements OnInit {
+export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
@@ -34,6 +35,8 @@ export class LayerListItemComponent implements OnInit {
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
   projectId!: string | null;
+
+  private subscription = new Subscription();
 
   constructor(
     private routerService: RouterService,
@@ -48,9 +51,11 @@ export class LayerListItemComponent implements OnInit {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
-    this.routerService.getProjectId$().subscribe(id => {
-      this.projectId = id;
-    });
+    this.subscription.add(
+      this.routerService.getProjectId$().subscribe(id => {
+        this.projectId = id;
+      })
+    );
   }
 
   ngOnChanges() {
@@ -71,6 +76,10 @@ export class LayerListItemComponent implements OnInit {
 
   onDownloadCsv() {
     const link = `https://${cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
 
