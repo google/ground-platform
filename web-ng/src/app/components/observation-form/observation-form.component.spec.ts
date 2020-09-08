@@ -168,7 +168,6 @@ describe('ObservationFormComponent', () => {
   beforeEach(async(() => {
     const routerService = {
       getProjectId$: () => of(''),
-      setLayerId: () => {},
     };
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
