@@ -106,9 +106,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     });
   }
 
-  /*
-    Input params change from the parent are handled by this method.
-  */
+  /**
+   * Input params change from the parent are handled by this method.
+   */
   ngOnChanges(changes: SimpleChanges) {
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
@@ -139,7 +139,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * Emits the delete field event to the layer dialog component.
    *
    * @returns void
-   *
    */
   onFieldDelete() {
     this.delete.emit();
@@ -154,7 +153,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    *
    * @param event: FieldTypeSelectOption
    * @returns void
-   *
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
     this.type = event.type;
@@ -185,9 +183,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
    * @param event: label and code value of the option field.
    * @param index: index of the option to be updated.
    * @returns void
-   *
    */
-
   onOptionUpdate(event: { label: string; code: string }, index: number) {
     const option = this.layerService.createOption(
       event.code,
