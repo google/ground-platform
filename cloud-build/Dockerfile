@@ -17,9 +17,10 @@ FROM node:14.3.0
 # Download and install Chrome. We don't actually use Chrome directly, but
 # Puppeteer needs several libraries that Chrome depends on, and this is the
 # easiest way to ensure all of its latest dependencies are installed.
+# libxss added as workaround for https://github.com/puppeteer/puppeteer/issues/6192.
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && apt-get update \
-    && apt -y install ./google-chrome-stable_current_amd64.deb \
+    && apt -y install libxss1 ./google-chrome-stable_current_amd64.deb \
     && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
