@@ -19,7 +19,7 @@ import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { RouterService } from './../../services/router/router.service';
-import { cloudFunctionsHost } from '../../../../.backend-config.json';
+import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -75,7 +75,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onDownloadCsv() {
-    const link = `https://${cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
+    const link = `https://${environment.cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
   }
 
   ngOnDestroy(): void {
