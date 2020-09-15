@@ -43,6 +43,7 @@ export interface FieldTypeSelectOption {
   icon: string;
   label: string;
   type: FieldType;
+  cardinality?: Cardinality;
 }
 
 @Component({
@@ -55,6 +56,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() required?: boolean;
   @Input() fieldType?: FieldType;
   @Input() multipleChoice?: MultipleChoice;
+  @Input() cardinality?: Cardinality;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
@@ -76,9 +78,16 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         type: FieldType.TEXT,
       },
       {
+        icon: 'radio_button_checked',
+        label: 'Select One',
+        type: FieldType.MULTIPLE_CHOICE,
+        cardinality: Cardinality.SELECT_ONE,
+      },
+      {
         icon: 'library_add_check',
         label: 'Select multiple',
         type: FieldType.MULTIPLE_CHOICE,
+        cardinality: Cardinality.SELECT_MULTIPLE,
       },
     ];
     this.formGroup = this.formBuilder.group({
@@ -107,25 +116,35 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * This method is used to get the updated values of field from the layer-dialog.
    */
   ngOnChanges(changes: SimpleChanges) {
-    const selectFieldOption = this.selectFieldOptions.find(
-      selectField => selectField.type === this.fieldType
-    );
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
-      this.formOptions?.options?.sortBy(option => option.index);
+      const options = this.formOptions?.options;
+      options?.sortBy(option => option.index);
     }
     this.formGroup.setValue({
       label: this.label,
       required: this.required,
-      selectFieldOption,
+      selectFieldOption: this.getSelectedFieldTypeOption(),
     });
+  }
+
+  getSelectedFieldTypeOption() {
+    switch (this.fieldType) {
+      case FieldType.TEXT:
+        return this.selectFieldOptions[0];
+      case FieldType.MULTIPLE_CHOICE:
+        return this.selectFieldOptions[
+          this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
+        ];
+      default:
+        throw new Error(`Unsupported field type${this.fieldType}`);
+    }
   }
 
   /**
    * Emits the delete field event to the layer dialog component.
    *
    * @returns void
-   *
    */
   onFieldDelete() {
     this.delete.emit();
@@ -140,13 +159,21 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    *
    * @param event: FieldTypeSelectOption
    * @returns void
-   *
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
     this.fieldType = event.type;
+    this.cardinality = event.cardinality;
+    if (this.cardinality && this.formOptions?.options) {
+      this.formOptions = new MultipleChoice(
+        this.cardinality,
+        this.formOptions.options
+      );
+    }
     this.formGroup.patchValue({ selectFieldOption: event });
     if (event.type === FieldType.MULTIPLE_CHOICE) {
-      this.onAddOption();
+      if (!this.formOptions?.options?.size) {
+        this.onAddOption();
+      }
     } else {
       this.formOptions = undefined;
     }
@@ -165,9 +192,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param event: label and code value of the option field.
    * @param index: index of the option to be updated.
    * @returns void
-   *
    */
-
   onOptionUpdate(event: { label: string; code: string }, index: number) {
     const option = this.layerService.createOption(
       event.code,
@@ -223,7 +248,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   emitFormOptions(options: List<Option>) {
     const cardinality =
-      this.formOptions?.cardinality || Cardinality.SELECT_MULTIPLE;
+      this.formOptions?.cardinality ||
+      this.cardinality ||
+      Cardinality.SELECT_MULTIPLE;
     this.formOptions = new MultipleChoice(cardinality, options);
     this.update.emit({
       label: StringMap({ en: this.label }),
