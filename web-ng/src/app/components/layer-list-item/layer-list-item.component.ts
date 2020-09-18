@@ -61,7 +61,7 @@ export class LayerListItemComponent implements OnInit {
   }
 
   onGoBackClick() {
-    this.routerService.setFeatureId(null);
+    this.navigationService.setFeatureId(null);
   }
 }
 
