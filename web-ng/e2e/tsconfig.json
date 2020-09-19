@@ -1,13 +1,10 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "resolveJsonModule": true,
     "outDir": "../out-tsc/e2e",
     "module": "commonjs",
     "target": "es5",
-    "types": [
-      "jasmine",
-      "jasminewd2",
-      "node"
-    ]
+    "types": ["jasmine", "jasminewd2", "node"]
   }
 }

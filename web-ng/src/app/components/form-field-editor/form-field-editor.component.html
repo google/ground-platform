@@ -36,7 +36,7 @@
           <mat-icon class="icon-field-type">{{ getFieldType().icon }}</mat-icon>
           <span> {{ getFieldType().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let field of fieldTypes" [value]="field">
+        <mat-option *ngFor="let field of fieldTypeOptions" [value]="field">
           <mat-icon>{{ field.icon }}</mat-icon>
           <span>{{ field.label }}</span>
         </mat-option>
