@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  OnDestroy,
+} from '@angular/core';
 import { Project } from '../../shared/models/project.model';
 import {
   Feature,
@@ -22,9 +28,9 @@ import {
   GeoJsonFeature,
 } from '../../shared/models/feature.model';
 import {
-  DrawingKitService,
+  DrawingToolsService,
   EditMode,
-} from '../../services/drawing-kit/drawing-kit.service';
+} from '../../services/drawing-tools/drawing-tools.service';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
@@ -41,7 +47,7 @@ import { GoogleMap } from '@angular/google-maps';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
-export class MapComponent implements OnInit, AfterViewInit {
+export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
@@ -65,7 +71,7 @@ export class MapComponent implements OnInit, AfterViewInit {
   @ViewChild(GoogleMap) map!: GoogleMap;
 
   constructor(
-    private drawingKitService: DrawingKitService,
+    private drawingToolsService: DrawingToolsService,
     private projectService: ProjectService,
     private featureService: FeatureService,
     private routerService: RouterService
@@ -83,55 +89,67 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.features$.subscribe(features => {
-      this.clearGoogleMapDataLayer();
-      features.forEach(feature => {
-        if (feature instanceof GeoJsonFeature) {
-          const addedFeatures = this.map.data.addGeoJson(
-            (feature as GeoJsonFeature).geoJson
-          );
-          addedFeatures.forEach(f => {
-            f.setProperty('layerId', feature.layerId);
-          });
-        }
-      });
-    });
-
-    this.activeProject$.subscribe(project =>
-      this.map.data.setStyle(feature => {
-        const layerId = feature.getProperty('layerId');
-        const color = project.layers.get(layerId)?.color;
-        return {
-          fillColor: color,
-        };
+    this.subscription.add(
+      this.features$.subscribe(features => {
+        this.clearGoogleMapDataLayer();
+        features.forEach(feature => {
+          if (feature instanceof GeoJsonFeature) {
+            const addedFeatures = this.map.data.addGeoJson(
+              (feature as GeoJsonFeature).geoJson
+            );
+            addedFeatures.forEach(f => {
+              f.setProperty('layerId', feature.layerId);
+            });
+          }
+        });
       })
     );
 
-    this.drawingKitService.getEditMode$().subscribe(editMode => {
-      this.mapOptions =
-        editMode === EditMode.AddPoint
-          ? this.crosshairCursorMapOptions
-          : this.defaultCursorMapOptions;
-    });
+    this.subscription.add(
+      this.activeProject$.subscribe(project =>
+        this.map.data.setStyle(feature => {
+          const layerId = feature.getProperty('layerId');
+          const color = project.layers.get(layerId)?.color;
+          return {
+            fillColor: color,
+          };
+        })
+      )
+    );
+    this.subscription.add(
+      this.drawingToolsService.getEditMode$().subscribe(editMode => {
+        this.mapOptions =
+          editMode === EditMode.AddPoint
+            ? this.crosshairCursorMapOptions
+            : this.defaultCursorMapOptions;
+      })
+    );
+  }
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
     // Deselect feature.
     this.onFeatureClick(null);
-    const editMode = this.drawingKitService.getEditMode$().getValue();
-    if (editMode === EditMode.AddPoint) {
-      // Otherwise add a point at the clicked location.
-      // TODO(#251): Remove once we implement the real "add point" flow.
-      return this.featureService.addPoint(
-        event.latLng.lat(),
-        event.latLng.lng(),
-        this.drawingKitService.getLayerId()
-      );
-    } else if (editMode === EditMode.AddPolygon) {
-      // TODO: Implement adding polygon.
+    const editMode = this.drawingToolsService.getEditMode$().getValue();
+    const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
+    if (selectedLayerId == undefined) {
       return Promise.resolve();
-    } else {
-      return Promise.resolve();
+    }
+    switch (editMode) {
+      case EditMode.AddPoint:
+        return this.featureService.addPoint(
+          event.latLng.lat(),
+          event.latLng.lng(),
+          selectedLayerId
+        );
+      case EditMode.AddPolygon:
+        // TODO: Implement adding polygon.
+        return Promise.resolve();
+      case EditMode.None:
+      default:
+        return Promise.resolve();
     }
   }
 
