@@ -31,4 +31,5 @@ export const environment = {
     messagingSenderId: '',
     appId: '',
   },
+  cloudFunctionsHost: 'some-subdomain.cloudfunctions.net',
 };

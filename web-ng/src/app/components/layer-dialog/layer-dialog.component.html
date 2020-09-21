@@ -46,6 +46,7 @@
         <app-form-field-editor
           [label]="field.label.get('en')"
           [required]="field.required"
+          [cardinality]="field.multipleChoice?.cardinality"
           [type]="field.type"
           [multipleChoice]="field.multipleChoice"
           (update)="onFieldUpdate($event, i)"
