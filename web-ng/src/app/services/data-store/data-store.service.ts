@@ -96,25 +96,12 @@ export class DataStoreService {
   }
 
   async deleteFeature(projectId: string, featureId: string) {
-    await this.deleteAllObservationsInFeature(projectId, featureId);
     return await this.db
       .collection('projects')
       .doc(projectId)
       .collection('features')
       .doc(featureId)
       .delete();
-  }
-
-  private async deleteAllObservationsInFeature(
-    projectId: string,
-    featureId: string
-  ) {
-    const observationsInFeature = this.db.collection(
-      `projects/${projectId}/observations`,
-      ref => ref.where('featureId', '==', featureId)
-    );
-    const querySnapshot = await observationsInFeature.get().toPromise();
-    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
   updateObservation(projectId: string, observation: Observation) {

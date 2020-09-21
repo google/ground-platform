@@ -23,6 +23,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -33,11 +34,12 @@ export class LayerListItemComponent implements OnInit {
   @Input() layer: Layer | undefined;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
-  projectId!: string | null;
-  featureId!: string | null;
+  projectId?: string | null;
+  featureId?: string | null;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
+  subscription: Subscription = new Subscription();
 
   constructor(
     private routerService: RouterService,
@@ -55,12 +57,20 @@ export class LayerListItemComponent implements OnInit {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
-    this.routerService.getFeatureId$().subscribe(id => {
-      this.featureId = id;
-    });
-    this.routerService.getProjectId$().subscribe(id => {
-      this.projectId = id;
-    });
+    this.subscription.add(
+      this.routerService.getFeatureId$().subscribe(id => {
+        this.featureId = id;
+      })
+    );
+    this.subscription.add(
+      this.routerService.getProjectId$().subscribe(id => {
+        this.projectId = id;
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   ngOnChanges() {
