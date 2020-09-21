@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +34,7 @@ export class DrawingToolsService {
     this.selectedLayerId = selectedLayerId;
   }
 
-  getEditMode$(): Observable<EditMode> {
+  getEditMode$(): BehaviorSubject<EditMode> {
     return this.editMode$;
   }
 

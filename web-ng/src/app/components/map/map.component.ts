@@ -134,7 +134,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onFeatureClick(null);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
-    if (selectedLayerId == undefined) {
+    if (selectedLayerId === undefined) {
       return Promise.resolve();
     }
     switch (editMode) {
