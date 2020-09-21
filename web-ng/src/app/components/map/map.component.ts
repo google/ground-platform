@@ -90,43 +90,53 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.subscription.add(
-      this.features$.subscribe(features => {
-        this.clearGoogleMapDataLayer();
-        features.forEach(feature => {
-          if (feature instanceof GeoJsonFeature) {
-            const addedFeatures = this.map.data.addGeoJson(
-              (feature as GeoJsonFeature).geoJson
-            );
-            addedFeatures.forEach(f => {
-              f.setProperty('layerId', feature.layerId);
-            });
-          }
-        });
-      })
+      this.features$.subscribe(features => this.onFeaturesUpdate(features))
     );
-
     this.subscription.add(
       this.activeProject$.subscribe(project =>
-        this.map.data.setStyle(feature => {
-          const layerId = feature.getProperty('layerId');
-          const color = project.layers.get(layerId)?.color;
-          return {
-            fillColor: color,
-          };
-        })
+        this.onProjectActivation(project)
       )
     );
     this.subscription.add(
-      this.drawingToolsService.getEditMode$().subscribe(editMode => {
-        this.mapOptions =
-          editMode === EditMode.AddPoint
-            ? this.crosshairCursorMapOptions
-            : this.defaultCursorMapOptions;
-      })
+      this.drawingToolsService
+        .getEditMode$()
+        .subscribe(editMode => this.onEditModeChange(editMode))
     );
   }
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  onFeaturesUpdate(features: List<Feature>) {
+    this.clearGoogleMapDataLayer();
+    features.forEach(feature => {
+      if (feature instanceof GeoJsonFeature) {
+        const addedFeatures = this.map.data.addGeoJson(
+          (feature as GeoJsonFeature).geoJson
+        );
+        addedFeatures.forEach(f => {
+          f.setProperty('layerId', feature.layerId);
+        });
+      }
+    });
+  }
+
+  onProjectActivation(project: Project) {
+    this.map.data.setStyle(feature => {
+      const layerId = feature.getProperty('layerId');
+      const color = project.layers.get(layerId)?.color;
+      return {
+        fillColor: color,
+      };
+    });
+  }
+
+  onEditModeChange(editMode: EditMode) {
+    this.mapOptions =
+      editMode === EditMode.AddPoint
+        ? this.crosshairCursorMapOptions
+        : this.defaultCursorMapOptions;
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
@@ -134,7 +144,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onFeatureClick(null);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
-    if (selectedLayerId === undefined) {
+    if (!selectedLayerId) {
       return Promise.resolve();
     }
     switch (editMode) {
