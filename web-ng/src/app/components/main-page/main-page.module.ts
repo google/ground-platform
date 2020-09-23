@@ -17,6 +17,7 @@
 import { CommonModule } from '@angular/common';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
+import { DrawingToolsModule } from '../drawing-tools/drawing-tools.module';
 import { MainPageComponent } from './main-page.component';
 import { MapModule } from '../map/map.module';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,15 +34,16 @@ import { MatIconModule } from '@angular/material/icon';
   declarations: [MainPageComponent],
   imports: [
     CommonModule,
+    DrawingToolsModule,
+    LayerDialogModule,
     MapModule,
     MatButtonModule,
     MatDialogModule,
+    MatIconModule,
     MatSidenavModule,
-    LayerDialogModule,
     RouterModule,
     SidePanelModule,
     ProjectHeaderModule,
-    MatIconModule,
   ],
 })
 export class MainPageModule {}

@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  OnDestroy,
+} from '@angular/core';
 import { Project } from '../../shared/models/project.model';
 import {
   Feature,
   LocationFeature,
   GeoJsonFeature,
 } from '../../shared/models/feature.model';
+import {
+  DrawingToolsService,
+  EditMode,
+} from '../../services/drawing-tools/drawing-tools.service';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
@@ -37,12 +47,12 @@ import { GoogleMap } from '@angular/google-maps';
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
-export class MapComponent implements OnInit, AfterViewInit {
+export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
   activeProject$: Observable<Project>;
-  mapOptions: google.maps.MapOptions = {
+  private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
     fullscreenControl: false,
@@ -50,10 +60,18 @@ export class MapComponent implements OnInit, AfterViewInit {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
+  private crosshairCursorMapOptions: google.maps.MapOptions = {
+    draggableCursor: 'crosshair',
+  };
+  private defaultCursorMapOptions: google.maps.MapOptions = {
+    draggableCursor: '',
+  };
+  mapOptions: google.maps.MapOptions = this.initialMapOptions;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
   constructor(
+    private drawingToolsService: DrawingToolsService,
     private projectService: ProjectService,
     private featureService: FeatureService,
     private navigationService: NavigationService
@@ -71,43 +89,77 @@ export class MapComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.features$.subscribe(features => {
-      this.clearGoogleMapDataLayer();
-      features.forEach(feature => {
-        if (feature instanceof GeoJsonFeature) {
-          const addedFeatures = this.map.data.addGeoJson(
-            (feature as GeoJsonFeature).geoJson
-          );
-          addedFeatures.forEach(f => {
-            f.setProperty('layerId', feature.layerId);
-          });
-        }
-      });
-    });
-
-    this.activeProject$.subscribe(project =>
-      this.map.data.setStyle(feature => {
-        const layerId = feature.getProperty('layerId');
-        const color = project.layers.get(layerId)?.color;
-        return {
-          fillColor: color,
-        };
-      })
+    this.subscription.add(
+      this.features$.subscribe(features => this.onFeaturesUpdate(features))
+    );
+    this.subscription.add(
+      this.activeProject$.subscribe(project =>
+        this.onProjectActivation(project)
+      )
+    );
+    this.subscription.add(
+      this.drawingToolsService
+        .getEditMode$()
+        .subscribe(editMode => this.onEditModeChange(editMode))
     );
   }
 
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  onFeaturesUpdate(features: List<Feature>) {
+    this.clearGoogleMapDataLayer();
+    features.forEach(feature => {
+      if (feature instanceof GeoJsonFeature) {
+        const addedFeatures = this.map.data.addGeoJson(
+          (feature as GeoJsonFeature).geoJson
+        );
+        addedFeatures.forEach(f => {
+          f.setProperty('layerId', feature.layerId);
+        });
+      }
+    });
+  }
+
+  onProjectActivation(project: Project) {
+    this.map.data.setStyle(feature => {
+      const layerId = feature.getProperty('layerId');
+      const color = project.layers.get(layerId)?.color;
+      return {
+        fillColor: color,
+      };
+    });
+  }
+
+  onEditModeChange(editMode: EditMode) {
+    this.mapOptions =
+      editMode === EditMode.AddPoint
+        ? this.crosshairCursorMapOptions
+        : this.defaultCursorMapOptions;
+  }
+
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    if (this.focusedFeatureId) {
-      // Deselect feature if selected.
-      this.onFeatureClick(null);
+    // Deselect feature.
+    this.onFeatureClick(null);
+    const editMode = this.drawingToolsService.getEditMode$().getValue();
+    const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
+    if (!selectedLayerId) {
       return Promise.resolve();
-    } else {
-      // Otherwise add a point at the clicked location.
-      // TODO(#251): Remove once we implement the real "add point" flow.
-      return this.featureService.addPoint(
-        event.latLng.lat(),
-        event.latLng.lng()
-      );
+    }
+    switch (editMode) {
+      case EditMode.AddPoint:
+        return this.featureService.addPoint(
+          event.latLng.lat(),
+          event.latLng.lng(),
+          selectedLayerId
+        );
+      case EditMode.AddPolygon:
+        // TODO: Implement adding polygon.
+        return Promise.resolve();
+      case EditMode.None:
+      default:
+        return Promise.resolve();
     }
   }
 
