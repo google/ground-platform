@@ -69,24 +69,28 @@ export class FeatureService {
     return this.selectedFeature$;
   }
 
-  addPoint(lat: number, lng: number): Promise<void> {
+  addPoint(lat: number, lng: number, layerId: string): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
     // upgrading to RxJS 7.
     return this.projectService
       .getActiveProject$()
       .pipe(take(1))
       .toPromise()
-      .then(project => this.addPointInternal(project, lat, lng));
+      .then(project => this.addPointInternal(project, lat, lng, layerId));
   }
 
-  private addPointInternal(project: Project, lat: number, lng: number) {
+  private addPointInternal(
+    project: Project,
+    lat: number,
+    lng: number,
+    layerId: string
+  ) {
     if (project.layers.isEmpty()) {
       return Promise.resolve();
     }
     const newFeature = new LocationFeature(
       this.dataStore.generateId(),
-      // TODO(#251): When we implement the real "add point" flow, use selected layer instead of first.
-      project.layers.keySeq().first(),
+      layerId,
       new firestore.GeoPoint(lat, lng)
     );
     return this.dataStore

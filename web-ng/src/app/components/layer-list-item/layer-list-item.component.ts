@@ -18,7 +18,7 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { RouterService } from './../../services/router/router.service';
+import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 
@@ -39,7 +39,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
 
   constructor(
-    private routerService: RouterService,
+    private navigationService: NavigationService,
     private sanitizer: DomSanitizer
   ) {
     // TODO: Make dynamic to support i18n.
@@ -52,7 +52,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       getPinImageSource(this.layer?.color)
     );
     this.subscription.add(
-      this.routerService.getProjectId$().subscribe(id => {
+      this.navigationService.getProjectId$().subscribe(id => {
         this.projectId = id;
       })
     );
@@ -66,12 +66,12 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
 
   onCustomizeLayer() {
     if (this.layer?.id) {
-      this.routerService.setLayerId(this.layer?.id);
+      this.navigationService.setLayerId(this.layer?.id);
     }
   }
 
   onGoBackClick() {
-    this.routerService.setFeatureId(null);
+    this.navigationService.setFeatureId(null);
   }
 
   onDownloadCsv() {

@@ -22,6 +22,7 @@ import {
   EventEmitter,
   OnChanges,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
@@ -32,11 +33,11 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
-import { DataStoreService } from '../../services/data-store/data-store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
+import { Subscription } from 'rxjs';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -50,64 +51,69 @@ export interface FieldTypeSelectOption {
   templateUrl: './form-field-editor.component.html',
   styleUrls: ['./form-field-editor.component.scss'],
 })
-export class FormFieldEditorComponent implements OnInit, OnChanges {
+export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
-  @Input() type?: FieldType;
+  @Input() fieldType?: FieldType;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
-  fieldTypeOptions: FieldTypeSelectOption[] = [
-    {
-      icon: 'short_text',
-      label: 'Text',
-      type: FieldType.TEXT,
-    },
-    {
-      icon: 'radio_button_checked',
-      label: 'Select One',
-      type: FieldType.MULTIPLE_CHOICE,
-      cardinality: Cardinality.SELECT_ONE,
-    },
-    {
-      icon: 'library_add_check',
-      label: 'Select multiple',
-      type: FieldType.MULTIPLE_CHOICE,
-      cardinality: Cardinality.SELECT_MULTIPLE,
-    },
-  ];
+  selectFieldOptions: FieldTypeSelectOption[];
 
-  formFieldGroup: FormGroup;
+  subscription: Subscription = new Subscription();
+
+  formGroup: FormGroup;
 
   constructor(
     private formBuilder: FormBuilder,
-    private dataStoreService: DataStoreService,
     private confirmationDialog: MatDialog,
     private layerService: LayerService
   ) {
-    this.formFieldGroup = this.formBuilder.group({
+    this.selectFieldOptions = [
+      {
+        icon: 'short_text',
+        label: 'Text',
+        type: FieldType.TEXT,
+      },
+      {
+        icon: 'radio_button_checked',
+        label: 'Select One',
+        type: FieldType.MULTIPLE_CHOICE,
+        cardinality: Cardinality.SELECT_ONE,
+      },
+      {
+        icon: 'library_add_check',
+        label: 'Select multiple',
+        type: FieldType.MULTIPLE_CHOICE,
+        cardinality: Cardinality.SELECT_MULTIPLE,
+      },
+    ];
+    this.formGroup = this.formBuilder.group({
       label: ['', Validators.required],
       required: [false],
-      type: this.fieldTypeOptions[0],
+      // By default we set the select field to be of text type.
+      selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
     });
   }
 
   ngOnInit(): void {
     // As the form fields value change we are emitting the updated value to the layer-dialog.
-    this.formFieldGroup.valueChanges.subscribe(value => {
-      this.update.emit({
-        label: StringMap({ en: value.label }),
-        required: value.required,
-        type: value.type.type,
-        multipleChoice: this.formOptions,
-      });
-    });
+    this.subscription.add(
+      this.formGroup.valueChanges.subscribe(value => {
+        this.update.emit({
+          label: StringMap({ en: value.label }),
+          required: value.required,
+          type: value.selectFieldOption.type,
+          multipleChoice: this.formOptions,
+        });
+      })
+    );
   }
 
-  /**
-   * Input params change from the parent are handled by this method.
+  /*
+   * This method is used to get the updated values of field from the layer-dialog.
    */
   ngOnChanges(changes: SimpleChanges) {
     if (changes.multipleChoice) {
@@ -115,23 +121,23 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       const options = this.formOptions?.options;
       options?.sortBy(option => option.index);
     }
-    this.formFieldGroup.setValue({
+    this.formGroup.setValue({
       label: this.label,
       required: this.required,
-      type: this.getSelectedFieldTypeOption(),
+      selectFieldOption: this.getSelectedFieldTypeOption(),
     });
   }
 
   getSelectedFieldTypeOption() {
-    switch (this.type) {
+    switch (this.fieldType) {
       case FieldType.TEXT:
-        return this.fieldTypeOptions[0];
+        return this.selectFieldOptions[0];
       case FieldType.MULTIPLE_CHOICE:
-        return this.fieldTypeOptions[
+        return this.selectFieldOptions[
           this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
         ];
       default:
-        throw new Error(`Unsupported field type${this.type}`);
+        throw new Error(`Unsupported field type${this.fieldType}`);
     }
   }
 
@@ -144,18 +150,18 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     this.delete.emit();
   }
 
-  getFieldType() {
-    return this.formFieldGroup.get('type')?.value;
+  getSelectFieldType() {
+    return this.formGroup.get('selectFieldOption')?.value;
   }
 
   /**
-   * Updates the type in the formFieldGroup on the select change event.
+   * Updates the type in the formGroup on the select change event.
    *
    * @param event: FieldTypeSelectOption
    * @returns void
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
-    this.type = event.type;
+    this.fieldType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
       this.formOptions = new MultipleChoice(
@@ -163,7 +169,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
         this.formOptions.options
       );
     }
-    this.formFieldGroup.patchValue({ type: event });
+    this.formGroup.patchValue({ selectFieldOption: event });
     if (event.type === FieldType.MULTIPLE_CHOICE) {
       if (!this.formOptions?.options?.size) {
         this.onAddOption();
@@ -173,12 +179,15 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     }
   }
 
+  /*
+   * This is used to track input added or removed in case of field options.
+   */
   trackByFn(index: number) {
     return index;
   }
 
   /**
-   * Emits event to layer dialog whenvever label or code gets updated in options-editor.
+   * Emits event with updated Options. Called when label or code gets updated.
    *
    * @param event: label and code value of the option field.
    * @param index: index of the option to be updated.
@@ -196,14 +205,17 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
 
   onOptionDelete(index: number) {
     const dialogRef = this.openConfirmationDialog();
-    dialogRef.afterClosed().subscribe(dialogResult => {
-      if (dialogResult) {
-        let options = this.formOptions?.options;
-        if (!options) return;
-        options = options.delete(index);
-        this.emitFormOptions(options);
-      }
-    });
+    dialogRef
+      .afterClosed()
+      .toPromise()
+      .then(dialogResult => {
+        if (dialogResult) {
+          let options = this.formOptions?.options;
+          if (!options) return;
+          options = options.delete(index);
+          this.emitFormOptions(options);
+        }
+      });
   }
 
   openConfirmationDialog() {
@@ -211,15 +223,19 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
       maxWidth: '500px',
       data: {
         title: 'Warning',
-        message:
-          'Are you sure you wish to delete this option? Any associated data will be lost. This cannot be undone.',
+        message: `Are you sure you wish to delete this option?
+        Any associated data will be lost. This cannot be undone.`,
       },
     });
   }
 
   onAddOption() {
     const index = this.formOptions?.options.size || 0;
-    const option = this.layerService.createOption('', '', index);
+    const option = this.layerService.createOption(
+      /* code= */ '',
+      /* label= */ '',
+      index
+    );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
   }
@@ -239,7 +255,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
     this.update.emit({
       label: StringMap({ en: this.label }),
       required: this.required,
-      type: this.type,
+      type: this.fieldType,
       multipleChoice: this.formOptions,
     });
   }
@@ -257,6 +273,10 @@ export class FormFieldEditorComponent implements OnInit, OnChanges {
   }
 
   get labelControl() {
-    return this.formFieldGroup.get('label')!;
+    return this.formGroup.get('label')!;
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

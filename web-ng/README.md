@@ -49,6 +49,22 @@
    };
    ```
 
+### Add local environment config
+
+Create a file in `environments/.backend-config.json` with the path to your
+hosted or local [Firebase Cloud Functions](
+https://firebase.google.com/products/functions) instance:
+
+```javascript
+export const backendConfig = {
+  cloudFunctionsHost: 'some-subdomain.cloudfunctions.net'
+};
+```
+
+If you don't yet have [Ground Cloud Functions](../functions) deployed, you
+may set `cloudFunctionsHost` to `'localhost'` for now; server-side operations
+like bulk CSV export will not be available.
+
 ## Dev Environment Setup
 
 Install Node.js using nvm:

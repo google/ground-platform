@@ -18,7 +18,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { LayerListItemComponent } from './layer-list-item.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
-import { RouterService } from './../../services/router/router.service';
+import { NavigationService } from './../../services/router/router.service';
 import { of } from 'rxjs';
 
 describe('LayerListItemComponent', () => {
@@ -26,14 +26,14 @@ describe('LayerListItemComponent', () => {
   let fixture: ComponentFixture<LayerListItemComponent>;
 
   beforeEach(async(() => {
-    const routerService = {
+    const navigationService = {
       getProjectId$: () => of(''),
     };
 
     TestBed.configureTestingModule({
       declarations: [LayerListItemComponent],
       imports: [MatListModule, MatMenuModule],
-      providers: [{ provide: RouterService, useValue: routerService }],
+      providers: [{ provide: NavigationService, useValue: navigationService }],
     }).compileComponents();
   }));
 

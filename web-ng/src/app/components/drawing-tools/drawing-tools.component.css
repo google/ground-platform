@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+ .drawing-buttons {
+  position: absolute;
+  bottom: 3em;
+  left: 3em;
+}
 
-import { NavigationService } from './router.service';
-import { Router } from '@angular/router';
-import { AngularFireModule } from '@angular/fire';
-
-describe('NavigationService', () => {
-  let service: NavigationService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [AngularFireModule.initializeApp({ projectId: '' })],
-      providers: [{ provide: Router, useValue: {} }],
-    });
-    service = TestBed.inject(NavigationService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-});
+.drawing-layer-selector {
+  position: absolute;
+  top: 2em;
+  left: 50%;
+  background-color: white;
+  transform: translate(-50%, 0);
+}
