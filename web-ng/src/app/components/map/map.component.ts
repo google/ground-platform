@@ -36,7 +36,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
-import { RouterService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
 
 // To make ESLint happy:
@@ -74,7 +74,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     private drawingToolsService: DrawingToolsService,
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private routerService: RouterService
+    private navigationService: NavigationService
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -82,7 +82,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.routerService.getFeatureId$().subscribe(id => {
+      this.navigationService.getFeatureId$().subscribe(id => {
         this.focusedFeatureId = id;
       })
     );
@@ -164,7 +164,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onFeatureClick(featureId: string | null) {
-    this.routerService.setFeatureId(featureId);
+    this.navigationService.setFeatureId(featureId);
   }
 
   isLocationFeature(feature: Feature) {

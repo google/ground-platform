@@ -27,7 +27,7 @@ import { Layer } from '../../shared/models/layer.model';
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
-import { RouterService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 
 const mockProject = new Project(
   'project001',
@@ -58,7 +58,7 @@ describe('LayerListComponent', () => {
   let fixture: ComponentFixture<LayerListComponent>;
 
   beforeEach(async(() => {
-    const routerService = {
+    const navigationService = {
       getProjectId$: () => of(''),
     };
     const routerSpy = createRouterSpy();
@@ -71,7 +71,7 @@ describe('LayerListComponent', () => {
           provide: Router,
           useValue: routerSpy,
         },
-        { provide: RouterService, useValue: routerService },
+        { provide: NavigationService, useValue: navigationService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
