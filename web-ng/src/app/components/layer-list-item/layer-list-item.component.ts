@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -23,6 +23,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
+import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -30,8 +31,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './layer-list-item.component.html',
   styleUrls: ['./layer-list-item.component.css'],
 })
-export class LayerListItemComponent implements OnInit {
-  @Input() layer: Layer | undefined;
+export class LayerListItemComponent implements OnInit, OnDestroy {
+  @Input() layer?: Layer;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
   projectId?: string | null;
@@ -67,10 +68,6 @@ export class LayerListItemComponent implements OnInit {
         this.projectId = id;
       })
     );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 
   ngOnChanges() {
@@ -119,6 +116,13 @@ export class LayerListItemComponent implements OnInit {
 
   onClose() {
     return this.router.navigate([`p/${this.projectId}`]);
+  }
+  onDownloadCsv() {
+    const link = `https://${environment.cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
 

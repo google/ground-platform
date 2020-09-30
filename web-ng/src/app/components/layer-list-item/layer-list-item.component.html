@@ -29,12 +29,16 @@ limitations under the License.
       <span>Delete</span>
     </button>
     <button mat-menu-item (click)="onCustomizeLayer()">
-      <mat-icon>layers</mat-icon>
+      <mat-icon>edit</mat-icon>
       <span>Customize layer</span>
     </button>
+    <button mat-menu-item (click)="onDownloadCsv()">
+      <mat-icon>cloud_download</mat-icon>
+      <span>Download CSV</span>
+    </button>
     <button mat-menu-item aria-label="back" (click)="onGoBackClick()">
-      <mat-icon>keyboard_backspace</mat-icon>
-      <span>Back</span>
+      <mat-icon>close</mat-icon>
+      <span>Close</span>
     </button>
   </mat-menu>
 </mat-list-item>
