@@ -55,10 +55,10 @@ Create a file in `environments/.backend-config.json` with the path to your
 hosted or local [Firebase Cloud Functions](
 https://firebase.google.com/products/functions) instance:
 
-```javascript
-export const backendConfig = {
-  cloudFunctionsHost: 'some-subdomain.cloudfunctions.net'
-};
+```json
+{
+  "cloudFunctionsHost": "some-subdomain.cloudfunctions.net"
+}
 ```
 
 If you don't yet have [Ground Cloud Functions](../functions) deployed, you
