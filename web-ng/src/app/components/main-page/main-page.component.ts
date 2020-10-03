@@ -23,7 +23,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
-import { RouterService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 import { ActivatedRoute } from '@angular/router';
 
 /**
@@ -42,7 +42,7 @@ export class MainPageComponent implements OnInit {
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
   constructor(
-    private routerService: RouterService,
+    private navigationService: NavigationService,
     private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService,
@@ -52,31 +52,31 @@ export class MainPageComponent implements OnInit {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
     this.activeProject$ = this.projectService.getActiveProject$();
-    routerService.init(route);
+    navigationService.init(route);
   }
 
   ngOnInit() {
     // Activate new project on route changes.
     this.subscription.add(
-      this.routerService.getProjectId$().subscribe(id => {
+      this.navigationService.getProjectId$().subscribe(id => {
         id && this.projectService.activateProject(id);
       })
     );
     // Show layer dialog when non-null layer id set in URL.
     this.subscription.add(
-      this.routerService
+      this.navigationService
         .getLayerId$()
         .subscribe(id => id && this.showEditLayerDialog(id))
     );
     // Show feature details when non-null feature id set in URL.
     this.subscription.add(
-      this.routerService
+      this.navigationService
         .getFeatureId$()
         .subscribe(id => id && this.loadFeatureDetails(id))
     );
     // Show/hide observation when observation id set in URL.
     this.subscription.add(
-      this.routerService
+      this.navigationService
         .getObservationId$()
         .subscribe(id => this.editObservation(id))
     );
@@ -89,7 +89,7 @@ export class MainPageComponent implements OnInit {
   private showEditLayerDialog(layerId: string) {
     this.activeProject$.pipe(take(1)).subscribe(project =>
       this.dialog.open(LayerDialogComponent, {
-        autoFocus: layerId === RouterService.LAYER_ID_NEW,
+        autoFocus: layerId === NavigationService.LAYER_ID_NEW,
         data: {
           projectId: project.isUnsavedNew()
             ? Project.PROJECT_ID_NEW

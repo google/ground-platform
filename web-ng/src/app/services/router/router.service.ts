@@ -31,17 +31,17 @@ interface ParamMap {
 @Injectable({
   providedIn: 'root',
 })
-export class RouterService {
+export class NavigationService {
   private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
   static readonly LAYER_ID_NEW = ':new';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
-    if (params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM)) {
+    if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
       return SideNavMode.OBSERVATION;
     }
-    if (params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM)) {
+    if (params.get(NavigationService.FEATURE_ID_FRAGMENT_PARAM)) {
       return SideNavMode.FEATURE;
     }
     return SideNavMode.LAYER_LIST;
@@ -71,16 +71,16 @@ export class RouterService {
       map(fragment => new HttpParams({ fromString: fragment || '' }))
     );
     this.layerId$ = fragmentParams$.pipe(
-      map(params => params.get(RouterService.LAYER_ID_FRAGMENT_PARAM))
+      map(params => params.get(NavigationService.LAYER_ID_FRAGMENT_PARAM))
     );
     this.featureId$ = fragmentParams$.pipe(
-      map(params => params.get(RouterService.FEATURE_ID_FRAGMENT_PARAM))
+      map(params => params.get(NavigationService.FEATURE_ID_FRAGMENT_PARAM))
     );
     this.observationId$ = fragmentParams$.pipe(
-      map(params => params.get(RouterService.OBSERVATION_ID_FRAGMENT_PARAM))
+      map(params => params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM))
     );
     this.sideNavMode$ = fragmentParams$.pipe(
-      map(params => RouterService.fragmentParamsToSideNavMode(params))
+      map(params => NavigationService.fragmentParamsToSideNavMode(params))
     );
   }
 
@@ -148,7 +148,7 @@ export class RouterService {
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
   setFeatureId(id: string | null) {
-    this.setFragmentParam(RouterService.FEATURE_ID_FRAGMENT_PARAM, id);
+    this.setFragmentParam(NavigationService.FEATURE_ID_FRAGMENT_PARAM, id);
   }
 
   /**
@@ -156,11 +156,11 @@ export class RouterService {
    * fragment.
    */
   setObservationId(id: string) {
-    this.setFragmentParam(RouterService.OBSERVATION_ID_FRAGMENT_PARAM, id);
+    this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
 
   setLayerId(id: string) {
-    this.setFragmentParam(RouterService.LAYER_ID_FRAGMENT_PARAM, id);
+    this.setFragmentParam(NavigationService.LAYER_ID_FRAGMENT_PARAM, id);
   }
 }
 

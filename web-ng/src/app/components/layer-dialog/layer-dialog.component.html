@@ -46,8 +46,8 @@
         <app-form-field-editor
           [label]="field.label.get('en')"
           [required]="field.required"
+          [fieldType]="field.type"
           [cardinality]="field.multipleChoice?.cardinality"
-          [type]="field.type"
           [multipleChoice]="field.multipleChoice"
           (update)="onFieldUpdate($event, i)"
           (delete)="onFieldDelete(i)"
@@ -78,7 +78,12 @@
       </button>
     </div>
     <div fxLayoutAlign="end">
-      <button type="button" mat-raised-button (click)="onClose()" class="btn-cancel">
+      <button
+        type="button"
+        mat-raised-button
+        (click)="onClose()"
+        class="btn-cancel"
+      >
         Cancel
       </button>
       <button mat-raised-button type="submit" class="btn-save">
