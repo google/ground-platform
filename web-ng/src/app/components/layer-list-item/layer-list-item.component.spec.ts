@@ -20,20 +20,29 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { NavigationService } from './../../services/router/router.service';
 import { of } from 'rxjs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 describe('LayerListItemComponent', () => {
   let component: LayerListItemComponent;
   let fixture: ComponentFixture<LayerListItemComponent>;
+  const firestoreStub: Partial<AngularFirestore> = {};
 
   beforeEach(async(() => {
     const navigationService = {
       getProjectId$: () => of(''),
+      getFeatureId$: () => of(''),
     };
 
     TestBed.configureTestingModule({
       declarations: [LayerListItemComponent],
-      imports: [MatListModule, MatMenuModule],
-      providers: [{ provide: NavigationService, useValue: navigationService }],
+      imports: [MatListModule, MatMenuModule, MatDialogModule],
+      providers: [
+        { provide: NavigationService, useValue: navigationService },
+        { provide: Router, useValue: {} },
+        { provide: AngularFirestore, useValue: firestoreStub },
+      ],
     }).compileComponents();
   }));
 

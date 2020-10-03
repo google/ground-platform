@@ -20,7 +20,7 @@ import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from '../../../environments/environment';
-import { of, Subject } from 'rxjs';
+import { never, of, Subject } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -168,6 +168,7 @@ describe('ObservationFormComponent', () => {
   beforeEach(async(() => {
     const navigationService = {
       getProjectId$: () => of(''),
+      getFeatureId$: never,
     };
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
