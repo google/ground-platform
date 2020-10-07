@@ -53,6 +53,7 @@ import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { User } from '../../shared/models/user.model';
+import { NavigationService } from '../../services/router/router.service';
 
 class MockModel {
   static element001: Field = new Field(
@@ -165,6 +166,9 @@ describe('ObservationFormComponent', () => {
   const user$ = new Subject<User | null>();
 
   beforeEach(async(() => {
+    const navigationService = {
+      getProjectId$: () => of(''),
+    };
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [ObservationFormComponent],
@@ -188,6 +192,7 @@ describe('ObservationFormComponent', () => {
         { provide: ProjectService, useValue: projectService },
         { provide: ObservationService, useValue: observationService },
         { provide: Router, useValue: routerSpy },
+        { provide: NavigationService, useValue: navigationService },
         {
           provide: AuthService,
           useValue: {

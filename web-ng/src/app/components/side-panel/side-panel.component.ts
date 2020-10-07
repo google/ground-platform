@@ -16,7 +16,7 @@
 
 import { Component } from '@angular/core';
 import {
-  RouterService,
+  NavigationService,
   SideNavMode,
 } from '../../services/router/router.service';
 import { Observable } from 'rxjs';
@@ -31,10 +31,10 @@ export class SidePanelComponent {
   readonly sideNavMode$: Observable<SideNavMode>;
   readonly lang: string;
 
-  constructor(private routerService: RouterService) {
+  constructor(private navigationService: NavigationService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
 
-    this.sideNavMode$ = routerService.getSideNavMode$();
+    this.sideNavMode$ = navigationService.getSideNavMode$();
   }
 }

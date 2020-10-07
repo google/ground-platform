@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { RouterService } from './../../services/router/router.service';
+import { NavigationService } from './../../services/router/router.service';
+import { environment } from '../../../environments/environment';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'ground-layer-list-item',
   templateUrl: './layer-list-item.component.html',
   styleUrls: ['./layer-list-item.component.css'],
 })
-export class LayerListItemComponent implements OnInit {
-  @Input() layer: Layer | undefined;
+export class LayerListItemComponent implements OnInit, OnDestroy {
+  @Input() layer?: Layer;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
+  projectId!: string | null;
+
+  private subscription = new Subscription();
 
   constructor(
-    private routerService: RouterService,
+    private navigationService: NavigationService,
     private sanitizer: DomSanitizer
   ) {
     // TODO: Make dynamic to support i18n.
@@ -46,6 +51,11 @@ export class LayerListItemComponent implements OnInit {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
+    this.subscription.add(
+      this.navigationService.getProjectId$().subscribe(id => {
+        this.projectId = id;
+      })
+    );
   }
 
   ngOnChanges() {
@@ -56,12 +66,20 @@ export class LayerListItemComponent implements OnInit {
 
   onCustomizeLayer() {
     if (this.layer?.id) {
-      this.routerService.setLayerId(this.layer?.id);
+      this.navigationService.setLayerId(this.layer?.id);
     }
   }
 
   onGoBackClick() {
-    this.routerService.setFeatureId(null);
+    this.navigationService.setFeatureId(null);
+  }
+
+  onDownloadCsv() {
+    const link = `https://${environment.cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
 

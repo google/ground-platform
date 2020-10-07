@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FeaturePanelComponent } from './feature-panel.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { DrawingToolsComponent } from './drawing-tools.component';
+import { MatButtonModule } from '@angular/material/button'; // ?
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   imports: [
-    BrowserModule,
-    MatCardModule,
-    MatListModule,
-    LayerListItemModule,
-    MatIconModule,
+    CommonModule,
     MatButtonModule,
-    MatMenuModule,
+    MatButtonToggleModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
-  exports: [FeaturePanelComponent],
-  declarations: [FeaturePanelComponent],
+  exports: [DrawingToolsComponent],
+  declarations: [DrawingToolsComponent],
 })
-export class FeaturePanelModule {}
+export class DrawingToolsModule {}

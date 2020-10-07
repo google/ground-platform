@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
 const functions = require('firebase-functions')
 const onCreateUser = require('./on-create-user')
 const exportCsv = require('./export-csv')
 const exportKml = require('./export-kml')
-const importCsv = require('./import-csv')
+const importCsv = require("./import-csv")
 const updateColumns = require('./update-columns')
 const onCreateRecord = require('./on-create-record')
 const onUpdateRecord = require('./on-update-record')
@@ -29,33 +29,31 @@ const onUpdateRecord = require('./on-update-record')
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
 
-exports.exportCsv = functions.https.onRequest(
-    (req, res) =>
-        exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
-exports.exportKml = functions.https.onRequest(
-    (req, res) =>
-        exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
+exports.importCsv = functions.https.onRequest(importCsv);
+
+exports.exportCsv = functions.https.onRequest((req, res) =>
+  exportCsv(req, res).catch((err) => res.status(500).send(`${err}`))
+);
+exports.exportKml = functions.https.onRequest((req, res) =>
+  exportKml(req, res).catch((err) => res.status(500).send(`${err}`))
+);
 
 // Test via shell:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
-exports.updateColumns = functions.https.onRequest(
-    (req, res) =>
-        updateColumns(req, res).catch(err => res.status(500).send(`${err}`)));
+exports.updateColumns = functions.https.onRequest((req, res) =>
+  updateColumns(req, res).catch((err) => res.status(500).send(`${err}`))
+);
 
 // Test via shell:
 // onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
-exports.onCreateRecord =
-    functions.firestore
-        .document(
-            'projects/{projectId}/features/{featureId}/records/{recordId}')
-        .onCreate((change, context) => onCreateRecord(change, context));
+exports.onCreateRecord = functions.firestore
+  .document("projects/{projectId}/features/{featureId}/records/{recordId}")
+  .onCreate((change, context) => onCreateRecord(change, context));
 
 // Test via shell:
 // onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
-exports.onUpdateRecord =
-    functions.firestore
-        .document(
-            'projects/{projectId}/features/{featureId}/records/{recordId}')
-        .onUpdate((change, context) => onUpdateRecord(change, context));
+exports.onUpdateRecord = functions.firestore
+  .document("projects/{projectId}/features/{featureId}/records/{recordId}")
+  .onUpdate((change, context) => onUpdateRecord(change, context));
 
 exports.importCsv = functions.https.onRequest(importCsv);
