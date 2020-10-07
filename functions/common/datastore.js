@@ -75,26 +75,22 @@ class Datastore {
 
   insertFeature(projectId, layerId, { caption, location }) {
     var docRef = this.db_.collection('projects').doc(projectId);
-    return docRef.get().then((docSnapshot) => {
-      if (docSnapshot.exists) {
-        docRef.collection('features').add({
-          layerId: layerId,
-          caption: caption,
-          location: location
-        })
-        console.log("Feature successfully written!");
+    if (!docRef.get().exists) {
+      console.log("Project " + projectId + " does not exist!");
+      // For debug purposes uncomment below to create the project
+      // docRef.set({ project: projectId });
+      return;
+    }
+    docRef.collection('features').add({
+      layerId: layerId,
+      caption: caption,
+      location: location
+    }, function(error) {
+      if (error) {
+        console.log("Features could not be saved." + error);
       } else {
-        docRef.set({ project: projectId });
-        docRef.collection('features').add({
-          layerId: layerId,
-          caption: caption,
-          location: location
-        })
-        console.log("Feature successfully written!");
-        // TODO(tiyara): For prod throw a 404 error.
+        console.log("Features saved successfully.");
       }
-    }).catch(function (error) {
-      console.log("Error getting document:", error);
     });
   }
 }
