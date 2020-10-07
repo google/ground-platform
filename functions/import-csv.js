@@ -47,9 +47,9 @@ function importCsv(req, res) {
 
         // Pipe file through CSV parser lib, inserting each row in the db as it is
         // received.
-        file.pipe(csvParser()).on("data", (record) => {
+        file.pipe(csvParser()).on("data", async (record) => {
             console.log("Processing row: ", JSON.stringify(record));
-            db.insertFeature(projectId, layerId, csvRowToFeature(record));
+            await db.insertFeature(projectId, layerId, csvRowToFeature(record));
         });
     });
 

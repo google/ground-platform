@@ -73,24 +73,19 @@ class Datastore {
     return this.fetchDoc_(`projects/${projectId}/sheets/config`);
   }
 
-  insertFeature(projectId, layerId, { caption, location }) {
-    var docRef = this.db_.collection('projects').doc(projectId);
-    if (!docRef.get().exists) {
+  async insertFeature(projectId, layerId, { caption, location }) {
+    const docRef = await this.db_.collection('projects').doc(projectId);
+    if (!docRef.exists) {
       console.log("Project " + projectId + " does not exist!");
       // For debug purposes uncomment below to create the project
       // docRef.set({ project: projectId });
+      throw new Error(`Project ${projectId} does not exist!`);
       return;
     }
-    docRef.collection('features').add({
+    await docRef.collection('features').add({
       layerId: layerId,
       caption: caption,
       location: location
-    }, function(error) {
-      if (error) {
-        console.log("Features could not be saved." + error);
-      } else {
-        console.log("Features saved successfully.");
-      }
     });
   }
 }
