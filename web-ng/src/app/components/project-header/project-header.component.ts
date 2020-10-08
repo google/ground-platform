@@ -21,6 +21,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 
 @Component({
   selector: 'app-project-header',
@@ -31,6 +33,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   lang: string;
   title: string;
   projectId!: string;
+  offlineBaseMapSources?: OfflineBaseMapSource[];
 
   subscription: Subscription = new Subscription();
   constructor(
@@ -48,6 +51,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
         this.projectId = project.id;
       })
     );
+    this.offlineBaseMapSources = environment.offlineBaseMapSources;
   }
 
   ngOnInit() {}
@@ -66,15 +70,15 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
    */
   updateProjectTitle(value: string) {
     if (!this.projectId) {
-      return this.createProject(value);
+      return this.createProject(value, this.offlineBaseMapSources);
     }
     if (value === this.title) return Promise.resolve();
     return this.projectService.updateTitle(this.projectId, value);
   }
 
-  createProject(title: string) {
+  createProject(title: string, offlineBaseMapSources?: OfflineBaseMapSource[]) {
     this.projectService
-      .createProject(title)
+      .createProject(title, offlineBaseMapSources)
       .then(projectId => {
         this.router.navigateByUrl(`/p/${projectId}`);
       })
