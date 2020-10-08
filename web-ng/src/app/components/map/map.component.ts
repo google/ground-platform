@@ -178,6 +178,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         feature.location.longitude
       ),
       icon,
+      draggable: false,
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
@@ -193,9 +194,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     if (marker !== null) {
       this.setIconSize(marker, enlargedIconScale);
+      marker.setDraggable(true);
     }
     if (this.focusedMarker !== null) {
       this.setIconSize(this.focusedMarker, normalIconScale);
+      this.focusedMarker.setDraggable(false);
     }
     this.focusedMarker = marker;
   }
