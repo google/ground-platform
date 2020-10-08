@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Component,
-  OnInit,
-  AfterViewInit,
-  ViewChild,
-  OnDestroy,
-} from '@angular/core';
+import { Component, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
 import { Project } from '../../shared/models/project.model';
 import {
   Feature,
@@ -33,7 +27,7 @@ import {
 } from '../../services/drawing-tools/drawing-tools.service';
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
@@ -42,14 +36,16 @@ import { GoogleMap } from '@angular/google-maps';
 // To make ESLint happy:
 /*global google*/
 
+const normalIconScale = 30;
+const enlargedIconScale = 50;
+
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
-export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
-  focusedFeatureId: string | null = null;
   features$: Observable<List<Feature>>;
   activeProject$: Observable<Project>;
   private initialMapOptions: google.maps.MapOptions = {
@@ -60,6 +56,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
+  private focusedMarker: google.maps.Marker | null = null;
+  private markers: google.maps.Marker[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
   };
@@ -80,23 +78,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.activeProject$ = this.projectService.getActiveProject$();
   }
 
-  ngOnInit() {
-    this.subscription.add(
-      this.navigationService.getFeatureId$().subscribe(id => {
-        this.focusedFeatureId = id;
-      })
-    );
-  }
-
   ngAfterViewInit() {
     this.subscription.add(
-      this.features$.subscribe(features => this.onFeaturesUpdate(features))
-    );
-    this.subscription.add(
-      this.activeProject$.subscribe(project =>
-        this.onProjectActivation(project)
+      combineLatest([
+        this.activeProject$,
+        this.features$,
+      ]).subscribe(([project, features]) =>
+        this.onProjectAndFeaturesUpdate(project, features)
       )
     );
+
     this.subscription.add(
       this.drawingToolsService
         .getEditMode$()
@@ -108,28 +99,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  onFeaturesUpdate(features: List<Feature>) {
+  onProjectAndFeaturesUpdate(project: Project, features: List<Feature>) {
+    this.deleteMarkers();
     this.clearGoogleMapDataLayer();
-    features.forEach(feature => {
-      if (feature instanceof GeoJsonFeature) {
-        const addedFeatures = this.map.data.addGeoJson(
-          (feature as GeoJsonFeature).geoJson
-        );
-        addedFeatures.forEach(f => {
-          f.setProperty('layerId', feature.layerId);
-        });
-      }
-    });
-  }
-
-  onProjectActivation(project: Project) {
-    this.map.data.setStyle(feature => {
-      const layerId = feature.getProperty('layerId');
-      const color = project.layers.get(layerId)?.color;
-      return {
-        fillColor: color,
-      };
-    });
+    this.addMarkersAndGeoJsonsToMap(project, features);
+    this.updateStylingFunctionForAllGeoJsons(project);
   }
 
   onEditModeChange(editMode: EditMode) {
@@ -140,8 +114,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    // Deselect feature.
-    this.onFeatureClick(null);
+    this.focusMarker(null);
+    this.navigationService.setFeatureId(null);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
     if (!selectedLayerId) {
@@ -163,42 +137,98 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  onFeatureClick(featureId: string | null) {
-    this.navigationService.setFeatureId(featureId);
+  private deleteMarkers() {
+    for (const marker of this.markers) {
+      marker.setMap(null);
+    }
+    this.markers = [];
   }
 
-  isLocationFeature(feature: Feature) {
-    return feature instanceof LocationFeature;
+  private clearGoogleMapDataLayer() {
+    this.map.data.forEach(f => this.map.data.remove(f));
   }
 
-  createMarkerOptions(
-    feature: LocationFeature,
-    focusedFeatureId: string,
-    project: Project
-  ): google.maps.MarkerOptions {
-    // Icon is not yet an input for <map-marker>, this is the only way to change icon for now.
-    // Consider break this down when more inputs are available for <map-marker>.
-    const normalScale = 30;
-    const enlargedScale = 50;
+  private addMarkersAndGeoJsonsToMap(
+    project: Project,
+    features: List<Feature>
+  ) {
+    features.forEach(feature => {
+      if (feature instanceof LocationFeature) {
+        this.addMarkerToMap(project, feature);
+      }
+      if (feature instanceof GeoJsonFeature) {
+        this.addGeoJsonToMap(feature);
+      }
+    });
+  }
+
+  private addMarkerToMap(project: Project, feature: LocationFeature) {
     const color = project.layers.get(feature.layerId)?.color;
     const icon = {
       url: getPinImageSource(color),
       scaledSize: {
-        width: feature.id === focusedFeatureId ? enlargedScale : normalScale,
-        height: feature.id === focusedFeatureId ? enlargedScale : normalScale,
+        width: normalIconScale,
+        height: normalIconScale,
       },
     } as google.maps.Icon;
-
-    return {
+    const options: google.maps.MarkerOptions = {
+      map: this.map._googleMap,
       position: new google.maps.LatLng(
         feature.location.latitude,
         feature.location.longitude
       ),
       icon,
-    } as google.maps.MarkerOptions;
+    };
+    const marker = new google.maps.Marker(options);
+    marker.addListener('click', () => {
+      this.focusMarker(marker);
+      this.navigationService.setFeatureId(feature.id);
+    });
+    this.markers.push(marker);
   }
 
-  private clearGoogleMapDataLayer() {
-    this.map.data.forEach(f => this.map.data.remove(f));
+  private focusMarker(marker: google.maps.Marker | null) {
+    if (marker === this.focusedMarker) {
+      return;
+    }
+    if (marker !== null) {
+      this.setIconSize(marker, enlargedIconScale);
+    }
+    if (this.focusedMarker !== null) {
+      this.setIconSize(this.focusedMarker, normalIconScale);
+    }
+    this.focusedMarker = marker;
+  }
+
+  private setIconSize(marker: google.maps.Marker, size: number) {
+    const icon = marker.getIcon() as google.maps.ReadonlyIcon;
+    const newIcon = {
+      url: icon.url,
+      scaledSize: {
+        width: size,
+        height: size,
+      },
+    } as google.maps.Icon;
+    marker.setIcon(newIcon);
+  }
+
+  private addGeoJsonToMap(feature: GeoJsonFeature) {
+    const addedFeatures = this.map.data.addGeoJson(
+      (feature as GeoJsonFeature).geoJson
+    );
+    // Set property 'layerId' so that it knows what color to render later.
+    addedFeatures.forEach(f => {
+      f.setProperty('layerId', feature.layerId);
+    });
+  }
+
+  private updateStylingFunctionForAllGeoJsons(project: Project) {
+    this.map.data.setStyle(mapFeature => {
+      const layerId = mapFeature.getProperty('layerId');
+      const color = project.layers.get(layerId)?.color;
+      return {
+        fillColor: color,
+      };
+    });
   }
 }
