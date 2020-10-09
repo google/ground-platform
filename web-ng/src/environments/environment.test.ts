@@ -32,4 +32,5 @@ export const environment = {
     appId: '',
   },
   cloudFunctionsHost: 'some-subdomain.cloudfunctions.net',
+  offlineBaseMapSources: [{ url: '' }],
 };
