@@ -32,6 +32,7 @@ import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
+import { firestore } from 'firebase/app';
 
 // To make ESLint happy:
 /*global google*/
@@ -184,6 +185,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('click', () => {
       this.focusMarker(marker);
       this.navigationService.setFeatureId(feature.id);
+    });
+    marker.addListener('dragend', (event: google.maps.MouseEvent) => {
+      const newFeature = new LocationFeature(
+        feature.id,
+        feature.layerId,
+        new firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
+      );
+      this.featureService.updatePoint(newFeature);
     });
     this.markers.push(marker);
   }
