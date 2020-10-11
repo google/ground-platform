@@ -23,7 +23,7 @@ import { List } from 'immutable';
 import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
-import { FieldType } from '../../shared/models/form/field.model';
+import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/router/router.service';
 import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
 
@@ -70,6 +70,10 @@ export class FeaturePanelComponent {
             .pipe(map(feature => project.layers.get(feature.layerId)!))
         )
       );
+  }
+
+  getFields(observation: Observation): List<Field> {
+    return List(observation.form?.fields?.valueSeq() || []);
   }
 
   onEditObservationClick(observation: Observation) {
