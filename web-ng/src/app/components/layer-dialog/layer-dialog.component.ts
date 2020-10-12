@@ -34,7 +34,6 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Project } from '../../shared/models/project.model';
-import { environment } from '../../../environments/environment';
 
 // To make ESLint happy:
 /*global alert*/
@@ -171,13 +170,10 @@ export class LayerDialogComponent implements OnDestroy {
     );
 
     if (this.projectId === Project.PROJECT_ID_NEW) {
-      const offlineBaseMapSources = environment.offlineBaseMapSources;
-      this.projectService
-        .createProject(/* title= */ '', offlineBaseMapSources)
-        .then(projectId => {
-          this.projectId = projectId;
-          this.updateLayer(this.projectId, layer);
-        });
+      this.projectService.createProject(/* title= */ '').then(projectId => {
+        this.projectId = projectId;
+        this.updateLayer(this.projectId, layer);
+      });
     } else {
       this.updateLayer(this.projectId, layer);
     }

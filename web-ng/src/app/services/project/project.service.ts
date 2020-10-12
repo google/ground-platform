@@ -24,7 +24,7 @@ import { Role } from '../../shared/models/role.model';
 import { Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -80,10 +80,8 @@ export class ProjectService {
     return this.dataStore.updateAcl(projectId, acl);
   }
 
-  async createProject(
-    title: string,
-    offlineBaseMapSources?: OfflineBaseMapSource[]
-  ): Promise<string> {
+  async createProject(title: string): Promise<string> {
+    const offlineBaseMapSources = environment.offlineBaseMapSources;
     const user = await this.authService.getUser$().pipe(take(1)).toPromise();
     const email = user?.email;
     if (!email) {
