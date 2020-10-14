@@ -103,8 +103,7 @@ export class FeatureService {
       layerId,
       new firestore.GeoPoint(lat, lng)
     );
-    await this.dataStore
-      .updateFeature(project.id, newFeature);
+    await this.dataStore.updateFeature(project.id, newFeature);
     this.selectFeature(newFeature.id);
   }
 
