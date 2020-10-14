@@ -17,14 +17,14 @@
 
 "use strict";
 
-const functions = require("firebase-functions");
-const onCreateUser = require("./on-create-user");
-const exportCsv = require("./export-csv");
-const exportKml = require("./export-kml");
-const importCsv = require("./import-csv");
-const updateColumns = require("./update-columns");
-const onCreateRecord = require("./on-create-record");
-const onUpdateRecord = require("./on-update-record");
+const functions = require('firebase-functions')
+const onCreateUser = require('./on-create-user')
+const exportCsv = require('./export-csv')
+const exportKml = require('./export-kml')
+const importCsv = require("./import-csv")
+const updateColumns = require('./update-columns')
+const onCreateRecord = require('./on-create-record')
+const onUpdateRecord = require('./on-update-record')
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
@@ -55,3 +55,5 @@ exports.onCreateRecord = functions.firestore
 exports.onUpdateRecord = functions.firestore
   .document("projects/{projectId}/features/{featureId}/records/{recordId}")
   .onUpdate((change, context) => onUpdateRecord(change, context));
+
+exports.importCsv = functions.https.onRequest(importCsv);
