@@ -18,6 +18,10 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
@@ -31,16 +35,19 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
+  projectId?: string | null;
+  featureId?: string | null;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
-  projectId!: string | null;
-
-  private subscription = new Subscription();
+  subscription: Subscription = new Subscription();
 
   constructor(
-    private navigationService: NavigationService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private confirmationDialog: MatDialog,
+    private router: Router,
+    private dataStoreService: DataStoreService,
+    private navigationService: NavigationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -50,6 +57,11 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
+    );
+    this.subscription.add(
+      this.navigationService.getFeatureId$().subscribe(id => {
+        this.featureId = id;
+      })
     );
     this.subscription.add(
       this.navigationService.getProjectId$().subscribe(id => {
@@ -74,6 +86,37 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     this.navigationService.setFeatureId(null);
   }
 
+  onDeleteFeature() {
+    const dialogRef = this.confirmationDialog.open(
+      ConfirmationDialogComponent,
+      {
+        maxWidth: '500px',
+        data: {
+          title: 'Warning',
+          message:
+            'Are you sure you wish to delete this feature? Any associated data including all observations in this feature will be lost. This cannot be undone.',
+        },
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(async dialogResult => {
+      if (dialogResult) {
+        await this.deleteFeature();
+      }
+    });
+  }
+
+  async deleteFeature() {
+    if (!this.projectId || !this.featureId) {
+      return;
+    }
+    await this.dataStoreService.deleteFeature(this.projectId, this.featureId);
+    this.onClose();
+  }
+
+  onClose() {
+    return this.router.navigate([`p/${this.projectId}`]);
+  }
   onDownloadCsv() {
     const link = `https://${environment.cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
   }
