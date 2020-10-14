@@ -57,7 +57,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
-  private focusedMarker: google.maps.Marker | null = null;
+  private selectedMarker: google.maps.Marker | null = null;
   private markers: google.maps.Marker[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
@@ -101,8 +101,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onProjectAndFeaturesUpdate(project: Project, features: List<Feature>) {
-    this.deleteMarkers();
-    this.clearGoogleMapDataLayer();
+    this.clearMap();
     this.addMarkersAndGeoJsonsToMap(project, features);
     this.updateStylingFunctionForAllGeoJsons(project);
   }
@@ -115,7 +114,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    this.focusMarker(null);
+    this.selectMarker(null);
     this.navigationService.setFeatureId(null);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
@@ -136,6 +135,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       default:
         return Promise.resolve();
     }
+  }
+
+  private clearMap() {
+    this.deleteMarkers();
+    this.clearGoogleMapDataLayer();
   }
 
   private deleteMarkers() {
@@ -183,7 +187,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
-      this.focusMarker(marker);
+      this.selectMarker(marker);
       this.navigationService.setFeatureId(feature.id);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
@@ -197,19 +201,19 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markers.push(marker);
   }
 
-  private focusMarker(marker: google.maps.Marker | null) {
-    if (marker === this.focusedMarker) {
+  private selectMarker(marker: google.maps.Marker | null) {
+    if (marker === this.selectedMarker) {
       return;
     }
-    if (marker !== null) {
+    if (marker) {
       this.setIconSize(marker, enlargedIconScale);
       marker.setDraggable(true);
     }
-    if (this.focusedMarker !== null) {
-      this.setIconSize(this.focusedMarker, normalIconScale);
-      this.focusedMarker.setDraggable(false);
+    if (this.selectedMarker) {
+      this.setIconSize(this.selectedMarker, normalIconScale);
+      this.selectedMarker.setDraggable(false);
     }
-    this.focusedMarker = marker;
+    this.selectedMarker = marker;
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {

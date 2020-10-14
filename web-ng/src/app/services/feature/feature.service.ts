@@ -69,27 +69,27 @@ export class FeatureService {
     return this.selectedFeature$;
   }
 
-  async addPoint(lat: number, lng: number, layerId: string): Promise<void> {
+  addPoint(lat: number, lng: number, layerId: string): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
     // upgrading to RxJS 7.
-    const project = await this.projectService
+    return this.projectService
       .getActiveProject$()
       .pipe(take(1))
-      .toPromise();
-    return await this.addPointInternal(project, lat, lng, layerId);
+      .toPromise()
+      .then(project => this.addPointInternal(project, lat, lng, layerId));
   }
 
-  async updatePoint(feature: Feature): Promise<void> {
+  updatePoint(feature: Feature): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
     // upgrading to RxJS 7.
-    const project = await this.projectService
+    return this.projectService
       .getActiveProject$()
       .pipe(take(1))
-      .toPromise();
-    return await this.updatePointInternal(project, feature);
+      .toPromise()
+      .then(project => this.updatePointInternal(project, feature));
   }
 
-  private async addPointInternal(
+  private addPointInternal(
     project: Project,
     lat: number,
     lng: number,
@@ -103,8 +103,9 @@ export class FeatureService {
       layerId,
       new firestore.GeoPoint(lat, lng)
     );
-    await this.dataStore.updateFeature(project.id, newFeature);
-    return this.selectFeature(newFeature.id);
+    return this.dataStore
+      .updateFeature(project.id, newFeature)
+      .then(() => this.selectFeature(newFeature.id));
   }
 
   private updatePointInternal(project: Project, feature: Feature) {
