@@ -57,7 +57,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
-  private selectedMarker: google.maps.Marker | null = null;
+  private selectedMarker?: google.maps.Marker;
   private markers: google.maps.Marker[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
@@ -114,7 +114,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    this.selectMarker(null);
+    this.selectMarker(undefined);
     this.navigationService.setFeatureId(null);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
@@ -201,7 +201,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markers.push(marker);
   }
 
-  private selectMarker(marker: google.maps.Marker | null) {
+  private selectMarker(marker: google.maps.Marker | undefined) {
     if (marker === this.selectedMarker) {
       return;
     }
@@ -229,9 +229,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private addGeoJsonToMap(feature: GeoJsonFeature) {
-    const addedFeatures = this.map.data.addGeoJson(
-      (feature as GeoJsonFeature).geoJson
-    );
+    const addedFeatures = this.map.data.addGeoJson(feature.geoJson);
     // Set property 'layerId' so that it knows what color to render later.
     addedFeatures.forEach(f => {
       f.setProperty('layerId', feature.layerId);
