@@ -26,9 +26,9 @@ class Datastore {
    * Stores user email, name, and avatar to db for use in application features.
    * These attributes are merged with other existing ones if already present.
    */
-  mergeUserProfile({uid, email, displayName, photoURL}) {
+  mergeUserProfile({ uid, email, displayName, photoURL }) {
     return this.db_.doc(`users/${uid}`)
-        .set({uid, email, displayName, photoURL}, {merge: true});
+      .set({ uid, email, displayName, photoURL }, { merge: true });
   }
 
   fetch_(docRef) {
@@ -49,7 +49,7 @@ class Datastore {
 
   fetchRecord(projectId, featureId, recordId) {
     return this.fetchDoc_(
-        `projects/${projectId}/features/${featureId}/records/${recordId}`);
+      `projects/${projectId}/features/${featureId}/records/${recordId}`);
   }
 
   fetchRecords(projectId, featureId) {
@@ -66,11 +66,27 @@ class Datastore {
 
   fetchForm(projectId, featureTypeId, formId) {
     return this.fetchDoc_(
-        `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
+      `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
   }
 
   fetchSheetsConfig(projectId) {
     return this.fetchDoc_(`projects/${projectId}/sheets/config`);
+  }
+
+  async insertFeature(projectId, layerId, { caption, location }) {
+    const docRef = await this.db_.collection('projects').doc(projectId);
+    if (!docRef.exists) {
+      console.log("Project " + projectId + " does not exist!");
+      // For debug purposes uncomment below to create the project
+      // docRef.set({ project: projectId });
+      throw new Error(`Project ${projectId} does not exist!`);
+      return;
+    }
+    await docRef.collection('features').add({
+      layerId: layerId,
+      caption: caption,
+      location: location
+    });
   }
 }
 

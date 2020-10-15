@@ -96,6 +96,15 @@ export class DataStoreService {
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
+  async deleteFeature(projectId: string, featureId: string) {
+    return await this.db
+      .collection('projects')
+      .doc(projectId)
+      .collection('features')
+      .doc(featureId)
+      .delete();
+  }
+
   updateObservation(projectId: string, observation: Observation) {
     return this.db
       .collection(`projects/${projectId}/observations`)

@@ -18,8 +18,10 @@ limitations under the License.
     TODO: create separate component for layer as a header instead of 
     using LayerListItem here.
   -->
-  <ground-layer-list-item [layer]="layer" 
-    [actionsType]="layerListItemActionsType.BACK"></ground-layer-list-item>
+  <ground-layer-list-item
+    [layer]="layer"
+    [actionsType]="layerListItemActionsType.BACK"
+  ></ground-layer-list-item>
 </mat-list>
 <div *ngIf="observations$ | async as observations">
   <mat-card class="observation card" *ngFor="let observation of observations">
@@ -29,9 +31,13 @@ limitations under the License.
       </mat-card-title>
       <!--TODO: figure out why serverTime is not working-->
       <mat-card-subtitle>
-        {{ observation.created.clientTime | date:'medium' }}
+        {{ observation.created.clientTime | date: 'medium' }}
       </mat-card-subtitle>
-      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
+      <button
+        mat-icon-button
+        aria-label="actions"
+        (click)="onEditObservationClick(observation)"
+      >
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
@@ -42,16 +48,22 @@ limitations under the License.
       </mat-menu>
     </mat-card-header>
     <mat-card-content>
-        <div *ngFor="let field_entry of observation.form.fields ">
-          <label class="field-label">{{ field_entry[1].label?.get(lang) }}</label>
-          <div class="field-response" *ngIf="field_entry[1].type == fieldTypes.TEXT">
-            {{ observation.responses?.get(field_entry[1].id)?.value }}
-          </div>
-          <div class="field-response" *ngIf="field_entry[1].type == fieldTypes.MULTIPLE_CHOICE">
-            <span class="option-label" *ngFor="let option of observation.responses?.get(field_entry[1].id)?.value">
-              {{ option.label?.get(lang) }}
-            </span>
-          </div>
+      <div *ngFor="let field of getFields(observation)">
+        <label class="field-label">{{ field.label?.get(lang) }}</label>
+        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT">
+          {{ observation.responses?.get(field.id)?.value }}
+        </div>
+        <div
+          class="field-response"
+          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
+        >
+          <span
+            class="option-label"
+            *ngFor="let option of observation.responses?.get(field.id)?.value"
+          >
+            {{ option.label?.get(lang) }}
+          </span>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>
