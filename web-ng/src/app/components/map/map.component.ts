@@ -184,6 +184,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       ),
       icon,
       draggable: false,
+      title: feature.id,
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
@@ -198,6 +199,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       );
       this.featureService.updatePoint(newFeature);
     });
+    if (marker.getTitle() === this.selectedMarker?.getTitle()) {
+      this.selectMarker(marker);
+    }
     this.markers.push(marker);
   }
 

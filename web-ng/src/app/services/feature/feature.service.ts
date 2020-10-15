@@ -96,7 +96,7 @@ export class FeatureService {
     layerId: string
   ) {
     if (project.layers.isEmpty()) {
-      return Promise.resolve();
+      return;
     }
     const newFeature = new LocationFeature(
       this.dataStore.generateId(),
@@ -107,10 +107,10 @@ export class FeatureService {
     this.selectFeature(newFeature.id);
   }
 
-  private updatePointInternal(project: Project, feature: Feature) {
+  private async updatePointInternal(project: Project, feature: Feature) {
     if (project.layers.isEmpty()) {
-      return Promise.resolve();
+      return;
     }
-    return this.dataStore.updateFeature(project.id, feature);
+    await this.dataStore.updateFeature(project.id, feature);
   }
 }
