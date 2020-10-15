@@ -48,23 +48,18 @@ limitations under the License.
       </mat-menu>
     </mat-card-header>
     <mat-card-content>
-      <div *ngFor="let field_entry of observation.form.fields">
-        <label class="field-label">{{ field_entry[1].label?.get(lang) }}</label>
-        <div
-          class="field-response"
-          *ngIf="field_entry[1].type == fieldTypes.TEXT"
-        >
-          {{ observation.responses?.get(field_entry[1].id)?.value }}
+      <div *ngFor="let field of getFields(observation)">
+        <label class="field-label">{{ field.label?.get(lang) }}</label>
+        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT">
+          {{ observation.responses?.get(field.id)?.value }}
         </div>
         <div
           class="field-response"
-          *ngIf="field_entry[1].type == fieldTypes.MULTIPLE_CHOICE"
+          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
         >
           <span
             class="option-label"
-            *ngFor="
-              let option of observation.responses?.get(field_entry[1].id)?.value
-            "
+            *ngFor="let option of observation.responses?.get(field.id)?.value"
           >
             {{ option.label?.get(lang) }}
           </span>
