@@ -14,23 +14,6 @@
  * limitations under the License.
  */
 
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --configuration=test ` replaces `environment.ts` with
-// `environment.test.ts`.
-// The list of file replacements can be found in `angular.json`.
-
-export const environment = {
-  production: false,
-  googleMapsApiKey: '',
-  firebaseConfig: {
-    apiKey: 'test',
-    authDomain: '',
-    databaseURL: '',
-    projectId: 'test',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: '',
-  },
-  cloudFunctionsHost: 'some-subdomain.cloudfunctions.net',
-  offlineBaseMapSources: [{ url: '' }],
-};
+export interface OfflineBaseMapSource {
+  url: string;
+}
