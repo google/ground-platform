@@ -19,30 +19,6 @@ limitations under the License.
   <h3 matLine>
     {{ layer?.name?.get(lang) }}
   </h3>
-  <!--
-  <button mat-icon-button [matMenuTriggerFor]="layerMenu">
-    <mat-icon>more_vert</mat-icon>
-  </button>
-  <mat-menu #layerMenu="matMenu">
-    <button mat-menu-item (click)="onDeleteFeature()">
-      <mat-icon>delete_forever</mat-icon>
-      <span>Delete</span>
-    </button>
-    <button mat-menu-item (click)="onCustomizeLayer()">
-      <mat-icon>edit</mat-icon>
-      <span>Customize layer</span>
-    </button>
-    <button mat-menu-item (click)="onDownloadCsv()">
-      <mat-icon>cloud_download</mat-icon>
-      <span>Download CSV</span>
-    </button>
-    <button mat-menu-item aria-label="back" (click)="onGoBackClick()">
-      <mat-icon>close</mat-icon>
-      <span>Close</span>
-    </button>
-  </mat-menu>
-  -->
-
   <div [ngSwitch]="actionsType">
     <div *ngSwitchCase="layerListItemActionsType.MENU">
       <button mat-icon-button [matMenuTriggerFor]="layerMenu">
