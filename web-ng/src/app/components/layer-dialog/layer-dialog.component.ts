@@ -49,6 +49,7 @@ export class LayerDialogComponent implements OnDestroy {
   lang: string;
   layer?: Layer;
   layerName!: string;
+  layersSize!: number;
   projectId?: string;
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
@@ -62,6 +63,7 @@ export class LayerDialogComponent implements OnDestroy {
       projectId: string;
       layer?: Layer;
       createLayer: boolean;
+      layersSize: number;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
@@ -74,7 +76,7 @@ export class LayerDialogComponent implements OnDestroy {
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
-    this.init(data.projectId, data.createLayer, data.layer);
+    this.init(data.projectId, data.createLayer, data.layersSize, data.layer);
   }
 
   addQuestion() {
@@ -117,12 +119,18 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  init(projectId: string, createLayer: boolean, layer?: Layer) {
+  init(
+    projectId: string,
+    createLayer: boolean,
+    layersSize: number,
+    layer?: Layer
+  ) {
     if (!createLayer && !layer) {
       console.warn('User passed an invalid layer id');
     }
     this.projectId = projectId;
     this.layer = layer;
+    this.layersSize = layersSize;
     this.layerName = this.layer?.name?.get(this.lang) || '';
     this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     if (!layer) {
@@ -162,7 +170,7 @@ export class LayerDialogComponent implements OnDestroy {
     const forms = this.layerService.createForm(formId, fields);
     const layer = new Layer(
       this.layer?.id || '',
-      /* index */ -1,
+      /* index */ this.layersSize,
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
