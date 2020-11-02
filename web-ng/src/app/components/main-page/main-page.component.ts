@@ -96,7 +96,6 @@ export class MainPageComponent implements OnInit {
             : project.id,
           createLayer: layerId === Project.PROJECT_ID_NEW,
           layer: project.layers?.get(layerId),
-          layerCount: project.layers?.size || 0,
         },
       })
     );

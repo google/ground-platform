@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { Component, Inject, NgZone, OnDestroy } from '@angular/core';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -22,7 +22,7 @@ import {
 } from '@angular/material/dialog';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
@@ -34,6 +34,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Project } from '../../shared/models/project.model';
+import { take } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global alert*/
@@ -49,13 +50,13 @@ export class LayerDialogComponent implements OnDestroy {
   lang: string;
   layer?: Layer;
   layerName!: string;
-  layerCount!: number;
   projectId?: string;
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
   form?: Form;
+  activeProject$: Observable<Project>;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -63,20 +64,21 @@ export class LayerDialogComponent implements OnDestroy {
       projectId: string;
       layer?: Layer;
       createLayer: boolean;
-      layerCount: number;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
     private confirmationDialog: MatDialog,
     private layerService: LayerService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private ngZone: NgZone
   ) {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
-    this.init(data.projectId, data.createLayer, data.layerCount, data.layer);
+    this.activeProject$ = this.projectService.getActiveProject$();
+    this.init(data.projectId, data.createLayer, data.layer);
   }
 
   addQuestion() {
@@ -119,18 +121,12 @@ export class LayerDialogComponent implements OnDestroy {
     });
   }
 
-  init(
-    projectId: string,
-    createLayer: boolean,
-    layerCount: number,
-    layer?: Layer
-  ) {
+  init(projectId: string, createLayer: boolean, layer?: Layer) {
     if (!createLayer && !layer) {
       console.warn('User passed an invalid layer id');
     }
     this.projectId = projectId;
     this.layer = layer;
-    this.layerCount = layerCount;
     this.layerName = this.layer?.name?.get(this.lang) || '';
     this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
     if (!layer) {
@@ -155,7 +151,12 @@ export class LayerDialogComponent implements OnDestroy {
     }
   }
 
-  onSave() {
+  async getLayerCount() {
+    const project = await this.activeProject$.pipe(take(1)).toPromise();
+    return project.layers?.size;
+  }
+
+  async onSave() {
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
@@ -165,12 +166,13 @@ export class LayerDialogComponent implements OnDestroy {
     if (emptyFields.size) {
       return;
     }
+    const layerCount = await this.getLayerCount();
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
     const layer = new Layer(
       this.layer?.id || '',
-      /* index */ this.layerCount,
+      /* index */ layerCount,
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
@@ -198,9 +200,11 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   onClose() {
-    this.dialogRef.close();
-    // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([`p/${this.projectId}`]);
+    this.ngZone.run(() => {
+      this.dialogRef.close();
+      // TODO: refactor this path into a custom router wrapper
+      return this.router.navigate([`p/${this.projectId}`]);
+    });
   }
 
   setLayerName(value: string) {
