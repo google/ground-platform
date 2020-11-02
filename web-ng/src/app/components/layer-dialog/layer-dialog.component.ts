@@ -200,8 +200,8 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   onClose() {
+    this.dialogRef.close();
     this.ngZone.run(() => {
-      this.dialogRef.close();
       // TODO: refactor this path into a custom router wrapper
       return this.router.navigate([`p/${this.projectId}`]);
     });
