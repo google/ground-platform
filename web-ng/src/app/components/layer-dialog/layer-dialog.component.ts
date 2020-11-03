@@ -174,17 +174,17 @@ export class LayerDialogComponent implements OnDestroy {
     if (this.projectId === Project.PROJECT_ID_NEW) {
       this.projectService.createProject(/* title= */ '').then(projectId => {
         this.projectId = projectId;
-        this.updateLayer(this.projectId, layer);
+        this.addOrUpdateLayer(this.projectId, layer);
       });
     } else {
-      this.updateLayer(this.projectId, layer);
+      this.addOrUpdateLayer(this.projectId, layer);
     }
   }
 
-  private updateLayer(projectId: string, layer: Layer) {
+  private addOrUpdateLayer(projectId: string, layer: Layer) {
     // TODO: Inform user layer was saved
     this.layerService
-      .updateLayer(projectId, layer)
+      .addOrUpdateLayer(projectId, layer)
       .then(() => this.onClose())
       .catch(() => {
         alert('Layer update failed.');

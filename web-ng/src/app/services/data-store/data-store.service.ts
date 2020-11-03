@@ -67,8 +67,7 @@ export class DataStoreService {
       .set({ title: { en: newTitle } }, { merge: true });
   }
 
-  // TODO: Define return types for methods in this class
-  updateLayer(projectId: string, layer: Layer): Promise<void> {
+  addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)

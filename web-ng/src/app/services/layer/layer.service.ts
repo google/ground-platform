@@ -81,10 +81,10 @@ export class LayerService {
   }
 
   /**
-   * Updates layer of a project with a given layer value.
+   * Adds/Updates the layer of a project with a given layer value.
    */
-  updateLayer(projectId: string, layer: Layer): Promise<void> {
-    return this.dataStoreService.updateLayer(projectId, layer);
+  addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
+    return this.dataStoreService.addOrUpdateLayer(projectId, layer);
   }
 
   /**
