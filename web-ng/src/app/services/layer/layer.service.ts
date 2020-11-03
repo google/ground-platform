@@ -23,12 +23,17 @@ import { Option } from '../../shared/models/form/option.model';
 import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
 import { List, Map } from 'immutable';
 import { Form } from '../../shared/models/form/form.model';
+import { ProjectService } from '../project/project.service';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LayerService {
-  constructor(private dataStoreService: DataStoreService) {}
+  constructor(
+    private dataStoreService: DataStoreService,
+    private projectService: ProjectService
+  ) {}
 
   /**
    * Creates and returns a new layer with a generated unique identifier.
@@ -126,5 +131,13 @@ export class LayerService {
   getForm(layer?: Layer): Form | undefined {
     const forms = layer?.forms;
     return forms ? forms.valueSeq().first() : undefined;
+  }
+
+  async getLayerCount() {
+    const project = await this.projectService
+      .getActiveProject$()
+      .pipe(take(1))
+      .toPromise();
+    return project.layers?.size;
   }
 }

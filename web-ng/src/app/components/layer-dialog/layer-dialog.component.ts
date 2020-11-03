@@ -22,7 +22,7 @@ import {
 } from '@angular/material/dialog';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
@@ -34,7 +34,6 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Project } from '../../shared/models/project.model';
-import { take } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global alert*/
@@ -56,7 +55,6 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
   color!: string;
   form?: Form;
-  activeProject$: Observable<Project>;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -77,7 +75,6 @@ export class LayerDialogComponent implements OnDestroy {
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
-    this.activeProject$ = this.projectService.getActiveProject$();
     this.init(data.projectId, data.createLayer, data.layer);
   }
 
@@ -151,11 +148,6 @@ export class LayerDialogComponent implements OnDestroy {
     }
   }
 
-  async getLayerCount() {
-    const project = await this.activeProject$.pipe(take(1)).toPromise();
-    return project.layers?.size;
-  }
-
   async onSave() {
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
@@ -166,7 +158,7 @@ export class LayerDialogComponent implements OnDestroy {
     if (emptyFields.size) {
       return;
     }
-    const layerCount = await this.getLayerCount();
+    const layerCount = await this.layerService.getLayerCount();
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);

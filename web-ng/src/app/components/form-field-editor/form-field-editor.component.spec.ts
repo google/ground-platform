@@ -24,9 +24,15 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AngularFirestore } from '@angular/fire/firestore';
+import {
+  AngularFirestore,
+  AngularFirestoreModule,
+} from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 
 const firestoreStub = {
   collection: () => ({
@@ -45,6 +51,9 @@ describe('FormFieldEditorComponent', () => {
     TestBed.configureTestingModule({
       declarations: [FormFieldEditorComponent],
       imports: [
+        AngularFireModule.initializeApp({}),
+        AngularFireAuthModule,
+        AngularFirestoreModule,
         FormsModule,
         ReactiveFormsModule,
         BrowserModule,
@@ -55,7 +64,10 @@ describe('FormFieldEditorComponent', () => {
         BrowserAnimationsModule,
         MatDialogModule,
       ],
-      providers: [{ provide: AngularFirestore, useValue: firestoreStub }],
+      providers: [
+        { provide: AngularFirestore, useValue: firestoreStub },
+        { provide: Router, useValue: {} },
+      ],
     }).compileComponents();
   }));
 
