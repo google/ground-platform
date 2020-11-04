@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div class="container">
+<div class="container" *ngIf="activeProject$ | async; else loading">
   <div class="header">
     <app-project-header></app-project-header>
   </div>
@@ -22,17 +22,32 @@
       <mat-sidenav-content class="mat-sidenav-content">
         <ground-map></ground-map>
         <drawing-tools></drawing-tools>
-        <div fxLayout="row"> 
-        <button mat-raised-button class="sidenav-toggle" (click)="sideNavOpened = !sideNavOpened;">
-          <mat-icon *ngIf='sideNavOpened'>navigate_next</mat-icon>
-          <mat-icon *ngIf='!sideNavOpened'>navigate_before</mat-icon>
-        </button>
-      </div>
+        <div fxLayout="row">
+          <button
+            mat-raised-button
+            class="sidenav-toggle"
+            (click)="sideNavOpened = !sideNavOpened"
+          >
+            <mat-icon *ngIf="sideNavOpened">navigate_next</mat-icon>
+            <mat-icon *ngIf="!sideNavOpened">navigate_before</mat-icon>
+          </button>
+        </div>
       </mat-sidenav-content>
-      <mat-sidenav #sidenav mode="side" position="end"
-       [(opened)]="sideNavOpened">
+      <mat-sidenav
+        #sidenav
+        mode="side"
+        position="end"
+        [(opened)]="sideNavOpened"
+      >
         <ground-side-panel></ground-side-panel>
       </mat-sidenav>
     </mat-sidenav-container>
   </div>
 </div>
+<ng-template #loading>
+  <div style="height: 100vh;">
+    <div fxLayout="row" fxLayoutAlign="center center" fxFill>
+      <mat-spinner mode="indeterminate"></mat-spinner>
+    </div>
+  </div>
+</ng-template>
