@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, NgZone, OnDestroy } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -68,8 +68,7 @@ export class LayerDialogComponent implements OnDestroy {
     private router: Router,
     private confirmationDialog: MatDialog,
     private layerService: LayerService,
-    private projectService: ProjectService,
-    private ngZone: NgZone
+    private projectService: ProjectService
   ) {
     this.lang = 'en';
     // Disable closing on clicks outside of dialog.
@@ -192,10 +191,8 @@ export class LayerDialogComponent implements OnDestroy {
 
   onClose() {
     this.dialogRef.close();
-    this.ngZone.run(() => {
-      // TODO: refactor this path into a custom router wrapper
-      return this.router.navigate([`p/${this.projectId}`]);
-    });
+    // TODO: refactor this path into a custom router wrapper
+    return this.router.navigate([`p/${this.projectId}`]);
   }
 
   setLayerName(value: string) {
