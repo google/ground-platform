@@ -57,8 +57,8 @@ const mockFeature = new LocationFeature(
 const mockObservations = List<Observation>([]);
 
 class MockProjectService {
-  getActiveProject$() {
-    return of<Project>(mockProject);
+  getActiveProject() {
+    return mockProject;
   }
 }
 

@@ -48,28 +48,15 @@ export class FeaturePanelComponent {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.observations$ = projectService
-      .getActiveProject$()
+    const project = projectService.getActiveProject()!;
+    this.observations$ = featureService
+      .getSelectedFeature$()
       .pipe(
-        switchMap(project =>
-          featureService
-            .getSelectedFeature$()
-            .pipe(
-              switchMap(feature =>
-                observationService.observations$(project, feature)
-              )
-            )
-        )
+        switchMap(feature => observationService.observations$(project, feature))
       );
-    this.layer$ = projectService
-      .getActiveProject$()
-      .pipe(
-        switchMap(project =>
-          featureService
-            .getSelectedFeature$()
-            .pipe(map(feature => project.layers.get(feature.layerId)!))
-        )
-      );
+    this.layer$ = featureService
+      .getSelectedFeature$()
+      .pipe(map(feature => project.layers.get(feature.layerId)!));
   }
 
   getFields(observation: Observation): List<Field> {
