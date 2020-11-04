@@ -17,12 +17,11 @@
 import { Component, OnInit } from '@angular/core';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
-import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/router/router.service';
 
 /**
@@ -36,19 +35,19 @@ import { NavigationService } from '../../services/router/router.service';
   styleUrls: ['./main-page.component.css'],
 })
 export class MainPageComponent implements OnInit {
-  activeProject$: Observable<Project>;
+  activeProject: Project;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
   constructor(
     private navigationService: NavigationService,
-    private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    projectService: ProjectService
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
-    this.activeProject$ = this.projectService.getActiveProject$();
+    this.activeProject = projectService.getActiveProject()!;
   }
 
   ngOnInit() {
@@ -77,18 +76,16 @@ export class MainPageComponent implements OnInit {
   }
 
   private showEditLayerDialog(layerId: string) {
-    this.activeProject$.pipe(take(1)).subscribe(project =>
-      this.dialog.open(LayerDialogComponent, {
-        autoFocus: layerId === NavigationService.LAYER_ID_NEW,
-        data: {
-          projectId: project.isUnsavedNew()
-            ? Project.PROJECT_ID_NEW
-            : project.id,
-          createLayer: layerId === Project.PROJECT_ID_NEW,
-          layer: project.layers?.get(layerId),
-        },
-      })
-    );
+    this.dialog.open(LayerDialogComponent, {
+      autoFocus: layerId === NavigationService.LAYER_ID_NEW,
+      data: {
+        projectId: this.activeProject.isUnsavedNew()
+          ? Project.PROJECT_ID_NEW
+          : this.activeProject.id,
+        createLayer: layerId === Project.PROJECT_ID_NEW,
+        layer: this.activeProject.layers?.get(layerId),
+      },
+    });
   }
 
   private loadFeatureDetails(featureId: string) {

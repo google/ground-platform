@@ -44,7 +44,7 @@ describe('MainPageComponent', () => {
     route = new ActivatedRouteStub();
 
     const projectService = jasmine.createSpyObj('ProjectService', [
-      'getActiveProject$',
+      'getActiveProject',
       'activateProject',
     ]);
 
