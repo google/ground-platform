@@ -83,7 +83,11 @@ export class LayerService {
   /**
    * Adds/Updates the layer of a project with a given layer value.
    */
-  addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
+  async addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
+    if (layer.index === -1) {
+      const layerCount = await this.getLayerCount();
+      (layer.index as number) = layerCount;
+    }
     return this.dataStoreService.addOrUpdateLayer(projectId, layer);
   }
 
@@ -133,7 +137,7 @@ export class LayerService {
     return forms ? forms.valueSeq().first() : undefined;
   }
 
-  async getLayerCount() {
+  private async getLayerCount(): Promise<number> {
     const project = await this.projectService
       .getActiveProject$()
       .pipe(take(1))

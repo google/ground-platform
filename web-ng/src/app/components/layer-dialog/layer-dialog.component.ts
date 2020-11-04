@@ -158,13 +158,12 @@ export class LayerDialogComponent implements OnDestroy {
     if (emptyFields.size) {
       return;
     }
-    const layerCount = await this.layerService.getLayerCount();
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
     const layer = new Layer(
       this.layer?.id || '',
-      /* index */ layerCount,
+      /* index */ this.layer?.index || -1,
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
