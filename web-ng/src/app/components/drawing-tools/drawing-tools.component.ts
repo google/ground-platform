@@ -39,7 +39,7 @@ export class DrawingToolsComponent {
   selectedValue = '';
   private lastSelectedValue = '';
   selectedLayerId = '';
-  readonly layers$: Observable<List<Layer>>;
+  readonly layers: List<Layer>;
   readonly lang: string;
 
   constructor(
@@ -49,12 +49,11 @@ export class DrawingToolsComponent {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = projectService.getActiveProject$().pipe(
-      map(project => {
-        this.selectedLayerId = project.layers.keySeq().first();
-        this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
-        return List(project.layers.valueSeq().toArray()).sortBy(l => l.index);
-      })
+    const project = projectService.getActiveProject()!;
+    this.selectedLayerId = project.layers.keySeq().first();
+    this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
+    this.layers = List(project.layers.valueSeq().toArray()).sortBy(
+      l => l.index
     );
   }
 
