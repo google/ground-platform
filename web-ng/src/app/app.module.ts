@@ -23,7 +23,7 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MainPageModule } from './components/main-page/main-page.module';
+import { MainPageContainerModule } from './components/main-page-container/main-page-container.module';
 import { environment } from '../environments/environment';
 import { ProjectHeaderModule } from './components/project-header/project-header.module';
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
@@ -39,7 +39,7 @@ import { ShareDialogModule } from './components/share-dialog/share-dialog.module
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
-    MainPageModule,
+    MainPageContainerModule,
     ProjectHeaderModule,
     UserProfilePopupModule,
     LayerDialogModule,

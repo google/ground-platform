@@ -26,7 +26,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { SidePanelModule } from '../side-panel/side-panel.module';
 import { ProjectHeaderModule } from '../project-header/project-header.module';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,6 +33,7 @@ import { MatIconModule } from '@angular/material/icon';
 @NgModule({
   entryComponents: [LayerDialogComponent],
   declarations: [MainPageComponent],
+  exports: [MainPageComponent],
   imports: [
     CommonModule,
     DrawingToolsModule,
@@ -45,7 +45,6 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule,
     MatProgressSpinnerModule,
     MatSidenavModule,
-    RouterModule,
     SidePanelModule,
     ProjectHeaderModule,
   ],

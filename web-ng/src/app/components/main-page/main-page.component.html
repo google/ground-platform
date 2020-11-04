@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div class="container" *ngIf="activeProject$ | async; else loading">
+<div class="container">
   <div class="header">
     <app-project-header></app-project-header>
   </div>
@@ -44,10 +44,3 @@
     </mat-sidenav-container>
   </div>
 </div>
-<ng-template #loading>
-  <div style="height: 100vh;">
-    <div fxLayout="row" fxLayoutAlign="center center" fxFill>
-      <mat-spinner mode="indeterminate"></mat-spinner>
-    </div>
-  </div>
-</ng-template>
