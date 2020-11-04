@@ -1,3 +1,4 @@
+import { OnDestroy } from '@angular/core';
 /**
  * Copyright 2019 Google LLC
  *
@@ -15,7 +16,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { switchMap, shareReplay } from 'rxjs/operators';
 import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
@@ -29,9 +30,11 @@ import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class ProjectService {
+export class ProjectService implements OnDestroy {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
+  private activeProject?: Project;
+  private subscription = new Subscription();
 
   constructor(
     private dataStore: DataStoreService,
@@ -56,6 +59,14 @@ export class ProjectService {
       // project to be reloaded.
       shareReplay(1)
     );
+    // Cache last activated project to simplify usage in cases where synchronous
+    // access is acceptable (i.e., in components where we assume the project
+    // was already loaded).
+    this.subscription.add(
+      this.activeProject$.subscribe(project => {
+        this.activeProject = project;
+      })
+    );
   }
 
   activateProject(id: string) {
@@ -64,6 +75,10 @@ export class ProjectService {
 
   getActiveProject$(): Observable<Project> {
     return this.activeProject$;
+  }
+
+  getActiveProject(): Project | undefined {
+    return this.activeProject;
   }
 
   /**
@@ -94,5 +109,9 @@ export class ProjectService {
       offlineBaseMapSources
     );
     return Promise.resolve(projectId);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
