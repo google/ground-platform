@@ -49,8 +49,8 @@ const mockProject = new Project(
 );
 
 class MockProjectService {
-  getActiveProject$() {
-    return of<Project>(mockProject);
+  getActiveProject() {
+    return mockProject;
   }
 }
 
