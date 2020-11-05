@@ -28,7 +28,7 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'drawing-tools',
+  selector: 'ground-drawing-tools',
   templateUrl: './drawing-tools.component.html',
   styleUrls: ['./drawing-tools.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
