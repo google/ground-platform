@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ElementRef, OnDestroy } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import { AuthService } from './../../services/auth/auth.service';
 import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
-import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -27,12 +26,11 @@ import { Router } from '@angular/router';
   templateUrl: './project-header.component.html',
   styleUrls: ['./project-header.component.scss'],
 })
-export class ProjectHeaderComponent implements OnInit, OnDestroy {
+export class ProjectHeaderComponent {
   lang: string;
   title: string;
   projectId!: string;
 
-  subscription: Subscription = new Subscription();
   constructor(
     public auth: AuthService,
     private dialog: MatDialog,
@@ -41,16 +39,10 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   ) {
     this.lang = 'en';
     this.title = '';
-    const activeProject$ = this.projectService.getActiveProject$();
-    this.subscription.add(
-      activeProject$.subscribe(project => {
-        this.title = project.title.get(this.lang)! || '';
-        this.projectId = project.id;
-      })
-    );
+    const project = this.projectService.getActiveProject()!;
+    this.title = project.title.get(this.lang)! || '';
+    this.projectId = project.id;
   }
-
-  ngOnInit() {}
 
   openProfileDialog(evt: MouseEvent): void {
     const target = new ElementRef(evt.currentTarget);
@@ -81,9 +73,5 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
       .catch(e => {
         console.warn('Project creation failed', e);
       });
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

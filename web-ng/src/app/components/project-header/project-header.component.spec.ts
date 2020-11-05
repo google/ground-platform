@@ -21,9 +21,11 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ProjectHeaderComponent } from './project-header.component';
 import { environment } from '../../../environments/environment';
+import { Map } from 'immutable';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ProjectService } from './../../services/project/project.service';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
@@ -54,6 +56,12 @@ describe('ProjectHeaderComponent', () => {
         },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
+        {
+          provide: ProjectService,
+          useValue: {
+            getActiveProject: () => ({ title: Map() }),
+          },
+        },
         { provide: Router, useValue: {} },
       ],
     }).compileComponents();
