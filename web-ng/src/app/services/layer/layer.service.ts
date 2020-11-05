@@ -85,8 +85,8 @@ export class LayerService {
    */
   async addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
     if (layer.index === -1) {
-      const layerCount = await this.getLayerCount();
-      (layer.index as number) = layerCount;
+      const index = await this.getLayerCount();
+      layer = layer.withIndex(index);
     }
     return this.dataStoreService.addOrUpdateLayer(projectId, layer);
   }

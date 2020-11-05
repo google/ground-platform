@@ -30,4 +30,8 @@ export class Layer {
   getForm(formId: string): Form | undefined {
     return this.forms?.get(formId);
   }
+
+  withIndex(index: number): Layer {
+    return { ...this, index };
+  }
 }
