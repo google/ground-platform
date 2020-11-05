@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { Cardinality } from '../../shared/models/form/multiple-choice.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -37,7 +37,7 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { Layer } from '../../shared/models/layer.model';
 import { FeatureService } from '../../services/feature/feature.service';
-import { switchMap, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
@@ -51,12 +51,12 @@ import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.com
   styleUrls: ['./observation-form.component.css'],
 })
 export class ObservationFormComponent {
+  readonly project: Project;
   readonly lang: string;
   readonly fieldTypes = FieldType;
   readonly cardinality = Cardinality;
   readonly layerListItemActionsType = LayerListItemActionsType;
-  readonly layer$: Observable<Layer>;
-  projectId?: string;
+  layer$!: Observable<Layer>;
   observation?: Observation;
   observationForm?: FormGroup;
   observationFields?: List<Field>;
@@ -66,15 +66,14 @@ export class ObservationFormComponent {
     private authService: AuthService,
     private formBuilder: FormBuilder,
     private router: Router,
-    projectService: ProjectService,
-    featureService: FeatureService,
-    observationService: ObservationService
+    private projectService: ProjectService,
+    private featureService: FeatureService,
+    private observationService: ObservationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    const project = projectService.getActiveProject()!;
-    this.projectId = project.id;
-    observationService
+    this.project = this.projectService.getActiveProject();
+    this.observationService
       .getSelectedObservation$()
       .subscribe((observation?: Observation | LoadingState) => {
         if (observation instanceof Observation) {
@@ -86,9 +85,10 @@ export class ObservationFormComponent {
           this.initForm();
         }
       });
-    this.layer$ = featureService
+    // TODO: Report error if project has no layers.
+    this.layer$ = this.featureService
       .getSelectedFeature$()
-      .pipe(map(feature => project.layers.get(feature.layerId)!));
+      .pipe(map(feature => this.project.layers.get(feature.layerId)!));
   }
 
   initForm() {
@@ -123,7 +123,7 @@ export class ObservationFormComponent {
           lastModified
         );
         this.dataStoreService
-          .updateObservation(this.projectId!, updatedObservation)
+          .updateObservation(this.project.id, updatedObservation)
           .then(() => this.navigateToFeature(updatedObservation))
           .catch(() => {
             alert('Observation update failed.');

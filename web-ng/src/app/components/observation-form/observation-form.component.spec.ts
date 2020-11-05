@@ -26,9 +26,9 @@ import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { firestore } from 'firebase';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Option } from '../../shared/models/form/option.model';
+import { StringMap } from './../../shared/models/string-map.model';
 import {
   MultipleChoice,
   Cardinality,
@@ -212,6 +212,7 @@ describe('ObservationFormComponent', () => {
   });
 
   it('should create', () => {
+    component.project = MockModel.project001;
     expect(component).toBeTruthy();
   });
 });
