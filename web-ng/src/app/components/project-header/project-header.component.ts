@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges } from '@angular/core';
 import { AuthService } from './../../services/auth/auth.service';
 import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
 import { MatDialog } from '@angular/material/dialog';
+import { Project } from './../../shared/models/project.model';
 import { ProjectService } from '../../services/project/project.service';
 import { Router } from '@angular/router';
 
@@ -26,9 +27,10 @@ import { Router } from '@angular/router';
   templateUrl: './project-header.component.html',
   styleUrls: ['./project-header.component.scss'],
 })
-export class ProjectHeaderComponent {
+export class ProjectHeaderComponent implements OnChanges {
+  @Input() project!: Project;
   lang: string;
-  title: string;
+  title!: string;
   projectId!: string;
 
   constructor(
@@ -38,10 +40,11 @@ export class ProjectHeaderComponent {
     private router: Router
   ) {
     this.lang = 'en';
-    this.title = '';
-    const project = this.projectService.getActiveProject()!;
-    this.title = project.title.get(this.lang)! || '';
-    this.projectId = project.id;
+  }
+
+  ngOnChanges(): void {
+    this.projectId = this.project.id;
+    this.title = this.project.title.get(this.lang) || '';
   }
 
   openProfileDialog(evt: MouseEvent): void {
