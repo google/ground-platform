@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/internal/operators/map';
+import { Component, Input, OnChanges } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/router/router.service';
+import { Project } from './../../shared/models/project.model';
 
 @Component({
   selector: 'ground-layer-list',
   templateUrl: './layer-list.component.html',
   styleUrls: ['./layer-list.component.scss'],
 })
-export class LayerListComponent {
-  readonly layers: List<Layer>;
-  readonly lang: string;
+export class LayerListComponent implements OnChanges {
+  @Input() project!: Project;
+  layers!: List<Layer>;
+  lang: string;
 
-  constructor(
-    projectService: ProjectService,
-    private navigationService: NavigationService
-  ) {
+  constructor(private navigationService: NavigationService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers = List(
-      projectService.getActiveProject()!.layers.valueSeq().toArray()
-    ).sortBy(l => l.index);
+  }
+
+  ngOnChanges() {
+    this.layers = List(this.project.layers.valueSeq().toArray()).sortBy(
+      l => l.index
+    );
   }
 
   onAddLayer() {

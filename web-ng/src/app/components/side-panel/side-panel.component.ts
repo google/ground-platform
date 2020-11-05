@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import {
   NavigationService,
   SideNavMode,
 } from '../../services/router/router.service';
 import { Observable } from 'rxjs';
+import { Project } from './../../shared/models/project.model';
 
 @Component({
   selector: 'ground-side-panel',
@@ -27,11 +28,12 @@ import { Observable } from 'rxjs';
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
+  @Input() project!: Project;
   readonly sideNavMode = SideNavMode;
   readonly sideNavMode$: Observable<SideNavMode>;
   readonly lang: string;
 
-  constructor(private navigationService: NavigationService) {
+  constructor(navigationService: NavigationService) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import {
   Validators,
@@ -43,13 +43,15 @@ class AclEntry {
   templateUrl: './share-dialog.component.html',
   styleUrls: ['./share-dialog.component.scss'],
 })
-export class ShareDialogComponent {
+export class ShareDialogComponent implements OnChanges {
   /** Roles and labels for select drop-downs. */
   readonly ROLE_OPTIONS = [
     { label: 'Contributor', value: Role.CONTRIBUTOR },
     { label: 'Manager', value: Role.MANAGER },
     { label: 'Viewer', value: Role.VIEWER },
   ];
+
+  @Input() project!: Project;
 
   addUserForm = new FormGroup({
     email: new FormControl('', [Validators.email, this.notInListValidator()]),
@@ -73,12 +75,13 @@ export class ShareDialogComponent {
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
     private projectService: ProjectService
-  ) {
-    const project = this.projectService.getActiveProject()!;
-    this.projectId = project.id;
-    this.originalAcl = project.acl;
+  ) {}
+
+  ngOnChanges(): void {
+    this.projectId = this.project.id;
+    this.originalAcl = this.project.acl;
     // Sort users by email address.
-    this.acl = project.acl
+    this.acl = this.project.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()

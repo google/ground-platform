@@ -43,11 +43,6 @@ describe('MainPageComponent', () => {
   beforeEach(async(() => {
     route = new ActivatedRouteStub();
 
-    const projectService = jasmine.createSpyObj('ProjectService', [
-      'getActiveProject',
-      'activateProject',
-    ]);
-
     const featureService = jasmine.createSpyObj('FeatureService', [
       'selectFeature$',
     ]);
@@ -69,7 +64,6 @@ describe('MainPageComponent', () => {
         { provide: MatDialog, useValue: dialog },
         { provide: FeatureService, useValue: featureService },
         { provide: ObservationService, useValue: observationService },
-        { provide: ProjectService, useValue: projectService },
         { provide: NavigationService, useValue: navigationService },
       ],
       schemas: [NO_ERRORS_SCHEMA],

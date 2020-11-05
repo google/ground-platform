@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { FeatureService } from '../../services/feature/feature.service';
-import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { NavigationService } from '../../services/router/router.service';
 
@@ -35,19 +34,17 @@ import { NavigationService } from '../../services/router/router.service';
   styleUrls: ['./main-page.component.css'],
 })
 export class MainPageComponent implements OnInit {
-  activeProject: Project;
+  @Input() project!: Project;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
   constructor(
     private navigationService: NavigationService,
     private featureService: FeatureService,
     private observationService: ObservationService,
-    private dialog: MatDialog,
-    projectService: ProjectService
+    private dialog: MatDialog
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
-    this.activeProject = projectService.getActiveProject()!;
   }
 
   ngOnInit() {
@@ -79,11 +76,11 @@ export class MainPageComponent implements OnInit {
     this.dialog.open(LayerDialogComponent, {
       autoFocus: layerId === NavigationService.LAYER_ID_NEW,
       data: {
-        projectId: this.activeProject.isUnsavedNew()
+        projectId: this.project.isUnsavedNew()
           ? Project.PROJECT_ID_NEW
-          : this.activeProject.id,
+          : this.project.id,
         createLayer: layerId === Project.PROJECT_ID_NEW,
-        layer: this.activeProject.layers?.get(layerId),
+        layer: this.project.layers?.get(layerId),
       },
     });
   }

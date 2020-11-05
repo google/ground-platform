@@ -27,7 +27,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   styleUrls: ['./main-page-container.component.css'],
 })
 export class MainPageContainerComponent implements OnInit, OnDestroy {
-  activeProject$: Observable<Project>;
+  readonly activeProject$: Observable<Project>;
   private subscription = new Subscription();
 
   constructor(
