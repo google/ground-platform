@@ -22,7 +22,7 @@ import { ProjectService } from '../../services/project/project.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-project-header',
+  selector: 'ground-project-header',
   templateUrl: './project-header.component.html',
   styleUrls: ['./project-header.component.scss'],
 })
