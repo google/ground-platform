@@ -15,13 +15,23 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAuthModule } from '@angular/fire/auth';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { DataStoreService } from '../data-store/data-store.service';
 import { LayerService } from './layer.service';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('LayerService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
   beforeEach(() =>
     TestBed.configureTestingModule({
+      imports: [
+        AngularFireModule.initializeApp({}),
+        AngularFireAuthModule,
+        AngularFirestoreModule,
+        RouterTestingModule,
+      ],
       providers: [
         { provide: DataStoreService, useValue: dataStoreServiceStub },
       ],

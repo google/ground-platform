@@ -147,7 +147,7 @@ export class LayerDialogComponent implements OnDestroy {
     }
   }
 
-  onSave() {
+  async onSave() {
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
@@ -162,7 +162,7 @@ export class LayerDialogComponent implements OnDestroy {
     const forms = this.layerService.createForm(formId, fields);
     const layer = new Layer(
       this.layer?.id || '',
-      /* index */ -1,
+      /* index */ this.layer?.index || -1,
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
@@ -172,17 +172,17 @@ export class LayerDialogComponent implements OnDestroy {
     if (this.projectId === Project.PROJECT_ID_NEW) {
       this.projectService.createProject(/* title= */ '').then(projectId => {
         this.projectId = projectId;
-        this.updateLayer(this.projectId, layer);
+        this.addOrUpdateLayer(this.projectId, layer);
       });
     } else {
-      this.updateLayer(this.projectId, layer);
+      this.addOrUpdateLayer(this.projectId, layer);
     }
   }
 
-  private updateLayer(projectId: string, layer: Layer) {
+  private addOrUpdateLayer(projectId: string, layer: Layer) {
     // TODO: Inform user layer was saved
     this.layerService
-      .updateLayer(projectId, layer)
+      .addOrUpdateLayer(projectId, layer)
       .then(() => this.onClose())
       .catch(() => {
         alert('Layer update failed.');
