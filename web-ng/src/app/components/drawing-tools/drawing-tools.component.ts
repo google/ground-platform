@@ -56,7 +56,6 @@ export class DrawingToolsComponent implements OnChanges {
   }
 
   ngOnChanges(): void {
-    console.log(this.project);
     // TODO(#): This will fail on projects with no layers.
     const layers = this.project.layers;
     this.selectedLayerId = layers.keySeq().first();
