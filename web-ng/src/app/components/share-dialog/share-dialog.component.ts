@@ -74,15 +74,16 @@ export class ShareDialogComponent {
     private dialogRef: MatDialogRef<ShareDialogComponent>,
     private projectService: ProjectService
   ) {
-    this.subscription.add(
-      // Grab only the first value from getActiveProject$() so that
-      // successive changes to the remote project config don't overwrite the
-      // contents of the contributors list in the dialog.
-      this.projectService
-        .getActiveProject$()
-        .pipe(take(1))
-        .subscribe(p => this.onProjectLoaded(p))
-    );
+    const project = this.projectService.getActiveProject()!;
+    this.projectId = project.id;
+    this.originalAcl = project.acl;
+    // Sort users by email address.
+    this.acl = project.acl
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toList()
+      .sortBy(entry => entry.email)
+      .toArray();
   }
 
   /**
@@ -142,21 +143,6 @@ export class ShareDialogComponent {
    */
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  /**
-   * Update ACL and projectId when project is loaded.
-   */
-  private onProjectLoaded(project: Project): void {
-    this.projectId = project.id;
-    this.originalAcl = project.acl;
-    // Sort users by email address.
-    this.acl = project.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
   }
 
   private updateChangeState() {
