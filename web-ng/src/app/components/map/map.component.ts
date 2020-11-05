@@ -48,7 +48,7 @@ const enlargedIconScale = 50;
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   features$: Observable<List<Feature>>;
-  activeProject$: Observable<Project>;
+  activeProject: Project;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
@@ -76,16 +76,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private navigationService: NavigationService
   ) {
     this.features$ = this.featureService.getFeatures$();
-    this.activeProject$ = this.projectService.getActiveProject$();
+    this.activeProject = this.projectService.getActiveProject()!;
   }
 
   ngAfterViewInit() {
     this.subscription.add(
-      combineLatest([
-        this.activeProject$,
-        this.features$,
-      ]).subscribe(([project, features]) =>
-        this.onProjectAndFeaturesUpdate(project, features)
+      this.features$.subscribe(features =>
+        this.onProjectAndFeaturesUpdate(this.activeProject, features)
       )
     );
 
