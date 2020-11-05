@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Input,
+  OnChanges,
+} from '@angular/core';
 import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
-import { ProjectService } from '../../services/project/project.service';
-import { Observable } from 'rxjs';
+import { Project } from './../../shared/models/project.model';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
-import { map } from 'rxjs/internal/operators/map';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
@@ -33,28 +36,32 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   styleUrls: ['./drawing-tools.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DrawingToolsComponent {
+export class DrawingToolsComponent implements OnChanges {
+  @Input() project!: Project;
+
   pointValue = 'point';
   polygonValue = 'polygon';
   selectedValue = '';
   private lastSelectedValue = '';
   selectedLayerId = '';
-  readonly layers: List<Layer>;
+  layers!: List<Layer>;
   readonly lang: string;
 
   constructor(
     private drawingToolsService: DrawingToolsService,
-    private sanitizer: DomSanitizer,
-    projectService: ProjectService
+    private sanitizer: DomSanitizer
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    const project = projectService.getActiveProject()!;
-    this.selectedLayerId = project.layers.keySeq().first();
+  }
+
+  ngOnChanges(): void {
+    console.log(this.project);
+    // TODO(#): This will fail on projects with no layers.
+    const layers = this.project.layers;
+    this.selectedLayerId = layers.keySeq().first();
     this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
-    this.layers = List(project.layers.valueSeq().toArray()).sortBy(
-      l => l.index
-    );
+    this.layers = List(layers.valueSeq().toArray()).sortBy(l => l.index);
   }
 
   onButtonClick() {
