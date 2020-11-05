@@ -64,17 +64,16 @@ export class ObservationFormComponent {
   constructor(
     private dataStoreService: DataStoreService,
     private authService: AuthService,
-    private observationService: ObservationService,
-    private projectService: ProjectService,
-    private featureService: FeatureService,
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    projectService: ProjectService,
+    featureService: FeatureService,
+    observationService: ObservationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    projectService.getActiveProject$().subscribe((project?: Project) => {
-      this.projectId = project?.id;
-    });
+    const project = projectService.getActiveProject()!;
+    this.projectId = project.id;
     observationService
       .getSelectedObservation$()
       .subscribe((observation?: Observation | LoadingState) => {
@@ -87,15 +86,9 @@ export class ObservationFormComponent {
           this.initForm();
         }
       });
-    this.layer$ = projectService
-      .getActiveProject$()
-      .pipe(
-        switchMap(project =>
-          featureService
-            .getSelectedFeature$()
-            .pipe(map(feature => project.layers.get(feature.layerId)!))
-        )
-      );
+    this.layer$ = featureService
+      .getSelectedFeature$()
+      .pipe(map(feature => project.layers.get(feature.layerId)!));
   }
 
   initForm() {
