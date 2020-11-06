@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
   selector: 'app-project-header',
@@ -81,6 +82,13 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
       .catch(e => {
         console.warn('Project creation failed', e);
       });
+  }
+
+  private openShareDialog(): void {
+    this.dialog.open(ShareDialogComponent, {
+      width: '580px',
+      autoFocus: false,
+    });
   }
 
   ngOnDestroy() {
