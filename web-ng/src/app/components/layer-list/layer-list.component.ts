@@ -28,7 +28,7 @@ import { NavigationService } from '../../services/router/router.service';
   styleUrls: ['./layer-list.component.scss'],
 })
 export class LayerListComponent {
-  readonly layers: List<Layer>;
+  readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
 
   constructor(
@@ -37,9 +37,13 @@ export class LayerListComponent {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers = List(
-      projectService.getActiveProject()!.layers.valueSeq().toArray()
-    ).sortBy(l => l.index);
+    this.layers$ = projectService
+      .getActiveProject$()
+      .pipe(
+        map(project =>
+          List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
+        )
+      );
   }
 
   onAddLayer() {
