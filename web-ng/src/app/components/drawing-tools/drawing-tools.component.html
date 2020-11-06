@@ -31,7 +31,7 @@ class="drawing-layer-selector"
 appearance="fill">
   <mat-label>Adding {{selectedValue}} for</mat-label>
   <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
-    <mat-option *ngFor="let layer of layers" [value]="layer.id">
+    <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
       <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
     </mat-option>
   </mat-select>
