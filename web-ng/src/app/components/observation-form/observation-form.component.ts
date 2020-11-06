@@ -82,7 +82,7 @@ export class ObservationFormComponent {
           this.observation = observation;
           this.observationFields = observation!
             .form!.fields.toOrderedMap()
-            .sortBy(entry => entry.label)
+            .sortBy(entry => entry.index)
             .toList();
           this.initForm();
         }
