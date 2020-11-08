@@ -24,6 +24,5 @@ import { UserAvatarModule } from '../user-avatar/user-avatar.module';
 @NgModule({
   declarations: [UserProfilePopupComponent],
   imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
-  entryComponents: [UserProfilePopupComponent],
 })
 export class UserProfilePopupModule {}

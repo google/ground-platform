@@ -16,7 +16,6 @@
 
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
 import { DrawingToolsModule } from '../drawing-tools/drawing-tools.module';
 import { MainPageComponent } from './main-page.component';
@@ -31,7 +30,6 @@ import { ProjectHeaderModule } from '../project-header/project-header.module';
 import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  entryComponents: [LayerDialogComponent],
   declarations: [MainPageComponent],
   exports: [MainPageComponent],
   imports: [
