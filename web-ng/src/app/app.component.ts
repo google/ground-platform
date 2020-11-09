@@ -16,6 +16,10 @@
 
 import { Component } from '@angular/core';
 
+/**
+ * Top-level component. Delegates routing of sub-components to paths defined
+ * in routing.module.ts.
+ */
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

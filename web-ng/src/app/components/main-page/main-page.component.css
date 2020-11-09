@@ -20,15 +20,15 @@
   height: 100%;
 }
 
-.header{
+.header {
   flex: 0 1 auto;
 }
 
-.content{
+.content {
   flex: 1 1 auto;
 }
 
-.main-page-container{
+.main-page-container {
   height: 100%;
 }
 
@@ -45,7 +45,7 @@
   right: -5px;
   width: 5px;
   height: 50px;
-  background-color: #D6D6D2;
+  background-color: #d6d6d2;
   position: absolute;
 }
 
