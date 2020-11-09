@@ -23,8 +23,8 @@ import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
-import { NavigationService } from '../../services/router/router.service';
-import { never } from 'rxjs';
+import { NavigationService } from './../../services/router/router.service';
+import { NEVER } from 'rxjs';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
@@ -57,11 +57,9 @@ describe('MainPageComponent', () => {
     ]);
 
     const navigationService = {
-      init: () => {},
-      getProjectId$: never,
-      getLayerId$: never,
-      getFeatureId$: never,
-      getObservationId$: never,
+      getLayerId$: () => NEVER,
+      getFeatureId$: () => NEVER,
+      getObservationId$: () => NEVER,
     };
 
     TestBed.configureTestingModule({
