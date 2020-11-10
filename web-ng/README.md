@@ -52,12 +52,12 @@
 ### Add local environment config
 
 Create a file in `environments/.backend-config.json` with the path to your
-hosted or local [Firebase Cloud Functions](
-https://firebase.google.com/products/functions) instance:
+hosted or local [Firebase Cloud Functions](https://firebase.google.com/products/functions) instance:
 
 ```json
 {
-  "cloudFunctionsHost": "some-subdomain.cloudfunctions.net"
+  "cloudFunctionsHost": "some-subdomain.cloudfunctions.net",
+  "offlineBaseMapSources": [{ "url": "" }]
 }
 ```
 
