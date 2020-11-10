@@ -152,11 +152,6 @@ export class LayerDialogComponent implements OnDestroy {
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
-    // Check if there are empty fields, if empty return.
-    const emptyFields = this.fields.filter(field => !field.label.get('en'));
-    if (emptyFields.size) {
-      return;
-    }
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);

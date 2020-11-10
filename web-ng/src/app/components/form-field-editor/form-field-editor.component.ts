@@ -91,7 +91,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       },
     ];
     this.formGroup = this.formBuilder.group({
-      label: ['', Validators.required],
+      label: [''],
       required: [false],
       // By default we set the select field to be of text type.
       selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
