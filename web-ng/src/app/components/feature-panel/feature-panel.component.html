@@ -33,11 +33,7 @@ limitations under the License.
       <mat-card-subtitle>
         {{ observation.created.clientTime | date: 'medium' }}
       </mat-card-subtitle>
-      <button
-        mat-icon-button
-        aria-label="actions"
-        (click)="onEditObservationClick(observation)"
-      >
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #menu="matMenu">

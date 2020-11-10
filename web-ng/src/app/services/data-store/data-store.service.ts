@@ -27,6 +27,7 @@ import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
 import { firestore } from 'firebase/app';
+import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -66,8 +67,7 @@ export class DataStoreService {
       .set({ title: { en: newTitle } }, { merge: true });
   }
 
-  // TODO: Define return types for methods in this class
-  updateLayer(projectId: string, layer: Layer): Promise<void> {
+  addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)
@@ -247,13 +247,23 @@ export class DataStoreService {
    * returning the id of the newly created project. ACLs are initialized
    * to include the specified user email as project owner.
    */
-  async createProject(ownerEmail: string, title: string): Promise<string> {
+  async createProject(
+    ownerEmail: string,
+    title: string,
+    offlineBaseMapSources?: OfflineBaseMapSource[]
+  ): Promise<string> {
     const projectId = this.generateId();
     await this.updateProjectTitle(projectId, title);
     await this.db
       .collection('projects')
       .doc(projectId)
-      .set(FirebaseDataConverter.newProjectJS(ownerEmail, title));
+      .set(
+        FirebaseDataConverter.newProjectJS(
+          ownerEmail,
+          title,
+          offlineBaseMapSources
+        )
+      );
     return Promise.resolve(projectId);
   }
 }

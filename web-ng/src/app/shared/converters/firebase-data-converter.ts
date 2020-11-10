@@ -36,6 +36,7 @@ import { AuditInfo } from '../models/audit-info.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
+import { OfflineBaseMapSource } from '../models/offline-base-map-source';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -89,11 +90,16 @@ export class FirebaseDataConverter {
     }
   }
 
-  static newProjectJS(ownerEmail: string, title: string): {} {
+  static newProjectJS(
+    ownerEmail: string,
+    title: string,
+    offlineBaseMapSources?: OfflineBaseMapSource[]
+  ): {} {
     return {
       // TODO(i18n): Make title language dynamic.
       title: { en: title },
       acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
+      ...(offlineBaseMapSources?.length ? { offlineBaseMapSources } : {}),
     };
   }
 
