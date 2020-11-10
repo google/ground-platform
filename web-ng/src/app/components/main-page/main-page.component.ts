@@ -24,14 +24,12 @@ import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/router/router.service';
-import { ActivatedRoute } from '@angular/router';
 
 /**
  * Root component for main application page showing map, layers list, and
  * project header. Responsible for coordinating page-level URL states with
  * various services.
  */
-
 @Component({
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
@@ -46,22 +44,14 @@ export class MainPageComponent implements OnInit {
     private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService,
-    private dialog: MatDialog,
-    route: ActivatedRoute
+    private dialog: MatDialog
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
     this.activeProject$ = this.projectService.getActiveProject$();
-    navigationService.init(route);
   }
 
   ngOnInit() {
-    // Activate new project on route changes.
-    this.subscription.add(
-      this.navigationService.getProjectId$().subscribe(id => {
-        id && this.projectService.activateProject(id);
-      })
-    );
     // Show layer dialog when non-null layer id set in URL.
     this.subscription.add(
       this.navigationService

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { MainPageContainerComponent } from './components/main-page-container/main-page-container.component';
-
-const routes: Routes = [
-  {
-    path: 'p/:projectId',
-    component: MainPageContainerComponent,
-  },
-];
-const config = RouterModule.forRoot(routes);
-
-@NgModule({
-  imports: [config],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}
+:host {
+  width: 100vw;
+  height: 100vh;
+}

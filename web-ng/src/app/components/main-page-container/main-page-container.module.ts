@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from './user-profile-popup.component';
-import { UserAvatarModule } from '../user-avatar/user-avatar.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { MainPageContainerComponent } from './main-page-container.component';
+import { MainPageModule } from './../main-page/main-page.module';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
-  declarations: [UserProfilePopupComponent],
-  imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
+  entryComponents: [],
+  declarations: [MainPageContainerComponent],
+  imports: [
+    CommonModule,
+    FlexLayoutModule,
+    RouterModule,
+    MainPageModule,
+    MatProgressSpinnerModule,
+  ],
 })
-export class UserProfilePopupModule {}
+export class MainPageContainerModule {}
