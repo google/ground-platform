@@ -15,7 +15,7 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
 import { DrawingToolsModule } from '../drawing-tools/drawing-tools.module';
 import { MainPageComponent } from './main-page.component';
@@ -23,25 +23,26 @@ import { MapModule } from '../map/map.module';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { SidePanelModule } from '../side-panel/side-panel.module';
 import { ProjectHeaderModule } from '../project-header/project-header.module';
 import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  entryComponents: [LayerDialogComponent],
   declarations: [MainPageComponent],
+  exports: [MainPageComponent],
   imports: [
     CommonModule,
     DrawingToolsModule,
+    FlexLayoutModule,
     LayerDialogModule,
     MapModule,
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     MatSidenavModule,
-    RouterModule,
     SidePanelModule,
     ProjectHeaderModule,
   ],

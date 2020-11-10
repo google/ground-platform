@@ -1,5 +1,5 @@
 <!--
-  Copyright 2019 Google LLC
+  Copyright 2020 Google LLC
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,8 +14,11 @@
   limitations under the License.
 -->
 
-<!--
-  Top-level component. Delegates routing of sub-components to paths defined
-  in routing.module.ts.
--->
-<router-outlet></router-outlet>
+<ground-main-page
+  *ngIf="activeProject$ | async; else loading"
+></ground-main-page>
+<ng-template #loading>
+  <div fxLayout="row" fxLayoutAlign="center center" fxFill>
+    <mat-spinner mode="indeterminate"></mat-spinner>
+  </div>
+</ng-template>
