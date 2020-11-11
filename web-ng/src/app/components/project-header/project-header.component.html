@@ -35,12 +35,14 @@
       <button mat-icon-button aria-label="More project settings">
         <mat-icon>more_vert</mat-icon>
       </button>
-      <img
-        *ngIf="user.photoURL; else defaultPhoto"
-        src="{{ user.photoURL }}=s64"
-        class="user-thumb"
-        (click)="openProfileDialog($event)"
-      />
+      <button mat-icon-button>
+        <img
+          *ngIf="user.photoURL; else defaultPhoto"
+          src="{{ user.photoURL }}=s64"
+          class="user-thumb"
+          (click)="openProfileDialog($event)"
+        />
+      </button>
       <ng-template #defaultPhoto>
         <user-avatar
           (click)="openProfileDialog($event)"
