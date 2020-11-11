@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy } from '@angular/core';
+import { Component, Inject, OnDestroy, ViewChild } from '@angular/core';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -34,6 +34,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Project } from '../../shared/models/project.model';
+import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
 
 // To make ESLint happy:
 /*global alert*/
@@ -46,6 +47,8 @@ const DEFAULT_LAYER_COLOR = '#ff9131';
   styleUrls: ['./layer-dialog.component.scss'],
 })
 export class LayerDialogComponent implements OnDestroy {
+  @ViewChild(FormFieldEditorComponent, { static: false })
+  formFieldEditor?: FormFieldEditorComponent;
   lang: string;
   layer?: Layer;
   layerName!: string;
@@ -148,9 +151,14 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   async onSave() {
+    // Mark the label control touched to show validation error message.
+    this.formFieldEditor?.labelControl.markAsTouched();
     // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
+    }
+    if (this.formFieldEditor?.formGroup.invalid) {
+      return;
     }
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;

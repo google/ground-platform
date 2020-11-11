@@ -91,11 +91,21 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       },
     ];
     this.formGroup = this.formBuilder.group({
-      label: [''],
+      label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select field to be of text type.
       selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
     });
+  }
+
+  /*
+   * Checks if any of the options has label or code value present.
+   */
+  validateLabel() {
+    const options = this.formOptions?.options.filter(
+      opt => opt.code || opt.label.get('en')
+    ).size;
+    return options ? { labelInvalid: true } : null;
   }
 
   ngOnInit(): void {
@@ -161,6 +171,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @returns void
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
+    debugger;
     this.fieldType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
@@ -278,5 +289,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  markLabelTouched() {
+    this.labelControl.markAsTouched();
   }
 }

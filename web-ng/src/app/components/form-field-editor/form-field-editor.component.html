@@ -20,6 +20,9 @@
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
       <input matInput formControlName="label" autocomplete="off" />
+      <mat-error *ngIf="labelControl.hasError('labelInvalid')">
+        Question is required
+      </mat-error>
     </mat-form-field>
     <mat-form-field fxFlex class="field-type" appearance="outline">
       <mat-select
