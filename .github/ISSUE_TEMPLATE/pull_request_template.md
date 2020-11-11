@@ -2,10 +2,10 @@ Screenshot(s) before:
 
 ..
 
-Screenshots(s) after:
+Screenshot(s) after:
 
 ..
 
-Fixes #..
+Closes #..
 
 @... PTAL?
