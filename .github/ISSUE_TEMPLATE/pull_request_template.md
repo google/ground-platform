@@ -6,6 +6,6 @@ Screenshot(s) after:
 
 ..
 
-Closes #..
+Closes #issueno
 
-@... PTAL?
+@user PTAL?
