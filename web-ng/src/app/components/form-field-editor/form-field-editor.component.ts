@@ -171,7 +171,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @returns void
    */
   onFieldTypeSelect(event: FieldTypeSelectOption) {
-    debugger;
     this.fieldType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
@@ -289,9 +288,5 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-  }
-
-  markLabelTouched() {
-    this.labelControl.markAsTouched();
   }
 }
