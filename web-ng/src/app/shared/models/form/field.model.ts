@@ -71,4 +71,8 @@ export class Field {
     }
     return option;
   }
+
+  withMultipleChoice(multipleChoice: MultipleChoice): Field {
+    return { ...this, multipleChoice };
+  }
 }

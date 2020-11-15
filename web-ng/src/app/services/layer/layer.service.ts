@@ -137,6 +137,51 @@ export class LayerService {
     return forms ? forms.valueSeq().first() : undefined;
   }
 
+  /*
+   * Iterates over all the fields and remove the options that are empty.
+   */
+  removeFieldsEmptyOptions(fields: List<Field>): List<Field> {
+    for (let [index, field] of fields.entries()) {
+      if (!field.multipleChoice) {
+        continue;
+      }
+      const options = this.getNonEmptyOptions(field);
+      const updatedField = this.updateFieldOptions(field, options);
+      fields = fields.set(index, updatedField);
+    }
+    return fields;
+  }
+
+  updateFieldOptions(field: Field, options: List<Option>): Field {
+    if (!field.multipleChoice) {
+      return field;
+    }
+    const multipleChoice = {
+      ...field.multipleChoice,
+      options,
+    };
+    return field.withMultipleChoice(multipleChoice);
+  }
+
+  getNonEmptyOptions(field: Field): List<Option> {
+    let options = List<Option>();
+    if (!field.multipleChoice) {
+      return options;
+    }
+    for (let opt of field.multipleChoice.options) {
+      if (!opt.label.get('en') && !opt.code) {
+        continue;
+      }
+      const option = opt.withIndex(options.size);
+      options = options.push(option);
+    }
+    return options;
+  }
+
+  getNonEmptyFields(fields: List<Field>): List<Field> {
+    return fields.filter(field => field.label.get('en'));
+  }
+
   private async getLayerCount(): Promise<number> {
     const project = await this.projectService
       .getActiveProject$()

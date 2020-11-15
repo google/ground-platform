@@ -21,7 +21,6 @@ import {
   Output,
   EventEmitter,
   OnChanges,
-  SimpleChanges,
   OnDestroy,
 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -105,7 +104,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     const options = this.formOptions?.options.filter(
       opt => opt.code || opt.label.get('en')
     ).size;
-    return options ? { labelInvalid: true } : null;
+    return !this.label && options ? { labelInvalid: true } : null;
   }
 
   ngOnInit(): void {
@@ -125,11 +124,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   /*
    * This method is used to get the updated values of field from the layer-dialog.
    */
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.multipleChoice) {
-      this.formOptions = this.multipleChoice;
-      const options = this.formOptions?.options;
-      options?.sortBy(option => option.index);
+  ngOnChanges() {
+    if (this.multipleChoice) {
+      let options = this.multipleChoice.options;
+      options = options.sortBy(option => option.index);
+      this.formOptions = { ...this.multipleChoice, options };
     }
     this.formGroup.setValue({
       label: this.label,
@@ -273,9 +272,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   drop(event: CdkDragDrop<string[]>) {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
-    const optionAtPrevIndex = options.get(event.previousIndex);
-    const optionAtCurrentIndex = options.get(event.currentIndex);
+    let optionAtPrevIndex = options.get(event.previousIndex);
+    let optionAtCurrentIndex = options.get(event.currentIndex);
     if (optionAtPrevIndex && optionAtCurrentIndex) {
+      optionAtPrevIndex = optionAtPrevIndex.withIndex(event.currentIndex);
+      optionAtCurrentIndex = optionAtCurrentIndex.withIndex(
+        event.previousIndex
+      );
       options = options.set(event.previousIndex, optionAtCurrentIndex);
       options = options.set(event.currentIndex, optionAtPrevIndex);
     }
