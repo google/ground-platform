@@ -15,6 +15,7 @@
  */
 
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -45,6 +46,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   constructor(
     private sanitizer: DomSanitizer,
     private confirmationDialog: MatDialog,
+    private importDialog: MatDialog,
     private router: Router,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService
@@ -117,8 +119,17 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   onClose() {
     return this.router.navigate([`p/${this.projectId}`]);
   }
+
+  onImportCsv() {
+    this.importDialog.open(ImportDialogComponent, {
+      maxWidth: '500px',
+      maxHeight: '800px',
+    });
+  }
+
   onDownloadCsv() {
     const link = `https://${environment.cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
+    // TODO(#320): Implement download CSV.
   }
 
   ngOnDestroy(): void {

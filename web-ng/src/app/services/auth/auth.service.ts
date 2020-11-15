@@ -29,6 +29,8 @@ import { shareReplay } from 'rxjs/operators';
 })
 export class AuthService {
   user$: Observable<User | null | undefined>;
+  private token?: string;
+
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
@@ -46,10 +48,17 @@ export class AuthService {
       // it as well.
       shareReplay(1)
     );
+    this.afAuth.authState.subscribe(async user => {
+      this.token = (await user?.getIdToken()) || undefined;
+    });
   }
 
   getUser$(): Observable<User | null | undefined> {
     return this.user$;
+  }
+
+  getIdToken(): string | undefined {
+    return this.token;
   }
 
   async signIn() {

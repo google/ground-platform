@@ -38,10 +38,11 @@ function importCsv(req, res) {
   busboy.on("field", (key, val) => {
     params[key] = val;
   });
+
   // This code will process each file uploaded.
   busboy.on("file", (key, file, _) => {
     const { projectId, layerId } = params;
-    if (key != "csvfile" || !projectId || !layerId) {
+    if (!projectId || !layerId) {
       return res.status(HttpStatus.BAD_REQUEST).end();
     }
     console.log(
@@ -50,9 +51,9 @@ function importCsv(req, res) {
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
     // received.
-    file.pipe(csvParser()).on("data", async (record) => {
-      console.log("Processing row: ", JSON.stringify(record));
-      await db.insertFeature(projectId, layerId, csvRowToFeature(record));
+    file.pipe(csvParser()).on("data", async (row) => {
+      console.log("Processing row: ", JSON.stringify(row));
+      await insertRow(projectId, layerId, row);
     });
   });
 
@@ -63,14 +64,48 @@ function importCsv(req, res) {
   busboy.end(req.rawBody);
 }
 
-function csvRowToFeature(record) {
-  var feature = {
-    caption: record.name + "," + record.state,
-    location: new firestore.GeoPoint(
-      Number.parseFloat(record.lat),
-      Number.parseFloat(record.long)
-    ),
-  };
+const SPECIAL_COLUMN_NAMES = {
+  id: "id",
+  name: "caption",
+  label: "caption",
+  caption: "caption",
+  lat: "lat",
+  latitude: "lat",
+  y: "lat",
+  lng: "lng",
+  long: "long",
+  longitude: "lng",
+  x: "lng",
+};
+
+async function insertRow(projectId, layerId, record) {
+  const feature = csvRowToFeature(record);
+  if (feature) {
+    await db.insertFeature(projectId, layerId, feature);
+  }
+}
+
+function csvRowToFeature(row) {
+  let attributes = {};
+  for (key in row) {
+    const featureKey = SPECIAL_COLUMN_NAMES[key.toLowerCase()];
+    const value = row[key];
+    if (featureKey) {
+      feature[featureKey] = value;
+    } else {
+      attributes[key] = value;
+    }
+  }
+  let { lat, lng, ...feature } = feature;
+  lat = Number.parseFloat(lat);
+  lng = Number.parseFloat(lng);
+  if (isNaN(lat) || isNaN(lng)) {
+    return null;
+  }
+  feature["location"] = new firestore.GeoPoint(lat, lng);
+  if (Object.keys(attributes).length > 0) {
+    feature["attributes"] = attributes;
+  }
   return feature;
 }
 

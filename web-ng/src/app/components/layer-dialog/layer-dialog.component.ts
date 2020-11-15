@@ -66,7 +66,7 @@ export class LayerDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dataStoreService: DataStoreService,
     private router: Router,
-    private confirmationDialog: MatDialog,
+    private dialog: MatDialog,
     private layerService: LayerService,
     private projectService: ProjectService
   ) {
@@ -98,17 +98,14 @@ export class LayerDialogComponent implements OnDestroy {
    *
    */
   onFieldDelete(index: number) {
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
-        },
-      }
-    );
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      maxWidth: '500px',
+      data: {
+        title: 'Warning',
+        message:
+          'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
+      },
+    });
 
     dialogRef.afterClosed().subscribe(dialogResult => {
       if (dialogResult) {
@@ -242,17 +239,14 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   onDeleteLayer() {
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
-        },
-      }
-    );
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      maxWidth: '500px',
+      data: {
+        title: 'Warning',
+        message:
+          'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
+      },
+    });
 
     dialogRef.afterClosed().subscribe(async dialogResult => {
       if (dialogResult) {

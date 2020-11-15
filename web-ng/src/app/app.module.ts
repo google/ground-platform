@@ -29,6 +29,7 @@ import { ProjectHeaderModule } from './components/project-header/project-header.
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
 import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [AppComponent],
@@ -39,6 +40,7 @@ import { ShareDialogModule } from './components/share-dialog/share-dialog.module
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     MainPageContainerModule,
     ProjectHeaderModule,
     UserProfilePopupModule,
