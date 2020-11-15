@@ -111,11 +111,18 @@ Ground Cloud Functions source code.
    $ firebase login
    ```
 
-3. Run cloud functions locally to test changes:
+3. Test Cloud Functions in a browser using a local emulator with:
+
+   ```
+   $ firebase emulators:start
+   ```
+   
+   Alternatively, you can test functions from a command-line shell using:
 
    ```
    $ firebase functions:shell
    ```
+
 
    For more information on using the Firebase shell, see
    <https://firebase.google.com/docs/functions/local-emulator>.
