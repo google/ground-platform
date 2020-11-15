@@ -107,6 +107,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onEditModeChange(editMode: EditMode) {
+    if (editMode !== EditMode.None) {
+      this.selectMarker(undefined);
+      this.navigationService.setFeatureId(null);
+      for (const marker of this.markers) {
+        marker.setClickable(false);
+      }
+    } else {
+      for (const marker of this.markers) {
+        marker.setClickable(true);
+      }
+    }
     this.mapOptions =
       editMode === EditMode.AddPoint
         ? this.crosshairCursorMapOptions
