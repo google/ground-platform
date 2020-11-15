@@ -170,7 +170,7 @@ export class LayerDialogComponent implements OnDestroy {
       editor.labelControl.markAsTouched();
     });
 
-    for (let editor of this.formFieldEditors) {
+    for (const editor of this.formFieldEditors) {
       if (editor.formGroup.invalid) {
         return;
       }

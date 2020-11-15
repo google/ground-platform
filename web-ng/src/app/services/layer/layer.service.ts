@@ -141,7 +141,7 @@ export class LayerService {
    * Iterates over all the fields and remove the options that are empty.
    */
   removeFieldsEmptyOptions(fields: List<Field>): List<Field> {
-    for (let [index, field] of fields.entries()) {
+    for (const [index, field] of fields.entries()) {
       if (!field.multipleChoice) {
         continue;
       }
@@ -168,7 +168,7 @@ export class LayerService {
     if (!field.multipleChoice) {
       return options;
     }
-    for (let opt of field.multipleChoice.options) {
+    for (const opt of field.multipleChoice.options) {
       if (!opt.label.get('en') && !opt.code) {
         continue;
       }
