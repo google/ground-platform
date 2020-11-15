@@ -22,13 +22,11 @@
 
 .btn-save {
   color: white;
-  background-color: #188038;
   height: 36px;
   width: 82px;
   border-radius: 5px;
   font-family: 'Open Sans', Arial, sans-serif;
   margin-left: 10px;
-  cursor: pointer;
 }
 
 .btn-cancel {
@@ -36,12 +34,11 @@
   width: 82px;
   border-radius: 5px;
   font-family: 'Open Sans', Arial, sans-serif;
-  cursor: pointer;
-  color: #009113;
+  color: mat-color($primary);
 }
 
 .link-add-question {
-  color: #009113;
+  color: mat-color($primary);
 }
 
 .add-question {
@@ -53,97 +50,9 @@
   text-align: left;
 }
 
-.plus-icon {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-  background: linear-gradient(#009113, #009113),
-    linear-gradient(#009113, #009113);
-  background-position: center;
-  background-size: 50% 2px, 2px 50%;
-  background-repeat: no-repeat;
-}
-
-.field-type {
-  margin-left: 30px;
-  font-size: 12px;
-}
-
-.main-container-questions {
-  margin-top: 10px;
-}
-
-.icon-field-type {
-  vertical-align: middle;
-  margin-right: 20px;
-}
-
-.container-question {
-  border-radius: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  border: 0px thin;
-  margin-top: 10px;
-  border: 1px #e6e7ea;
-  border-style: solid;
-}
-
 .mat-dialog-actions {
   margin-top: 10px;
   margin-bottom: 0.83em;
-}
-
-.container-option {
-  margin-right: 20px;
-}
-
-.field-option {
-  width: 100%;
-}
-
-.add-option {
-  margin-left: 30px;
-  cursor: pointer;
-  text-decoration: underline;
-  color: #009113;
-  text-underline-position: under;
-}
-
-.dot {
-  height: 15px;
-  width: 15px;
-  border: 1px solid black;
-  align-self: center;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.main-container-options {
-  padding-bottom: 20px;
-}
-
-.required-label {
-  margin-right: 20px;
-}
-
-.question-actions {
-  margin-bottom: 20px;
-  margin-right: 10px;
-}
-
-.vertical-divider {
-  border-left: 1px solid #e0e0e0;
-  height: 30px;
-  margin: 3px 20px;
-}
-
-.required-toggle {
-  padding-top: 5px;
-}
-
-.trash-icon {
-  color: #707074;
 }
 
 .default-style {
