@@ -32,7 +32,7 @@ import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
-import { firestore } from 'firebase/app';
+import firebase from "firebase/app";
 
 // To make ESLint happy:
 /*global google*/
@@ -206,7 +206,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const newFeature = new LocationFeature(
         feature.id,
         feature.layerId,
-        new firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
+        new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
       );
       this.featureService.updatePoint(newFeature);
     });

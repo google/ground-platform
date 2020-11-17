@@ -22,7 +22,7 @@ import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
-import { firestore } from 'firebase';
+import firebase from "firebase/app";
 
 @Injectable({
   providedIn: 'root',
@@ -101,7 +101,7 @@ export class FeatureService {
     const newFeature = new LocationFeature(
       this.dataStore.generateId(),
       layerId,
-      new firestore.GeoPoint(lat, lng)
+      new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
     this.selectFeature(newFeature.id);

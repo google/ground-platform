@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { firestore } from 'firebase/app';
+import firebase from "firebase/app";
 
 export interface Feature {
   readonly id: string;
@@ -26,7 +26,7 @@ export class LocationFeature implements Feature {
     readonly id: string,
     readonly layerId: string,
     // TODO: User custom type instead of exposing types from data layer.
-    readonly location: firestore.GeoPoint
+    readonly location: firebase.firestore.GeoPoint
   ) {}
 }
 

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
+import firebase from "firebase/app";
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { FeaturePanelComponent } from './feature-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
-import { firestore } from 'firebase/app';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -51,7 +50,7 @@ const mockProject = new Project(
 const mockFeature = new LocationFeature(
   'feature001',
   'layer001',
-  new firestore.GeoPoint(0.0, 0.0)
+  new firebase.firestore.GeoPoint(0.0, 0.0)
 );
 
 const mockObservations = List<Observation>([]);
