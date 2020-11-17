@@ -188,7 +188,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       },
     } as google.maps.Icon;
     const options: google.maps.MarkerOptions = {
-      map: this.map._googleMap,
+      map: this.map.googleMap,
       position: new google.maps.LatLng(
         feature.location.latitude,
         feature.location.longitude
