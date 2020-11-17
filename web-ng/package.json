@@ -34,7 +34,7 @@
     "firebase": "^7.24.0",
     "hammerjs": "^2.0.8",
     "immutable": "^4.0.0-rc.12",
-    "ngx-autosize-input": "^2.3.7",
+    "ngx-autosize-input": "^10.0.6",
     "ngx-color": "^5.1.4",
     "rxjs": "^6.6.3",
     "tslib": "^1.14.1",
