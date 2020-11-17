@@ -12,6 +12,7 @@
     "clean": "gts clean",
     "compile": "tsc -p .",
     "fix": "gts fix",
+    "postinstall": "ngcc",
     "posttest": "npm run check"
   },
   "private": true,
