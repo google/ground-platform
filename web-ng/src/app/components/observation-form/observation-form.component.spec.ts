@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
@@ -165,7 +165,7 @@ describe('ObservationFormComponent', () => {
   let fixture: ComponentFixture<ObservationFormComponent>;
   const user$ = new Subject<User | null>();
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const navigationService = {
       getProjectId$: () => of(''),
       getFeatureId$: never,

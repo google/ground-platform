@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { UserProfilePopupComponent } from './user-profile-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -29,7 +29,7 @@ describe('UserProfilePopupComponent', () => {
   let fixture: ComponentFixture<UserProfilePopupComponent>;
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [UserProfilePopupComponent],

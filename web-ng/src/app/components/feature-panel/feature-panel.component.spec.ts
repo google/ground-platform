@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { FeaturePanelComponent } from './feature-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -82,7 +82,7 @@ describe('FeaturePanelComponent', () => {
   let component: FeaturePanelComponent;
   let fixture: ComponentFixture<FeaturePanelComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [FeaturePanelComponent],

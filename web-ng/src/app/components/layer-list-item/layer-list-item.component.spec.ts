@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { LayerListItemComponent } from './layer-list-item.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
@@ -29,7 +29,7 @@ describe('LayerListItemComponent', () => {
   let fixture: ComponentFixture<LayerListItemComponent>;
   const firestoreStub: Partial<AngularFirestore> = {};
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const navigationService = {
       getProjectId$: () => of(''),
       getFeatureId$: () => of(''),

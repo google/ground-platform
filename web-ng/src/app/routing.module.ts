@@ -24,7 +24,7 @@ const routes: Routes = [
     component: MainPageContainerComponent,
   },
 ];
-const config = RouterModule.forRoot(routes);
+const config = RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' });
 
 @NgModule({
   imports: [config],

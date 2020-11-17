@@ -15,7 +15,7 @@
  */
 
 import { AuthService } from './../../services/auth/auth.service';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
@@ -35,7 +35,7 @@ describe('ProjectHeaderComponent', () => {
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
   const user$ = new Subject<User | null>();
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         AngularFireModule.initializeApp(environment.firebaseConfig),

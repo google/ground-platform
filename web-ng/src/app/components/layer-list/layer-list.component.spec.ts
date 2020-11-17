@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { LayerListComponent } from './layer-list.component';
 import { ProjectService } from '../../services/project/project.service';
@@ -60,7 +60,7 @@ describe('LayerListComponent', () => {
   let component: LayerListComponent;
   let fixture: ComponentFixture<LayerListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const navigationService = {
       getProjectId$: () => of(''),
       getFeatureId$: () => of(''),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { LayerDialogComponent } from './layer-dialog.component';
 import {
@@ -46,7 +46,7 @@ describe('LayerDialogComponent', () => {
   let fixture: ComponentFixture<LayerDialogComponent>;
   const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
       declarations: [LayerDialogComponent, MatDialogContent, MatDialogActions],
