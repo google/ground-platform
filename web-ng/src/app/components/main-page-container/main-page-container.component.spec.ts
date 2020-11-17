@@ -38,21 +38,23 @@ describe('MainPageContainerComponent', () => {
   let fixture: ComponentFixture<MainPageContainerComponent>;
   let route: ActivatedRouteStub;
 
-  beforeEach(waitForAsync(() => {
-    route = new ActivatedRouteStub();
-    TestBed.configureTestingModule({
-      declarations: [MainPageContainerComponent, MainPageComponent],
-      providers: [
-        { provide: ActivatedRoute, useValue: route },
-        { provide: NavigationService, useValue: navigationService },
-        { provide: ProjectService, useValue: projectService },
-      ],
-    }).compileComponents();
+  beforeEach(
+    waitForAsync(() => {
+      route = new ActivatedRouteStub();
+      TestBed.configureTestingModule({
+        declarations: [MainPageContainerComponent, MainPageComponent],
+        providers: [
+          { provide: ActivatedRoute, useValue: route },
+          { provide: NavigationService, useValue: navigationService },
+          { provide: ProjectService, useValue: projectService },
+        ],
+      }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageContainerComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+      fixture = TestBed.createComponent(MainPageContainerComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    })
+  );
 
   it('should create', () => {
     expect(component).toBeTruthy();

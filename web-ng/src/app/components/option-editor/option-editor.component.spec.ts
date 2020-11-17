@@ -29,21 +29,23 @@ describe('OptionEditorComponent', () => {
   let component: OptionEditorComponent;
   let fixture: ComponentFixture<OptionEditorComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [OptionEditorComponent],
-      imports: [
-        CommonModule,
-        BrowserAnimationsModule,
-        FlexLayoutModule,
-        MatFormFieldModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatInputModule,
-        MatButtonModule,
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [OptionEditorComponent],
+        imports: [
+          CommonModule,
+          BrowserAnimationsModule,
+          FlexLayoutModule,
+          MatFormFieldModule,
+          FormsModule,
+          ReactiveFormsModule,
+          MatInputModule,
+          MatButtonModule,
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(OptionEditorComponent);

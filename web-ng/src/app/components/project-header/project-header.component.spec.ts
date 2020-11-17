@@ -35,29 +35,31 @@ describe('ProjectHeaderComponent', () => {
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
   const user$ = new Subject<User | null>();
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        AngularFireModule.initializeApp(environment.firebaseConfig),
-        AngularFireAuthModule,
-        AngularFirestoreModule,
-        MatIconModule,
-        MatDialogModule,
-      ],
-      declarations: [ProjectHeaderComponent],
-      providers: [
-        {
-          provide: AuthService,
-          useValue: {
-            user$,
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [
+          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireAuthModule,
+          AngularFirestoreModule,
+          MatIconModule,
+          MatDialogModule,
+        ],
+        declarations: [ProjectHeaderComponent],
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              user$,
+            },
           },
-        },
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: {} },
-      ],
-    }).compileComponents();
-  }));
+          { provide: MAT_DIALOG_DATA, useValue: {} },
+          { provide: MatDialogRef, useValue: dialogRef },
+          { provide: Router, useValue: {} },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ProjectHeaderComponent);

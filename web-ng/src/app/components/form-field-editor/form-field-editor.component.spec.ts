@@ -47,29 +47,31 @@ describe('FormFieldEditorComponent', () => {
   let component: FormFieldEditorComponent;
   let fixture: ComponentFixture<FormFieldEditorComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [FormFieldEditorComponent],
-      imports: [
-        AngularFireModule.initializeApp({}),
-        AngularFireAuthModule,
-        AngularFirestoreModule,
-        FormsModule,
-        ReactiveFormsModule,
-        BrowserModule,
-        MatSelectModule,
-        MatSlideToggleModule,
-        MatFormFieldModule,
-        MatInputModule,
-        BrowserAnimationsModule,
-        MatDialogModule,
-      ],
-      providers: [
-        { provide: AngularFirestore, useValue: firestoreStub },
-        { provide: Router, useValue: {} },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [FormFieldEditorComponent],
+        imports: [
+          AngularFireModule.initializeApp({}),
+          AngularFireAuthModule,
+          AngularFirestoreModule,
+          FormsModule,
+          ReactiveFormsModule,
+          BrowserModule,
+          MatSelectModule,
+          MatSlideToggleModule,
+          MatFormFieldModule,
+          MatInputModule,
+          BrowserAnimationsModule,
+          MatDialogModule,
+        ],
+        providers: [
+          { provide: AngularFirestore, useValue: firestoreStub },
+          { provide: Router, useValue: {} },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FormFieldEditorComponent);

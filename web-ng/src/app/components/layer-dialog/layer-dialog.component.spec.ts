@@ -46,31 +46,37 @@ describe('LayerDialogComponent', () => {
   let fixture: ComponentFixture<LayerDialogComponent>;
   const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
 
-  beforeEach(waitForAsync(() => {
-    const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
-      declarations: [LayerDialogComponent, MatDialogContent, MatDialogActions],
-      imports: [
-        AngularFireModule.initializeApp(environment.firebaseConfig),
-        AngularFireAuthModule,
-        AngularFirestoreModule,
-        FormsModule,
-        InlineEditorModule,
-        ReactiveFormsModule,
-        BrowserAnimationsModule,
-        FlexLayoutModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDialogModule,
-        MatIconModule,
-      ],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: routerSpy },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      const routerSpy = createRouterSpy();
+      TestBed.configureTestingModule({
+        declarations: [
+          LayerDialogComponent,
+          MatDialogContent,
+          MatDialogActions,
+        ],
+        imports: [
+          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireAuthModule,
+          AngularFirestoreModule,
+          FormsModule,
+          InlineEditorModule,
+          ReactiveFormsModule,
+          BrowserAnimationsModule,
+          FlexLayoutModule,
+          MatFormFieldModule,
+          MatInputModule,
+          MatDialogModule,
+          MatIconModule,
+        ],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
+          { provide: MatDialogRef, useValue: dialogRef },
+          { provide: Router, useValue: routerSpy },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LayerDialogComponent);

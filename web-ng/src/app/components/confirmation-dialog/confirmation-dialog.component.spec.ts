@@ -24,15 +24,17 @@ describe('ConfirmationDialogComponent', () => {
   let fixture: ComponentFixture<ConfirmationDialogComponent>;
   const dialogRef: Partial<MatDialogRef<ConfirmationDialogComponent>> = {};
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ConfirmationDialogComponent],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ConfirmationDialogComponent],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: {} },
+          { provide: MatDialogRef, useValue: dialogRef },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ConfirmationDialogComponent);

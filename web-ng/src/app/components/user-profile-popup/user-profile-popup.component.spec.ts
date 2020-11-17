@@ -29,23 +29,25 @@ describe('UserProfilePopupComponent', () => {
   let fixture: ComponentFixture<UserProfilePopupComponent>;
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
 
-  beforeEach(waitForAsync(() => {
-    const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
-      declarations: [UserProfilePopupComponent],
-      imports: [
-        MatDialogModule,
-        AngularFireModule.initializeApp(environment.firebaseConfig),
-        AngularFireAuthModule,
-        AngularFirestoreModule,
-      ],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: routerSpy },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      const routerSpy = createRouterSpy();
+      TestBed.configureTestingModule({
+        declarations: [UserProfilePopupComponent],
+        imports: [
+          MatDialogModule,
+          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireAuthModule,
+          AngularFirestoreModule,
+        ],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: {} },
+          { provide: MatDialogRef, useValue: dialogRef },
+          { provide: Router, useValue: routerSpy },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UserProfilePopupComponent);

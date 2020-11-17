@@ -40,45 +40,47 @@ describe('MainPageComponent', () => {
   let route: ActivatedRouteStub;
   const dialog: Partial<MatDialog> = {};
 
-  beforeEach(waitForAsync(() => {
-    route = new ActivatedRouteStub();
+  beforeEach(
+    waitForAsync(() => {
+      route = new ActivatedRouteStub();
 
-    const projectService = jasmine.createSpyObj('ProjectService', [
-      'getActiveProject$',
-      'activateProject',
-    ]);
+      const projectService = jasmine.createSpyObj('ProjectService', [
+        'getActiveProject$',
+        'activateProject',
+      ]);
 
-    const featureService = jasmine.createSpyObj('FeatureService', [
-      'selectFeature$',
-    ]);
+      const featureService = jasmine.createSpyObj('FeatureService', [
+        'selectFeature$',
+      ]);
 
-    const observationService = jasmine.createSpyObj('ObservationService', [
-      'selectObservation$',
-    ]);
+      const observationService = jasmine.createSpyObj('ObservationService', [
+        'selectObservation$',
+      ]);
 
-    const navigationService = {
-      getLayerId$: () => NEVER,
-      getFeatureId$: () => NEVER,
-      getObservationId$: () => NEVER,
-    };
+      const navigationService = {
+        getLayerId$: () => NEVER,
+        getFeatureId$: () => NEVER,
+        getObservationId$: () => NEVER,
+      };
 
-    TestBed.configureTestingModule({
-      declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
-      providers: [
-        { provide: ActivatedRoute, useValue: route },
-        { provide: MatDialog, useValue: dialog },
-        { provide: FeatureService, useValue: featureService },
-        { provide: ObservationService, useValue: observationService },
-        { provide: ProjectService, useValue: projectService },
-        { provide: NavigationService, useValue: navigationService },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+      TestBed.configureTestingModule({
+        declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
+        providers: [
+          { provide: ActivatedRoute, useValue: route },
+          { provide: MatDialog, useValue: dialog },
+          { provide: FeatureService, useValue: featureService },
+          { provide: ObservationService, useValue: observationService },
+          { provide: ProjectService, useValue: projectService },
+          { provide: NavigationService, useValue: navigationService },
+        ],
+        schemas: [NO_ERRORS_SCHEMA],
+      }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+      fixture = TestBed.createComponent(MainPageComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    })
+  );
 
   it('should create', () => {
     expect(component).toBeTruthy();

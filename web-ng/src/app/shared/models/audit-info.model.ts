@@ -15,7 +15,7 @@
  */
 
 import { User } from './user.model';
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 
 export class AuditInfo {
   constructor(

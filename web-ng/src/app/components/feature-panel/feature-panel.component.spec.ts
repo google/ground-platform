@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FeaturePanelComponent } from './feature-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -81,20 +81,22 @@ describe('FeaturePanelComponent', () => {
   let component: FeaturePanelComponent;
   let fixture: ComponentFixture<FeaturePanelComponent>;
 
-  beforeEach(waitForAsync(() => {
-    const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
-      declarations: [FeaturePanelComponent],
-      imports: [AngularFireModule.initializeApp({})],
-      providers: [
-        { provide: FeatureService, useValue: featureService },
-        { provide: ProjectService, useValue: projectService },
-        { provide: ObservationService, useValue: observationService },
-        { provide: Router, useValue: routerSpy },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      const routerSpy = createRouterSpy();
+      TestBed.configureTestingModule({
+        declarations: [FeaturePanelComponent],
+        imports: [AngularFireModule.initializeApp({})],
+        providers: [
+          { provide: FeatureService, useValue: featureService },
+          { provide: ProjectService, useValue: projectService },
+          { provide: ObservationService, useValue: observationService },
+          { provide: Router, useValue: routerSpy },
+        ],
+        schemas: [NO_ERRORS_SCHEMA],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FeaturePanelComponent);

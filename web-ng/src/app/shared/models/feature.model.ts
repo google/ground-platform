@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 
 export interface Feature {
   readonly id: string;

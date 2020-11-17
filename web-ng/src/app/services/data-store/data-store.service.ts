@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';

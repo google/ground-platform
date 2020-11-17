@@ -22,7 +22,7 @@ import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 
 @Injectable({
   providedIn: 'root',

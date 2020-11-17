@@ -26,18 +26,20 @@ describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
   let fixture: ComponentFixture<ShareDialogComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ShareDialogComponent],
-      providers: [
-        { provide: MatDialogRef, useValue: {} },
-        {
-          provide: ProjectService,
-          useValue: { getActiveProject$: () => of({ acl: Map() }) },
-        },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ShareDialogComponent],
+        providers: [
+          { provide: MatDialogRef, useValue: {} },
+          {
+            provide: ProjectService,
+            useValue: { getActiveProject$: () => of({ acl: Map() }) },
+          },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareDialogComponent);

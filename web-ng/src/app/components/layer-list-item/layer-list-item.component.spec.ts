@@ -29,22 +29,24 @@ describe('LayerListItemComponent', () => {
   let fixture: ComponentFixture<LayerListItemComponent>;
   const firestoreStub: Partial<AngularFirestore> = {};
 
-  beforeEach(waitForAsync(() => {
-    const navigationService = {
-      getProjectId$: () => of(''),
-      getFeatureId$: () => of(''),
-    };
+  beforeEach(
+    waitForAsync(() => {
+      const navigationService = {
+        getProjectId$: () => of(''),
+        getFeatureId$: () => of(''),
+      };
 
-    TestBed.configureTestingModule({
-      declarations: [LayerListItemComponent],
-      imports: [MatListModule, MatMenuModule, MatDialogModule],
-      providers: [
-        { provide: NavigationService, useValue: navigationService },
-        { provide: Router, useValue: {} },
-        { provide: AngularFirestore, useValue: firestoreStub },
-      ],
-    }).compileComponents();
-  }));
+      TestBed.configureTestingModule({
+        declarations: [LayerListItemComponent],
+        imports: [MatListModule, MatMenuModule, MatDialogModule],
+        providers: [
+          { provide: NavigationService, useValue: navigationService },
+          { provide: Router, useValue: {} },
+          { provide: AngularFirestore, useValue: firestoreStub },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LayerListItemComponent);

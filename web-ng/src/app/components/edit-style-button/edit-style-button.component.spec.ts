@@ -23,12 +23,14 @@ describe('EditStyleButtonComponent', () => {
   let component: EditStyleButtonComponent;
   let fixture: ComponentFixture<EditStyleButtonComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [EditStyleButtonComponent],
-      imports: [MatDialogModule, MatIconModule],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [EditStyleButtonComponent],
+        imports: [MatDialogModule, MatIconModule],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditStyleButtonComponent);

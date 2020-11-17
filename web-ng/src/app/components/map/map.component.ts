@@ -32,7 +32,7 @@ import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
-import firebase from "firebase/app";
+import firebase from 'firebase/app';
 
 // To make ESLint happy:
 /*global google*/
