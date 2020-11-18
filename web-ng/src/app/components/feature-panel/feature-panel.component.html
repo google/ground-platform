@@ -23,6 +23,9 @@ limitations under the License.
     [actionsType]="layerListItemActionsType.BACK"
   ></ground-layer-list-item>
 </mat-list>
+<button color="primary" mat-raised-button (click)="onAddObservationClick()">
+  + Add observation
+</button>
 <div *ngIf="observations$ | async as observations">
   <mat-card class="observation card" *ngFor="let observation of observations">
     <mat-card-header>
