@@ -25,7 +25,7 @@ import { Project } from '../../shared/models/project.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
-import { firestore } from 'firebase';
+import firebase from 'firebase/app';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -117,7 +117,7 @@ class MockModel {
   static feature001 = new LocationFeature(
     'feature001',
     MockModel.layer001.id,
-    new firestore.GeoPoint(0.0, 0.0)
+    new firebase.firestore.GeoPoint(0.0, 0.0)
   );
 
   static user001 = {
