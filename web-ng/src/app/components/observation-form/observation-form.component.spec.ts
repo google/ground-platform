@@ -121,7 +121,7 @@ class MockModel {
   );
 
   static user001 = {
-    uid: 'user001',
+    id: 'user001',
     email: 'email@gmail.com',
   };
 
