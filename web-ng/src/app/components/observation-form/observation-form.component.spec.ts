@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
@@ -165,45 +165,47 @@ describe('ObservationFormComponent', () => {
   let fixture: ComponentFixture<ObservationFormComponent>;
   const user$ = new Subject<User | null>();
 
-  beforeEach(async(() => {
-    const navigationService = {
-      getProjectId$: () => of(''),
-      getFeatureId$: never,
-    };
-    const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
-      declarations: [ObservationFormComponent],
-      imports: [
-        AngularFireModule.initializeApp(environment.firebaseConfig),
-        BrowserAnimationsModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatRadioModule,
-        MatCheckboxModule,
-        MatIconModule,
-        MatListModule,
-        LayerListItemModule,
-      ],
-      providers: [
-        { provide: FeatureService, useValue: featureService },
-        { provide: ProjectService, useValue: projectService },
-        { provide: ObservationService, useValue: observationService },
-        { provide: Router, useValue: routerSpy },
-        { provide: NavigationService, useValue: navigationService },
-        {
-          provide: AuthService,
-          useValue: {
-            user$,
+  beforeEach(
+    waitForAsync(() => {
+      const navigationService = {
+        getProjectId$: () => of(''),
+        getFeatureId$: never,
+      };
+      const routerSpy = createRouterSpy();
+      TestBed.configureTestingModule({
+        declarations: [ObservationFormComponent],
+        imports: [
+          AngularFireModule.initializeApp(environment.firebaseConfig),
+          BrowserAnimationsModule,
+          FormsModule,
+          ReactiveFormsModule,
+          MatFormFieldModule,
+          MatButtonModule,
+          MatFormFieldModule,
+          MatInputModule,
+          MatRadioModule,
+          MatCheckboxModule,
+          MatIconModule,
+          MatListModule,
+          LayerListItemModule,
+        ],
+        providers: [
+          { provide: FeatureService, useValue: featureService },
+          { provide: ProjectService, useValue: projectService },
+          { provide: ObservationService, useValue: observationService },
+          { provide: Router, useValue: routerSpy },
+          { provide: NavigationService, useValue: navigationService },
+          {
+            provide: AuthService,
+            useValue: {
+              user$,
+            },
           },
-        },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
-  }));
+        ],
+        schemas: [NO_ERRORS_SCHEMA],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ObservationFormComponent);
