@@ -16,7 +16,7 @@
 
 import { ActivatedRouteStub } from './../../../testing/activated-route-stub';
 import { ActivatedRoute } from '@angular/router';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MainPageContainerComponent } from './main-page-container.component';
 import { MainPageComponent } from './../main-page/main-page.component';
 import { NavigationService } from './../../services/router/router.service';
@@ -38,21 +38,23 @@ describe('MainPageContainerComponent', () => {
   let fixture: ComponentFixture<MainPageContainerComponent>;
   let route: ActivatedRouteStub;
 
-  beforeEach(async(() => {
-    route = new ActivatedRouteStub();
-    TestBed.configureTestingModule({
-      declarations: [MainPageContainerComponent, MainPageComponent],
-      providers: [
-        { provide: ActivatedRoute, useValue: route },
-        { provide: NavigationService, useValue: navigationService },
-        { provide: ProjectService, useValue: projectService },
-      ],
-    }).compileComponents();
+  beforeEach(
+    waitForAsync(() => {
+      route = new ActivatedRouteStub();
+      TestBed.configureTestingModule({
+        declarations: [MainPageContainerComponent, MainPageComponent],
+        providers: [
+          { provide: ActivatedRoute, useValue: route },
+          { provide: NavigationService, useValue: navigationService },
+          { provide: ProjectService, useValue: projectService },
+        ],
+      }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageContainerComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+      fixture = TestBed.createComponent(MainPageContainerComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    })
+  );
 
   it('should create', () => {
     expect(component).toBeTruthy();

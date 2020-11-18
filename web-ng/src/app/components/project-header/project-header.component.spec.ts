@@ -15,7 +15,7 @@
  */
 
 import { AuthService } from './../../services/auth/auth.service';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
@@ -35,29 +35,31 @@ describe('ProjectHeaderComponent', () => {
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
   const user$ = new Subject<User | null>();
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        AngularFireModule.initializeApp(environment.firebaseConfig),
-        AngularFireAuthModule,
-        AngularFirestoreModule,
-        MatIconModule,
-        MatDialogModule,
-      ],
-      declarations: [ProjectHeaderComponent],
-      providers: [
-        {
-          provide: AuthService,
-          useValue: {
-            user$,
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [
+          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireAuthModule,
+          AngularFirestoreModule,
+          MatIconModule,
+          MatDialogModule,
+        ],
+        declarations: [ProjectHeaderComponent],
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              user$,
+            },
           },
-        },
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: {} },
-      ],
-    }).compileComponents();
-  }));
+          { provide: MAT_DIALOG_DATA, useValue: {} },
+          { provide: MatDialogRef, useValue: dialogRef },
+          { provide: Router, useValue: {} },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ProjectHeaderComponent);

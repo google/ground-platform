@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import firebase from 'firebase/app';
 import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
@@ -26,7 +27,6 @@ import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
-import { firestore } from 'firebase/app';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
@@ -82,7 +82,7 @@ export class DataStoreService {
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layerId}`]: firestore.FieldValue.delete(),
+        [`layers.${layerId}`]: firebase.firestore.FieldValue.delete(),
       });
   }
 
@@ -230,7 +230,7 @@ export class DataStoreService {
   }
 
   getServerTimestamp() {
-    return firestore.FieldValue.serverTimestamp();
+    return firebase.firestore.FieldValue.serverTimestamp();
   }
 
   updateFeature(projectId: string, feature: Feature): Promise<void> {
