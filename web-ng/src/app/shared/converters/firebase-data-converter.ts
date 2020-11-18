@@ -515,7 +515,7 @@ export class FirebaseDataConverter {
 
   private static userToJs(user: User): {} {
     return {
-      uid: user.uid,
+      id: user.id,
       email: user.email,
       displayName: user.displayName,
     };
