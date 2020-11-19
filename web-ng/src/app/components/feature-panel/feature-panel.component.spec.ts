@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import firebase from 'firebase/app';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FeaturePanelComponent } from './feature-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
-import { firestore } from 'firebase/app';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -51,7 +50,7 @@ const mockProject = new Project(
 const mockFeature = new LocationFeature(
   'feature001',
   'layer001',
-  new firestore.GeoPoint(0.0, 0.0)
+  new firebase.firestore.GeoPoint(0.0, 0.0)
 );
 
 const mockObservations = List<Observation>([]);
@@ -82,20 +81,22 @@ describe('FeaturePanelComponent', () => {
   let component: FeaturePanelComponent;
   let fixture: ComponentFixture<FeaturePanelComponent>;
 
-  beforeEach(async(() => {
-    const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
-      declarations: [FeaturePanelComponent],
-      imports: [AngularFireModule.initializeApp({})],
-      providers: [
-        { provide: FeatureService, useValue: featureService },
-        { provide: ProjectService, useValue: projectService },
-        { provide: ObservationService, useValue: observationService },
-        { provide: Router, useValue: routerSpy },
-      ],
-      schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      const routerSpy = createRouterSpy();
+      TestBed.configureTestingModule({
+        declarations: [FeaturePanelComponent],
+        imports: [AngularFireModule.initializeApp({})],
+        providers: [
+          { provide: FeatureService, useValue: featureService },
+          { provide: ProjectService, useValue: projectService },
+          { provide: ObservationService, useValue: observationService },
+          { provide: Router, useValue: routerSpy },
+        ],
+        schemas: [NO_ERRORS_SCHEMA],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(FeaturePanelComponent);

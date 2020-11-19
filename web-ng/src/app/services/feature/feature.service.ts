@@ -1,5 +1,3 @@
-import { Project } from './../../shared/models/project.model';
-import { firestore } from 'firebase/app';
 /**
  * Copyright 2020 Google LLC
  *
@@ -19,10 +17,12 @@ import { firestore } from 'firebase/app';
 import { DataStoreService } from './../data-store/data-store.service';
 import { switchMap, take } from 'rxjs/operators';
 import { Observable, ReplaySubject } from 'rxjs';
+import { Project } from './../../shared/models/project.model';
 import { ProjectService } from './../project/project.service';
 import { Injectable } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
+import firebase from 'firebase/app';
 
 @Injectable({
   providedIn: 'root',
@@ -101,7 +101,7 @@ export class FeatureService {
     const newFeature = new LocationFeature(
       this.dataStore.generateId(),
       layerId,
-      new firestore.GeoPoint(lat, lng)
+      new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
     this.selectFeature(newFeature.id);

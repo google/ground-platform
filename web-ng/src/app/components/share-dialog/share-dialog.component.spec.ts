@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ShareDialogComponent } from './share-dialog.component';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -26,18 +26,20 @@ describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
   let fixture: ComponentFixture<ShareDialogComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ShareDialogComponent],
-      providers: [
-        { provide: MatDialogRef, useValue: {} },
-        {
-          provide: ProjectService,
-          useValue: { getActiveProject$: () => of({ acl: Map() }) },
-        },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ShareDialogComponent],
+        providers: [
+          { provide: MatDialogRef, useValue: {} },
+          {
+            provide: ProjectService,
+            useValue: { getActiveProject$: () => of({ acl: Map() }) },
+          },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareDialogComponent);
