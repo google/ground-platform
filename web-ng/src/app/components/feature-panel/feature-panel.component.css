@@ -33,3 +33,12 @@
     content: ", ";
     display: inline-block;
 }
+.add-observation-btn {
+    position: absolute;
+    bottom: 32px;
+    border-radius: 100px;
+    width: 193px;
+    height: 48px;
+    right: 53px;
+    z-index: 1000;
+}
