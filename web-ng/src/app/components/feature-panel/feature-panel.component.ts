@@ -81,6 +81,8 @@ export class FeaturePanelComponent {
   }
 
   onAddObservationClick() {
-    this.navigationService.setObservationId(NavigationService.OBSERVATION_ID_NEW);
+    this.navigationService.setObservationId(
+      NavigationService.OBSERVATION_ID_NEW
+    );
   }
 }
