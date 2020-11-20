@@ -178,6 +178,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private centerViewportOnMarker(options: google.maps.MarkerOptions): void {
+    if (options.position) {
+      this.map.panTo(options.position);
+    }
+  }
+
+  private setMapZoomDefault(): void {
+    if (
+      this.initialMapOptions.zoom &&
+      this.map.getZoom() < this.initialMapOptions.zoom
+    ) {
+      this.map.zoom = this.initialMapOptions.zoom;
+    }
+  }
+
   private addMarkerToMap(project: Project, feature: LocationFeature) {
     const color = project.layers.get(feature.layerId)?.color;
     const icon = {
@@ -201,6 +216,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('click', () => {
       this.selectMarker(marker);
       this.navigationService.setFeatureId(feature.id);
+      this.centerViewportOnMarker(options);
+      this.setMapZoomDefault();
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
       const newFeature = new LocationFeature(
