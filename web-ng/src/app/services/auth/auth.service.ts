@@ -19,7 +19,7 @@ import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Injectable } from '@angular/core';
-import { auth } from 'firebase/app';
+import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { shareReplay } from 'rxjs/operators';
@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   async signIn() {
-    const provider = new auth.GoogleAuthProvider();
+    const provider = new firebase.auth.GoogleAuthProvider();
     await this.afAuth.signInWithPopup(provider);
   }
 
