@@ -23,6 +23,12 @@ const csvParser = require("csv-parser");
 const Busboy = require("busboy");
 const { db } = require("./common/context");
 
+const closeConnection = (code, reason) => {
+  req.unpipe(busboy);
+  res.writeHead(code || 400, { Connection: "close" });
+  res.end(reason || "Bad Request");
+};
+
 function importCsv(req, res) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== "POST") {
@@ -33,7 +39,7 @@ function importCsv(req, res) {
   // Dictionary used to accumulate form field values, keyed by field name.
   const params = {};
 
-  // Handle non-file fields in the form. projectId and layerId must appear
+  // Handle non-file fields in the form. project and layer must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -41,7 +47,7 @@ function importCsv(req, res) {
 
   // This code will process each file uploaded.
   busboy.on("file", (key, file, _) => {
-    const { projectId, layerId } = params;
+    const { project: projectId, layer: layerId } = params;
     if (!projectId || !layerId) {
       return res.status(HttpStatus.BAD_REQUEST).end();
     }
@@ -51,52 +57,66 @@ function importCsv(req, res) {
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
     // received.
+
     file.pipe(csvParser()).on("data", async (row) => {
-      console.log("Processing row: ", JSON.stringify(row));
-      await insertRow(projectId, layerId, row);
+      try {
+        await insertRow(projectId, layerId, row);
+      } catch (err) {
+        console.error(err);
+        await res.status(HttpStatus.BAD_REQUEST).end("{}");
+        // TODO: Abort stream on error. How?
+      }
     });
   });
 
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on("finish", async () => {
-    res.sendStatus(HttpStatus.OK);
+    await res.status(HttpStatus.OK).end("{}");
+  });
+
+  busboy.on("error", (err) => {
+    console.err("Busboy error", err);
+    next(err);
   });
   busboy.end(req.rawBody);
 }
 
-const SPECIAL_COLUMN_NAMES = {
-  id: "id",
-  name: "caption",
-  label: "caption",
-  caption: "caption",
-  lat: "lat",
-  latitude: "lat",
-  y: "lat",
-  lng: "lng",
-  long: "long",
-  longitude: "lng",
-  x: "lng",
-};
+function invertAndFlatten(obj) {
+  return Object.keys(obj)
+    .flatMap((k) => obj[k].map((v) => ({ k, v })))
+    .reduce((o, { v, k }) => {
+      o[v] = k;
+      return o;
+    }, {});
+}
+
+const SPECIAL_COLUMN_NAMES = invertAndFlatten({
+  id: ["id", "key"],
+  caption: ["caption", "name", "label"],
+  lat: ["lat", "latitude", "y"],
+  lng: ["lng", "lon", "long", "lng", "x"],
+});
 
 async function insertRow(projectId, layerId, record) {
-  const feature = csvRowToFeature(record);
+  const feature = csvRowToFeature(record, layerId);
   if (feature) {
-    await db.insertFeature(projectId, layerId, feature);
+    await db.insertFeature(projectId, feature);
   }
 }
 
-function csvRowToFeature(row) {
+function csvRowToFeature(row, layerId) {
+  let data = { layerId };
   let attributes = {};
-  for (key in row) {
+  for (const key in row) {
     const featureKey = SPECIAL_COLUMN_NAMES[key.toLowerCase()];
     const value = row[key];
     if (featureKey) {
-      feature[featureKey] = value;
+      data[featureKey] = value;
     } else {
       attributes[key] = value;
     }
   }
-  let { lat, lng, ...feature } = feature;
+  let { lat, lng, ...feature } = data;
   lat = Number.parseFloat(lat);
   lng = Number.parseFloat(lng);
   if (isNaN(lat) || isNaN(lng)) {
@@ -108,5 +128,5 @@ function csvRowToFeature(row) {
   }
   return feature;
 }
-
+``;
 module.exports = importCsv;

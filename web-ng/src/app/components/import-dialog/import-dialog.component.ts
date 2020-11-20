@@ -16,40 +16,48 @@
 
 import { AuthService } from './../../services/auth/auth.service';
 import { Component, OnInit } from '@angular/core';
-
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-import-dialog',
   templateUrl: './import-dialog.component.html',
   styleUrls: ['./import-dialog.component.css'],
 })
-export class ImportDialogComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+export class ImportDialogComponent {
+  readonly SERVER_URL = 'http://localhost:5001/gnd-dev/us-central1/importCsv';
+  uploadForm: FormGroup;
 
-  getConfig(): any {
-    const token = this.authService.getIdToken();
-    return {
-      multiple: false,
-      formatsAllowed: '.csv,.txt',
-      maxSize: '1',
-      uploadAPI: {
-        url: 'http://localhost:5001/gnd-dev/us-central1/importCsv',
-      },
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data;charset=UTF-8',
-        Authorization: `Bearer ${token || ''}`,
-      },
-      params: {
-        projectId: 'test',
-        layerId: 'layer',
-      },
-      //    theme: 'dragNDrop',
-      hideProgressBar: false,
-      hideResetBtn: true,
-      hideSelectBtn: false,
-      fileNameIndex: true,
-    };
+  constructor(
+    private authService: AuthService,
+    private formBuilder: FormBuilder,
+    private httpClient: HttpClient
+  ) {
+    this.uploadForm = this.formBuilder.group({
+      file: [''],
+    });
   }
 
-  ngOnInit(): void {}
+  onFileSelect(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target && target.files && target.files.length > 0) {
+      const file = target.files[0];
+      this.uploadForm.get('file')?.setValue(file);
+    }
+  }
+
+  onSubmit() {
+    const file = this.uploadForm.get('file');
+    if (!file) {
+      return;
+    }
+    const formData = new FormData();
+    formData.set('project', 'example');
+    formData.set('layer', 'li1arWwnAu5ZUctKiE0q');
+    formData.append('file', file.value);
+
+    this.httpClient.post<any>(this.SERVER_URL, formData).subscribe(
+      res => console.log(res),
+      err => console.log(err)
+    );
+  }
 }

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import { AngularFileUploaderModule } from 'angular-file-uploader';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ReactiveFormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 
 @NgModule({
   declarations: [ImportDialogComponent],
-  imports: [AngularFileUploaderModule, CommonModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    MatDialogModule,
+    ReactiveFormsModule,
+  ],
   exports: [ImportDialogComponent],
 })
 export class ImportDialogModule {}

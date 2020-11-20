@@ -15,5 +15,12 @@
 -->
 <h2 mat-dialog-title>Import CSV</h2>
 <mat-dialog-content>
-  <angular-file-uploader [config]="getConfig()"></angular-file-uploader>
+  <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+    <div>
+      <input type="file" name="file" (change)="onFileSelect($event)" />
+    </div>
+    <div>
+      <button type="submit">Upload</button>
+    </div>
+  </form>
 </mat-dialog-content>
