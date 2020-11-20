@@ -70,7 +70,13 @@ like bulk CSV export will not be available.
 Install Node.js using nvm:
 
 ```
-$ nvm install 13.1.0
+$ nvm install 13
+```
+
+Make version this version your default with:
+
+```
+$ npm alias default 13
 ```
 
 Install ng CLI using npm:
