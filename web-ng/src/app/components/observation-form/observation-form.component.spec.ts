@@ -175,7 +175,7 @@ describe('ObservationFormComponent', () => {
       TestBed.configureTestingModule({
         declarations: [ObservationFormComponent],
         imports: [
-          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireModule.initializeApp({ projectId: '' }),
           BrowserAnimationsModule,
           FormsModule,
           ReactiveFormsModule,
