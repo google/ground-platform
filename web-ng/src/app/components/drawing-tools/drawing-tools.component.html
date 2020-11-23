@@ -25,14 +25,17 @@ class="drawing-buttons"
   </mat-button-toggle>
 </mat-button-toggle-group>
 
-<mat-form-field
+<div
 *ngIf="selectedValue"
-class="drawing-layer-selector"
-appearance="fill">
-  <mat-label>Adding {{selectedValue}} for</mat-label>
-  <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
-    <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
-      <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+class="drawing-layer-selector">
+  <mat-form-field
+  appearance="fill">
+    <mat-label>Adding {{selectedValue}} for</mat-label>
+    <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
+      <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
+        <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button (click)="onCancel()">Cancel</button>
+</div>
