@@ -22,9 +22,6 @@
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
 
-// TODO(#376): For now, we "prod" will deploy to the developer's Firebase
-// instance. In the future we will also allow separate configspwd for staging and
-// production.
 export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
