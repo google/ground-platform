@@ -17,8 +17,8 @@
 class="drawing-buttons"
 [(value)] = "selectedValue">
 <!-- TODO: replace these with icons. -->
-  <mat-button-toggle value = "{{pointValue}}" (click)="onButtonClick()">
-    add point
+  <mat-button-toggle class="add-point-button" value = "{{pointValue}}" (click)="onButtonClick()">
+    <img class="add-point-icon" [src]="addPointIcon" />
   </mat-button-toggle>
   <mat-button-toggle hidden value = "{{polygonValue}}" (click)="onButtonClick()">
     add polygon

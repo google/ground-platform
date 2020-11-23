@@ -48,6 +48,15 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   selectedLayerId = '';
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
+  private black = '#202225';
+  private addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
+    getPinImageSource(this.black)
+  );
+  private green = '#3d7d40';
+  private addPointIconGreen = this.sanitizer.bypassSecurityTrustUrl(
+    getPinImageSource(this.green)
+  );
+  addPointIcon = this.addPointIconBlack;
 
   constructor(
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -108,14 +117,17 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     switch (editMode) {
       case EditMode.AddPoint:
         this.selectedValue = this.pointValue;
+        this.addPointIcon = this.addPointIconGreen;
         break;
       case EditMode.AddPolygon:
         this.selectedValue = this.polygonValue;
+        this.addPointIcon = this.addPointIconBlack;
         break;
       case EditMode.None:
       default:
         this.selectedValue = '';
         this.lastSelectedValue = '';
+        this.addPointIcon = this.addPointIconBlack;
         break;
     }
     this.changeDetectorRef.detectChanges();
