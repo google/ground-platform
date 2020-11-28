@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ColorPickerComponent } from './color-picker.component';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -29,23 +29,25 @@ describe('ColorPickerComponent', () => {
   let fixture: ComponentFixture<ColorPickerComponent>;
   const dialogRef: Partial<MatDialogRef<ColorPickerComponent>> = {};
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ColorPickerComponent],
-      imports: [
-        CommonModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        ColorCircleModule,
-        ReactiveFormsModule,
-        MatIconModule,
-      ],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-      ],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [ColorPickerComponent],
+        imports: [
+          CommonModule,
+          MatDialogModule,
+          MatFormFieldModule,
+          ColorCircleModule,
+          ReactiveFormsModule,
+          MatIconModule,
+        ],
+        providers: [
+          { provide: MAT_DIALOG_DATA, useValue: {} },
+          { provide: MatDialogRef, useValue: dialogRef },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorPickerComponent);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { LayerListItemComponent } from './layer-list-item.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
@@ -29,22 +29,24 @@ describe('LayerListItemComponent', () => {
   let fixture: ComponentFixture<LayerListItemComponent>;
   const firestoreStub: Partial<AngularFirestore> = {};
 
-  beforeEach(async(() => {
-    const navigationService = {
-      getProjectId$: () => of(''),
-      getFeatureId$: () => of(''),
-    };
+  beforeEach(
+    waitForAsync(() => {
+      const navigationService = {
+        getProjectId$: () => of(''),
+        getFeatureId$: () => of(''),
+      };
 
-    TestBed.configureTestingModule({
-      declarations: [LayerListItemComponent],
-      imports: [MatListModule, MatMenuModule, MatDialogModule],
-      providers: [
-        { provide: NavigationService, useValue: navigationService },
-        { provide: Router, useValue: {} },
-        { provide: AngularFirestore, useValue: firestoreStub },
-      ],
-    }).compileComponents();
-  }));
+      TestBed.configureTestingModule({
+        declarations: [LayerListItemComponent],
+        imports: [MatListModule, MatMenuModule, MatDialogModule],
+        providers: [
+          { provide: NavigationService, useValue: navigationService },
+          { provide: Router, useValue: {} },
+          { provide: AngularFirestore, useValue: firestoreStub },
+        ],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LayerListItemComponent);
