@@ -57,6 +57,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() fieldType?: FieldType;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
+  @Input() fieldCount?: Number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
@@ -91,11 +92,18 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       },
     ];
     this.formGroup = this.formBuilder.group({
-      label: ['', Validators.required],
+      label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select field to be of text type.
       selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
     });
+  }
+
+  private validateLabel() {
+    if (this.label || (!this.label && this.fieldCount === 1)) {
+      return null;
+    }
+    return { labelInvalid: true };
   }
 
   ngOnInit(): void {
