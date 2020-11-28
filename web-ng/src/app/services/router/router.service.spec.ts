@@ -18,15 +18,18 @@ import { TestBed } from '@angular/core/testing';
 
 import { NavigationService } from './router.service';
 import { Router } from '@angular/router';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 
 describe('NavigationService', () => {
   let service: NavigationService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [AngularFireModule.initializeApp({ projectId: '' })],
-      providers: [{ provide: Router, useValue: {} }],
+      imports: [AngularFireModule],
+      providers: [
+        { provide: FIREBASE_OPTIONS, useValue: {} },
+        { provide: Router, useValue: {} },
+      ],
     });
     service = TestBed.inject(NavigationService);
   });

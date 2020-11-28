@@ -22,7 +22,7 @@ import {
   MatDialogRef,
   MatDialogModule,
 } from '@angular/material/dialog';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../../../environments/environment';
@@ -56,7 +56,7 @@ describe('LayerDialogComponent', () => {
           MatDialogActions,
         ],
         imports: [
-          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireModule,
           AngularFireAuthModule,
           AngularFirestoreModule,
           FormsModule,
@@ -70,6 +70,7 @@ describe('LayerDialogComponent', () => {
           MatIconModule,
         ],
         providers: [
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
           { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },
