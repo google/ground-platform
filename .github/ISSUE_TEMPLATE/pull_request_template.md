@@ -1,11 +1,7 @@
-Screenshot(s) before:
+Closes #issueno.
+
+Steps to verify (screenshot(s) where applicable):
 
 ..
-
-Screenshot(s) after:
-
-..
-
-Closes #issueno
 
 @user PTAL?
