@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { EditStyleButtonComponent } from './edit-style-button.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -23,12 +23,14 @@ describe('EditStyleButtonComponent', () => {
   let component: EditStyleButtonComponent;
   let fixture: ComponentFixture<EditStyleButtonComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [EditStyleButtonComponent],
-      imports: [MatDialogModule, MatIconModule],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        declarations: [EditStyleButtonComponent],
+        imports: [MatDialogModule, MatIconModule],
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EditStyleButtonComponent);
