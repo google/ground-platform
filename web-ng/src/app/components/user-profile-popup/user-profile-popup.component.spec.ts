@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { UserProfilePopupComponent } from './user-profile-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { environment } from '../../../environments/environment';
@@ -36,11 +36,12 @@ describe('UserProfilePopupComponent', () => {
         declarations: [UserProfilePopupComponent],
         imports: [
           MatDialogModule,
-          AngularFireModule.initializeApp(environment.firebase),
+          AngularFireModule,
           AngularFireAuthModule,
           AngularFirestoreModule,
         ],
         providers: [
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },

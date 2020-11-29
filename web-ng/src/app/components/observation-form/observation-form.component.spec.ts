@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { environment } from '../../../environments/environment';
 import { never, of, Subject } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
@@ -175,7 +175,7 @@ describe('ObservationFormComponent', () => {
       TestBed.configureTestingModule({
         declarations: [ObservationFormComponent],
         imports: [
-          AngularFireModule.initializeApp(environment.firebase),
+          AngularFireModule,
           BrowserAnimationsModule,
           FormsModule,
           ReactiveFormsModule,
@@ -190,6 +190,7 @@ describe('ObservationFormComponent', () => {
           LayerListItemModule,
         ],
         providers: [
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
           { provide: FeatureService, useValue: featureService },
           { provide: ProjectService, useValue: projectService },
           { provide: ObservationService, useValue: observationService },
