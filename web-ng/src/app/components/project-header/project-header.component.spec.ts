@@ -16,7 +16,7 @@
 
 import { AuthService } from './../../services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ProjectHeaderComponent } from './project-header.component';
@@ -39,7 +39,7 @@ describe('ProjectHeaderComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         imports: [
-          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireModule,
           AngularFireAuthModule,
           AngularFirestoreModule,
           MatIconModule,
@@ -47,6 +47,7 @@ describe('ProjectHeaderComponent', () => {
         ],
         declarations: [ProjectHeaderComponent],
         providers: [
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
           {
             provide: AuthService,
             useValue: {
