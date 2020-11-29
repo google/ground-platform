@@ -1,3 +1,4 @@
+import { DataImportService } from './../../services/data-import/data-import.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -14,10 +15,8 @@
  * limitations under the License.
  */
 
-import { environment } from '../../../environments/environment';
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
@@ -26,8 +25,6 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
   styleUrls: ['./import-dialog.component.css'],
 })
 export class ImportDialogComponent {
-  // TODO: Access via AngularFireFunctionsModule instead?
-  readonly SERVER_URL = `${environment.cloudFunctionsUrl}/importCsv`;
   private projectId: string;
   private layerId: string;
   uploadForm: FormGroup;
@@ -36,7 +33,7 @@ export class ImportDialogComponent {
     @Inject(MAT_DIALOG_DATA)
     public data: { projectId: string; layerId: string },
     private formBuilder: FormBuilder,
-    private httpClient: HttpClient
+    private dataImportService: DataImportService
   ) {
     this.projectId = data.projectId;
     this.layerId = data.layerId;
@@ -59,13 +56,12 @@ export class ImportDialogComponent {
       console.error('File missing');
       return;
     }
-    const formData = new FormData();
-    formData.set('project', this.projectId);
-    formData.set('layer', this.layerId);
-    formData.append('file', file.value);
-    this.httpClient.post<any>(this.SERVER_URL, formData).subscribe(
-      res => console.log(res),
-      err => console.log(err)
-    );
+
+    this.dataImportService
+      .importCsv(this.projectId, this.layerId, file.value as File)
+      .subscribe(
+        res => console.log(res),
+        err => console.log(err)
+      );
   }
 }
