@@ -16,6 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
  */
 
 import { CommonModule } from '@angular/common';
+import { FileUploadModule } from '@iplab/ngx-file-upload';
 import { HttpClientModule } from '@angular/common/http';
 import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -26,6 +27,7 @@ import { NgModule } from '@angular/core';
   declarations: [ImportDialogComponent],
   imports: [
     CommonModule,
+    FileUploadModule,
     HttpClientModule,
     MatButtonModule,
     MatDialogModule,

@@ -17,7 +17,14 @@
 <mat-dialog-content>
   <form [formGroup]="uploadForm">
     <div>
-      <input type="file" name="file" (change)="onFileSelect($event)" />
+      <!-- <input type="file" name="file" (change)="onFileSelect($event)" /> -->
+      <file-upload
+        accept="csv"
+        formControlName="file"
+        multiple="false"
+        minsize="10 B"
+        maxsize="2 MB"
+      ></file-upload>
     </div>
   </form>
 </mat-dialog-content>
