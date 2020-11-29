@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy } from '@angular/core';
+import {
+  Component,
+  Inject,
+  OnDestroy,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -34,6 +40,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Project } from '../../shared/models/project.model';
+import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
 
 // To make ESLint happy:
 /*global alert*/
@@ -55,6 +62,9 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
   color!: string;
   form?: Form;
+  @ViewChildren(FormFieldEditorComponent) formFieldEditors?: QueryList<
+    FormFieldEditorComponent
+  >;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -88,6 +98,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields.size
     );
     this.fields = this.fields.push(newField);
+    this.markFormEditorsTouched();
   }
 
   /**
@@ -145,14 +156,20 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   async onSave() {
-    // TODO: Wait for project to load before showing dialog.
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
-    // Check if there are empty fields, if empty return.
-    const emptyFields = this.fields.filter(field => !field.label.get('en'));
-    if (emptyFields.size) {
+
+    if (!this.formFieldEditors) {
       return;
+    }
+
+    this.markFormEditorsTouched();
+
+    for (const editor of this.formFieldEditors) {
+      if (editor.formGroup.invalid) {
+        return;
+      }
     }
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
@@ -258,5 +275,11 @@ export class LayerDialogComponent implements OnDestroy {
   async deleteLayer() {
     await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
     this.onClose();
+  }
+
+  markFormEditorsTouched() {
+    this.formFieldEditors?.forEach(editor => {
+      editor.labelControl.markAsTouched();
+    });
   }
 }

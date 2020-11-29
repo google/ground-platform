@@ -30,7 +30,7 @@ import {
 } from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 
@@ -52,7 +52,7 @@ describe('FormFieldEditorComponent', () => {
       TestBed.configureTestingModule({
         declarations: [FormFieldEditorComponent],
         imports: [
-          AngularFireModule.initializeApp({}),
+          AngularFireModule,
           AngularFireAuthModule,
           AngularFirestoreModule,
           FormsModule,
@@ -66,6 +66,7 @@ describe('FormFieldEditorComponent', () => {
           MatDialogModule,
         ],
         providers: [
+          { provide: FIREBASE_OPTIONS, useValue: {} },
           { provide: AngularFirestore, useValue: firestoreStub },
           { provide: Router, useValue: {} },
         ],
