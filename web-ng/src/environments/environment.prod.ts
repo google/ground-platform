@@ -23,5 +23,6 @@ import { firebaseConfig } from './.firebase-config';
 export const environment = {
   production: true,
   googleMapsApiKey: googleMapsConfig.apiKey,
-  firebaseConfig,
+  firebase: firebaseConfig,
+  useEmulators: false,
 };

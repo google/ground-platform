@@ -22,7 +22,7 @@
 export const environment = {
   production: false,
   googleMapsApiKey: '',
-  firebaseConfig: {
+  firebase: {
     apiKey: 'test',
     authDomain: '',
     databaseURL: '',
@@ -33,4 +33,5 @@ export const environment = {
   },
   cloudFunctionsHost: 'some-subdomain.cloudfunctions.net',
   offlineBaseMapSources: [{ url: '' }],
+  useEmulators: false,
 };
