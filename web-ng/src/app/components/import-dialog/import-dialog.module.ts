@@ -1,3 +1,4 @@
+import { MatButtonModule } from '@angular/material/button';
 /**
  * Copyright 2020 Google LLC
  *
@@ -26,6 +27,7 @@ import { NgModule } from '@angular/core';
   imports: [
     CommonModule,
     HttpClientModule,
+    MatButtonModule,
     MatDialogModule,
     ReactiveFormsModule,
   ],

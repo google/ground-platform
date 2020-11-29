@@ -17,7 +17,7 @@ import { DataImportService } from './../../services/data-import/data-import.serv
 
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-import-dialog',
@@ -33,12 +33,18 @@ export class ImportDialogComponent {
     @Inject(MAT_DIALOG_DATA)
     public data: { projectId: string; layerId: string },
     private formBuilder: FormBuilder,
-    private dataImportService: DataImportService
+    private dataImportService: DataImportService,
+    dialogRef: MatDialogRef<ImportDialogComponent>
   ) {
     this.projectId = data.projectId;
     this.layerId = data.layerId;
     this.uploadForm = this.formBuilder.group({
       file: [''],
+    });
+    dialogRef.afterClosed().subscribe(submit => {
+      if (submit) {
+        this.upload();
+      }
     });
   }
 
@@ -50,7 +56,7 @@ export class ImportDialogComponent {
     }
   }
 
-  onSubmit() {
+  upload() {
     const file = this.uploadForm.get('file');
     if (!file) {
       console.error('File missing');
@@ -60,6 +66,7 @@ export class ImportDialogComponent {
     this.dataImportService
       .importCsv(this.projectId, this.layerId, file.value as File)
       .subscribe(
+        // TODO(#528): Show upload progress and success/error message to user.
         res => console.log(res),
         err => console.log(err)
       );
