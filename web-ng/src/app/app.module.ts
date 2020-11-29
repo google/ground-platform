@@ -19,7 +19,7 @@ import { NgModule } from '@angular/core';
 
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { AngularFirestoreModule, USE_EMULATOR } from '@angular/fire/firestore';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -33,6 +33,9 @@ import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [AppComponent],
+  providers: [
+    { provide: USE_EMULATOR, useValue: environment.firebaseConfig.emulator },
+  ],
   imports: [
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireAuthModule,

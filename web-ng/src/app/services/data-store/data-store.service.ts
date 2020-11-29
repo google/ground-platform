@@ -125,7 +125,9 @@ export class DataStoreService {
       .get()
       .pipe(
         // Fail with error if feature could not be loaded.
-        map(doc => FirebaseDataConverter.toFeature(doc.id, doc.data()!)),
+        map(doc =>
+          FirebaseDataConverter.toFeature(doc.id, doc.data()! as DocumentData)
+        ),
         // Cast to Feature to remove undefined from type. Done as separate
         // map() operation since compiler doesn't recognize cast when defined in
         // previous map() step.
@@ -203,9 +205,11 @@ export class DataStoreService {
       .pipe(
         map(doc => {
           return FirebaseDataConverter.toObservation(
-            project.getLayer(feature.layerId)!.getForm(doc.data()!.formId)!,
+            project
+              .getLayer(feature.layerId)!
+              .getForm((doc.data()! as DocumentData).formId)!,
             doc.id,
-            doc.data()!
+            doc.data()! as DocumentData
           );
         })
       );

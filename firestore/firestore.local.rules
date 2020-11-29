@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { googleMapsConfig } from './.google-maps-config';
-import { firebaseConfig } from './.firebase-config';
-
-// TODO(#376): For now, "prod" config will deploy to the developer's Firebase
-// instance. In the future we will also allow separate configs for staging and
-// production.
-export const environment = {
-  production: true,
-  googleMapsApiKey: googleMapsConfig.apiKey,
-  firebaseConfig,
-};
+ // Define access rules for Firestore collections and documents.
+ service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write;
+    }
+  }
+ }
+ 

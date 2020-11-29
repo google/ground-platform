@@ -27,6 +27,14 @@
             "scripts": []
           },
           "configurations": {
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -63,6 +71,9 @@
             "browserTarget": "web-ng:build"
           },
           "configurations": {
+            "local": {
+              "browserTarget": "web-ng:build:local"
+            },
             "production": {
               "browserTarget": "web-ng:build:production"
             }

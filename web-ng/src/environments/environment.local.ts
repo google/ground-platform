@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
+// This file can be replaced during build by using the `fileReplacements` array.
+// `ng build --configuration=test ` replaces `environment.ts` with
+// `environment.test.ts`.
+// The list of file replacements can be found in `angular.json`.
+
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
 
-// TODO(#376): For now, "prod" config will deploy to the developer's Firebase
-// instance. In the future we will also allow separate configs for staging and
-// production.
 export const environment = {
-  production: true,
+  production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
-  firebaseConfig,
+  firebaseConfig: {
+    useEmulators: true,
+    ...firebaseConfig,
+  },
+  cloudFunctionsHost: 'localhost:5001',
+  offlineBaseMapSources: [{ url: '' }],
 };
