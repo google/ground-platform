@@ -21,7 +21,7 @@ file-upload {
 }
 
 file-upload div {
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  font-size: 14px;
-  color: mat-color($foreground);
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif !important;
+  font-size: 14px !important;
+  color: mat-color($foreground) !important;
 }
