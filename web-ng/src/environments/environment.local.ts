@@ -25,10 +25,8 @@ import { firebaseConfig } from './.firebase-config';
 export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
-  firebaseConfig: {
-    useEmulators: true,
-    ...firebaseConfig,
-  },
+  firebase: firebaseConfig,
   cloudFunctionsHost: 'localhost:5001',
   offlineBaseMapSources: [{ url: '' }],
+  useEmulators: true,
 };
