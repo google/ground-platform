@@ -47,7 +47,7 @@ describe('ProjectHeaderComponent', () => {
         ],
         declarations: [ProjectHeaderComponent],
         providers: [
-          { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
           {
             provide: AuthService,
             useValue: {

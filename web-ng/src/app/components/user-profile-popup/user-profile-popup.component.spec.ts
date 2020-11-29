@@ -41,7 +41,7 @@ describe('UserProfilePopupComponent', () => {
           AngularFirestoreModule,
         ],
         providers: [
-          { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },

@@ -34,7 +34,7 @@ describe('AuthService', () => {
         AngularFirestoreModule,
       ],
       providers: [
-        { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
+        { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
         { provide: AngularFireAuth, useValue: { authState: NEVER } },
         { provide: DataStoreService },
         { provide: Router, useValue: {} },

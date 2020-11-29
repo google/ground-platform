@@ -190,7 +190,7 @@ describe('ObservationFormComponent', () => {
           LayerListItemModule,
         ],
         providers: [
-          { provide: FIREBASE_OPTIONS, useValue: environment.firebaseConfig },
+          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
           { provide: FeatureService, useValue: featureService },
           { provide: ProjectService, useValue: projectService },
           { provide: ObservationService, useValue: observationService },
