@@ -56,7 +56,7 @@ describe('LayerDialogComponent', () => {
           MatDialogActions,
         ],
         imports: [
-          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireModule.initializeApp(environment.firebase),
           AngularFireAuthModule,
           AngularFirestoreModule,
           FormsModule,

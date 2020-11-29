@@ -36,7 +36,7 @@ describe('UserProfilePopupComponent', () => {
         declarations: [UserProfilePopupComponent],
         imports: [
           MatDialogModule,
-          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireModule.initializeApp(environment.firebase),
           AngularFireAuthModule,
           AngularFirestoreModule,
         ],

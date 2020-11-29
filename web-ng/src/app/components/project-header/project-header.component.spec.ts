@@ -39,7 +39,7 @@ describe('ProjectHeaderComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         imports: [
-          AngularFireModule.initializeApp(environment.firebaseConfig),
+          AngularFireModule.initializeApp(environment.firebase),
           AngularFireAuthModule,
           AngularFirestoreModule,
           MatIconModule,
