@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
 class Datastore {
   constructor(db) {
@@ -27,12 +27,13 @@ class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   mergeUserProfile({ uid, email, displayName, photoURL }) {
-    return this.db_.doc(`users/${uid}`)
+    return this.db_
+      .doc(`users/${uid}`)
       .set({ uid, email, displayName, photoURL }, { merge: true });
   }
 
   fetch_(docRef) {
-    return docRef.get().then(doc => doc.exists ? doc.data() : null);
+    return docRef.get().then((doc) => (doc.exists ? doc.data() : null));
   }
 
   fetchDoc_(path) {
@@ -49,7 +50,8 @@ class Datastore {
 
   fetchRecord(projectId, featureId, recordId) {
     return this.fetchDoc_(
-      `projects/${projectId}/features/${featureId}/records/${recordId}`);
+      `projects/${projectId}/features/${featureId}/records/${recordId}`
+    );
   }
 
   fetchRecords(projectId, featureId) {
@@ -66,27 +68,21 @@ class Datastore {
 
   fetchForm(projectId, featureTypeId, formId) {
     return this.fetchDoc_(
-      `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
+      `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`
+    );
   }
 
   fetchSheetsConfig(projectId) {
     return this.fetchDoc_(`projects/${projectId}/sheets/config`);
   }
 
-  async insertFeature(projectId, layerId, { caption, location }) {
-    const docRef = await this.db_.collection('projects').doc(projectId);
-    if (!docRef.exists) {
-      console.log("Project " + projectId + " does not exist!");
-      // For debug purposes uncomment below to create the project
-      // docRef.set({ project: projectId });
-      throw new Error(`Project ${projectId} does not exist!`);
-      return;
+  async insertFeature(projectId, feature) {
+    const docRef = await this.db_.collection("projects").doc(projectId);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      throw new Error(`/projects/${projectId} not found`);
     }
-    await docRef.collection('features').add({
-      layerId: layerId,
-      caption: caption,
-      location: location
-    });
+    await docRef.collection("features").add(feature);
   }
 }
 
