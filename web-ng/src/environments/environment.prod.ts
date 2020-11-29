@@ -17,6 +17,8 @@
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
 
+const { projectId } = firebaseConfig;
+
 // TODO(#376): For now, "prod" config will deploy to the developer's Firebase
 // instance. In the future we will also allow separate configs for staging and
 // production.
@@ -24,5 +26,6 @@ export const environment = {
   production: true,
   googleMapsApiKey: googleMapsConfig.apiKey,
   firebase: firebaseConfig,
+  cloudFunctionsUrl: `https://us-central1-${projectId}.cloudfunctions.net`,
   useEmulators: false,
 };

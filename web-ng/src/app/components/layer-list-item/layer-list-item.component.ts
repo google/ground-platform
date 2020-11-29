@@ -121,14 +121,18 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onImportCsv() {
+    if (!this.projectId || !this.layer?.id) {
+      return;
+    }
     this.importDialog.open(ImportDialogComponent, {
+      data: { projectId: this.projectId, layerId: this.layer?.id },
       maxWidth: '500px',
       maxHeight: '800px',
     });
   }
 
   onDownloadCsv() {
-    const link = `https://${environment.cloudFunctionsHost}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
+    const link = `${environment.cloudFunctionsUrl}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
     // TODO(#320): Implement download CSV.
   }
 
