@@ -16,7 +16,6 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ColorPickerComponent } from './color-picker.component';
-import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -30,7 +29,7 @@ describe('ColorPickerComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [ColorPickerComponent],
-        imports: [CommonModule, MatDialogModule],
+        imports: [MatDialogModule],
         providers: [
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
