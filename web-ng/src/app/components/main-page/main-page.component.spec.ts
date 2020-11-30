@@ -22,7 +22,6 @@ import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ObservationService } from '../../services/observation/observation.service';
 import { NavigationService } from './../../services/router/router.service';
 import { NEVER } from 'rxjs';
@@ -66,7 +65,6 @@ describe('MainPageComponent', () => {
 
       TestBed.configureTestingModule({
         declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
-        imports: [MatProgressSpinnerModule],
         providers: [
           { provide: ActivatedRoute, useValue: route },
           { provide: MatDialog, useValue: dialog },

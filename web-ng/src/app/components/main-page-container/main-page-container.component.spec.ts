@@ -19,6 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MainPageContainerComponent } from './main-page-container.component';
 import { MainPageComponent } from './../main-page/main-page.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NavigationService } from './../../services/router/router.service';
 import { NEVER } from 'rxjs';
 import { ProjectService } from './../../services/project/project.service';
@@ -43,6 +44,7 @@ describe('MainPageContainerComponent', () => {
       route = new ActivatedRouteStub();
       TestBed.configureTestingModule({
         declarations: [MainPageContainerComponent, MainPageComponent],
+        imports: [MatProgressSpinnerModule],
         providers: [
           { provide: ActivatedRoute, useValue: route },
           { provide: NavigationService, useValue: navigationService },
