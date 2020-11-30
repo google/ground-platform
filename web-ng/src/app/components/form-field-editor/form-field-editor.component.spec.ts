@@ -19,6 +19,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormFieldEditorComponent } from './form-field-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { LayerService } from './../../services/layer/layer.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -26,14 +27,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import {
-  AngularFirestore,
-  AngularFirestoreModule,
-} from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
-import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 
 const firestoreStub = {
@@ -54,12 +49,10 @@ describe('FormFieldEditorComponent', () => {
       TestBed.configureTestingModule({
         declarations: [FormFieldEditorComponent],
         imports: [
-          AngularFireModule,
-          AngularFireAuthModule,
-          AngularFirestoreModule,
           FormsModule,
           ReactiveFormsModule,
           BrowserModule,
+          MatDialogModule,
           MatIconModule,
           MatSelectModule,
           MatSlideToggleModule,
@@ -67,12 +60,10 @@ describe('FormFieldEditorComponent', () => {
           MatFormFieldModule,
           MatInputModule,
           BrowserAnimationsModule,
-          MatDialogModule,
         ],
         providers: [
-          { provide: FIREBASE_OPTIONS, useValue: {} },
-          { provide: AngularFirestore, useValue: firestoreStub },
           { provide: Router, useValue: {} },
+          { provide: LayerService, useValue: {} },
         ],
       }).compileComponents();
     })

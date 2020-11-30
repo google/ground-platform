@@ -28,9 +28,6 @@ import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/router/router.service';
-import { AngularFirestore } from '@angular/fire/firestore';
-
-const firestoreStub: Partial<AngularFirestore> = {};
 
 const mockProject = new Project(
   'project001',
@@ -77,7 +74,6 @@ describe('LayerListComponent', () => {
             useValue: routerSpy,
           },
           { provide: NavigationService, useValue: navigationService },
-          { provide: AngularFirestore, useValue: firestoreStub },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
