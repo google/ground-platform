@@ -21,3 +21,8 @@
 :host ::ng-deep .mat-list-item-content {
   padding-right: 8px !important;
 }
+
+.layersIcon {
+  vertical-align: middle;
+  padding-right: 5px;
+}

@@ -15,8 +15,15 @@ limitations under the License.
 -->
 
 <mat-list-item>
-  <img matListAvatar [src]="layerPinUrl" />
   <h3 matLine>
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Layer icon"
+      [color]="iconColor"
+      class="layersIcon"
+    >
+      layers
+    </mat-icon>
     {{ layer?.name?.get(lang) }}
   </h3>
   <div [ngSwitch]="actionsType">
