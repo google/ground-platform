@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "busboy": "^0.3.1",
+    "cors": "^2.8.5",
     "csv-parser": "^2.3.3",
     "firebase-admin": "^9.3.0",
     "firebase-functions": "^3.9.0",
@@ -19,7 +20,7 @@
     "requests": "^0.3.0"
   },
   "engines": {
-    "node": "13"
+    "node": "12"
   },
   "private": true
 }
