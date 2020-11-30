@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LayerListComponent } from './layer-list.component';
 import { ProjectService } from '../../services/project/project.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -68,6 +68,8 @@ describe('LayerListComponent', () => {
         declarations: [LayerListComponent],
         imports: [LayerListItemModule, MatListModule],
         providers: [
+          // Why is DataStoreService required if it's only used transitively?
+          { provide: DataStoreService, useValue: {} },
           { provide: ProjectService, useValue: projectService },
           {
             provide: Router,
