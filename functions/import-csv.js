@@ -111,8 +111,8 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   lng: ["lng", "lon", "long", "lng", "x"],
 });
 
-async function insertRow(projectId, layerId, record) {
-  const feature = csvRowToFeature(record, layerId);
+async function insertRow(projectId, layerId, row) {
+  const feature = csvRowToFeature(row, layerId);
   if (feature) {
     await db.insertFeature(projectId, feature);
   }
