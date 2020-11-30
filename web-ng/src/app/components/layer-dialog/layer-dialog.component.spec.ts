@@ -18,6 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { EditStyleButtonModule } from './../edit-style-button/edit-style-button.module';
+import { FormFieldEditorComponent } from './../form-field-editor/form-field-editor.component';
 import { ProjectService } from './../../services/project/project.service';
 import { LayerDialogComponent } from './layer-dialog.component';
 import {
@@ -57,6 +58,7 @@ describe('LayerDialogComponent', () => {
         imports: [
           EditStyleButtonModule,
           FormsModule,
+          FormFieldEditorComponent,
           InlineEditorModule,
           ReactiveFormsModule,
           BrowserAnimationsModule,
