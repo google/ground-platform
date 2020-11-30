@@ -30,15 +30,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-
-const firestoreStub = {
-  collection: () => ({
-    doc: () => ({
-      valueChanges: () => new BehaviorSubject({}),
-      set: () => new Promise(resolve => resolve()),
-    }),
-  }),
-};
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('FormFieldEditorComponent', () => {
   let component: FormFieldEditorComponent;
@@ -55,16 +47,14 @@ describe('FormFieldEditorComponent', () => {
           MatDialogModule,
           MatIconModule,
           MatSelectModule,
-          MatSlideToggleModule,
-          MatProgressSpinnerModule,
           MatFormFieldModule,
           MatInputModule,
-          BrowserAnimationsModule,
         ],
         providers: [
           { provide: Router, useValue: {} },
           { provide: LayerService, useValue: {} },
         ],
+        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
     })
   );
