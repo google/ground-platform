@@ -125,13 +125,13 @@ async function insertRow(projectId, layerId, record) {
 function csvRowToFeature(row, layerId) {
   let data = { layerId };
   let attributes = {};
-  for (const key in row) {
-    const featureKey = SPECIAL_COLUMN_NAMES[key.toLowerCase()];
-    const value = row[key];
+  for (const columnName in row) {
+    const featureKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
+    const value = row[columnName];
     if (featureKey) {
       data[featureKey] = value;
     } else {
-      attributes[key] = value;
+      attributes[columnName] = value;
     }
   }
   let { lat, lng, ...feature } = data;
