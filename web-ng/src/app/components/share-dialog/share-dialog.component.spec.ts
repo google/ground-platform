@@ -18,9 +18,12 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ShareDialogComponent } from './share-dialog.component';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { ProjectService } from '../../services/project/project.service';
 import { of } from 'rxjs';
 import { Map } from 'immutable';
+import { MatOptionModule } from '@angular/material/core';
 
 describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
@@ -30,6 +33,7 @@ describe('ShareDialogComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [ShareDialogComponent],
+        imports: [MatFormFieldModule, MatSelectModule, MatOptionModule],
         providers: [
           { provide: MatDialogRef, useValue: {} },
           {

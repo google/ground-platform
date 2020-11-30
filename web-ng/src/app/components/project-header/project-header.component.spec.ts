@@ -1,4 +1,3 @@
-import { ProjectService } from './../../services/project/project.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -17,7 +16,9 @@ import { ProjectService } from './../../services/project/project.service';
 
 import { AuthService } from './../../services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { InlineEditorModule } from './../inline-editor/inline-editor.module';
 import { ProjectHeaderComponent } from './project-header.component';
+import { ProjectService } from './../../services/project/project.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -35,7 +36,7 @@ describe('ProjectHeaderComponent', () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        imports: [MatIconModule, MatDialogModule],
+        imports: [InlineEditorModule, MatIconModule, MatDialogModule],
         declarations: [ProjectHeaderComponent],
         providers: [
           { provide: AuthService, useValue: { user$ } },

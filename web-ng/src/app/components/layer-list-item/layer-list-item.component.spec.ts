@@ -16,6 +16,7 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { LayerListItemComponent } from './layer-list-item.component';
+import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { NavigationService } from './../../services/router/router.service';
@@ -38,7 +39,7 @@ describe('LayerListItemComponent', () => {
 
       TestBed.configureTestingModule({
         declarations: [LayerListItemComponent],
-        imports: [MatListModule, MatMenuModule, MatDialogModule],
+        imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
         providers: [
           { provide: NavigationService, useValue: navigationService },
           { provide: Router, useValue: {} },

@@ -19,8 +19,10 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormFieldEditorComponent } from './form-field-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -58,8 +60,10 @@ describe('FormFieldEditorComponent', () => {
           FormsModule,
           ReactiveFormsModule,
           BrowserModule,
+          MatIconModule,
           MatSelectModule,
           MatSlideToggleModule,
+          MatProgressSpinnerModule,
           MatFormFieldModule,
           MatInputModule,
           BrowserAnimationsModule,
