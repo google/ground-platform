@@ -21,6 +21,7 @@ import {
 } from '../../services/drawing-tools/drawing-tools.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
 import { map } from 'rxjs/internal/operators/map';
@@ -28,7 +29,7 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'drawing-tools',
+  selector: 'ground-drawing-tools',
   templateUrl: './drawing-tools.component.html',
   styleUrls: ['./drawing-tools.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,11 +51,13 @@ export class DrawingToolsComponent {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layers$ = projectService.getActiveProject$().pipe(
-      map(project => {
+      tap(project => {
         this.selectedLayerId = project.layers.keySeq().first();
         this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
-        return List(project.layers.valueSeq().toArray()).sortBy(l => l.index);
-      })
+      }),
+      map(project =>
+        List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
+      )
     );
   }
 
