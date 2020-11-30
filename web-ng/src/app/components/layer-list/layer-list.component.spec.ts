@@ -15,7 +15,6 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LayerListComponent } from './layer-list.component';
 import { ProjectService } from '../../services/project/project.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -24,7 +23,6 @@ import { of } from 'rxjs';
 import { Map } from 'immutable';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/router/router.service';
@@ -66,10 +64,8 @@ describe('LayerListComponent', () => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
         declarations: [LayerListComponent],
-        imports: [LayerListItemModule, MatListModule],
+        imports: [MatListModule],
         providers: [
-          // Why is DataStoreService required if it's only used transitively?
-          { provide: DataStoreService, useValue: {} },
           { provide: ProjectService, useValue: projectService },
           {
             provide: Router,
