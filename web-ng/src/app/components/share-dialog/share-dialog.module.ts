@@ -17,6 +17,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ShareDialogComponent } from './share-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -24,6 +25,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatFormField } from '@angular/material/form-field';
 
 @NgModule({
   declarations: [ShareDialogComponent],
@@ -32,6 +34,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     FlexLayoutModule,
     MatButtonModule,
     MatDialogModule,
+    MatFormFieldModule,
     MatInputModule,
     MatListModule,
     MatSelectModule,
