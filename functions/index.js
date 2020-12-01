@@ -17,14 +17,15 @@
 
 "use strict";
 
-const functions = require('firebase-functions')
-const onCreateUser = require('./on-create-user')
-const exportCsv = require('./export-csv')
-const exportKml = require('./export-kml')
-const importCsv = require("./import-csv")
-const updateColumns = require('./update-columns')
-const onCreateRecord = require('./on-create-record')
-const onUpdateRecord = require('./on-update-record')
+const functions = require("firebase-functions");
+const onCreateUser = require("./on-create-user");
+const exportCsv = require("./export-csv");
+const exportKml = require("./export-kml");
+const importCsv = require("./import-csv");
+const updateColumns = require("./update-columns");
+const onCreateRecord = require("./on-create-record");
+const onUpdateRecord = require("./on-update-record");
+const cors = require("cors")({ origin: true });
 
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
@@ -34,6 +35,7 @@ exports.importCsv = functions.https.onRequest(importCsv);
 exports.exportCsv = functions.https.onRequest((req, res) =>
   exportCsv(req, res).catch((err) => res.status(500).send(`${err}`))
 );
+
 exports.exportKml = functions.https.onRequest((req, res) =>
   exportKml(req, res).catch((err) => res.status(500).send(`${err}`))
 );
@@ -56,4 +58,6 @@ exports.onUpdateRecord = functions.firestore
   .document("projects/{projectId}/features/{featureId}/records/{recordId}")
   .onUpdate((change, context) => onUpdateRecord(change, context));
 
-exports.importCsv = functions.https.onRequest(importCsv);
+exports.importCsv = functions.https.onRequest((req, res) =>
+  cors(req, res, () => importCsv(req, res))
+);
