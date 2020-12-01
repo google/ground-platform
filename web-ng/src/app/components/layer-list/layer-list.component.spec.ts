@@ -15,7 +15,6 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { LayerListComponent } from './layer-list.component';
 import { ProjectService } from '../../services/project/project.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -24,13 +23,9 @@ import { of } from 'rxjs';
 import { Map } from 'immutable';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/router/router.service';
-import { AngularFirestore } from '@angular/fire/firestore';
-
-const firestoreStub: Partial<AngularFirestore> = {};
 
 const mockProject = new Project(
   'project001',
@@ -69,7 +64,7 @@ describe('LayerListComponent', () => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
         declarations: [LayerListComponent],
-        imports: [LayerListItemModule, MatListModule],
+        imports: [MatListModule],
         providers: [
           { provide: ProjectService, useValue: projectService },
           {
@@ -77,7 +72,6 @@ describe('LayerListComponent', () => {
             useValue: routerSpy,
           },
           { provide: NavigationService, useValue: navigationService },
-          { provide: AngularFirestore, useValue: firestoreStub },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();

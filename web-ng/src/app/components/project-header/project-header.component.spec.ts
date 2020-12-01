@@ -16,16 +16,14 @@
 
 import { AuthService } from './../../services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { InlineEditorModule } from './../inline-editor/inline-editor.module';
 import { ProjectHeaderComponent } from './project-header.component';
-import { environment } from '../../../environments/environment';
+import { ProjectService } from './../../services/project/project.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
-import { Subject } from 'rxjs';
+import { NEVER, Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 import { Router } from '@angular/router';
 
@@ -38,24 +36,16 @@ describe('ProjectHeaderComponent', () => {
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        imports: [
-          AngularFireModule,
-          AngularFireAuthModule,
-          AngularFirestoreModule,
-          MatIconModule,
-          MatDialogModule,
-        ],
+        imports: [InlineEditorModule, MatIconModule, MatDialogModule],
         declarations: [ProjectHeaderComponent],
         providers: [
-          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
-          {
-            provide: AuthService,
-            useValue: {
-              user$,
-            },
-          },
+          { provide: AuthService, useValue: { user$ } },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
+          {
+            provide: ProjectService,
+            useValue: { getActiveProject$: () => NEVER },
+          },
           { provide: Router, useValue: {} },
         ],
       }).compileComponents();

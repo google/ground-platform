@@ -16,16 +16,16 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
+import { DataStoreService } from './../../services/data-store/data-store.service';
+import { EditStyleButtonModule } from './../edit-style-button/edit-style-button.module';
+import { FormFieldEditorModule } from './../form-field-editor/form-field-editor.module';
+import { ProjectService } from './../../services/project/project.service';
 import { LayerDialogComponent } from './layer-dialog.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
   MatDialogModule,
 } from '@angular/material/dialog';
-import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -56,10 +56,9 @@ describe('LayerDialogComponent', () => {
           MatDialogActions,
         ],
         imports: [
-          AngularFireModule,
-          AngularFireAuthModule,
-          AngularFirestoreModule,
+          EditStyleButtonModule,
           FormsModule,
+          FormFieldEditorModule,
           InlineEditorModule,
           ReactiveFormsModule,
           BrowserAnimationsModule,
@@ -70,7 +69,8 @@ describe('LayerDialogComponent', () => {
           MatIconModule,
         ],
         providers: [
-          { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
+          { provide: ProjectService, useValue: {} },
+          { provide: DataStoreService, useValue: { generateId: () => '123' } },
           { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },
