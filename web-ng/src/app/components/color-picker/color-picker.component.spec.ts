@@ -16,13 +16,9 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ColorPickerComponent } from './color-picker.component';
-import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
-import { ColorCircleModule } from 'ngx-color/circle';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('ColorPickerComponent', () => {
   let component: ColorPickerComponent;
@@ -33,18 +29,12 @@ describe('ColorPickerComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [ColorPickerComponent],
-        imports: [
-          CommonModule,
-          MatDialogModule,
-          MatFormFieldModule,
-          ColorCircleModule,
-          ReactiveFormsModule,
-          MatIconModule,
-        ],
+        imports: [MatDialogModule],
         providers: [
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
         ],
+        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
     })
   );
