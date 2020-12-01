@@ -15,19 +15,19 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LayerListItemComponent } from './layer-list-item.component';
+import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
 import { NavigationService } from './../../services/router/router.service';
 import { of } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { AngularFirestore } from '@angular/fire/firestore';
 
 describe('LayerListItemComponent', () => {
   let component: LayerListItemComponent;
   let fixture: ComponentFixture<LayerListItemComponent>;
-  const firestoreStub: Partial<AngularFirestore> = {};
 
   beforeEach(
     waitForAsync(() => {
@@ -38,11 +38,11 @@ describe('LayerListItemComponent', () => {
 
       TestBed.configureTestingModule({
         declarations: [LayerListItemComponent],
-        imports: [MatListModule, MatMenuModule, MatDialogModule],
+        imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
         providers: [
+          { provide: DataStoreService, useValue: {} },
           { provide: NavigationService, useValue: navigationService },
           { provide: Router, useValue: {} },
-          { provide: AngularFirestore, useValue: firestoreStub },
         ],
       }).compileComponents();
     })
