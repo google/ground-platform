@@ -23,8 +23,10 @@ import {
   OnChanges,
   SimpleChanges,
   OnDestroy,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -38,6 +40,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { Subscription } from 'rxjs';
+import { OptionEditorComponent } from '../option-editor/option-editor.component';
 
 export interface FieldTypeSelectOption {
   icon: string;
@@ -66,6 +69,10 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   subscription: Subscription = new Subscription();
 
   formGroup: FormGroup;
+
+  @ViewChildren(OptionEditorComponent) optionEditors?: QueryList<
+    OptionEditorComponent
+  >;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -100,7 +107,12 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private validateLabel() {
-    if (this.label || (!this.label && this.fieldCount === 1)) {
+    if (
+      this.label ||
+      (!this.label &&
+        this.fieldCount === 1 &&
+        this.fieldType === FieldType.TEXT)
+    ) {
       return null;
     }
     return { labelInvalid: true };
@@ -134,6 +146,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       required: this.required,
       selectFieldOption: this.getSelectedFieldTypeOption(),
     });
+    this.markOptionEditorsTouched();
   }
 
   getSelectedFieldTypeOption() {
@@ -286,5 +299,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private markOptionEditorsTouched() {
+    this.optionEditors?.forEach(editor => {
+      editor.optionGroup.markAllAsTouched();
+    });
   }
 }

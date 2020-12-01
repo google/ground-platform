@@ -98,7 +98,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields.size
     );
     this.fields = this.fields.push(newField);
-    this.markFormEditorsTouched();
+    this.markFormFieldsTouched();
   }
 
   /**
@@ -167,10 +167,10 @@ export class LayerDialogComponent implements OnDestroy {
       return;
     }
 
-    this.markFormEditorsTouched();
+    this.markFormFieldsTouched();
 
     for (const editor of this.formFieldEditors) {
-      if (editor.formGroup.invalid) {
+      if (editor.formGroup.invalid || !this.isFieldOptionsValid(editor)) {
         return;
       }
     }
@@ -194,6 +194,18 @@ export class LayerDialogComponent implements OnDestroy {
     } else {
       this.addOrUpdateLayer(this.projectId, layer);
     }
+  }
+
+  private isFieldOptionsValid(formFieldEditor: FormFieldEditorComponent) {
+    if (!formFieldEditor.optionEditors) {
+      return;
+    }
+    for (const editor of formFieldEditor.optionEditors) {
+      if (editor.optionGroup.invalid) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private addOrUpdateLayer(projectId: string, layer: Layer) {
@@ -283,9 +295,16 @@ export class LayerDialogComponent implements OnDestroy {
     this.onClose();
   }
 
-  markFormEditorsTouched() {
+  private markFormFieldsTouched() {
     this.formFieldEditors?.forEach(editor => {
+      this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
+    });
+  }
+
+  private markOptionsTouched(editor: FormFieldEditorComponent) {
+    editor.optionEditors?.forEach(editor => {
+      editor.optionGroup.markAllAsTouched();
     });
   }
 }
