@@ -83,11 +83,7 @@ export class ProjectService {
   async createProject(title: string): Promise<string> {
     const offlineBaseMapSources = environment.offlineBaseMapSources;
     const user = await this.authService.getUser$().pipe(take(1)).toPromise();
-    const email = user?.email;
-    if (!email) {
-      console.log('User email address missing');
-      return Promise.reject();
-    }
+    const email = user?.email || 'Unknown email';
     const projectId = await this.dataStore.createProject(
       email,
       title,
