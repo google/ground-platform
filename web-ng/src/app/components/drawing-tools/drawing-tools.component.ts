@@ -36,7 +36,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 @Component({
   selector: 'drawing-tools',
   templateUrl: './drawing-tools.component.html',
-  styleUrls: ['./drawing-tools.component.css'],
+  styleUrls: ['./drawing-tools.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DrawingToolsComponent implements OnInit, OnDestroy {
@@ -48,12 +48,12 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   selectedLayerId = '';
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
-  private black = '#202225';
-  private addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
+  readonly black = '#202225';
+  readonly addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
     getPinImageSource(this.black)
   );
-  private green = '#3d7d40';
-  private addPointIconGreen = this.sanitizer.bypassSecurityTrustUrl(
+  readonly green = '#3d7d40';
+  readonly addPointIconGreen = this.sanitizer.bypassSecurityTrustUrl(
     getPinImageSource(this.green)
   );
   addPointIcon = this.addPointIconBlack;
