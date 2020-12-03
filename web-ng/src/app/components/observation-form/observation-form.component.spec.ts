@@ -1,3 +1,4 @@
+import { DataStoreService } from './../../services/data-store/data-store.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -18,8 +19,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
-import { AngularFireModule } from '@angular/fire';
-import { environment } from '../../../environments/environment';
 import { never, of, Subject } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { List, Map } from 'immutable';
@@ -175,7 +174,6 @@ describe('ObservationFormComponent', () => {
       TestBed.configureTestingModule({
         declarations: [ObservationFormComponent],
         imports: [
-          AngularFireModule.initializeApp(environment.firebaseConfig),
           BrowserAnimationsModule,
           FormsModule,
           ReactiveFormsModule,
@@ -190,17 +188,13 @@ describe('ObservationFormComponent', () => {
           LayerListItemModule,
         ],
         providers: [
+          { provide: DataStoreService, useValue: {} },
           { provide: FeatureService, useValue: featureService },
           { provide: ProjectService, useValue: projectService },
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },
           { provide: NavigationService, useValue: navigationService },
-          {
-            provide: AuthService,
-            useValue: {
-              user$,
-            },
-          },
+          { provide: AuthService, useValue: { user$ } },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();

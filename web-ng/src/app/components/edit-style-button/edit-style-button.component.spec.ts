@@ -16,8 +16,8 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { EditStyleButtonComponent } from './edit-style-button.component';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('EditStyleButtonComponent', () => {
   let component: EditStyleButtonComponent;
@@ -27,7 +27,8 @@ describe('EditStyleButtonComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         declarations: [EditStyleButtonComponent],
-        imports: [MatDialogModule, MatIconModule],
+        imports: [MatDialogModule],
+        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
     })
   );
