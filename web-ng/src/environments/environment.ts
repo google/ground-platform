@@ -28,9 +28,10 @@ import {
 export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
-  firebaseConfig,
+  firebase: firebaseConfig,
   cloudFunctionsHost,
   offlineBaseMapSources,
+  useEmulators: false,
 };
 
 /*

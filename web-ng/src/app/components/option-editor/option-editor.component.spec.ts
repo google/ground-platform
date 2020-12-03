@@ -19,6 +19,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { OptionEditorComponent } from './option-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -37,6 +38,7 @@ describe('OptionEditorComponent', () => {
           CommonModule,
           BrowserAnimationsModule,
           FlexLayoutModule,
+          MatIconModule,
           MatFormFieldModule,
           FormsModule,
           ReactiveFormsModule,

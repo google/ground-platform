@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
+import { AuthService } from './../../services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { UserProfilePopupComponent } from './user-profile-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 
 describe('UserProfilePopupComponent', () => {
@@ -34,13 +31,9 @@ describe('UserProfilePopupComponent', () => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
         declarations: [UserProfilePopupComponent],
-        imports: [
-          MatDialogModule,
-          AngularFireModule.initializeApp(environment.firebaseConfig),
-          AngularFireAuthModule,
-          AngularFirestoreModule,
-        ],
+        imports: [MatDialogModule],
         providers: [
+          { provide: AuthService, useValue: {} },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },

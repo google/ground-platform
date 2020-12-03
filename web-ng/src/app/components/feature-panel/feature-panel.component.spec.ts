@@ -16,6 +16,7 @@
 
 import firebase from 'firebase/app';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { DataStoreService } from './../../services/data-store/data-store.service';
 import { FeaturePanelComponent } from './feature-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
@@ -29,7 +30,6 @@ import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
-import { AngularFireModule } from '@angular/fire';
 
 const mockProject = new Project(
   'project001',
@@ -86,8 +86,8 @@ describe('FeaturePanelComponent', () => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
         declarations: [FeaturePanelComponent],
-        imports: [AngularFireModule.initializeApp({})],
         providers: [
+          { provide: DataStoreService, useValue: {} },
           { provide: FeatureService, useValue: featureService },
           { provide: ProjectService, useValue: projectService },
           { provide: ObservationService, useValue: observationService },
