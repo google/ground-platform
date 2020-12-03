@@ -179,15 +179,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private centerViewportOnMarker(options: google.maps.MarkerOptions): void {
-    if (options.position) {
-      this.map.panTo(options.position);
+  private panAndZoom(
+    position?: google.maps.LatLng | google.maps.LatLngLiteral
+  ) {
+    if (!position) {
+      return;
     }
-  }
-
-  private setMapZoom(zoom: number): void {
-    if (this.map.getZoom() < zoom) {
-      this.map.zoom = zoom;
+    this.map.panTo(position);
+    if (this.map.getZoom() < zoomedInLevel) {
+      this.map.zoom = zoomedInLevel;
     }
   }
 
@@ -214,8 +214,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('click', () => {
       this.selectMarker(marker);
       this.navigationService.setFeatureId(feature.id);
-      this.centerViewportOnMarker(options);
-      this.setMapZoom(zoomedInLevel);
+      this.panAndZoom(options.position);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
       const newFeature = new LocationFeature(
