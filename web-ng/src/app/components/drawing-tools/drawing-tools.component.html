@@ -13,25 +13,24 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<mat-button-toggle-group class="drawing-buttons" [(value)]="selectedValue">
-  <!-- TODO: replace these with icons. -->
-  <mat-button-toggle value="{{ pointValue }}" (click)="onButtonClick()">
-    add point
+
+<mat-button-toggle-group class="drawing-buttons" [(value)] = "selectedValue">
+  <mat-button-toggle class="add-point-button" value = "{{pointValue}}" (click)="onButtonClick()">
+    <img class="add-point-icon" [src]="addPointIcon" />
   </mat-button-toggle>
   <mat-button-toggle hidden value = "{{ polygonValue }}" (click)="onButtonClick()">
     add polygon
   </mat-button-toggle>
 </mat-button-toggle-group>
 
-<mat-form-field
-  *ngIf="selectedValue"
-  class="drawing-layer-selector"
-  appearance="fill"
->
-  <mat-label>Adding {{ selectedValue }} for</mat-label>
-  <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
-    <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
-      <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+<div *ngIf="selectedValue" class="drawing-layer-selector">
+  <mat-form-field appearance="fill">
+    <mat-label>Adding {{selectedValue}} for</mat-label>
+    <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
+      <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
+        <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button (click)="onCancel()">Cancel</button>
+</div>

@@ -135,6 +135,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     switch (editMode) {
       case EditMode.AddPoint:
+        this.drawingToolsService.setEditMode(EditMode.None);
         return this.featureService.addPoint(
           event.latLng.lat(),
           event.latLng.lng(),

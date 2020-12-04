@@ -33,3 +33,8 @@ $theme: mat-light-theme($primary, $accent, $warn);
 // https://github.com/angular/components/blob/16f5f793dea3d83a6f08de14e3787ce97d82ff15/src/material/core/theming/_palette.scss#L674
 $foreground: map-get($theme, foreground);
 $background: map-get($theme, background);
+
+:root {
+  --drawing-tools-black: #202225;
+  --drawing-tools-green: #3d7d40;
+}
