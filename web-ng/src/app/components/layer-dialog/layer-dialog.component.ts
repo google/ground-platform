@@ -196,9 +196,11 @@ export class LayerDialogComponent implements OnDestroy {
     }
   }
 
-  private isFieldOptionsValid(formFieldEditor: FormFieldEditorComponent) {
+  private isFieldOptionsValid(
+    formFieldEditor: FormFieldEditorComponent
+  ): boolean {
     if (!formFieldEditor.optionEditors) {
-      return;
+      return true;
     }
     for (const editor of formFieldEditor.optionEditors) {
       if (editor.optionGroup.invalid) {

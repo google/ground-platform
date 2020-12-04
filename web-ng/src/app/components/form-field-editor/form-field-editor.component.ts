@@ -26,7 +26,12 @@ import {
   ViewChildren,
   QueryList,
 } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  FormControl,
+} from '@angular/forms';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -106,16 +111,16 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  private validateLabel() {
-    if (
-      this.label ||
-      (!this.label &&
-        this.fieldCount === 1 &&
-        this.fieldType === FieldType.TEXT)
-    ) {
-      return null;
-    }
-    return { labelInvalid: true };
+  private validateLabel(control: FormControl) {
+    return this.isFormEmpty() ? null : Validators.required(control);
+  }
+
+  private isFormEmpty(): boolean {
+    return (
+      this.label?.trim().length === 0 &&
+      this.fieldCount === 1 &&
+      this.fieldType === FieldType.TEXT
+    );
   }
 
   ngOnInit(): void {

@@ -21,7 +21,7 @@
       <mat-label>Question</mat-label>
       <input matInput formControlName="label" autocomplete="off" />
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
-        <ng-container *ngIf="labelControl.getError('labelInvalid')">
+        <ng-container *ngIf="labelControl.getError('required')">
           Question is required
         </ng-container>
       </mat-error>
