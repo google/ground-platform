@@ -179,12 +179,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private panAndZoom(
-    position?: google.maps.LatLng | google.maps.LatLngLiteral
-  ) {
-    if (!position) {
-      return;
-    }
+  private panAndZoom(position: google.maps.LatLng | google.maps.LatLngLiteral) {
     this.map.panTo(position);
     if (this.map.getZoom() < zoomedInLevel) {
       this.map.zoom = zoomedInLevel;
@@ -214,7 +209,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('click', () => {
       this.selectMarker(marker);
       this.navigationService.setFeatureId(feature.id);
-      this.panAndZoom(options.position);
+      this.panAndZoom(options.position!);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
       const newFeature = new LocationFeature(
