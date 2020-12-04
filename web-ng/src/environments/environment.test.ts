@@ -24,4 +24,5 @@ export const environment = {
   googleMapsApiKey: '',
   cloudFunctionsHost: 'some-subdomain.cloudfunctions.net',
   offlineBaseMapSources: [{ url: '' }],
+  useEmulators: false,
 };
