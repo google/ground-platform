@@ -39,6 +39,7 @@ import firebase from 'firebase/app';
 
 const normalIconScale = 30;
 const enlargedIconScale = 50;
+const zoomedInLevel = 13;
 
 @Component({
   selector: 'ground-map',
@@ -179,6 +180,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private panAndZoom(position: google.maps.LatLng) {
+    this.map.panTo(position);
+    if (this.map.getZoom() < zoomedInLevel) {
+      this.map.zoom = zoomedInLevel;
+    }
+  }
+
   private addMarkerToMap(project: Project, feature: LocationFeature) {
     const color = project.layers.get(feature.layerId)?.color;
     const icon = {
@@ -202,6 +210,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('click', () => {
       this.selectMarker(marker);
       this.navigationService.setFeatureId(feature.id);
+      this.panAndZoom(options.position! as google.maps.LatLng);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
       const newFeature = new LocationFeature(
