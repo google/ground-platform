@@ -26,7 +26,7 @@ export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
   firebase: firebaseConfig,
-  cloudFunctionsHost: 'localhost:5001',
+  cloudFunctionsUrl: `http://localhost:5001/${firebaseConfig.projectId}/us-central1`,
   offlineBaseMapSources: [{ url: '' }],
   useEmulators: true,
 };
