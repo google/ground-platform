@@ -20,16 +20,15 @@
 
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
-import {
-  cloudFunctionsHost,
-  offlineBaseMapSources,
-} from './.backend-config.json';
+import { offlineBaseMapSources } from './.backend-config.json';
+
+const { projectId } = firebaseConfig;
 
 export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
   firebase: firebaseConfig,
-  cloudFunctionsHost,
+  cloudFunctionsUrl: `https://us-central1-${projectId}.cloudfunctions.net`,
   offlineBaseMapSources,
   useEmulators: false,
 };
