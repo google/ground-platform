@@ -27,7 +27,6 @@ import {
 } from '../../services/drawing-tools/drawing-tools.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable, Subscription } from 'rxjs';
-import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
