@@ -16,10 +16,13 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
-import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { AngularFireModule } from '@angular/fire';
+import {
+  AngularFirestoreModule,
+  SETTINGS as FIRESTORE_SETTINGS,
+  USE_EMULATOR as USE_FIRESTORE_EMULATOR,
+} from '@angular/fire/firestore';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -29,16 +32,28 @@ import { ProjectHeaderModule } from './components/project-header/project-header.
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
 import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [AppComponent],
+  providers: [
+    {
+      provide: FIRESTORE_SETTINGS,
+      useValue: { ignoreUndefinedProperties: true },
+    },
+    {
+      provide: USE_FIRESTORE_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
+    },
+  ],
   imports: [
-    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,
     AngularFirestoreModule,
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     MainPageContainerModule,
     ProjectHeaderModule,
     UserProfilePopupModule,

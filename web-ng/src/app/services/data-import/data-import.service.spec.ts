@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --configuration=test ` replaces `environment.ts` with
-// `environment.test.ts`.
-// The list of file replacements can be found in `angular.json`.
+import { TestBed } from '@angular/core/testing';
 
-export const environment = {
-  production: false,
-  googleMapsApiKey: '',
-  cloudFunctionsUrl: '',
-  offlineBaseMapSources: [{ url: '' }],
-  useEmulators: false,
-};
+import { DataImportService } from './data-import.service';
+import { HttpClient } from '@angular/common/http';
+import { MatDialogModule } from '@angular/material/dialog';
+
+describe('DataImportService', () => {
+  let service: DataImportService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [MatDialogModule],
+      providers: [{ provide: HttpClient, useValue: {} }],
+    });
+    service = TestBed.inject(DataImportService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});
