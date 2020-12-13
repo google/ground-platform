@@ -33,7 +33,7 @@ const closeConnection = (code, reason) => {
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'project' id and 'layer' id to the database.
  */
-function importCsv(req, res) {
+async function importCsv(req, res) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== "POST") {
     return res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
@@ -56,7 +56,7 @@ function importCsv(req, res) {
       return res.status(HttpStatus.BAD_REQUEST).end();
     }
     console.log(
-      `Importing features into project '${projectId}', layer '${layerId}'..`
+      `Importing features into project '${projectId}', layer '${layerId}'.`
     );
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
