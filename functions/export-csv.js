@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
-const {db} = require('./common/context');
+const { db } = require("./common/context");
 
 function exportCsv(req, res) {
   const {
@@ -28,65 +28,61 @@ function exportCsv(req, res) {
   // TODO: Simplify/refactor post G4G19.
   var elements = [];
   var features = [];
-  return db.fetchProject(projectId).then(
-    project => {
+  return db
+    .fetchProject(projectId)
+    .then((project) => {
       if (!project.exists) {
-        res.status(404).send('not found');
-        return Promise.reject(new Error('project not found: ' + projectId))
+        res.status(404).send("not found");
+        return Promise.reject(new Error("project not found: " + projectId));
       }
-      res.type('text/csv');
-      let form = project.get('featureTypes')[featureTypeId]['forms'];
-      elements = form[Object.keys(form)[0]]['elements'];
-      var arr = []
+      res.type("text/csv");
+      let form = project.get("featureTypes")[featureTypeId]["forms"];
+      elements = form[Object.keys(form)[0]]["elements"];
+      var arr = [];
       for (var el in elements) {
-        arr.push('"' + escapeQuotes(elements[el]['labels']['_']) + '"');
+        arr.push('"' + escapeQuotes(elements[el]["labels"]["_"]) + '"');
       }
       arr.push('"Latitude"');
       arr.push('"Longitude"');
-      res.write(arr.join(',') + '\n');
+      res.write(arr.join(",") + "\n");
       return db.fetchFeatures(project.id);
-    }
-  ).then(
-    data => {
+    })
+    .then((data) => {
       features = data;
       var promises = [];
-      features.docs.forEach(feature => {
+      features.docs.forEach((feature) => {
         promises.push(db.fetchRecords(projectId, feature.id));
       });
       return Promise.all(promises);
-    }
-  )
-  .then(
-    records => {
+    })
+    .then((records) => {
       var records = records[0]; // TODO: remove this line if fetchRecords give correct data
-      features.docs.forEach(feature => {
-          records.docs.forEach(record => {
-            if (record.get('featureId') == feature.id) { // TODO: remove this condition if fetchRecords give correct data
-              var arr = [];
-              for (var el in elements) {
-                var value = record.data()['responses'][elements[el]['id']];
-                value = value == (undefined || null) ? '' : value;
-                arr.push('"' + escapeQuotes(value) + '"');
-              }
-              var center = feature.data()['center'];
-              arr.push('"' + center['_latitude'] + '"');
-              arr.push('"' + center['_longitude'] + '"');
-              res.write(arr.join(',') + '\n');
+      features.docs.forEach((feature) => {
+        records.docs.forEach((record) => {
+          if (record.get("featureId") == feature.id) {
+            // TODO: remove this condition if fetchRecords give correct data
+            var arr = [];
+            for (var el in elements) {
+              var value = record.data()["responses"][elements[el]["id"]];
+              value = value == (undefined || null) ? "" : value;
+              arr.push('"' + escapeQuotes(value) + '"');
             }
-          });
+            var center = feature.data()["center"];
+            arr.push('"' + center["_latitude"] + '"');
+            arr.push('"' + center["_longitude"] + '"');
+            res.write(arr.join(",") + "\n");
+          }
+        });
       });
       return res.end();
-    }
-  )
-  .catch(
-    err => {
-      console.error("Export Failed: " , err);
+    })
+    .catch((err) => {
+      console.error("Export Failed: ", err);
       return res.status(500).end();
-    }
-  )
+    });
 
   function escapeQuotes(str) {
-    return str.replace(/\r?\n/g, '\\n').replace(/"/g, '""');
+    return str.replace(/\r?\n/g, "\\n").replace(/"/g, '""');
   }
 }
 
