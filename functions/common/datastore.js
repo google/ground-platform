@@ -54,8 +54,8 @@ class Datastore {
     );
   }
 
-  fetchRecords(projectId, featureId) {
-    return this.fetchCollection_(`projects/${projectId}/records`);
+  fetchObservations(projectId, featureId) {
+    return this.fetchCollection_(`projects/${projectId}/observations`);
   }
 
   fetchFeature(projectId, featureId) {

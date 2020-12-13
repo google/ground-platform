@@ -51,19 +51,19 @@ function exportCsv(req, res) {
       features = data;
       var promises = [];
       features.docs.forEach((feature) => {
-        promises.push(db.fetchRecords(projectId, feature.id));
+        promises.push(db.fetchObservations(projectId, feature.id));
       });
       return Promise.all(promises);
     })
-    .then((records) => {
-      var records = records[0]; // TODO: remove this line if fetchRecords give correct data
+    .then((observations) => {
+      var observations = observations[0]; // TODO: remove this line if fetchObservations give correct data
       features.docs.forEach((feature) => {
-        records.docs.forEach((record) => {
-          if (record.get("featureId") == feature.id) {
-            // TODO: remove this condition if fetchRecords give correct data
+        observations.docs.forEach((observation) => {
+          if (observation.get("featureId") == feature.id) {
+            // TODO: remove this condition if fetchObservations give correct data
             var arr = [];
             for (var el in elements) {
-              var value = record.data()["responses"][elements[el]["id"]];
+              var value = observation.data()["responses"][elements[el]["id"]];
               value = value == (undefined || null) ? "" : value;
               arr.push('"' + escapeQuotes(value) + '"');
             }
