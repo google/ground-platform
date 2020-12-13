@@ -54,16 +54,22 @@ class Datastore {
     );
   }
 
-  fetchObservations(projectId, featureId) {
-    return this.fetchCollection_(`projects/${projectId}/observations`);
+  fetchObservationsByLayerId(projectId, layerId) {
+    return this.db_
+      .collection(`projects/${projectId}/observations`)
+      .where("layerId", "==", layerId)
+      .get();
   }
 
   fetchFeature(projectId, featureId) {
     return this.fetchDoc_(`projects/${projectId}/features/${featureId}`);
   }
 
-  fetchFeatures(projectId) {
-    return this.fetchCollection_(`projects/${projectId}/features`);
+  fetchFeaturesByLayerId(projectId, layerId) {
+    return this.db_
+      .collection(`projects/${projectId}/features`)
+      .where("layerId", "==", layerId)
+      .get();
   }
 
   fetchForm(projectId, featureTypeId, formId) {

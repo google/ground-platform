@@ -87,13 +87,10 @@ export class ObservationService {
   }
 
   createNewObservation(
-    user: User | null | undefined,
+    user: User,
     project: Project,
     feature: Feature
   ): Observation | LoadingState {
-    if (!user) {
-      throw Error('Login required to create new observation.');
-    }
     const form = project
       .getLayer(feature.layerId)!
       .forms?.first(/*notSetValue=*/ null);
@@ -111,6 +108,7 @@ export class ObservationService {
     return new Observation(
       newObservationId,
       feature.id,
+      feature.layerId,
       form!,
       auditInfo,
       auditInfo,

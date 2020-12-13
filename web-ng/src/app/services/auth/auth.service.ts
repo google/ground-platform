@@ -22,13 +22,20 @@ import { Injectable } from '@angular/core';
 import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
+
+const ANONYMOUS_USER: User = {
+  id: '',
+  email: 'nobody',
+  displayName: 'Anonymous user',
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  user$: Observable<User | null | undefined>;
+  user$: Observable<User>;
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
@@ -42,13 +49,14 @@ export class AuthService {
           return of(null);
         }
       }),
+      map(user => user || ANONYMOUS_USER),
       // Cache last authenticated user so that late subscribers will receive
       // it as well.
       shareReplay(1)
     );
   }
 
-  getUser$(): Observable<User | null | undefined> {
+  getUser$(): Observable<User> {
     return this.user$;
   }
 

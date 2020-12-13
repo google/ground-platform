@@ -17,73 +17,82 @@
 
 "use strict";
 
+const csv = require("@fast-csv/format");
 const { db } = require("./common/context");
 
-function exportCsv(req, res) {
-  const {
-    project: projectId,
-    layer: layerId,
-    lang: desiredLanguage,
-  } = req.query;
-  // TODO: Simplify/refactor post G4G19.
-  var elements = [];
-  var features = [];
-  return db
-    .fetchProject(projectId)
-    .then((project) => {
-      if (!project.exists) {
-        res.status(404).send("not found");
-        return Promise.reject(new Error("project not found: " + projectId));
-      }
-      res.type("text/csv");
-      let form = project.get("layers")[layerId]["forms"];
-      elements = form[Object.keys(form)[0]]["elements"];
-      var arr = [];
-      for (var el in elements) {
-        arr.push('"' + escapeQuotes(elements[el]["labels"]["_"]) + '"');
-      }
-      arr.push('"Latitude"');
-      arr.push('"Longitude"');
-      res.write(arr.join(",") + "\n");
-      return db.fetchFeatures(project.id);
-    })
-    .then((data) => {
-      features = data;
-      var promises = [];
-      features.docs.forEach((feature) => {
-        promises.push(db.fetchObservations(projectId, feature.id));
-      });
-      return Promise.all(promises);
-    })
-    .then((observations) => {
-      var observations = observations[0]; // TODO: remove this line if fetchObservations give correct data
-      features.docs.forEach((feature) => {
-        observations.docs.forEach((observation) => {
-          if (observation.get("featureId") == feature.id) {
-            // TODO: remove this condition if fetchObservations give correct data
-            var arr = [];
-            for (var el in elements) {
-              var value = observation.data()["responses"][elements[el]["id"]];
-              value = value == (undefined || null) ? "" : value;
-              arr.push('"' + escapeQuotes(value) + '"');
-            }
-            var center = feature.data()["center"];
-            arr.push('"' + center["_latitude"] + '"');
-            arr.push('"' + center["_longitude"] + '"');
-            res.write(arr.join(",") + "\n");
-          }
-        });
-      });
-      return res.end();
-    })
-    .catch((err) => {
-      console.error("Export Failed: ", err);
-      return res.status(500).end();
-    });
-
-  function escapeQuotes(str) {
-    return str.replace(/\r?\n/g, "\\n").replace(/"/g, '""');
+async function exportCsv(req, res) {
+  const { project: projectId, layer: layerId } = req.query;
+  const project = await db.fetchProject(projectId);
+  if (!project.exists) {
+    res.status(404).send("Project not found");
+    return;
   }
+  console.log(`Exporting project '${projectId}', layer '${layerId}'`);
+
+  const layers = project.get("layers") || {};
+  const layer = layers[layerId] || {};
+  const forms = layer["forms"] || {};
+  const form = Object.values(forms)[0] || {};
+  const elementMap = form["elements"] || {};
+  const elements = Object.keys(elementMap)
+    .map((elementId) => ({ id: elementId, ...elementMap[elementId] }))
+    .sort((a, b) => a.index - b.index);
+
+  const headers = [];
+  headers.push("Place ID");
+  headers.push("Place name");
+  headers.push("Latitude");
+  headers.push("Longitude");
+  elements.forEach((element) => {
+    const labelMap = element["label"] || {};
+    const label = Object.values(labelMap)[0] || "Unnamed field";
+    headers.push(label);
+  });
+
+  res.type("text/csv");
+  const csvStream = csv.format({
+    delimiter: ",",
+    headers,
+    includeEndRowDelimiter: true,
+    rowDelimiter: "\n",
+    quoteColumns: true,
+    quote: '"',
+  });
+  csvStream.pipe(res);
+
+  const features = await db.fetchFeaturesByLayerId(project.id, layerId);
+  const observations = await db.fetchObservationsByLayerId(project.id, layerId);
+
+  // Index observations by feature id in memory. This consumes more
+  // memory than iterating over and streaming both feature and observation`
+  // collections simultaneously, but it's easier to read and maintain. This will
+  // likely need to be optimized to scale to larger datasets.
+  const observationsByFeature = {};
+  observations.forEach((observation) => {
+    const featureId = observation.get("featureId");
+    const arr = observationsByFeature[featureId] || [];
+    arr.push(observation.data());
+    observationsByFeature[featureId] = arr;
+  });
+
+  features.forEach((feature) => {
+    const featureId = feature.id;
+    const location = feature.get("location") || {};
+    (observationsByFeature[featureId] || []).forEach((observation) => {
+      const row = [];
+      row.push(feature.get("id") || "");
+      row.push(feature.get("caption") || "");
+      row.push(location["_latitude"] || "");
+      row.push(location["_longitude"] || "");
+      const responses = observation["responses"] || {};
+      elements.forEach((element) => {
+        console.log(element.id, observation);
+        row.push(responses[element.id] || "");
+      });
+      csvStream.write(row);
+    });
+  });
+  csvStream.end();
 }
 
 module.exports = exportCsv;

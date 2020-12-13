@@ -27,24 +27,33 @@ const onCreateRecord = require("./on-create-record");
 const onUpdateRecord = require("./on-update-record");
 const cors = require("cors")({ origin: true });
 
+/**
+ * Wrapper for HTTP request handlers. Captures uncaught exceptions to prevent
+ * debug details from being returned to user.
+ */
+function onHttpsRequest(handler) {
+  return functions.https.onRequest((req, res) =>
+    cors(req, res, () => handler(req, res).catch((err) => onError(res, err)))
+  );
+}
+
+function onError(res, err) {
+  console.error(err);
+  res.status(500).send("Internal error");
+}
+
 // Create user profile in database when user first logs in.
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
 
-exports.importCsv = functions.https.onRequest(importCsv);
+exports.importCsv = onHttpsRequest(importCsv);
 
-exports.exportCsv = functions.https.onRequest((req, res) =>
-  exportCsv(req, res).catch((err) => res.status(500).send(`${err}`))
-);
+exports.exportCsv = onHttpsRequest(exportCsv);
 
-exports.exportKml = functions.https.onRequest((req, res) =>
-  exportKml(req, res).catch((err) => res.status(500).send(`${err}`))
-);
+exports.exportKml = onHttpsRequest(exportKml);
 
 // Test via shell:
 // updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
-exports.updateColumns = functions.https.onRequest((req, res) =>
-  updateColumns(req, res).catch((err) => res.status(500).send(`${err}`))
-);
+exports.updateColumns = onHttpsRequest(updateColumns);
 
 // Test via shell:
 // onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
@@ -57,7 +66,3 @@ exports.onCreateRecord = functions.firestore
 exports.onUpdateRecord = functions.firestore
   .document("projects/{projectId}/features/{featureId}/records/{recordId}")
   .onUpdate((change, context) => onUpdateRecord(change, context));
-
-exports.importCsv = functions.https.onRequest((req, res) =>
-  cors(req, res, () => importCsv(req, res))
-);
