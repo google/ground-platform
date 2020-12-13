@@ -22,7 +22,7 @@ const { db } = require("./common/context");
 function exportCsv(req, res) {
   const {
     project: projectId,
-    featureType: featureTypeId,
+    layer: layerId,
     lang: desiredLanguage,
   } = req.query;
   // TODO: Simplify/refactor post G4G19.
@@ -36,7 +36,7 @@ function exportCsv(req, res) {
         return Promise.reject(new Error("project not found: " + projectId));
       }
       res.type("text/csv");
-      let form = project.get("featureTypes")[featureTypeId]["forms"];
+      let form = project.get("layers")[layerId]["forms"];
       elements = form[Object.keys(form)[0]]["elements"];
       var arr = [];
       for (var el in elements) {
