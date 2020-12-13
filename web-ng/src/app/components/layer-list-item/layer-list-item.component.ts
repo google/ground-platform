@@ -30,7 +30,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'ground-layer-list-item',
   templateUrl: './layer-list-item.component.html',
-  styleUrls: ['./layer-list-item.component.css'],
+  styleUrls: ['./layer-list-item.component.scss'],
 })
 export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
