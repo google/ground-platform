@@ -430,6 +430,7 @@ export class FirebaseDataConverter {
   static observationToJS(observation: Observation): {} {
     return {
       featureId: observation.featureId,
+      layerId: observation.layerId,
       formId: observation.form?.id,
       created: FirebaseDataConverter.auditInfoToJs(observation.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(
