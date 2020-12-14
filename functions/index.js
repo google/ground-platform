@@ -48,21 +48,3 @@ exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
 exports.importCsv = onHttpsRequest(importCsv);
 
 exports.exportCsv = onHttpsRequest(exportCsv);
-
-exports.exportKml = onHttpsRequest(exportKml);
-
-// Test via shell:
-// updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
-exports.updateColumns = onHttpsRequest(updateColumns);
-
-// Test via shell:
-// onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
-exports.onCreateRecord = functions.firestore
-  .document("projects/{projectId}/features/{featureId}/records/{recordId}")
-  .onCreate((change, context) => onCreateRecord(change, context));
-
-// Test via shell:
-// onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
-exports.onUpdateRecord = functions.firestore
-  .document("projects/{projectId}/features/{featureId}/records/{recordId}")
-  .onUpdate((change, context) => onUpdateRecord(change, context));
