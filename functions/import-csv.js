@@ -33,7 +33,7 @@ const closeConnection = (code, reason) => {
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'project' id and 'layer' id to the database.
  */
-function importCsv(req, res) {
+async function importCsv(req, res) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== "POST") {
     return res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
