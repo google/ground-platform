@@ -30,7 +30,6 @@
     "@angular/platform-browser": "^11.0.0",
     "@angular/platform-browser-dynamic": "^11.0.0",
     "@angular/router": "^11.0.0",
-    "@fast-csv/format": "^4.3.5",
     "@grpc/grpc-js": "^1.2.1",
     "@iplab/ngx-file-upload": "^2.0.8",
     "@types/googlemaps": "^3.40.3",
