@@ -410,6 +410,7 @@ export class FirebaseDataConverter {
     return new Observation(
       id,
       data.featureId,
+      data.layerId,
       form,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
