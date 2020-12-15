@@ -30,7 +30,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'ground-layer-list-item',
   templateUrl: './layer-list-item.component.html',
-  styleUrls: ['./layer-list-item.component.css'],
+  styleUrls: ['./layer-list-item.component.scss'],
 })
 export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
@@ -131,9 +131,11 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     });
   }
 
-  onDownloadCsv() {
-    const link = `${environment.cloudFunctionsUrl}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
-    // TODO(#320): Implement download CSV.
+  getDownloadCsvUrl() {
+    return (
+      `${environment.cloudFunctionsUrl}/exportCsv?` +
+      `project=${this.projectId}&layer=${this.layer?.id}`
+    );
   }
 
   ngOnDestroy(): void {

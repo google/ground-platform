@@ -87,7 +87,7 @@ export class ObservationService {
   }
 
   createNewObservation(
-    user: User | null | undefined,
+    user: User,
     project: Project,
     feature: Feature
   ): Observation | LoadingState {
@@ -98,9 +98,7 @@ export class ObservationService {
       .getLayer(feature.layerId)!
       .forms?.first(/*notSetValue=*/ null);
     if (!form) {
-      throw Error(
-        `Layer ${feature.layerId} does not contain any forms -> Can not create new observation.`
-      );
+      throw Error(`No form in layer ${feature.layerId}`);
     }
     const newObservationId = this.dataStore.generateId();
     const auditInfo = new AuditInfo(
@@ -111,6 +109,7 @@ export class ObservationService {
     return new Observation(
       newObservationId,
       feature.id,
+      feature.layerId,
       form!,
       auditInfo,
       auditInfo,
