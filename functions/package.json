@@ -9,6 +9,7 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
+    "@fast-csv/format": "^4.3.5",
     "busboy": "^0.3.1",
     "cors": "^2.8.5",
     "csv-parser": "^2.3.3",
