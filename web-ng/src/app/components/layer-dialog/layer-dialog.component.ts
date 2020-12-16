@@ -74,7 +74,7 @@ export class LayerDialogComponent implements OnDestroy {
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private router: Router,
-    private confirmationDialog: MatDialog,
+    private dialog: MatDialog,
     private layerService: LayerService,
     private projectService: ProjectService
   ) {
@@ -96,7 +96,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields.size
     );
     this.fields = this.fields.push(newField);
-    this.markFormEditorsTouched();
+    this.markFormFieldsTouched();
   }
 
   /**
@@ -107,17 +107,14 @@ export class LayerDialogComponent implements OnDestroy {
    *
    */
   onFieldDelete(index: number) {
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
-        },
-      }
-    );
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      maxWidth: '500px',
+      data: {
+        title: 'Warning',
+        message:
+          'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
+      },
+    });
 
     dialogRef.afterClosed().subscribe(dialogResult => {
       if (dialogResult) {
@@ -165,10 +162,10 @@ export class LayerDialogComponent implements OnDestroy {
       return;
     }
 
-    this.markFormEditorsTouched();
+    this.markFormFieldsTouched();
 
     for (const editor of this.formFieldEditors) {
-      if (editor.formGroup.invalid) {
+      if (editor.formGroup.invalid || !this.isFieldOptionsValid(editor)) {
         return;
       }
     }
@@ -192,6 +189,20 @@ export class LayerDialogComponent implements OnDestroy {
     } else {
       this.addOrUpdateLayer(this.projectId, layer);
     }
+  }
+
+  private isFieldOptionsValid(
+    formFieldEditor: FormFieldEditorComponent
+  ): boolean {
+    if (!formFieldEditor.optionEditors) {
+      return true;
+    }
+    for (const editor of formFieldEditor.optionEditors) {
+      if (editor.optionGroup.invalid) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private addOrUpdateLayer(projectId: string, layer: Layer) {
@@ -256,9 +267,16 @@ export class LayerDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  markFormEditorsTouched() {
+  private markFormFieldsTouched() {
     this.formFieldEditors?.forEach(editor => {
+      this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
+    });
+  }
+
+  private markOptionsTouched(editor: FormFieldEditorComponent) {
+    editor.optionEditors?.forEach(editor => {
+      editor.optionGroup.markAllAsTouched();
     });
   }
 }

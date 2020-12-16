@@ -22,6 +22,7 @@ import { MainPageComponent } from './../main-page/main-page.component';
 import { NavigationService } from './../../services/router/router.service';
 import { NEVER } from 'rxjs';
 import { ProjectService } from './../../services/project/project.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const navigationService = {
   init: () => {},
@@ -48,6 +49,7 @@ describe('MainPageContainerComponent', () => {
           { provide: NavigationService, useValue: navigationService },
           { provide: ProjectService, useValue: projectService },
         ],
+        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
 
       fixture = TestBed.createComponent(MainPageContainerComponent);

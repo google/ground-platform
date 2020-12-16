@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,18 @@
  */
 
 // This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
+// `ng build --configuration=test ` replaces `environment.ts` with
+// `environment.test.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
-import { offlineBaseMapSources } from './.backend-config.json';
-
-const { projectId } = firebaseConfig;
 
 export const environment = {
   production: false,
   googleMapsApiKey: googleMapsConfig.apiKey,
   firebase: firebaseConfig,
-  cloudFunctionsUrl: `https://us-central1-${projectId}.cloudfunctions.net`,
-  offlineBaseMapSources,
-  useEmulators: false,
+  cloudFunctionsUrl: `http://localhost:5001/${firebaseConfig.projectId}/us-central1`,
+  offlineBaseMapSources: [{ url: '' }],
+  useEmulators: true,
 };
-
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/dist/zone-error';  // Included with Angular CLI.

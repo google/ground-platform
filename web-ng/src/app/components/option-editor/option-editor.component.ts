@@ -22,7 +22,7 @@ import {
   EventEmitter,
   OnChanges,
 } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-option-editor',
@@ -41,7 +41,7 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   constructor(private formBuilder: FormBuilder) {
     this.optionGroup = this.formBuilder.group({
       code: [''],
-      label: [''],
+      label: ['', Validators.required],
     });
   }
 
@@ -64,5 +64,9 @@ export class OptionEditorComponent implements OnInit, OnChanges {
 
   onDeleteOption(index: number) {
     this.delete.emit(index);
+  }
+
+  get labelControl() {
+    return this.optionGroup.get('label')!;
   }
 }

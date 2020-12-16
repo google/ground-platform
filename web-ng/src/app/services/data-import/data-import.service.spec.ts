@@ -15,25 +15,23 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { DataStoreService } from '../data-store/data-store.service';
-import { LayerService } from './layer.service';
-import { ProjectService } from './../project/project.service';
-import { RouterTestingModule } from '@angular/router/testing';
 
-describe('LayerService', () => {
-  const dataStoreServiceStub: Partial<DataStoreService> = {};
-  beforeEach(() =>
+import { DataImportService } from './data-import.service';
+import { HttpClient } from '@angular/common/http';
+import { MatDialogModule } from '@angular/material/dialog';
+
+describe('DataImportService', () => {
+  let service: DataImportService;
+
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
-      providers: [
-        { provide: DataStoreService, useValue: dataStoreServiceStub },
-        { provide: ProjectService, useValue: {} },
-      ],
-    })
-  );
+      imports: [MatDialogModule],
+      providers: [{ provide: HttpClient, useValue: {} }],
+    });
+    service = TestBed.inject(DataImportService);
+  });
 
   it('should be created', () => {
-    const service: LayerService = TestBed.inject(LayerService);
     expect(service).toBeTruthy();
   });
 });
