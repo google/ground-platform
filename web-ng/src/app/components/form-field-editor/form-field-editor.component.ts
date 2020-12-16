@@ -75,9 +75,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   formGroup: FormGroup;
 
-  @ViewChildren(OptionEditorComponent) optionEditors?: QueryList<
-    OptionEditorComponent
-  >;
+  @ViewChildren(OptionEditorComponent)
+  optionEditors?: QueryList<OptionEditorComponent>;
 
   constructor(
     private formBuilder: FormBuilder,

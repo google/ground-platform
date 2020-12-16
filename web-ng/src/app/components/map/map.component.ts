@@ -28,11 +28,13 @@ import {
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { List } from 'immutable';
+import { pairwise, map, startWith } from 'rxjs/operators';
+import { List, Map } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
+import { StringMap } from '../../shared/models/string-map.model';
 
 // To make ESLint happy:
 /*global google*/
@@ -81,13 +83,39 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    const dummyProject: Project = new Project(
+      '',
+      StringMap({ en: 'title' }),
+      StringMap({ en: 'description' }),
+      Map({}),
+      Map({})
+    );
     this.subscription.add(
       combineLatest([
-        this.activeProject$,
-        this.features$,
-      ]).subscribe(([project, features]) =>
-        this.onProjectAndFeaturesUpdate(project, features)
-      )
+        this.activeProject$.pipe(startWith(dummyProject)),
+        this.features$.pipe(startWith(List<Feature>())),
+      ])
+        .pipe(pairwise())
+        .pipe(
+          map(([[oldProject, oldFeatures], [newProject, newFeatures]]) => {
+            const oldFeatureIds = oldFeatures.map(f => f.id);
+            const newFeatureIds = newFeatures.map(f => f.id);
+            const featuresToAdd = newFeatures.filter(
+              f => !oldFeatureIds.contains(f.id)
+            );
+            const feautresToRemove = oldFeatures.filter(
+              f => !newFeatureIds.contains(f.id)
+            );
+            return { newProject, featuresToAdd, feautresToRemove };
+          })
+        )
+        .subscribe(tuple => {
+          this.onProjectAndFeaturesUpdate(
+            tuple.newProject,
+            tuple.featuresToAdd,
+            tuple.feautresToRemove
+          );
+        })
     );
 
     this.subscription.add(
@@ -101,9 +129,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  onProjectAndFeaturesUpdate(project: Project, features: List<Feature>) {
-    this.clearMap();
-    this.addMarkersAndGeoJsonsToMap(project, features);
+  onProjectAndFeaturesUpdate(
+    project: Project,
+    featuresToAdd: List<Feature>,
+    feautresToRemove: List<Feature>
+  ) {
+    this.removeMarkersAndGeoJsonsOnMap(feautresToRemove);
+    this.addMarkersAndGeoJsonsToMap(project, featuresToAdd);
     this.updateStylingFunctionForAllGeoJsons(project);
   }
 
@@ -150,20 +182,32 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private clearMap() {
-    this.deleteMarkers();
-    this.clearGoogleMapDataLayer();
+  private removeMarkersAndGeoJsonsOnMap(features: List<Feature>) {
+    const locationFetureIds = features
+      .filter(f => f instanceof LocationFeature)
+      .map(f => f.id);
+    this.deleteMarkersOnMap(locationFetureIds);
+    const geoJsonFeatureIds = features
+      .filter(f => f instanceof GeoJsonFeature)
+      .map(f => f.id);
+    this.deleteGeoJsonsOnMap(geoJsonFeatureIds);
   }
 
-  private deleteMarkers() {
-    for (const marker of this.markers) {
-      marker.setMap(null);
+  private deleteMarkersOnMap(featureIds: List<String>) {
+    for (let i = this.markers.length - 1; i >= 0; i--) {
+      if (featureIds.contains(this.markers[i].getTitle()!)) {
+        this.markers[i].setMap(null);
+        this.markers.splice(i, 1);
+      }
     }
-    this.markers = [];
   }
 
-  private clearGoogleMapDataLayer() {
-    this.map.data.forEach(f => this.map.data.remove(f));
+  private deleteGeoJsonsOnMap(featureIds: List<String>) {
+    this.map.data.forEach(f => {
+      if (featureIds.contains(f.getProperty('featureId'))) {
+        this.map.data.remove(f);
+      }
+    });
   }
 
   private addMarkersAndGeoJsonsToMap(
@@ -178,13 +222,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.addGeoJsonToMap(feature);
       }
     });
-  }
-
-  private panAndZoom(position: google.maps.LatLng) {
-    this.map.panTo(position);
-    if (this.map.getZoom() < zoomedInLevel) {
-      this.map.zoom = zoomedInLevel;
-    }
   }
 
   private addMarkerToMap(project: Project, feature: LocationFeature) {
@@ -226,6 +263,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markers.push(marker);
   }
 
+  private panAndZoom(position: google.maps.LatLng) {
+    this.map.panTo(position);
+    if (this.map.getZoom() < zoomedInLevel) {
+      this.map.zoom = zoomedInLevel;
+    }
+  }
+
   private selectMarker(marker: google.maps.Marker | undefined) {
     if (marker === this.selectedMarker) {
       return;
@@ -257,6 +301,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const addedFeatures = this.map.data.addGeoJson(feature.geoJson);
     // Set property 'layerId' so that it knows what color to render later.
     addedFeatures.forEach(f => {
+      f.setProperty('featureId', feature.id);
       f.setProperty('layerId', feature.layerId);
     });
   }
