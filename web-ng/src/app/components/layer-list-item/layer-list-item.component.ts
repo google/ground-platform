@@ -29,7 +29,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'ground-layer-list-item',
   templateUrl: './layer-list-item.component.html',
-  styleUrls: ['./layer-list-item.component.css'],
+  styleUrls: ['./layer-list-item.component.scss'],
 })
 export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
@@ -86,7 +86,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     this.navigationService.setFeatureId(null);
   }
 
-  onDeleteFeature() {
+  onDeleteLayer() {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
@@ -94,23 +94,20 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
         data: {
           title: 'Warning',
           message:
-            'Are you sure you wish to delete this feature? Any associated data including all observations in this feature will be lost. This cannot be undone.',
+            'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
         },
       }
     );
 
     dialogRef.afterClosed().subscribe(async dialogResult => {
       if (dialogResult) {
-        await this.deleteFeature();
+        await this.deleteLayer();
       }
     });
   }
 
-  async deleteFeature() {
-    if (!this.projectId || !this.featureId) {
-      return;
-    }
-    await this.dataStoreService.deleteFeature(this.projectId, this.featureId);
+  async deleteLayer() {
+    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
     this.onClose();
   }
 

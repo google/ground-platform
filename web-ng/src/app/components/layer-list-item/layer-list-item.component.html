@@ -19,8 +19,8 @@ limitations under the License.
     <mat-icon
       aria-hidden="false"
       aria-label="Layer icon"
-      [color]="iconColor"
-      class="layersIcon"
+      [ngStyle]="{ color: layer?.color }"
+      class="layer-icon"
     >
       layers
     </mat-icon>
@@ -40,7 +40,7 @@ limitations under the License.
           <mat-icon>cloud_download</mat-icon>
           <span>Download CSV</span>
         </button>
-        <button mat-menu-item (click)="onDeleteFeature()">
+        <button mat-menu-item (click)="onDeleteLayer()">
           <mat-icon>delete_forever</mat-icon>
           <span>Delete</span>
         </button>
