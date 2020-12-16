@@ -127,6 +127,7 @@ class MockModel {
   static observation001 = new Observation(
     'observation001',
     MockModel.feature001.id,
+    MockModel.feature001.layerId,
     MockModel.form001,
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),

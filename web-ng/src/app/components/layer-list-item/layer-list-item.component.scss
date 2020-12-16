@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@import 'variables';
+
 /*
   Workaround to eliminate double-padding between right-hand side overflow
   menu control and list item.
@@ -25,4 +27,9 @@
 .layer-icon {
   vertical-align: middle;
   padding-right: 5px;
+}
+
+.download {
+  color: mat-color($foreground, text) !important;
+  text-decoration: none;
 }

@@ -128,9 +128,11 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     });
   }
 
-  onDownloadCsv() {
-    const link = `${environment.cloudFunctionsUrl}/exportCsv?p=${this.projectId}&l=${this.layer?.id}`;
-    // TODO(#320): Implement download CSV.
+  getDownloadCsvUrl() {
+    return (
+      `${environment.cloudFunctionsUrl}/exportCsv?` +
+      `project=${this.projectId}&layer=${this.layer?.id}`
+    );
   }
 
   ngOnDestroy(): void {

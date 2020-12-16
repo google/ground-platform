@@ -81,7 +81,7 @@ export class ObservationFormComponent {
         if (observation instanceof Observation) {
           this.observation = observation;
           this.observationFields = observation!
-            .form!.fields.toOrderedMap()
+            .form!.fields!.toOrderedMap()
             .sortBy(entry => entry.index)
             .toList();
           this.initForm();
