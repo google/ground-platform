@@ -28,13 +28,11 @@ import {
 import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { pairwise, map, startWith } from 'rxjs/operators';
-import { List, Map } from 'immutable';
+import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
-import { StringMap } from '../../shared/models/string-map.model';
 
 // To make ESLint happy:
 /*global google*/
@@ -83,39 +81,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    const dummyProject: Project = new Project(
-      '',
-      StringMap({ en: 'title' }),
-      StringMap({ en: 'description' }),
-      Map({}),
-      Map({})
-    );
     this.subscription.add(
       combineLatest([
-        this.activeProject$.pipe(startWith(dummyProject)),
-        this.features$.pipe(startWith(List<Feature>())),
-      ])
-        .pipe(pairwise())
-        .pipe(
-          map(([[oldProject, oldFeatures], [newProject, newFeatures]]) => {
-            const oldFeatureIds = oldFeatures.map(f => f.id);
-            const newFeatureIds = newFeatures.map(f => f.id);
-            const featuresToAdd = newFeatures.filter(
-              f => !oldFeatureIds.contains(f.id)
-            );
-            const feautresToRemove = oldFeatures.filter(
-              f => !newFeatureIds.contains(f.id)
-            );
-            return { newProject, featuresToAdd, feautresToRemove };
-          })
-        )
-        .subscribe(tuple => {
-          this.onProjectAndFeaturesUpdate(
-            tuple.newProject,
-            tuple.featuresToAdd,
-            tuple.feautresToRemove
-          );
-        })
+        this.activeProject$,
+        this.features$,
+      ]).subscribe(([project, features]) =>
+        this.onProjectAndFeaturesUpdate(project, features)
+      )
     );
 
     this.subscription.add(
@@ -127,34 +99,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-  }
-
-  onProjectAndFeaturesUpdate(
-    project: Project,
-    featuresToAdd: List<Feature>,
-    feautresToRemove: List<Feature>
-  ) {
-    this.removeMarkersAndGeoJsonsOnMap(feautresToRemove);
-    this.addMarkersAndGeoJsonsToMap(project, featuresToAdd);
-    this.updateStylingFunctionForAllGeoJsons(project);
-  }
-
-  onEditModeChange(editMode: EditMode) {
-    if (editMode !== EditMode.None) {
-      this.selectMarker(undefined);
-      this.navigationService.setFeatureId(null);
-      for (const marker of this.markers) {
-        marker.setClickable(false);
-      }
-    } else {
-      for (const marker of this.markers) {
-        marker.setClickable(true);
-      }
-    }
-    this.mapOptions =
-      editMode === EditMode.AddPoint
-        ? this.crosshairCursorMapOptions
-        : this.defaultCursorMapOptions;
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
@@ -182,29 +126,33 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private removeMarkersAndGeoJsonsOnMap(features: List<Feature>) {
-    const locationFetureIds = features
-      .filter(f => f instanceof LocationFeature)
-      .map(f => f.id);
-    this.deleteMarkersOnMap(locationFetureIds);
-    const geoJsonFeatureIds = features
-      .filter(f => f instanceof GeoJsonFeature)
-      .map(f => f.id);
-    this.deleteGeoJsonsOnMap(geoJsonFeatureIds);
+  private onProjectAndFeaturesUpdate(
+    project: Project,
+    features: List<Feature>
+  ): void {
+    this.removeMarkersAndGeoJsonsOnMap(features);
+    this.addMarkersAndGeoJsonsToMap(project, features);
+    this.updateStylingFunctionForAllGeoJsons(project);
   }
 
-  private deleteMarkersOnMap(featureIds: List<String>) {
+  private removeMarkersAndGeoJsonsOnMap(features: List<Feature>) {
+    const newFeatureIds: List<string> = features.map(f => f.id);
+    this.removeMarkersOnMap(newFeatureIds);
+    this.removeGeoJsonsOnMap(newFeatureIds);
+  }
+
+  private removeMarkersOnMap(newFeatureIds: List<string>) {
     for (let i = this.markers.length - 1; i >= 0; i--) {
-      if (featureIds.contains(this.markers[i].getTitle()!)) {
+      if (!newFeatureIds.contains(this.markers[i].getTitle()!)) {
         this.markers[i].setMap(null);
         this.markers.splice(i, 1);
       }
     }
   }
 
-  private deleteGeoJsonsOnMap(featureIds: List<String>) {
+  private removeGeoJsonsOnMap(newFeatureIds: List<string>) {
     this.map.data.forEach(f => {
-      if (featureIds.contains(f.getProperty('featureId'))) {
+      if (!newFeatureIds.contains(f.getProperty('featureId'))) {
         this.map.data.remove(f);
       }
     });
@@ -214,12 +162,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     project: Project,
     features: List<Feature>
   ) {
+    const locationFeatureIds = this.markers.map(m => m.getTitle());
+    const geoJsonFeatureIds: String[] = [];
+    this.map.data.forEach(f => {
+      geoJsonFeatureIds.push(f.getProperty('featureId'));
+    });
+
     features.forEach(feature => {
       if (feature instanceof LocationFeature) {
-        this.addMarkerToMap(project, feature);
+        if (!locationFeatureIds.includes(feature.id)) {
+          this.addMarkerToMap(project, feature);
+        }
       }
       if (feature instanceof GeoJsonFeature) {
-        this.addGeoJsonToMap(feature);
+        if (!geoJsonFeatureIds.includes(feature.id)) {
+          this.addGeoJsonToMap(feature);
+        }
       }
     });
   }
@@ -268,6 +226,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.map.getZoom() < zoomedInLevel) {
       this.map.zoom = zoomedInLevel;
     }
+  }
+
+  private onEditModeChange(editMode: EditMode) {
+    if (editMode !== EditMode.None) {
+      this.selectMarker(undefined);
+      this.navigationService.setFeatureId(null);
+      for (const marker of this.markers) {
+        marker.setClickable(false);
+      }
+    } else {
+      for (const marker of this.markers) {
+        marker.setClickable(true);
+      }
+    }
+    this.mapOptions =
+      editMode === EditMode.AddPoint
+        ? this.crosshairCursorMapOptions
+        : this.defaultCursorMapOptions;
   }
 
   private selectMarker(marker: google.maps.Marker | undefined) {
