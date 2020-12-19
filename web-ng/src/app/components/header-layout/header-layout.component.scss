@@ -16,28 +16,27 @@
 
 @import 'variables';
 
-.header-divider {
-  display: inline-block;
-  border-left: 1px solid mat-color($foreground, divider);
-  width: 1px;
-  height: 30px;
-  margin-left: 14px;
-  margin-right: 8px;
+.app-title {
+  margin-left: 12px;
+  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 14pt;
+  color: mat-color($foreground, secondary-text);
 }
 
-app-inline-edit-title {
-  margin-top: 15px;
+.header {
+  padding: 16px;
+  white-space: nowrap;
 }
 
-.user-thumb {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 50%;
-  margin-right: 8px;
+.header div,
+img,
+.header span,
+mat-icon {
+  vertical-align: middle;
 }
 
-/* Relative top used to push title input field in line with flex row. */
-.inline-editor {
-  position: relative;
-  top: 2px;
+.logo {
+  width: 48px;
+  height: 48px;
+  margin-left: 4px;
 }

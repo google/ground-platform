@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-@import 'variables';
+import { Component, OnInit } from '@angular/core';
 
-.header-divider {
-  display: inline-block;
-  border-left: 1px solid mat-color($foreground, divider);
-  width: 1px;
-  height: 30px;
-  margin-left: 14px;
-  margin-right: 8px;
-}
+@Component({
+  selector: 'gnd-header-layout',
+  templateUrl: './header-layout.component.html',
+  styleUrls: ['./header-layout.component.scss'],
+})
+export class HeaderLayoutComponent implements OnInit {
+  constructor() {}
 
-app-inline-edit-title {
-  margin-top: 15px;
-}
-
-.user-thumb {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-/* Relative top used to push title input field in line with flex row. */
-.inline-editor {
-  position: relative;
-  top: 2px;
+  ngOnInit(): void {}
 }
