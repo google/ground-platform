@@ -42,7 +42,9 @@
 }
 
 .welcome {
-  font-size: 1.2em;
+  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 1.4em;
+  font-weight: bold;
 }
 
 .button {
