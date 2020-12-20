@@ -25,7 +25,6 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatFormField } from '@angular/material/form-field';
 
 @NgModule({
   declarations: [ShareDialogComponent],
