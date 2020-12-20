@@ -102,8 +102,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
+    if (!this.navigationService.setFeatureId(null)) {
+      return Promise.resolve();
+    }
     this.selectMarker(undefined);
-    this.navigationService.setFeatureId(null);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
     if (!selectedLayerId) {
@@ -203,8 +205,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
+      if (!this.navigationService.setFeatureId(feature.id)) {
+        return;
+      }
       this.selectMarker(marker);
-      this.navigationService.setFeatureId(feature.id);
       this.panAndZoom(options.position! as google.maps.LatLng);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {

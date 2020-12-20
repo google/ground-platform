@@ -20,10 +20,6 @@ import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 
-interface ParamMap {
-  [key: string]: string;
-}
-
 /**
  * Exposes application state in the URL as streams to other services
  * and components, and provides methods for altering said state.
@@ -148,8 +144,25 @@ export class NavigationService {
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string | null) {
+  setFeatureId(id: string | null): boolean {
+    if (
+      this.getFragmentParams().get(
+        NavigationService.OBSERVATION_ID_FRAGMENT_PARAM
+      ) !== null
+    ) {
+      return false;
+    }
     this.setFragmentParam(NavigationService.FEATURE_ID_FRAGMENT_PARAM, id);
+    return true;
+  }
+
+  /**
+   * Get current observation id in the URL fragment.
+   */
+  getObservationId(): string | null {
+    return this.getFragmentParams().get(
+      NavigationService.OBSERVATION_ID_FRAGMENT_PARAM
+    );
   }
 
   /**

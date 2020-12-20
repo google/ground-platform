@@ -33,6 +33,7 @@ import { List } from 'immutable';
 import { map } from 'rxjs/internal/operators/map';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { NavigationService } from '../../services/router/router.service';
 
 @Component({
   selector: 'ground-drawing-tools',
@@ -58,13 +59,16 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     getPinImageSource(this.green)
   );
   addPointIcon = this.addPointIconBlack;
+  observationId$: Observable<string | null>;
 
   constructor(
     private readonly changeDetectorRef: ChangeDetectorRef,
     private drawingToolsService: DrawingToolsService,
     private sanitizer: DomSanitizer,
+    private navigationService: NavigationService,
     projectService: ProjectService
   ) {
+    this.observationId$ = this.navigationService.getObservationId$();
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layers$ = projectService.getActiveProject$().pipe(
