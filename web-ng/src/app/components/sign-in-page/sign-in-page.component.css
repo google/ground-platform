@@ -27,6 +27,12 @@
   height: 48px;
 }
 
+.google-logo {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+}
+
 .title {
   font-family: 'Open Sans', 'Helvetica neue', sans-serif;
 }
@@ -48,6 +54,6 @@
 }
 
 .button {
-  padding: 12px 16px 12px 12px;
+  padding: 10px 18px;
   margin-top: 36px;
 }
