@@ -15,18 +15,30 @@
  */
 
 import { Component } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material/icon';
+import {
+  FirebaseUISignInFailure,
+  FirebaseUISignInSuccessWithAuthResult,
+} from 'firebaseui-angular';
+import { Router } from '@angular/router';
 
 @Component({
   templateUrl: './sign-in-page.component.html',
   styleUrls: ['./sign-in-page.component.css'],
 })
 export class SignInPageComponent {
-  constructor(iconRegistry: MatIconRegistry, sanitizer: DomSanitizer) {
-    iconRegistry.addSvgIcon(
-      'google',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/img/google.svg')
-    );
+  constructor(private router: Router) {}
+
+  successCallback(signInSuccessData: FirebaseUISignInSuccessWithAuthResult) {
+    // TODO(#545): Redirect to original URL on success.
+    this.router.navigate(['/p/:new']);
+  }
+
+  errorCallback(errorData: FirebaseUISignInFailure) {
+    // TODO: React to error.
+    alert(`Sign in error ${errorData.code}`);
+  }
+
+  uiShownCallback() {
+    // TODO: Disable buttons while signing in.
   }
 }

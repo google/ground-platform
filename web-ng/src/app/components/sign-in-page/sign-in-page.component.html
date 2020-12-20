@@ -17,20 +17,20 @@
   <gnd-header-layout></gnd-header-layout>
   <div fxFlex fxLayoutAlign="center center" class="body-container">
     <mat-card class="card">
-      <mat-card-header>
-        <div mat-card-avatar class="logo" alt="Google logo"></div>
-        <mat-card-title class="title">Ground</mat-card-title>
-        <mat-card-subtitle>Sign in</mat-card-subtitle>
-      </mat-card-header>
       <mat-card-content class="content">
-        <p class="welcome">Welcome to Ground!</p>
-        <p class="cta">Please sign in to continue.</p>
-        <p>
-          <button mat-raised-button class="button">
-            <mat-icon class="google-logo" svgIcon="google"></mat-icon>
-            Sign in with Google
-          </button>
-        </p>
+        <div>
+          <!-- TODO(#546): Replace with higher res image. -->
+          <img class="logo" alt="Ground logo" src="/assets/img/logo.png" />
+        </div>
+        <p class="title">Ground</p>
+        <p class="cta">Sign in to continue</p>
+        <div class="buttons">
+          <firebase-ui
+            (signInSuccessWithAuthResult)="successCallback($event)"
+            (signInFailure)="errorCallback($event)"
+            (uiShown)="uiShownCallback()"
+          ></firebase-ui>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>

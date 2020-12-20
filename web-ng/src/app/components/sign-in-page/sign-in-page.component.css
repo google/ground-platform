@@ -22,24 +22,19 @@
 }
 
 .logo {
-  background-image: url(/assets/img/logo.png);
-  width: 48px;
-  height: 48px;
-}
-
-.google-logo {
-  width: 24px;
-  height: 24px;
-  margin-right: 12px;
+  width: 64px;
+  height: 64px;
 }
 
 .title {
   font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 1.8em;
+  font-weight: bold;
 }
 
 .card {
-  width: 400px;
-  height: 400px;
+  width: 420px;
+  height: 460px;
 }
 
 .content {
@@ -47,13 +42,10 @@
   padding: 40px;
 }
 
-.welcome {
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 1.4em;
-  font-weight: bold;
+.buttons {
+  margin-top: 48px;
 }
 
-.button {
-  padding: 10px 18px;
-  margin-top: 36px;
+/deep/ .firebaseui-container {
+  max-width: 240px;
 }
