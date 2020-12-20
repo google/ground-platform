@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-export interface User {
-  id: string;
-  email: string;
-  isAuthenticated: boolean;
-  displayName?: string;
-  photoURL?: string;
+export class User {
+  constructor(
+    readonly id: string,
+    readonly email: string,
+    readonly isAuthenticated: boolean,
+    readonly displayName?: string,
+    readonly photoURL?: string
+  ) {}
 }

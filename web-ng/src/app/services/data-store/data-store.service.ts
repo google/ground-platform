@@ -145,11 +145,7 @@ export class DataStoreService {
     return this.db
       .doc<User>(`users/${uid}`)
       .valueChanges()
-      .pipe(
-        map(user => {
-          return user ? { ...user, isAuthenticated: true } : undefined;
-        })
-      );
+      .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
   features$({ id }: Project): Observable<List<Feature>> {
