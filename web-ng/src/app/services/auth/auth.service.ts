@@ -29,6 +29,7 @@ const ANONYMOUS_USER: User = {
   id: '',
   email: 'nobody',
   displayName: 'Anonymous user',
+  isAuthenticated: false,
 };
 
 @Injectable({
@@ -49,7 +50,9 @@ export class AuthService {
           return of(null);
         }
       }),
-      map(user => user || ANONYMOUS_USER),
+      map(
+        user => (user && { ...user, isAuthenticated: true }) || ANONYMOUS_USER
+      ),
       // Cache last authenticated user so that late subscribers will receive
       // it as well.
       shareReplay(1)

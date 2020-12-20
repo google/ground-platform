@@ -22,13 +22,13 @@ import { catchError, map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
-export class AuthGuardService {
+export class AuthGuard {
   constructor(private router: Router, private authService: AuthService) {}
 
   canActivate(): Observable<boolean> {
     return this.authService.getUser$().pipe(
       map(response => {
-        if (response.uid) {
+        if (response.isAuthenticated) {
           return true;
         }
         return false;
