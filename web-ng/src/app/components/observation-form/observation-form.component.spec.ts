@@ -122,6 +122,7 @@ class MockModel {
   static user001 = {
     id: 'user001',
     email: 'email@gmail.com',
+    isAuthenticated: false,
   };
 
   static observation001 = new Observation(
