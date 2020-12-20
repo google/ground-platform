@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,38 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
-
-@import 'variables';
-@import '~firebaseui/dist/firebaseui.css';
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  font-size: 14px;
+.body-container {
+  background-image: url(/assets/img/happy-land.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100vw;
 }
 
-button label {
-  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+.logo {
+  width: 64px;
+  height: 64px;
 }
 
-/* Space between button icon and label. */
-button .mat-icon + label {
-  padding-left: 6px;
-  cursor: pointer;
+.title {
+  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 1.8em;
+  font-weight: bold;
 }
 
-.mat-menu-item mat-icon {
-  color: mat-color($foreground, icon) !important;
+.card {
+  width: 420px;
+  height: 460px;
+}
+
+.content {
+  text-align: center;
+  padding: 40px;
+}
+
+.buttons {
+  margin-top: 48px;
+}
+
+/deep/ .firebaseui-container {
+  max-width: 240px;
 }

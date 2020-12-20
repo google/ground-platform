@@ -34,6 +34,8 @@
     "@iplab/ngx-file-upload": "^2.0.8",
     "@types/googlemaps": "^3.40.3",
     "firebase": "^8.0.2",
+    "firebaseui": "^4.7.1",
+    "firebaseui-angular": "^5.1.1",
     "hammerjs": "^2.0.8",
     "immutable": "^4.0.0-rc.12",
     "ngx-autosize-input": "^10.0.6",

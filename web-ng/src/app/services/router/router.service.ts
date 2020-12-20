@@ -20,10 +20,6 @@ import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
 
-interface ParamMap {
-  [key: string]: string;
-}
-
 /**
  * Exposes application state in the URL as streams to other services
  * and components, and provides methods for altering said state.
