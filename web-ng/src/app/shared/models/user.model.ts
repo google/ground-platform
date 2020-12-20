@@ -17,7 +17,7 @@
 export interface User {
   id: string;
   email: string;
+  isAuthenticated: boolean;
   displayName?: string;
   photoURL?: string;
-  isAuthenticated?: boolean;
 }

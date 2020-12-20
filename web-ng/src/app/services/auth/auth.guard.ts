@@ -23,6 +23,8 @@ import { catchError, map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AuthGuard {
+  private static readonly SIGN_IN_URL = '/signin';
+
   constructor(private router: Router, private authService: AuthService) {}
 
   canActivate(): Observable<boolean> {
@@ -31,11 +33,11 @@ export class AuthGuard {
         if (response.isAuthenticated) {
           return true;
         }
+        this.router.navigate([AuthGuard.SIGN_IN_URL]);
         return false;
-        // TODO: this.router.navigate(['/signin']);
       }),
       catchError(() => {
-        // TODO: this.router.navigate(['/signin']);
+        this.router.navigate([AuthGuard.SIGN_IN_URL]);
         return of(false);
       })
     );
