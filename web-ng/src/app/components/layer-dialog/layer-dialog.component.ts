@@ -29,7 +29,6 @@ import {
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
-import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
@@ -73,7 +72,6 @@ export class LayerDialogComponent implements OnDestroy {
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private dataStoreService: DataStoreService,
     private router: Router,
     private dialog: MatDialog,
     private layerService: LayerService,
@@ -266,28 +264,6 @@ export class LayerDialogComponent implements OnDestroy {
 
   onMarkerColorChange(event: MarkerColorEvent) {
     this.color = event.color;
-  }
-
-  onDeleteLayer() {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      maxWidth: '500px',
-      data: {
-        title: 'Warning',
-        message:
-          'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe(async dialogResult => {
-      if (dialogResult) {
-        await this.deleteLayer();
-      }
-    });
-  }
-
-  async deleteLayer() {
-    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
-    this.onClose();
   }
 
   private markFormFieldsTouched() {

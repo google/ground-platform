@@ -16,31 +16,6 @@
 
 @import 'variables';
 
-.header {
-  padding: 16px;
-  white-space: nowrap;
-}
-
-.header div,
-img,
-.header span,
-mat-icon {
-  vertical-align: middle;
-}
-
-.logo {
-  width: 48px;
-  height: 48px;
-  margin-left: 4px;
-}
-
-.app-title {
-  margin-left: 12px;
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 14pt;
-  color: mat-color($foreground, secondary-text);
-}
-
 .header-divider {
   display: inline-block;
   border-left: 1px solid mat-color($foreground, divider);

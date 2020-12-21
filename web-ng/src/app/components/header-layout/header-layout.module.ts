@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-@import 'variables';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { HeaderLayoutComponent } from './header-layout.component';
 
-/*
-  Workaround to eliminate double-padding between right-hand side overflow
-  menu control and list item.
-*/
-:host ::ng-deep .mat-list-item-content {
-  padding-right: 8px !important;
-}
-
-.layer-icon {
-  vertical-align: middle;
-  padding-right: 5px;
-}
-
-.download {
-  color: mat-color($foreground, text) !important;
-  text-decoration: none;
-}
+@NgModule({
+  declarations: [HeaderLayoutComponent],
+  imports: [CommonModule, FlexLayoutModule],
+  exports: [HeaderLayoutComponent],
+})
+export class HeaderLayoutModule {}

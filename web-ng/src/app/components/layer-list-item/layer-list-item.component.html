@@ -15,8 +15,15 @@ limitations under the License.
 -->
 
 <mat-list-item>
-  <img matListAvatar [src]="layerPinUrl" />
   <h3 matLine>
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Layer icon"
+      [ngStyle]="{ color: layer?.color }"
+      class="layer-icon"
+    >
+      layers
+    </mat-icon>
     {{ layer?.name?.get(lang) }}
   </h3>
   <div [ngSwitch]="actionsType">
@@ -39,7 +46,7 @@ limitations under the License.
             <span>Download CSV</span>
           </button>
         </a>
-        <button mat-menu-item (click)="onDeleteFeature()">
+        <button mat-menu-item (click)="onDeleteLayer()">
           <mat-icon>delete_forever</mat-icon>
           <span>Delete</span>
         </button>

@@ -13,10 +13,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div fxLayout="row" class="header" fxLayoutAlign="flex-self center">
-  <div fxFlex>
-    <img class="logo" src="/assets/img/logo.png" />
-    <span class="app-title">Ground</span>
+<gnd-header-layout>
+  <span left>
     <span class="header-divider"></span>
     <inline-editor
       [data]="title"
@@ -24,8 +22,8 @@
       (focusOut)="updateProjectTitle($event)"
       class="inline-editor"
     ></inline-editor>
-  </div>
-  <div>
+  </span>
+  <div right>
     <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
       <button mat-flat-button color="primary" (click)="openShareDialog($event)">
         <mat-icon>people_alt</mat-icon>
@@ -56,4 +54,4 @@
       </button>
     </ng-template>
   </div>
-</div>
+</gnd-header-layout>

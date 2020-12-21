@@ -17,11 +17,18 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { MainPageContainerComponent } from './components/main-page-container/main-page-container.component';
+import { AuthGuard } from './services/auth/auth.guard';
+import { SignInPageComponent } from './components/sign-in-page/sign-in-page.component';
 
 const routes: Routes = [
   {
+    path: 'signin',
+    component: SignInPageComponent,
+  },
+  {
     path: 'p/:projectId',
     component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
   },
 ];
 const config = RouterModule.forRoot(routes, {

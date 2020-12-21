@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { ShareDialogComponent } from './share-dialog.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatSelectModule } from '@angular/material/select';
-import { MatListModule } from '@angular/material/list';
+import { HeaderLayoutModule } from '../header-layout/header-layout.module';
+import { FirebaseUIModule } from 'firebaseui-angular';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { NgModule } from '@angular/core';
+import { SignInPageComponent } from './sign-in-page.component';
 
 @NgModule({
-  declarations: [ShareDialogComponent],
+  declarations: [SignInPageComponent],
   imports: [
+    BrowserModule,
     CommonModule,
+    FirebaseUIModule,
+    HeaderLayoutModule,
     FlexLayoutModule,
     MatButtonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatListModule,
-    MatSelectModule,
-    FormsModule,
-    ReactiveFormsModule,
+    MatCardModule,
+    MatIconModule,
   ],
+  exports: [SignInPageComponent],
 })
-export class ShareDialogModule {}
+export class SignInPageModule {}

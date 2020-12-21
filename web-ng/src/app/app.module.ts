@@ -33,6 +33,17 @@ import { UserProfilePopupModule } from './components/user-profile-popup/user-pro
 import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
 import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
 import { HttpClientModule } from '@angular/common/http';
+import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
+
+const firebaseUiAuthConfig: firebaseui.auth.Config = {
+  // Popup is required to prevent some browsers and Chrome incognito for getting
+  // blocked due to unsupported 3rd party cookies.
+  signInFlow: 'popup',
+  // For now we only use Google for auth.
+  signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+  // Required to enable one-tap sign-up credential helper.
+  credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
+};
 
 @NgModule({
   declarations: [AppComponent],
@@ -53,6 +64,7 @@ import { HttpClientModule } from '@angular/common/http';
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
+    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     HttpClientModule,
     MainPageContainerModule,
     ProjectHeaderModule,
