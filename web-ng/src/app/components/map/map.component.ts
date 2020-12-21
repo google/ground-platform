@@ -67,6 +67,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     draggableCursor: '',
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
+  getFeatureId$: Observable<string | null>;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -78,6 +79,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
+    this.getFeatureId$ = this.navigationService.getFeatureId$();
   }
 
   ngAfterViewInit() {
@@ -85,8 +87,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       combineLatest([
         this.activeProject$,
         this.features$,
-      ]).subscribe(([project, features]) =>
-        this.onProjectAndFeaturesUpdate(project, features)
+        this.getFeatureId$,
+      ]).subscribe(([project, features, selectedFeatureId]) =>
+        this.onProjectAndFeaturesUpdate(project, features, selectedFeatureId)
       )
     );
 
@@ -130,10 +133,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onProjectAndFeaturesUpdate(
     project: Project,
-    features: List<Feature>
+    features: List<Feature>,
+    selectedFeatureId: string | null
   ): void {
     this.removeMarkersAndGeoJsonsOnMap(features);
-    this.addMarkersAndGeoJsonsToMap(project, features);
+    this.addMarkersAndGeoJsonsToMap(project, features, selectedFeatureId);
     this.updateStylingFunctionForAllGeoJsons(project);
   }
 
@@ -162,7 +166,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private addMarkersAndGeoJsonsToMap(
     project: Project,
-    features: List<Feature>
+    features: List<Feature>,
+    selectedFeatureId: string | null
   ) {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
@@ -173,7 +178,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     features.forEach(feature => {
       if (feature instanceof LocationFeature) {
         if (!locationFeatureIds.includes(feature.id)) {
-          this.addMarkerToMap(project, feature);
+          this.addMarkerToMap(project, feature, selectedFeatureId);
         }
       }
       if (feature instanceof GeoJsonFeature) {
@@ -184,7 +189,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private addMarkerToMap(project: Project, feature: LocationFeature) {
+  private addMarkerToMap(
+    project: Project,
+    feature: LocationFeature,
+    selectedFeatureId: string | null
+  ) {
     const color = project.layers.get(feature.layerId)?.color;
     const icon = {
       url: getPinImageSource(color),
@@ -223,6 +232,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.selectMarker(marker);
     }
     this.markers.push(marker);
+    if (selectedFeatureId === feature.id) {
+      this.selectMarker(marker);
+    }
   }
 
   private panAndZoom(position: google.maps.LatLng) {
