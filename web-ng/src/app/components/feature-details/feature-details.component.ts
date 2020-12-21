@@ -32,13 +32,12 @@ import { Subscription } from 'rxjs';
 })
 export class FeatureDetailsComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
-  @Input() actionsType: LayerListItemActionsType =
-    LayerListItemActionsType.MENU;
+  @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   projectId?: string | null;
   featureId?: string | null;
   layerPinUrl: SafeUrl;
   readonly lang: string;
-  readonly layerListItemActionsType = LayerListItemActionsType;
+  readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
 
   constructor(
@@ -120,7 +119,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
   }
 }
 
-export enum LayerListItemActionsType {
+export enum FeatureHeaderActionType {
   MENU = 1,
   BACK = 2,
 }

@@ -20,7 +20,7 @@ limitations under the License.
     {{ layer?.name?.get(lang) }}
   </h3>
   <div [ngSwitch]="actionsType">
-    <div *ngSwitchCase="layerListItemActionsType.MENU">
+    <div *ngSwitchCase="featureHeaderActionType.MENU">
       <button mat-icon-button [matMenuTriggerFor]="layerMenu">
         <mat-icon>more_vert</mat-icon>
       </button>
@@ -31,7 +31,7 @@ limitations under the License.
         </button>
       </mat-menu>
     </div>
-    <div *ngSwitchCase="layerListItemActionsType.BACK">
+    <div *ngSwitchCase="featureHeaderActionType.BACK">
       <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
         <mat-icon>close</mat-icon>
       </button>
