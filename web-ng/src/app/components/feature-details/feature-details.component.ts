@@ -35,7 +35,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
   @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   projectId?: string | null;
   featureId?: string | null;
-  layerPinUrl: SafeUrl;
+  pinUrl: SafeUrl;
   readonly lang: string;
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
@@ -50,11 +50,11 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
   }
 
   ngOnInit() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+    this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
     this.subscription.add(
@@ -70,7 +70,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
   }
 
   ngOnChanges() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+    this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
   }
