@@ -24,12 +24,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { NavigationService } from '../../services/router/router.service';
+import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
 
-import { FeatureDetailsComponent } from './feature-details.component';
-
-describe('FeatureDetailsComponent', () => {
-  let component: FeatureDetailsComponent;
-  let fixture: ComponentFixture<FeatureDetailsComponent>;
+describe('FeaturePanelHeaderComponent', () => {
+  let component: FeaturePanelHeaderComponent;
+  let fixture: ComponentFixture<FeaturePanelHeaderComponent>;
 
   beforeEach(async () => {
     const navigationService = {
@@ -37,7 +36,7 @@ describe('FeatureDetailsComponent', () => {
       getFeatureId$: () => of(''),
     };
     await TestBed.configureTestingModule({
-      declarations: [FeatureDetailsComponent],
+      declarations: [FeaturePanelHeaderComponent],
       imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
       providers: [
         { provide: Router, useValue: {} },
@@ -49,7 +48,7 @@ describe('FeatureDetailsComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FeatureDetailsComponent);
+    fixture = TestBed.createComponent(FeaturePanelHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

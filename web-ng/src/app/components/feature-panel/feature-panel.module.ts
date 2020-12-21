@@ -24,7 +24,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
-import { FeatureDetailsModule } from '../feature-details/feature-details.module';
+import { FeaturePanelHeaderModule } from '../feature-panel-header/feature-panel-header.module';
 
 @NgModule({
   imports: [
@@ -35,7 +35,7 @@ import { FeatureDetailsModule } from '../feature-details/feature-details.module'
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
-    FeatureDetailsModule,
+    FeaturePanelHeaderModule,
   ],
   exports: [FeaturePanelComponent],
   declarations: [FeaturePanelComponent],

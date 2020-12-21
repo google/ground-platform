@@ -25,7 +25,7 @@ import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/router/router.service';
-import { FeatureHeaderActionType } from '../feature-details/feature-details.component';
+import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
 
 // TODO: Rename "FeatureDetailsComponent".
 @Component({

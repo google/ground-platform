@@ -22,10 +22,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatDialogModule } from '@angular/material/dialog';
-import { FeatureDetailsComponent } from './feature-details.component';
+import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
 
 @NgModule({
-  declarations: [FeatureDetailsComponent],
+  declarations: [FeaturePanelHeaderComponent],
   imports: [
     BrowserModule,
     MatListModule,
@@ -36,6 +36,6 @@ import { FeatureDetailsComponent } from './feature-details.component';
     MatMenuModule,
     MatDialogModule,
   ],
-  exports: [FeatureDetailsComponent],
+  exports: [FeaturePanelHeaderComponent],
 })
-export class FeatureDetailsModule {}
+export class FeaturePanelHeaderModule {}

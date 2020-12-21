@@ -22,15 +22,15 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/router/router.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'ground-feature-details',
-  templateUrl: './feature-details.component.html',
-  styleUrls: ['./feature-details.component.scss'],
+  selector: 'ground-feature-panel-header',
+  templateUrl: './feature-panel-header.component.html',
+  styleUrls: ['./feature-panel-header.component.scss'],
 })
-export class FeatureDetailsComponent implements OnInit, OnDestroy {
+export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
   @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   projectId?: string | null;
