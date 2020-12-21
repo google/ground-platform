@@ -79,7 +79,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     this.navigationService.setFeatureId(null);
   }
 
-  onDeleteFeature() {
+  onDeleteFeatureClick() {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
