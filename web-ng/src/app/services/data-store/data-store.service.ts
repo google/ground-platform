@@ -78,12 +78,37 @@ export class DataStoreService {
 
   async deleteLayer(projectId: string, layerId: string) {
     await this.deleteAllFeaturesInLayer(projectId, layerId);
+    await this.deleteAllObservationsInLayer(projectId, layerId);
     return await this.db
       .collection('projects')
       .doc(projectId)
       .update({
         [`layers.${layerId}`]: firebase.firestore.FieldValue.delete(),
       });
+  }
+
+  private async deleteAllObservationsInLayer(
+    projectId: string,
+    layerId: string
+  ) {
+    const observations = this.db.collection(
+      `projects/${projectId}/observations`,
+      ref => ref.where('layerId', '==', layerId)
+    );
+    const querySnapshot = await observations.get().toPromise();
+    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+  }
+
+  private async deleteAllObservationsInFeature(
+    projectId: string,
+    featureId: string
+  ) {
+    const observations = this.db.collection(
+      `projects/${projectId}/observations`,
+      ref => ref.where('featureId', '==', featureId)
+    );
+    const querySnapshot = await observations.get().toPromise();
+    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
   private async deleteAllFeaturesInLayer(projectId: string, layerId: string) {
@@ -96,6 +121,7 @@ export class DataStoreService {
   }
 
   async deleteFeature(projectId: string, featureId: string) {
+    await this.deleteAllObservationsInFeature(projectId, featureId);
     return await this.db
       .collection('projects')
       .doc(projectId)
