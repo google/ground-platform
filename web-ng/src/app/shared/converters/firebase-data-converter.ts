@@ -440,6 +440,19 @@ export class FirebaseDataConverter {
     };
   }
 
+  static toUser(data: DocumentData): User | undefined {
+    if (!data) {
+      return;
+    }
+    return new User(
+      data.id,
+      data.email,
+      data.isAuthenticated || true,
+      data.displayName,
+      data.photoURL
+    );
+  }
+
   private static responsesToJS(responses: Map<string, Response>): {} {
     return responses.entrySeq().reduce(
       (obj: {}, [fieldId, response]) => ({

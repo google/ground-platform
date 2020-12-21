@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
+import { Component, OnInit } from '@angular/core';
 
-@import 'variables';
-@import '~firebaseui/dist/firebaseui.css';
+@Component({
+  selector: 'gnd-header-layout',
+  templateUrl: './header-layout.component.html',
+  styleUrls: ['./header-layout.component.scss'],
+})
+export class HeaderLayoutComponent implements OnInit {
+  constructor() {}
 
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  font-size: 14px;
-}
-
-button label {
-  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
-}
-
-/* Space between button icon and label. */
-button .mat-icon + label {
-  padding-left: 6px;
-  cursor: pointer;
-}
-
-.mat-menu-item mat-icon {
-  color: mat-color($foreground, icon) !important;
+  ngOnInit(): void {}
 }
