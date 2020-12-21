@@ -21,10 +21,10 @@ limitations under the License.
   </h3>
   <div [ngSwitch]="actionsType">
     <div *ngSwitchCase="featureHeaderActionType.MENU">
-      <button mat-icon-button [matMenuTriggerFor]="layerMenu">
+      <button mat-icon-button [matMenuTriggerFor]="featureMenu">
         <mat-icon>more_vert</mat-icon>
       </button>
-      <mat-menu #layerMenu="matMenu">
+      <mat-menu #featureMenu="matMenu">
         <button mat-menu-item (click)="onDeleteFeature()">
           <mat-icon>delete_forever</mat-icon>
           <span>Delete</span>
