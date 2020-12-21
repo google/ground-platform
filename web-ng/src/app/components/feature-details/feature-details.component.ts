@@ -75,7 +75,7 @@ export class FeatureDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
-  onGoBackClick() {
+  onCloseClick() {
     this.navigationService.setFeatureId(null);
   }
 
