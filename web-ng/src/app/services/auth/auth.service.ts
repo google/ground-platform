@@ -29,6 +29,7 @@ const ANONYMOUS_USER: User = {
   id: '',
   email: 'nobody',
   displayName: 'Anonymous user',
+  isAuthenticated: false,
 };
 
 @Injectable({

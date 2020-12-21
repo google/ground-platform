@@ -168,7 +168,10 @@ export class DataStoreService {
    * @param uid the unique id used to represent the user in the data store.
    */
   user$(uid: string): Observable<User | undefined> {
-    return this.db.doc<User>(`users/${uid}`).valueChanges();
+    return this.db
+      .doc<User>(`users/${uid}`)
+      .valueChanges()
+      .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
   features$({ id }: Project): Observable<List<Feature>> {
