@@ -18,10 +18,10 @@ limitations under the License.
     TODO: create separate component for layer as a header instead of 
     using LayerListItem here.
   -->
-  <app-feature-details
+  <ground-feature-details
     [layer]="layer"
-    [actionsType]="layerListItemActionsType.MENU"
-  ></app-feature-details>
+    [actionsType]="featureHeaderActionType.BACK"
+  ></ground-feature-details>
 </mat-list>
 <div *ngIf="layer$ | async as layer">
   <button

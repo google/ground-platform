@@ -25,7 +25,7 @@ import { Component } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/router/router.service';
-import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
+import { FeatureHeaderActionType } from '../feature-details/feature-details.component';
 
 // TODO: Rename "FeatureDetailsComponent".
 @Component({
@@ -38,7 +38,7 @@ export class FeaturePanelComponent {
   readonly layer$: Observable<Layer>;
   readonly lang: string;
   readonly fieldTypes = FieldType;
-  readonly layerListItemActionsType = LayerListItemActionsType;
+  readonly featureHeaderActionType = FeatureHeaderActionType;
 
   constructor(
     private navigationService: NavigationService,
