@@ -18,13 +18,19 @@ limitations under the License.
     TODO: create separate component for layer as a header instead of 
     using LayerListItem here.
   -->
-  <ground-layer-list-item
+  <ground-feature-panel-header
     [layer]="layer"
-    [actionsType]="layerListItemActionsType.BACK"
-  ></ground-layer-list-item>
+    [actionsType]="featureHeaderActionType.BACK"
+  ></ground-feature-panel-header>
 </mat-list>
 <div *ngIf="layer$ | async as layer">
-  <button *ngIf="!layer.forms?.isEmpty()" color="primary" class="add-observation-btn" mat-raised-button (click)="onAddObservationClick()">
+  <button
+    *ngIf="!layer.forms?.isEmpty()"
+    color="primary"
+    class="add-observation-btn"
+    mat-raised-button
+    (click)="onAddObservationClick()"
+  >
     + Add observation
   </button>
 </div>

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
+import { Component, Input, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -23,41 +22,39 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from './../../services/router/router.service';
-import { environment } from '../../../environments/environment';
+import { NavigationService } from '../../services/router/router.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'ground-layer-list-item',
-  templateUrl: './layer-list-item.component.html',
-  styleUrls: ['./layer-list-item.component.scss'],
+  selector: 'ground-feature-panel-header',
+  templateUrl: './feature-panel-header.component.html',
+  styleUrls: ['./feature-panel-header.component.scss'],
 })
-export class LayerListItemComponent implements OnInit, OnDestroy {
+export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
-  @Input() actionsType: LayerListItemActionsType =
-    LayerListItemActionsType.MENU;
+  @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   projectId?: string | null;
   featureId?: string | null;
-  layerPinUrl: SafeUrl;
+  pinUrl: SafeUrl;
   readonly lang: string;
-  readonly layerListItemActionsType = LayerListItemActionsType;
+  readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
 
   constructor(
     private sanitizer: DomSanitizer,
     private confirmationDialog: MatDialog,
-    private importDialog: MatDialog,
     private router: Router,
     private dataStoreService: DataStoreService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private zone: NgZone
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
   }
 
   ngOnInit() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+    this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
     this.subscription.add(
@@ -73,22 +70,16 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   ngOnChanges() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+    this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
   }
 
-  onCustomizeLayer() {
-    if (this.layer?.id) {
-      this.navigationService.setLayerId(this.layer?.id);
-    }
-  }
-
-  onGoBackClick() {
+  onCloseClick() {
     this.navigationService.setFeatureId(null);
   }
 
-  onDeleteLayer() {
+  onDeleteFeatureClick() {
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
@@ -96,43 +87,31 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
         data: {
           title: 'Warning',
           message:
-            'Are you sure you wish to delete this layer? Any associated data including all features and observations in this layer will be lost. This cannot be undone.',
+            'Are you sure you wish to delete this feature? Any associated data including all observations in this feature will be lost. This cannot be undone.',
         },
       }
     );
 
     dialogRef.afterClosed().subscribe(async dialogResult => {
       if (dialogResult) {
-        await this.deleteLayer();
+        await this.deleteFeature();
       }
     });
   }
 
-  async deleteLayer() {
-    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
+  async deleteFeature() {
+    if (!this.projectId || !this.featureId) {
+      return;
+    }
+    await this.dataStoreService.deleteFeature(this.projectId, this.featureId);
     this.onClose();
   }
 
   onClose() {
-    return this.router.navigate([`p/${this.projectId}`]);
-  }
-
-  onImportCsv() {
-    if (!this.projectId || !this.layer?.id) {
-      return;
-    }
-    this.importDialog.open(ImportDialogComponent, {
-      data: { projectId: this.projectId, layerId: this.layer?.id },
-      maxWidth: '500px',
-      maxHeight: '800px',
+    // ng zone is run to fix navigation triggered outside Angular zone warning.
+    this.zone.run(() => {
+      this.router.navigate([`p/${this.projectId}`]);
     });
-  }
-
-  getDownloadCsvUrl() {
-    return (
-      `${environment.cloudFunctionsUrl}/exportCsv?` +
-      `project=${this.projectId}&layer=${this.layer?.id}`
-    );
   }
 
   ngOnDestroy(): void {
@@ -140,7 +119,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 }
 
-export enum LayerListItemActionsType {
+export enum FeatureHeaderActionType {
   MENU = 1,
   BACK = 2,
 }
