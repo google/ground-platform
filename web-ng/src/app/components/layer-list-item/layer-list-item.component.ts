@@ -96,7 +96,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
         data: {
           title: 'Warning',
           message:
-            'Are you sure you wish to delete this layer? Any associated data including all features in this layer will be lost. This cannot be undone.',
+            'Are you sure you wish to delete this layer? Any associated data including all features and observations in this layer will be lost. This cannot be undone.',
         },
       }
     );
