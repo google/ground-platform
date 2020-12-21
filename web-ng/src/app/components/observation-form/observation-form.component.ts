@@ -247,9 +247,8 @@ export class ObservationFormComponent {
     field: Field,
     response?: Response
   ): void {
-    const selectedOptionId = ((response?.value as List<
-      Option
-    >)?.first() as Option)?.id;
+    const selectedOptionId = ((response?.value as List<Option>)?.first() as Option)
+      ?.id;
     group[field.id] = field.required
       ? new FormControl(selectedOptionId, Validators.required)
       : new FormControl(selectedOptionId);

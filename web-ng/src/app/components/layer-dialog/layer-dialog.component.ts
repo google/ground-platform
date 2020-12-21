@@ -61,9 +61,8 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
   color!: string;
   form?: Form;
-  @ViewChildren(FormFieldEditorComponent) formFieldEditors?: QueryList<
-    FormFieldEditorComponent
-  >;
+  @ViewChildren(FormFieldEditorComponent)
+  formFieldEditors?: QueryList<FormFieldEditorComponent>;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)

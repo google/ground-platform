@@ -101,30 +101,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  onProjectAndFeaturesUpdate(project: Project, features: List<Feature>) {
-    this.clearMap();
-    this.addMarkersAndGeoJsonsToMap(project, features);
-    this.updateStylingFunctionForAllGeoJsons(project);
-  }
-
-  onEditModeChange(editMode: EditMode) {
-    if (editMode !== EditMode.None) {
-      this.selectMarker(undefined);
-      this.navigationService.setFeatureId(null);
-      for (const marker of this.markers) {
-        marker.setClickable(false);
-      }
-    } else {
-      for (const marker of this.markers) {
-        marker.setClickable(true);
-      }
-    }
-    this.mapOptions =
-      editMode === EditMode.AddPoint
-        ? this.crosshairCursorMapOptions
-        : this.defaultCursorMapOptions;
-  }
-
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
     this.selectMarker(undefined);
     this.navigationService.setFeatureId(null);
@@ -150,41 +126,60 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private clearMap() {
-    this.deleteMarkers();
-    this.clearGoogleMapDataLayer();
+  private onProjectAndFeaturesUpdate(
+    project: Project,
+    features: List<Feature>
+  ): void {
+    this.removeMarkersAndGeoJsonsOnMap(features);
+    this.addMarkersAndGeoJsonsToMap(project, features);
+    this.updateStylingFunctionForAllGeoJsons(project);
   }
 
-  private deleteMarkers() {
-    for (const marker of this.markers) {
-      marker.setMap(null);
+  private removeMarkersAndGeoJsonsOnMap(features: List<Feature>) {
+    const newFeatureIds: List<string> = features.map(f => f.id);
+    this.removeMarkersOnMap(newFeatureIds);
+    this.removeGeoJsonsOnMap(newFeatureIds);
+  }
+
+  private removeMarkersOnMap(newFeatureIds: List<string>) {
+    for (let i = this.markers.length - 1; i >= 0; i--) {
+      if (!newFeatureIds.contains(this.markers[i].getTitle()!)) {
+        this.markers[i].setMap(null);
+        this.markers.splice(i, 1);
+      }
     }
-    this.markers = [];
   }
 
-  private clearGoogleMapDataLayer() {
-    this.map.data.forEach(f => this.map.data.remove(f));
+  private removeGeoJsonsOnMap(newFeatureIds: List<string>) {
+    this.map.data.forEach(f => {
+      if (!newFeatureIds.contains(f.getProperty('featureId'))) {
+        this.map.data.remove(f);
+      }
+    });
   }
 
   private addMarkersAndGeoJsonsToMap(
     project: Project,
     features: List<Feature>
   ) {
+    const locationFeatureIds = this.markers.map(m => m.getTitle());
+    const geoJsonFeatureIds: String[] = [];
+    this.map.data.forEach(f => {
+      geoJsonFeatureIds.push(f.getProperty('featureId'));
+    });
+
     features.forEach(feature => {
       if (feature instanceof LocationFeature) {
-        this.addMarkerToMap(project, feature);
+        if (!locationFeatureIds.includes(feature.id)) {
+          this.addMarkerToMap(project, feature);
+        }
       }
       if (feature instanceof GeoJsonFeature) {
-        this.addGeoJsonToMap(feature);
+        if (!geoJsonFeatureIds.includes(feature.id)) {
+          this.addGeoJsonToMap(feature);
+        }
       }
     });
-  }
-
-  private panAndZoom(position: google.maps.LatLng) {
-    this.map.panTo(position);
-    if (this.map.getZoom() < zoomedInLevel) {
-      this.map.zoom = zoomedInLevel;
-    }
   }
 
   private addMarkerToMap(project: Project, feature: LocationFeature) {
@@ -226,6 +221,31 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markers.push(marker);
   }
 
+  private panAndZoom(position: google.maps.LatLng) {
+    this.map.panTo(position);
+    if (this.map.getZoom() < zoomedInLevel) {
+      this.map.zoom = zoomedInLevel;
+    }
+  }
+
+  private onEditModeChange(editMode: EditMode) {
+    if (editMode !== EditMode.None) {
+      this.selectMarker(undefined);
+      this.navigationService.setFeatureId(null);
+      for (const marker of this.markers) {
+        marker.setClickable(false);
+      }
+    } else {
+      for (const marker of this.markers) {
+        marker.setClickable(true);
+      }
+    }
+    this.mapOptions =
+      editMode === EditMode.AddPoint
+        ? this.crosshairCursorMapOptions
+        : this.defaultCursorMapOptions;
+  }
+
   private selectMarker(marker: google.maps.Marker | undefined) {
     if (marker === this.selectedMarker) {
       return;
@@ -257,6 +277,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const addedFeatures = this.map.data.addGeoJson(feature.geoJson);
     // Set property 'layerId' so that it knows what color to render later.
     addedFeatures.forEach(f => {
+      f.setProperty('featureId', feature.id);
       f.setProperty('layerId', feature.layerId);
     });
   }
