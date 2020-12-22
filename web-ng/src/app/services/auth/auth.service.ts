@@ -24,6 +24,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { shareReplay } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -31,7 +32,6 @@ const ANONYMOUS_USER: User = {
   displayName: 'Anonymous user',
   isAuthenticated: false,
 };
-
 @Injectable({
   providedIn: 'root',
 })
@@ -46,11 +46,19 @@ export class AuthService {
       switchMap(user => {
         if (user) {
           return dataStore.user$(user.uid);
+        } else if (environment.useEmulators) {
+          return of({ ...ANONYMOUS_USER, isAuthenticated: true });
         } else {
           return of(null);
         }
       }),
-      map(user => user || ANONYMOUS_USER),
+      map(
+        user =>
+          user || {
+            ...ANONYMOUS_USER,
+            isAuthenticated: environment.useEmulators,
+          }
+      ),
       // Cache last authenticated user so that late subscribers will receive
       // it as well.
       shareReplay(1)
