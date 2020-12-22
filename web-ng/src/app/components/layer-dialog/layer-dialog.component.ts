@@ -111,7 +111,7 @@ export class LayerDialogComponent implements OnDestroy {
       data: {
         title: 'Warning',
         message:
-          'Are you sure you wish to delete this field? Any associated data will be lost. This cannot be undone.',
+          'Are you sure you wish to delete this question? Any associated data will be lost. This cannot be undone.',
       },
     });
 

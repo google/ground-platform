@@ -19,18 +19,35 @@ import {
   FirebaseUISignInFailure,
   FirebaseUISignInSuccessWithAuthResult,
 } from 'firebaseui-angular';
+import { OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { User } from './../../shared/models/user.model';
+import { Observable } from 'rxjs';
+import { AuthService } from './../../services/auth/auth.service';
+
+const DEFAULT_ROUTE = ['/p/:new'];
 
 @Component({
   templateUrl: './sign-in-page.component.html',
   styleUrls: ['./sign-in-page.component.css'],
 })
-export class SignInPageComponent {
-  constructor(private router: Router) {}
+export class SignInPageComponent implements OnInit {
+  constructor(private router: Router, private authService: AuthService) {}
+
+  async ngOnInit() {
+    const isAuth = await this.authService.isAuthenticated();
+    if (isAuth) {
+      this.router.navigate(DEFAULT_ROUTE);
+    }
+  }
+
+  getUser$(): Observable<User> {
+    return this.authService.getUser$();
+  }
 
   successCallback(signInSuccessData: FirebaseUISignInSuccessWithAuthResult) {
     // TODO(#545): Redirect to original URL on success.
-    this.router.navigate(['/p/:new']);
+    this.router.navigate(DEFAULT_ROUTE);
   }
 
   errorCallback(errorData: FirebaseUISignInFailure) {
