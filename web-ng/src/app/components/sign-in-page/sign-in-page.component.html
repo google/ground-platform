@@ -23,7 +23,7 @@
           <img class="logo" alt="Ground logo" src="/assets/img/logo.png" />
         </div>
         <p class="title">Ground</p>
-        <p class="cta">Sign in to continue</p>
+        <p class="cta" *ngIf="getUser$() | async">Sign in to continue</p>
         <div class="buttons">
           <firebase-ui
             (signInSuccessWithAuthResult)="successCallback($event)"
