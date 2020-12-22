@@ -79,7 +79,7 @@ async function exportCsv(req, res) {
   features.forEach((feature) => {
     const featureId = feature.id;
     const location = feature.get("location") || {};
-    (observationsByFeature[featureId] || []).forEach((observation) => {
+    (observationsByFeature[featureId] || [{}]).forEach((observation) => {
       const row = [];
       row.push(feature.get("id") || "");
       row.push(feature.get("caption") || "");
