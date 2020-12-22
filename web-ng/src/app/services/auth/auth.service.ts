@@ -69,6 +69,10 @@ export class AuthService {
     return this.user$;
   }
 
+  async isAuthenticated(): Promise<boolean> {
+    return !!this.afAuth.currentUser;
+  }
+
   async signIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
     await this.afAuth.signInWithPopup(provider);
