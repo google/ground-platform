@@ -61,8 +61,8 @@ export class AuthService {
     return this.user$;
   }
 
-  async isAuthenticated(): Promise<boolean> {
-    return !!this.afAuth.currentUser;
+  isAuthenticated(): boolean {
+    return !!firebase.auth().currentUser;
   }
 
   async signIn() {
