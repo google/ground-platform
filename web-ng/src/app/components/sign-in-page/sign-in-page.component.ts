@@ -34,10 +34,10 @@ export class SignInPageComponent implements OnInit, OnDestroy {
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit() {
-    console.log(this.authService.isAuthenticated());
     this.subscription.add(
       // TODO(#545): Redirect to original URL on success.
-      this.isAuthenticated$()
+      this.authService
+        .isAuthenticated$()
         .pipe(filter(isAuth => isAuth))
         .subscribe(() => this.router.navigate(DEFAULT_ROUTE))
     );
@@ -48,7 +48,7 @@ export class SignInPageComponent implements OnInit, OnDestroy {
   }
 
   isAuthenticated$(): Observable<boolean> {
-    return this.authService.getUser$().pipe(map(user => user.isAuthenticated));
+    return this.authService.isAuthenticated$();
   }
 
   errorCallback(errorData: FirebaseUISignInFailure) {

@@ -61,8 +61,8 @@ export class AuthService {
     return this.user$;
   }
 
-  isAuthenticated(): boolean {
-    return !!firebase.auth().currentUser;
+  isAuthenticated$(): Observable<boolean> {
+    return this.getUser$().pipe(map(user => user.isAuthenticated));
   }
 
   async signIn() {
