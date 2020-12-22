@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import { AngularFireAuth } from '@angular/fire/auth';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 
 const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;
 
@@ -29,17 +29,32 @@ export interface ImportCsvResponse {
   providedIn: 'root',
 })
 export class DataImportService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(
+    private httpClient: HttpClient,
+    private afAuth: AngularFireAuth
+  ) {}
 
-  importCsv(
+  async importCsv(
     projectId: string,
     layerId: string,
     file: File
-  ): Observable<ImportCsvResponse> {
+  ): Promise<ImportCsvResponse> {
+    // https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients
+    const user = await this.afAuth.currentUser;
+    const idToken = await user!.getIdToken(/* forceRefresh */ true);
+    // https://cloud.google.com/functions/docs/securing/authenticating#firebase_authentication
+    const headers = {
+      Authorization: `Bearer ${idToken}`,
+    };
+
     const formData = new FormData();
     formData.set('project', projectId);
     formData.set('layer', layerId);
     formData.append('file', file);
-    return this.httpClient.post<ImportCsvResponse>(IMPORT_CSV_URL, formData);
+    // TODO: When run on protected importCsv returns 401 with response header:
+    // www-authenticate: Bearer error="invalid_token" error_description="The access token could not be verified"
+    return this.httpClient
+      .post<ImportCsvResponse>(IMPORT_CSV_URL, formData, { headers })
+      .toPromise();
   }
 }
