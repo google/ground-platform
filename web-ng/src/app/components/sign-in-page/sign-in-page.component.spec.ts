@@ -29,7 +29,10 @@ describe('SignInPageComponent', () => {
       declarations: [SignInPageComponent],
       providers: [
         { provide: Router, useValue: {} },
-        { provide: AuthService, useValue: { getUser$: () => NEVER } },
+        {
+          provide: AuthService,
+          useValue: { getUser$: () => NEVER, isAuthenticated: () => false },
+        },
       ],
     }).compileComponents();
   });
