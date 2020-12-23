@@ -18,6 +18,7 @@ import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -30,6 +31,9 @@ export class AuthGuard {
   canActivate(): Observable<boolean> {
     return this.authService.getUser$().pipe(
       map(response => {
+        if (environment.useEmulators) {
+          return true;
+        }
         if (response.isAuthenticated) {
           return true;
         }
