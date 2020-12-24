@@ -19,11 +19,13 @@ import { Routes, RouterModule } from '@angular/router';
 import { MainPageContainerComponent } from './components/main-page-container/main-page-container.component';
 import { AuthGuard } from './services/auth/auth.guard';
 import { SignInPageComponent } from './components/sign-in-page/sign-in-page.component';
+import { UnauthGuard } from './services/auth/unauth.guard';
 
 const routes: Routes = [
   {
     path: 'signin',
     component: SignInPageComponent,
+    canActivate: [UnauthGuard],
   },
   {
     path: 'p/:projectId',
