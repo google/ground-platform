@@ -24,6 +24,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { shareReplay } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -62,7 +63,9 @@ export class AuthService {
   }
 
   isAuthenticated$(): Observable<boolean> {
-    return this.getUser$().pipe(map(user => user.isAuthenticated));
+    return this.getUser$().pipe(
+      map(user => user.isAuthenticated || environment.useEmulators)
+    );
   }
 
   async signIn() {

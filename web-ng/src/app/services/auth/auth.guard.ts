@@ -24,7 +24,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class AuthGuard {
-  private static readonly SIGN_IN_URL = '/signin';
+  static readonly SIGN_IN_URL = '/signin';
 
   constructor(private router: Router, private authService: AuthService) {}
 
