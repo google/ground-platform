@@ -24,8 +24,6 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class AuthGuard {
-  static readonly SIGN_IN_URL = '/signin';
-
   constructor(private router: Router, private authService: AuthService) {}
 
   canActivate(): Observable<boolean> {
@@ -37,11 +35,11 @@ export class AuthGuard {
         if (response.isAuthenticated) {
           return true;
         }
-        this.router.navigate([AuthGuard.SIGN_IN_URL]);
+        this.router.navigate([AuthService.SIGN_IN_URL]);
         return false;
       }),
       catchError(() => {
-        this.router.navigate([AuthGuard.SIGN_IN_URL]);
+        this.router.navigate([AuthService.SIGN_IN_URL]);
         return of(false);
       })
     );

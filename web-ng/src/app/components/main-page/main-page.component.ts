@@ -25,8 +25,8 @@ import { ObservationService } from '../../services/observation/observation.servi
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/router/router.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { AuthGuard } from '../../services/auth/auth.guard';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 /**
  * Root component for main application page showing map, layers list, and
@@ -78,8 +78,8 @@ export class MainPageComponent implements OnInit {
     // Redirect to sign in page if user is not authenticated.
     this.subscription.add(
       this.authService.isAuthenticated$().subscribe(isAuthenticated => {
-        if (!isAuthenticated) {
-          this.router.navigate([AuthGuard.SIGN_IN_URL]);
+        if (!isAuthenticated && !environment.useEmulators) {
+          this.router.navigate([AuthService.SIGN_IN_URL]);
         }
       })
     );
