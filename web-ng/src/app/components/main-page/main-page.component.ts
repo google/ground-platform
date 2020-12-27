@@ -24,6 +24,9 @@ import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/router/router.service';
+import { AuthService } from '../../services/auth/auth.service';
+import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 /**
  * Root component for main application page showing map, layers list, and
@@ -44,7 +47,9 @@ export class MainPageComponent implements OnInit {
     private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService,
-    private dialog: MatDialog
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private router: Router
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
@@ -69,6 +74,14 @@ export class MainPageComponent implements OnInit {
       this.navigationService
         .getObservationId$()
         .subscribe(id => this.editObservation(id))
+    );
+    // Redirect to sign in page if user is not authenticated.
+    this.subscription.add(
+      this.authService.isAuthenticated$().subscribe(isAuthenticated => {
+        if (!isAuthenticated && !environment.useEmulators) {
+          this.router.navigate([AuthService.SIGN_IN_URL]);
+        }
+      })
     );
   }
 
