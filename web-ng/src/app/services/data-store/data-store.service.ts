@@ -130,6 +130,16 @@ export class DataStoreService {
       .delete();
   }
 
+  async deleteObservation(projectId: string, observationId: string) {
+    debugger;
+    return await this.db
+      .collection('projects')
+      .doc(projectId)
+      .collection('observations')
+      .doc(observationId)
+      .delete();
+  }
+
   updateObservation(projectId: string, observation: Observation) {
     return this.db
       .collection(`projects/${projectId}/observations`)
