@@ -20,10 +20,8 @@ import { OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from './../../services/auth/auth.service';
-import { filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-
-const DEFAULT_ROUTE = ['p', ':new'];
 
 @Component({
   templateUrl: './sign-in-page.component.html',
@@ -39,7 +37,7 @@ export class SignInPageComponent implements OnInit, OnDestroy {
       this.authService
         .isAuthenticated$()
         .pipe(filter(isAuth => isAuth))
-        .subscribe(() => this.router.navigate(DEFAULT_ROUTE))
+        .subscribe(() => this.router.navigate(AuthService.DEFAULT_ROUTE))
     );
   }
 

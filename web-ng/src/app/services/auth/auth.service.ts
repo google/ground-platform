@@ -36,6 +36,8 @@ const ANONYMOUS_USER: User = {
   providedIn: 'root',
 })
 export class AuthService {
+  static readonly DEFAULT_ROUTE = ['p', ':new'];
+  static readonly SIGN_IN_URL = '/signin';
   user$: Observable<User>;
   constructor(
     private afAuth: AngularFireAuth,

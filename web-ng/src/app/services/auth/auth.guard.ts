@@ -14,36 +14,55 @@
  * limitations under the License.
  */
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { AuthService } from './auth.service';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { User } from '../../shared/models/user.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AuthGuard {
-  private static readonly SIGN_IN_URL = '/signin';
-
+export class AuthGuard implements CanActivate {
   constructor(private router: Router, private authService: AuthService) {}
 
-  canActivate(): Observable<boolean> {
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean> {
     return this.authService.getUser$().pipe(
-      map(response => {
-        if (environment.useEmulators) {
+      map(user => {
+        if (state.url === '/signin') {
+          return this.handleSignin(user);
+        }
+        if (this.isAuthenticated(user)) {
           return true;
         }
-        if (response.isAuthenticated) {
-          return true;
-        }
-        this.router.navigate([AuthGuard.SIGN_IN_URL]);
+        this.router.navigate([AuthService.SIGN_IN_URL]);
         return false;
       }),
       catchError(() => {
-        this.router.navigate([AuthGuard.SIGN_IN_URL]);
+        this.router.navigate([AuthService.SIGN_IN_URL]);
         return of(false);
       })
     );
+  }
+
+  private handleSignin(user: User): boolean {
+    if (!this.isAuthenticated(user)) {
+      return true;
+    }
+    this.router.navigate(AuthService.DEFAULT_ROUTE);
+    return false;
+  }
+
+  private isAuthenticated(user: User): boolean {
+    return environment.useEmulators || user.isAuthenticated;
   }
 }
