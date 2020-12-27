@@ -25,7 +25,7 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
     && rm -rf /var/lib/apt/lists/*
 
 # Cache web console build deps and Ivy build.
-WORKDIR /usr/src/ground-platform/web-ng
-COPY web-ng/package*.json ./
+WORKDIR /usr/src/ground-platform/web
+COPY web/package*.json ./
 RUN npm install
 RUN ./node_modules/.bin/ngcc
