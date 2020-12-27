@@ -32,25 +32,25 @@ steps:
       - --cache=true
 
   - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
-    id: "Move web-ng deps"
+    id: "Move web deps"
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        mv /usr/src/ground-platform/web-ng/node_modules web-ng/
+        mv /usr/src/ground-platform/web/node_modules web/
 
   - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
-    id: "Lint web-ng"
+    id: "Lint web"
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        cd web-ng && npm run check
+        cd web && npm run check
 
   - name: "gcr.io/$PROJECT_ID/ground-platform-build:${COMMIT_SHA}"
-    id: "Test web-ng"
+    id: "Test web"
     entrypoint: "bash"
     args:
       - "-c"
       - |
-        cd web-ng && npm run test
+        cd web && npm run test
