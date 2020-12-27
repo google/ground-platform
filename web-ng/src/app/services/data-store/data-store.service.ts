@@ -131,7 +131,6 @@ export class DataStoreService {
   }
 
   async deleteObservation(projectId: string, observationId: string) {
-    debugger;
     return await this.db
       .collection('projects')
       .doc(projectId)
