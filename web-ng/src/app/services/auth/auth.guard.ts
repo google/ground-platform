@@ -37,32 +37,28 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> {
     return this.authService.getUser$().pipe(
-      map(user => {
-        if (state.url === '/signin') {
-          return this.handleSignin(user);
-        }
-        if (this.isAuthenticated(user)) {
-          return true;
-        }
-        this.router.navigate([AuthService.SIGN_IN_URL]);
-        return false;
-      }),
+      map(user => this.canUserActivate(user, state.url)),
       catchError(() => {
         this.router.navigate([AuthService.SIGN_IN_URL]);
         return of(false);
       })
     );
   }
-
-  private handleSignin(user: User): boolean {
-    if (!this.isAuthenticated(user)) {
+  canUserActivate(user: User, url: string): boolean {
+    if (environment.useEmulators) {
       return true;
     }
-    this.router.navigate(AuthService.DEFAULT_ROUTE);
+    if (url.includes(AuthService.SIGN_IN_URL)) {
+      if (!user.isAuthenticated) {
+        return true;
+      }
+      this.router.navigate(AuthService.DEFAULT_ROUTE);
+      return false;
+    }
+    if (user.isAuthenticated) {
+      return true;
+    }
+    this.router.navigate([AuthService.SIGN_IN_URL]);
     return false;
-  }
-
-  private isAuthenticated(user: User): boolean {
-    return environment.useEmulators || user.isAuthenticated;
   }
 }
