@@ -17,7 +17,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -25,6 +25,9 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { NavigationService } from './../../services/router/router.service';
 import { NEVER } from 'rxjs';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}
@@ -72,6 +75,13 @@ describe('MainPageComponent', () => {
           { provide: ObservationService, useValue: observationService },
           { provide: ProjectService, useValue: projectService },
           { provide: NavigationService, useValue: navigationService },
+          { provide: AngularFirestore, useValue: {} },
+          { provide: AngularFireAuth, useValue: {} },
+          { provide: Router, useValue: {} },
+          {
+            provide: AuthService,
+            useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
+          },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
