@@ -44,6 +44,7 @@ export class AuthGuard implements CanActivate {
       })
     );
   }
+
   canUserActivate(user: User, url: string): boolean {
     if (environment.useEmulators) {
       return true;
