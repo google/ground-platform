@@ -146,9 +146,17 @@ export class LayerDialogComponent implements OnDestroy {
     }
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
-      this.fields =
+      const fields =
         this.form?.fields.toList().sortBy(field => field.index) ||
         List<Field>();
+      fields.forEach((field, ind) => {
+        const options = field.multipleChoice?.options.sortBy(opt => opt.index);
+        if (field.multipleChoice && options?.size) {
+          const multipleChoice = field.multipleChoice.withOptions(options);
+          field = field.withMultipleChoice(multipleChoice);
+        }
+        this.fields = this.fields.set(ind, field);
+      });
     }
   }
 
@@ -250,6 +258,7 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   drop(event: CdkDragDrop<string[]>) {
+    debugger;
     const fieldAtPrevIndex = this.fields.get(event.previousIndex);
     const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
     if (fieldAtCurrentIndex && fieldAtPrevIndex) {

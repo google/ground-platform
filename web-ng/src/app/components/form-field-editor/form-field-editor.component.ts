@@ -142,8 +142,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
-      const options = this.formOptions?.options;
-      options?.sortBy(option => option.index);
     }
     this.formGroup.setValue({
       label: this.label,

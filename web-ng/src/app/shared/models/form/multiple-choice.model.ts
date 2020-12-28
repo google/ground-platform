@@ -42,4 +42,8 @@ export class MultipleChoice {
     readonly cardinality: Cardinality,
     readonly options: List<Option>
   ) {}
+
+  withOptions(options: List<Option>): MultipleChoice {
+    return { ...this, options };
+  }
 }
