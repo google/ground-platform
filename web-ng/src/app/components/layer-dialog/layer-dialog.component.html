@@ -24,7 +24,7 @@
 <div class="default-style">
   <div class="default-style-tag">Default style</div>
   <app-edit-style-button
-    [markerColor]="layer!.color || '#ff9131'"
+    [markerColor]="layer!.color || defaultColor"
     (markerColorChange)="onMarkerColorChange($event)"
   ></app-edit-style-button>
 </div>

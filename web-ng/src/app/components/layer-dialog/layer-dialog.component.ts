@@ -44,8 +44,6 @@ import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor
 // To make ESLint happy:
 /*global alert*/
 
-const DEFAULT_LAYER_COLOR = '#ff9131';
-
 @Component({
   selector: 'app-layer-dialog',
   templateUrl: './layer-dialog.component.html',
@@ -60,6 +58,7 @@ export class LayerDialogComponent implements OnDestroy {
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
+  defaultColor: string = '#ff9131';
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
@@ -129,7 +128,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = projectId;
     this.layer = layer;
     this.layerName = this.layer?.name?.get(this.lang) || '';
-    this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
+    this.color = this.layer?.color || this.defaultColor;
     if (!layer) {
       this.layer = this.layerService.createNewLayer();
       const newField = this.layerService.createField(
