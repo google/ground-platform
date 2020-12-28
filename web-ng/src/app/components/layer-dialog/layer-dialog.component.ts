@@ -258,7 +258,6 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    debugger;
     const fieldAtPrevIndex = this.fields.get(event.previousIndex);
     const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
     if (fieldAtCurrentIndex && fieldAtPrevIndex) {
