@@ -37,6 +37,7 @@
           mat-flat-button
           color="primary"
           [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
+          (click)="onAddUserSubmit()"
         >
           <label>Add</label>
         </button>
