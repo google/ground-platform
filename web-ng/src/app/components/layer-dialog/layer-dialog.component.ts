@@ -58,7 +58,7 @@ export class LayerDialogComponent implements OnDestroy {
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
-  defaultLayerColor: string = '#ff9131';
+  defaultLayerColor: string;
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
@@ -77,6 +77,7 @@ export class LayerDialogComponent implements OnDestroy {
     private projectService: ProjectService
   ) {
     this.lang = 'en';
+    this.defaultLayerColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
