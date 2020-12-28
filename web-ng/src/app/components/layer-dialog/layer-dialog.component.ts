@@ -58,7 +58,7 @@ export class LayerDialogComponent implements OnDestroy {
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
-  defaultColor: string = '#ff9131';
+  defaultLayerColor: string = '#ff9131';
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
@@ -128,7 +128,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = projectId;
     this.layer = layer;
     this.layerName = this.layer?.name?.get(this.lang) || '';
-    this.color = this.layer?.color || this.defaultColor;
+    this.color = this.layer?.color || this.defaultLayerColor;
     if (!layer) {
       this.layer = this.layerService.createNewLayer();
       const newField = this.layerService.createField(
