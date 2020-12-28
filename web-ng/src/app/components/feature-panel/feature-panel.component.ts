@@ -38,8 +38,8 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./feature-panel.component.css'],
 })
 export class FeaturePanelComponent implements OnInit, OnDestroy {
-  projectId?: string | null;
-  observationId?: string | null;
+  projectId?: string;
+  observationId?: string;
   readonly observations$: Observable<List<Observation>>;
   readonly layer$: Observable<Layer>;
   readonly lang: string;
@@ -86,13 +86,13 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription.add(
       this.navigationService.getProjectId$().subscribe(id => {
-        this.projectId = id;
+        this.projectId = id || undefined;
       })
     );
 
     this.subscription.add(
       this.navigationService.getObservationId$().subscribe(id => {
-        this.observationId = id;
+        this.observationId = id || undefined;
       })
     );
   }
