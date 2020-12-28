@@ -20,7 +20,7 @@ import { OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from './../../services/auth/auth.service';
-import { filter, map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 const DEFAULT_ROUTE = ['p', ':new'];
