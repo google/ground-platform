@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AuthService } from './../auth/auth.service';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -30,8 +30,8 @@ export interface ImportCsvResponse {
 })
 export class DataImportService {
   constructor(
-    private httpClient: HttpClient,
-    private afAuth: AngularFireAuth
+    private authService: AuthService,
+    private httpClient: HttpClient
   ) {}
 
   async importCsv(
@@ -39,18 +39,11 @@ export class DataImportService {
     layerId: string,
     file: File
   ): Promise<ImportCsvResponse> {
-    // https://firebase.google.com/docs/auth/admin/verify-id-tokens#retrieve_id_tokens_on_clients
-    const user = await this.afAuth.currentUser;
-    const idToken = await user!.getIdToken(/* forceRefresh */ true);
-    // https://cloud.google.com/functions/docs/securing/authenticating#firebase_authentication
-    const headers = {
-      Authorization: `Bearer ${idToken}`,
-    };
-
     const formData = new FormData();
     formData.set('project', projectId);
     formData.set('layer', layerId);
     formData.append('file', file);
+    const headers = await this.authService.getAuthHeaders();
     // TODO: When run on protected importCsv returns 401 with response header:
     // www-authenticate: Bearer error="invalid_token" error_description="The access token could not be verified"
     return this.httpClient
