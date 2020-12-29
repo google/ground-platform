@@ -14,16 +14,16 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>Project title</h1>
-<div mat-dialog-content>
+<h1 mat-dialog-title>New project</h1>
+<mat-dialog-content>
   <form [formGroup]="projectTitleForm">
-    <p>Please enter the project title to get started</p>
+    <p>Please enter the project title to get started.</p>
     <mat-form-field class="title-input">
       <input matInput formControlName="title" />
     </mat-form-field>
   </form>
-</div>
-<div mat-dialog-actions>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
   <button
     mat-raised-button
     class="create-project-btn"
@@ -32,4 +32,4 @@
   >
     Create project
   </button>
-</div>
+</mat-dialog-actions>
