@@ -1,3 +1,4 @@
+import { AuthService } from './../auth/auth.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -26,7 +27,10 @@ describe('DataImportService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [MatDialogModule],
-      providers: [{ provide: HttpClient, useValue: {} }],
+      providers: [
+        { provide: AuthService, useValue: {} },
+        { provide: HttpClient, useValue: {} },
+      ],
     });
     service = TestBed.inject(DataImportService);
   });
