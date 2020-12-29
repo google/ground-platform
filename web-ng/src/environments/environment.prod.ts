@@ -25,6 +25,7 @@ export const environment = {
   production: true,
   googleMapsApiKey: googleMapsConfig.apiKey,
   firebase: firebaseConfig,
+  // Cloud Functions are accessed via local rewrite.
   cloudFunctionsUrl: '',
   offlineBaseMapSources,
   useEmulators: false,

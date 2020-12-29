@@ -14,31 +14,43 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import {
-  FirebaseUISignInFailure,
-  FirebaseUISignInSuccessWithAuthResult,
-} from 'firebaseui-angular';
+import { Component, OnDestroy } from '@angular/core';
+import { FirebaseUISignInFailure } from 'firebaseui-angular';
+import { OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { AuthService } from './../../services/auth/auth.service';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   templateUrl: './sign-in-page.component.html',
   styleUrls: ['./sign-in-page.component.css'],
 })
-export class SignInPageComponent {
-  constructor(private router: Router) {}
+export class SignInPageComponent implements OnInit, OnDestroy {
+  private subscription = new Subscription();
+  constructor(private router: Router, private authService: AuthService) {}
 
-  successCallback(signInSuccessData: FirebaseUISignInSuccessWithAuthResult) {
-    // TODO(#545): Redirect to original URL on success.
-    this.router.navigate(['/p/:new']);
+  ngOnInit() {
+    this.subscription.add(
+      // TODO(#545): Redirect to original URL on success.
+      this.authService
+        .isAuthenticated$()
+        .pipe(filter(isAuth => isAuth))
+        .subscribe(() => this.router.navigate(AuthService.DEFAULT_ROUTE))
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  isAuthenticated$(): Observable<boolean> {
+    return this.authService.isAuthenticated$();
   }
 
   errorCallback(errorData: FirebaseUISignInFailure) {
     // TODO: React to error.
     alert(`Sign in error ${errorData.code}`);
-  }
-
-  uiShownCallback() {
-    // TODO: Disable buttons while signing in.
   }
 }

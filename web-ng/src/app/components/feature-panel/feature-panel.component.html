@@ -52,6 +52,13 @@ limitations under the License.
           <mat-icon>edit</mat-icon>
           <span>Edit observation</span>
         </button>
+        <button
+          mat-menu-item
+          (click)="onDeleteObservationClick(observation.id)"
+        >
+          <mat-icon>delete_forever</mat-icon>
+          <span>Delete observation</span>
+        </button>
       </mat-menu>
     </mat-card-header>
     <mat-card-content>

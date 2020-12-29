@@ -24,6 +24,7 @@ const routes: Routes = [
   {
     path: 'signin',
     component: SignInPageComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'p/:projectId',
