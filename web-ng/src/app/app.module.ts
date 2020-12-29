@@ -34,6 +34,7 @@ import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module
 import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
 import { HttpClientModule } from '@angular/common/http';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
+import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -71,6 +72,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     UserProfilePopupModule,
     LayerDialogModule,
     ShareDialogModule,
+    TitleDialogModule
   ],
   bootstrap: [AppComponent],
 })

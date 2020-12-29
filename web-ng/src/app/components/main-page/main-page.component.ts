@@ -27,6 +27,7 @@ import { NavigationService } from '../../services/router/router.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
 
 /**
  * Root component for main application page showing map, layers list, and
@@ -57,6 +58,12 @@ export class MainPageComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Show title dialog to assign title on a new project.
+    this.subscription.add(
+      this.navigationService
+        .getProjectId$()
+        .subscribe(id => id == ':new' && this.showTitleDialog())
+    );
     // Show layer dialog when non-null layer id set in URL.
     this.subscription.add(
       this.navigationService
@@ -87,6 +94,13 @@ export class MainPageComponent implements OnInit {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private showTitleDialog() {
+    this.dialog.open(TitleDialogComponent, {
+      width: '500px',
+      disableClose: true,
+    });
   }
 
   private showEditLayerDialog(layerId: string) {
