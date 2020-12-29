@@ -11,6 +11,10 @@
         "function": "importCsv"
       },
       {
+        "source": "/exportCsv",
+        "function": "exportCsv"
+      },
+      {
         "source": "**/!(*.*)",
         "destination": "/index.html"
       }
