@@ -274,7 +274,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       this.formOptions?.cardinality ||
       this.cardinality ||
       Cardinality.SELECT_MULTIPLE;
-    this.formOptions = new MultipleChoice(cardinality, options);
+    const formOptions = new MultipleChoice(cardinality, options);
+    this.formOptions = formOptions.withOptions(options);
     this.update.emit({
       label: StringMap({ en: this.label }),
       required: this.required,
