@@ -44,8 +44,4 @@ export class MultipleChoice {
   ) {
     this.options = this.options.sortBy(option => option.index);
   }
-
-  withOptions(options: List<Option>): MultipleChoice {
-    return { ...this, options };
-  }
 }

@@ -274,8 +274,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       this.formOptions?.cardinality ||
       this.cardinality ||
       Cardinality.SELECT_MULTIPLE;
-    const formOptions = new MultipleChoice(cardinality, options);
-    this.formOptions = formOptions.withOptions(options);
+    this.formOptions = new MultipleChoice(cardinality, options);
     this.update.emit({
       label: StringMap({ en: this.label }),
       required: this.required,
@@ -287,9 +286,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   drop(event: CdkDragDrop<string[]>) {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
-    const optionAtPrevIndex = options.get(event.previousIndex);
-    const optionAtCurrentIndex = options.get(event.currentIndex);
+    let optionAtPrevIndex = options.get(event.previousIndex);
+    let optionAtCurrentIndex = options.get(event.currentIndex);
     if (optionAtPrevIndex && optionAtCurrentIndex) {
+      optionAtPrevIndex = optionAtPrevIndex.withIndex(event.currentIndex);
+      optionAtCurrentIndex = optionAtCurrentIndex.withIndex(
+        event.previousIndex
+      );
       options = options.set(event.previousIndex, optionAtCurrentIndex);
       options = options.set(event.currentIndex, optionAtPrevIndex);
     }
