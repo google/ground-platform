@@ -1,3 +1,4 @@
+import { DataExportService } from './../../services/data-export/data-export.service';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 /**
  * Copyright 2020 Google LLC
@@ -190,6 +191,7 @@ describe('ObservationFormComponent', () => {
           LayerListItemModule,
         ],
         providers: [
+          { provide: DataExportService, useValue: {} },
           { provide: DataStoreService, useValue: {} },
           { provide: FeatureService, useValue: featureService },
           { provide: ProjectService, useValue: projectService },

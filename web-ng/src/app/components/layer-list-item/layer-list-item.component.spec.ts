@@ -1,3 +1,4 @@
+import { DataExportService } from './../../services/data-export/data-export.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -40,6 +41,7 @@ describe('LayerListItemComponent', () => {
         declarations: [LayerListItemComponent],
         imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
         providers: [
+          { provide: DataExportService, useValue: {} },
           { provide: DataStoreService, useValue: {} },
           { provide: NavigationService, useValue: navigationService },
           { provide: Router, useValue: {} },
