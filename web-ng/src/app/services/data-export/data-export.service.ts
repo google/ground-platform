@@ -31,7 +31,10 @@ export class DataExportService {
     private httpClient: HttpClient
   ) {}
 
-  async downloadCsv(projectId: string, layerId: string): Promise<any> {
+  /**
+   * Exports a layer to CSV and opens download in a new window.
+   */
+  async downloadCsv(projectId: string, layerId: string) {
     const headers = await this.authService.getAuthHeaders();
     // TODO(#586): Stream results instead of using blob to support large files.
     const data = await this.httpClient
@@ -46,9 +49,11 @@ export class DataExportService {
       .toPromise();
     const blob = new Blob([data], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
-    const pwa = window.open(url);
-    if (!pwa || pwa.closed || typeof pwa.closed === 'undefined') {
-      alert('Please disable your Pop-up blocker and try again.');
+    const downloadWindow = window.open(url);
+    if (!downloadWindow || downloadWindow.closed) {
+      alert(
+        'Download blocked. Please disable your pop-up blocker and try again'
+      );
     }
   }
 }
