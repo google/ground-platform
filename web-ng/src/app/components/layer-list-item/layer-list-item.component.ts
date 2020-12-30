@@ -130,7 +130,13 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onDownloadCsv() {
-    this.exportService.downloadCsv(this.projectId!, this.layer!.id);
+    try {
+      this.exportService.downloadCsv(this.projectId!, this.layer!.id);
+    } catch (error) {
+      console.error(error);
+      // TODO: Friendlier error message.
+      alert('Export failed. See logs for details.');
+    }
   }
 
   ngOnDestroy(): void {
