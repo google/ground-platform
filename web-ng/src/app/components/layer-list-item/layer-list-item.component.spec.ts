@@ -1,4 +1,3 @@
-import { DataExportService } from './../../services/data-export/data-export.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -16,6 +15,7 @@ import { DataExportService } from './../../services/data-export/data-export.serv
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { DataExportService } from './../../services/data-export/data-export.service';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LayerListItemComponent } from './layer-list-item.component';
 import { MatIconModule } from '@angular/material/icon';
