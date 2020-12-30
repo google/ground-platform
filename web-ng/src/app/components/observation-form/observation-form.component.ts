@@ -1,3 +1,4 @@
+import { ConfirmationDialogComponent } from './../confirmation-dialog/confirmation-dialog.component';
 /**
  * Copyright 2020 Google LLC
  *
@@ -50,7 +51,7 @@ import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.com
   templateUrl: './observation-form.component.html',
   styleUrls: ['./observation-form.component.css'],
 })
-export class ObservationFormComponent {
+export class ObservationFormComponent implements OnInit {
   readonly lang: string;
   readonly fieldTypes = FieldType;
   readonly cardinality = Cardinality;
@@ -96,6 +97,32 @@ export class ObservationFormComponent {
             .pipe(map(feature => project.layers.get(feature.layerId)!))
         )
       );
+  }
+
+  ngOnInit() {
+    this.router.setNavigationListener(this.onNavigate);
+  }
+
+  async onNavigate() {
+    new Promise<boolean>((resolve, reject) => {
+      // this.dialogRef = ...
+
+      const dialogRef = this.confirmationDialog.open(
+        ConfirmationDialogComponent,
+        {
+          maxWidth: '500px',
+          data: {
+            title: 'Warning',
+            message:
+              'Are you sure you wish to delete this observation? Any associated data will be lost. This cannot be undone.',
+          },
+        }
+      );
+
+      dialogRef.afterClosed().subscribe(async dialogResult => {
+        resolve(dialogResult);
+      });
+    });
   }
 
   initForm() {

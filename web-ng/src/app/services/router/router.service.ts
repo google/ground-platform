@@ -50,9 +50,16 @@ export class NavigationService {
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
+  private routeChangeInterceptor?: Function<>;
 
   constructor(private router: Router) {}
 
+  setRouteChangeInterceptor(fn) {
+    this.routeChangeInterceptor = fn;
+  }
+  clearRouteChangeInterceptor() {
+    this.routeChangeInterceptor = undefined;
+  }
   /**
    * Set up streams using provided route. This must be called before any of
    * the accessors are called.
@@ -123,7 +130,14 @@ export class NavigationService {
       const navigationExtras: NavigationExtras = {
         fragment: params.toString(),
       };
-      this.router.navigate([primaryUrl], navigationExtras);
+
+      if (this.interceptor) {
+        boolean canNavigate = await this.navigationListener();
+        if (!canNavigate) {
+          return;
+        }
+      }
+        this.router.navigate([primaryUrl], navigationExtras);
     } else {
       this.router.navigate([primaryUrl]);
     }
