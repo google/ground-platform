@@ -17,8 +17,8 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { ProjectService } from '../../services/project/project.service';
+import { NavigationService } from '../../services/router/router.service';
 
 @Component({
   selector: 'app-title-dialog',
@@ -30,8 +30,8 @@ export class TitleDialogComponent {
 
   constructor(
     private readonly matDialogRef: MatDialogRef<TitleDialogComponent>,
-    private projectService: ProjectService,
-    private router: Router
+    private navigationService: NavigationService,
+    private projectService: ProjectService
   ) {
     this.projectTitleForm = new FormGroup({ title: new FormControl() });
   }
@@ -40,7 +40,7 @@ export class TitleDialogComponent {
     await this.projectService
       .createProject(this.projectTitleForm.get('title')?.value)
       .then(projectId => {
-        this.router.navigateByUrl(`/p/${projectId}`);
+        this.navigationService.setProjectId(projectId);
       })
       .catch(e => {
         console.warn('Project creation failed', e);
