@@ -19,7 +19,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TitleDialogComponent } from './title-dialog.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
-import { Router } from '@angular/router';
+import { NavigationService } from '../../services/router/router.service';
 
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
@@ -28,7 +28,9 @@ describe('TitleDialogComponent', () => {
   const projectService = jasmine.createSpyObj('ProjectService', [
     'createProject',
   ]);
-  const routerSpy = createRouterSpy();
+  const navigationService = jasmine.createSpyObj('NavigationService', [
+    'setProjectId',
+  ]);
 
   beforeEach(
     waitForAsync(() => {
@@ -38,7 +40,7 @@ describe('TitleDialogComponent', () => {
         providers: [
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: ProjectService, useValue: projectService },
-          { provide: Router, useValue: routerSpy },
+          { provide: NavigationService, useValue: navigationService },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
@@ -55,7 +57,3 @@ describe('TitleDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-
-function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
-}
