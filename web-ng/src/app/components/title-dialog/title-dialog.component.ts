@@ -36,8 +36,8 @@ export class TitleDialogComponent {
     this.projectTitleForm = new FormGroup({ title: new FormControl() });
   }
 
-  onCreateProject(): void {
-    this.projectService
+  async onCreateProject() {
+    await this.projectService
       .createProject(this.projectTitleForm.get('title')?.value)
       .then(projectId => {
         this.router.navigateByUrl(`/p/${projectId}`);
