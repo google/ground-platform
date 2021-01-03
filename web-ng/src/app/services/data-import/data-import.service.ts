@@ -35,11 +35,13 @@ export class DataImportService {
     projectId: string,
     layerId: string,
     file: File
-  ): Observable<ImportCsvResponse> {
+  ): Promise<ImportCsvResponse> {
     const formData = new FormData();
     formData.set('project', projectId);
     formData.set('layer', layerId);
     formData.append('file', file);
-    return this.httpClient.post<ImportCsvResponse>(IMPORT_CSV_URL, formData);
+    return this.httpClient
+      .post<ImportCsvResponse>(IMPORT_CSV_URL, formData)
+      .toPromise();
   }
 }
