@@ -30,6 +30,8 @@ import { ProjectService } from '../../services/project/project.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
+import { MatDialogModule } from '@angular/material/dialog';
+import { NavigationService } from '../../services/router/router.service';
 
 const mockProject = new Project(
   'project001',
@@ -76,6 +78,10 @@ class MockObservationService {
 const projectService = new MockProjectService();
 const featureService = new MockFeatureService();
 const observationService = new MockObservationService();
+const navigationService = {
+  getProjectId$: () => of(''),
+  getObservationId$: () => of(''),
+};
 
 describe('FeaturePanelComponent', () => {
   let component: FeaturePanelComponent;
@@ -86,12 +92,14 @@ describe('FeaturePanelComponent', () => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
         declarations: [FeaturePanelComponent],
+        imports: [MatDialogModule],
         providers: [
           { provide: DataStoreService, useValue: {} },
           { provide: FeatureService, useValue: featureService },
           { provide: ProjectService, useValue: projectService },
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },
+          { provide: NavigationService, useValue: navigationService },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
