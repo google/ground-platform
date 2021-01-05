@@ -72,7 +72,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     UserProfilePopupModule,
     LayerDialogModule,
     ShareDialogModule,
-    TitleDialogModule
+    TitleDialogModule,
   ],
   bootstrap: [AppComponent],
 })

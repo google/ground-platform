@@ -63,7 +63,7 @@ export class MainPageComponent implements OnInit {
       this.navigationService
         .getProjectId$()
         .subscribe(
-          id => id == NavigationService.LAYER_ID_NEW && this.showTitleDialog()
+          id => id === NavigationService.LAYER_ID_NEW && this.showTitleDialog()
         )
     );
     // Show layer dialog when non-null layer id set in URL.
