@@ -23,4 +23,8 @@ export class Option {
     readonly label: StringMap,
     readonly index: number
   ) {}
+
+  withIndex(index: number) {
+    return { ...this, index };
+  }
 }

@@ -41,5 +41,7 @@ export class MultipleChoice {
   constructor(
     readonly cardinality: Cardinality,
     readonly options: List<Option>
-  ) {}
+  ) {
+    this.options = this.options.sortBy(option => option.index);
+  }
 }
