@@ -37,17 +37,14 @@ export class TitleDialogComponent {
   }
 
   async onCreateProject() {
-    let projectId = '';
     try {
-      projectId = await this.projectService.createProject(
+      const projectId = await this.projectService.createProject(
         this.projectTitleForm.get('title')?.value
       );
-    } catch (e) {
-      console.warn('Project creation failed', e);
-    }
-    if (projectId) {
       this.navigationService.setProjectId(projectId);
       this.matDialogRef.close();
+    } catch (e) {
+      console.warn('Project creation failed', e);
     }
   }
 }
