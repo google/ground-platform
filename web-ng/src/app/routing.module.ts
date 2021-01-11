@@ -27,7 +27,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'p/:projectId',
+    path: 'project/:projectId',
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },

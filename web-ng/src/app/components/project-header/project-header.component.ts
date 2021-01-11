@@ -77,7 +77,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     this.projectService
       .createProject(title)
       .then(projectId => {
-        this.router.navigateByUrl(`/p/${projectId}`);
+        this.router.navigateByUrl(`/project/${projectId}`);
       })
       .catch(e => {
         console.warn('Project creation failed', e);

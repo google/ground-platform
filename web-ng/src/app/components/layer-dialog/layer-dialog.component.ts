@@ -217,7 +217,7 @@ export class LayerDialogComponent implements OnDestroy {
   onClose() {
     this.dialogRef.close();
     // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([`p/${this.projectId}`]);
+    return this.router.navigate([`project/${this.projectId}`]);
   }
 
   setLayerName(value: string) {

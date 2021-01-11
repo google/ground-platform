@@ -64,7 +64,7 @@ export class ObservationService {
                   switchMap(feature =>
                     authService.getUser$().pipe(
                       switchMap(user => {
-                        if (observationId === ':new') {
+                        if (observationId === 'new') {
                           return of(
                             this.createNewObservation(user, project, feature)
                           );
