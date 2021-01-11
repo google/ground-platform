@@ -26,7 +26,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
 import { getPinImageSource } from '../map/ground-pin';
-import { ColorEvent } from 'ngx-color';
 
 @Component({
   selector: 'app-edit-style-button',

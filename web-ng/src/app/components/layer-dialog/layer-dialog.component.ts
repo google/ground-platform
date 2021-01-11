@@ -40,7 +40,6 @@ import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Project } from '../../shared/models/project.model';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
-import { Color } from 'ngx-color';
 
 // To make ESLint happy:
 /*global alert*/
