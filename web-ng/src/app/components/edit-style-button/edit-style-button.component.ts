@@ -59,8 +59,8 @@ export class EditStyleButtonComponent implements OnInit {
       .open(ColorPickerComponent, {
         data: { trigger: target },
       })
-      .componentInstance.onColorPicked.subscribe((evt: ColorEvent) => {
-        this.markerColor = evt.color.hex;
+      .componentInstance.onColorPicked.subscribe((color: string) => {
+        this.markerColor = color;
         this.markerColorChange.emit(new MarkerColorEvent(this.markerColor));
         this.markerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
           getPinImageSource(this.markerColor)

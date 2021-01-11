@@ -25,6 +25,7 @@ import { List, Map } from 'immutable';
 import { Form } from '../../shared/models/form/form.model';
 import { ProjectService } from '../project/project.service';
 import { take } from 'rxjs/operators';
+import { Color } from 'ngx-color';
 
 @Injectable({
   providedIn: 'root',
