@@ -103,7 +103,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       },
       {
         icon: 'photo',
-        label: 'Photos',
+        label: 'Photo',
         type: FieldType.PHOTO,
       },
     ];
