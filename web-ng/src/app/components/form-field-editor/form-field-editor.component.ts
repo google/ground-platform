@@ -101,6 +101,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         type: FieldType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_MULTIPLE,
       },
+      {
+        icon: 'photo',
+        label: 'Photos',
+        type: FieldType.PHOTO,
+      },
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
@@ -159,6 +164,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         return this.selectFieldOptions[
           this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
         ];
+      case FieldType.PHOTO:
+        return this.selectFieldOptions[3];
       default:
         throw new Error(`Unsupported field type${this.fieldType}`);
     }
