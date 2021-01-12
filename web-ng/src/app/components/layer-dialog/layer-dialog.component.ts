@@ -218,7 +218,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.dialogRef.close();
     // TODO: refactor this path into a custom router wrapper
     return this.router.navigate([
-      `${NavigationService.DEFAULT_PROJECT_ROUTE}/${this.projectId}`,
+      `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
     ]);
   }
 

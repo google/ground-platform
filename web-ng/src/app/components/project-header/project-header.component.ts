@@ -79,7 +79,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
       .createProject(title)
       .then(projectId => {
         this.router.navigateByUrl(
-          `${NavigationService.DEFAULT_PROJECT_ROUTE}/${projectId}`
+          `${NavigationService.PROJECT_SEGMENT}/${projectId}`
         );
       })
       .catch(e => {

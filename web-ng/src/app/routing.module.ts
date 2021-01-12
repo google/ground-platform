@@ -23,12 +23,12 @@ import { NavigationService } from './services/router/router.service';
 
 const routes: Routes = [
   {
-    path: NavigationService.SIGN_IN_ROUTE,
+    path: NavigationService.SIGN_IN_SEGMENT,
     component: SignInPageComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.DEFAULT_PROJECT_ROUTE}/:${NavigationService.PROJECT_ID}`,
+    path: `${NavigationService.PROJECT_SEGMENT}/:${NavigationService.PROJECT_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },

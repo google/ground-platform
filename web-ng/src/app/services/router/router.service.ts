@@ -35,8 +35,8 @@ export class NavigationService {
   static readonly OBSERVATION_ID_NEW = 'new';
   static readonly PROJECT_ID_NEW = 'new';
   static readonly PROJECT_ID = 'projectId';
-  static readonly DEFAULT_PROJECT_ROUTE = 'project';
-  static readonly SIGN_IN_ROUTE = 'signin';
+  static readonly PROJECT_SEGMENT = 'project';
+  static readonly SIGN_IN_SEGMENT = 'signin';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
@@ -172,9 +172,7 @@ export class NavigationService {
    * Navigate to the URL with new project id
    */
   setProjectId(id: string) {
-    this.router.navigateByUrl(
-      `${NavigationService.DEFAULT_PROJECT_ROUTE}/${id}`
-    );
+    this.router.navigateByUrl(`${NavigationService.PROJECT_SEGMENT}/${id}`);
   }
 }
 

@@ -40,7 +40,7 @@ export class AuthGuard implements CanActivate {
     return this.authService.getUser$().pipe(
       map(user => this.canUserActivate(user, state.url)),
       catchError(() => {
-        this.router.navigate([NavigationService.SIGN_IN_ROUTE]);
+        this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
         return of(false);
       })
     );
@@ -50,12 +50,12 @@ export class AuthGuard implements CanActivate {
     if (environment.useEmulators) {
       return true;
     }
-    if (url.includes(NavigationService.SIGN_IN_ROUTE)) {
+    if (url.includes(NavigationService.SIGN_IN_SEGMENT)) {
       if (!user.isAuthenticated) {
         return true;
       }
       this.router.navigate([
-        NavigationService.DEFAULT_PROJECT_ROUTE,
+        NavigationService.PROJECT_SEGMENT,
         NavigationService.PROJECT_ID_NEW,
       ]);
       return false;
@@ -63,7 +63,7 @@ export class AuthGuard implements CanActivate {
     if (user.isAuthenticated) {
       return true;
     }
-    this.router.navigate([NavigationService.SIGN_IN_ROUTE]);
+    this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
     return false;
   }
 }

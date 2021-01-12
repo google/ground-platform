@@ -40,7 +40,7 @@ export class SignInPageComponent implements OnInit, OnDestroy {
         .pipe(filter(isAuth => isAuth))
         .subscribe(() =>
           this.router.navigate([
-            NavigationService.DEFAULT_PROJECT_ROUTE,
+            NavigationService.PROJECT_SEGMENT,
             NavigationService.PROJECT_ID_NEW,
           ])
         )

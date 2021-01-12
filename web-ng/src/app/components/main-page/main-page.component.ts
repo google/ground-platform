@@ -88,7 +88,7 @@ export class MainPageComponent implements OnInit {
     this.subscription.add(
       this.authService.isAuthenticated$().subscribe(isAuthenticated => {
         if (!isAuthenticated && !environment.useEmulators) {
-          this.router.navigate([NavigationService.SIGN_IN_ROUTE]);
+          this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
         }
       })
     );
