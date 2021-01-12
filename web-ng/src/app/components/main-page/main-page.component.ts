@@ -88,7 +88,7 @@ export class MainPageComponent implements OnInit {
     this.subscription.add(
       this.authService.isAuthenticated$().subscribe(isAuthenticated => {
         if (!isAuthenticated && !environment.useEmulators) {
-          this.router.navigate([AuthService.SIGN_IN_URL]);
+          this.router.navigate([NavigationService.SIGN_IN_ROUTE]);
         }
       })
     );
@@ -111,9 +111,9 @@ export class MainPageComponent implements OnInit {
         autoFocus: layerId === NavigationService.LAYER_ID_NEW,
         data: {
           projectId: project.isUnsavedNew()
-            ? Project.PROJECT_ID_NEW
+            ? NavigationService.PROJECT_ID_NEW
             : project.id,
-          createLayer: layerId === Project.PROJECT_ID_NEW,
+          createLayer: layerId === NavigationService.PROJECT_ID_NEW,
           layer: project.layers?.get(layerId),
         },
       })

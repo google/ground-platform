@@ -22,6 +22,7 @@ import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
+import { NavigationService } from '../../services/router/router.service';
 
 @Component({
   selector: 'app-project-header',
@@ -77,7 +78,9 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     this.projectService
       .createProject(title)
       .then(projectId => {
-        this.router.navigateByUrl(`/project/${projectId}`);
+        this.router.navigateByUrl(
+          `${NavigationService.DEFAULT_PROJECT_ROUTE}/${projectId}`
+        );
       })
       .catch(e => {
         console.warn('Project creation failed', e);

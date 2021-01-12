@@ -145,7 +145,9 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.zone.run(() => {
-      this.router.navigate([`project/${this.projectId}`]);
+      this.router.navigate([
+        `${NavigationService.DEFAULT_PROJECT_ROUTE}/${this.projectId}`,
+      ]);
     });
   }
 

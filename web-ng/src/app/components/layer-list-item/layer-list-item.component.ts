@@ -114,7 +114,9 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onClose() {
-    return this.router.navigate([`project/${this.projectId}`]);
+    return this.router.navigate([
+      `${NavigationService.DEFAULT_PROJECT_ROUTE}/${this.projectId}`,
+    ]);
   }
 
   onImportCsv() {

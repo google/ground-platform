@@ -33,6 +33,10 @@ export class NavigationService {
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
   static readonly LAYER_ID_NEW = 'new';
   static readonly OBSERVATION_ID_NEW = 'new';
+  static readonly PROJECT_ID_NEW = 'new';
+  static readonly PROJECT_ID = 'projectId';
+  static readonly DEFAULT_PROJECT_ROUTE = 'project';
+  static readonly SIGN_IN_ROUTE = 'signin';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
@@ -61,7 +65,7 @@ export class NavigationService {
     this.activatedRoute = route;
     // Pipe values from URL query parameters.
     this.projectId$ = route.paramMap.pipe(
-      map(params => params.get('projectId'))
+      map(params => params.get(NavigationService.PROJECT_ID))
     );
     // Pipe values from URL fragment.
     const fragmentParams$ = route.fragment.pipe(
@@ -168,7 +172,9 @@ export class NavigationService {
    * Navigate to the URL with new project id
    */
   setProjectId(id: string) {
-    this.router.navigateByUrl(`/project/${id}`);
+    this.router.navigateByUrl(
+      `${NavigationService.DEFAULT_PROJECT_ROUTE}/${id}`
+    );
   }
 }
 
