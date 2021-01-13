@@ -24,7 +24,8 @@ export class Layer {
     readonly index: number,
     readonly color?: string,
     readonly name?: StringMap,
-    readonly forms?: Map<string, Form>
+    readonly forms?: Map<string, Form>,
+    readonly contributorsCanAdd?: string[]
   ) {}
 
   getForm(formId: string): Form | undefined {
