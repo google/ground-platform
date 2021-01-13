@@ -38,8 +38,8 @@ import { MarkerColorEvent } from '../edit-style-button/edit-style-button.compone
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
-import { Project } from '../../shared/models/project.model';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
+import { NavigationService } from '../../services/router/router.service';
 
 // To make ESLint happy:
 /*global alert*/
@@ -186,7 +186,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.contributorsCanAdd ? ['points'] : []
     );
 
-    if (this.projectId === Project.PROJECT_ID_NEW) {
+    if (this.projectId === NavigationService.PROJECT_ID_NEW) {
       this.projectService.createProject(/* title= */ '').then(projectId => {
         this.projectId = projectId;
         this.addOrUpdateLayer(this.projectId, layer);
@@ -223,7 +223,9 @@ export class LayerDialogComponent implements OnDestroy {
   onClose() {
     this.dialogRef.close();
     // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([`p/${this.projectId}`]);
+    return this.router.navigate([
+      `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
+    ]);
   }
 
   setLayerName(value: string) {
