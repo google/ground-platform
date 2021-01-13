@@ -173,8 +173,19 @@ export class NavigationService {
     this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
 
+  /**
+   * Navigate to the current URL, updating the layer id in the URL
+   * fragment.
+   */
   setLayerId(id: string) {
     this.setFragmentParam(NavigationService.LAYER_ID_FRAGMENT_PARAM, id);
+  }
+
+  /**
+   * Navigate to the URL with new project id
+   */
+  setProjectId(id: string) {
+    this.router.navigateByUrl(`/p/${id}`);
   }
 }
 
