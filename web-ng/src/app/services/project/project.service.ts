@@ -25,6 +25,7 @@ import { Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { NavigationService } from '../router/router.service';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +46,7 @@ export class ProjectService {
           // Asynchronously load project. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => {
-            if (id === Project.PROJECT_ID_NEW) {
+            if (id === NavigationService.PROJECT_ID_NEW) {
               return of(Project.UNSAVED_NEW);
             }
             return this.dataStore.loadProject$(id);
