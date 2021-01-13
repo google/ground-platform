@@ -61,6 +61,7 @@ describe('MainPageComponent', () => {
       ]);
 
       const navigationService = {
+        getProjectId$: () => NEVER,
         getLayerId$: () => NEVER,
         getFeatureId$: () => NEVER,
         getObservationId$: () => NEVER,
