@@ -62,6 +62,7 @@ export class LayerDialogComponent implements OnDestroy {
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
+  contributorsCanAdd = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -144,6 +145,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields = this.fields.push(newField);
       return;
     }
+    const canAddPoints = this.layer?.contributorsCanAdd?.find(
+      val => val === 'points'
+    );
+    this.contributorsCanAdd = canAddPoints ? true : false;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
@@ -177,7 +182,8 @@ export class LayerDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      forms
+      forms,
+      this.contributorsCanAdd ? ['points'] : []
     );
 
     if (this.projectId === Project.PROJECT_ID_NEW) {

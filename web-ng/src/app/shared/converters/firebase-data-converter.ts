@@ -122,13 +122,15 @@ export class FirebaseDataConverter {
           id as string,
           FirebaseDataConverter.toForm(id, data.forms[id]),
         ])
-      )
+      ),
+      data.contributorsCanAdd || []
     );
   }
 
   static layerToJS(layer: Layer): {} {
-    const { name, forms, color, ...layerDoc } = layer;
+    const { name, forms, color, contributorsCanAdd, ...layerDoc } = layer;
     return {
+      contributorsCanAdd,
       name: name?.toJS() || {},
       forms:
         forms
