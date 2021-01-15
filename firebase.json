@@ -5,6 +5,18 @@
   },
   "hosting": {
     "public": "web-ng/dist/web-ng",
+    "redirects": [
+      {
+        "source": "/p/[:]new",
+        "destination": "/project/new",
+        "type": 301
+      },
+      {
+        "source": "/p/:id",
+        "destination": "/project/:id",
+        "type": 301
+      }
+    ],
     "rewrites": [
       {
         "source": "/importCsv",
