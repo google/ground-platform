@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { LayerListComponent } from './layer-list.component';
 import { ProjectService } from '../../services/project/project.service';
@@ -26,6 +28,7 @@ import { Layer } from '../../shared/models/layer.model';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/router/router.service';
+import { DataStoreService } from '../../services/data-store/data-store.service';
 
 const mockProject = new Project(
   'project001',
@@ -43,10 +46,21 @@ const mockProject = new Project(
   /* acl= */ Map()
 );
 
+const authState = {
+  displayName: null,
+  isAnonymous: true,
+  uid: '',
+};
+
+const mockAngularFireAuth = {
+  authState: of(authState),
+};
+
 class MockProjectService {
   getActiveProject$() {
     return of<Project>(mockProject);
   }
+  getProjectAcl() {}
 }
 
 const projectService = new MockProjectService();
@@ -72,6 +86,12 @@ describe('LayerListComponent', () => {
             useValue: routerSpy,
           },
           { provide: NavigationService, useValue: navigationService },
+          { provide: AngularFirestore, useValue: {} },
+          {
+            provide: AngularFireAuth,
+            useValue: mockAngularFireAuth,
+          },
+          { provide: DataStoreService, useValue: { user$: () => of() } },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LayerListItemComponent } from './layer-list-item.component';
@@ -24,6 +26,16 @@ import { NavigationService } from './../../services/router/router.service';
 import { of } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+
+const authState = {
+  displayName: null,
+  isAnonymous: true,
+  uid: '',
+};
+
+const mockAngularFireAuth = {
+  authState: of(authState),
+};
 
 describe('LayerListItemComponent', () => {
   let component: LayerListItemComponent;
@@ -40,9 +52,14 @@ describe('LayerListItemComponent', () => {
         declarations: [LayerListItemComponent],
         imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
         providers: [
-          { provide: DataStoreService, useValue: {} },
+          { provide: DataStoreService, useValue: { user$: () => of() } },
           { provide: NavigationService, useValue: navigationService },
           { provide: Router, useValue: {} },
+          { provide: AngularFirestore, useValue: {} },
+          {
+            provide: AngularFireAuth,
+            useValue: mockAngularFireAuth,
+          },
         ],
       }).compileComponents();
     })

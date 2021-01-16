@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
-import { never, of, Subject } from 'rxjs';
+import { NEVER, of, Subject } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -143,6 +143,7 @@ class MockProjectService {
   getActiveProject$() {
     return of<Project>(MockModel.project001);
   }
+  getProjectAcl() {}
 }
 
 class MockFeatureService {
@@ -170,7 +171,7 @@ describe('ObservationFormComponent', () => {
     waitForAsync(() => {
       const navigationService = {
         getProjectId$: () => of(''),
-        getFeatureId$: never,
+        getFeatureId$: () => NEVER,
       };
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
@@ -196,7 +197,7 @@ describe('ObservationFormComponent', () => {
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },
           { provide: NavigationService, useValue: navigationService },
-          { provide: AuthService, useValue: { user$ } },
+          { provide: AuthService, useValue: { getUser$: () => NEVER } },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
