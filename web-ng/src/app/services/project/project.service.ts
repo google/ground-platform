@@ -26,6 +26,7 @@ import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { NavigationService } from '../router/router.service';
+import { AclEntry } from '../../shared/models/acl-entry.model';
 
 @Injectable({
   providedIn: 'root',
@@ -91,5 +92,14 @@ export class ProjectService {
       offlineBaseMapSources
     );
     return Promise.resolve(projectId);
+  }
+
+  getProjectAcl(project: Project) {
+    return project.acl
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toList()
+      .sortBy(entry => entry.email)
+      .toArray();
   }
 }

@@ -26,6 +26,7 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
+import { AuthManager } from '../../services/auth/auth.manager';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -49,7 +50,8 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     private importDialog: MatDialog,
     private router: Router,
     private dataStoreService: DataStoreService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private authManager: AuthManager
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -135,6 +137,10 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       `${environment.cloudFunctionsUrl}/exportCsv?` +
       `project=${this.projectId}&layer=${this.layer?.id}`
     );
+  }
+
+  canViewCustomizeLayer() {
+    return this.authManager.canManageProject();
   }
 
   ngOnDestroy(): void {

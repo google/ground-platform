@@ -21,6 +21,7 @@ import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/router/router.service';
+import { AuthManager } from '../../services/auth/auth.manager';
 
 @Component({
   selector: 'ground-layer-list',
@@ -33,7 +34,8 @@ export class LayerListComponent {
 
   constructor(
     projectService: ProjectService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private authManager: AuthManager
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -48,5 +50,9 @@ export class LayerListComponent {
 
   onAddLayer() {
     this.navigationService.setLayerId(NavigationService.LAYER_ID_NEW);
+  }
+
+  canViewAddLayer() {
+    return this.authManager.canManageProject();
   }
 }
