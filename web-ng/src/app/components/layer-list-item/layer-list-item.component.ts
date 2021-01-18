@@ -26,7 +26,9 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
-import { AuthManager } from '../../services/auth/auth.manager';
+import { take } from 'rxjs/operators';
+import { ProjectService } from '../../services/project/project.service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -43,6 +45,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
   subscription: Subscription = new Subscription();
+  canViewCustomizeLayer = false;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -51,11 +54,13 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     private router: Router,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    private authManager: AuthManager
+    private projectService: ProjectService,
+    private authService: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.initLayerItemPermission();
   }
 
   ngOnInit() {
@@ -139,8 +144,13 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  canViewCustomizeLayer() {
-    return this.authManager.canManageProject();
+  async initLayerItemPermission() {
+    const project = await this.projectService
+      .getActiveProject$()
+      .pipe(take(1))
+      .toPromise();
+    const acl = this.projectService.getProjectAcl(project);
+    this.canViewCustomizeLayer = await this.authService.canManageProject(acl);
   }
 
   ngOnDestroy(): void {

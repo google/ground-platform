@@ -95,7 +95,7 @@ export class ProjectService {
   }
 
   getProjectAcl(project: Project) {
-    return project.acl
+    return project?.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()

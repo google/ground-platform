@@ -21,7 +21,8 @@ import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/router/router.service';
-import { AuthManager } from '../../services/auth/auth.manager';
+import { take } from 'rxjs/operators';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'ground-layer-list',
@@ -31,11 +32,12 @@ import { AuthManager } from '../../services/auth/auth.manager';
 export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
+  canViewAddLayer = false;
 
   constructor(
-    projectService: ProjectService,
+    private projectService: ProjectService,
     private navigationService: NavigationService,
-    private authManager: AuthManager
+    private authService: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -46,13 +48,19 @@ export class LayerListComponent {
           List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
+    this.initLayerListPermission();
+  }
+
+  async initLayerListPermission() {
+    const project = await this.projectService
+      .getActiveProject$()
+      .pipe(take(1))
+      .toPromise();
+    const acl = this.projectService.getProjectAcl(project);
+    this.canViewAddLayer = await this.authService.canManageProject(acl);
   }
 
   onAddLayer() {
     this.navigationService.setLayerId(NavigationService.LAYER_ID_NEW);
-  }
-
-  canViewAddLayer() {
-    return this.authManager.canManageProject();
   }
 }

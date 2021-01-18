@@ -16,7 +16,7 @@
 
 import { DataStoreService } from '../data-store/data-store.service';
 import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Injectable } from '@angular/core';
 import firebase from 'firebase/app';
@@ -24,6 +24,8 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { shareReplay } from 'rxjs/operators';
+import { AclEntry } from '../../shared/models/acl-entry.model';
+import { Role } from '../../shared/models/role.model';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -73,5 +75,22 @@ export class AuthService {
   async signOut() {
     await this.afAuth.signOut();
     return this.router.navigate(['/']);
+  }
+
+  private async getUserEmail() {
+    const user = await this.user$.pipe(take(1)).toPromise();
+    return user?.email;
+  }
+
+  async canManageProject(acl: AclEntry[]) {
+    const userEmail = await this.getUserEmail();
+    const entry = acl.find(val => val.email === userEmail);
+    if (!entry) {
+      return false;
+    }
+    if (entry.role === Role.MANAGER || entry.role === Role.OWNER) {
+      return true;
+    }
+    return false;
   }
 }
