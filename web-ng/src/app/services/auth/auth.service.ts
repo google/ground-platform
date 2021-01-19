@@ -25,7 +25,6 @@ import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { shareReplay } from 'rxjs/operators';
 import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Role } from '../../shared/models/role.model';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -39,6 +38,8 @@ const ANONYMOUS_USER: User = {
 })
 export class AuthService {
   user$: Observable<User>;
+  currentUser?: User;
+
   constructor(
     private afAuth: AngularFireAuth,
     private router: Router,
@@ -57,6 +58,7 @@ export class AuthService {
       // it as well.
       shareReplay(1)
     );
+    this.user$.subscribe(user => (this.currentUser = user));
   }
 
   getUser$(): Observable<User> {
@@ -77,20 +79,11 @@ export class AuthService {
     return this.router.navigate(['/']);
   }
 
-  private async getUserEmail() {
-    const user = await this.user$.pipe(take(1)).toPromise();
-    return user?.email;
-  }
-
-  async canManageProject(acl: AclEntry[]) {
-    const userEmail = await this.getUserEmail();
-    const entry = acl.find(val => val.email === userEmail);
-    if (!entry) {
-      return false;
-    }
-    if (entry.role === Role.MANAGER || entry.role === Role.OWNER) {
-      return true;
-    }
-    return false;
+  /**
+   * Checks if a user has manager or owner level permissions of the project.
+   */
+  canManageProject(acl: AclEntry[]): boolean {
+    const userEmail = this.currentUser?.email;
+    return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }

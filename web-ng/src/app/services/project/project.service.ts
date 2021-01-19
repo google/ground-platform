@@ -94,7 +94,10 @@ export class ProjectService {
     return Promise.resolve(projectId);
   }
 
-  getProjectAcl(project: Project) {
+  /**
+   * Returns the acl of the project.
+   */
+  getProjectAcl(project: Project): AclEntry[] {
     return project?.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))

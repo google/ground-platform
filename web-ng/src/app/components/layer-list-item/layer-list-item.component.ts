@@ -144,13 +144,13 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  async initLayerItemPermission() {
+  async initLayerItemPermission(): Promise<void> {
     const project = await this.projectService
       .getActiveProject$()
       .pipe(take(1))
       .toPromise();
     const acl = this.projectService.getProjectAcl(project);
-    this.canViewCustomizeLayer = await this.authService.canManageProject(acl);
+    this.canViewCustomizeLayer = this.authService.canManageProject(acl);
   }
 
   ngOnDestroy(): void {

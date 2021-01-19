@@ -51,13 +51,13 @@ export class LayerListComponent {
     this.initLayerListPermission();
   }
 
-  async initLayerListPermission() {
+  async initLayerListPermission(): Promise<void> {
     const project = await this.projectService
       .getActiveProject$()
       .pipe(take(1))
       .toPromise();
     const acl = this.projectService.getProjectAcl(project);
-    this.canViewAddLayer = await this.authService.canManageProject(acl);
+    this.canViewAddLayer = this.authService.canManageProject(acl);
   }
 
   onAddLayer() {
