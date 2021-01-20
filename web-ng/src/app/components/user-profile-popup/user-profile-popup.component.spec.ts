@@ -20,6 +20,7 @@ import { UserProfilePopupComponent } from './user-profile-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('UserProfilePopupComponent', () => {
   let component: UserProfilePopupComponent;
@@ -33,7 +34,7 @@ describe('UserProfilePopupComponent', () => {
         declarations: [UserProfilePopupComponent],
         imports: [MatDialogModule],
         providers: [
-          { provide: AuthService, useValue: {} },
+          { provide: AuthService, useValue: { getUser$: () => of() } },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },

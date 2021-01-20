@@ -19,6 +19,7 @@ import { DataStoreService } from '../data-store/data-store.service';
 import { LayerService } from './layer.service';
 import { ProjectService } from './../project/project.service';
 import { RouterTestingModule } from '@angular/router/testing';
+import { NEVER } from 'rxjs';
 
 describe('LayerService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
@@ -27,7 +28,7 @@ describe('LayerService', () => {
       imports: [RouterTestingModule],
       providers: [
         { provide: DataStoreService, useValue: dataStoreServiceStub },
-        { provide: ProjectService, useValue: {} },
+        { provide: ProjectService, useValue: { getProjectAcl: () => NEVER } },
       ],
     })
   );
