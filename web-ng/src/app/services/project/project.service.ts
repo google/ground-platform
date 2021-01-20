@@ -41,7 +41,7 @@ export class ProjectService {
     private authService: AuthService
   ) {
     // Reload active project each time authenticated user changes.
-    this.activeProject$ = authService.user$.pipe(
+    this.activeProject$ = authService.getUser$().pipe(
       switchMap(() =>
         //  on each change to project id.
         this.activeProjectId$.pipe(

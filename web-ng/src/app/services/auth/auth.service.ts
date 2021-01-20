@@ -37,7 +37,7 @@ const ANONYMOUS_USER: User = {
   providedIn: 'root',
 })
 export class AuthService {
-  user$: Observable<User>;
+  private user$: Observable<User>;
   private currentUser?: User;
 
   constructor(
