@@ -61,6 +61,7 @@ class MockProjectService {
     return of<Project>(mockProject);
   }
   getProjectAcl() {}
+  getCurrentProject() {}
 }
 
 const projectService = new MockProjectService();

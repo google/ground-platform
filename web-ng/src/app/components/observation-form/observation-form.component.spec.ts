@@ -144,6 +144,7 @@ class MockProjectService {
     return of<Project>(MockModel.project001);
   }
   getProjectAcl() {}
+  getCurrentProject() {}
 }
 
 class MockFeatureService {
