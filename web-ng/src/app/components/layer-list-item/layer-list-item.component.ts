@@ -26,7 +26,6 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { ProjectService } from '../../services/project/project.service';
 import { AuthService } from '../../services/auth/auth.service';
 
@@ -45,7 +44,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
   subscription: Subscription = new Subscription();
-  canViewCustomizeLayer = false;
+  canCustomizeLayer = false;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -144,13 +143,13 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  async initLayerItemPermission(): Promise<void> {
-    const project = await this.projectService
-      .getActiveProject$()
-      .pipe(take(1))
-      .toPromise();
+  initLayerItemPermission(): void {
+    const project = this.projectService.getCurrentProject();
+    if (!project) {
+      return;
+    }
     const acl = this.projectService.getProjectAcl(project);
-    this.canViewCustomizeLayer = this.authService.canManageProject(acl);
+    this.canCustomizeLayer = this.authService.canManageProject(acl);
   }
 
   ngOnDestroy(): void {

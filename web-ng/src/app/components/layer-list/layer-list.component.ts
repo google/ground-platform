@@ -21,7 +21,6 @@ import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/router/router.service';
-import { take } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
@@ -32,7 +31,7 @@ import { AuthService } from '../../services/auth/auth.service';
 export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
-  canViewAddLayer = false;
+  canAddLayer = false;
 
   constructor(
     private projectService: ProjectService,
@@ -51,13 +50,13 @@ export class LayerListComponent {
     this.initLayerListPermission();
   }
 
-  async initLayerListPermission(): Promise<void> {
-    const project = await this.projectService
-      .getActiveProject$()
-      .pipe(take(1))
-      .toPromise();
+  initLayerListPermission(): void {
+    const project = this.projectService.getCurrentProject();
+    if (!project) {
+      return;
+    }
     const acl = this.projectService.getProjectAcl(project);
-    this.canViewAddLayer = this.authService.canManageProject(acl);
+    this.canAddLayer = this.authService.canManageProject(acl);
   }
 
   onAddLayer() {

@@ -38,7 +38,7 @@ const ANONYMOUS_USER: User = {
 })
 export class AuthService {
   user$: Observable<User>;
-  currentUser?: User;
+  private currentUser?: User;
 
   constructor(
     private afAuth: AngularFireAuth,

@@ -34,6 +34,7 @@ import { AclEntry } from '../../shared/models/acl-entry.model';
 export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
+  private currentProject?: Project;
 
   constructor(
     private dataStore: DataStoreService,
@@ -58,6 +59,7 @@ export class ProjectService {
       // project to be reloaded.
       shareReplay(1)
     );
+    this.activeProject$.subscribe(project => (this.currentProject = project));
   }
 
   activateProject(id: string) {
@@ -104,5 +106,9 @@ export class ProjectService {
       .toList()
       .sortBy(entry => entry.email)
       .toArray();
+  }
+
+  getCurrentProject(): Project | undefined {
+    return this.currentProject;
   }
 }
