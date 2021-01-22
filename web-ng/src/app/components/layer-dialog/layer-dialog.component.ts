@@ -29,7 +29,6 @@ import {
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
@@ -72,10 +71,10 @@ export class LayerDialogComponent implements OnDestroy {
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private router: Router,
     private dialog: MatDialog,
     private layerService: LayerService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private navigationService: NavigationService
   ) {
     this.lang = 'en';
     this.defaultLayerColor = '#ff9131';
@@ -222,10 +221,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   onClose() {
     this.dialogRef.close();
-    // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([
-      `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
-    ]);
+    return this.navigationService.setProjectId(this.projectId!);
   }
 
   setLayerName(value: string) {

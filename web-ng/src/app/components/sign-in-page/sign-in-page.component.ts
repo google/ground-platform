@@ -17,7 +17,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FirebaseUISignInFailure } from 'firebaseui-angular';
 import { OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from './../../services/auth/auth.service';
 import { filter } from 'rxjs/operators';
@@ -30,7 +29,10 @@ import { NavigationService } from '../../services/router/router.service';
 })
 export class SignInPageComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private navigationService: NavigationService
+  ) {}
 
   ngOnInit() {
     this.subscription.add(
@@ -38,12 +40,7 @@ export class SignInPageComponent implements OnInit, OnDestroy {
       this.authService
         .isAuthenticated$()
         .pipe(filter(isAuth => isAuth))
-        .subscribe(() =>
-          this.router.navigate([
-            NavigationService.PROJECT_SEGMENT,
-            NavigationService.PROJECT_ID_NEW,
-          ])
-        )
+        .subscribe(() => this.navigationService.newProject())
     );
   }
 
