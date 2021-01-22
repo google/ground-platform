@@ -33,13 +33,15 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   lang: string;
   title: string;
   projectId!: string;
+  canShare = false;
 
   subscription: Subscription = new Subscription();
   constructor(
     public auth: AuthService,
     private dialog: MatDialog,
     private projectService: ProjectService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.lang = 'en';
     this.title = '';
@@ -50,6 +52,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
         this.projectId = project.id;
       })
     );
+    this.initPermission();
   }
 
   ngOnInit() {}
@@ -92,6 +95,15 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
       width: '580px',
       autoFocus: false,
     });
+  }
+
+  initPermission(): void {
+    const project = this.projectService.getCurrentProject();
+    if (!project) {
+      return;
+    }
+    const acl = this.projectService.getProjectAcl(project);
+    this.canShare = this.authService.canManageProject(acl);
   }
 
   ngOnDestroy() {

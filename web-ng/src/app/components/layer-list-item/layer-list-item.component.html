@@ -39,7 +39,7 @@ limitations under the License.
           <mat-icon>edit</mat-icon>
           <span>Customize layer</span>
         </button>
-        <button mat-menu-item (click)="onImportCsv()">
+        <button mat-menu-item (click)="onImportCsv()" *ngIf="canCustomizeLayer">
           <mat-icon>cloud_upload</mat-icon>
           <span>Import CSV</span>
         </button>
