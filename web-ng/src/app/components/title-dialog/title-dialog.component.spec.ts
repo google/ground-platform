@@ -29,7 +29,7 @@ describe('TitleDialogComponent', () => {
     'createProject',
   ]);
   const navigationService = jasmine.createSpyObj('NavigationService', [
-    'setProjectId',
+    'selectProject',
   ]);
 
   beforeEach(

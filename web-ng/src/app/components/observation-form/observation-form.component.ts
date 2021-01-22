@@ -139,7 +139,7 @@ export class ObservationFormComponent {
   }
 
   navigateToFeature() {
-    this.navigationService.setObservationId(null);
+    this.navigationService.editObservation(null);
   }
 
   convertObservationToFormGroup(observation: Observation): FormGroup {

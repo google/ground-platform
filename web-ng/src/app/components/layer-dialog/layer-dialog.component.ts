@@ -221,7 +221,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   onClose() {
     this.dialogRef.close();
-    return this.navigationService.setProjectId(this.projectId!);
+    return this.navigationService.selectProject(this.projectId!);
   }
 
   setLayerName(value: string) {

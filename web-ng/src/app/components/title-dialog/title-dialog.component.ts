@@ -41,7 +41,7 @@ export class TitleDialogComponent {
       const projectId = await this.projectService.createProject(
         this.projectTitleForm.get('title')?.value
       );
-      this.navigationService.setProjectId(projectId);
+      this.navigationService.selectProject(projectId);
       this.matDialogRef.close();
     } catch (e) {
       console.warn('Project creation failed', e);

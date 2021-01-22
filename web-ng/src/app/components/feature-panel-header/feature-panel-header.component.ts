@@ -108,7 +108,7 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   onClose() {
     // ng zone is run to fix navigation triggered outside Angular zone warning.
     this.zone.run(() => {
-      this.navigationService.setProjectId(this.projectId!);
+      this.navigationService.selectProject(this.projectId!);
     });
   }
 

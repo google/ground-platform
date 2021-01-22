@@ -100,17 +100,17 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   }
 
   onEditObservationClick(observation: Observation) {
-    this.navigationService.setObservationId(observation.id);
+    this.navigationService.editObservation(observation.id);
   }
 
   onAddObservationClick() {
-    this.navigationService.setObservationId(
+    this.navigationService.editObservation(
       NavigationService.OBSERVATION_ID_NEW
     );
   }
 
   onDeleteObservationClick(id: string) {
-    this.navigationService.setObservationId(id);
+    this.navigationService.editObservation(id);
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
@@ -143,7 +143,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.zone.run(() => {
-      this.navigationService.setProjectId(this.projectId!);
+      this.navigationService.selectProject(this.projectId!);
     });
   }
 

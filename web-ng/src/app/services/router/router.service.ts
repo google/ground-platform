@@ -156,7 +156,7 @@ export class NavigationService {
    * Navigate to the current URL, updating the observation id in the URL
    * fragment.
    */
-  setObservationId(id: string | null) {
+  editObservation(id: string | null) {
     this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
 
@@ -171,7 +171,7 @@ export class NavigationService {
   /**
    * Navigate to the URL with new project id.
    */
-  setProjectId(id: string) {
+  selectProject(id: string) {
     this.router.navigateByUrl(`${NavigationService.PROJECT_SEGMENT}/${id}`);
   }
 
