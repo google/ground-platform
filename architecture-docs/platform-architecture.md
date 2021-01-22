@@ -3,7 +3,7 @@
 <!---
 TODO: link to Android architecture docs after https://github.com/google/ground-android/pull/630 is merged.
 -->
-Ground is made up of three primary components: a [Firebase backend](architecture-docs/firebase-architecture.md), an [Angular web app](architecture-docs/web-app-architecture.md), and a native Android app.
+Ground is made up of three primary components: a [Firebase backend](architecture-docs/firebase-implementation-overview.md), an [Angular web app](architecture-docs/web-app-architecture.md), and a native Android app.
 
 <!---
 Editable diagram source:  https://docs.google.com/drawings/d/1xUtCkWZTDHkf77M_50EIO0n75LBitSad3pebvJM-jdw
