@@ -22,21 +22,8 @@
 </mat-dialog-content>
 <mat-dialog-actions fxLayout fxLayoutAlign="end" class="action-dialog">
   <div fxLayoutAlign="end">
-    <button
-      type="button"
-      mat-raised-button
-      (click)="close()"
-      class="btn-cancel"
-    >
-      Cancel
-    </button>
-    <button
-      color="primary"
-      mat-raised-button
-      type="submit"
-      class="btn-save"
-      (click)="onSave()"
-    >
+    <button type="button" mat-raised-button (click)="close()">Cancel</button>
+    <button color="primary" mat-raised-button type="submit" (click)="onSave()">
       Apply
     </button>
   </div>
