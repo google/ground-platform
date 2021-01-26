@@ -34,6 +34,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
@@ -67,6 +68,7 @@ describe('LayerDialogComponent', () => {
           MatInputModule,
           MatDialogModule,
           MatIconModule,
+          MatCheckboxModule,
         ],
         providers: [
           { provide: ProjectService, useValue: {} },

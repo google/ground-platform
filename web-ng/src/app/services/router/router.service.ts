@@ -31,8 +31,12 @@ export class NavigationService {
   private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
-  static readonly LAYER_ID_NEW = ':new';
-  static readonly OBSERVATION_ID_NEW = ':new';
+  static readonly LAYER_ID_NEW = 'new';
+  static readonly OBSERVATION_ID_NEW = 'new';
+  static readonly PROJECT_ID_NEW = 'new';
+  static readonly PROJECT_ID = 'projectId';
+  static readonly PROJECT_SEGMENT = 'project';
+  static readonly SIGN_IN_SEGMENT = 'signin';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
@@ -61,7 +65,7 @@ export class NavigationService {
     this.activatedRoute = route;
     // Pipe values from URL query parameters.
     this.projectId$ = route.paramMap.pipe(
-      map(params => params.get('projectId'))
+      map(params => params.get(NavigationService.PROJECT_ID))
     );
     // Pipe values from URL fragment.
     const fragmentParams$ = route.fragment.pipe(
@@ -173,8 +177,19 @@ export class NavigationService {
     this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
   }
 
+  /**
+   * Navigate to the current URL, updating the layer id in the URL
+   * fragment.
+   */
   setLayerId(id: string) {
     this.setFragmentParam(NavigationService.LAYER_ID_FRAGMENT_PARAM, id);
+  }
+
+  /**
+   * Navigate to the URL with new project id
+   */
+  setProjectId(id: string) {
+    this.router.navigateByUrl(`${NavigationService.PROJECT_SEGMENT}/${id}`);
   }
 }
 

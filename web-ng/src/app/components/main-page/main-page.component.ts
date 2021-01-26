@@ -24,6 +24,10 @@ import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/router/router.service';
+import { AuthService } from '../../services/auth/auth.service';
+import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
 
 /**
  * Root component for main application page showing map, layers list, and
@@ -44,7 +48,9 @@ export class MainPageComponent implements OnInit {
     private projectService: ProjectService,
     private featureService: FeatureService,
     private observationService: ObservationService,
-    private dialog: MatDialog
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private router: Router
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
@@ -52,6 +58,14 @@ export class MainPageComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Show title dialog to assign title on a new project.
+    this.subscription.add(
+      this.navigationService
+        .getProjectId$()
+        .subscribe(
+          id => id === NavigationService.LAYER_ID_NEW && this.showTitleDialog()
+        )
+    );
     // Show layer dialog when non-null layer id set in URL.
     this.subscription.add(
       this.navigationService
@@ -70,10 +84,25 @@ export class MainPageComponent implements OnInit {
         .getObservationId$()
         .subscribe(id => this.editObservation(id))
     );
+    // Redirect to sign in page if user is not authenticated.
+    this.subscription.add(
+      this.authService.isAuthenticated$().subscribe(isAuthenticated => {
+        if (!isAuthenticated && !environment.useEmulators) {
+          this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private showTitleDialog() {
+    this.dialog.open(TitleDialogComponent, {
+      width: '500px',
+      disableClose: true,
+    });
   }
 
   private showEditLayerDialog(layerId: string) {
@@ -82,9 +111,9 @@ export class MainPageComponent implements OnInit {
         autoFocus: layerId === NavigationService.LAYER_ID_NEW,
         data: {
           projectId: project.isUnsavedNew()
-            ? Project.PROJECT_ID_NEW
+            ? NavigationService.PROJECT_ID_NEW
             : project.id,
-          createLayer: layerId === Project.PROJECT_ID_NEW,
+          createLayer: layerId === NavigationService.PROJECT_ID_NEW,
           layer: project.layers?.get(layerId),
         },
       })

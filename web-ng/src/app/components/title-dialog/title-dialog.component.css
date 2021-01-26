@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,12 @@
  * limitations under the License.
  */
 
-import { Form } from './form/form.model';
-import { StringMap } from './string-map.model';
-import { Map } from 'immutable';
+.create-project-btn {
+  color: white;
+  background-color: rgb(0, 145, 19);
+  font-family: 'Open Sans', Arial, sans-serif;
+}
 
-export class Layer {
-  constructor(
-    readonly id: string,
-    readonly index: number,
-    readonly color?: string,
-    readonly name?: StringMap,
-    readonly forms?: Map<string, Form>,
-    readonly contributorsCanAdd?: string[]
-  ) {}
-
-  getForm(formId: string): Form | undefined {
-    return this.forms?.get(formId);
-  }
-
-  withIndex(index: number): Layer {
-    return { ...this, index };
-  }
+.title-input {
+  width: 100%;
 }

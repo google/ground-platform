@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 <mat-list-item>
   <h3 matLine>
     <mat-icon
@@ -32,7 +31,11 @@ limitations under the License.
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #layerMenu="matMenu">
-        <button mat-menu-item (click)="onCustomizeLayer()">
+        <button
+          mat-menu-item
+          (click)="onCustomizeLayer()"
+          *ngIf="canCustomizeLayer"
+        >
           <mat-icon>edit</mat-icon>
           <span>Customize layer</span>
         </button>
@@ -48,7 +51,7 @@ limitations under the License.
         </a>
         <button mat-menu-item (click)="onDeleteLayer()">
           <mat-icon>delete_forever</mat-icon>
-          <span>Delete</span>
+          <span>Delete layer</span>
         </button>
       </mat-menu>
     </div>

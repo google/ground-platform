@@ -5,7 +5,22 @@
   },
   "hosting": {
     "public": "web-ng/dist/web-ng",
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/signin",
+        "type": 301
+      }
+    ],
     "rewrites": [
+      {
+        "source": "/importCsv",
+        "function": "importCsv"
+      },
+      {
+        "source": "/exportCsv",
+        "function": "exportCsv"
+      },
       {
         "source": "**/!(*.*)",
         "destination": "/index.html"

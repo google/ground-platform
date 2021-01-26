@@ -101,6 +101,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         type: FieldType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_MULTIPLE,
       },
+      {
+        icon: 'photo',
+        label: 'Photo',
+        type: FieldType.PHOTO,
+      },
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
@@ -142,8 +147,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges) {
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
-      const options = this.formOptions?.options;
-      options?.sortBy(option => option.index);
     }
     this.formGroup.setValue({
       label: this.label,
@@ -161,6 +164,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         return this.selectFieldOptions[
           this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
         ];
+      case FieldType.PHOTO:
+        return this.selectFieldOptions[3];
       default:
         throw new Error(`Unsupported field type${this.fieldType}`);
     }
@@ -288,9 +293,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   drop(event: CdkDragDrop<string[]>) {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
-    const optionAtPrevIndex = options.get(event.previousIndex);
-    const optionAtCurrentIndex = options.get(event.currentIndex);
+    let optionAtPrevIndex = options.get(event.previousIndex);
+    let optionAtCurrentIndex = options.get(event.currentIndex);
     if (optionAtPrevIndex && optionAtCurrentIndex) {
+      optionAtPrevIndex = optionAtPrevIndex.withIndex(event.currentIndex);
+      optionAtCurrentIndex = optionAtCurrentIndex.withIndex(
+        event.previousIndex
+      );
       options = options.set(event.previousIndex, optionAtCurrentIndex);
       options = options.set(event.currentIndex, optionAtPrevIndex);
     }

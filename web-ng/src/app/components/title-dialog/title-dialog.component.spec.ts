@@ -14,37 +14,41 @@
  * limitations under the License.
  */
 
-import { AuthService } from './../../services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { UserProfilePopupComponent } from './user-profile-popup.component';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { TitleDialogComponent } from './title-dialog.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ProjectService } from '../../services/project/project.service';
+import { NavigationService } from '../../services/router/router.service';
 
-describe('UserProfilePopupComponent', () => {
-  let component: UserProfilePopupComponent;
-  let fixture: ComponentFixture<UserProfilePopupComponent>;
-  const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
+describe('TitleDialogComponent', () => {
+  let component: TitleDialogComponent;
+  let fixture: ComponentFixture<TitleDialogComponent>;
+  const dialogRef: Partial<MatDialogRef<TitleDialogComponent>> = {};
+  const projectService = jasmine.createSpyObj('ProjectService', [
+    'createProject',
+  ]);
+  const navigationService = jasmine.createSpyObj('NavigationService', [
+    'setProjectId',
+  ]);
 
   beforeEach(
     waitForAsync(() => {
-      const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
-        declarations: [UserProfilePopupComponent],
+        declarations: [TitleDialogComponent],
         imports: [MatDialogModule],
         providers: [
-          { provide: AuthService, useValue: { getUser$: () => of() } },
-          { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
-          { provide: Router, useValue: routerSpy },
+          { provide: ProjectService, useValue: projectService },
+          { provide: NavigationService, useValue: navigationService },
         ],
+        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
     })
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(UserProfilePopupComponent);
+    fixture = TestBed.createComponent(TitleDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -53,7 +57,3 @@ describe('UserProfilePopupComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-
-function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
-}
