@@ -25,13 +25,17 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ColorEvent } from 'ngx-color';
+import { Layer } from '../../shared/models/layer.model';
 
 @Component({
   selector: 'app-color-picker',
   templateUrl: './color-picker.component.html',
-  styleUrls: ['./color-picker.component.css'],
+  styleUrls: ['./color-picker.component.scss'],
 })
 export class ColorPickerComponent implements OnInit {
+  layer?: Layer;
+  projectId?: string;
+  color!: string;
   private readonly matDialogRef: MatDialogRef<ColorPickerComponent>;
   private readonly triggerElementRef: ElementRef;
   @Output() onColorPicked: EventEmitter<{}> = new EventEmitter();
@@ -56,7 +60,7 @@ export class ColorPickerComponent implements OnInit {
       top: `${rect.bottom + 10}px`,
     };
     matDialogConfig.width = '300px';
-    matDialogConfig.height = '400px';
+    matDialogConfig.height = '300px';
     this.matDialogRef.updateSize(matDialogConfig.width, matDialogConfig.height);
     this.matDialogRef.updatePosition(matDialogConfig.position);
   }
@@ -70,6 +74,11 @@ export class ColorPickerComponent implements OnInit {
   }
 
   handleColorChange($event: ColorEvent) {
-    this.onColorPicked.emit($event);
+    this.color = $event.color.hex;
+  }
+
+  onSave() {
+    this.onColorPicked.emit(this.color);
+    this.close();
   }
 }
