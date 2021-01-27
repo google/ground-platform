@@ -25,6 +25,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { User } from '../../shared/models/user.model';
+import { NavigationService } from '../router/router.service';
 
 @Injectable({
   providedIn: 'root',
@@ -39,7 +40,7 @@ export class AuthGuard implements CanActivate {
     return this.authService.getUser$().pipe(
       map(user => this.canUserActivate(user, state.url)),
       catchError(() => {
-        this.router.navigate([AuthService.SIGN_IN_URL]);
+        this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
         return of(false);
       })
     );
@@ -49,17 +50,20 @@ export class AuthGuard implements CanActivate {
     if (environment.useEmulators) {
       return true;
     }
-    if (url.includes(AuthService.SIGN_IN_URL)) {
+    if (url.includes(NavigationService.SIGN_IN_SEGMENT)) {
       if (!user.isAuthenticated) {
         return true;
       }
-      this.router.navigate(AuthService.DEFAULT_ROUTE);
+      this.router.navigate([
+        NavigationService.PROJECT_SEGMENT,
+        NavigationService.PROJECT_ID_NEW,
+      ]);
       return false;
     }
     if (user.isAuthenticated) {
       return true;
     }
-    this.router.navigate([AuthService.SIGN_IN_URL]);
+    this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
     return false;
   }
 }

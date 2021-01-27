@@ -25,6 +25,8 @@ import { Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { NavigationService } from '../router/router.service';
+import { AclEntry } from '../../shared/models/acl-entry.model';
 
 @Injectable({
   providedIn: 'root',
@@ -32,20 +34,21 @@ import { environment } from '../../../environments/environment';
 export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
+  private currentProject?: Project;
 
   constructor(
     private dataStore: DataStoreService,
     private authService: AuthService
   ) {
     // Reload active project each time authenticated user changes.
-    this.activeProject$ = authService.user$.pipe(
+    this.activeProject$ = authService.getUser$().pipe(
       switchMap(() =>
         //  on each change to project id.
         this.activeProjectId$.pipe(
           // Asynchronously load project. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => {
-            if (id === Project.PROJECT_ID_NEW) {
+            if (id === NavigationService.PROJECT_ID_NEW) {
               return of(Project.UNSAVED_NEW);
             }
             return this.dataStore.loadProject$(id);
@@ -56,6 +59,7 @@ export class ProjectService {
       // project to be reloaded.
       shareReplay(1)
     );
+    this.activeProject$.subscribe(project => (this.currentProject = project));
   }
 
   activateProject(id: string) {
@@ -90,5 +94,21 @@ export class ProjectService {
       offlineBaseMapSources
     );
     return Promise.resolve(projectId);
+  }
+
+  /**
+   * Returns the acl of the project.
+   */
+  getProjectAcl(project: Project): AclEntry[] {
+    return project?.acl
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toList()
+      .sortBy(entry => entry.email)
+      .toArray();
+  }
+
+  getCurrentProject(): Project | undefined {
+    return this.currentProject;
   }
 }

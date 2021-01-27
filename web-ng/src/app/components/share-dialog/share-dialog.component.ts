@@ -151,12 +151,7 @@ export class ShareDialogComponent {
     this.projectId = project.id;
     this.originalAcl = project.acl;
     // Sort users by email address.
-    this.acl = project.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
+    this.acl = this.projectService.getProjectAcl(project);
   }
 
   private updateChangeState() {

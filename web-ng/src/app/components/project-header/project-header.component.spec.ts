@@ -39,7 +39,7 @@ describe('ProjectHeaderComponent', () => {
         imports: [InlineEditorModule, MatIconModule, MatDialogModule],
         declarations: [ProjectHeaderComponent],
         providers: [
-          { provide: AuthService, useValue: { user$ } },
+          { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
           {
