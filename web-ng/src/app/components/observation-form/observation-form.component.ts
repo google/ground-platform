@@ -88,6 +88,8 @@ export class ObservationFormComponent {
             )
           ) {
             this.onSave();
+          } else {
+            this.observationForm = undefined;
           }
         }
         if (observation instanceof Observation) {
