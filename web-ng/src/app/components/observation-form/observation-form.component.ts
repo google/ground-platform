@@ -78,6 +78,18 @@ export class ObservationFormComponent {
     observationService
       .getSelectedObservation$()
       .subscribe((observation?: Observation | LoadingState) => {
+        if (
+          observation === LoadingState.NOT_LOADED &&
+          this.observationForm?.dirty
+        ) {
+          if (
+            confirm(
+              'You have unsaved changes in observation form, do you want to save them?'
+            )
+          ) {
+            this.onSave();
+          }
+        }
         if (observation instanceof Observation) {
           this.observation = observation;
           this.observationFields = observation!
