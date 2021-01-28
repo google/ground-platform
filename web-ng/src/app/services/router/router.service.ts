@@ -191,7 +191,9 @@ export class NavigationService {
   }
 
   editObservation(id: string | null) {
-    this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
+    this.setFragmentParam(
+      Map([[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id]])
+    );
   }
 
   /**
