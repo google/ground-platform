@@ -190,6 +190,10 @@ export class NavigationService {
     );
   }
 
+  editObservation(id: string | null) {
+    this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
+  }
+
   /**
    * Navigate to the current URL, updating the layer id in the URL
    * fragment.
@@ -201,10 +205,34 @@ export class NavigationService {
   }
 
   /**
-   * Navigate to the URL with new project id
+   * Navigate to the URL with new project id.
    */
-  setProjectId(id: string) {
+  selectProject(id: string) {
     this.router.navigateByUrl(`${NavigationService.PROJECT_SEGMENT}/${id}`);
+  }
+
+  /**
+   * Navigate to the URL for new project creation.
+   */
+  newProject() {
+    this.router.navigate([
+      NavigationService.PROJECT_SEGMENT,
+      NavigationService.PROJECT_ID_NEW,
+    ]);
+  }
+
+  /**
+   * Navigate to the URL for signin.
+   */
+  signIn() {
+    this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+  }
+
+  /**
+   * Navigate to the URL for signout.
+   */
+  signOut() {
+    this.router.navigate(['/']);
   }
 }
 

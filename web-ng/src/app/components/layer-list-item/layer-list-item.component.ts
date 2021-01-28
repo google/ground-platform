@@ -21,7 +21,6 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
@@ -50,7 +49,6 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private confirmationDialog: MatDialog,
     private importDialog: MatDialog,
-    private router: Router,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private projectService: ProjectService,
@@ -120,9 +118,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onClose() {
-    return this.router.navigate([
-      `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
-    ]);
+    return this.navigationService.selectProject(this.projectId!);
   }
 
   onImportCsv() {
