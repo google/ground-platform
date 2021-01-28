@@ -33,6 +33,7 @@ import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/router/router.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
+import { startWith } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global google*/
@@ -67,7 +68,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     draggableCursor: '',
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
-  getFeatureId$: Observable<string | null>;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -79,7 +79,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
-    this.getFeatureId$ = this.navigationService.getFeatureId$();
   }
 
   ngAfterViewInit() {
@@ -87,7 +86,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       combineLatest([
         this.activeProject$,
         this.features$,
-        this.getFeatureId$,
+        this.featureService.getSelectedFeatureId$().pipe(startWith('')),
       ]).subscribe(([project, features, selectedFeatureId]) =>
         this.onProjectAndFeaturesUpdate(project, features, selectedFeatureId)
       )
@@ -105,17 +104,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
-    if (!this.navigationService.setFeatureId(null)) {
-      return Promise.resolve();
-    }
     this.selectMarker(undefined);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
-    if (!selectedLayerId) {
-      return Promise.resolve();
-    }
     switch (editMode) {
       case EditMode.AddPoint:
+        if (!selectedLayerId) {
+          return Promise.resolve();
+        }
         this.drawingToolsService.setEditMode(EditMode.None);
         return this.featureService.addPoint(
           event.latLng.lat(),
@@ -124,9 +120,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         );
       case EditMode.AddPolygon:
         // TODO: Implement adding polygon.
+        if (!selectedLayerId) {
+          return Promise.resolve();
+        }
         return Promise.resolve();
       case EditMode.None:
       default:
+        this.navigationService.setFeatureId(null);
         return Promise.resolve();
     }
   }
@@ -134,11 +134,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private onProjectAndFeaturesUpdate(
     project: Project,
     features: List<Feature>,
-    selectedFeatureId: string | null
+    selectedFeatureId: string
   ): void {
     this.removeMarkersAndGeoJsonsOnMap(features);
-    this.addMarkersAndGeoJsonsToMap(project, features, selectedFeatureId);
+    this.addMarkersAndGeoJsonsToMap(project, features);
     this.updateStylingFunctionForAllGeoJsons(project);
+    this.selectMarkerWithFeatureId(selectedFeatureId);
   }
 
   private removeMarkersAndGeoJsonsOnMap(features: List<Feature>) {
@@ -166,8 +167,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private addMarkersAndGeoJsonsToMap(
     project: Project,
-    features: List<Feature>,
-    selectedFeatureId: string | null
+    features: List<Feature>
   ) {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
@@ -178,7 +178,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     features.forEach(feature => {
       if (feature instanceof LocationFeature) {
         if (!locationFeatureIds.includes(feature.id)) {
-          this.addMarkerToMap(project, feature, selectedFeatureId);
+          this.addMarkerToMap(project, feature);
         }
       }
       if (feature instanceof GeoJsonFeature) {
@@ -189,11 +189,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private addMarkerToMap(
-    project: Project,
-    feature: LocationFeature,
-    selectedFeatureId: string | null
-  ) {
+  private addMarkerToMap(project: Project, feature: LocationFeature) {
     const color = project.layers.get(feature.layerId)?.color;
     const icon = {
       url: getPinImageSource(color),
@@ -214,11 +210,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
-      if (!this.navigationService.setFeatureId(feature.id)) {
-        return;
-      }
       this.selectMarker(marker);
-      this.panAndZoom(options.position! as google.maps.LatLng);
+      this.navigationService.setFeatureId(feature.id);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
       const newFeature = new LocationFeature(
@@ -228,16 +221,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       );
       this.featureService.updatePoint(newFeature);
     });
-    if (marker.getTitle() === this.selectedMarker?.getTitle()) {
-      this.selectMarker(marker);
-    }
     this.markers.push(marker);
-    if (selectedFeatureId === feature.id) {
-      this.selectMarker(marker);
-    }
   }
 
-  private panAndZoom(position: google.maps.LatLng) {
+  private panAndZoom(position: google.maps.LatLng | null | undefined) {
+    if (!position) {
+      return;
+    }
     this.map.panTo(position);
     if (this.map.getZoom() < zoomedInLevel) {
       this.map.zoom = zoomedInLevel;
@@ -275,6 +265,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.selectedMarker.setDraggable(false);
     }
     this.selectedMarker = marker;
+    this.panAndZoom(marker?.getPosition());
+  }
+
+  private selectMarkerWithFeatureId(selectedFeatureId: string) {
+    for (const marker of this.markers) {
+      if (marker.getTitle() === selectedFeatureId) {
+        this.selectMarker(marker);
+      }
+    }
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {

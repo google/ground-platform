@@ -16,7 +16,7 @@
 
 <mat-button-toggle-group
   class="drawing-buttons"
-  [disabled]="observationId$ | async"
+  [disabled]="disableControls$ | async"
   [(value)] = "selectedValue">
   <mat-button-toggle class="add-point-button" value = "{{pointValue}}" (click)="onButtonClick()">
     <img class="add-point-icon" [src]="addPointIcon" />

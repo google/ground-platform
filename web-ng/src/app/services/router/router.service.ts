@@ -19,6 +19,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
+import { Map } from 'immutable';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -137,27 +138,37 @@ export class NavigationService {
    * Navigate to the current URL, replacing the single URL fragment param
    * with the specified value.
    */
-  private setFragmentParam(key: string, value: string | null) {
-    if (value) {
-      this.setFragmentParams(this.getFragmentParams().set(key, value));
-    } else {
-      this.setFragmentParams(this.getFragmentParams().delete(key));
+  private setFragmentParam(updates: Map<string, string | null>) {
+    let params = this.getFragmentParams();
+    for (const [key, value] of updates) {
+      if (value) {
+        params = params.set(key, value);
+      } else {
+        params = params.delete(key);
+      }
     }
+    this.setFragmentParams(params);
+  }
+
+  /**
+   * Get current feature id in the URL fragment.
+   */
+  getFeatureId(): string | null {
+    return this.getFragmentParams().get(
+      NavigationService.FEATURE_ID_FRAGMENT_PARAM
+    );
   }
 
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string | null): boolean {
-    if (
-      this.getFragmentParams().get(
-        NavigationService.OBSERVATION_ID_FRAGMENT_PARAM
-      ) !== null
-    ) {
-      return false;
+  setFeatureId(id: string | null) {
+    const updates: { [key: string]: string | null } = {};
+    updates[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = id;
+    if (this.getObservationId()) {
+      updates[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = null;
     }
-    this.setFragmentParam(NavigationService.FEATURE_ID_FRAGMENT_PARAM, id);
-    return true;
+    this.setFragmentParam(Map(updates));
   }
 
   /**
@@ -173,8 +184,10 @@ export class NavigationService {
    * Navigate to the current URL, updating the observation id in the URL
    * fragment.
    */
-  setObservationId(id: string) {
-    this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
+  setObservationId(id: string | null) {
+    this.setFragmentParam(
+      Map([[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id]])
+    );
   }
 
   /**
@@ -182,7 +195,9 @@ export class NavigationService {
    * fragment.
    */
   setLayerId(id: string) {
-    this.setFragmentParam(NavigationService.LAYER_ID_FRAGMENT_PARAM, id);
+    this.setFragmentParam(
+      Map([[NavigationService.LAYER_ID_FRAGMENT_PARAM, id]])
+    );
   }
 
   /**
