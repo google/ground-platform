@@ -25,7 +25,6 @@ import { ObservationService } from '../../services/observation/observation.servi
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/router/router.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
 
@@ -49,8 +48,7 @@ export class MainPageComponent implements OnInit {
     private featureService: FeatureService,
     private observationService: ObservationService,
     private authService: AuthService,
-    private dialog: MatDialog,
-    private router: Router
+    private dialog: MatDialog
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
@@ -88,7 +86,7 @@ export class MainPageComponent implements OnInit {
     this.subscription.add(
       this.authService.isAuthenticated$().subscribe(isAuthenticated => {
         if (!isAuthenticated && !environment.useEmulators) {
-          this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+          this.navigationService.signIn();
         }
       })
     );

@@ -20,8 +20,10 @@ import { ColorPickerComponent } from './color-picker.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ColorCircleModule } from 'ngx-color/circle';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   declarations: [ColorPickerComponent],
@@ -32,6 +34,9 @@ import { MatIconModule } from '@angular/material/icon';
     ColorCircleModule,
     ReactiveFormsModule,
     MatIconModule,
+    MatButtonModule,
+    FlexLayoutModule,
+    FormsModule,
   ],
   exports: [ColorPickerComponent],
 })

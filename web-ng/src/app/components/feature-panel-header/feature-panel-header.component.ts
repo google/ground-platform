@@ -20,7 +20,6 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/router/router.service';
 import { Subscription } from 'rxjs';
@@ -43,7 +42,6 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   constructor(
     private sanitizer: DomSanitizer,
     private confirmationDialog: MatDialog,
-    private router: Router,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private zone: NgZone
@@ -110,9 +108,7 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   onClose() {
     // ng zone is run to fix navigation triggered outside Angular zone warning.
     this.zone.run(() => {
-      this.router.navigate([
-        `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
-      ]);
+      this.navigationService.selectProject(this.projectId!);
     });
   }
 

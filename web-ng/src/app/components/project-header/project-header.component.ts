@@ -20,7 +20,6 @@ import { UserProfilePopupComponent } from '../../components/user-profile-popup/u
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 import { NavigationService } from '../../services/router/router.service';
 
@@ -39,8 +38,8 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private dialog: MatDialog,
     private projectService: ProjectService,
-    private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private navigationService: NavigationService
   ) {
     this.lang = 'en';
     this.title = '';
@@ -79,9 +78,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     this.projectService
       .createProject(title)
       .then(projectId => {
-        this.router.navigateByUrl(
-          `${NavigationService.PROJECT_SEGMENT}/${projectId}`
-        );
+        this.navigationService.selectProject(projectId);
       })
       .catch(e => {
         console.warn('Project creation failed', e);

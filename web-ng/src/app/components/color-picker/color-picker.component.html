@@ -15,9 +15,16 @@
 -->
 
 <h2 mat-dialog-title>
-    <span> Color </span>
-    <mat-icon style="float: right; cursor: pointer;" (click)="close()">close</mat-icon>
+  <span> Default color </span>
 </h2>
 <mat-dialog-content>
-    <color-circle (onChange)="handleColorChange($event)"> </color-circle>
+  <color-circle (onChange)="handleColorChange($event)"> </color-circle>
 </mat-dialog-content>
+<mat-dialog-actions fxLayout fxLayoutAlign="end" class="action-dialog">
+  <div fxLayoutAlign="end">
+    <button type="button" mat-raised-button (click)="close()">Cancel</button>
+    <button color="primary" mat-raised-button type="submit" (click)="onSave()">
+      Apply
+    </button>
+  </div>
+</mat-dialog-actions>
