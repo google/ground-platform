@@ -31,15 +31,11 @@ limitations under the License.
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #layerMenu="matMenu">
-        <button
-          mat-menu-item
-          (click)="onCustomizeLayer()"
-          *ngIf="canCustomizeLayer"
-        >
+        <button mat-menu-item (click)="onCustomizeLayer()" *ngIf="canShare()">
           <mat-icon>edit</mat-icon>
           <span>Customize layer</span>
         </button>
-        <button mat-menu-item (click)="onImportCsv()" *ngIf="canCustomizeLayer">
+        <button mat-menu-item (click)="onImportCsv()" *ngIf="canShare()">
           <mat-icon>cloud_upload</mat-icon>
           <span>Import CSV</span>
         </button>

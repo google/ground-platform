@@ -108,7 +108,15 @@ export class ProjectService {
       .toArray();
   }
 
-  getCurrentProject(): Project | undefined {
+  private getCurrentProject(): Project | undefined {
     return this.currentProject;
+  }
+
+  getCurrentProjectAcl(): AclEntry[] | undefined {
+    const project = this.getCurrentProject();
+    if (!project) {
+      return;
+    }
+    return this.getProjectAcl(project);
   }
 }

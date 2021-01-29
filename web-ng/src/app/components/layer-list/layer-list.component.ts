@@ -31,7 +31,6 @@ import { AuthService } from '../../services/auth/auth.service';
 export class LayerListComponent {
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
-  canAddLayer = false;
 
   constructor(
     private projectService: ProjectService,
@@ -47,16 +46,11 @@ export class LayerListComponent {
           List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
-    this.initLayerListPermission();
   }
 
-  initLayerListPermission(): void {
-    const project = this.projectService.getCurrentProject();
-    if (!project) {
-      return;
-    }
-    const acl = this.projectService.getProjectAcl(project);
-    this.canAddLayer = this.authService.canManageProject(acl);
+  canShare(): boolean {
+    const acl = this.projectService.getCurrentProjectAcl();
+    return acl ? this.authService.canManageProject(acl) : false;
   }
 
   onAddLayer() {

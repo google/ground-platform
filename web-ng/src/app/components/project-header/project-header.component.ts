@@ -33,7 +33,6 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   lang: string;
   title: string;
   projectId!: string;
-  canShare = false;
 
   subscription: Subscription = new Subscription();
   constructor(
@@ -52,7 +51,6 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
         this.projectId = project.id;
       })
     );
-    this.initPermission();
   }
 
   ngOnInit() {}
@@ -97,13 +95,9 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
-  initPermission(): void {
-    const project = this.projectService.getCurrentProject();
-    if (!project) {
-      return;
-    }
-    const acl = this.projectService.getProjectAcl(project);
-    this.canShare = this.authService.canManageProject(acl);
+  canShare(): boolean {
+    const acl = this.projectService.getCurrentProjectAcl();
+    return acl ? this.authService.canManageProject(acl) : false;
   }
 
   ngOnDestroy() {

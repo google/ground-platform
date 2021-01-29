@@ -44,7 +44,6 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
   subscription: Subscription = new Subscription();
-  canCustomizeLayer = false;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -59,7 +58,6 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
-    this.initLayerItemPermission();
   }
 
   ngOnInit() {
@@ -143,13 +141,9 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  initLayerItemPermission(): void {
-    const project = this.projectService.getCurrentProject();
-    if (!project) {
-      return;
-    }
-    const acl = this.projectService.getProjectAcl(project);
-    this.canCustomizeLayer = this.authService.canManageProject(acl);
+  canShare(): boolean {
+    const acl = this.projectService.getCurrentProjectAcl();
+    return acl ? this.authService.canManageProject(acl) : false;
   }
 
   ngOnDestroy(): void {
