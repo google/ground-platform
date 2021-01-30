@@ -22,9 +22,9 @@ import { Injectable } from '@angular/core';
 import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
-import { Router } from '@angular/router';
 import { shareReplay } from 'rxjs/operators';
 import { AclEntry } from '../../shared/models/acl-entry.model';
+import { NavigationService } from '../router/router.service';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -42,8 +42,8 @@ export class AuthService {
 
   constructor(
     private afAuth: AngularFireAuth,
-    private router: Router,
-    dataStore: DataStoreService
+    dataStore: DataStoreService,
+    private navigationService: NavigationService
   ) {
     this.user$ = this.afAuth.authState.pipe(
       switchMap(user => {
@@ -76,7 +76,7 @@ export class AuthService {
 
   async signOut() {
     await this.afAuth.signOut();
-    return this.router.navigate(['/']);
+    return this.navigationService.signOut();
   }
 
   /**

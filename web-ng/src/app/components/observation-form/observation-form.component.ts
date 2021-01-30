@@ -31,7 +31,6 @@ import { List, Map } from 'immutable';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { Project } from '../../shared/models/project.model';
 import { ProjectService } from '../../services/project/project.service';
-import { Router, NavigationExtras } from '@angular/router';
 import { LoadingState } from '../../services/loading-state.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -41,6 +40,7 @@ import { switchMap, map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
+import { NavigationService } from '../../services/router/router.service';
 
 // To make ESLint happy:
 /*global alert*/
@@ -68,7 +68,7 @@ export class ObservationFormComponent {
     private projectService: ProjectService,
     private featureService: FeatureService,
     private formBuilder: FormBuilder,
-    private router: Router
+    private navigationService: NavigationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -108,7 +108,7 @@ export class ObservationFormComponent {
   }
 
   onCancel() {
-    this.navigateToFeature(this.observation!);
+    this.navigateToFeature();
   }
 
   onSave() {
@@ -131,22 +131,15 @@ export class ObservationFormComponent {
         );
         this.dataStoreService
           .updateObservation(this.projectId!, updatedObservation)
-          .then(() => this.navigateToFeature(updatedObservation))
+          .then(() => this.navigateToFeature())
           .catch(() => {
             alert('Observation update failed.');
           });
       });
   }
 
-  navigateToFeature(observation: Observation) {
-    // TODO: refactor URL read/write logic into its own service.
-    const primaryUrl = this.router
-      .parseUrl(this.router.url)
-      .root.children['primary'].toString();
-    const navigationExtras: NavigationExtras = {
-      fragment: `f=${observation.featureId}`,
-    };
-    this.router.navigate([primaryUrl], navigationExtras);
+  navigateToFeature() {
+    this.navigationService.editObservation(null);
   }
 
   convertObservationToFormGroup(observation: Observation): FormGroup {
