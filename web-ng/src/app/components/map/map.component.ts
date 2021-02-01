@@ -137,7 +137,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     selectedFeatureId: string
   ): void {
     this.removeMarkersAndGeoJsonsOnMap(features);
-    this.addMarkersAndGeoJsonsToMap(project, features);
+    this.addFeaturesToMap(project, features);
     this.updateStylingFunctionForAllGeoJsons(project);
     this.selectMarkerWithFeatureId(selectedFeatureId);
   }
@@ -165,10 +165,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private addMarkersAndGeoJsonsToMap(
-    project: Project,
-    features: List<Feature>
-  ) {
+  private addFeaturesToMap(project: Project, features: List<Feature>) {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
     this.map.data.forEach(f => {
