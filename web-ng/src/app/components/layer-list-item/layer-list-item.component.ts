@@ -89,7 +89,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onGoBackClick() {
-    this.navigationService.setFeatureId(null);
+    this.navigationService.clearFeatureId();
   }
 
   onDeleteLayer() {

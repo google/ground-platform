@@ -19,7 +19,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { HttpParams } from '@angular/common/http';
-import { Map } from 'immutable';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -135,22 +134,6 @@ export class NavigationService {
   }
 
   /**
-   * Navigate to the current URL, replacing the single URL fragment param
-   * with the specified value.
-   */
-  private setFragmentParam(updates: Map<string, string | null>) {
-    let params = this.getFragmentParams();
-    for (const [key, value] of updates) {
-      if (value) {
-        params = params.set(key, value);
-      } else {
-        params = params.delete(key);
-      }
-    }
-    this.setFragmentParams(params);
-  }
-
-  /**
    * Get current feature id in the URL fragment.
    */
   getFeatureId(): string | null {
@@ -162,13 +145,14 @@ export class NavigationService {
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string | null) {
-    const updates: { [key: string]: string | null } = {};
-    updates[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = id;
-    if (this.getObservationId()) {
-      updates[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = null;
-    }
-    this.setFragmentParam(Map(updates));
+  setFeatureId(id: string) {
+    const newParam: { [key: string]: string } = {};
+    newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = id;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+  }
+
+  clearFeatureId() {
+    this.setFragmentParams(new HttpParams({ fromString: '' }));
   }
 
   /**
@@ -184,16 +168,21 @@ export class NavigationService {
    * Navigate to the current URL, updating the observation id in the URL
    * fragment.
    */
-  setObservationId(id: string | null) {
-    this.setFragmentParam(
-      Map([[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id]])
-    );
+  editObservation(featureId: string | null, observationId: string) {
+    const newParam: { [key: string]: string } = {};
+    if (featureId) {
+      newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId!;
+    }
+    newParam[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = observationId;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  editObservation(id: string | null) {
-    this.setFragmentParam(
-      Map([[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id]])
-    );
+  clearObservationId(featureId: string | null) {
+    const newParam: { [key: string]: string } = {};
+    if (featureId) {
+      newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId!;
+    }
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
   /**
@@ -201,9 +190,9 @@ export class NavigationService {
    * fragment.
    */
   setLayerId(id: string) {
-    this.setFragmentParam(
-      Map([[NavigationService.LAYER_ID_FRAGMENT_PARAM, id]])
-    );
+    const newParam: { [key: string]: string } = {};
+    newParam[NavigationService.LAYER_ID_FRAGMENT_PARAM] = id;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
   /**

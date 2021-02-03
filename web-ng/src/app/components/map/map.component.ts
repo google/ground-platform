@@ -126,7 +126,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         return Promise.resolve();
       case EditMode.None:
       default:
-        this.navigationService.setFeatureId(null);
+        this.navigationService.clearFeatureId();
         return Promise.resolve();
     }
   }
@@ -234,7 +234,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private onEditModeChange(editMode: EditMode) {
     if (editMode !== EditMode.None) {
       this.selectMarker(undefined);
-      this.navigationService.setFeatureId(null);
+      this.navigationService.clearFeatureId();
       for (const marker of this.markers) {
         marker.setClickable(false);
       }
