@@ -17,13 +17,32 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ProjectService } from './project.service';
+import { DataStoreService } from '../data-store/data-store.service';
+import { AuthService } from '../auth/auth.service';
+import { Subject } from 'rxjs';
+import { User } from '../../shared/models/user.model';
 
 describe('ProjectService', () => {
-  beforeEach(() => TestBed.configureTestingModule({}));
+  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  const user$ = new Subject<User | null>();
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: DataStoreService, useValue: dataStoreServiceStub },
+        {
+          provide: AuthService,
+          useValue: {
+            user$,
+            getUser$: () => user$,
+          },
+        },
+      ],
+    })
+  );
 
   it('should be created', () => {
     // TODO(gino-m): Implement tests.
-    const service: ProjectService = TestBed.get(ProjectService);
+    const service: ProjectService = TestBed.inject(ProjectService);
     expect(service).toBeTruthy();
   });
 });

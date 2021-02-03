@@ -1,0 +1,84 @@
+<!--
+Copyright 2020 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<mat-list *ngIf="layer$ | async as layer">
+  <!-- 
+    TODO: create separate component for layer as a header instead of 
+    using LayerListItem here.
+  -->
+  <ground-feature-panel-header
+    [layer]="layer"
+    [actionsType]="featureHeaderActionType.BACK"
+  ></ground-feature-panel-header>
+</mat-list>
+<div *ngIf="layer$ | async as layer">
+  <button
+    *ngIf="!layer.forms?.isEmpty()"
+    color="primary"
+    class="add-observation-btn"
+    mat-raised-button
+    (click)="onAddObservationClick()"
+  >
+    + Add observation
+  </button>
+</div>
+<div *ngIf="observations$ | async as observations">
+  <mat-card class="observation card" *ngFor="let observation of observations">
+    <mat-card-header>
+      <mat-card-title>
+        {{ observation.created.user.displayName }}
+      </mat-card-title>
+      <!--TODO: figure out why serverTime is not working-->
+      <mat-card-subtitle>
+        {{ observation.created.clientTime | date: 'medium' }}
+      </mat-card-subtitle>
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onEditObservationClick(observation)">
+          <mat-icon>edit</mat-icon>
+          <span>Edit observation</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="onDeleteObservationClick(observation.id)"
+        >
+          <mat-icon>delete_forever</mat-icon>
+          <span>Delete observation</span>
+        </button>
+      </mat-menu>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngFor="let field of getFields(observation)">
+        <label class="field-label">{{ field.label?.get(lang) }}</label>
+        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT">
+          {{ observation.responses?.get(field.id)?.value }}
+        </div>
+        <div
+          class="field-response"
+          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
+        >
+          <span
+            class="option-label"
+            *ngFor="let option of observation.responses?.get(field.id)?.value"
+          >
+            {{ option.label?.get(lang) }}
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

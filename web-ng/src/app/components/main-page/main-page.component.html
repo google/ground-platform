@@ -13,8 +13,34 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-<div *ngIf="(activeProject$ | async) as project">
-  <div style="height: 48px">{{ project.title[lang] }}</div>
+<div class="container">
+  <div class="header">
+    <app-project-header></app-project-header>
+  </div>
+  <div class="content">
+    <mat-sidenav-container class="main-page-container">
+      <mat-sidenav-content class="mat-sidenav-content">
+        <ground-map></ground-map>
+        <ground-drawing-tools></ground-drawing-tools>
+        <div fxLayout="row">
+          <button
+            mat-raised-button
+            class="sidenav-toggle"
+            (click)="sideNavOpened = !sideNavOpened"
+          >
+            <mat-icon *ngIf="sideNavOpened">navigate_next</mat-icon>
+            <mat-icon *ngIf="!sideNavOpened">navigate_before</mat-icon>
+          </button>
+        </div>
+      </mat-sidenav-content>
+      <mat-sidenav
+        #sidenav
+        mode="side"
+        position="end"
+        [(opened)]="sideNavOpened"
+      >
+        <ground-side-panel></ground-side-panel>
+      </mat-sidenav>
+    </mat-sidenav-container>
+  </div>
 </div>
-<ground-map></ground-map>

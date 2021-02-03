@@ -1,0 +1,67 @@
+/**
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '_variables';
+
+.mat-dialog-content {
+  width: 600px;
+}
+
+.btn-save {
+  color: white;
+  height: 36px;
+  width: 82px;
+  border-radius: 5px;
+  font-family: 'Open Sans', Arial, sans-serif;
+  margin-left: 10px;
+}
+
+.btn-cancel {
+  height: 36px;
+  width: 82px;
+  border-radius: 5px;
+  font-family: 'Open Sans', Arial, sans-serif;
+  color: mat-color($primary);
+}
+
+.link-add-question {
+  color: mat-color($primary);
+}
+
+.add-question {
+  padding: 10px;
+  border: 1px solid #e6e7ea;
+  border-radius: 10px;
+  margin-top: 20px;
+  width: 100%;
+  text-align: left;
+}
+
+.mat-dialog-actions {
+  margin-top: 10px;
+  margin-bottom: 0.83em;
+}
+
+.horizontal-line {
+  border: 1px solid mat-color($foreground, divider);
+  margin: -20px 0 20px 0;
+}
+
+.label-helper-text {
+  color: mat-color($foreground, secondary-text);
+  padding-top: 5px;
+  line-height: 1.6;
+}

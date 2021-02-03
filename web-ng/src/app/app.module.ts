@@ -16,22 +16,63 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireModule } from '@angular/fire';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
+import {
+  AngularFirestoreModule,
+  SETTINGS as FIRESTORE_SETTINGS,
+  USE_EMULATOR as USE_FIRESTORE_EMULATOR,
+} from '@angular/fire/firestore';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
-import { MainPageModule } from './components/main-page/main-page.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MainPageContainerModule } from './components/main-page-container/main-page-container.module';
 import { environment } from '../environments/environment';
+import { ProjectHeaderModule } from './components/project-header/project-header.module';
+import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
+import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
+import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
+import { HttpClientModule } from '@angular/common/http';
+import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
+import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
+
+const firebaseUiAuthConfig: firebaseui.auth.Config = {
+  // Popup is required to prevent some browsers and Chrome incognito for getting
+  // blocked due to unsupported 3rd party cookies.
+  signInFlow: 'popup',
+  // For now we only use Google for auth.
+  signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+  // Required to enable one-tap sign-up credential helper.
+  credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
+};
 
 @NgModule({
   declarations: [AppComponent],
+  providers: [
+    {
+      provide: FIRESTORE_SETTINGS,
+      useValue: { ignoreUndefinedProperties: true },
+    },
+    {
+      provide: USE_FIRESTORE_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
+    },
+  ],
   imports: [
-    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireAuthModule,
     AngularFirestoreModule,
+    BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
-    MainPageModule,
+    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
+    HttpClientModule,
+    MainPageContainerModule,
+    ProjectHeaderModule,
+    UserProfilePopupModule,
+    LayerDialogModule,
+    ShareDialogModule,
+    TitleDialogModule,
   ],
   bootstrap: [AppComponent],
 })

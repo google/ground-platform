@@ -19,6 +19,14 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap, shareReplay } from 'rxjs/operators';
 import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
+import { AuthService } from '../auth/auth.service';
+import { Role } from '../../shared/models/role.model';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { NavigationService } from '../router/router.service';
+import { AclEntry } from '../../shared/models/acl-entry.model';
 
 @Injectable({
   providedIn: 'root',
@@ -26,17 +34,32 @@ import { DataStoreService } from '../data-store/data-store.service';
 export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
+  private currentProject?: Project;
 
-  constructor(private dataStore: DataStoreService) {
-    //  on each change to project id.
-    this.activeProject$ = this.activeProjectId$.pipe(
-      // Asynchronously load project. switchMap() internally disposes
-      // of previous subscription if present.
-      switchMap(id => this.dataStore.loadProject(id)),
+  constructor(
+    private dataStore: DataStoreService,
+    private authService: AuthService
+  ) {
+    // Reload active project each time authenticated user changes.
+    this.activeProject$ = authService.getUser$().pipe(
+      switchMap(() =>
+        //  on each change to project id.
+        this.activeProjectId$.pipe(
+          // Asynchronously load project. switchMap() internally disposes
+          // of previous subscription if present.
+          switchMap(id => {
+            if (id === NavigationService.PROJECT_ID_NEW) {
+              return of(Project.UNSAVED_NEW);
+            }
+            return this.dataStore.loadProject$(id);
+          })
+        )
+      ),
       // Cache last loaded project so that late subscribers don't cause
       // project to be reloaded.
       shareReplay(1)
     );
+    this.activeProject$.subscribe(project => (this.currentProject = project));
   }
 
   activateProject(id: string) {
@@ -45,5 +68,47 @@ export class ProjectService {
 
   getActiveProject$(): Observable<Project> {
     return this.activeProject$;
+  }
+
+  /**
+   * Updates the project with new title by calling the data-store service.
+   *
+   * @param projectId the id of the project.
+   * @param newTitle the new title of the project.
+   */
+  updateTitle(projectId: string, newTitle: string): Promise<void> {
+    return this.dataStore.updateProjectTitle(projectId, newTitle);
+  }
+
+  updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateAcl(projectId, acl);
+  }
+
+  async createProject(title: string): Promise<string> {
+    const offlineBaseMapSources = environment.offlineBaseMapSources;
+    const user = await this.authService.getUser$().pipe(take(1)).toPromise();
+    const email = user?.email || 'Unknown email';
+    const projectId = await this.dataStore.createProject(
+      email,
+      title,
+      offlineBaseMapSources
+    );
+    return Promise.resolve(projectId);
+  }
+
+  /**
+   * Returns the acl of the project.
+   */
+  getProjectAcl(project: Project): AclEntry[] {
+    return project?.acl
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toList()
+      .sortBy(entry => entry.email)
+      .toArray();
+  }
+
+  getCurrentProject(): Project | undefined {
+    return this.currentProject;
   }
 }

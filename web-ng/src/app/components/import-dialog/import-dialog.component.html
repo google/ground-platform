@@ -1,0 +1,33 @@
+<!--
+  Copyright 2020 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limit
+-->
+<h2 mat-dialog-title>Import CSV</h2>
+<mat-dialog-content>
+  <form [formGroup]="uploadForm">
+    <div>
+      <file-upload
+        accept="csv"
+        formControlName="file"
+        multiple="false"
+        minsize="10 B"
+        maxsize="2 MB"
+      ></file-upload>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="true" color="primary">Upload</button>
+</mat-dialog-actions>

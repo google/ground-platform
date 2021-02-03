@@ -13,3 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.container {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.header {
+  flex: 0 1 auto;
+}
+
+.content {
+  flex: 1 1 auto;
+}
+
+.main-page-container {
+  height: 100%;
+}
+
+.mat-sidenav {
+  width: 300px;
+}
+
+.sidenav-toggle {
+  top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: unset;
+  right: -5px;
+  width: 5px;
+  height: 50px;
+  background-color: #d6d6d2;
+  position: absolute;
+}
+
+.mat-sidenav-content {
+  overflow: hidden;
+}

@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+import { googleMapsConfig } from './.google-maps-config';
+import { firebaseConfig } from './.firebase-config';
+import { offlineBaseMapSources } from './.backend-config.json';
+
+// TODO(#376): For now, "prod" config will deploy to the developer's Firebase
+// instance. In the future we will also allow separate configs for staging and
+// production.
 export const environment = {
   production: true,
+  googleMapsApiKey: googleMapsConfig.apiKey,
+  firebase: firebaseConfig,
+  cloudFunctionsUrl: '',
+  offlineBaseMapSources,
+  useEmulators: false,
 };

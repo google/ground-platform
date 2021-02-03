@@ -1,0 +1,42 @@
+<!--
+  Copyright 2020 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<mat-dialog-content>
+  <div *ngIf="auth.getUser$() | async as user" class="rhs-widgets">
+    <img
+      *ngIf="user.photoURL; else defaultPhoto"
+      src="{{ user.photoURL }}=s64"
+      class="user-thumb"
+    />
+    <ng-template #defaultPhoto>
+      <user-avatar
+        class="user-avatar"
+        [displayText]="user.displayName.charAt(0)"
+      ></user-avatar>
+    </ng-template>
+    <div class="user-description">
+      <div class="user-display-name">{{ user.displayName }}</div>
+      <div class="user-email">{{ user.email }}</div>
+      <button
+        class="btn-signout"
+        mat-flat-button
+        color="primary"
+        (click)="onSignOut($event)"
+      >
+        Sign out
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>

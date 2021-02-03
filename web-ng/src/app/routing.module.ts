@@ -16,10 +16,26 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MainPageComponent } from './components/main-page/main-page.component';
+import { MainPageContainerComponent } from './components/main-page-container/main-page-container.component';
+import { AuthGuard } from './services/auth/auth.guard';
+import { SignInPageComponent } from './components/sign-in-page/sign-in-page.component';
+import { NavigationService } from './services/router/router.service';
 
-const routes: Routes = [{ path: 'p/:projectId', component: MainPageComponent }];
-const config = RouterModule.forRoot(routes);
+const routes: Routes = [
+  {
+    path: NavigationService.SIGN_IN_SEGMENT,
+    component: SignInPageComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.PROJECT_SEGMENT}/:${NavigationService.PROJECT_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
+];
+const config = RouterModule.forRoot(routes, {
+  relativeLinkResolution: 'legacy',
+});
 
 @NgModule({
   imports: [config],

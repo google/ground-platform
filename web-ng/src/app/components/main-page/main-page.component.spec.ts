@@ -14,25 +14,84 @@
  * limitations under the License.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
+import { ProjectService } from '../../services/project/project.service';
+import { MatDialog } from '@angular/material/dialog';
+import { FeatureService } from '../../services/feature/feature.service';
+import { ObservationService } from '../../services/observation/observation.service';
+import { NavigationService } from './../../services/router/router.service';
+import { NEVER } from 'rxjs';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { AuthService } from '../../services/auth/auth.service';
+
+@Component({ selector: 'ground-map', template: '' })
+class MapComponent {}
+
+@Component({ selector: 'mat-sidenav', template: '' })
+class MatSideNavComponent {
+  opened = false;
+}
 
 describe('MainPageComponent', () => {
   let component: MainPageComponent;
   let fixture: ComponentFixture<MainPageComponent>;
+  let route: ActivatedRouteStub;
+  const dialog: Partial<MatDialog> = {};
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [MainPageComponent],
-    }).compileComponents();
-  }));
+  beforeEach(
+    waitForAsync(() => {
+      route = new ActivatedRouteStub();
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MainPageComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+      const projectService = jasmine.createSpyObj('ProjectService', [
+        'getActiveProject$',
+        'activateProject',
+      ]);
+
+      const featureService = jasmine.createSpyObj('FeatureService', [
+        'selectFeature$',
+      ]);
+
+      const observationService = jasmine.createSpyObj('ObservationService', [
+        'selectObservation$',
+      ]);
+
+      const navigationService = {
+        getProjectId$: () => NEVER,
+        getLayerId$: () => NEVER,
+        getFeatureId$: () => NEVER,
+        getObservationId$: () => NEVER,
+      };
+
+      TestBed.configureTestingModule({
+        declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
+        providers: [
+          { provide: ActivatedRoute, useValue: route },
+          { provide: MatDialog, useValue: dialog },
+          { provide: FeatureService, useValue: featureService },
+          { provide: ObservationService, useValue: observationService },
+          { provide: ProjectService, useValue: projectService },
+          { provide: NavigationService, useValue: navigationService },
+          { provide: AngularFirestore, useValue: {} },
+          { provide: AngularFireAuth, useValue: {} },
+          { provide: Router, useValue: {} },
+          {
+            provide: AuthService,
+            useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
+          },
+        ],
+        schemas: [NO_ERRORS_SCHEMA],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(MainPageComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    })
+  );
 
   it('should create', () => {
     expect(component).toBeTruthy();

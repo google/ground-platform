@@ -14,34 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-'use strict';
 
-const functions = require('firebase-functions');
-const exportCsv = require('./export-csv')
-const exportKml = require('./export-kml')
-const updateColumns = require('./update-columns')
-const onCreateRecord = require('./on-create-record')
-const onUpdateRecord = require('./on-update-record')
+"use strict";
 
-exports.exportCsv = functions.https.onRequest((req, res) =>
-	exportCsv(req, res).catch(err => res.status(500).send(`${err}`)));
-exports.exportKml = functions.https.onRequest((req, res) =>
-	exportKml(req, res).catch(err => res.status(500).send(`${err}`)));
+const functions = require("firebase-functions");
+const onCreateUser = require("./on-create-user");
+const exportCsv = require("./export-csv");
+const exportKml = require("./export-kml");
+const importCsv = require("./import-csv");
+const updateColumns = require("./update-columns");
+const onCreateRecord = require("./on-create-record");
+const onUpdateRecord = require("./on-update-record");
+const cors = require("cors")({ origin: true });
 
-// Test via shell:
-// updateColumns.get('/?project=R06MucQJSWvERdE7SiL1&featureType=aaaaaaaa&form=1234567')
-exports.updateColumns = functions.https.onRequest((req, res) => 
-  updateColumns(req, res).catch(err => res.status(500).send(`${err}`)));
+/**
+ * Wrapper for HTTP request handlers. Captures uncaught exceptions to prevent
+ * debug details from being returned to user.
+ */
+function onHttpsRequest(handler) {
+  return functions.https.onRequest((req, res) =>
+    cors(req, res, () => handler(req, res).catch((err) => onError(res, err)))
+  );
+}
 
-// Test via shell:
-// onCreateRecord({featureTypeId: 'households', formId: '1', responses: {'interviewer': 'Nikola Tesla'}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
-exports.onCreateRecord = functions.firestore
-  .document('projects/{projectId}/features/{featureId}/records/{recordId}')
-  .onCreate((change, context) => onCreateRecord(change, context));
+function onError(res, err) {
+  console.error(err);
+  res.status(500).send("Internal error");
+}
 
-// Test via shell:
-// onUpdateRecord({after: {featureTypeId: 'households', formId: '1', responses: {'interviewer': 'George Washington'}}}, {params: {projectId: 'R06MucQJSWvERdE7SiL1', featureId: 'p9lyePfXYPOByUFpnIVp', recordId: 'newRecord'}});
-exports.onUpdateRecord = functions.firestore
-  .document('projects/{projectId}/features/{featureId}/records/{recordId}')
-  .onUpdate((change, context) => onUpdateRecord(change, context));
+// Create user profile in database when user first logs in.
+exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
+
+exports.importCsv = onHttpsRequest(importCsv);
+
+exports.exportCsv = onHttpsRequest(exportCsv);

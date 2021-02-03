@@ -18,17 +18,23 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": false,
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "aot": true,
+            "assets": ["src/favicon.ico", "src/assets"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/app/shared/styles"]
+            },
+            "styles": ["src/custom-theme.scss", "src/styles.scss"],
             "scripts": []
           },
           "configurations": {
+            "local": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -39,7 +45,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -48,7 +53,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
+                  "maximumWarning": "3mb",
                   "maximumError": "5mb"
                 },
                 {
@@ -66,6 +71,9 @@
             "browserTarget": "web-ng:build"
           },
           "configurations": {
+            "local": {
+              "browserTarget": "web-ng:build:local"
+            },
             "production": {
               "browserTarget": "web-ng:build:production"
             }
@@ -83,14 +91,18 @@
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
+            "fileReplacements": [
+              {
+                "replace": "src/environments/environment.ts",
+                "with": "src/environments/environment.test.ts"
+              }
+            ],
             "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/app/shared/styles"]
+            },
+            "styles": ["src/custom-theme.scss", "src/styles.scss"],
             "scripts": []
           }
         },
@@ -102,9 +114,7 @@
               "tsconfig.spec.json",
               "e2e/tsconfig.json"
             ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
+            "exclude": ["**/node_modules/**"]
           }
         },
         "e2e": {
@@ -118,8 +128,16 @@
               "devServerTarget": "web-ng:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {}
         }
       }
-    }},
-  "defaultProject": "web-ng"
+    }
+  },
+  "defaultProject": "web-ng",
+  "cli": {
+    "analytics": "a3d976d8-4082-411f-98f4-58b9c7a5b304"
+  }
 }

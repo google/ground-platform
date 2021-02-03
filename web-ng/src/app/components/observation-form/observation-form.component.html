@@ -1,0 +1,91 @@
+<!--
+  Copyright 2020 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<mat-list *ngIf="layer$ | async as layer">
+  <!--
+    TODO: create separate component for layer as a header instead of
+    using LayerListItem here.
+  -->
+  <ground-layer-list-item
+    [layer]="layer"
+    [actionsType]="layerListItemActionsType.BACK"
+  ></ground-layer-list-item>
+</mat-list>
+<div *ngIf="observationForm" class="observation">
+  <h3>Add/edit observation</h3>
+  <form [formGroup]="observationForm" (ngSubmit)="onSave()" autocomplete="off">
+    <div *ngFor="let field of observationFields">
+      <label class="field-label" [attr.for]="field.id">
+        {{ field.label.get(lang) }}
+      </label>
+      <div class="field-response">
+        <div *ngIf="field.type == fieldTypes.TEXT">
+          <mat-form-field appearance="fill">
+            <input matInput [formControlName]="field.id" [id]="field.id" />
+          </mat-form-field>
+        </div>
+        <div
+          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
+          class="multiple-choice-field"
+        >
+          <mat-radio-group
+            [id]="field.id"
+            [formControlName]="field.id"
+            *ngIf="field.multipleChoice.cardinality == cardinality.SELECT_ONE"
+          >
+            <mat-radio-button
+              *ngFor="let option of field.multipleChoice.options"
+              [value]="option.id"
+            >
+              {{ option.label.get(lang) }}
+            </mat-radio-button>
+          </mat-radio-group>
+          <div
+            *ngIf="
+              field.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE
+            "
+          >
+            <mat-checkbox
+              [formControlName]="option.id"
+              *ngFor="let option of field.multipleChoice.options"
+              [value]="option.id"
+            >
+              {{ option.label.get(lang) }}
+            </mat-checkbox>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      class="btn-save"
+      [disabled]="!observationForm.valid"
+    >
+      Save
+    </button>
+    <button
+      mat-raised-button
+      color="secondary"
+      class="btn-cancel"
+      (click)="onCancel()"
+      type="button"
+    >
+      Cancel
+    </button>
+  </form>
+</div>

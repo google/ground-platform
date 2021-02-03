@@ -14,11 +14,44 @@
  * limitations under the License.
  */
 
-import { StringDictionary } from "./string-dictionary.model";
+import { Layer } from './layer.model';
+import { StringMap } from './string-map.model';
+import { Map } from 'immutable';
+import { Role } from './role.model';
 
 export class Project {
+  static readonly UNSAVED_NEW = new Project(
+    /* id= */
+    '',
+    /* title= */
+    StringMap({}),
+    /* description= */
+    StringMap({}),
+    /* layers= */
+    Map<string, Layer>(),
+    /* acl= */
+    Map<string, Role>()
+  );
+
   constructor(
-    readonly title: StringDictionary,
-    readonly description: StringDictionary
+    readonly id: string,
+    readonly title: StringMap,
+    readonly description: StringMap,
+    readonly layers: Map<string, Layer>,
+    readonly acl: Map<string, Role>
   ) {}
+
+  getLayer(layerId: string): Layer | undefined {
+    return this.layers.get(layerId);
+  }
+
+  isUnsavedNew() {
+    return (
+      !this.id &&
+      !this.title.size &&
+      !this.description.size &&
+      !this.layers.size &&
+      !this.acl.size
+    );
+  }
 }

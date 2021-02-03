@@ -4,18 +4,19 @@
 
 1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
 
-    > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
-    > Platform](https://console.cloud.google.com/) under APIs \> Services \>
-    > Credentials.
+   > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
+   > Platform](https://console.cloud.google.com/) under APIs \> Services \>
+   > Credentials.
 
-2. Write the key to `src/environments/.google-maps-config.json` as follows:
+2. Write the key to `src/environments/.google-maps-config.ts` as follows:
 
-    ```json
-    {
-      "apiKey": "YOUR_API_KEY"
-    }
-    ```
-    Where `YOUR_API_KEY` is your Google Maps API key.
+   ```javascript
+   export const googleMapsConfig = {
+     apiKey: 'YOUR_API_KEY',
+   };
+   ```
+
+   Where `YOUR_API_KEY` is your Google Maps API key.
 
 ### Download Firebase API key
 
@@ -37,23 +38,39 @@
    the file contents. The contents of the file should look roughly like this:
 
    ```javascript
-    export const firebaseConfig = {
-      apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
-      authDomain: 'my-app.firebaseapp.com',
-      databaseURL: 'https://my-app.firebaseio.com',
-      projectId: 'my-app',
-      storageBucket: 'my-app.appspot.com',
-      messagingSenderId: '12345678',
-      appId: '1:12345678:web:abc123etcetc',
-    };
+   export const firebaseConfig = {
+     apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
+     authDomain: 'my-app.firebaseapp.com',
+     databaseURL: 'https://my-app.firebaseio.com',
+     projectId: 'my-app',
+     storageBucket: 'my-app.appspot.com',
+     messagingSenderId: '12345678',
+     appId: '1:12345678:web:abc123etcetc',
+   };
    ```
+
+### Add local environment config
+
+Create a file in `environments/.backend-config.json` with the path to your
+hosted or local [Firebase Cloud Functions](https://firebase.google.com/products/functions) instance:
+
+```json
+{
+  "cloudFunctionsHost": "some-subdomain.cloudfunctions.net",
+  "offlineBaseMapSources": [{ "url": "" }]
+}
+```
+
+If you don't yet have [Ground Cloud Functions](../functions) deployed, you
+may set `cloudFunctionsHost` to `'localhost'` for now; server-side operations
+like bulk CSV export will not be available.
 
 ## Dev Environment Setup
 
 Install Node.js using nvm:
 
 ```
-$ nvm install 13.1.0
+$ nvm install 13 && nvm use 13
 ```
 
 Install ng CLI using npm:
@@ -73,8 +90,11 @@ This last step will fail if you haven't yet following instructions above in
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to http://localhost:4200/. The app
-will automatically reload if you change any of the source files.
+Run `ng serve` for a dev server. Navigate to http://localhost:4200/. Add
+`project/<project_name>` as a suffix to the url to see an existing project interface
+in your browser. Alternatively, go to http://localhost:4200/project/new for a
+new project.
+The app will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
@@ -88,13 +108,17 @@ Run `ng build` to build the project. The build artifacts will be stored in the
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via
-[Karma](https://karma-runner.github.io).
+Run `ng test` to execute run tests locally in Chrome using
+[Karma](https://karma-runner.github.io) test runner.
 
 ## Running end-to-end tests
 
 Run `ng e2e` to execute the end-to-end tests via
 [Protractor](http://www.protractortest.org/).
+
+## Deploying web app to development Firebase instance
+
+Run `ng deploy`.
 
 ## Further help
 

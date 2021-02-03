@@ -14,20 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-'use strict';
+
+"use strict";
 
 class Datastore {
   constructor(db) {
     this.db_ = db;
-  }  
+  }
+
+  /**
+   * Stores user email, name, and avatar to db for use in application features.
+   * These attributes are merged with other existing ones if already present.
+   */
+  mergeUserProfile({ uid, email, displayName, photoURL }) {
+    return this.db_
+      .doc(`users/${uid}`)
+      .set({ uid, email, displayName, photoURL }, { merge: true });
+  }
 
   fetch_(docRef) {
-    return docRef.get().then(doc => doc.exists ? doc.data() : null);
+    return docRef.get().then((doc) => (doc.exists ? doc.data() : null));
   }
 
   fetchDoc_(path) {
-    return this.fetch_(this.db_.doc(path));    
+    return this.fetch_(this.db_.doc(path));
   }
 
   fetchCollection_(path) {
@@ -39,27 +49,46 @@ class Datastore {
   }
 
   fetchRecord(projectId, featureId, recordId) {
-    return this.fetchDoc_(`projects/${projectId}/features/${featureId}/records/${recordId}`);
+    return this.fetchDoc_(
+      `projects/${projectId}/features/${featureId}/records/${recordId}`
+    );
   }
 
-  fetchRecords(projectId, featureId) {
-    return this.fetchCollection_(`projects/${projectId}/records`);
+  fetchObservationsByLayerId(projectId, layerId) {
+    return this.db_
+      .collection(`projects/${projectId}/observations`)
+      .where("layerId", "==", layerId)
+      .get();
   }
 
   fetchFeature(projectId, featureId) {
     return this.fetchDoc_(`projects/${projectId}/features/${featureId}`);
   }
 
-  fetchFeatures(projectId) {
-    return this.fetchCollection_(`projects/${projectId}/features`);
+  fetchFeaturesByLayerId(projectId, layerId) {
+    return this.db_
+      .collection(`projects/${projectId}/features`)
+      .where("layerId", "==", layerId)
+      .get();
   }
 
   fetchForm(projectId, featureTypeId, formId) {
-    return this.fetchDoc_(`projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`);
+    return this.fetchDoc_(
+      `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`
+    );
   }
 
   fetchSheetsConfig(projectId) {
     return this.fetchDoc_(`projects/${projectId}/sheets/config`);
+  }
+
+  async insertFeature(projectId, feature) {
+    const docRef = await this.db_.collection("projects").doc(projectId);
+    const doc = await docRef.get();
+    if (!doc.exists) {
+      throw new Error(`/projects/${projectId} not found`);
+    }
+    await docRef.collection("features").add(feature);
   }
 }
 
