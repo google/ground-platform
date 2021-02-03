@@ -60,9 +60,9 @@ class MockProjectService {
   getActiveProject$() {
     return of<Project>(mockProject);
   }
-  getProjectAcl() {}
   getCurrentProject() {}
   getCurrentProjectAcl() {}
+  canManageProject() {}
 }
 
 const projectService = new MockProjectService();

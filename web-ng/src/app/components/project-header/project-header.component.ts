@@ -38,7 +38,6 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private dialog: MatDialog,
     private projectService: ProjectService,
-    private authService: AuthService,
     private navigationService: NavigationService
   ) {
     this.lang = 'en';
@@ -90,11 +89,6 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
       width: '580px',
       autoFocus: false,
     });
-  }
-
-  canShare(): boolean {
-    const acl = this.projectService.getCurrentProjectAcl();
-    return acl ? this.authService.canManageProject(acl) : false;
   }
 
   ngOnDestroy() {

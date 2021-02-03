@@ -72,7 +72,7 @@ export class ShareDialogComponent {
 
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    private projectService: ProjectService
+    readonly projectService: ProjectService
   ) {
     this.subscription.add(
       // Grab only the first value from getActiveProject$() so that
@@ -151,7 +151,7 @@ export class ShareDialogComponent {
     this.projectId = project.id;
     this.originalAcl = project.acl;
     // Sort users by email address.
-    this.acl = this.projectService.getProjectAcl(project);
+    this.acl = this.projectService.getCurrentProjectAcl();
   }
 
   private updateChangeState() {

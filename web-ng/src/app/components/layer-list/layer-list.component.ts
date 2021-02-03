@@ -21,7 +21,6 @@ import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/router/router.service';
-import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'ground-layer-list',
@@ -33,9 +32,8 @@ export class LayerListComponent {
   readonly lang: string;
 
   constructor(
-    private projectService: ProjectService,
-    private navigationService: NavigationService,
-    private authService: AuthService
+    readonly projectService: ProjectService,
+    private navigationService: NavigationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -46,11 +44,6 @@ export class LayerListComponent {
           List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
-  }
-
-  canShare(): boolean {
-    const acl = this.projectService.getCurrentProjectAcl();
-    return acl ? this.authService.canManageProject(acl) : false;
   }
 
   onAddLayer() {

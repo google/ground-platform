@@ -29,7 +29,7 @@
       class="rhs-widgets"
     >
       <button
-        [disabled]="!canShare()"
+        [disabled]="!projectService.canManageProject()"
         mat-flat-button
         color="primary"
         (click)="openShareDialog($event)"

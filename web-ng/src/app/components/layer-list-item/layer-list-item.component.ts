@@ -50,8 +50,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     private importDialog: MatDialog,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    private projectService: ProjectService,
-    private authService: AuthService
+    readonly projectService: ProjectService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -135,11 +134,6 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       `${environment.cloudFunctionsUrl}/exportCsv?` +
       `project=${this.projectId}&layer=${this.layer?.id}`
     );
-  }
-
-  canShare(): boolean {
-    const acl = this.projectService.getCurrentProjectAcl();
-    return acl ? this.authService.canManageProject(acl) : false;
   }
 
   ngOnDestroy(): void {
