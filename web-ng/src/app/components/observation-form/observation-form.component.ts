@@ -157,9 +157,7 @@ export class ObservationFormComponent {
   }
 
   private navigateToFeature() {
-    this.navigationService.clearObservationId(
-      this.navigationService.getFeatureId()
-    );
+    this.navigationService.clearObservationId();
   }
 
   private convertObservationToFormGroup(observation: Observation): FormGroup {

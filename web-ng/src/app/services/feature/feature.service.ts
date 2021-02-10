@@ -110,7 +110,7 @@ export class FeatureService {
       new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
-    this.navigationService.setFeatureId(newFeature.id);
+    this.navigationService.selectFeature(newFeature.id);
   }
 
   private async updatePointInternal(project: Project, feature: Feature) {

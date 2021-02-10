@@ -101,21 +101,21 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   onEditObservationClick(observation: Observation) {
     this.navigationService.editObservation(
-      this.navigationService.getFeatureId(),
+      this.navigationService.getFeatureId()!,
       observation.id
     );
   }
 
   onAddObservationClick() {
     this.navigationService.editObservation(
-      this.navigationService.getFeatureId(),
+      this.navigationService.getFeatureId()!,
       NavigationService.OBSERVATION_ID_NEW
     );
   }
 
   onDeleteObservationClick(id: string) {
     this.navigationService.editObservation(
-      this.navigationService.getFeatureId(),
+      this.navigationService.getFeatureId()!,
       id
     );
     const dialogRef = this.confirmationDialog.open(

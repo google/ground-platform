@@ -208,7 +208,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
       this.selectMarker(marker);
-      this.navigationService.setFeatureId(feature.id);
+      this.navigationService.selectFeature(feature.id);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
       const newFeature = new LocationFeature(

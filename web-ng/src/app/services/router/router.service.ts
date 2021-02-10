@@ -145,7 +145,7 @@ export class NavigationService {
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string) {
+  selectFeature(id: string) {
     const newParam: { [key: string]: string } = {};
     newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = id;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
@@ -168,20 +168,18 @@ export class NavigationService {
    * Navigate to the current URL, updating the observation id in the URL
    * fragment.
    */
-  editObservation(featureId: string | null, observationId: string) {
+  editObservation(featureId: string, observationId: string) {
     const newParam: { [key: string]: string } = {};
-    if (featureId) {
-      newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId!;
-    }
+    newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId;
     newParam[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = observationId;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  clearObservationId(featureId: string | null) {
+  clearObservationId() {
     const newParam: { [key: string]: string } = {};
-    if (featureId) {
-      newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId!;
-    }
+    newParam[
+      NavigationService.FEATURE_ID_FRAGMENT_PARAM
+    ] = this.getFeatureId()!;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
@@ -189,7 +187,7 @@ export class NavigationService {
    * Navigate to the current URL, updating the layer id in the URL
    * fragment.
    */
-  setLayerId(id: string) {
+  customizeLayer(id: string) {
     const newParam: { [key: string]: string } = {};
     newParam[NavigationService.LAYER_ID_FRAGMENT_PARAM] = id;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
