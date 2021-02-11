@@ -38,7 +38,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { ProjectService } from '../../services/project/project.service';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 // To make ESLint happy:
 /*global alert*/

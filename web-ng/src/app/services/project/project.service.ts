@@ -25,7 +25,7 @@ import { Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { NavigationService } from '../router/router.service';
+import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
 
 @Injectable({

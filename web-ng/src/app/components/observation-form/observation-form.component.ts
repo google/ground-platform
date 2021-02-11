@@ -40,7 +40,7 @@ import { switchMap, map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 // To make ESLint happy:
 /*global alert*/

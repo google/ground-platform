@@ -24,7 +24,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
 import { AclEntry } from '../../shared/models/acl-entry.model';
-import { NavigationService } from '../router/router.service';
+import { NavigationService } from '../navigation/navigation.service';
 
 const ANONYMOUS_USER: User = {
   id: '',

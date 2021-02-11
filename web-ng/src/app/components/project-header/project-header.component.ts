@@ -21,7 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'app-project-header',

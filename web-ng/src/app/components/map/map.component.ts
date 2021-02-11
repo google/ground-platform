@@ -30,7 +30,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
 
