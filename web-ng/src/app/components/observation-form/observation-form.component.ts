@@ -64,11 +64,11 @@ export class ObservationFormComponent {
   constructor(
     private dataStoreService: DataStoreService,
     private authService: AuthService,
-    private observationService: ObservationService,
-    private projectService: ProjectService,
-    private featureService: FeatureService,
     private formBuilder: FormBuilder,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    observationService: ObservationService,
+    projectService: ProjectService,
+    featureService: FeatureService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -77,16 +77,9 @@ export class ObservationFormComponent {
     });
     observationService
       .getSelectedObservation$()
-      .subscribe((observation?: Observation | LoadingState) => {
-        if (observation instanceof Observation) {
-          this.observation = observation;
-          this.observationFields = observation!
-            .form!.fields!.toOrderedMap()
-            .sortBy(entry => entry.index)
-            .toList();
-          this.initForm();
-        }
-      });
+      .subscribe((observation?: Observation | LoadingState) =>
+        this.onSelectObservation(observation)
+      );
     this.layer$ = projectService
       .getActiveProject$()
       .pipe(
@@ -96,15 +89,6 @@ export class ObservationFormComponent {
             .pipe(map(feature => project.layers.get(feature.layerId)!))
         )
       );
-  }
-
-  initForm() {
-    if (this.observation === undefined) {
-      throw Error('Observation is not selected.');
-    }
-    this.observationForm = this.convertObservationToFormGroup(
-      this.observation!
-    );
   }
 
   onCancel() {
@@ -138,11 +122,45 @@ export class ObservationFormComponent {
       });
   }
 
-  navigateToFeature() {
-    this.navigationService.editObservation(null);
+  private onSelectObservation(observation?: Observation | LoadingState) {
+    if (
+      observation === LoadingState.NOT_LOADED &&
+      this.observationForm?.dirty
+    ) {
+      if (
+        confirm(
+          'You have unsaved changes in observation form, do you want to save them?'
+        )
+      ) {
+        this.onSave();
+      } else {
+        this.observationForm = undefined;
+      }
+    }
+    if (observation instanceof Observation) {
+      this.observation = observation;
+      this.observationFields = observation!
+        .form!.fields!.toOrderedMap()
+        .sortBy(entry => entry.index)
+        .toList();
+      this.initForm();
+    }
   }
 
-  convertObservationToFormGroup(observation: Observation): FormGroup {
+  private initForm() {
+    if (this.observation === undefined) {
+      throw Error('Observation is not selected.');
+    }
+    this.observationForm = this.convertObservationToFormGroup(
+      this.observation!
+    );
+  }
+
+  private navigateToFeature() {
+    this.navigationService.clearObservationId();
+  }
+
+  private convertObservationToFormGroup(observation: Observation): FormGroup {
     const group: { [fieldId: string]: FormControl } = {};
     for (const [fieldId, field] of observation.form!.fields) {
       const response = observation!.responses?.get(fieldId);
@@ -163,7 +181,7 @@ export class ObservationFormComponent {
     return this.formBuilder.group(group);
   }
 
-  extractResponses(): Map<string, Response> {
+  private extractResponses(): Map<string, Response> {
     return Map<string, Response>(
       this.observationFields!.map(field => [
         field.id,
@@ -172,7 +190,7 @@ export class ObservationFormComponent {
     );
   }
 
-  extractResponseForField(field: Field) {
+  private extractResponseForField(field: Field) {
     switch (field.type) {
       case FieldType.TEXT:
         return this.extractResponseForTextField(field);
@@ -186,7 +204,7 @@ export class ObservationFormComponent {
     }
   }
 
-  addControlsForTextField(
+  private addControlsForTextField(
     group: { [fieldId: string]: FormControl },
     field: Field,
     response?: Response
@@ -197,11 +215,11 @@ export class ObservationFormComponent {
       : new FormControl(value);
   }
 
-  extractResponseForTextField(field: Field): Response {
+  private extractResponseForTextField(field: Field): Response {
     return new Response(this.observationForm?.value[field.id]);
   }
 
-  addControlsForMultipleChoiceField(
+  private addControlsForMultipleChoiceField(
     group: { [fieldId: string]: FormControl },
     field: Field,
     response?: Response
@@ -221,7 +239,7 @@ export class ObservationFormComponent {
     }
   }
 
-  extractResponseForMultipleChoiceField(field: Field): Response {
+  private extractResponseForMultipleChoiceField(field: Field): Response {
     switch (field.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
         return this.extractResponseForSelectOneField(field);
@@ -235,7 +253,7 @@ export class ObservationFormComponent {
     }
   }
 
-  addControlsForSelectOneField(
+  private addControlsForSelectOneField(
     group: { [fieldId: string]: FormControl },
     field: Field,
     response?: Response
@@ -247,14 +265,14 @@ export class ObservationFormComponent {
       : new FormControl(selectedOptionId);
   }
 
-  extractResponseForSelectOneField(field: Field): Response {
+  private extractResponseForSelectOneField(field: Field): Response {
     const selectedOption: Option = field.getMultipleChoiceOption(
       this.observationForm?.value[field.id]
     );
     return new Response(List([selectedOption]));
   }
 
-  addControlsForSelectMultipleField(
+  private addControlsForSelectMultipleField(
     group: { [fieldId: string]: FormControl },
     field: Field,
     response?: Response
@@ -265,7 +283,7 @@ export class ObservationFormComponent {
     }
   }
 
-  extractResponseForSelectMultipleField(field: Field): Response {
+  private extractResponseForSelectMultipleField(field: Field): Response {
     const selectedOptions: List<Option> = field.multipleChoice!.options!.filter(
       option => this.observationForm?.value[option.id]
     );
