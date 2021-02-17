@@ -31,8 +31,12 @@ export class NavigationService {
   private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
-  static readonly LAYER_ID_NEW = ':new';
-  static readonly OBSERVATION_ID_NEW = ':new';
+  static readonly LAYER_ID_NEW = 'new';
+  static readonly OBSERVATION_ID_NEW = 'new';
+  static readonly PROJECT_ID_NEW = 'new';
+  static readonly PROJECT_ID = 'projectId';
+  static readonly PROJECT_SEGMENT = 'project';
+  static readonly SIGN_IN_SEGMENT = 'signin';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
@@ -61,7 +65,7 @@ export class NavigationService {
     this.activatedRoute = route;
     // Pipe values from URL query parameters.
     this.projectId$ = route.paramMap.pipe(
-      map(params => params.get('projectId'))
+      map(params => params.get(NavigationService.PROJECT_ID))
     );
     // Pipe values from URL fragment.
     const fragmentParams$ = route.fragment.pipe(
@@ -130,34 +134,94 @@ export class NavigationService {
   }
 
   /**
-   * Navigate to the current URL, replacing the single URL fragment param
-   * with the specified value.
+   * Get current feature id in the URL fragment.
    */
-  private setFragmentParam(key: string, value: string | null) {
-    if (value) {
-      this.setFragmentParams(this.getFragmentParams().set(key, value));
-    } else {
-      this.setFragmentParams(this.getFragmentParams().delete(key));
-    }
+  getFeatureId(): string | null {
+    return this.getFragmentParams().get(
+      NavigationService.FEATURE_ID_FRAGMENT_PARAM
+    );
   }
 
   /**
    * Navigate to the current URL, updating the feature id in the URL fragment.
    */
-  setFeatureId(id: string | null) {
-    this.setFragmentParam(NavigationService.FEATURE_ID_FRAGMENT_PARAM, id);
+  selectFeature(id: string) {
+    const newParam: { [key: string]: string } = {};
+    newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = id;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+  }
+
+  clearFeatureId() {
+    this.setFragmentParams(new HttpParams({ fromString: '' }));
+  }
+
+  /**
+   * Get current observation id in the URL fragment.
+   */
+  getObservationId(): string | null {
+    return this.getFragmentParams().get(
+      NavigationService.OBSERVATION_ID_FRAGMENT_PARAM
+    );
   }
 
   /**
    * Navigate to the current URL, updating the observation id in the URL
    * fragment.
    */
-  setObservationId(id: string) {
-    this.setFragmentParam(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM, id);
+  editObservation(featureId: string, observationId: string) {
+    const newParam: { [key: string]: string } = {};
+    newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId;
+    newParam[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = observationId;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  setLayerId(id: string) {
-    this.setFragmentParam(NavigationService.LAYER_ID_FRAGMENT_PARAM, id);
+  clearObservationId() {
+    const newParam: { [key: string]: string } = {};
+    newParam[
+      NavigationService.FEATURE_ID_FRAGMENT_PARAM
+    ] = this.getFeatureId()!;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+  }
+
+  /**
+   * Navigate to the current URL, updating the layer id in the URL
+   * fragment.
+   */
+  customizeLayer(id: string) {
+    const newParam: { [key: string]: string } = {};
+    newParam[NavigationService.LAYER_ID_FRAGMENT_PARAM] = id;
+    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+  }
+
+  /**
+   * Navigate to the URL with new project id.
+   */
+  selectProject(id: string) {
+    this.router.navigateByUrl(`${NavigationService.PROJECT_SEGMENT}/${id}`);
+  }
+
+  /**
+   * Navigate to the URL for new project creation.
+   */
+  newProject() {
+    this.router.navigate([
+      NavigationService.PROJECT_SEGMENT,
+      NavigationService.PROJECT_ID_NEW,
+    ]);
+  }
+
+  /**
+   * Navigate to the URL for signin.
+   */
+  signIn() {
+    this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+  }
+
+  /**
+   * Navigate to the URL for signout.
+   */
+  signOut() {
+    this.router.navigate(['/']);
   }
 }
 

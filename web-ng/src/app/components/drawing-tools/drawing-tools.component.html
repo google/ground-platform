@@ -14,7 +14,10 @@
   limitations under the License.
 -->
 
-<mat-button-toggle-group class="drawing-buttons" [(value)] = "selectedValue">
+<mat-button-toggle-group
+  class="drawing-buttons"
+  [disabled]="disableControls$ | async"
+  [(value)] = "selectedValue">
   <mat-button-toggle class="add-point-button" value = "{{pointValue}}" (click)="onButtonClick()">
     <img class="add-point-icon" [src]="addPointIcon" />
   </mat-button-toggle>

@@ -20,7 +20,6 @@ import { Map } from 'immutable';
 import { Role } from './role.model';
 
 export class Project {
-  static readonly PROJECT_ID_NEW = ':new';
   static readonly UNSAVED_NEW = new Project(
     /* id= */
     '',

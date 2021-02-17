@@ -21,11 +21,12 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from './../../services/router/router.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
+import { ProjectService } from '../../services/project/project.service';
+import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -42,18 +43,21 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
   subscription: Subscription = new Subscription();
+  canCustomizeLayer = false;
 
   constructor(
     private sanitizer: DomSanitizer,
     private confirmationDialog: MatDialog,
     private importDialog: MatDialog,
-    private router: Router,
     private dataStoreService: DataStoreService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private projectService: ProjectService,
+    private authService: AuthService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.initLayerItemPermission();
   }
 
   ngOnInit() {
@@ -80,12 +84,12 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
 
   onCustomizeLayer() {
     if (this.layer?.id) {
-      this.navigationService.setLayerId(this.layer?.id);
+      this.navigationService.customizeLayer(this.layer?.id);
     }
   }
 
   onGoBackClick() {
-    this.navigationService.setFeatureId(null);
+    this.navigationService.clearFeatureId();
   }
 
   onDeleteLayer() {
@@ -114,7 +118,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onClose() {
-    return this.router.navigate([`p/${this.projectId}`]);
+    return this.navigationService.selectProject(this.projectId!);
   }
 
   onImportCsv() {
@@ -133,6 +137,15 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       `${environment.cloudFunctionsUrl}/exportCsv?` +
       `project=${this.projectId}&layer=${this.layer?.id}`
     );
+  }
+
+  initLayerItemPermission(): void {
+    const project = this.projectService.getCurrentProject();
+    if (!project) {
+      return;
+    }
+    const acl = this.projectService.getProjectAcl(project);
+    this.canCustomizeLayer = this.authService.canManageProject(acl);
   }
 
   ngOnDestroy(): void {

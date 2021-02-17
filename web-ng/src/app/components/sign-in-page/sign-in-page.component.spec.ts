@@ -31,7 +31,7 @@ describe('SignInPageComponent', () => {
         { provide: Router, useValue: {} },
         {
           provide: AuthService,
-          useValue: { getUser$: () => NEVER, isAuthenticated: () => false },
+          useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
         },
       ],
     }).compileComponents();

@@ -15,29 +15,22 @@
  */
 
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ColorPickerComponent } from './color-picker.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { ColorCircleModule } from 'ngx-color/circle';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
+import { TitleDialogComponent } from './title-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
-  declarations: [ColorPickerComponent],
+  declarations: [TitleDialogComponent],
   imports: [
-    CommonModule,
+    MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
-    ColorCircleModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    MatButtonModule,
-    FlexLayoutModule,
+    MatInputModule,
     FormsModule,
+    ReactiveFormsModule,
   ],
-  exports: [ColorPickerComponent],
 })
-export class ColorPickerModule {}
+export class TitleDialogModule {}

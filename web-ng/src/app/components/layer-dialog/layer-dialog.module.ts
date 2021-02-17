@@ -30,6 +30,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { FormFieldEditorModule } from '../form-field-editor/form-field-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [LayerDialogComponent, ConfirmationDialogComponent],
@@ -48,6 +49,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     FormFieldEditorModule,
     DragDropModule,
     MatIconModule,
+    MatCheckboxModule,
   ],
 })
 export class LayerDialogModule {}

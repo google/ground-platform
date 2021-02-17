@@ -29,7 +29,6 @@ import {
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
@@ -37,14 +36,11 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
-import { ProjectService } from '../../services/project/project.service';
-import { Project } from '../../shared/models/project.model';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
+import { NavigationService } from '../../services/router/router.service';
 
 // To make ESLint happy:
 /*global alert*/
-
-const DEFAULT_LAYER_COLOR = '#ff9131';
 
 @Component({
   selector: 'app-layer-dialog',
@@ -60,9 +56,11 @@ export class LayerDialogComponent implements OnDestroy {
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
+  defaultLayerColor: string;
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
+  contributorsCanAdd = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -72,12 +70,12 @@ export class LayerDialogComponent implements OnDestroy {
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private router: Router,
     private dialog: MatDialog,
     private layerService: LayerService,
-    private projectService: ProjectService
+    private navigationService: NavigationService
   ) {
     this.lang = 'en';
+    this.defaultLayerColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
@@ -129,7 +127,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.projectId = projectId;
     this.layer = layer;
     this.layerName = this.layer?.name?.get(this.lang) || '';
-    this.color = this.layer?.color || DEFAULT_LAYER_COLOR;
+    this.color = this.layer?.color || this.defaultLayerColor;
     if (!layer) {
       this.layer = this.layerService.createNewLayer();
       const newField = this.layerService.createField(
@@ -144,6 +142,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields = this.fields.push(newField);
       return;
     }
+    const canAddPoints = this.layer?.contributorsCanAdd?.find(
+      val => val === 'points'
+    );
+    this.contributorsCanAdd = canAddPoints ? true : false;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
@@ -177,17 +179,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
-      forms
+      forms,
+      this.contributorsCanAdd ? ['points'] : []
     );
-
-    if (this.projectId === Project.PROJECT_ID_NEW) {
-      this.projectService.createProject(/* title= */ '').then(projectId => {
-        this.projectId = projectId;
-        this.addOrUpdateLayer(this.projectId, layer);
-      });
-    } else {
-      this.addOrUpdateLayer(this.projectId, layer);
-    }
+    this.addOrUpdateLayer(this.projectId, layer);
   }
 
   private isFieldOptionsValid(
@@ -216,8 +211,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   onClose() {
     this.dialogRef.close();
-    // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([`p/${this.projectId}`]);
+    return this.navigationService.selectProject(this.projectId!);
   }
 
   setLayerName(value: string) {

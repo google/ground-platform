@@ -14,48 +14,46 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import {
-  FirebaseUISignInFailure,
-  FirebaseUISignInSuccessWithAuthResult,
-} from 'firebaseui-angular';
+import { Component, OnDestroy } from '@angular/core';
+import { FirebaseUISignInFailure } from 'firebaseui-angular';
 import { OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { User } from './../../shared/models/user.model';
 import { Observable } from 'rxjs';
 import { AuthService } from './../../services/auth/auth.service';
-
-const DEFAULT_ROUTE = ['/p/:new'];
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { NavigationService } from '../../services/router/router.service';
 
 @Component({
   templateUrl: './sign-in-page.component.html',
   styleUrls: ['./sign-in-page.component.css'],
 })
-export class SignInPageComponent implements OnInit {
-  constructor(private router: Router, private authService: AuthService) {}
+export class SignInPageComponent implements OnInit, OnDestroy {
+  private subscription = new Subscription();
+  constructor(
+    private authService: AuthService,
+    private navigationService: NavigationService
+  ) {}
 
-  async ngOnInit() {
-    const isAuth = await this.authService.isAuthenticated();
-    if (isAuth) {
-      this.router.navigate(DEFAULT_ROUTE);
-    }
+  ngOnInit() {
+    this.subscription.add(
+      // TODO(#545): Redirect to original URL on success.
+      this.authService
+        .isAuthenticated$()
+        .pipe(filter(isAuth => isAuth))
+        .subscribe(() => this.navigationService.newProject())
+    );
   }
 
-  getUser$(): Observable<User> {
-    return this.authService.getUser$();
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
-  successCallback(signInSuccessData: FirebaseUISignInSuccessWithAuthResult) {
-    // TODO(#545): Redirect to original URL on success.
-    this.router.navigate(DEFAULT_ROUTE);
+  isAuthenticated$(): Observable<boolean> {
+    return this.authService.isAuthenticated$();
   }
 
   errorCallback(errorData: FirebaseUISignInFailure) {
     // TODO: React to error.
     alert(`Sign in error ${errorData.code}`);
-  }
-
-  uiShownCallback() {
-    // TODO: Disable buttons while signing in.
   }
 }

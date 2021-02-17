@@ -19,7 +19,6 @@ import { Component } from '@angular/core';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { EditStyleButtonModule } from './../edit-style-button/edit-style-button.module';
 import { FormFieldEditorModule } from './../form-field-editor/form-field-editor.module';
-import { ProjectService } from './../../services/project/project.service';
 import { LayerDialogComponent } from './layer-dialog.component';
 import {
   MAT_DIALOG_DATA,
@@ -34,6 +33,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { AuthService } from '../../services/auth/auth.service';
+import { NEVER } from 'rxjs';
 
 @Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
@@ -67,13 +69,17 @@ describe('LayerDialogComponent', () => {
           MatInputModule,
           MatDialogModule,
           MatIconModule,
+          MatCheckboxModule,
         ],
         providers: [
-          { provide: ProjectService, useValue: {} },
           { provide: DataStoreService, useValue: { generateId: () => '123' } },
           { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },
+          {
+            provide: AuthService,
+            useValue: { getUser$: () => NEVER },
+          },
         ],
       }).compileComponents();
     })

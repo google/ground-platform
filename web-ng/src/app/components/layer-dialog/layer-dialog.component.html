@@ -21,17 +21,29 @@
   (focusOut)="setLayerName($event)"
 ></inline-editor>
 <hr class="horizontal-line" />
-<div class="default-style">
-  <div class="default-style-tag">Default style</div>
-  <app-edit-style-button
-    [markerColor]="layer!.color || '#000'"
-    (markerColorChange)="onMarkerColorChange($event)"
-  ></app-edit-style-button>
+<div fxLayout="column" fxLayoutGap="10px">
+  <div fxLayout>
+    <div fxFlex>Permissions</div>
+    <div fxFlex>Default style</div>
+  </div>
+  <div fxLayout>
+    <div fxFlex fxFlexAlign="center">
+      <mat-checkbox [(ngModel)]="contributorsCanAdd" color="primary">
+        <label>Contributors may add points</label>
+      </mat-checkbox>
+    </div>
+    <app-edit-style-button
+      fxFlex
+      [markerColor]="layer!.color || defaultLayerColor"
+      (markerColorChange)="onMarkerColorChange($event)"
+    ></app-edit-style-button>
+  </div>
 </div>
 <div>
   <h3>Form Layout</h3>
   <div class="label-helper-text">
-    Add questions that should be asked to observers about each point, line, or polygon in this layer.
+    Add questions that should be asked to observers about each point, line, or
+    polygon in this layer.
   </div>
 </div>
 <form (ngSubmit)="onSave()">

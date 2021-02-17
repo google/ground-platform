@@ -20,7 +20,6 @@ import { UserProfilePopupComponent } from '../../components/user-profile-popup/u
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
@@ -37,8 +36,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private dialog: MatDialog,
-    private projectService: ProjectService,
-    private router: Router
+    private projectService: ProjectService
   ) {
     this.lang = 'en';
     this.title = '';
@@ -65,23 +63,9 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
    *
    * @param evt the event emitted from the input element on blur.
    */
-  updateProjectTitle(value: string) {
-    if (!this.projectId) {
-      return this.createProject(value);
-    }
+  updateProjectTitle(value: string): Promise<void> {
     if (value === this.title) return Promise.resolve();
     return this.projectService.updateTitle(this.projectId, value);
-  }
-
-  createProject(title: string) {
-    this.projectService
-      .createProject(title)
-      .then(projectId => {
-        this.router.navigateByUrl(`/p/${projectId}`);
-      })
-      .catch(e => {
-        console.warn('Project creation failed', e);
-      });
   }
 
   private openShareDialog(): void {
