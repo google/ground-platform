@@ -20,7 +20,7 @@
 const csv = require("@fast-csv/format");
 const { db } = require("./common/context");
 
-// TODO: Refactor.
+// TODO: Refactor into meaningful pieces.
 async function exportCsv(req, res) {
   const { project: projectId, layer: layerId } = req.query;
   const project = await db.fetchProject(projectId);
@@ -95,6 +95,9 @@ async function exportCsv(req, res) {
   csvStream.end();
 }
 
+/**
+ * Returns the string representation of a specific form element response.
+ */
 function getValue(element, responses) {
   const response = responses[element.id] || "";
   if (
@@ -110,9 +113,14 @@ function getValue(element, responses) {
   }
 }
 
+/**
+ * Returns the code associated with a specified multiple choice option, or if
+ * the code is not defined, returns the label in English.
+ */
 function getMultipleChoiceValues(id, element) {
   const option = element.options[id];
   // TODO: i18n.
   return option.code || option.label["en"] || "";
 }
+
 module.exports = exportCsv;
