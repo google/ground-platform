@@ -81,12 +81,12 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
 
   onCustomizeLayer() {
     if (this.layer?.id) {
-      this.navigationService.setLayerId(this.layer?.id);
+      this.navigationService.customizeLayer(this.layer?.id);
     }
   }
 
   onGoBackClick() {
-    this.navigationService.setFeatureId(null);
+    this.navigationService.clearFeatureId();
   }
 
   onDeleteLayer() {

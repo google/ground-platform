@@ -36,7 +36,6 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
-import { ProjectService } from '../../services/project/project.service';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
 import { NavigationService } from '../../services/router/router.service';
 
@@ -73,7 +72,6 @@ export class LayerDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dialog: MatDialog,
     private layerService: LayerService,
-    private projectService: ProjectService,
     private navigationService: NavigationService
   ) {
     this.lang = 'en';
@@ -184,15 +182,7 @@ export class LayerDialogComponent implements OnDestroy {
       forms,
       this.contributorsCanAdd ? ['points'] : []
     );
-
-    if (this.projectId === NavigationService.PROJECT_ID_NEW) {
-      this.projectService.createProject(/* title= */ '').then(projectId => {
-        this.projectId = projectId;
-        this.addOrUpdateLayer(this.projectId, layer);
-      });
-    } else {
-      this.addOrUpdateLayer(this.projectId, layer);
-    }
+    this.addOrUpdateLayer(this.projectId, layer);
   }
 
   private isFieldOptionsValid(
