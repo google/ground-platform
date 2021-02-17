@@ -53,7 +53,10 @@ describe('ShareDialogComponent', () => {
           { provide: MatDialogRef, useValue: {} },
           {
             provide: ProjectService,
-            useValue: { getActiveProject$: () => of({ acl: Map() }) },
+            useValue: {
+              getActiveProject$: () => of({ acl: Map() }),
+              getProjectAcl: () => {},
+            },
           },
         ],
       }).compileComponents();

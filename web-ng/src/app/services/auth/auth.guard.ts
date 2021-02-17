@@ -17,7 +17,6 @@ import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivate,
-  Router,
   RouterStateSnapshot,
 } from '@angular/router';
 import { AuthService } from './auth.service';
@@ -31,7 +30,10 @@ import { NavigationService } from '../router/router.service';
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private navigationService: NavigationService
+  ) {}
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -40,7 +42,7 @@ export class AuthGuard implements CanActivate {
     return this.authService.getUser$().pipe(
       map(user => this.canUserActivate(user, state.url)),
       catchError(() => {
-        this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+        this.navigationService.signIn();
         return of(false);
       })
     );
@@ -54,16 +56,13 @@ export class AuthGuard implements CanActivate {
       if (!user.isAuthenticated) {
         return true;
       }
-      this.router.navigate([
-        NavigationService.PROJECT_SEGMENT,
-        NavigationService.PROJECT_ID_NEW,
-      ]);
+      this.navigationService.newProject();
       return false;
     }
     if (user.isAuthenticated) {
       return true;
     }
-    this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+    this.navigationService.signIn();
     return false;
   }
 }

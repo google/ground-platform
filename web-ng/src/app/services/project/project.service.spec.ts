@@ -33,6 +33,7 @@ describe('ProjectService', () => {
           provide: AuthService,
           useValue: {
             user$,
+            getUser$: () => user$,
           },
         },
       ],

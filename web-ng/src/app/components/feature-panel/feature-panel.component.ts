@@ -27,7 +27,6 @@ import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/router/router.service';
 import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { Router } from '@angular/router';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -52,7 +51,6 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
     projectService: ProjectService,
     featureService: FeatureService,
     observationService: ObservationService,
-    private router: Router,
     private dataStoreService: DataStoreService,
     private confirmationDialog: MatDialog,
     private zone: NgZone
@@ -102,17 +100,24 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   }
 
   onEditObservationClick(observation: Observation) {
-    this.navigationService.setObservationId(observation.id);
+    this.navigationService.editObservation(
+      this.navigationService.getFeatureId()!,
+      observation.id
+    );
   }
 
   onAddObservationClick() {
-    this.navigationService.setObservationId(
+    this.navigationService.editObservation(
+      this.navigationService.getFeatureId()!,
       NavigationService.OBSERVATION_ID_NEW
     );
   }
 
   onDeleteObservationClick(id: string) {
-    this.navigationService.setObservationId(id);
+    this.navigationService.editObservation(
+      this.navigationService.getFeatureId()!,
+      id
+    );
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {
@@ -145,9 +150,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.zone.run(() => {
-      this.router.navigate([
-        `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
-      ]);
+      this.navigationService.selectProject(this.projectId!);
     });
   }
 

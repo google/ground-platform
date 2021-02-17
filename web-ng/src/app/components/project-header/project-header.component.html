@@ -24,7 +24,10 @@
     ></inline-editor>
   </span>
   <div right>
-    <div *ngIf="auth.user$ | async as user; else login" class="rhs-widgets">
+    <div
+      *ngIf="auth.getUser$() | async as user; else login"
+      class="rhs-widgets"
+    >
       <button mat-flat-button color="primary" (click)="openShareDialog($event)">
         <mat-icon>people_alt</mat-icon>
         <label>Share</label>

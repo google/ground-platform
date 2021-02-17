@@ -29,7 +29,6 @@ import {
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
@@ -37,7 +36,6 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
-import { ProjectService } from '../../services/project/project.service';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
 import { NavigationService } from '../../services/router/router.service';
 
@@ -72,10 +70,9 @@ export class LayerDialogComponent implements OnDestroy {
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private router: Router,
     private dialog: MatDialog,
     private layerService: LayerService,
-    private projectService: ProjectService
+    private navigationService: NavigationService
   ) {
     this.lang = 'en';
     this.defaultLayerColor = '#ff9131';
@@ -185,15 +182,7 @@ export class LayerDialogComponent implements OnDestroy {
       forms,
       this.contributorsCanAdd ? ['points'] : []
     );
-
-    if (this.projectId === NavigationService.PROJECT_ID_NEW) {
-      this.projectService.createProject(/* title= */ '').then(projectId => {
-        this.projectId = projectId;
-        this.addOrUpdateLayer(this.projectId, layer);
-      });
-    } else {
-      this.addOrUpdateLayer(this.projectId, layer);
-    }
+    this.addOrUpdateLayer(this.projectId, layer);
   }
 
   private isFieldOptionsValid(
@@ -222,10 +211,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   onClose() {
     this.dialogRef.close();
-    // TODO: refactor this path into a custom router wrapper
-    return this.router.navigate([
-      `${NavigationService.PROJECT_SEGMENT}/${this.projectId}`,
-    ]);
+    return this.navigationService.selectProject(this.projectId!);
   }
 
   setLayerName(value: string) {
