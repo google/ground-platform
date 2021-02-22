@@ -51,6 +51,10 @@ async function exportCsv(req, res) {
   });
 
   res.type("text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    "attachment; filename=" + layer.name.en + ".csv"
+  );
   const csvStream = csv.format({
     delimiter: ",",
     headers,
