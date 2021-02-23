@@ -54,9 +54,7 @@ async function exportCsv(req, res) {
   res.type("text/csv");
   res.setHeader(
     "Content-Disposition",
-    "attachment; filename=" +
-      layerName.replace(/[^a-z0-9]/gi, "-").toLowerCase() +
-      ".csv"
+    "attachment; filename=" + getFileName(layerName)
   );
   const csvStream = csv.format({
     delimiter: ",",
@@ -129,6 +127,13 @@ function getMultipleChoiceValues(id, element) {
   const option = element.options[id];
   // TODO: i18n.
   return option.code || option.label["en"] || "";
+}
+
+/**
+ * Returns the file name in lowercase (replacing any special characters with '-') for csv export
+ */
+function getFileName(layerName) {
+  return layerName.replace(/[^a-z0-9]/gi, "-").toLowerCase() + ".csv";
 }
 
 module.exports = exportCsv;
