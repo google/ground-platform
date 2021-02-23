@@ -32,6 +32,7 @@ async function exportCsv(req, res) {
 
   const layers = project.get("layers") || {};
   const layer = layers[layerId] || {};
+  const layerName = layer.name.en;
   const forms = layer["forms"] || {};
   const form = Object.values(forms)[0] || {};
   const elementMap = form["elements"] || {};
@@ -53,7 +54,9 @@ async function exportCsv(req, res) {
   res.type("text/csv");
   res.setHeader(
     "Content-Disposition",
-    "attachment; filename=" + layer.name.en + ".csv"
+    "attachment; filename=" +
+      layerName.replace(/[^a-z0-9]/gi, "-").toLowerCase() +
+      ".csv"
   );
   const csvStream = csv.format({
     delimiter: ",",
