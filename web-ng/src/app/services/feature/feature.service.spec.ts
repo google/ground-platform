@@ -18,13 +18,18 @@ import { TestBed } from '@angular/core/testing';
 import { FeatureService } from './feature.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { ProjectService } from '../project/project.service';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
+import { NavigationService } from '../../services/router/router.service';
 
 describe('FeatureService', () => {
   const activeProject$ = new Subject<Project | null>();
 
-  beforeEach(() =>
+  beforeEach(() => {
+    const navigationService = {
+      getProjectId$: () => of(''),
+      getFeatureId$: () => of(''),
+    };
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: {} },
@@ -34,9 +39,10 @@ describe('FeatureService', () => {
             getActiveProject$: () => activeProject$,
           },
         },
+        { provide: NavigationService, useValue: navigationService },
       ],
-    })
-  );
+    });
+  });
 
   it('should be created', () => {
     const service: FeatureService = TestBed.inject(FeatureService);

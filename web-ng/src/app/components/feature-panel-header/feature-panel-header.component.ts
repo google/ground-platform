@@ -74,7 +74,7 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   }
 
   onCloseClick() {
-    this.navigationService.setFeatureId(null);
+    this.navigationService.clearFeatureId();
   }
 
   onDeleteFeatureClick() {

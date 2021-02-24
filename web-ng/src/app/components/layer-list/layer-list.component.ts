@@ -60,6 +60,6 @@ export class LayerListComponent {
   }
 
   onAddLayer() {
-    this.navigationService.setLayerId(NavigationService.LAYER_ID_NEW);
+    this.navigationService.customizeLayer(NavigationService.LAYER_ID_NEW);
   }
 }
