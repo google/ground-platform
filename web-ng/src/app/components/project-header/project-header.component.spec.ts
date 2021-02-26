@@ -44,7 +44,10 @@ describe('ProjectHeaderComponent', () => {
           { provide: MatDialogRef, useValue: dialogRef },
           {
             provide: ProjectService,
-            useValue: { getActiveProject$: () => NEVER },
+            useValue: {
+              getActiveProject$: () => NEVER,
+              getCurrentProject: () => {},
+            },
           },
           { provide: Router, useValue: {} },
         ],

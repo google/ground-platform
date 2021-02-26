@@ -16,14 +16,13 @@
 
 import { DataStoreService } from '../data-store/data-store.service';
 import { Observable, of } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Injectable } from '@angular/core';
 import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
-import { AclEntry } from '../../shared/models/acl-entry.model';
 import { NavigationService } from '../router/router.service';
 
 const ANONYMOUS_USER: User = {
@@ -38,7 +37,7 @@ const ANONYMOUS_USER: User = {
 })
 export class AuthService {
   private user$: Observable<User>;
-  private currentUser?: User;
+  private currentUser!: User;
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -69,6 +68,10 @@ export class AuthService {
     return this.getUser$().pipe(map(user => user.isAuthenticated));
   }
 
+  getCurrentUser(): User {
+    return this.currentUser;
+  }
+
   async signIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
     await this.afAuth.signInWithPopup(provider);
@@ -77,13 +80,5 @@ export class AuthService {
   async signOut() {
     await this.afAuth.signOut();
     return this.navigationService.signOut();
-  }
-
-  /**
-   * Checks if a user has manager or owner level permissions of the project.
-   */
-  canManageProject(acl: AclEntry[]): boolean {
-    const userEmail = this.currentUser?.email;
-    return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }
