@@ -7,8 +7,13 @@
     "public": "web-ng/dist/web-ng",
     "redirects": [
       {
-        "source": "/",
-        "destination": "/signin",
+        "source": "/p/[:]new",
+        "destination": "/project/new",
+        "type": 301
+      },
+      {
+        "source": "/p/:id",
+        "destination": "/project/:id",
         "type": 301
       }
     ],
