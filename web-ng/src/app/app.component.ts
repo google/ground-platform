@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject } from '@angular/core';
+import { environment } from '../environments/environment';
 
 /**
  * Top-level component. Delegates routing of sub-components to paths defined
@@ -25,4 +27,15 @@ import { Component } from '@angular/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.css'],
 })
-export class AppComponent {}
+export class AppComponent {
+  public constructor(@Inject(DOCUMENT) private doc: Document) {
+    this.initGoogleMap();
+  }
+  private initGoogleMap(): void {
+    const script = this.doc.createElement('script');
+    script.type = 'text/javascript';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}`;
+    const head = this.doc.getElementsByTagName('head')[0];
+    head.appendChild(script);
+  }
+}
