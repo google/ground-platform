@@ -97,6 +97,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         .getEditMode$()
         .subscribe(editMode => this.onEditModeChange(editMode))
     );
+
+    this.subscription.add(
+      this.navigationService.getFeatureId$()
+      .subscribe(featureId => this.selectMarkerWithFeatureId(featureId))
+    );
   }
 
   ngOnDestroy() {
@@ -207,7 +212,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
-      this.selectMarker(marker);
       this.navigationService.selectFeature(feature.id);
     });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
@@ -233,7 +237,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onEditModeChange(editMode: EditMode) {
     if (editMode !== EditMode.None) {
-      this.selectMarker(undefined);
       this.navigationService.clearFeatureId();
       for (const marker of this.markers) {
         marker.setClickable(false);
@@ -265,7 +268,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(marker?.getPosition());
   }
 
-  private selectMarkerWithFeatureId(selectedFeatureId: string) {
+  private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
+    if (!selectedFeatureId) {
+      this.selectMarker(undefined);
+      return;
+    }
     for (const marker of this.markers) {
       if (marker.getTitle() === selectedFeatureId) {
         this.selectMarker(marker);
