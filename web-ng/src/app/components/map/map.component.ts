@@ -68,6 +68,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     draggableCursor: '',
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
+  showRepositionConfirmDialog = false;
+  newFeatureToReposition?: LocationFeature;
+  oldLatLng?: google.maps.LatLng;
+  newLatLng?: google.maps.LatLng;
+  markerToReposition?: google.maps.Marker;
+  disableMapClicks = false;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -99,8 +105,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
 
     this.subscription.add(
-      this.navigationService.getFeatureId$()
-      .subscribe(featureId => this.selectMarkerWithFeatureId(featureId))
+      this.navigationService
+        .getFeatureId$()
+        .subscribe(featureId => this.selectMarkerWithFeatureId(featureId))
     );
   }
 
@@ -109,6 +116,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
+    if (this.disableMapClicks) {
+      return Promise.resolve();
+    }
     this.selectMarker(undefined);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
@@ -212,15 +222,34 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => {
+      if (this.disableMapClicks) {
+        return;
+      }
       this.navigationService.selectFeature(feature.id);
     });
+    marker.addListener('dragstart', (event: google.maps.MouseEvent) => {
+      // TODO: Show confirm dialog and disable other components when entering reposition state.
+      // Currently we are figuring out how should the UI trigger this state.
+      this.showRepositionConfirmDialog = true;
+      // TODO: Disable side panel as well.
+      this.disableMapClicks = true;
+      this.drawingToolsService.setDisabled$(true);
+      this.oldLatLng = new google.maps.LatLng(
+        event.latLng.lat(),
+        event.latLng.lng()
+      );
+    });
     marker.addListener('dragend', (event: google.maps.MouseEvent) => {
-      const newFeature = new LocationFeature(
+      this.newLatLng = new google.maps.LatLng(
+        event.latLng.lat(),
+        event.latLng.lng()
+      );
+      this.markerToReposition = marker;
+      this.newFeatureToReposition = new LocationFeature(
         feature.id,
         feature.layerId,
         new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
       );
-      this.featureService.updatePoint(newFeature);
     });
     this.markers.push(marker);
   }
@@ -309,5 +338,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         fillColor: color,
       };
     });
+  }
+
+  onSaveRepositionClick() {
+    this.markerToReposition?.setPosition(this.newLatLng!);
+    this.featureService.updatePoint(this.newFeatureToReposition!);
+    this.resetReposition();
+  }
+
+  onCancelRepositionClick() {
+    this.markerToReposition?.setPosition(this.oldLatLng!);
+    this.resetReposition();
+  }
+
+  private resetReposition() {
+    this.showRepositionConfirmDialog = false;
+    this.newFeatureToReposition = undefined;
+    this.oldLatLng = undefined;
+    this.newLatLng = undefined;
+    this.markerToReposition = undefined;
+    this.disableMapClicks = false;
+    this.drawingToolsService.setDisabled$(false);
   }
 }

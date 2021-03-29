@@ -59,7 +59,8 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     getPinImageSource(this.green)
   );
   addPointIcon = this.addPointIconBlack;
-  disableControls$: Observable<boolean>;
+  isObservationSelected$: Observable<boolean>;
+  disabled$: Observable<boolean>;
 
   constructor(
     private readonly changeDetectorRef: ChangeDetectorRef,
@@ -68,9 +69,10 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     projectService: ProjectService
   ) {
-    this.disableControls$ = this.navigationService
+    this.isObservationSelected$ = this.navigationService
       .getObservationId$()
       .pipe(map(obs => !!obs));
+    this.disabled$ = drawingToolsService.getDisabled$();
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layers$ = projectService.getActiveProject$().pipe(
