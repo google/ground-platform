@@ -31,7 +31,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 const mockProject = new Project(
   'project001',

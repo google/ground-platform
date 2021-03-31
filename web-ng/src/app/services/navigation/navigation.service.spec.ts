@@ -16,7 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { NavigationService } from './router.service';
+import { NavigationService } from './navigation.service';
 import { Router } from '@angular/router';
 
 describe('NavigationService', () => {
