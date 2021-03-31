@@ -22,7 +22,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../services/project/project.service';
@@ -43,7 +43,6 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
   subscription: Subscription = new Subscription();
-  canCustomizeLayer = false;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -51,13 +50,11 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     private importDialog: MatDialog,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    private projectService: ProjectService,
-    private authService: AuthService
+    readonly projectService: ProjectService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
-    this.initLayerItemPermission();
   }
 
   ngOnInit() {
@@ -137,15 +134,6 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       `${environment.cloudFunctionsUrl}/exportCsv?` +
       `project=${this.projectId}&layer=${this.layer?.id}`
     );
-  }
-
-  initLayerItemPermission(): void {
-    const project = this.projectService.getCurrentProject();
-    if (!project) {
-      return;
-    }
-    const acl = this.projectService.getProjectAcl(project);
-    this.canCustomizeLayer = this.authService.canManageProject(acl);
   }
 
   ngOnDestroy(): void {

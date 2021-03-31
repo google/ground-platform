@@ -55,7 +55,7 @@ describe('ShareDialogComponent', () => {
             provide: ProjectService,
             useValue: {
               getActiveProject$: () => of({ acl: Map() }),
-              getProjectAcl: () => {},
+              getCurrentProjectAcl: () => {},
             },
           },
         ],

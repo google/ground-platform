@@ -25,7 +25,7 @@ import { Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { NavigationService } from '../router/router.service';
+import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
 
 @Injectable({
@@ -34,7 +34,7 @@ import { AclEntry } from '../../shared/models/acl-entry.model';
 export class ProjectService {
   private activeProjectId$ = new ReplaySubject<string>(1);
   private activeProject$: Observable<Project>;
-  private currentProject?: Project;
+  private currentProject!: Project;
 
   constructor(
     private dataStore: DataStoreService,
@@ -97,10 +97,10 @@ export class ProjectService {
   }
 
   /**
-   * Returns the acl of the project.
+   * Returns the acl of the current project.
    */
-  getProjectAcl(project: Project): AclEntry[] {
-    return project?.acl
+  getCurrentProjectAcl(): AclEntry[] {
+    return this.currentProject.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()
@@ -108,7 +108,16 @@ export class ProjectService {
       .toArray();
   }
 
-  getCurrentProject(): Project | undefined {
-    return this.currentProject;
+  /**
+   * Checks if a user has manager or owner level permissions of the project.
+   */
+  canManageProject(): boolean {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      return false;
+    }
+    const userEmail = user.email;
+    const acl = this.getCurrentProjectAcl();
+    return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }
