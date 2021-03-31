@@ -24,7 +24,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { DataStoreService } from '../../services/data-store/data-store.service';
