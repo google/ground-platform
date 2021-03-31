@@ -19,7 +19,7 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TitleDialogComponent } from './title-dialog.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
