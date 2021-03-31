@@ -23,7 +23,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
 
 describe('FeaturePanelHeaderComponent', () => {

@@ -35,7 +35,7 @@ import { AuditInfo } from '../../shared/models/audit-info.model';
 import { AuthService } from './../../services/auth/auth.service';
 import { User } from '../../shared/models/user.model';
 import { Response } from '../../shared/models/observation/response.model';
-import { NavigationService } from '../router/router.service';
+import { NavigationService } from '../navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',

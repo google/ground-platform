@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { AuthService } from './../../services/auth/auth.service';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   templateUrl: './sign-in-page.component.html',
