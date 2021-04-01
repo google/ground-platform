@@ -133,9 +133,9 @@ function getMultipleChoiceValues(id, element) {
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
 function getFileName(layerName) {
-  layerName =
-    layerName.toLowerCase().replace(/[^a-z0-9]/gi, "-") || "ground-export";
-  return `${layerName}.csv`;
+  layerName = layerName || "ground-export";
+  const fileBase = layerName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
+  return `${fileBase}.csv`;
 }
 
 module.exports = exportCsv;
