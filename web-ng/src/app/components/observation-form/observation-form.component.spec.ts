@@ -52,7 +52,7 @@ import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { User } from '../../shared/models/user.model';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 class MockModel {
   static element001: Field = new Field(

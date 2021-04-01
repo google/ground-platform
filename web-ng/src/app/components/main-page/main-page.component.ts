@@ -23,7 +23,7 @@ import { FeatureService } from '../../services/feature/feature.service';
 import { ProjectService } from '../../services/project/project.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { environment } from '../../../environments/environment';
 import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
