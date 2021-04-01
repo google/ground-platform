@@ -32,7 +32,7 @@ async function exportCsv(req, res) {
 
   const layers = project.get("layers") || {};
   const layer = layers[layerId] || {};
-  const layerName = layer.name.en;
+  const layerName = layer.name && layer.name["en"];
   const forms = layer["forms"] || {};
   const form = Object.values(forms)[0] || {};
   const elementMap = form["elements"] || {};
@@ -133,7 +133,9 @@ function getMultipleChoiceValues(id, element) {
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
 function getFileName(layerName) {
-  return layerName.replace(/[^a-z0-9]/gi, "-").toLowerCase() + ".csv";
+  layerName =
+    layerName.toLowerCase().replace(/[^a-z0-9]/gi, "-") || "ground-export";
+  return `${layerName}.csv`;
 }
 
 module.exports = exportCsv;
