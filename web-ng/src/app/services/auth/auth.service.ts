@@ -23,7 +23,7 @@ import firebase from 'firebase/app';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
-import { NavigationService } from '../router/router.service';
+import { NavigationService } from '../navigation/navigation.service';
 
 const ANONYMOUS_USER: User = {
   id: '',

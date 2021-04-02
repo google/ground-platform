@@ -33,7 +33,7 @@ import { List } from 'immutable';
 import { map } from 'rxjs/internal/operators/map';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-drawing-tools',

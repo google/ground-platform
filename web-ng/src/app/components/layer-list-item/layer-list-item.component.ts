@@ -22,7 +22,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../services/project/project.service';

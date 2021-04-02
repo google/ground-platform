@@ -19,7 +19,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { MainPageContainerComponent } from './components/main-page-container/main-page-container.component';
 import { AuthGuard } from './services/auth/auth.guard';
 import { SignInPageComponent } from './components/sign-in-page/sign-in-page.component';
-import { NavigationService } from './services/router/router.service';
+import { NavigationService } from './services/navigation/navigation.service';
 
 const routes: Routes = [
   {
