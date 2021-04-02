@@ -109,6 +109,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         .getFeatureId$()
         .subscribe(featureId => this.selectMarkerWithFeatureId(featureId))
     );
+
+    this.subscription.add(
+      combineLatest([
+        this.navigationService.getFeatureId$(),
+        this.navigationService.getObservationId$(),
+      ]).subscribe(() => this.cancelReposition())
+    );
   }
 
   ngOnDestroy() {
@@ -359,5 +366,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.markerToReposition = undefined;
     this.disableMapClicks = false;
     this.drawingToolsService.setDisabled$(false);
+  }
+
+  private cancelReposition() {
+    if (this.showRepositionConfirmDialog) {
+      this.onCancelRepositionClick();
+    }
   }
 }
