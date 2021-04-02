@@ -366,9 +366,9 @@ export class FirebaseDataConverter {
    * @param id the uuid of the project instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  static toFeature(id: string, data: DocumentData): Feature | void {
-    if (!this.isFeatureValid(data)) {
-      const errors = this.getFeatureErrors(id, data);
+  static toFeature(id: string, data: DocumentData): Feature | undefined {
+    const errors = this.validateFeature(data);
+    if (Object.keys(errors).length) {
       console.error(`Invalid feature ${id}`, errors);
       return;
     }
@@ -379,6 +379,8 @@ export class FirebaseDataConverter {
       const geoJson = JSON.parse(data.geoJson);
       return new GeoJsonFeature(id, data.layerId, geoJson);
     }
+    console.warn(`Invalid feature ${id} in remote data store ignored`);
+    return;
   }
 
   /**
@@ -549,11 +551,17 @@ export class FirebaseDataConverter {
     return Role[role].toLowerCase();
   }
 
-  private static isFeatureValid(data: DocumentData): boolean {
-    return (
-      data?.layerId &&
-      (this.isLocationFeature(data) || this.isGeoJsonFeature(data))
-    );
+  private static validateFeature(
+    data: DocumentData
+  ): { [key: string]: string } {
+    const errors: { [key: string]: string } = {};
+    if (!data?.layerId) {
+      errors.layerId = 'layer id is required';
+    } else if (!this.isLocationFeature(data) && !this.isGeoJsonFeature(data)) {
+      errors.geoJson = 'geoJson is required';
+      errors.location = this.getLocationErrorMessage(data);
+    }
+    return errors;
   }
 
   private static isLocationFeature(data: DocumentData): boolean {
@@ -564,25 +572,7 @@ export class FirebaseDataConverter {
     return data?.geoJson;
   }
 
-  private static getFeatureErrors(
-    id: string,
-    data: DocumentData
-  ): { [key: string]: string } {
-    const errors: { [key: string]: string } = {};
-
-    if (!data.layerId) {
-      errors.layerId = 'layer id is required';
-    } else {
-      errors.geoJson = 'geoJson is required';
-      errors.location = this.getLocationErrorMessage(id, data);
-    }
-    return errors;
-  }
-
-  private static getLocationErrorMessage(
-    id: string,
-    data: DocumentData
-  ): string {
+  private static getLocationErrorMessage(data: DocumentData): string {
     if (data?.location?.latitude && !data?.location?.longitude) {
       return 'longitude in the location property of feature is required';
     } else if (!data?.location?.latitude && data?.location?.longitude) {
