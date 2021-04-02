@@ -366,9 +366,10 @@ export class FirebaseDataConverter {
    * @param id the uuid of the project instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  static toFeature(id: string, data: DocumentData): Feature | undefined {
+  static toFeature(id: string, data: DocumentData): Feature | void {
     if (!this.isFeatureValid(data)) {
-      console.warn(`Invalid feature ${id} in remote data store ignored`);
+      const errors = this.getFeatureErrors(id, data);
+      console.error(`Invalid feature ${id}`, errors);
       return;
     }
     if (this.isLocationFeature(data)) {
@@ -378,8 +379,6 @@ export class FirebaseDataConverter {
       const geoJson = JSON.parse(data.geoJson);
       return new GeoJsonFeature(id, data.layerId, geoJson);
     }
-    console.warn(`Invalid feature ${id} in remote data store ignored`);
-    return;
   }
 
   /**
@@ -563,5 +562,33 @@ export class FirebaseDataConverter {
 
   private static isGeoJsonFeature(data: DocumentData): boolean {
     return data?.geoJson;
+  }
+
+  private static getFeatureErrors(
+    id: string,
+    data: DocumentData
+  ): { [key: string]: string } {
+    const errors: { [key: string]: string } = {};
+
+    if (!data.layerId) {
+      errors.layerId = 'layer id is required';
+    } else {
+      errors.geoJson = 'geoJson is required';
+      errors.location = this.getLocationErrorMessage(id, data);
+    }
+    return errors;
+  }
+
+  private static getLocationErrorMessage(
+    id: string,
+    data: DocumentData
+  ): string {
+    if (data?.location?.latitude && !data?.location?.longitude) {
+      return 'longitude in the location property of feature is required';
+    } else if (!data?.location?.latitude && data?.location?.longitude) {
+      return 'latitude in the location property of feature is required';
+    } else {
+      return 'latitude and longitude in the location property of feature are required';
+    }
   }
 }
