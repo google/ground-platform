@@ -367,9 +367,7 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    */
   static toFeature(id: string, data: DocumentData): Feature | undefined {
-    const errors = this.validateFeature(data);
-    if (Object.keys(errors).length) {
-      console.error(`Invalid feature ${id}`, errors);
+    if (!this.isFeatureValid(id, data)) {
       return;
     }
     if (this.isLocationFeature(data)) {
@@ -551,17 +549,19 @@ export class FirebaseDataConverter {
     return Role[role].toLowerCase();
   }
 
-  private static validateFeature(
-    data: DocumentData
-  ): { [key: string]: string } {
-    const errors: { [key: string]: string } = {};
+  private static isFeatureValid(id: string, data: DocumentData): boolean {
     if (!data?.layerId) {
-      errors.layerId = 'layer id is required';
-    } else if (!this.isLocationFeature(data) && !this.isGeoJsonFeature(data)) {
-      errors.geoJson = 'geoJson is required';
-      errors.location = this.getLocationErrorMessage(data);
+      console.error(`layerId is required in the feature ${id}`);
+      return false;
+    } else {
+      if (!this.isLocationFeature(data) && !this.isGeoJsonFeature(data)) {
+        console.error(
+          `geoJson and location with latitude and longitude are required in the feature ${id}`
+        );
+        return false;
+      }
     }
-    return errors;
+    return true;
   }
 
   private static isLocationFeature(data: DocumentData): boolean {
@@ -570,15 +570,5 @@ export class FirebaseDataConverter {
 
   private static isGeoJsonFeature(data: DocumentData): boolean {
     return data?.geoJson;
-  }
-
-  private static getLocationErrorMessage(data: DocumentData): string {
-    if (data?.location?.latitude && !data?.location?.longitude) {
-      return 'longitude in the location property of feature is required';
-    } else if (!data?.location?.latitude && data?.location?.longitude) {
-      return 'latitude in the location property of feature is required';
-    } else {
-      return 'latitude and longitude in the location property of feature are required';
-    }
   }
 }
