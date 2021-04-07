@@ -32,6 +32,7 @@ async function exportCsv(req, res) {
 
   const layers = project.get("layers") || {};
   const layer = layers[layerId] || {};
+  const layerName = layer.name && layer.name["en"];
   const forms = layer["forms"] || {};
   const form = Object.values(forms)[0] || {};
   const elementMap = form["elements"] || {};
@@ -51,6 +52,10 @@ async function exportCsv(req, res) {
   });
 
   res.type("text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    "attachment; filename=" + getFileName(layerName)
+  );
   const csvStream = csv.format({
     delimiter: ",",
     headers,
@@ -122,6 +127,15 @@ function getMultipleChoiceValues(id, element) {
   const option = element.options[id];
   // TODO: i18n.
   return option.code || option.label["en"] || "";
+}
+
+/**
+ * Returns the file name in lowercase (replacing any special characters with '-') for csv export
+ */
+function getFileName(layerName) {
+  layerName = layerName || "ground-export";
+  const fileBase = layerName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
+  return `${fileBase}.csv`;
 }
 
 module.exports = exportCsv;
