@@ -309,6 +309,10 @@ export class FirebaseDataConverter {
         return FieldType.MULTIPLE_CHOICE;
       case 'photo':
         return FieldType.PHOTO;
+      case 'date':
+        return FieldType.DATE;
+      case 'time':
+        return FieldType.TIME;
       default:
         throw Error(`Unsupported field type ${fieldType}`);
     }
@@ -322,6 +326,10 @@ export class FirebaseDataConverter {
         return 'multiple_choice';
       case FieldType.PHOTO:
         return 'photo';
+      case FieldType.DATE:
+        return 'date';
+      case FieldType.TIME:
+        return 'time';
       default:
         throw Error(`Unsupported field type ${fieldType}`);
     }

@@ -106,6 +106,16 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         label: 'Photo',
         type: FieldType.PHOTO,
       },
+      {
+        icon: 'calendar_today',
+        label: 'Date',
+        type: FieldType.DATE,
+      },
+      {
+        icon: 'access_time',
+        label: 'Time',
+        type: FieldType.TIME,
+      }
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
@@ -166,6 +176,10 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         ];
       case FieldType.PHOTO:
         return this.selectFieldOptions[3];
+      case FieldType.DATE:
+        return this.selectFieldOptions[4];
+      case FieldType.TIME:
+        return this.selectFieldOptions[5];
       default:
         throw new Error(`Unsupported field type${this.fieldType}`);
     }
