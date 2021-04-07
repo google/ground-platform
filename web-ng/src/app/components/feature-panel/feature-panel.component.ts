@@ -29,7 +29,6 @@ import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-h
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { MatDialog } from '@angular/material/dialog';
-import 'firebase/storage';
 
 // TODO: Rename "FeatureDetailsComponent".
 @Component({
