@@ -18,19 +18,12 @@ limitations under the License.
     TODO: create separate component for layer as a header instead of 
     using LayerListItem here.
   -->
-  <ground-feature-panel-header
-    [layer]="layer"
-    [actionsType]="featureHeaderActionType.BACK"
-  ></ground-feature-panel-header>
+  <ground-feature-panel-header [layer]="layer" [actionsType]="featureHeaderActionType.BACK">
+  </ground-feature-panel-header>
 </mat-list>
 <div *ngIf="layer$ | async as layer">
-  <button
-    *ngIf="!layer.forms?.isEmpty()"
-    color="primary"
-    class="add-observation-btn"
-    mat-raised-button
-    (click)="onAddObservationClick()"
-  >
+  <button *ngIf="!layer.forms?.isEmpty()" color="primary" class="add-observation-btn" mat-raised-button
+    (click)="onAddObservationClick()">
     + Add observation
   </button>
 </div>
@@ -52,10 +45,7 @@ limitations under the License.
           <mat-icon>edit</mat-icon>
           <span>Edit observation</span>
         </button>
-        <button
-          mat-menu-item
-          (click)="onDeleteObservationClick(observation.id)"
-        >
+        <button mat-menu-item (click)="onDeleteObservationClick(observation.id)">
           <mat-icon>delete_forever</mat-icon>
           <span>Delete observation</span>
         </button>
@@ -67,16 +57,13 @@ limitations under the License.
         <div class="field-response" *ngIf="field.type == fieldTypes.TEXT">
           {{ observation.responses?.get(field.id)?.value }}
         </div>
-        <div
-          class="field-response"
-          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
-        >
-          <span
-            class="option-label"
-            *ngFor="let option of observation.responses?.get(field.id)?.value"
-          >
+        <div class="field-response" *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE">
+          <span class="option-label" *ngFor="let option of observation.responses?.get(field.id)?.value">
             {{ option.label?.get(lang) }}
           </span>
+        </div>
+        <div class="field-response" *ngIf="field.type == fieldTypes.PHOTO">
+          <img (click)="openUrlInNewTab(photoUrls.get(field.id))" src="{{ photoUrls.get(field.id) }}" width="100%" />
         </div>
       </div>
     </mat-card-content>
