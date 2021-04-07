@@ -252,7 +252,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // TODO: Show confirm dialog and disable other components when entering reposition state.
     // Currently we are figuring out how should the UI trigger this state.
     this.showRepositionConfirmDialog = true;
-    // TODO: Disable side panel as well.
     this.disableMapClicks = true;
     this.drawingToolsService.setDisabled$(true);
     this.markerToReposition = marker;
