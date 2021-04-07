@@ -45,7 +45,7 @@ const zoomedInLevel = 13;
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css'],
+  styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
@@ -228,37 +228,53 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       title: feature.id,
     };
     const marker = new google.maps.Marker(options);
-    marker.addListener('click', () => {
-      if (this.disableMapClicks) {
-        return;
-      }
-      this.navigationService.selectFeature(feature.id);
-    });
-    marker.addListener('dragstart', (event: google.maps.MouseEvent) => {
-      // TODO: Show confirm dialog and disable other components when entering reposition state.
-      // Currently we are figuring out how should the UI trigger this state.
-      this.showRepositionConfirmDialog = true;
-      // TODO: Disable side panel as well.
-      this.disableMapClicks = true;
-      this.drawingToolsService.setDisabled$(true);
-      this.oldLatLng = new google.maps.LatLng(
-        event.latLng.lat(),
-        event.latLng.lng()
-      );
-    });
-    marker.addListener('dragend', (event: google.maps.MouseEvent) => {
-      this.newLatLng = new google.maps.LatLng(
-        event.latLng.lat(),
-        event.latLng.lng()
-      );
-      this.markerToReposition = marker;
-      this.newFeatureToReposition = new LocationFeature(
-        feature.id,
-        feature.layerId,
-        new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
-      );
-    });
+    marker.addListener('click', () => this.onMarkerClick(feature.id));
+    marker.addListener('dragstart', (event: google.maps.MouseEvent) =>
+      this.onMarkerDragStart(event, marker)
+    );
+    marker.addListener('dragend', (event: google.maps.MouseEvent) =>
+      this.onMarkerDragEnd(event, feature)
+    );
     this.markers.push(marker);
+  }
+
+  private onMarkerClick(featureId: string) {
+    if (this.disableMapClicks) {
+      return;
+    }
+    this.navigationService.selectFeature(featureId);
+  }
+
+  private onMarkerDragStart(
+    event: google.maps.MouseEvent,
+    marker: google.maps.Marker
+  ) {
+    // TODO: Show confirm dialog and disable other components when entering reposition state.
+    // Currently we are figuring out how should the UI trigger this state.
+    this.showRepositionConfirmDialog = true;
+    // TODO: Disable side panel as well.
+    this.disableMapClicks = true;
+    this.drawingToolsService.setDisabled$(true);
+    this.markerToReposition = marker;
+    this.oldLatLng = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+  }
+
+  private onMarkerDragEnd(
+    event: google.maps.MouseEvent,
+    feature: LocationFeature
+  ) {
+    this.newLatLng = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+    this.newFeatureToReposition = new LocationFeature(
+      feature.id,
+      feature.layerId,
+      new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
+    );
   }
 
   private panAndZoom(position: google.maps.LatLng | null | undefined) {
