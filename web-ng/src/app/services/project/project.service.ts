@@ -70,6 +70,11 @@ export class ProjectService {
     return this.activeProject$;
   }
 
+
+  getAllProjects(){
+      return this.dataStore.loadAllProject$();
+  }
+
   /**
    * Updates the project with new title by calling the data-store service.
    *
@@ -119,5 +124,17 @@ export class ProjectService {
     const userEmail = user.email;
     const acl = this.getCurrentProjectAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
+  }
+
+  /**
+   * Returns the acl of the project.
+   */
+   getProjectAcl(project: Project): AclEntry[] {
+    return project?.acl
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toList()
+      .sortBy(entry => entry.email)
+      .toArray();
   }
 }
