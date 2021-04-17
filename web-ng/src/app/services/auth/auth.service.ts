@@ -24,6 +24,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
 import { NavigationService } from '../navigation/navigation.service';
+import { AclEntry } from '../../shared/models/acl-entry.model';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -81,4 +82,13 @@ export class AuthService {
     await this.afAuth.signOut();
     return this.navigationService.signOut();
   }
+
+   /**
+   * Checks if a user has manager or owner level permissions of the project.
+   */
+    canManageProject(acl: AclEntry[]): boolean {
+      const userEmail = this.currentUser?.email;
+      return !!acl.find(entry => entry.email === userEmail && entry.isManager());
+    }
+
 }

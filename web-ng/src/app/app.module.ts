@@ -35,6 +35,11 @@ import { ShareDialogModule } from './components/share-dialog/share-dialog.module
 import { HttpClientModule } from '@angular/common/http';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
+import { MatCardModule } from '@angular/material/card';
+import {MatGridListModule} from '@angular/material/grid-list';
+import { CardViewProjectModule } from './components/card-view-project/card-view-project.module';
+import { MatInputModule } from '@angular/material/input';
+
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -71,6 +76,12 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     ProjectHeaderModule,
     UserProfilePopupModule,
     LayerDialogModule,
+    ShareDialogModule,
+    MatInputModule,
+    LayerDialogModule,
+    MatCardModule,
+    CardViewProjectModule,
+    MatGridListModule,
     ShareDialogModule,
     TitleDialogModule,
   ],

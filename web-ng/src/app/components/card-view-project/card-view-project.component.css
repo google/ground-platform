@@ -1,0 +1,25 @@
+.project-card {
+    background-image: url(/assets/img/happy-land.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    max-width: 400px;
+    padding: 32px;
+    }
+
+  
+    
+  .logo {
+      width: 64px;
+      height: 64px;
+   }
+  
+  .title-project{
+      width: 100px;
+      color: #fff;
+      word-wrap: break-word;
+  }
+  
+  .container-projects{
+      background-color: #F0F1F2;
+  }
+  
