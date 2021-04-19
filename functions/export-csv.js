@@ -20,6 +20,7 @@
 const csv = require("@fast-csv/format");
 const { db } = require("./common/context");
 
+// TODO: Refactor into meaningful pieces.
 async function exportCsv(req, res) {
   const { project: projectId, layer: layerId } = req.query;
   const project = await db.fetchProject(projectId);
@@ -31,6 +32,7 @@ async function exportCsv(req, res) {
 
   const layers = project.get("layers") || {};
   const layer = layers[layerId] || {};
+  const layerName = layer.name && layer.name["en"];
   const forms = layer["forms"] || {};
   const form = Object.values(forms)[0] || {};
   const elementMap = form["elements"] || {};
@@ -50,6 +52,10 @@ async function exportCsv(req, res) {
   });
 
   res.type("text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    "attachment; filename=" + getFileName(layerName)
+  );
   const csvStream = csv.format({
     delimiter: ",",
     headers,
@@ -86,14 +92,50 @@ async function exportCsv(req, res) {
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
       const responses = observation["responses"] || {};
-      elements.forEach((element) => {
-        console.log(element.id, observation);
-        row.push(responses[element.id] || "");
-      });
+      elements
+        .map((element) => getValue(element, responses))
+        .forEach((value) => row.push(value));
       csvStream.write(row);
     });
   });
   csvStream.end();
+}
+
+/**
+ * Returns the string representation of a specific form element response.
+ */
+function getValue(element, responses) {
+  const response = responses[element.id] || "";
+  if (
+    element.type === "multiple_choice" &&
+    Array.isArray(response) &&
+    element.options
+  ) {
+    return response
+      .map((id) => getMultipleChoiceValues(id, element))
+      .join(", ");
+  } else {
+    return response;
+  }
+}
+
+/**
+ * Returns the code associated with a specified multiple choice option, or if
+ * the code is not defined, returns the label in English.
+ */
+function getMultipleChoiceValues(id, element) {
+  const option = element.options[id];
+  // TODO: i18n.
+  return option.code || option.label["en"] || "";
+}
+
+/**
+ * Returns the file name in lowercase (replacing any special characters with '-') for csv export
+ */
+function getFileName(layerName) {
+  layerName = layerName || "ground-export";
+  const fileBase = layerName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
+  return `${fileBase}.csv`;
 }
 
 module.exports = exportCsv;

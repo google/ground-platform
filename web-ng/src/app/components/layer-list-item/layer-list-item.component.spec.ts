@@ -22,7 +22,7 @@ import { LayerListItemComponent } from './layer-list-item.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { of } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';

@@ -21,7 +21,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -74,7 +74,7 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   }
 
   onCloseClick() {
-    this.navigationService.setFeatureId(null);
+    this.navigationService.clearFeatureId();
   }
 
   onDeleteFeatureClick() {

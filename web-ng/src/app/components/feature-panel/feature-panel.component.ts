@@ -24,7 +24,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { DataStoreService } from '../../services/data-store/data-store.service';
@@ -100,17 +100,24 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   }
 
   onEditObservationClick(observation: Observation) {
-    this.navigationService.editObservation(observation.id);
+    this.navigationService.editObservation(
+      this.navigationService.getFeatureId()!,
+      observation.id
+    );
   }
 
   onAddObservationClick() {
     this.navigationService.editObservation(
+      this.navigationService.getFeatureId()!,
       NavigationService.OBSERVATION_ID_NEW
     );
   }
 
   onDeleteObservationClick(id: string) {
-    this.navigationService.editObservation(id);
+    this.navigationService.editObservation(
+      this.navigationService.getFeatureId()!,
+      id
+    );
     const dialogRef = this.confirmationDialog.open(
       ConfirmationDialogComponent,
       {

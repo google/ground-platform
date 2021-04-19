@@ -23,6 +23,7 @@ import { Injectable } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
 import firebase from 'firebase/app';
+import { NavigationService } from '../navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +35,8 @@ export class FeatureService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private navigationService: NavigationService
   ) {
     this.features$ = projectService
       .getActiveProject$()
@@ -67,6 +69,10 @@ export class FeatureService {
 
   getSelectedFeature$(): Observable<Feature> {
     return this.selectedFeature$;
+  }
+
+  getSelectedFeatureId$(): ReplaySubject<string> {
+    return this.selectedFeatureId$;
   }
 
   async addPoint(lat: number, lng: number, layerId: string): Promise<void> {
@@ -104,7 +110,7 @@ export class FeatureService {
       new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
-    this.selectFeature(newFeature.id);
+    this.navigationService.selectFeature(newFeature.id);
   }
 
   private async updatePointInternal(project: Project, feature: Feature) {

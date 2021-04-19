@@ -28,7 +28,12 @@
       *ngIf="auth.getUser$() | async as user; else login"
       class="rhs-widgets"
     >
-      <button mat-flat-button color="primary" (click)="openShareDialog($event)">
+      <button
+        [disabled]="!projectService.canManageProject()"
+        mat-flat-button
+        color="primary"
+        (click)="openShareDialog($event)"
+      >
         <mat-icon>people_alt</mat-icon>
         <label>Share</label>
       </button>

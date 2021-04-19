@@ -14,8 +14,14 @@
   limitations under the License.
 -->
 
-<mat-button-toggle-group class="drawing-buttons" [(value)] = "selectedValue">
-  <mat-button-toggle class="add-point-button" value = "{{pointValue}}" (click)="onButtonClick()">
+<mat-button-toggle-group
+  class="drawing-buttons"
+  [disabled]="(isObservationSelected$ | async) || (disabled$ | async)"
+  [(value)] = "selectedValue">
+  <mat-button-toggle
+      class="add-point-button"
+      value = "{{pointValue}}"
+      (click)="onButtonClick()">
     <img class="add-point-icon" [src]="addPointIcon" />
   </mat-button-toggle>
   <mat-button-toggle hidden value = "{{ polygonValue }}" (click)="onButtonClick()">

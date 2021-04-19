@@ -27,7 +27,7 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 
 const mockProject = new Project(
@@ -60,8 +60,9 @@ class MockProjectService {
   getActiveProject$() {
     return of<Project>(mockProject);
   }
-  getProjectAcl() {}
   getCurrentProject() {}
+  getCurrentProjectAcl() {}
+  canManageProject() {}
 }
 
 const projectService = new MockProjectService();
