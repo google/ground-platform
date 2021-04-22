@@ -45,7 +45,7 @@ const zoomedInLevel = 13;
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css'],
+  styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
@@ -68,6 +68,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     draggableCursor: '',
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
+  showRepositionConfirmDialog = false;
+  newFeatureToReposition?: LocationFeature;
+  oldLatLng?: google.maps.LatLng;
+  newLatLng?: google.maps.LatLng;
+  markerToReposition?: google.maps.Marker;
+  disableMapClicks = false;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -97,6 +103,19 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         .getEditMode$()
         .subscribe(editMode => this.onEditModeChange(editMode))
     );
+
+    this.subscription.add(
+      this.navigationService
+        .getFeatureId$()
+        .subscribe(featureId => this.selectMarkerWithFeatureId(featureId))
+    );
+
+    this.subscription.add(
+      combineLatest([
+        this.navigationService.getFeatureId$(),
+        this.navigationService.getObservationId$(),
+      ]).subscribe(() => this.cancelReposition())
+    );
   }
 
   ngOnDestroy() {
@@ -104,6 +123,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   onMapClick(event: google.maps.MouseEvent): Promise<void> {
+    if (this.disableMapClicks) {
+      return Promise.resolve();
+    }
     this.selectMarker(undefined);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
@@ -206,19 +228,52 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       title: feature.id,
     };
     const marker = new google.maps.Marker(options);
-    marker.addListener('click', () => {
-      this.selectMarker(marker);
-      this.navigationService.selectFeature(feature.id);
-    });
-    marker.addListener('dragend', (event: google.maps.MouseEvent) => {
-      const newFeature = new LocationFeature(
-        feature.id,
-        feature.layerId,
-        new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
-      );
-      this.featureService.updatePoint(newFeature);
-    });
+    marker.addListener('click', () => this.onMarkerClick(feature.id));
+    marker.addListener('dragstart', (event: google.maps.MouseEvent) =>
+      this.onMarkerDragStart(event, marker)
+    );
+    marker.addListener('dragend', (event: google.maps.MouseEvent) =>
+      this.onMarkerDragEnd(event, feature)
+    );
     this.markers.push(marker);
+  }
+
+  private onMarkerClick(featureId: string) {
+    if (this.disableMapClicks) {
+      return;
+    }
+    this.navigationService.selectFeature(featureId);
+  }
+
+  private onMarkerDragStart(
+    event: google.maps.MouseEvent,
+    marker: google.maps.Marker
+  ) {
+    // TODO: Show confirm dialog and disable other components when entering reposition state.
+    // Currently we are figuring out how should the UI trigger this state.
+    this.showRepositionConfirmDialog = true;
+    this.disableMapClicks = true;
+    this.drawingToolsService.setDisabled$(true);
+    this.markerToReposition = marker;
+    this.oldLatLng = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+  }
+
+  private onMarkerDragEnd(
+    event: google.maps.MouseEvent,
+    feature: LocationFeature
+  ) {
+    this.newLatLng = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+    this.newFeatureToReposition = new LocationFeature(
+      feature.id,
+      feature.layerId,
+      new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
+    );
   }
 
   private panAndZoom(position: google.maps.LatLng | null | undefined) {
@@ -233,7 +288,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onEditModeChange(editMode: EditMode) {
     if (editMode !== EditMode.None) {
-      this.selectMarker(undefined);
       this.navigationService.clearFeatureId();
       for (const marker of this.markers) {
         marker.setClickable(false);
@@ -265,7 +319,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(marker?.getPosition());
   }
 
-  private selectMarkerWithFeatureId(selectedFeatureId: string) {
+  private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
+    if (!selectedFeatureId) {
+      this.selectMarker(undefined);
+      return;
+    }
     for (const marker of this.markers) {
       if (marker.getTitle() === selectedFeatureId) {
         this.selectMarker(marker);
@@ -302,5 +360,32 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         fillColor: color,
       };
     });
+  }
+
+  onSaveRepositionClick() {
+    this.markerToReposition?.setPosition(this.newLatLng!);
+    this.featureService.updatePoint(this.newFeatureToReposition!);
+    this.resetReposition();
+  }
+
+  onCancelRepositionClick() {
+    this.markerToReposition?.setPosition(this.oldLatLng!);
+    this.resetReposition();
+  }
+
+  private resetReposition() {
+    this.showRepositionConfirmDialog = false;
+    this.newFeatureToReposition = undefined;
+    this.oldLatLng = undefined;
+    this.newLatLng = undefined;
+    this.markerToReposition = undefined;
+    this.disableMapClicks = false;
+    this.drawingToolsService.setDisabled$(false);
+  }
+
+  private cancelReposition() {
+    if (this.showRepositionConfirmDialog) {
+      this.onCancelRepositionClick();
+    }
   }
 }
