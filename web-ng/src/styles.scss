@@ -41,3 +41,16 @@ button .mat-icon + label {
 .mat-menu-item mat-icon {
   color: mat-color($foreground, icon) !important;
 }
+
+snack-bar-container.success {
+  background-color: mat-color($primary);
+}
+
+snack-bar-container.error {
+  background-color: mat-color($warn);
+}
+
+snack-bar-container.notification {
+  color: white;
+  font-weight: bold;
+}

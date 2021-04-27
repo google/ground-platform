@@ -124,7 +124,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     }
     this.importDialog.open(ImportDialogComponent, {
       data: { projectId: this.projectId, layerId: this.layer?.id },
-      maxWidth: '500px',
+      width: '350px',
       maxHeight: '800px',
     });
   }
