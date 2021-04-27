@@ -367,18 +367,21 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    */
   static toFeature(id: string, data: DocumentData): Feature | undefined {
-    if (!this.isFeatureValid(data)) {
-      console.warn(`Invalid feature ${id} in remote data store ignored`);
-      return;
+    try {
+      if (!data.layerId) {
+        throw new Error('Missing layer id');
+      }
+      if (this.isLocationFeature(data)) {
+        return new LocationFeature(id, data.layerId, data.location);
+      }
+      if (this.isGeoJsonFeature(data)) {
+        const geoJson = JSON.parse(data.geoJson);
+        return new GeoJsonFeature(id, data.layerId, geoJson);
+      }
+      throw new Error('Missing location and geoJson');
+    } catch (err) {
+      console.error(`Invalid feature ${id}, ${err}`);
     }
-    if (this.isLocationFeature(data)) {
-      return new LocationFeature(id, data.layerId, data.location);
-    }
-    if (this.isGeoJsonFeature(data)) {
-      const geoJson = JSON.parse(data.geoJson);
-      return new GeoJsonFeature(id, data.layerId, geoJson);
-    }
-    console.warn(`Invalid feature ${id} in remote data store ignored`);
     return;
   }
 
@@ -548,13 +551,6 @@ export class FirebaseDataConverter {
    */
   static toRoleId(role: Role): string {
     return Role[role].toLowerCase();
-  }
-
-  private static isFeatureValid(data: DocumentData): boolean {
-    return (
-      data?.layerId &&
-      (this.isLocationFeature(data) || this.isGeoJsonFeature(data))
-    );
   }
 
   private static isLocationFeature(data: DocumentData): boolean {
