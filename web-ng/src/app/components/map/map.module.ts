@@ -18,9 +18,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { MapComponent } from './map.component';
 import { GoogleMapsModule } from '@angular/google-maps';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
-  imports: [BrowserModule, GoogleMapsModule],
+  imports: [BrowserModule, GoogleMapsModule, MatButtonModule],
   exports: [MapComponent],
   declarations: [MapComponent],
 })
