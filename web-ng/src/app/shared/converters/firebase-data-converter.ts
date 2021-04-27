@@ -553,21 +553,6 @@ export class FirebaseDataConverter {
     return Role[role].toLowerCase();
   }
 
-  private static isFeatureValid(id: string, data: DocumentData): boolean {
-    if (!data?.layerId) {
-      console.error(`layerId is required in the feature ${id}`);
-      return false;
-    } else {
-      if (!this.isLocationFeature(data) && !this.isGeoJsonFeature(data)) {
-        console.error(
-          `geoJson and location with latitude and longitude are required in the feature ${id}`
-        );
-        return false;
-      }
-    }
-    return true;
-  }
-
   private static isLocationFeature(data: DocumentData): boolean {
     return data?.location?.latitude && data?.location?.longitude;
   }
