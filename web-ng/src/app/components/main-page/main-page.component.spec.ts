@@ -23,7 +23,7 @@ import { ProjectService } from '../../services/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/auth';

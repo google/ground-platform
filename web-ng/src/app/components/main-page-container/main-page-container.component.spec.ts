@@ -19,7 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MainPageContainerComponent } from './main-page-container.component';
 import { MainPageComponent } from './../main-page/main-page.component';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
 import { ProjectService } from './../../services/project/project.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';

@@ -15,7 +15,7 @@
  */
 
 import { ActivatedRoute } from '@angular/router';
-import { NavigationService } from './../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { Observable, Subscription } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { ProjectService } from './../../services/project/project.service';

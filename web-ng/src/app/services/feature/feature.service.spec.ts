@@ -20,7 +20,7 @@ import { DataStoreService } from '../data-store/data-store.service';
 import { ProjectService } from '../project/project.service';
 import { Subject, of } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
-import { NavigationService } from '../../services/router/router.service';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 describe('FeatureService', () => {
   const activeProject$ = new Subject<Project | null>();
