@@ -56,6 +56,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
     private confirmationDialog: MatDialog,
     private zone: NgZone
   ) {
+    console.log("constructing panel");
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.observations$ = projectService
@@ -82,15 +83,15 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
       );
     this.photoUrls = new Map();
     this.observations$.forEach((observations) => {
+      console.log("observations$.forEach");
       observations.forEach(observation => {
+        console.log("observations.forEach");
         this.getFields(observation).forEach(
           field => {
-            if (field.type == FieldType.PHOTO) {
-              if (observation.responses?.get(field.id)?.value as string) {
+            if (field.type == FieldType.PHOTO && observation.responses?.get(field.id)?.value as string) {
                 this.fillPhotoURL(field.id, observation.responses?.get(field.id)?.value as string);
               }
             }
-          }
         );
       });
     });
