@@ -81,15 +81,19 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
         )
       );
     this.photoUrls = new Map();
-    this.observations$.forEach((observations) => {
+    this.observations$.forEach(observations => {
       observations.forEach(observation => {
-        this.getFields(observation).forEach(
-          field => {
-            if (field.type == FieldType.PHOTO && observation.responses?.get(field.id)?.value as string) {
-                this.fillPhotoURL(field.id, observation.responses?.get(field.id)?.value as string);
-              }
-            }
-        );
+        this.getFields(observation).forEach(field => {
+          if (
+            field.type === FieldType.PHOTO &&
+            (observation.responses?.get(field.id)?.value as string)
+          ) {
+            this.fillPhotoURL(
+              field.id,
+              observation.responses?.get(field.id)?.value as string
+            );
+          }
+        });
       });
     });
   }
@@ -99,11 +103,12 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   }
 
   fillPhotoURL(fieldId: string, storageFilePath: string) {
-    this.dataStoreService.getImageDownloadURL(storageFilePath)
-      .then((url) => {
+    this.dataStoreService
+      .getImageDownloadURL(storageFilePath)
+      .then(url => {
         this.photoUrls.set(fieldId, url);
       })
-      .catch((error) => {
+      .catch(error => {
         console.log(error);
       });
   }

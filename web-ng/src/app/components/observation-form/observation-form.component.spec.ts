@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
-import { NEVER, of, Subject } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { Project } from '../../shared/models/project.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -51,7 +51,6 @@ import { MatListModule } from '@angular/material/list';
 import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
-import { User } from '../../shared/models/user.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 class MockModel {
@@ -166,7 +165,6 @@ const observationService = new MockObservationService();
 describe('ObservationFormComponent', () => {
   let component: ObservationFormComponent;
   let fixture: ComponentFixture<ObservationFormComponent>;
-  const user$ = new Subject<User | null>();
 
   beforeEach(
     waitForAsync(() => {

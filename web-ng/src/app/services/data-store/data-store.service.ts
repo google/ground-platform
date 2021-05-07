@@ -310,7 +310,7 @@ export class DataStoreService {
     return Promise.resolve(projectId);
   }
 
- getImageDownloadURL(path: string) {
+  getImageDownloadURL(path: string) {
     return firebase.storage().ref().child(path).getDownloadURL();
   }
 }
