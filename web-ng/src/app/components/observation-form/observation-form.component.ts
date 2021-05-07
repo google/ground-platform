@@ -172,10 +172,7 @@ export class ObservationFormComponent {
           this.addControlsForMultipleChoiceField(group, field, response);
           break;
         default:
-          throw Error(
-            `Unimplemented conversion to FormControl(s) for Field with
-             Type:${field.type}`
-          );
+          console.debug(`Skipping unsupported field type: ${field.type}`);
       }
     }
     return this.formBuilder.group(group);
