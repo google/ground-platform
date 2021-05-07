@@ -29,14 +29,11 @@ import { ProjectService } from '../../services/project/project.service';
 import { Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Layer } from '../../shared/models/layer.model';
-import { Role } from '../../shared/models/role.model';
 import { List } from 'immutable';
 import { map } from 'rxjs/internal/operators/map';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { Project } from '../../shared/models/project.model';
 
 @Component({
   selector: 'ground-drawing-tools',
@@ -70,8 +67,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     private drawingToolsService: DrawingToolsService,
     private sanitizer: DomSanitizer,
     private navigationService: NavigationService,
-    projectService: ProjectService,
-    authService: AuthService
+    projectService: ProjectService
   ) {
     this.isObservationSelected$ = this.navigationService
       .getObservationId$()
@@ -85,36 +81,11 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
         this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
       }),
       map(project =>
-        this.addableLayers(
-          project,
-          authService.getCurrentUser().email,
-          'points'
-        )
+        List(project.layers.valueSeq().toArray())
+          .sortBy(l => l.index)
+          .filter(l => projectService.canUserAddPointsToLayer(l))
       )
     );
-  }
-
-  private addableLayers(
-    project: Project,
-    userEmail: string,
-    featureType: string
-  ): List<Layer> {
-    const allLayers = List(project.layers.valueSeq().toArray()).sortBy(
-      l => l.index
-    );
-    const userRole = project.acl.get(userEmail);
-    switch (userRole) {
-      case Role.OWNER:
-      case Role.MANAGER:
-        return allLayers;
-      case Role.CONTRIBUTOR:
-        return allLayers.filter(layer =>
-          layer.contributorsCanAdd?.includes(featureType)
-        );
-      case Role.VIEWER:
-      default:
-        return List<Layer>();
-    }
   }
 
   ngOnInit() {
