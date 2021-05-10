@@ -51,6 +51,7 @@ class MockFirebaseData {
     responses: {
       element001: 'text response',
       element002: ['option001', 'option002'],
+      element003: 123,
     },
   };
 }
@@ -69,7 +70,7 @@ class MockModel {
     FieldType.MULTIPLE_CHOICE,
     StringMap({ en: 'Multiple Select' }),
     /*required=*/ true,
-    0,
+    1,
     new MultipleChoice(
       Cardinality.SELECT_MULTIPLE,
       List([
@@ -91,11 +92,20 @@ class MockModel {
     )
   );
 
+  static element003: Field = new Field(
+    'element003',
+    FieldType.NUMBER,
+    StringMap({ en: 'How many sloths are there?' }),
+    /*required=*/ true,
+    2
+  );
+
   static form001: Form = new Form(
     'form001',
     Map({
       element001: MockModel.element001,
       element002: MockModel.element002,
+      element003: MockModel.element003,
     })
   );
 }
