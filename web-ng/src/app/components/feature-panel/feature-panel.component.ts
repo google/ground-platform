@@ -45,6 +45,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   readonly fieldTypes = FieldType;
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
+  photoUrls: Map<string, string>;
 
   constructor(
     private navigationService: NavigationService,
@@ -79,6 +80,37 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
             .pipe(map(feature => project.layers.get(feature.layerId)!))
         )
       );
+    this.photoUrls = new Map();
+    this.observations$.forEach(observations => {
+      observations.forEach(observation => {
+        this.getFields(observation).forEach(field => {
+          if (
+            field.type === FieldType.PHOTO &&
+            (observation.responses?.get(field.id)?.value as string)
+          ) {
+            this.fillPhotoURL(
+              field.id,
+              observation.responses?.get(field.id)?.value as string
+            );
+          }
+        });
+      });
+    });
+  }
+
+  openUrlInNewTab(url: string) {
+    window.open(url, '_blank');
+  }
+
+  fillPhotoURL(fieldId: string, storageFilePath: string) {
+    this.dataStoreService
+      .getImageDownloadURL(storageFilePath)
+      .then(url => {
+        this.photoUrls.set(fieldId, url);
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
 
   ngOnInit() {

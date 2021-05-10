@@ -26,7 +26,6 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { ProjectService } from '../../services/project/project.service';
-import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'ground-layer-list-item',

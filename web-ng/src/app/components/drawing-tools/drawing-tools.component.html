@@ -19,6 +19,7 @@
   [disabled]="(isObservationSelected$ | async) || (disabled$ | async)"
   [(value)] = "selectedValue">
   <mat-button-toggle
+      *ngIf="!(layers$ | async).isEmpty()"
       class="add-point-button"
       value = "{{pointValue}}"
       (click)="onButtonClick()">
