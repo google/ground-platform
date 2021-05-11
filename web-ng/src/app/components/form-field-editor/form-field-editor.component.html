@@ -30,17 +30,17 @@
       <mat-select
         formControlName="selectFieldOption"
         class="field-type-select"
-        (selectionChange)="onFieldTypeSelect($event.value)"
+        (selectionChange)="onChangeFieldType($event.value)"
       >
         <mat-select-trigger>
           <mat-icon class="icon-field-type">{{
-            getSelectFieldType().icon
+            getSelectedFieldType().icon
           }}</mat-icon>
-          <span> {{ getSelectFieldType().label }}</span>
+          <span> {{ getSelectedFieldType().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let field of selectFieldOptions" [value]="field">
-          <mat-icon>{{ field.icon }}</mat-icon>
-          <span>{{ field.label }}</span>
+        <mat-option *ngFor="let option of fieldTypeSelectOptions" [value]="option">
+          <mat-icon>{{ option.icon }}</mat-icon>
+          <span>{{ option.label }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>

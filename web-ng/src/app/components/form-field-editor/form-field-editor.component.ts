@@ -69,7 +69,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
-  selectFieldOptions: FieldTypeSelectOption[];
+  fieldTypeSelectOptions: FieldTypeSelectOption[];
 
   subscription: Subscription = new Subscription();
 
@@ -83,7 +83,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     private confirmationDialog: MatDialog,
     private layerService: LayerService
   ) {
-    this.selectFieldOptions = [
+    this.fieldTypeSelectOptions = [
       {
         icon: 'short_text',
         label: 'Text',
@@ -115,8 +115,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
-      // By default we set the select field to be of text type.
-      selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
+      selectFieldOption: this.fieldTypeSelectOptions[FieldType.TEXT],
     });
   }
 
@@ -164,15 +163,15 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   getSelectedFieldTypeOption() {
     switch (this.fieldType) {
       case FieldType.TEXT:
-        return this.selectFieldOptions[0];
+        return this.fieldTypeSelectOptions[0];
       case FieldType.MULTIPLE_CHOICE:
-        return this.selectFieldOptions[
+        return this.fieldTypeSelectOptions[
           this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
         ];
       case FieldType.PHOTO:
-        return this.selectFieldOptions[3];
+        return this.fieldTypeSelectOptions[3];
       case FieldType.NUMBER:
-        return this.selectFieldOptions[4];
+        return this.fieldTypeSelectOptions[4];
       default:
         throw new Error(`Unsupported field type${this.fieldType}`);
     }
@@ -187,7 +186,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.delete.emit();
   }
 
-  getSelectFieldType() {
+  getSelectedFieldType() {
     return this.formGroup.get('selectFieldOption')?.value;
   }
 
@@ -197,7 +196,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param event: FieldTypeSelectOption
    * @returns void
    */
-  onFieldTypeSelect(event: FieldTypeSelectOption) {
+  onChangeFieldType(event: FieldTypeSelectOption) {
     this.fieldType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
