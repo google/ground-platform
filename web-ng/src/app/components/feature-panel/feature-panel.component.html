@@ -54,7 +54,7 @@ limitations under the License.
     <mat-card-content>
       <div *ngFor="let field of getFields(observation)">
         <label class="field-label">{{ field.label?.get(lang) }}</label>
-        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT">
+        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT || field.type == fieldTypes.NUMBER">
           {{ observation.responses?.get(field.id)?.value }}
         </div>
         <div class="field-response" *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE">

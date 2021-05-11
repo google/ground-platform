@@ -106,6 +106,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         label: 'Photo',
         type: FieldType.PHOTO,
       },
+      {
+        icon: 'tag',
+        label: 'Number',
+        type: FieldType.NUMBER,
+      },
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
@@ -166,6 +171,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         ];
       case FieldType.PHOTO:
         return this.selectFieldOptions[3];
+      case FieldType.NUMBER:
+        return this.selectFieldOptions[4];
       default:
         throw new Error(`Unsupported field type${this.fieldType}`);
     }

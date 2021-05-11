@@ -37,6 +37,11 @@
             <input matInput [formControlName]="field.id" [id]="field.id" />
           </mat-form-field>
         </div>
+        <div *ngIf="field.type == fieldTypes.NUMBER">
+          <mat-form-field appearance="fill">
+            <input type="number" matInput [formControlName]="field.id" [id]="field.id" />
+          </mat-form-field>
+        </div>
         <div
           *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
           class="multiple-choice-field"
