@@ -160,21 +160,17 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.markOptionEditorsTouched();
   }
 
-  getSelectedFieldTypeOption() {
-    switch (this.fieldType) {
-      case FieldType.TEXT:
-        return this.fieldTypeSelectOptions[0];
-      case FieldType.MULTIPLE_CHOICE:
-        return this.fieldTypeSelectOptions[
-          this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
-        ];
-      case FieldType.PHOTO:
-        return this.fieldTypeSelectOptions[3];
-      case FieldType.NUMBER:
-        return this.fieldTypeSelectOptions[4];
-      default:
-        throw new Error(`Unsupported field type${this.fieldType}`);
+  getSelectedFieldTypeOption(): FieldTypeSelectOption {
+    const selectedOption = this.fieldTypeSelectOptions.find(
+      option =>
+        option.type === this.fieldType &&
+        (option.type !== FieldType.MULTIPLE_CHOICE ||
+          option.cardinality === this.cardinality)
+    );
+    if (!selectedOption) {
+      throw new Error(`Unsupported field type${this.fieldType}`);
     }
+    return selectedOption;
   }
 
   /**
