@@ -38,6 +38,20 @@ import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
 
+const FIELD_TYPE_STRING_VALUES = Map([
+  [FieldType.TEXT, 'text_field'],
+  [FieldType.MULTIPLE_CHOICE, 'multiple_choice'],
+  [FieldType.PHOTO, 'photo'],
+  [FieldType.NUMBER, 'number'],
+]);
+
+const FIELD_TYPES_BY_STRING_VALUE = Map(
+  Array.from(
+    FIELD_TYPE_STRING_VALUES.toArray(),
+    el => el.reverse() as [string, FieldType]
+  )
+);
+
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
  * empty array.
@@ -302,33 +316,19 @@ export class FirebaseDataConverter {
   }
 
   private static stringToFieldType(fieldType: string): FieldType {
-    switch (fieldType) {
-      case 'text_field':
-        return FieldType.TEXT;
-      case 'multiple_choice':
-        return FieldType.MULTIPLE_CHOICE;
-      case 'photo':
-        return FieldType.PHOTO;
-      case 'number':
-        return FieldType.NUMBER;
-      default:
-        throw Error(`Unsupported field type ${fieldType}`);
+    const type = FIELD_TYPES_BY_STRING_VALUE.get(fieldType);
+    if (!type) {
+      throw Error(`Unsupported field type ${fieldType}`);
     }
+    return type;
   }
 
   private static fieldTypeToString(fieldType: FieldType): string {
-    switch (fieldType) {
-      case FieldType.TEXT:
-        return 'text_field';
-      case FieldType.MULTIPLE_CHOICE:
-        return 'multiple_choice';
-      case FieldType.PHOTO:
-        return 'photo';
-      case FieldType.NUMBER:
-        return 'number';
-      default:
-        throw Error(`Unsupported field type ${fieldType}`);
+    const str = FIELD_TYPE_STRING_VALUES.get(fieldType);
+    if (!str) {
+      throw Error(`Unsupported field type ${fieldType}`);
     }
+    return str;
   }
 
   /**
