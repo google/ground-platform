@@ -42,6 +42,7 @@ export enum FieldType {
   MULTIPLE_CHOICE = 2,
   PHOTO = 3,
   NUMBER = 4,
+  LOCATION = 5,
 }
 
 // TODO: add a subclass of Field for each field type.

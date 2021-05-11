@@ -43,6 +43,7 @@ const FIELD_TYPE_STRING_VALUES = Map([
   [FieldType.MULTIPLE_CHOICE, 'multiple_choice'],
   [FieldType.PHOTO, 'photo'],
   [FieldType.NUMBER, 'number'],
+  [FieldType.LOCATION, 'location'],
 ]);
 
 const FIELD_TYPES_BY_STRING_VALUE = Map(

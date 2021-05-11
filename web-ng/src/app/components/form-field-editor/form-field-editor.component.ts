@@ -111,6 +111,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         label: 'Number',
         type: FieldType.NUMBER,
       },
+      {
+        icon: 'my_location',
+        label: 'Location',
+        type: FieldType.LOCATION,
+      },
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
