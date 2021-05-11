@@ -169,10 +169,10 @@ export class FirebaseDataConverter {
     return new Form(
       id,
       Map<string, Field>(
-        keys(data.elements).map((id: string) => [
-          id as string,
-          FirebaseDataConverter.toField(id, data.elements[id]),
-        ])
+        keys(data.elements)
+          .map(id => FirebaseDataConverter.toField(id, data.elements[id]))
+          .filter(field => field !== null)
+          .map(field => [field!.id, field!])
       )
     );
   }
@@ -244,24 +244,29 @@ export class FirebaseDataConverter {
    *   }
    * </code></pre>
    */
-  private static toField(id: string, data: DocumentData): Field {
-    return new Field(
-      id,
-      FirebaseDataConverter.stringToFieldType(data.type),
-      StringMap(data.label),
-      data.required,
-      // Fall back to constant so old dev databases do not break.
-      data.index || -1,
-      data.options &&
-        new MultipleChoice(
-          FirebaseDataConverter.stringToCardinality(data.cardinality),
-          List(
-            keys(data.options).map((id: string) =>
-              FirebaseDataConverter.toOption(id, data.options[id])
+  private static toField(id: string, data: DocumentData): Field | null {
+    try {
+      return new Field(
+        id,
+        FirebaseDataConverter.stringToFieldType(data.type),
+        StringMap(data.label),
+        data.required,
+        // Fall back to constant so old dev databases do not break.
+        data.index || -1,
+        data.options &&
+          new MultipleChoice(
+            FirebaseDataConverter.stringToCardinality(data.cardinality),
+            List(
+              keys(data.options).map((id: string) =>
+                FirebaseDataConverter.toOption(id, data.options[id])
+              )
             )
           )
-        )
-    );
+      );
+    } catch (e: Error) {
+      console.error(e);
+      return null;
+    }
   }
 
   private static fieldToJS(field: Field): {} {
@@ -318,7 +323,7 @@ export class FirebaseDataConverter {
   private static stringToFieldType(fieldType: string): FieldType {
     const type = FIELD_TYPES_BY_STRING_VALUE.get(fieldType);
     if (!type) {
-      throw Error(`Unsupported field type ${fieldType}`);
+      throw new Error(`Ignoring unsupported field of type: ${fieldType}`);
     }
     return type;
   }
