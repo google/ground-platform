@@ -38,16 +38,16 @@ import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
 
-const FIELD_TYPES_TO_STRING_VALUES = Map([
+const FIELD_TYPE_ENUMS_BY_STRING = Map([
   [FieldType.TEXT, 'text_field'],
   [FieldType.MULTIPLE_CHOICE, 'multiple_choice'],
   [FieldType.PHOTO, 'photo'],
   [FieldType.NUMBER, 'number'],
 ]);
 
-const STRING_VALUES_TO_FIELD_TYPES = Map(
+const FIELD_TYPE_STRINGS_BY_ENUM = Map(
   Array.from(
-    FIELD_TYPES_TO_STRING_VALUES.toArray(),
+    FIELD_TYPE_ENUMS_BY_STRING.toArray(),
     el => el.reverse() as [string, FieldType]
   )
 );
@@ -321,7 +321,7 @@ export class FirebaseDataConverter {
   }
 
   private static stringToFieldType(fieldType: string): FieldType {
-    const type = STRING_VALUES_TO_FIELD_TYPES.get(fieldType);
+    const type = FIELD_TYPE_STRINGS_BY_ENUM.get(fieldType);
     if (!type) {
       throw new Error(`Ignoring unsupported field of type: ${fieldType}`);
     }
@@ -329,7 +329,7 @@ export class FirebaseDataConverter {
   }
 
   private static fieldTypeToString(fieldType: FieldType): string {
-    const str = FIELD_TYPES_TO_STRING_VALUES.get(fieldType);
+    const str = FIELD_TYPE_ENUMS_BY_STRING.get(fieldType);
     if (!str) {
       throw Error(`Unsupported field type ${fieldType}`);
     }
