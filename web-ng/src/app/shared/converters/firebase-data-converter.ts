@@ -309,6 +309,8 @@ export class FirebaseDataConverter {
         return FieldType.MULTIPLE_CHOICE;
       case 'photo':
         return FieldType.PHOTO;
+      case 'number':
+        return FieldType.NUMBER;
       default:
         throw Error(`Unsupported field type ${fieldType}`);
     }
@@ -322,6 +324,8 @@ export class FirebaseDataConverter {
         return 'multiple_choice';
       case FieldType.PHOTO:
         return 'photo';
+      case FieldType.NUMBER:
+        return 'number';
       default:
         throw Error(`Unsupported field type ${fieldType}`);
     }
@@ -471,10 +475,13 @@ export class FirebaseDataConverter {
   private static toResponse(
     form: Form,
     fieldID: string,
-    responseValue: string | List<string>
+    responseValue: number | string | List<string>
   ): Response {
     if (typeof responseValue === 'string') {
       return new Response(responseValue as string);
+    }
+    if (typeof responseValue === 'number') {
+      return new Response(responseValue as number);
     }
     if (responseValue instanceof Array) {
       return new Response(
@@ -490,6 +497,9 @@ export class FirebaseDataConverter {
 
   private static responseToJS(response: Response): {} {
     if (typeof response.value === 'string') {
+      return response.value;
+    }
+    if (typeof response.value === 'number') {
       return response.value;
     }
     if (response.value instanceof List) {
