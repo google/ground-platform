@@ -263,7 +263,7 @@ export class FirebaseDataConverter {
             )
           )
       );
-    } catch (e: Error) {
+    } catch (e) {
       console.error(e);
       return null;
     }
