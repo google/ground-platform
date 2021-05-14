@@ -45,12 +45,12 @@ limitations under the License.
           *ngIf="projectService.canManageProject()"
         >
           <mat-icon>cloud_upload</mat-icon>
-          <span>Import CSV</span>
+          <span>Import features</span>
         </button>
         <a class="download" [href]="getDownloadCsvUrl()" target="_blank">
           <button mat-menu-item>
             <mat-icon>cloud_download</mat-icon>
-            <span>Download CSV</span>
+            <span>Download observations</span>
           </button>
         </a>
         <button mat-menu-item (click)="onDeleteLayer()">
