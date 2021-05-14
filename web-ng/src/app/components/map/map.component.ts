@@ -357,6 +357,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const layerId = mapFeature.getProperty('layerId');
       const color = project.layers.get(layerId)?.color;
       return {
+        strokeColor: color,
         fillColor: color,
       };
     });
