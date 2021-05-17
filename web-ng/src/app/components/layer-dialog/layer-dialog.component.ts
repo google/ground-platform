@@ -204,7 +204,8 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerService
       .addOrUpdateLayer(projectId, layer)
       .then(() => this.onClose())
-      .catch(() => {
+      .catch(err => {
+        console.error(err);
         alert('Layer update failed.');
       });
   }
