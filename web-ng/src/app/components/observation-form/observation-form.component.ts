@@ -168,6 +168,9 @@ export class ObservationFormComponent {
         case FieldType.TEXT:
           this.addControlsForTextField(group, field, response);
           break;
+        case FieldType.NUMBER:
+          this.addControlsForNumberField(group, field, response);
+          break;
         case FieldType.MULTIPLE_CHOICE:
           this.addControlsForMultipleChoiceField(group, field, response);
           break;
@@ -191,6 +194,8 @@ export class ObservationFormComponent {
     switch (field.type) {
       case FieldType.TEXT:
         return this.extractResponseForTextField(field);
+      case FieldType.NUMBER:
+        return this.extractResponseForNumberField(field);
       case FieldType.MULTIPLE_CHOICE:
         return this.extractResponseForMultipleChoiceField(field);
       default:
@@ -212,7 +217,22 @@ export class ObservationFormComponent {
       : new FormControl(value);
   }
 
+  private addControlsForNumberField(
+    group: { [fieldId: string]: FormControl },
+    field: Field,
+    response?: Response
+  ): void {
+    const value = response?.value as number;
+    group[field.id] = field.required
+      ? new FormControl(value, Validators.required)
+      : new FormControl(value);
+  }
+
   private extractResponseForTextField(field: Field): Response {
+    return new Response(this.observationForm?.value[field.id]);
+  }
+
+  private extractResponseForNumberField(field: Field): Response {
     return new Response(this.observationForm?.value[field.id]);
   }
 

@@ -106,6 +106,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         label: 'Photo',
         type: FieldType.PHOTO,
       },
+      {
+        icon: 'tag',
+        label: 'Number',
+        type: FieldType.NUMBER,
+      },
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
@@ -156,19 +161,17 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.markOptionEditorsTouched();
   }
 
-  getSelectedFieldTypeOption() {
-    switch (this.fieldType) {
-      case FieldType.TEXT:
-        return this.selectFieldOptions[0];
-      case FieldType.MULTIPLE_CHOICE:
-        return this.selectFieldOptions[
-          this.cardinality === Cardinality.SELECT_ONE ? 1 : 2
-        ];
-      case FieldType.PHOTO:
-        return this.selectFieldOptions[3];
-      default:
-        throw new Error(`Unsupported field type${this.fieldType}`);
+  getSelectedFieldTypeOption(): FieldTypeSelectOption {
+    const selectedOption = this.selectFieldOptions.find(
+      option =>
+        option.type === this.fieldType &&
+        (option.type !== FieldType.MULTIPLE_CHOICE ||
+          option.cardinality === this.cardinality)
+    );
+    if (!selectedOption) {
+      throw new Error(`Unsupported field type${this.fieldType}`);
     }
+    return selectedOption;
   }
 
   /**
