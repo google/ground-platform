@@ -27,6 +27,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 export class ImportDialogComponent {
   private projectId: string;
   private layerId: string;
+  public readonly acceptedExtensions = 'csv,geojson';
   uploadForm: FormGroup;
   public files: Array<File> = [];
 

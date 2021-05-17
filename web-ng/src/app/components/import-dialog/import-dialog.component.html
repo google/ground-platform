@@ -13,12 +13,12 @@
   See the License for the specific language governing permissions and
   limit
 -->
-<h2 mat-dialog-title>Import CSV</h2>
+<h2 mat-dialog-title>Import features</h2>
 <mat-dialog-content>
   <form [formGroup]="uploadForm">
     <div>
       <file-upload
-        accept="csv"
+        accept="{{ acceptedExtensions }}"
         formControlName="file"
         multiple="false"
         minsize="10 B"
