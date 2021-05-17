@@ -43,7 +43,7 @@ async function importGeoJson(req, res) {
   });
 
   // This code will process each file uploaded.
-  busboy.on("file", (_, file, _) => {
+  busboy.on("file", (_field, file, _filename) => {
     const { project: projectId, layer: layerId } = params;
     if (!projectId || !layerId) {
       return res.status(HttpStatus.BAD_REQUEST).end();
