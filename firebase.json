@@ -28,6 +28,10 @@
         "function": "importCsv"
       },
       {
+        "source": "/importGeoJson",
+        "function": "importGeoJson"
+      },
+      {
         "source": "/exportCsv",
         "function": "exportCsv"
       },
