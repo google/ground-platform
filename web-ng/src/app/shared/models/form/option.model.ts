@@ -25,6 +25,6 @@ export class Option {
   ) {}
 
   withIndex(index: number): Option {
-    return new Option (this.id, this.code, this.label, index );
+    return new Option(this.id, this.code, this.label, index);
   }
 }

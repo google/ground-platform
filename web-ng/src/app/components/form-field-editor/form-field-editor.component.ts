@@ -296,13 +296,15 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   drop(event: CdkDragDrop<string[]>) {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
-    let optionAtPrevIndex = options.get(event.previousIndex);
+    const optionAtPrevIndex = options.get(event.previousIndex);
     if (!optionAtPrevIndex) return;
-    
+
     options = options.delete(event.previousIndex);
     options = options.insert(event.currentIndex, optionAtPrevIndex);
     // Update indexes.
-    options = options.map((option: Option, index: number) =>  option.withIndex(index));
+    options = options.map((option: Option, index: number) =>
+      option.withIndex(index)
+    );
 
     this.emitFormOptions(options);
   }
