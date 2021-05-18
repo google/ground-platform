@@ -22,11 +22,9 @@ import {
   EventEmitter,
   OnChanges,
   ViewChild,
-  ChangeDetectorRef,
   ElementRef,
 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'app-option-editor',
