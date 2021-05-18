@@ -297,15 +297,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
     let optionAtPrevIndex = options.get(event.previousIndex);
-    let optionAtCurrentIndex = options.get(event.currentIndex);
-    if (optionAtPrevIndex && optionAtCurrentIndex) {
-      optionAtPrevIndex = optionAtPrevIndex.withIndex(event.currentIndex);
-      optionAtCurrentIndex = optionAtCurrentIndex.withIndex(
-        event.previousIndex
-      );
-      options = options.set(event.previousIndex, optionAtCurrentIndex);
-      options = options.set(event.currentIndex, optionAtPrevIndex);
-    }
+    if (!optionAtPrevIndex) return;
+    
+    options = options.delete(event.previousIndex);
+    options = options.insert(event.currentIndex, optionAtPrevIndex);
+    // Update indexes.
+    options = options.map((option: Option, index: number) =>  option.withIndex(index));
+
     this.emitFormOptions(options);
   }
 
