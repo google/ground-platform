@@ -125,7 +125,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private isFormEmpty(): boolean {
-    debugger;
     return (
       this.label?.trim().length === 0 &&
       this.fieldCount === 1 &&
@@ -137,7 +136,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     // As the form fields value change we are emitting the updated value to the layer-dialog.
     this.subscription.add(
       this.formGroup.valueChanges.subscribe(value => {
-        debugger;
         this.update.emit({
           label: StringMap({ en: value.label }),
           required: value.required,

@@ -155,7 +155,6 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   async onSave() {
-    debugger;
     if (!this.projectId) {
       throw Error('Project not yet loaded');
     }
