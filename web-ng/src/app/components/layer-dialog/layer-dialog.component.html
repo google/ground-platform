@@ -21,76 +21,75 @@
   (focusOut)="setLayerName($event)"
 ></inline-editor>
 <hr class="horizontal-line" />
-<div fxLayout="column" fxLayoutGap="10px">
-  <div fxLayout>
-    <div fxFlex>Permissions</div>
-    <div fxFlex>Default style</div>
-  </div>
-  <div fxLayout>
-    <div fxFlex fxFlexAlign="center">
-      <mat-checkbox [(ngModel)]="contributorsCanAdd" color="primary">
-        <label>Contributors may add points</label>
-      </mat-checkbox>
+<mat-dialog-content class="mat-typography">
+  <div fxLayout="column" fxLayoutGap="10px">
+    <div fxLayout>
+      <div fxFlex>Permissions</div>
+      <div fxFlex>Default style</div>
     </div>
-    <app-edit-style-button
-      fxFlex
-      [markerColor]="layer!.color || defaultLayerColor"
-      (markerColorChange)="onMarkerColorChange($event)"
-    ></app-edit-style-button>
-  </div>
-</div>
-<div>
-  <h3>Form Layout</h3>
-  <div class="label-helper-text">
-    Add questions that should be asked to observers about each point, line, or
-    polygon in this layer.
-  </div>
-</div>
-<form (ngSubmit)="onSave()">
-  <mat-dialog-content>
-    <div cdkDropList (cdkDropListDropped)="drop($event)">
-      <div
-        *ngFor="let field of fields; let i = index; trackBy: trackByFn"
-        fxLayout
-        cdkDrag
-      >
-        <app-form-field-editor
-          [label]="field.label.get('en')"
-          [required]="field.required"
-          [fieldType]="field.type"
-          [cardinality]="field.multipleChoice?.cardinality"
-          [multipleChoice]="field.multipleChoice"
-          [fieldCount]="fields?.size"
-          (update)="onFieldUpdate($event, i)"
-          (delete)="onFieldDelete(i)"
-          fxFlex="2 1 auto"
-        >
-        </app-form-field-editor>
+    <div fxLayout>
+      <div fxFlex fxFlexAlign="center">
+        <mat-checkbox [(ngModel)]="contributorsCanAdd" color="primary">
+          <label>Contributors may add points</label>
+        </mat-checkbox>
       </div>
+      <app-edit-style-button
+        fxFlex
+        [markerColor]="layer!.color || defaultLayerColor"
+        (markerColorChange)="onMarkerColorChange($event)"
+      ></app-edit-style-button>
     </div>
-    <button
-      mat-button
-      class="add-question"
-      type="button"
-      (click)="addQuestion()"
+  </div>
+  <div>
+    <h3>Form Layout</h3>
+    <div class="label-helper-text">
+      Add questions that should be asked to observers about each point, line, or
+      polygon in this layer.
+    </div>
+  </div>
+  <div cdkDropList (cdkDropListDropped)="drop($event)">
+    <div
+      *ngFor="let field of fields; let i = index; trackBy: trackByFn"
+      fxLayout
+      cdkDrag
     >
-      <mat-icon color="primary">add</mat-icon>
-      <span class="link-add-question">Add question</span>
-    </button>
-  </mat-dialog-content>
-  <mat-dialog-actions fxLayout fxLayoutAlign="end">
-    <div fxLayoutAlign="end">
-      <button
-        type="button"
-        mat-raised-button
-        (click)="onClose()"
-        class="btn-cancel"
+      <app-form-field-editor
+        [label]="field.label.get('en')"
+        [required]="field.required"
+        [fieldType]="field.type"
+        [cardinality]="field.multipleChoice?.cardinality"
+        [multipleChoice]="field.multipleChoice"
+        [fieldCount]="fields?.size"
+        (update)="onFieldUpdate($event, i)"
+        (delete)="onFieldDelete(i)"
+        fxFlex="2 1 auto"
       >
-        Cancel
-      </button>
-      <button color="primary" mat-raised-button type="submit" class="btn-save">
-        Save
-      </button>
+      </app-form-field-editor>
     </div>
-  </mat-dialog-actions>
-</form>
+  </div>
+  <button mat-button class="add-question" type="button" (click)="addQuestion()">
+    <mat-icon color="primary">add</mat-icon>
+    <span class="link-add-question">Add question</span>
+  </button>
+</mat-dialog-content>
+<mat-dialog-actions fxLayout fxLayoutAlign="end">
+  <div fxLayoutAlign="end">
+    <button
+      type="button"
+      mat-raised-button
+      (click)="onClose()"
+      class="btn-cancel"
+    >
+      Cancel
+    </button>
+    <button
+      color="primary"
+      mat-raised-button
+      type="submit"
+      class="btn-save"
+      (click)="onSave()"
+    >
+      Save
+    </button>
+  </div>
+</mat-dialog-actions>
