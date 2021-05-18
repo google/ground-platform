@@ -125,8 +125,23 @@ export class LayerService {
    */
   private static createFormMap(id: string, form: Form): Map<string, Form> {
     let forms = Map<string, Form>();
+    if (LayerService.isFormFieldEmpty(form)) {
+      return forms;
+    }
     forms = forms.set(id, form);
     return forms;
+  }
+
+  /**
+   * Checks if the first field in the form is empty.
+   */
+  private static isFormFieldEmpty(form: Form): boolean {
+    const fields = form.fields;
+    return fields.size === 1 && !LayerService.getFieldLabel(fields.first());
+  }
+
+  private static getFieldLabel(field: Field): string {
+    return field.label.get('en')?.trim() || '';
   }
 
   /**
