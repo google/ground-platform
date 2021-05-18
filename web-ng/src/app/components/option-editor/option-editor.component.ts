@@ -21,8 +21,12 @@ import {
   Output,
   EventEmitter,
   OnChanges,
+  ViewChild,
+  ChangeDetectorRef,
+  ElementRef,
 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'app-option-editor',
@@ -35,6 +39,7 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() index?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+  @ViewChild('optionInput', { static: true }) optionInput?: ElementRef;
 
   optionGroup: FormGroup;
 
@@ -56,6 +61,9 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
+    if (this.optionInput) {
+      this.optionInput.nativeElement.focus();
+    }
     this.optionGroup.setValue({
       code: this.code,
       label: this.label,

@@ -21,7 +21,13 @@
     <div fxFlex>
       <mat-form-field class="field-option">
         <mat-label>Option</mat-label>
-        <input matInput formControlName="label" autocomplete="off" />
+        <input
+          matInput
+          formControlName="label"
+          autocomplete="off"
+          cdkFocusInitial
+          #optionInput
+        />
         <mat-error *ngIf="labelControl.touched && labelControl.invalid">
           <ng-container *ngIf="labelControl.getError('required')">
             Option is required
