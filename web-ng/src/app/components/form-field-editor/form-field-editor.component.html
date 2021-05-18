@@ -19,6 +19,9 @@
     <mat-panel-title>
       {{ label }}
     </mat-panel-title>
+    <mat-panel-description class="label-field-type">
+      {{ getSelectFieldType().label }}
+    </mat-panel-description>
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>
     <form [formGroup]="formGroup">
