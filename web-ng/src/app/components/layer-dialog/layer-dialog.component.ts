@@ -130,17 +130,11 @@ export class LayerDialogComponent implements OnDestroy {
     this.color = this.layer?.color || this.defaultLayerColor;
     if (!layer) {
       this.layer = this.layerService.createNewLayer();
-      const newField = this.layerService.createField(
-        FieldType.TEXT,
-        /* label= */
-        '',
-        /* required= */
-        false,
-        /* index= */
-        this.fields.size
-      );
-      this.fields = this.fields.push(newField);
+      this.createDefaultField();
       return;
+    }
+    if (!layer.forms || layer.forms?.isEmpty()) {
+      this.createDefaultField();
     }
     const canAddPoints = this.layer?.contributorsCanAdd?.find(
       val => val === 'points'
@@ -261,16 +255,29 @@ export class LayerDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  private markFormFieldsTouched() {
+  private markFormFieldsTouched(): void {
     this.formFieldEditors?.forEach(editor => {
       this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
     });
   }
 
-  private markOptionsTouched(editor: FormFieldEditorComponent) {
+  private markOptionsTouched(editor: FormFieldEditorComponent): void {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
+  }
+
+  private createDefaultField(): void {
+    const newField = this.layerService.createField(
+      FieldType.TEXT,
+      /* label= */
+      '',
+      /* required= */
+      false,
+      /* index= */
+      this.fields.size
+    );
+    this.fields = this.fields.push(newField);
   }
 }
