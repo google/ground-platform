@@ -19,7 +19,7 @@ import { switchMap, take } from 'rxjs/operators';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Project } from './../../shared/models/project.model';
 import { ProjectService } from './../project/project.service';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
 import firebase from 'firebase/app';
@@ -36,7 +36,8 @@ export class FeatureService {
   constructor(
     private dataStore: DataStoreService,
     private projectService: ProjectService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private zone: NgZone
   ) {
     this.features$ = projectService
       .getActiveProject$()
@@ -110,7 +111,9 @@ export class FeatureService {
       new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
-    this.navigationService.selectFeature(newFeature.id);
+    this.zone.run(() => {
+      this.navigationService.selectFeature(newFeature.id);
+    });
   }
 
   private async updatePointInternal(project: Project, feature: Feature) {

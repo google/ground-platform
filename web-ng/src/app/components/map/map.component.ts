@@ -39,13 +39,14 @@ import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
-import { startWith } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global google*/
 
 const normalIconScale = 30;
 const enlargedIconScale = 50;
+const normalPolygonStrokeWeight = 3;
+const enlargedPolygonStrokeWeight = 6;
 const zoomedInLevel = 13;
 
 @Component({
@@ -99,7 +100,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       combineLatest([
         this.activeProject$,
         this.features$,
-        this.featureService.getSelectedFeatureId$().pipe(startWith('')),
+        this.navigationService.getFeatureId$(),
       ]).subscribe(([project, features, selectedFeatureId]) =>
         this.onProjectAndFeaturesUpdate(project, features, selectedFeatureId)
       )
@@ -109,12 +110,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.drawingToolsService
         .getEditMode$()
         .subscribe(editMode => this.onEditModeChange(editMode))
-    );
-
-    this.subscription.add(
-      this.navigationService
-        .getFeatureId$()
-        .subscribe(featureId => this.selectMarkerWithFeatureId(featureId))
     );
 
     this.subscription.add(
@@ -163,11 +158,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private onProjectAndFeaturesUpdate(
     project: Project,
     features: List<Feature>,
-    selectedFeatureId: string
+    selectedFeatureId: string | null
   ): void {
     this.removeMarkersAndGeoJsonsOnMap(features);
     this.addFeaturesToMap(project, features);
-    this.updateStylingFunctionForAllGeoJsons(project);
+    this.updateStylingFunctionForAllGeoJsons(project, selectedFeatureId);
     this.selectMarkerWithFeatureId(selectedFeatureId);
   }
 
@@ -336,15 +331,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
-    if (!selectedFeatureId) {
-      this.selectMarker(undefined);
-      return;
-    }
-    for (const marker of this.markers) {
-      if (marker.getTitle() === selectedFeatureId) {
-        this.selectMarker(marker);
-      }
-    }
+    const markerToSelect = this.markers.find(
+      marker => marker.getTitle() === selectedFeatureId
+    );
+    this.selectMarker(markerToSelect);
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {
@@ -368,13 +358,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private updateStylingFunctionForAllGeoJsons(project: Project) {
+  private updateStylingFunctionForAllGeoJsons(
+    project: Project,
+    selectedFeatureId: string | null
+  ) {
     this.map.data.setStyle(mapFeature => {
       const layerId = mapFeature.getProperty('layerId');
       const color = project.layers.get(layerId)?.color;
+      const featureId = mapFeature.getProperty('featureId');
+      const isSelefted = featureId === selectedFeatureId;
       return {
         fillOpacity: 0,
         strokeColor: color,
+        strokeWeight: isSelefted
+          ? enlargedPolygonStrokeWeight
+          : normalPolygonStrokeWeight,
       };
     });
   }
