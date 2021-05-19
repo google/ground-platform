@@ -246,11 +246,11 @@ export class LayerDialogComponent implements OnDestroy {
 
   drop(event: CdkDragDrop<string[]>) {
     const fieldAtPrevIndex = this.fields.get(event.previousIndex);
-    const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
-    if (fieldAtCurrentIndex && fieldAtPrevIndex) {
-      this.fields = this.fields.set(event.previousIndex, fieldAtCurrentIndex);
-      this.fields = this.fields.set(event.currentIndex, fieldAtPrevIndex);
+    if (!fieldAtPrevIndex) {
+      return;
     }
+    this.fields = this.fields.delete(event.previousIndex);
+    this.fields = this.fields.insert(event.currentIndex, fieldAtPrevIndex);
   }
 
   ngOnDestroy() {

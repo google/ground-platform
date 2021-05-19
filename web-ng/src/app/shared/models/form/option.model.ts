@@ -24,7 +24,7 @@ export class Option {
     readonly index: number
   ) {}
 
-  withIndex(index: number) {
-    return { ...this, index };
+  withIndex(index: number): Option {
+    return new Option(this.id, this.code, this.label, index);
   }
 }
