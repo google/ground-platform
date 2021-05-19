@@ -116,7 +116,7 @@ export class LayerService {
     id: string | undefined,
     fields: Map<string, Field>
   ): Map<string, Form> | undefined {
-    if (LayerService.isFormFieldEmpty(fields)) {
+    if (fields.isEmpty() || LayerService.isFormFieldEmpty(fields)) {
       return undefined;
     }
     const formId = id || this.dataStoreService.generateId();

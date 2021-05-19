@@ -133,9 +133,6 @@ export class LayerDialogComponent implements OnDestroy {
       this.createDefaultField();
       return;
     }
-    if (!layer.forms || layer.forms?.isEmpty()) {
-      this.createDefaultField();
-    }
     const canAddPoints = this.layer?.contributorsCanAdd?.find(
       val => val === 'points'
     );
@@ -145,6 +142,8 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields =
         this.form?.fields.toList().sortBy(field => field.index) ||
         List<Field>();
+    } else {
+      this.createDefaultField();
     }
   }
 
