@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  OnDestroy,
+  NgZone,
+} from '@angular/core';
 import { Project } from '../../shared/models/project.model';
 import {
   Feature,
@@ -81,7 +87,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private drawingToolsService: DrawingToolsService,
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private zone: NgZone
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -192,6 +199,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const geoJsonFeatureIds: String[] = [];
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
+    });
+    this.map.data.addListener('click', (event: google.maps.Data.MouseEvent) => {
+      const featureId = event.feature.getProperty('featureId');
+      if (this.disableMapClicks) {
+        return;
+      }
+      this.zone.run(() => {
+        this.navigationService.selectFeature(featureId);
+      });
     });
 
     features.forEach(feature => {
