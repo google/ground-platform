@@ -115,7 +115,10 @@ export class ObservationFormComponent {
         );
         this.dataStoreService
           .updateObservation(this.projectId!, updatedObservation)
-          .then(() => this.navigateToFeature())
+          .then(() => {
+            this.observationForm?.markAsPristine();
+            return this.navigateToFeature();
+          })
           .catch(() => {
             alert('Observation update failed.');
           });
