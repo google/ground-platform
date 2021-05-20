@@ -45,19 +45,19 @@ export class ImportDialogComponent {
     });
     dialogRef.afterClosed().subscribe(submit => {
       if (submit) {
-        this.importCsv();
+        this.importFeatures();
       }
     });
   }
 
-  private async importCsv() {
+  private async importFeatures() {
     const files = this.uploadForm.get('file')?.value;
     if (!files || files.length === 0) {
       console.error('File missing');
       return;
     }
     // TODO(#528): Show upload progress and success/error message to user.
-    await this.dataImportService.importCsv(
+    await this.dataImportService.importFeatures(
       this.projectId,
       this.layerId,
       files[0] as File

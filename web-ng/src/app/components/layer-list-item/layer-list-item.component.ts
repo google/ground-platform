@@ -117,7 +117,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     return this.navigationService.selectProject(this.projectId!);
   }
 
-  onImportCsv() {
+  onImportFeatures() {
     if (!this.projectId || !this.layer?.id) {
       return;
     }

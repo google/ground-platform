@@ -32,7 +32,7 @@ export interface ImportResponse {
 export class DataImportService {
   constructor(private httpClient: HttpClient) {}
 
-  importCsv(
+  importFeatures(
     projectId: string,
     layerId: string,
     file: File
