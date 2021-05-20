@@ -28,6 +28,7 @@ import { NotificationService } from '../../services/notification/notification.se
 export class ImportDialogComponent {
   private projectId: string;
   private layerId: string;
+  public readonly acceptedExtensions = 'csv,geojson';
   uploadForm: FormGroup;
   public files: Array<File> = [];
   isUploadingCSV = false;

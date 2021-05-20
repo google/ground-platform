@@ -24,7 +24,7 @@
     <form [formGroup]="uploadForm">
       <div>
         <file-upload
-          accept="csv"
+          accept="{{ acceptedExtensions }}"
           formControlName="file"
           multiple="false"
           minsize="10 B"
