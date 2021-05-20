@@ -30,6 +30,7 @@ export class DialogService {
   ): MatDialogRef<ConfirmationDialogComponent> {
     return this.dialog.open(ConfirmationDialogComponent, {
       maxWidth: '500px',
+      autoFocus: false,
       data: {
         title,
         message,
