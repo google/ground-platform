@@ -14,17 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <mat-list *ngIf="layer$ | async as layer">
-  <!-- 
-    TODO: create separate component for layer as a header instead of 
+  <!--
+    TODO: create separate component for layer as a header instead of
     using LayerListItem here.
   -->
-  <ground-feature-panel-header [layer]="layer" [actionsType]="featureHeaderActionType.BACK">
+  <ground-feature-panel-header
+    [layer]="layer"
+    [actionsType]="featureHeaderActionType.BACK"
+  >
   </ground-feature-panel-header>
 </mat-list>
-<div *ngIf="layer$ | async as layer">
-  <button *ngIf="!layer.forms?.isEmpty()" color="primary" class="add-observation-btn" mat-raised-button
-    (click)="onAddObservationClick()">
-    + Add observation
+<div *ngIf="layer$ | async as layer" class="button-container">
+  <button
+    *ngIf="!layer.forms?.isEmpty()"
+    mat-flat-button
+    color="primary"
+    class="add-observation-btn"
+    (click)="onAddObservationClick()"
+  >
+    <mat-icon class="add-observation-icon">add</mat-icon>
+    Add observation
   </button>
 </div>
 <div *ngIf="observations$ | async as observations">
@@ -45,7 +54,10 @@ limitations under the License.
           <mat-icon>edit</mat-icon>
           <span>Edit observation</span>
         </button>
-        <button mat-menu-item (click)="onDeleteObservationClick(observation.id)">
+        <button
+          mat-menu-item
+          (click)="onDeleteObservationClick(observation.id)"
+        >
           <mat-icon>delete_forever</mat-icon>
           <span>Delete observation</span>
         </button>
@@ -54,16 +66,31 @@ limitations under the License.
     <mat-card-content>
       <div *ngFor="let field of getFields(observation)">
         <label class="field-label">{{ field.label?.get(lang) }}</label>
-        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT || field.type == fieldTypes.NUMBER">
+        <div
+          class="field-response"
+          *ngIf="
+            field.type == fieldTypes.TEXT || field.type == fieldTypes.NUMBER
+          "
+        >
           {{ observation.responses?.get(field.id)?.value }}
         </div>
-        <div class="field-response" *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE">
-          <span class="option-label" *ngFor="let option of observation.responses?.get(field.id)?.value">
+        <div
+          class="field-response"
+          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
+        >
+          <span
+            class="option-label"
+            *ngFor="let option of observation.responses?.get(field.id)?.value"
+          >
             {{ option.label?.get(lang) }}
           </span>
         </div>
         <div class="field-response" *ngIf="field.type == fieldTypes.PHOTO">
-          <img (click)="openUrlInNewTab(photoUrls.get(field.id))" src="{{ photoUrls.get(field.id) }}" width="100%" />
+          <img
+            (click)="openUrlInNewTab(photoUrls.get(field.id))"
+            src="{{ photoUrls.get(field.id) }}"
+            width="100%"
+          />
         </div>
       </div>
     </mat-card-content>
