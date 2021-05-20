@@ -22,7 +22,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
   templateUrl: './confirmation-dialog.component.html',
   styleUrls: ['./confirmation-dialog.component.css'],
 })
-export class ConfirmationDialogComponent implements OnInit {
+export class ConfirmationDialogComponent {
   title: string;
   message: string;
 
@@ -33,8 +33,6 @@ export class ConfirmationDialogComponent implements OnInit {
     this.title = data.title;
     this.message = data.message;
   }
-
-  ngOnInit() {}
 
   onConfirm() {
     this.dialogRef.close(true);
