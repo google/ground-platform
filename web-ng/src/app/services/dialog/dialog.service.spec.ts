@@ -17,12 +17,13 @@
 import { TestBed } from '@angular/core/testing';
 
 import { DialogService } from './dialog.service';
+import { MatDialogModule } from '@angular/material/dialog';
 
 describe('DialogService', () => {
   let service: DialogService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ imports: [MatDialogModule] });
     service = TestBed.inject(DialogService);
   });
 
