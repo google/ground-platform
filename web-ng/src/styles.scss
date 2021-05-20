@@ -41,3 +41,8 @@ button .mat-icon + label {
 .mat-menu-item mat-icon {
   color: mat-color($foreground, icon) !important;
 }
+
+.layer-dialog-container .mat-dialog-container {
+  margin: 24px;
+  width: 1024px;
+}
