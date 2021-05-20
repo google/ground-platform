@@ -206,6 +206,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
 
     features.forEach(feature => {
+      if (!project.getLayer(feature.layerId)) {
+        // Ignore features whose layer has been removed.
+        console.debug(
+          `Ignoring feature ${feature.id} with missing layer ${feature.layerId}`
+        );
+        return;
+      }
       if (feature instanceof LocationFeature) {
         if (!locationFeatureIds.includes(feature.id)) {
           this.addMarkerToMap(project, feature);
