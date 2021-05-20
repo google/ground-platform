@@ -15,11 +15,11 @@
  */
 
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { DialogService } from '../../services/dialog/dialog.service';
 import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -45,7 +45,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private confirmationDialog: MatDialog,
+    private dialogService: DialogService,
     private importDialog: MatDialog,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
@@ -89,23 +89,19 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onDeleteLayer() {
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this layer? Any associated data including all features and observations in this layer will be lost. This cannot be undone.',
-        },
-      }
-    );
-
-    dialogRef.afterClosed().subscribe(async dialogResult => {
-      if (dialogResult) {
-        await this.deleteLayer();
-      }
-    });
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this layer? Any associated data ' +
+          'including all features and observations in this layer will be ' +
+          'lost. This cannot be undone.'
+      )
+      .afterClosed()
+      .subscribe(async dialogResult => {
+        if (dialogResult) {
+          await this.deleteLayer();
+        }
+      });
   }
 
   async deleteLayer() {
