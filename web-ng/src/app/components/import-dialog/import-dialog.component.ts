@@ -31,7 +31,7 @@ export class ImportDialogComponent {
   public readonly acceptedExtensions = 'csv,geojson';
   uploadForm: FormGroup;
   public files: Array<File> = [];
-  isUploadingCSV = false;
+  isImporting = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -56,17 +56,17 @@ export class ImportDialogComponent {
       return;
     }
     try {
-      this.isUploadingCSV = true;
+      this.isImporting = true;
       await this.dataImportService.importCsv(
         this.projectId,
         this.layerId,
         files[0] as File
       );
-      this.notificationService.success('Csv import completed');
+      this.notificationService.success('Import complete');
     } catch (err) {
-      this.notificationService.error('Csv import failed');
+      this.notificationService.error('Importing features failed');
     }
-    this.isUploadingCSV = false;
+    this.isImporting = false;
     this.ngZone.run(() => {
       this.dialogRef.close();
     });

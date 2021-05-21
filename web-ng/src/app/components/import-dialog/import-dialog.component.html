@@ -14,12 +14,12 @@
   limit
 -->
 
-<div *ngIf="isUploadingCSV; else defaultView">
-  <h2 mat-dialog-title>Uploading CSV</h2>
+<div *ngIf="isImporting; else defaultView">
+  <h2 mat-dialog-title>Uploading features</h2>
   <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
 </div>
 <ng-template #defaultView>
-  <h2 mat-dialog-title>Import CSV</h2>
+  <h2 mat-dialog-title>Import features</h2>
   <mat-dialog-content>
     <form [formGroup]="uploadForm">
       <div>
