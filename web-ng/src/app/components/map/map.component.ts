@@ -137,11 +137,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           return Promise.resolve();
         }
         this.drawingToolsService.setEditMode(EditMode.None);
-        return this.featureService.addPoint(
-          event.latLng.lat(),
-          event.latLng.lng(),
-          selectedLayerId
-        );
+        return this.featureService
+          .addPoint(event.latLng.lat(), event.latLng.lng(), selectedLayerId)
+          .then(newFeature => {
+            if (newFeature) {
+              this.navigationService.selectFeature(newFeature.id);
+            }
+          });
       case EditMode.AddPolygon:
         // TODO: Implement adding polygon.
         if (!selectedLayerId) {
