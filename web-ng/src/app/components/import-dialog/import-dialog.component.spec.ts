@@ -27,6 +27,7 @@ import { ImportDialogComponent } from './import-dialog.component';
 import { NEVER } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;
@@ -41,6 +42,7 @@ describe('ImportDialogComponent', () => {
           ReactiveFormsModule,
           MatDialogModule,
           NoopAnimationsModule,
+          MatSnackBarModule,
         ],
         providers: [
           { provide: DataImportService, useValue: {} },
