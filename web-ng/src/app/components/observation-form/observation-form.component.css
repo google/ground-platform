@@ -27,12 +27,6 @@
   line-height: 20px;
   margin-bottom: 12px;
 }
-.observation .btn-save,
-.observation .btn-cancel {
-  float: right;
-  width: 70px;
-  margin-left: 17px;
-}
 .field-response .mat-form-field {
   width: 100%;
 }
