@@ -116,7 +116,7 @@ export class LayerService {
     id: string | undefined,
     fields: Map<string, Field>
   ): Map<string, Form> | undefined {
-    if (LayerService.isFormFieldEmpty(fields)) {
+    if (LayerService.isFormEmpty(fields)) {
       return undefined;
     }
     const formId = id || this.dataStoreService.generateId();
@@ -135,7 +135,7 @@ export class LayerService {
   /**
    * Checks if there are no fields or first field in the form is empty.
    */
-  private static isFormFieldEmpty(fields: Map<string, Field>): boolean {
+  private static isFormEmpty(fields: Map<string, Field>): boolean {
     return (
       fields.isEmpty() ||
       (fields.size === 1 && !LayerService.getFieldLabel(fields.first()))
