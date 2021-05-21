@@ -49,7 +49,7 @@ export class ImportDialogComponent {
     });
   }
 
-  async importCsv(): Promise<void> {
+  async onImportFeatures(): Promise<void> {
     const files = this.uploadForm.get('file')?.value;
     if (!files || files.length === 0) {
       console.error('File missing');
@@ -57,7 +57,7 @@ export class ImportDialogComponent {
     }
     try {
       this.isImporting = true;
-      await this.dataImportService.importCsv(
+      await this.dataImportService.importFeatures(
         this.projectId,
         this.layerId,
         files[0] as File
