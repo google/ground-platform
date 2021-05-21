@@ -117,13 +117,13 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     return this.navigationService.selectProject(this.projectId!);
   }
 
-  onImportCsv() {
+  onImportFeatures() {
     if (!this.projectId || !this.layer?.id) {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
       data: { projectId: this.projectId, layerId: this.layer?.id },
-      maxWidth: '500px',
+      width: '350px',
       maxHeight: '800px',
     });
   }
