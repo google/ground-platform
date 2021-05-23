@@ -34,6 +34,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
+import { DialogService } from '../../services/dialog/dialog.service';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -42,8 +43,6 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { Subscription } from 'rxjs';
@@ -82,7 +81,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(
     private formBuilder: FormBuilder,
-    private confirmationDialog: MatDialog,
+    private dialogService: DialogService,
     private layerService: LayerService
   ) {
     this.selectFieldOptions = [
@@ -238,9 +237,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.emitFormOptions(options);
   }
 
-  onOptionDelete(index: number): void {
-    const dialogRef = this.openConfirmationDialog();
-    dialogRef
+  onOptionDelete(index: number) {
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this option? ' +
+          'Any associated data will be lost. This cannot be undone.'
+      )
       .afterClosed()
       .toPromise()
       .then(dialogResult => {
@@ -251,17 +254,6 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
           this.emitFormOptions(options);
         }
       });
-  }
-
-  openConfirmationDialog(): MatDialogRef<ConfirmationDialogComponent> {
-    return this.confirmationDialog.open(ConfirmationDialogComponent, {
-      maxWidth: '500px',
-      data: {
-        title: 'Warning',
-        message: `Are you sure you wish to delete this option?
-        Any associated data will be lost. This cannot be undone.`,
-      },
-    });
   }
 
   onAddOption(): void {

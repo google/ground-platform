@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,20 @@
  * limitations under the License.
  */
 
-@import '_variables';
+import { TestBed } from '@angular/core/testing';
 
-.mat-dialog-content {
-  width: 100%;
-}
+import { DialogService } from './dialog.service';
+import { MatDialogModule } from '@angular/material/dialog';
 
-.link-add-question {
-  color: mat-color($primary);
-}
+describe('DialogService', () => {
+  let service: DialogService;
 
-.add-question {
-  padding: 10px;
-  border: 1px solid #e6e7ea;
-  border-radius: 10px;
-  margin-top: 20px;
-  width: 100%;
-  text-align: left;
-}
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [MatDialogModule] });
+    service = TestBed.inject(DialogService);
+  });
 
-.mat-dialog-actions {
-  margin-top: 10px;
-  margin-bottom: 0.83em;
-}
-
-.horizontal-line {
-  border: 1px solid mat-color($foreground, divider);
-  margin: -20px 0 20px 0;
-}
-
-.label-helper-text {
-  color: mat-color($foreground, secondary-text);
-  padding-top: 5px;
-  line-height: 1.6;
-}
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});

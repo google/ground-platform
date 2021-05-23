@@ -26,9 +26,8 @@ import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { MatDialog } from '@angular/material/dialog';
+import { DialogService } from '../../services/dialog/dialog.service';
 
 // TODO: Rename "FeatureDetailsComponent".
 @Component({
@@ -53,7 +52,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
     featureService: FeatureService,
     observationService: ObservationService,
     private dataStoreService: DataStoreService,
-    private confirmationDialog: MatDialog,
+    private dialogService: DialogService,
     private zone: NgZone
   ) {
     // TODO: Make dynamic to support i18n.
@@ -150,23 +149,18 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
       this.navigationService.getFeatureId()!,
       id
     );
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this observation? Any associated data will be lost. This cannot be undone.',
-        },
-      }
-    );
-
-    dialogRef.afterClosed().subscribe(async dialogResult => {
-      if (dialogResult) {
-        await this.deleteObservation();
-      }
-    });
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this observation? ' +
+          'Any associated data will be lost. This cannot be undone.'
+      )
+      .afterClosed()
+      .subscribe(async dialogResult => {
+        if (dialogResult) {
+          await this.deleteObservation();
+        }
+      });
   }
 
   async deleteObservation() {
