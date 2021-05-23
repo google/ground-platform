@@ -317,6 +317,10 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  onLabelBlur() {
+    this.labelControl.setValue(this.labelControl.value.trim());
+  }
+
   private markOptionEditorsTouched() {
     this.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();

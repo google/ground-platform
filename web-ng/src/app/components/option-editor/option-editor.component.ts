@@ -69,4 +69,16 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   get labelControl() {
     return this.optionGroup.get('label')!;
   }
+
+  get codeControl() {
+    return this.optionGroup.get('code')!;
+  }
+
+  onLabelBlur(): void {
+    this.labelControl.setValue(this.labelControl.value.trim());
+  }
+
+  onCodeBlur(): void {
+    this.codeControl.setValue(this.codeControl.value.trim());
+  }
 }
