@@ -49,8 +49,8 @@ export class OptionEditorComponent implements OnInit, OnChanges {
     // As the options fields value change we are emitting the updated value to the form-field-editor.
     this.optionGroup.valueChanges.subscribe(value => {
       this.update.emit({
-        code: value.code.trim(),
-        label: value.label.trim(),
+        code: value.code,
+        label: value.label,
       });
     });
   }

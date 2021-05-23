@@ -137,7 +137,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.subscription.add(
       this.formGroup.valueChanges.subscribe(value => {
         this.update.emit({
-          label: StringMap({ en: value.label.trim() }),
+          label: StringMap({ en: value.label }),
           required: value.required,
           type: value.selectFieldOption.type,
           multipleChoice: this.formOptions,
