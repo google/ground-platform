@@ -48,7 +48,7 @@ const enlargedIconScale = 50;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
 const zoomedInLevel = 13;
-
+let subsampleCount = 0;
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
@@ -206,6 +206,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
 
     features.forEach(feature => {
+      if (feature.layerId === 'lISXIiKXdNNTwu90B4ht') {
+        subsampleCount++;
+        console.log(subsampleCount);
+      }
+
       if (!project.getLayer(feature.layerId)) {
         // Ignore features whose layer has been removed.
         console.debug(
