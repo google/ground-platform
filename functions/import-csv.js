@@ -23,12 +23,6 @@ const csvParser = require("csv-parser");
 const Busboy = require("busboy");
 const { db } = require("./common/context");
 
-const closeConnection = (code, reason) => {
-  req.unpipe(busboy);
-  res.writeHead(code || 400, { Connection: "close" });
-  res.end(reason || "Bad Request");
-};
-
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'project' id and 'layer' id to the database.
@@ -71,10 +65,10 @@ async function importCsv(req, res) {
         inserts.push(insertRow(projectId, layerId, row));
       } catch (err) {
         console.error(err);
+        re.unpipe(busboy);
         await res
           .status(HttpStatus.BAD_REQUEST)
           .end(JSON.stringify({ error: err.message }));
-        // TODO(#525): Abort stream on error. How?
       }
     });
   });
