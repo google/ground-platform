@@ -23,6 +23,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   imports: [
@@ -33,6 +34,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatListModule,
     MatMenuModule,
     MatDialogModule,
+    MatSnackBarModule,
   ],
   exports: [LayerListItemComponent],
   declarations: [LayerListItemComponent],
