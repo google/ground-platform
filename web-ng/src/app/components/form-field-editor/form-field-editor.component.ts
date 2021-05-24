@@ -31,6 +31,8 @@ import {
   FormBuilder,
   Validators,
   FormControl,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { FieldType } from '../../shared/models/form/field.model';
@@ -119,7 +121,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  private validateLabel(control: FormControl) {
+  private validateLabel(control: FormControl): ValidationErrors | null {
     return this.isFormEmpty() ? null : Validators.required(control);
   }
 
@@ -148,7 +150,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   /*
    * This method is used to get the updated values of field from the layer-dialog.
    */
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
     }
@@ -178,11 +180,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    *
    * @returns void
    */
-  onFieldDelete() {
+  onFieldDelete(): void {
     this.delete.emit();
   }
 
-  getSelectFieldType() {
+  getSelectFieldType(): FieldTypeSelectOption {
     return this.formGroup.get('selectFieldOption')?.value;
   }
 
@@ -192,7 +194,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param event: FieldTypeSelectOption
    * @returns void
    */
-  onFieldTypeSelect(event: FieldTypeSelectOption) {
+  onFieldTypeSelect(event: FieldTypeSelectOption): void {
     this.fieldType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
@@ -214,7 +216,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   /*
    * This is used to track input added or removed in case of field options.
    */
-  trackByFn(index: number) {
+  trackByFn(index: number): number {
     return index;
   }
 
@@ -225,7 +227,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: { label: string; code: string }, index: number) {
+  onOptionUpdate(event: { label: string; code: string }, index: number): void {
     const option = this.layerService.createOption(
       event.code,
       event.label,
@@ -254,7 +256,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       });
   }
 
-  onAddOption() {
+  onAddOption(): void {
     const index = this.formOptions?.options.size || 0;
     const option = this.layerService.createOption(
       /* code= */ '',
@@ -265,13 +267,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.emitFormOptions(options);
   }
 
-  setFormOptions(index: number, option: Option) {
+  setFormOptions(index: number, option: Option): List<Option> {
     let options = this.formOptions?.options || List<Option>();
     options = options?.set(index, option);
     return options;
   }
 
-  emitFormOptions(options: List<Option>) {
+  emitFormOptions(options: List<Option>): void {
     const cardinality =
       this.formOptions?.cardinality ||
       this.cardinality ||
@@ -285,7 +287,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  drop(event: CdkDragDrop<string[]>) {
+  drop(event: CdkDragDrop<string[]>): void {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
     const optionAtPrevIndex = options.get(event.previousIndex);
@@ -301,15 +303,19 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.emitFormOptions(options);
   }
 
-  get labelControl() {
+  get labelControl(): AbstractControl {
     return this.formGroup.get('label')!;
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  private markOptionEditorsTouched() {
+  onLabelBlur(): void {
+    this.labelControl.setValue(this.labelControl.value.trim());
+  }
+
+  private markOptionEditorsTouched(): void {
     this.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
