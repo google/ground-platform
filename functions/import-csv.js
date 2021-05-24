@@ -65,7 +65,7 @@ async function importCsv(req, res) {
         inserts.push(insertRow(projectId, layerId, row));
       } catch (err) {
         console.error(err);
-        re.unpipe(busboy);
+        res.unpipe(busboy);
         await res
           .status(HttpStatus.BAD_REQUEST)
           .end(JSON.stringify({ error: err.message }));
