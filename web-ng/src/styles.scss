@@ -28,10 +28,6 @@ body {
   font-size: 14px;
 }
 
-button label {
-  font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
-}
-
 /* Space between button icon and label. */
 button .mat-icon + label {
   padding-left: 6px;
@@ -40,4 +36,22 @@ button .mat-icon + label {
 
 .mat-menu-item mat-icon {
   color: mat-color($foreground, icon) !important;
+}
+
+snack-bar-container.success {
+  background-color: mat-color($primary);
+}
+
+snack-bar-container.error {
+  background-color: mat-color($warn);
+}
+
+snack-bar-container.notification {
+  color: white;
+  font-weight: bold;
+}
+
+.layer-dialog-container .mat-dialog-container {
+  margin: 24px;
+  width: 1024px;
 }

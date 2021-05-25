@@ -19,7 +19,12 @@
   <div fxLayout>
     <mat-form-field appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
-      <input matInput formControlName="label" autocomplete="off" />
+      <input
+        matInput
+        formControlName="label"
+        autocomplete="off"
+        (blur)="onLabelBlur()"
+      />
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
         <ng-container *ngIf="labelControl.getError('required')">
           Question is required
