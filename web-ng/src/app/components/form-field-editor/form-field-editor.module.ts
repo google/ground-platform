@@ -27,7 +27,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormFieldEditorComponent } from './form-field-editor.component';
 import { OptionEditorModule } from '../option-editor/option-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { MatExpansionModule } from '@angular/material/expansion';
 
 @NgModule({
   declarations: [FormFieldEditorComponent],
@@ -44,7 +43,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatButtonModule,
     OptionEditorModule,
     DragDropModule,
-    MatExpansionModule,
   ],
   exports: [FormFieldEditorComponent],
 })
