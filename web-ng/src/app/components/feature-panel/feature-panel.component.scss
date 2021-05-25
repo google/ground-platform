@@ -22,13 +22,13 @@
 .observation .field-label {
   font-size: 12px;
   line-height: 16px;
-  color: #70757a;
+  color: mat-color($foreground, secondary-text);
   margin-bottom: 3px;
 }
 .observation .field-response {
   font-size: 14px;
   line-height: 20px;
-  color: #3c4043;
+  color: mat-color($foreground, text) !important;
   margin-bottom: 12px;
 }
 .option-label:not(:last-child):after {
@@ -46,26 +46,7 @@
 }
 
 .no-observation-text {
-  margin-left: 12px;
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 14pt;
-  color: mat-color($foreground, secondary-text);
-}
-
-/*
-font-size: medium;
-  font-weight: 500;
-  color: mat-color($foreground, secondary-text);
-  padding: 16px 0 12px 0;
-
-margin-left: 12px;
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 14pt;
-  color: mat-color($foreground, secondary-text);
-
-
   font-style: italic;
   color: mat-color($foreground, secondary-text);
   margin: 16px;
-
-*/
+}
