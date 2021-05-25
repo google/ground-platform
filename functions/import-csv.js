@@ -23,12 +23,6 @@ const csvParser = require("csv-parser");
 const Busboy = require("busboy");
 const { db } = require("./common/context");
 
-const closeConnection = (code, reason) => {
-  req.unpipe(busboy);
-  res.writeHead(code || 400, { Connection: "close" });
-  res.end(reason || "Bad Request");
-};
-
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'project' id and 'layer' id to the database.
@@ -42,6 +36,10 @@ async function importCsv(req, res) {
 
   // Dictionary used to accumulate form field values, keyed by field name.
   const params = {};
+
+  // Accumulates Promises for insert operations so we don't finalize the res
+  // stream before operations are complete.
+  let inserts = [];
 
   // Handle non-file fields in the form. project and layer must appear
   // before the file for the file handler to work properly.
@@ -64,19 +62,23 @@ async function importCsv(req, res) {
 
     file.pipe(csvParser()).on("data", async (row) => {
       try {
-        await insertRow(projectId, layerId, row);
+        inserts.push(insertRow(projectId, layerId, row));
       } catch (err) {
         console.error(err);
-        await res.status(HttpStatus.BAD_REQUEST).end("{}");
-        // TODO(#525): Abort stream on error. How?
+        res.unpipe(busboy);
+        await res
+          .status(HttpStatus.BAD_REQUEST)
+          .end(JSON.stringify({ error: err.message }));
       }
     });
   });
 
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on("finish", async () => {
-    // TODO(#525): Return more meaningful errors.
-    await res.status(HttpStatus.OK).end("{}");
+    await Promise.all(inserts);
+    const count = inserts.length;
+    console.log(`Inserted ${count} rows`);
+    await res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
   busboy.on("error", (err) => {
