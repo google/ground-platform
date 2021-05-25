@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import '_variables';
+@import 'variables';
 
 .observation.card {
   margin: 16px;
@@ -46,7 +46,26 @@
 }
 
 .no-observation-text {
+  margin-left: 12px;
+  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 14pt;
   color: mat-color($foreground, secondary-text);
-  padding-top: 20px;
-  line-height: 1.6;
 }
+
+/*
+font-size: medium;
+  font-weight: 500;
+  color: mat-color($foreground, secondary-text);
+  padding: 16px 0 12px 0;
+
+margin-left: 12px;
+  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
+  font-size: 14pt;
+  color: mat-color($foreground, secondary-text);
+
+
+  font-style: italic;
+  color: mat-color($foreground, secondary-text);
+  margin: 16px;
+
+*/
