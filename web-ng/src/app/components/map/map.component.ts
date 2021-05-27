@@ -124,34 +124,36 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  onMapClick(event: google.maps.MouseEvent): Promise<void> {
+  async onMapClick(event: google.maps.MouseEvent) {
     if (this.disableMapClicks) {
-      return Promise.resolve();
+      return;
     }
     this.selectMarker(undefined);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
     switch (editMode) {
-      case EditMode.AddPoint:
+      case EditMode.AddPoint: {
         if (!selectedLayerId) {
-          return Promise.resolve();
+          return;
         }
         this.drawingToolsService.setEditMode(EditMode.None);
-        return this.featureService.addPoint(
+        const newFeature = await this.featureService.addPoint(
           event.latLng.lat(),
           event.latLng.lng(),
           selectedLayerId
         );
+        if (newFeature) {
+          this.navigationService.selectFeature(newFeature.id);
+        }
+        return;
+      }
       case EditMode.AddPolygon:
         // TODO: Implement adding polygon.
-        if (!selectedLayerId) {
-          return Promise.resolve();
-        }
-        return Promise.resolve();
+        return;
       case EditMode.None:
       default:
         this.navigationService.clearFeatureId();
-        return Promise.resolve();
+        return;
     }
   }
 
