@@ -33,7 +33,7 @@ import { DialogService } from '../../services/dialog/dialog.service';
 @Component({
   selector: 'ground-feature-panel',
   templateUrl: './feature-panel.component.html',
-  styleUrls: ['./feature-panel.component.css'],
+  styleUrls: ['./feature-panel.component.scss'],
 })
 export class FeaturePanelComponent implements OnInit, OnDestroy {
   projectId?: string;
