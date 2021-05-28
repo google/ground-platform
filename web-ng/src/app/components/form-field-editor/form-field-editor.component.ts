@@ -72,8 +72,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
   selectFieldOptions: FieldTypeSelectOption[];
-  showOptionsAndActions = false;
-  private clickWasInside = false;
+  showOptionsAndActions: boolean;
+  clickWasInside: boolean;
 
   subscription: Subscription = new Subscription();
 
@@ -101,6 +101,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     private dialogService: DialogService,
     private layerService: LayerService
   ) {
+    this.showOptionsAndActions = false;
+    this.clickWasInside = false;
     this.selectFieldOptions = [
       {
         icon: 'short_text',
