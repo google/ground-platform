@@ -25,6 +25,7 @@ import {
   OnDestroy,
   ViewChildren,
   QueryList,
+  HostListener,
 } from '@angular/core';
 import {
   FormGroup,
@@ -71,10 +72,26 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
   selectFieldOptions: FieldTypeSelectOption[];
+  showOptionsAndActions = false;
+  private clickWasInside = false;
 
   subscription: Subscription = new Subscription();
 
   formGroup: FormGroup;
+
+  @HostListener('click')
+  clickedInsideForm() {
+    this.showOptionsAndActions = true;
+    this.clickWasInside = true;
+  }
+
+  @HostListener('document:click')
+  clickedOutsideForm() {
+    if (!this.clickWasInside) {
+      this.showOptionsAndActions = false;
+    }
+    this.clickWasInside = false;
+  }
 
   @ViewChildren(OptionEditorComponent)
   optionEditors?: QueryList<OptionEditorComponent>;
