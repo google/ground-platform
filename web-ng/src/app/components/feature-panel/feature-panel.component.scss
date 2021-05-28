@@ -28,13 +28,18 @@
 .observation .field-response {
   font-size: 14px;
   line-height: 20px;
-  color: mat-color($foreground, text) !important;
+  color: mat-color($foreground, text);
   margin-bottom: 12px;
 }
 .option-label:not(:last-child):after {
   content: ', ';
   display: inline-block;
 }
+
+.button-container {
+  padding: 0 16px;
+}
+
 .add-observation-btn {
   position: absolute;
   bottom: 32px;
@@ -49,4 +54,11 @@
   font-style: italic;
   color: mat-color($foreground, secondary-text);
   margin: 16px;
+  width: 267px;
+  bottom: 32px;
+  z-index: 1000;
+}
+
+.add-observation-icon {
+  padding: 10px;
 }

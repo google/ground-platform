@@ -21,6 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [ImportDialogComponent],
@@ -30,6 +31,7 @@ import { NgModule } from '@angular/core';
     MatButtonModule,
     MatDialogModule,
     ReactiveFormsModule,
+    MatProgressSpinnerModule,
   ],
   exports: [ImportDialogComponent],
 })

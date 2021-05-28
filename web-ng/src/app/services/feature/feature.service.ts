@@ -23,7 +23,6 @@ import { Injectable } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
 import firebase from 'firebase/app';
-import { NavigationService } from '../navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',
@@ -35,8 +34,7 @@ export class FeatureService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService,
-    private navigationService: NavigationService
+    private projectService: ProjectService
   ) {
     this.features$ = projectService
       .getActiveProject$()
@@ -71,11 +69,11 @@ export class FeatureService {
     return this.selectedFeature$;
   }
 
-  getSelectedFeatureId$(): ReplaySubject<string> {
-    return this.selectedFeatureId$;
-  }
-
-  async addPoint(lat: number, lng: number, layerId: string): Promise<void> {
+  async addPoint(
+    lat: number,
+    lng: number,
+    layerId: string
+  ): Promise<Feature | null> {
     // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
     // upgrading to RxJS 7.
     const project = await this.projectService
@@ -100,9 +98,9 @@ export class FeatureService {
     lat: number,
     lng: number,
     layerId: string
-  ) {
-    if (project.layers.isEmpty()) {
-      return;
+  ): Promise<Feature | null> {
+    if (!(project.layers || new Map()).get(layerId)) {
+      return null;
     }
     const newFeature = new LocationFeature(
       this.dataStore.generateId(),
@@ -110,7 +108,7 @@ export class FeatureService {
       new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
-    this.navigationService.selectFeature(newFeature.id);
+    return newFeature;
   }
 
   private async updatePointInternal(project: Project, feature: Feature) {

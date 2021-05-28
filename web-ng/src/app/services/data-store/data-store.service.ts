@@ -28,6 +28,7 @@ import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
+import 'firebase/storage';
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -307,5 +308,9 @@ export class DataStoreService {
         )
       );
     return Promise.resolve(projectId);
+  }
+
+  getImageDownloadURL(path: string) {
+    return firebase.storage().ref().child(path).getDownloadURL();
   }
 }

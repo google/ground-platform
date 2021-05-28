@@ -23,7 +23,11 @@
   class="confirmation-actions"
 >
   <button mat-button (click)="onClose()">No</button>
-  <button mat-raised-button (click)="onConfirm()" class="confirmation-btn">
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="onConfirm()"
+  >
     Yes
   </button>
 </div>
