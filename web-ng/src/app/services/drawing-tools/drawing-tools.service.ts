@@ -24,7 +24,18 @@ export class DrawingToolsService {
   private editMode$: BehaviorSubject<EditMode> = new BehaviorSubject<EditMode>(
     EditMode.None
   );
+  private disabled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
   private selectedLayerId: string | undefined;
+
+  getDisabled$(): BehaviorSubject<boolean> {
+    return this.disabled$;
+  }
+
+  setDisabled$(disabled: boolean) {
+    return this.disabled$.next(disabled);
+  }
 
   getSelectedLayerId(): string | undefined {
     return this.selectedLayerId;

@@ -27,6 +27,7 @@ import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
+import { Layer } from '../../shared/models/layer.model';
 
 @Injectable({
   providedIn: 'root',
@@ -136,5 +137,25 @@ export class ProjectService {
       .toList()
       .sortBy(entry => entry.email)
       .toArray();
+   }
+  /** 
+   * Checks if a user can add points to a specific layer.
+   */
+  canUserAddPointsToLayer(layer: Layer): boolean {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      return false;
+    }
+    const userRole = this.currentProject.acl.get(user.email);
+    switch (userRole) {
+      case Role.OWNER:
+      case Role.MANAGER:
+        return true;
+      case Role.CONTRIBUTOR:
+        return layer.contributorsCanAdd?.includes('points') ?? false;
+      case Role.VIEWER:
+      default:
+        return false;
+    }
   }
 }

@@ -13,21 +13,30 @@
   See the License for the specific language governing permissions and
   limit
 -->
-<h2 mat-dialog-title>Import CSV</h2>
-<mat-dialog-content>
-  <form [formGroup]="uploadForm">
-    <div>
-      <file-upload
-        accept="csv"
-        formControlName="file"
-        multiple="false"
-        minsize="10 B"
-        maxsize="2 MB"
-      ></file-upload>
-    </div>
-  </form>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-button [mat-dialog-close]="true" color="primary">Upload</button>
-</mat-dialog-actions>
+
+<div *ngIf="isImporting; else defaultView">
+  <h2 mat-dialog-title>Uploading features</h2>
+  <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
+</div>
+<ng-template #defaultView>
+  <h2 mat-dialog-title>Import features</h2>
+  <mat-dialog-content>
+    <form [formGroup]="uploadForm">
+      <div>
+        <file-upload
+          accept="{{ acceptedExtensions }}"
+          formControlName="file"
+          multiple="false"
+          minsize="10 B"
+          maxsize="2 MB"
+        ></file-upload>
+      </div>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-button (click)="onImportFeatures()" color="primary">
+      Upload
+    </button>
+  </mat-dialog-actions>
+</ng-template>

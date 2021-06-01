@@ -27,3 +27,16 @@
 
 // Include theme styles for core and each component used in the app.
 @include angular-material-theme($theme);
+
+// Override typography for all Angular Material, including mat-base-typography
+// and all components.
+@include angular-material-typography(
+  mat-typography-config(
+    $button:
+      mat-typography-level(
+        $font-family: 'Google Sans,Roboto,Arial,sans-serif',
+        $font-weight: 500,
+        $font-size: 14px
+      )
+  )
+);

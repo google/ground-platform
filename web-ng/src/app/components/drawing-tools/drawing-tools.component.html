@@ -16,9 +16,13 @@
 
 <mat-button-toggle-group
   class="drawing-buttons"
-  [disabled]="disableControls$ | async"
+  [disabled]="(isObservationSelected$ | async) || (disabled$ | async)"
   [(value)] = "selectedValue">
-  <mat-button-toggle class="add-point-button" value = "{{pointValue}}" (click)="onButtonClick()">
+  <mat-button-toggle
+      *ngIf="!(layers$ | async).isEmpty()"
+      class="add-point-button"
+      value = "{{pointValue}}"
+      (click)="onButtonClick()">
     <img class="add-point-icon" [src]="addPointIcon" />
   </mat-button-toggle>
   <mat-button-toggle hidden value = "{{ polygonValue }}" (click)="onButtonClick()">
