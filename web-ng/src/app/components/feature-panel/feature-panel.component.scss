@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
+@import 'variables';
+
 .observation.card {
   margin: 16px;
 }
 .observation .field-label {
   font-size: 12px;
   line-height: 16px;
-  color: #70757a;
+  color: mat-color($foreground, secondary-text);
   margin-bottom: 3px;
 }
 .observation .field-response {
   font-size: 14px;
   line-height: 20px;
-  color: #3c4043;
+  color: mat-color($foreground, text);
   margin-bottom: 12px;
 }
 .option-label:not(:last-child):after {
@@ -40,6 +42,18 @@
 
 .add-observation-btn {
   position: absolute;
+  bottom: 32px;
+  border-radius: 100px;
+  width: 193px;
+  height: 48px;
+  right: 53px;
+  z-index: 1000;
+}
+
+.no-observation-text {
+  font-style: italic;
+  color: mat-color($foreground, secondary-text);
+  margin: 16px;
   width: 267px;
   bottom: 32px;
   z-index: 1000;
