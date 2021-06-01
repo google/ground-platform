@@ -146,13 +146,16 @@ export class FirebaseDataConverter {
     return {
       contributorsCanAdd,
       name: name?.toJS() || {},
-      forms:
-        forms
-          ?.valueSeq()
-          .reduce(
-            (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
-            {}
-          ) || {},
+      ...(forms
+        ? {
+            forms: forms
+              ?.valueSeq()
+              .reduce(
+                (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
+                {}
+              ),
+          }
+        : {}),
       defaultStyle: { color },
       ...layerDoc,
     };

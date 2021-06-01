@@ -31,7 +31,10 @@ import {
   FormBuilder,
   Validators,
   FormControl,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
+import { DialogService } from '../../services/dialog/dialog.service';
 import { FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -40,8 +43,6 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { Subscription } from 'rxjs';
@@ -80,7 +81,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(
     private formBuilder: FormBuilder,
-    private confirmationDialog: MatDialog,
+    private dialogService: DialogService,
     private layerService: LayerService
   ) {
     this.selectFieldOptions = [
@@ -120,7 +121,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  private validateLabel(control: FormControl) {
+  private validateLabel(control: FormControl): ValidationErrors | null {
     return this.isFormEmpty() ? null : Validators.required(control);
   }
 
@@ -149,7 +150,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   /*
    * This method is used to get the updated values of field from the layer-dialog.
    */
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes.multipleChoice) {
       this.formOptions = this.multipleChoice;
     }
@@ -179,11 +180,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    *
    * @returns void
    */
-  onFieldDelete() {
+  onFieldDelete(): void {
     this.delete.emit();
   }
 
-  getSelectFieldType() {
+  getSelectFieldType(): FieldTypeSelectOption {
     return this.formGroup.get('selectFieldOption')?.value;
   }
 
@@ -193,7 +194,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param event: FieldTypeSelectOption
    * @returns void
    */
-  onFieldTypeSelect(event: FieldTypeSelectOption) {
+  onFieldTypeSelect(event: FieldTypeSelectOption): void {
     this.fieldType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.formOptions?.options) {
@@ -215,7 +216,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   /*
    * This is used to track input added or removed in case of field options.
    */
-  trackByFn(index: number) {
+  trackByFn(index: number): number {
     return index;
   }
 
@@ -226,7 +227,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: { label: string; code: string }, index: number) {
+  onOptionUpdate(event: { label: string; code: string }, index: number): void {
     const option = this.layerService.createOption(
       event.code,
       event.label,
@@ -237,8 +238,12 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onOptionDelete(index: number) {
-    const dialogRef = this.openConfirmationDialog();
-    dialogRef
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this option? ' +
+          'Any associated data will be lost. This cannot be undone.'
+      )
       .afterClosed()
       .toPromise()
       .then(dialogResult => {
@@ -251,18 +256,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       });
   }
 
-  openConfirmationDialog() {
-    return this.confirmationDialog.open(ConfirmationDialogComponent, {
-      maxWidth: '500px',
-      data: {
-        title: 'Warning',
-        message: `Are you sure you wish to delete this option?
-        Any associated data will be lost. This cannot be undone.`,
-      },
-    });
-  }
-
-  onAddOption() {
+  onAddOption(): void {
     const index = this.formOptions?.options.size || 0;
     const option = this.layerService.createOption(
       /* code= */ '',
@@ -280,13 +274,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  setFormOptions(index: number, option: Option) {
+  setFormOptions(index: number, option: Option): List<Option> {
     let options = this.formOptions?.options || List<Option>();
     options = options?.set(index, option);
     return options;
   }
 
-  emitFormOptions(options: List<Option>) {
+  emitFormOptions(options: List<Option>): void {
     const cardinality =
       this.formOptions?.cardinality ||
       this.cardinality ||
@@ -300,31 +294,35 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  drop(event: CdkDragDrop<string[]>) {
+  drop(event: CdkDragDrop<string[]>): void {
     if (!this.formOptions) return;
     let options = this.formOptions.options;
-    let optionAtPrevIndex = options.get(event.previousIndex);
-    let optionAtCurrentIndex = options.get(event.currentIndex);
-    if (optionAtPrevIndex && optionAtCurrentIndex) {
-      optionAtPrevIndex = optionAtPrevIndex.withIndex(event.currentIndex);
-      optionAtCurrentIndex = optionAtCurrentIndex.withIndex(
-        event.previousIndex
-      );
-      options = options.set(event.previousIndex, optionAtCurrentIndex);
-      options = options.set(event.currentIndex, optionAtPrevIndex);
-    }
+    const optionAtPrevIndex = options.get(event.previousIndex);
+    if (!optionAtPrevIndex) return;
+
+    options = options.delete(event.previousIndex);
+    options = options.insert(event.currentIndex, optionAtPrevIndex);
+    // Update indexes.
+    options = options.map((option: Option, index: number) =>
+      option.withIndex(index)
+    );
+
     this.emitFormOptions(options);
   }
 
-  get labelControl() {
+  get labelControl(): AbstractControl {
     return this.formGroup.get('label')!;
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
-  private markOptionEditorsTouched() {
+  onLabelBlur(): void {
+    this.labelControl.setValue(this.labelControl.value.trim());
+  }
+
+  private markOptionEditorsTouched(): void {
     this.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });

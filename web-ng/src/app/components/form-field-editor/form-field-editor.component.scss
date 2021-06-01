@@ -60,6 +60,11 @@
   cursor: move;
   padding: 5px;
   color: #dadde1;
+  visibility: hidden;
+}
+
+.question-container:hover .drag-icon {
+  visibility: visible;
 }
 
 .add-option {

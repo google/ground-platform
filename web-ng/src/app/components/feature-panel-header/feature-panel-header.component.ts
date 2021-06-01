@@ -18,8 +18,7 @@ import { Component, Input, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { DialogService } from '../../services/dialog/dialog.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
@@ -41,7 +40,7 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private confirmationDialog: MatDialog,
+    private dialogService: DialogService,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private zone: NgZone
@@ -78,23 +77,19 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   }
 
   onDeleteFeatureClick() {
-    const dialogRef = this.confirmationDialog.open(
-      ConfirmationDialogComponent,
-      {
-        maxWidth: '500px',
-        data: {
-          title: 'Warning',
-          message:
-            'Are you sure you wish to delete this feature? Any associated data including all observations in this feature will be lost. This cannot be undone.',
-        },
-      }
-    );
-
-    dialogRef.afterClosed().subscribe(async dialogResult => {
-      if (dialogResult) {
-        await this.deleteFeature();
-      }
-    });
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this feature? ' +
+          'Any associated data, including all observations, will be lost. ' +
+          'This cannot be undone.'
+      )
+      .afterClosed()
+      .subscribe(async dialogResult => {
+        if (dialogResult) {
+          await this.deleteFeature();
+        }
+      });
   }
 
   async deleteFeature() {

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, NgZone } from '@angular/core';
 import { DataImportService } from './../../services/data-import/data-import.service';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { NotificationService } from '../../services/notification/notification.service';
 
 @Component({
   selector: 'app-import-dialog',
@@ -30,37 +31,44 @@ export class ImportDialogComponent {
   public readonly acceptedExtensions = 'csv,geojson';
   uploadForm: FormGroup;
   public files: Array<File> = [];
+  isImporting = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { projectId: string; layerId: string },
     private formBuilder: FormBuilder,
     private dataImportService: DataImportService,
-    dialogRef: MatDialogRef<ImportDialogComponent>
+    private readonly dialogRef: MatDialogRef<ImportDialogComponent>,
+    private readonly notificationService: NotificationService,
+    private ngZone: NgZone
   ) {
     this.projectId = data.projectId;
     this.layerId = data.layerId;
     this.uploadForm = this.formBuilder.group({
       file: new FormControl(),
     });
-    dialogRef.afterClosed().subscribe(submit => {
-      if (submit) {
-        this.importCsv();
-      }
-    });
   }
 
-  private async importCsv() {
+  async onImportFeatures(): Promise<void> {
     const files = this.uploadForm.get('file')?.value;
     if (!files || files.length === 0) {
       console.error('File missing');
       return;
     }
-    // TODO(#528): Show upload progress and success/error message to user.
-    await this.dataImportService.importCsv(
-      this.projectId,
-      this.layerId,
-      files[0] as File
-    );
+    try {
+      this.isImporting = true;
+      await this.dataImportService.importFeatures(
+        this.projectId,
+        this.layerId,
+        files[0] as File
+      );
+      this.notificationService.success('Import complete');
+    } catch (err) {
+      this.notificationService.error('Importing features failed');
+    }
+    this.isImporting = false;
+    this.ngZone.run(() => {
+      this.dialogRef.close();
+    });
   }
 }
