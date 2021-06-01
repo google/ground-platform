@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,20 @@
  * limitations under the License.
  */
 
-.observation.card {
-    margin: 16px;
-}
-.observation .field-label {
-    font-size: 12px;
-    line-height: 16px;
-    color: #70757A;
-    margin-bottom: 3px;
-}
-.observation .field-response {
-    font-size: 14px;
-    line-height: 20px;
-    color: #3C4043;
-    margin-bottom: 12px;
-}
-.option-label:not(:last-child):after {
-    content: ", ";
-    display: inline-block;
-}
-.add-observation-btn {
-    position: absolute;
-    bottom: 32px;
-    border-radius: 100px;
-    width: 193px;
-    height: 48px;
-    right: 53px;
-    z-index: 1000;
-}
+import { TestBed } from '@angular/core/testing';
+
+import { DialogService } from './dialog.service';
+import { MatDialogModule } from '@angular/material/dialog';
+
+describe('DialogService', () => {
+  let service: DialogService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [MatDialogModule] });
+    service = TestBed.inject(DialogService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});

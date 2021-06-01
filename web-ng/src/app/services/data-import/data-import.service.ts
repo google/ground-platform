@@ -20,7 +20,9 @@ import { Injectable } from '@angular/core';
 
 const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;
 
-export interface ImportCsvResponse {
+const IMPORT_GEOJSON_URL = `${environment.cloudFunctionsUrl}/importGeoJson`;
+
+export interface ImportResponse {
   message?: string;
 }
 
@@ -30,17 +32,25 @@ export interface ImportCsvResponse {
 export class DataImportService {
   constructor(private httpClient: HttpClient) {}
 
-  importCsv(
+  importFeatures(
     projectId: string,
     layerId: string,
     file: File
-  ): Promise<ImportCsvResponse> {
+  ): Promise<ImportResponse> {
     const formData = new FormData();
     formData.set('project', projectId);
     formData.set('layer', layerId);
     formData.append('file', file);
+    let importUrl;
+    if (file.name.endsWith('.geojson')) {
+      importUrl = IMPORT_GEOJSON_URL;
+    } else if (file.name.endsWith('.csv')) {
+      importUrl = IMPORT_CSV_URL;
+    } else {
+      throw new Error('Invalid file format');
+    }
     return this.httpClient
-      .post<ImportCsvResponse>(IMPORT_CSV_URL, formData)
+      .post<ImportResponse>(importUrl, formData)
       .toPromise();
   }
 }

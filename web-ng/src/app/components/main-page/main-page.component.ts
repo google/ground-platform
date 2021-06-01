@@ -114,6 +114,7 @@ export class MainPageComponent implements OnInit {
           createLayer: layerId === NavigationService.PROJECT_ID_NEW,
           layer: project.layers?.get(layerId),
         },
+        panelClass: 'layer-dialog-container',
       })
     );
   }

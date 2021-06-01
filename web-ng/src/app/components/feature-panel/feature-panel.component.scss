@@ -14,31 +14,51 @@
  * limitations under the License.
  */
 
-.observation {
+@import 'variables';
+
+.observation.card {
   margin: 16px;
 }
 .observation .field-label {
   font-size: 12px;
   line-height: 16px;
+  color: mat-color($foreground, secondary-text);
   margin-bottom: 3px;
 }
 .observation .field-response {
   font-size: 14px;
   line-height: 20px;
+  color: mat-color($foreground, text);
   margin-bottom: 12px;
 }
-.field-response .mat-form-field {
-  width: 100%;
+.option-label:not(:last-child):after {
+  content: ', ';
+  display: inline-block;
 }
-/**
- * Make sure that inline items have proper spacing between them,
- * e.g. on Observation Form page.
- */
-.mat-radio-label-content,
-.mat-checkbox-label {
-  margin-right: 17px;
+
+.button-container {
+  padding: 0 16px;
 }
-/* The spacing below text box should be smaller. */
-.mat-form-field-wrapper {
-  margin-bottom: -1.34em;
+
+.add-observation-btn {
+  position: absolute;
+  bottom: 32px;
+  border-radius: 100px;
+  width: 193px;
+  height: 48px;
+  right: 53px;
+  z-index: 1000;
+}
+
+.no-observation-text {
+  font-style: italic;
+  color: mat-color($foreground, secondary-text);
+  margin: 16px;
+  width: 267px;
+  bottom: 32px;
+  z-index: 1000;
+}
+
+.add-observation-icon {
+  padding: 10px;
 }

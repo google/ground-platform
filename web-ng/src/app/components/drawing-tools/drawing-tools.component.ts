@@ -81,7 +81,9 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
         this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
       }),
       map(project =>
-        List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
+        List(project.layers.valueSeq().toArray())
+          .sortBy(l => l.index)
+          .filter(l => projectService.canUserAddPointsToLayer(l))
       )
     );
   }

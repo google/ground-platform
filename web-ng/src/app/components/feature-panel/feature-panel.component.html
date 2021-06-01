@@ -14,71 +14,92 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <mat-list *ngIf="layer$ | async as layer">
-  <!-- 
-    TODO: create separate component for layer as a header instead of 
+  <!--
+    TODO: create separate component for layer as a header instead of
     using LayerListItem here.
   -->
   <ground-feature-panel-header
     [layer]="layer"
     [actionsType]="featureHeaderActionType.BACK"
-  ></ground-feature-panel-header>
+  >
+  </ground-feature-panel-header>
 </mat-list>
-<div *ngIf="layer$ | async as layer">
+<div *ngIf="layer$ | async as layer" class="button-container">
   <button
     *ngIf="!layer.forms?.isEmpty()"
+    mat-flat-button
     color="primary"
     class="add-observation-btn"
-    mat-raised-button
     (click)="onAddObservationClick()"
   >
-    + Add observation
+    <mat-icon class="add-observation-icon">add</mat-icon>
+    Add observation
   </button>
 </div>
 <div *ngIf="observations$ | async as observations">
-  <mat-card class="observation card" *ngFor="let observation of observations">
-    <mat-card-header>
-      <mat-card-title>
-        {{ observation.created.user.displayName }}
-      </mat-card-title>
-      <!--TODO: figure out why serverTime is not working-->
-      <mat-card-subtitle>
-        {{ observation.created.clientTime | date: 'medium' }}
-      </mat-card-subtitle>
-      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="onEditObservationClick(observation)">
-          <mat-icon>edit</mat-icon>
-          <span>Edit observation</span>
+  <ng-container *ngIf="observations.length; else noObservations">
+    <mat-card class="observation card" *ngFor="let observation of observations">
+      <mat-card-header>
+        <mat-card-title>
+          {{ observation.created.user.displayName }}
+        </mat-card-title>
+        <!--TODO: figure out why serverTime is not working-->
+        <mat-card-subtitle>
+          {{ observation.created.clientTime | date: 'medium' }}
+        </mat-card-subtitle>
+        <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
+          <mat-icon>more_vert</mat-icon>
         </button>
-        <button
-          mat-menu-item
-          (click)="onDeleteObservationClick(observation.id)"
-        >
-          <mat-icon>delete_forever</mat-icon>
-          <span>Delete observation</span>
-        </button>
-      </mat-menu>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngFor="let field of getFields(observation)">
-        <label class="field-label">{{ field.label?.get(lang) }}</label>
-        <div class="field-response" *ngIf="field.type == fieldTypes.TEXT">
-          {{ observation.responses?.get(field.id)?.value }}
-        </div>
-        <div
-          class="field-response"
-          *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
-        >
-          <span
-            class="option-label"
-            *ngFor="let option of observation.responses?.get(field.id)?.value"
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="onEditObservationClick(observation)">
+            <mat-icon>edit</mat-icon>
+            <span>Edit observation</span>
+          </button>
+          <button
+            mat-menu-item
+            (click)="onDeleteObservationClick(observation.id)"
           >
-            {{ option.label?.get(lang) }}
-          </span>
+            <mat-icon>delete_forever</mat-icon>
+            <span>Delete observation</span>
+          </button>
+        </mat-menu>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let field of getFields(observation)">
+          <label class="field-label">{{ field.label?.get(lang) }}</label>
+          <div
+            class="field-response"
+            *ngIf="
+              field.type == fieldTypes.TEXT || field.type == fieldTypes.NUMBER
+            "
+          >
+            {{ observation.responses?.get(field.id)?.value }}
+          </div>
+          <div
+            class="field-response"
+            *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
+          >
+            <span
+              class="option-label"
+              *ngFor="let option of observation.responses?.get(field.id)?.value"
+            >
+              {{ option.label?.get(lang) }}
+            </span>
+          </div>
+          <div class="field-response" *ngIf="field.type == fieldTypes.PHOTO">
+            <img
+              (click)="openUrlInNewTab(photoUrls.get(field.id))"
+              src="{{ photoUrls.get(field.id) }}"
+              width="100%"
+            />
+          </div>
         </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+  <ng-template #noObservations>
+    <div class="no-observation-text">
+      No observations found for the selected feature.
+    </div>
+  </ng-template>
 </div>

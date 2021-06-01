@@ -21,18 +21,14 @@ import {
   QueryList,
   ViewChildren,
 } from '@angular/core';
-import {
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-  MatDialog,
-} from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DialogService } from '../../services/dialog/dialog.service';
 import { Layer } from '../../shared/models/layer.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
@@ -70,7 +66,7 @@ export class LayerDialogComponent implements OnDestroy {
       createLayer: boolean;
     },
     private dialogRef: MatDialogRef<LayerDialogComponent>,
-    private dialog: MatDialog,
+    private dialogService: DialogService,
     private layerService: LayerService,
     private navigationService: NavigationService
   ) {
@@ -104,20 +100,18 @@ export class LayerDialogComponent implements OnDestroy {
    *
    */
   onFieldDelete(index: number) {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      maxWidth: '500px',
-      data: {
-        title: 'Warning',
-        message:
-          'Are you sure you wish to delete this question? Any associated data will be lost. This cannot be undone.',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe(dialogResult => {
-      if (dialogResult) {
-        this.fields = this.fields.splice(index, 1);
-      }
-    });
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this question? Any associated data ' +
+          'will be lost. This cannot be undone.'
+      )
+      .afterClosed()
+      .subscribe(dialogResult => {
+        if (dialogResult) {
+          this.fields = this.fields.splice(index, 1);
+        }
+      });
   }
 
   init(projectId: string, createLayer: boolean, layer?: Layer) {
@@ -130,16 +124,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.color = this.layer?.color || this.defaultLayerColor;
     if (!layer) {
       this.layer = this.layerService.createNewLayer();
-      const newField = this.layerService.createField(
-        FieldType.TEXT,
-        /* label= */
-        '',
-        /* required= */
-        false,
-        /* index= */
-        this.fields.size
-      );
-      this.fields = this.fields.push(newField);
+      this.addQuestion();
       return;
     }
     const canAddPoints = this.layer?.contributorsCanAdd?.find(
@@ -151,6 +136,8 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields =
         this.form?.fields.toList().sortBy(field => field.index) ||
         List<Field>();
+    } else {
+      this.addQuestion();
     }
   }
 
@@ -204,7 +191,8 @@ export class LayerDialogComponent implements OnDestroy {
     this.layerService
       .addOrUpdateLayer(projectId, layer)
       .then(() => this.onClose())
-      .catch(() => {
+      .catch(err => {
+        console.error(err);
         alert('Layer update failed.');
       });
   }
@@ -245,11 +233,11 @@ export class LayerDialogComponent implements OnDestroy {
 
   drop(event: CdkDragDrop<string[]>) {
     const fieldAtPrevIndex = this.fields.get(event.previousIndex);
-    const fieldAtCurrentIndex = this.fields.get(event.currentIndex);
-    if (fieldAtCurrentIndex && fieldAtPrevIndex) {
-      this.fields = this.fields.set(event.previousIndex, fieldAtCurrentIndex);
-      this.fields = this.fields.set(event.currentIndex, fieldAtPrevIndex);
+    if (!fieldAtPrevIndex) {
+      return;
     }
+    this.fields = this.fields.delete(event.previousIndex);
+    this.fields = this.fields.insert(event.currentIndex, fieldAtPrevIndex);
   }
 
   ngOnDestroy() {
@@ -260,14 +248,14 @@ export class LayerDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  private markFormFieldsTouched() {
+  private markFormFieldsTouched(): void {
     this.formFieldEditors?.forEach(editor => {
       this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
     });
   }
 
-  private markOptionsTouched(editor: FormFieldEditorComponent) {
+  private markOptionsTouched(editor: FormFieldEditorComponent): void {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });

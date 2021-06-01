@@ -37,6 +37,16 @@
             <input matInput [formControlName]="field.id" [id]="field.id" />
           </mat-form-field>
         </div>
+        <div *ngIf="field.type == fieldTypes.NUMBER">
+          <mat-form-field appearance="fill">
+            <input
+              type="number"
+              matInput
+              [formControlName]="field.id"
+              [id]="field.id"
+            />
+          </mat-form-field>
+        </div>
         <div
           *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
           class="multiple-choice-field"
@@ -69,23 +79,19 @@
         </div>
       </div>
     </div>
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      class="btn-save"
-      [disabled]="!observationForm.valid"
-    >
-      Save
-    </button>
-    <button
-      mat-raised-button
-      color="secondary"
-      class="btn-cancel"
-      (click)="onCancel()"
-      type="button"
-    >
-      Cancel
-    </button>
+    <div style="float: right">
+      <button mat-stroked-button (click)="onCancel()" type="button">
+        Cancel
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        style="margin-left: 8px"
+        [disabled]="!observationForm.valid"
+      >
+        Save
+      </button>
+    </div>
   </form>
 </div>
