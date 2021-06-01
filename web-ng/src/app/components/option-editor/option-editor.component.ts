@@ -56,7 +56,6 @@ export class OptionEditorComponent implements OnInit, OnChanges {
         label: value.label,
       });
     });
-    this.focusOptionInput();
   }
 
   ngOnChanges() {
@@ -72,11 +71,5 @@ export class OptionEditorComponent implements OnInit, OnChanges {
 
   get labelControl() {
     return this.optionGroup.get('label')!;
-  }
-
-  private focusOptionInput(): void {
-    if (this.optionInput) {
-      this.optionInput.nativeElement.focus();
-    }
   }
 }

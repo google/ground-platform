@@ -271,6 +271,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
+    // setTimeout is to added to wait for the option to load.
+    setTimeout(() => {
+      if (this.optionEditors) {
+        const opt = this.optionEditors.find((_val, ind) => ind === index);
+        opt?.optionInput?.nativeElement.focus();
+      }
+    });
   }
 
   setFormOptions(index: number, option: Option) {
