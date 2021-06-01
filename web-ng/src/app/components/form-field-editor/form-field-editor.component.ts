@@ -265,13 +265,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
-    // setTimeout is to added to wait for the option to load.
-    setTimeout(() => {
-      if (this.optionEditors) {
-        const opt = this.optionEditors.find((_val, ind) => ind === index);
-        opt?.optionInput?.nativeElement.focus();
-      }
-    });
+    this.focusNewOption(index);
   }
 
   setFormOptions(index: number, option: Option): List<Option> {
@@ -325,6 +319,16 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   private markOptionEditorsTouched(): void {
     this.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
+    });
+  }
+
+  private focusNewOption(index: number): void {
+    // setTimeout is to added to wait for the option to load.
+    setTimeout(() => {
+      if (this.optionEditors) {
+        const option = this.optionEditors.find((_val, ind) => ind === index);
+        option?.optionInput?.nativeElement.focus();
+      }
     });
   }
 }
