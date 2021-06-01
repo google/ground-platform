@@ -29,9 +29,11 @@
     </div>
     <div fxLayout>
       <div fxFlex fxFlexAlign="center">
-        <mat-checkbox [(ngModel)]="contributorsCanAdd" color="primary">
-          <label>Contributors may add points</label>
-        </mat-checkbox>
+        <label>
+          <mat-checkbox [(ngModel)]="contributorsCanAdd" color="primary">
+            Contributors may add points
+          </mat-checkbox>
+        </label>
       </div>
       <app-edit-style-button
         fxFlex
