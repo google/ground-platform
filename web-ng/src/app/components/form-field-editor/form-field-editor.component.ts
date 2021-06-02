@@ -25,6 +25,7 @@ import {
   OnDestroy,
   ViewChildren,
   QueryList,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormGroup,
@@ -82,7 +83,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
-    private layerService: LayerService
+    private layerService: LayerService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.selectFieldOptions = [
       {
@@ -265,7 +267,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
-    this.focusNewOption(index);
+    this.focusNewOption();
   }
 
   setFormOptions(index: number, option: Option): List<Option> {
@@ -322,13 +324,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  private focusNewOption(index: number): void {
-    // setTimeout is to added to wait for the option to load.
-    setTimeout(() => {
-      if (this.optionEditors) {
-        const option = this.optionEditors.find((_val, ind) => ind === index);
-        option?.optionInput?.nativeElement.focus();
-      }
-    });
+  private focusNewOption(): void {
+    this.cdr.detectChanges();
+    if (this.optionEditors?.length) {
+      const option = this.optionEditors.last;
+      option?.optionInput?.nativeElement.focus();
+    }
   }
 }
