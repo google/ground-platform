@@ -121,7 +121,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         icon: 'access_time',
         label: 'Time',
         type: FieldType.TIME,
-      }
+      },
     ];
     this.formGroup = this.formBuilder.group({
       label: ['', this.validateLabel.bind(this)],
