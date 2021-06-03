@@ -71,9 +71,8 @@ export class ProjectService {
     return this.activeProject$;
   }
 
-
-  getAllProjects(){
-      return this.dataStore.loadAllProject$();
+  getAllProjects() {
+    return this.dataStore.loadAllProject$();
   }
 
   /**
@@ -130,15 +129,15 @@ export class ProjectService {
   /**
    * Returns the acl of the project.
    */
-   getProjectAcl(project: Project): AclEntry[] {
+  getProjectAcl(project: Project): AclEntry[] {
     return project?.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()
       .sortBy(entry => entry.email)
       .toArray();
-   }
-  /** 
+  }
+  /**
    * Checks if a user can add points to a specific layer.
    */
   canUserAddPointsToLayer(layer: Layer): boolean {

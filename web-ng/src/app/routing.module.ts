@@ -32,11 +32,12 @@ const routes: Routes = [
     path: `${NavigationService.PROJECT_SEGMENT}/:${NavigationService.PROJECT_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
-  },{
+  },
+  {
     path: `${NavigationService.HOME_SEGMENT}`,
     component: CardViewProjectComponent,
     canActivate: [AuthGuard],
-  }
+  },
 ];
 const config = RouterModule.forRoot(routes, {
   relativeLinkResolution: 'legacy',

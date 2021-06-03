@@ -36,10 +36,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
 import { MatCardModule } from '@angular/material/card';
-import {MatGridListModule} from '@angular/material/grid-list';
+import { MatGridListModule } from '@angular/material/grid-list';
 import { CardViewProjectModule } from './components/card-view-project/card-view-project.module';
 import { MatInputModule } from '@angular/material/input';
-
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting

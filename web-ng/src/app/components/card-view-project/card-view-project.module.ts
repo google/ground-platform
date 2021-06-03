@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
- import { NgModule } from '@angular/core';
- import { CommonModule } from '@angular/common';
- import { FlexLayoutModule } from '@angular/flex-layout';
- import { HeaderLayoutModule } from './../header-layout/header-layout.module';
- import { CardViewProjectComponent } from './card-view-project.component';
- import { MatButtonModule } from '@angular/material/button';
- import { MatIconModule } from '@angular/material/icon';
- import { MatDialogModule } from '@angular/material/dialog';
- import { UserAvatarModule } from '../user-avatar/user-avatar.module';
- import { InlineEditorModule } from '../inline-editor/inline-editor.module';
- import { ProjectHeaderModule } from '../project-header/project-header.module';
- import {MatGridListModule} from '@angular/material/grid-list';
- 
- import {MatCardModule} from '@angular/material/card';
- @NgModule({
-   declarations: [CardViewProjectComponent],
-   imports: [
-     CommonModule,
-     FlexLayoutModule,
-     HeaderLayoutModule,
-     MatButtonModule,
-     MatIconModule,
-     MatDialogModule,
-     ProjectHeaderModule,
-     UserAvatarModule,
-     MatCardModule,
-     MatGridListModule,
-     InlineEditorModule,
-   ],
-   exports: [CardViewProjectComponent],
- })
- export class CardViewProjectModule {}
- 
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { HeaderLayoutModule } from './../header-layout/header-layout.module';
+import { CardViewProjectComponent } from './card-view-project.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
+import { UserAvatarModule } from '../user-avatar/user-avatar.module';
+import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { ProjectHeaderModule } from '../project-header/project-header.module';
+import { MatGridListModule } from '@angular/material/grid-list';
+
+import { MatCardModule } from '@angular/material/card';
+@NgModule({
+  declarations: [CardViewProjectComponent],
+  imports: [
+    CommonModule,
+    FlexLayoutModule,
+    HeaderLayoutModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    ProjectHeaderModule,
+    UserAvatarModule,
+    MatCardModule,
+    MatGridListModule,
+    InlineEditorModule,
+  ],
+  exports: [CardViewProjectComponent],
+})
+export class CardViewProjectModule {}

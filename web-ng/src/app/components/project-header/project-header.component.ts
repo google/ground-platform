@@ -20,7 +20,6 @@ import { UserProfilePopupComponent } from '../../components/user-profile-popup/u
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
-import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
@@ -70,9 +69,8 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     return this.projectService.updateTitle(this.projectId, value);
   }
 
- 
   redirectMainPage(): void {
-    this.navigationService.viewProjects()
+    this.navigationService.viewProjects();
   }
 
   ngOnDestroy() {

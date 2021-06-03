@@ -83,12 +83,11 @@ export class AuthService {
     return this.navigationService.signOut();
   }
 
-   /**
+  /**
    * Checks if a user has manager or owner level permissions of the project.
    */
-    canManageProject(acl: AclEntry[]): boolean {
-      const userEmail = this.currentUser?.email;
-      return !!acl.find(entry => entry.email === userEmail && entry.isManager());
-    }
-
+  canManageProject(acl: AclEntry[]): boolean {
+    const userEmail = this.currentUser?.email;
+    return !!acl.find(entry => entry.email === userEmail && entry.isManager());
+  }
 }

@@ -55,21 +55,24 @@ export class DataStoreService {
       );
   }
 
-    /**
+  /**
    * Returns an Observable that loads and emits the projects with the specified
    * uuid.
    *
    */
   loadAllProject$() {
-      return this.db
-        .collection('projects')
-        .snapshotChanges().pipe(
-          map(actions => actions.map(a => {
+    return this.db
+      .collection('projects')
+      .snapshotChanges()
+      .pipe(
+        map(actions =>
+          actions.map(a => {
             const data = a.payload.doc.data() as Project;
             const id = a.payload.doc.id;
-            return FirebaseDataConverter.toProject(id, data as DocumentData)
-          }))
-        );
+            return FirebaseDataConverter.toProject(id, data as DocumentData);
+          })
+        )
+      );
   }
 
   /**
