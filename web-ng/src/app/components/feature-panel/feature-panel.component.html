@@ -37,7 +37,7 @@ limitations under the License.
   </button>
 </div>
 <div *ngIf="observations$ | async as observations">
-  <ng-container *ngIf="observations.length; else noObservations">
+  <ng-container *ngIf="observations.size; else noObservations">
     <mat-card class="observation card" *ngFor="let observation of observations">
       <mat-card-header>
         <mat-card-title>
