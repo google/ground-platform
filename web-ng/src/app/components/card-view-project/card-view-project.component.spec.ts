@@ -71,13 +71,15 @@ describe('CardViewProjectComponent', () => {
             useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
           },
         ],
-        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
-      fixture = TestBed.createComponent(CardViewProjectComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
     })
   );
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(CardViewProjectComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();
