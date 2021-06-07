@@ -26,8 +26,8 @@ import { UserAvatarModule } from '../user-avatar/user-avatar.module';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 import { ProjectHeaderModule } from '../project-header/project-header.module';
 import { MatGridListModule } from '@angular/material/grid-list';
-
 import { MatCardModule } from '@angular/material/card';
+
 @NgModule({
   declarations: [CardViewProjectComponent],
   imports: [
