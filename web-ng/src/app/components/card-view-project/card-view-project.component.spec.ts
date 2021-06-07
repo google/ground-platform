@@ -42,10 +42,6 @@ describe('CardViewProjectComponent', () => {
 
   beforeEach(
     waitForAsync(() => {
-      const projectService = jasmine.createSpyObj('ProjectService', [
-        'getAllProjects',
-      ]);
-
       const navigationService = {
         newProject: () => NEVER,
       };
@@ -61,7 +57,12 @@ describe('CardViewProjectComponent', () => {
         providers: [
           { provide: MatDialog, useValue: dialog },
           { provide: MatDialogRef, useValue: dialogRef },
-          { provide: ProjectService, useValue: projectService },
+          {
+            provide: ProjectService,
+            useValue: {
+              getAllProjects: () => {},
+            },
+          },
           { provide: NavigationService, useValue: navigationService },
           { provide: AngularFirestore, useValue: {} },
           { provide: AngularFireAuth, useValue: {} },
