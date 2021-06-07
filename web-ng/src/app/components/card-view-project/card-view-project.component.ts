@@ -42,20 +42,23 @@ export class CardViewProjectComponent implements OnInit, OnDestroy {
     private authService: AuthService
   ) {
     this.breakpoint = window.innerWidth <= 400 ? 1 : 6;
+  }
+
+  ngOnInit(): void {
+    const allProjects = this.projectService.getAllProjects();
     this.subscription.add(
-      this.projectService.getAllProjects().subscribe(p => {
-        p?.forEach(element => {
+      allProjects.subscribe(projects => {
+        projects?.forEach(element => {
           const acl = this.projectService.getProjectAcl(element);
           const isValid = this.authService.canManageProject(acl);
           if (!isValid) {
-            p.splice(p.indexOf(element), 1);
+            projects.splice(projects.indexOf(element), 1);
           }
         });
-        this.projects = p;
+        this.projects = projects;
       })
     );
   }
-  ngOnInit(): void {}
 
   onProjectClicked(index: number) {
     this.navigationService.selectProject(this.projects![index].id);

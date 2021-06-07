@@ -26,6 +26,10 @@ import { ProjectService } from '../../services/project/project.service';
 
 import { CardViewProjectComponent } from './card-view-project.component';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
+import { MatCardModule } from '@angular/material/card';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({ selector: 'gnd-header-layout', template: '' })
 class HeaderLayoutComponent {}
@@ -47,6 +51,12 @@ describe('CardViewProjectComponent', () => {
       };
 
       TestBed.configureTestingModule({
+        imports: [
+          MatCardModule,
+          MatGridListModule,
+          MatButtonModule,
+          MatIconModule,
+        ],
         declarations: [CardViewProjectComponent, HeaderLayoutComponent],
         providers: [
           { provide: MatDialog, useValue: dialog },
