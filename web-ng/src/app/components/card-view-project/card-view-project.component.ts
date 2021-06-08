@@ -45,7 +45,7 @@ export class CardViewProjectComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const allProjects = this.projectService.getAllProjects();
+    const allProjects = this.projectService.getAllProjects$();
     this.subscription.add(
       allProjects.subscribe(projects => {
         projects?.forEach(element => {

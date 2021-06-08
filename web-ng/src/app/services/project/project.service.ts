@@ -71,7 +71,7 @@ export class ProjectService {
     return this.activeProject$;
   }
 
-  getAllProjects() {
+  getAllProjects$(): Observable<Project[]> {
     return this.dataStore.loadAllProject$();
   }
 

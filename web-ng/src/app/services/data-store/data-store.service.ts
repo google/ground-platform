@@ -60,7 +60,7 @@ export class DataStoreService {
    * uuid.
    *
    */
-  loadAllProject$() {
+  loadAllProject$(): Observable<Project[]> {
     return this.db
       .collection('projects')
       .snapshotChanges()
