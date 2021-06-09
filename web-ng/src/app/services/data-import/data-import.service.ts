@@ -24,6 +24,7 @@ const IMPORT_GEOJSON_URL = `${environment.cloudFunctionsUrl}/importGeoJson`;
 
 export interface ImportResponse {
   message?: string;
+  count: number;
 }
 
 @Injectable({
