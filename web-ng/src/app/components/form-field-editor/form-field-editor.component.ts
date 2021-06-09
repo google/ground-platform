@@ -73,7 +73,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   formOptions: MultipleChoice | undefined;
   selectFieldOptions: FieldTypeSelectOption[];
   showOptionsAndActions: boolean;
-  clickWasInside: boolean;
+  selected: boolean;
 
   subscription: Subscription = new Subscription();
 
@@ -82,15 +82,15 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @HostListener('click')
   clickedInsideForm() {
     this.showOptionsAndActions = true;
-    this.clickWasInside = true;
+    this.selected = true;
   }
 
   @HostListener('document:click')
   clickedOutsideForm() {
-    if (!this.clickWasInside) {
+    if (!this.selected) {
       this.showOptionsAndActions = false;
     }
-    this.clickWasInside = false;
+    this.selected = false;
   }
 
   @ViewChildren(OptionEditorComponent)
@@ -102,7 +102,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     private layerService: LayerService
   ) {
     this.showOptionsAndActions = false;
-    this.clickWasInside = false;
+    this.selected = false;
     this.selectFieldOptions = [
       {
         icon: 'short_text',
