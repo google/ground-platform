@@ -46,7 +46,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
-  private feature?: Feature;
+  feature?: Feature;
 
   constructor(
     private navigationService: NavigationService,
