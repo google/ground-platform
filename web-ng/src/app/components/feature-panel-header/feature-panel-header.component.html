@@ -15,10 +15,15 @@ limitations under the License.
 -->
 
 <mat-list-item>
-  <img matListAvatar [src]="pinUrl" />
-  <h3 matLine>
-    {{ layer?.name?.get(lang) }}
-  </h3>
+  <img *ngIf="featureType === 'point'" matListAvatar [src]="pinUrl" />
+  <ng-container *ngIf="featureType === 'polygon'">
+    Polygon will be added here
+  </ng-container>
+  <h3 matLine><!-- TODO: Add feature label here --></h3>
+  <div matLine>
+    <div class="layer-name">{{ layer?.name?.get(lang) }}</div>
+  </div>
+
   <div [ngSwitch]="actionsType">
     <div *ngSwitchCase="featureHeaderActionType.MENU">
       <button mat-icon-button [matMenuTriggerFor]="featureMenu">

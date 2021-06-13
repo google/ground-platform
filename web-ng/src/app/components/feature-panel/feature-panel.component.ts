@@ -28,6 +28,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { DialogService } from '../../services/dialog/dialog.service';
+import { Feature } from '../../shared/models/feature.model';
 
 // TODO: Rename "FeatureDetailsComponent".
 @Component({
@@ -45,6 +46,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
+  private feature?: Feature;
 
   constructor(
     private navigationService: NavigationService,
@@ -70,15 +72,16 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
             )
         )
       );
-    this.layer$ = projectService
-      .getActiveProject$()
-      .pipe(
-        switchMap(project =>
-          featureService
-            .getSelectedFeature$()
-            .pipe(map(feature => project.layers.get(feature.layerId)!))
+    this.layer$ = projectService.getActiveProject$().pipe(
+      switchMap(project =>
+        featureService.getSelectedFeature$().pipe(
+          map(feature => {
+            this.feature = feature;
+            return project.layers.get(feature.layerId)!;
+          })
         )
-      );
+      )
+    );
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {
       observations.forEach(observation => {

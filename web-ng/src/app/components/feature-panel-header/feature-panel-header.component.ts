@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, OnDestroy, NgZone } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  NgZone,
+  SimpleChanges,
+} from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -22,6 +29,10 @@ import { DialogService } from '../../services/dialog/dialog.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
+import {
+  GeoJsonFeature,
+  LocationFeature,
+} from '../../shared/models/feature.model';
 
 @Component({
   selector: 'ground-feature-panel-header',
@@ -31,12 +42,14 @@ import { Subscription } from 'rxjs';
 export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
   @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
+  @Input() feature?: GeoJsonFeature | LocationFeature;
   projectId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
   readonly lang: string;
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
+  featureType?: 'point' | 'polygon';
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -66,10 +79,20 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
+    if (
+      changes.feature &&
+      changes.feature.currentValue !== changes.feature.previousValue
+    ) {
+      if (this.feature instanceof GeoJsonFeature) {
+        this.featureType = 'polygon';
+      } else if (this.feature instanceof LocationFeature) {
+        this.featureType = 'point';
+      }
+    }
   }
 
   onCloseClick() {
