@@ -24,6 +24,7 @@
         matInput
         formControlName="label"
         autocomplete="off"
+        (focus)="clickedInsideForm()"
         (blur)="onLabelBlur()"
       />
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
