@@ -26,6 +26,8 @@ import {
   ViewChildren,
   QueryList,
   HostListener,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import {
   FormGroup,
@@ -78,6 +80,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   subscription: Subscription = new Subscription();
 
   formGroup: FormGroup;
+  @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
 
   @HostListener('click')
   clickedInsideForm() {
