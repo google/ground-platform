@@ -87,7 +87,12 @@
       </button>
     </div>
     <hr class="horizontal-line" />
-    <div fxLayout fxLayoutAlign="end" class="question-actions">
+    <div
+      fxLayout
+      fxLayoutAlign="end"
+      (focusout)="clickedOutsideForm()"
+      class="question-actions"
+    >
       <button type="button" mat-icon-button (click)="onFieldDelete()">
         <mat-icon>delete_forever</mat-icon>
       </button>
