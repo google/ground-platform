@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import { Component, AfterViewInit, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ViewChild,
+  OnDestroy,
+  NgZone,
+} from '@angular/core';
 import { Project } from '../../shared/models/project.model';
 import {
   Feature,
   LocationFeature,
   GeoJsonFeature,
+  PolygonFeature,
 } from '../../shared/models/feature.model';
 import {
   DrawingToolsService,
@@ -61,6 +68,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   private selectedMarker?: google.maps.Marker;
   private markers: google.maps.Marker[] = [];
+  private polygons: google.maps.Polygon[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
   };
@@ -75,7 +83,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private drawingToolsService: DrawingToolsService,
     private projectService: ProjectService,
     private featureService: FeatureService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private zone: NgZone
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -146,6 +155,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const newFeatureIds: List<string> = features.map(f => f.id);
     this.removeMarkersOnMap(newFeatureIds);
     this.removeGeoJsonsOnMap(newFeatureIds);
+    this.removePolygonOnMap(newFeatureIds);
   }
 
   private removeMarkersOnMap(newFeatureIds: List<string>) {
@@ -165,11 +175,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private removePolygonOnMap(newFeatureIds: List<string>) {
+    this.map.data.forEach(f => {
+      if (!newFeatureIds.contains(f.getProperty('featureId'))) {
+        this.map.data.remove(f);
+      }
+    });
+  }
+
   private addFeaturesToMap(project: Project, features: List<Feature>) {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
+    const polygonFeatureIds: String[] = [];
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
+      polygonFeatureIds.push(f.getProperty('featureId'));
     });
 
     features.forEach(feature => {
@@ -181,6 +201,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (feature instanceof GeoJsonFeature) {
         if (!geoJsonFeatureIds.includes(feature.id)) {
           this.addGeoJsonToMap(feature);
+        }
+      }
+
+      if (feature instanceof PolygonFeature) {
+        if (!polygonFeatureIds.includes(feature.id)) {
+          this.addPolygonToMap(feature);
         }
       }
     });
@@ -292,6 +318,28 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       f.setProperty('featureId', feature.id);
       f.setProperty('layerId', feature.layerId);
     });
+  }
+
+  private addPolygonToMap(feature: PolygonFeature) {
+    const vertices: google.maps.LatLng[] = [];
+    feature.polygonVertices.map(vertex => {
+      vertices.push(new google.maps.LatLng(vertex.latitude, vertex.longitude));
+    });
+    // Construct the polygon.
+    const polygon = new google.maps.Polygon({
+      paths: vertices,
+      strokeColor: '#ff9131',
+      strokeOpacity: 1,
+      strokeWeight: 4,
+      fillOpacity: 0,
+    });
+    polygon.addListener('click', () => {
+      this.panAndZoom(polygon?.get('paths'));
+      this.zone.run(() => {
+        this.navigationService.selectFeature(feature.id);
+      });
+    });
+    polygon.setMap(this.map.googleMap!!);
   }
 
   private updateStylingFunctionForAllGeoJsons(project: Project) {
