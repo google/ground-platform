@@ -57,12 +57,14 @@ export class ImportDialogComponent {
     }
     try {
       this.isImporting = true;
-      await this.dataImportService.importFeatures(
+      const response = await this.dataImportService.importFeatures(
         this.projectId,
         this.layerId,
         files[0] as File
       );
-      this.notificationService.success('Import complete');
+      this.notificationService.success(
+        `Successfully imported ${response.count} features`
+      );
     } catch (err) {
       this.notificationService.error('Importing features failed');
     }
