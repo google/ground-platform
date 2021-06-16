@@ -83,13 +83,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
 
   @HostListener('click')
-  clickedInsideForm() {
+  onFormFocus() {
     this.showOptionsAndActions = true;
     this.selected = true;
   }
 
   @HostListener('document:click')
-  clickedOutsideForm() {
+  onFormBlur() {
     if (!this.selected) {
       this.showOptionsAndActions = false;
     }

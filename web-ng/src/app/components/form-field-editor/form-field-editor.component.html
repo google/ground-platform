@@ -24,7 +24,7 @@
         matInput
         formControlName="label"
         autocomplete="off"
-        (focus)="clickedInsideForm()"
+        (focus)="onFormFocus()"
         (blur)="onLabelBlur()"
       />
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
@@ -38,7 +38,7 @@
         formControlName="selectFieldOption"
         class="field-type-select"
         (selectionChange)="onFieldTypeSelect($event.value)"
-        (openedChange)="clickedInsideForm()"
+        (openedChange)="onFormFocus()"
       >
         <mat-select-trigger>
           <mat-icon class="icon-field-type">{{
@@ -90,7 +90,7 @@
     <div
       fxLayout
       fxLayoutAlign="end"
-      (focusout)="clickedOutsideForm()"
+      (focusout)="onFormBlur()"
       class="question-actions"
     >
       <button type="button" mat-icon-button (click)="onFieldDelete()">
