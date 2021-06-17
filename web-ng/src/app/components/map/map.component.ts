@@ -334,7 +334,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       fillOpacity: 0,
     });
     polygon.addListener('click', () => {
-      this.panAndZoom(polygon?.get('paths'));
+      this.panAndZoom(vertices[0]);
       this.zone.run(() => {
         this.navigationService.selectFeature(feature.id);
       });
