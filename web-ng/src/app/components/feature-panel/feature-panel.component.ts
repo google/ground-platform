@@ -25,7 +25,6 @@ import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { FeatureHeaderActionType } from '../feature-panel-header/feature-panel-header.component';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { DialogService } from '../../services/dialog/dialog.service';
 
@@ -42,7 +41,6 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   readonly layer$: Observable<Layer>;
   readonly lang: string;
   readonly fieldTypes = FieldType;
-  readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
 

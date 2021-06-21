@@ -19,22 +19,17 @@ limitations under the License.
   <h3 matLine>
     {{ layer?.name?.get(lang) }}
   </h3>
-  <div [ngSwitch]="actionsType">
-    <div *ngSwitchCase="featureHeaderActionType.MENU">
-      <button mat-icon-button [matMenuTriggerFor]="featureMenu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <mat-menu #featureMenu="matMenu">
-        <button mat-menu-item (click)="onDeleteFeatureClick()">
-          <mat-icon>delete_forever</mat-icon>
-          <span>Delete</span>
-        </button>
-      </mat-menu>
-    </div>
-    <div *ngSwitchCase="featureHeaderActionType.BACK">
-      <button mat-icon-button aria-label="back" (click)="onCloseClick()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  </div>
+  <button mat-icon-button [matMenuTriggerFor]="featureMenu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <mat-menu #featureMenu="matMenu">
+    <button mat-menu-item aria-label="delete" (click)="onDeleteFeatureClick()">
+      <mat-icon>delete_forever</mat-icon>
+      <span>Delete feature</span>
+    </button>
+    <button mat-menu-item aria-label="back" (click)="onCloseClick()">
+      <mat-icon>close</mat-icon>
+      <span>Back</span>
+    </button>
+  </mat-menu>
 </mat-list-item>

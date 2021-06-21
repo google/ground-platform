@@ -30,12 +30,10 @@ import { Subscription } from 'rxjs';
 })
 export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
-  @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   projectId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
   readonly lang: string;
-  readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
 
   constructor(
@@ -110,9 +108,4 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-}
-
-export enum FeatureHeaderActionType {
-  MENU = 1,
-  BACK = 2,
 }
