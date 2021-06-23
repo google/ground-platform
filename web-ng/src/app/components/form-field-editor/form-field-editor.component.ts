@@ -75,7 +75,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Output() delete = new EventEmitter();
   formOptions: MultipleChoice | undefined;
   selectFieldOptions: FieldTypeSelectOption[];
-  showOptionsAndActions: boolean;
+
+  /** When expanded, options and actions below the fold are visible to the user. */
+  expanded: boolean;
+
+  /** Set to true when question gets focus, false when it loses focus. */
   selected: boolean;
 
   subscription: Subscription = new Subscription();
@@ -85,14 +89,14 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   @HostListener('click')
   onFormFocus() {
-    this.showOptionsAndActions = true;
+    this.expanded = true;
     this.selected = true;
   }
 
   @HostListener('document:click')
   onFormBlur() {
     if (!this.selected) {
-      this.showOptionsAndActions = false;
+      this.expanded = false;
     }
     this.selected = false;
   }
@@ -106,7 +110,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     private layerService: LayerService,
     private readonly cdr: ChangeDetectorRef
   ) {
-    this.showOptionsAndActions = false;
+    this.expanded = false;
     this.selected = false;
     this.selectFieldOptions = [
       {
