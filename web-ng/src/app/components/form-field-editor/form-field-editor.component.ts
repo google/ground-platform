@@ -28,6 +28,7 @@ import {
   HostListener,
   ElementRef,
   ViewChild,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormGroup,
@@ -102,7 +103,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
-    private layerService: LayerService
+    private layerService: LayerService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.showOptionsAndActions = false;
     this.selected = false;
@@ -287,6 +289,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
+    this.focusNewOption();
   }
 
   setFormOptions(index: number, option: Option): List<Option> {
@@ -341,5 +344,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
+  }
+
+  private focusNewOption(): void {
+    this.cdr.detectChanges();
+    if (this.optionEditors?.length) {
+      const option = this.optionEditors.last;
+      option?.optionInput?.nativeElement.focus();
+    }
   }
 }
