@@ -49,6 +49,11 @@ const normalIconScale = 30;
 const enlargedIconScale = 50;
 const zoomedInLevel = 13;
 
+function Polygon(id: string, polygon: google.maps.Polygon): google.maps.Polygon & { id: string } {
+  return Object.assign(polygon, { id });
+}
+type Polygon = google.maps.Polygon & { id: string };
+
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
@@ -68,7 +73,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   private selectedMarker?: google.maps.Marker;
   private markers: google.maps.Marker[] = [];
-  private polygons: google.maps.Polygon[] = [];
+  private polygons: Polygon[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
   };
@@ -176,20 +181,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private removePolygonOnMap(newFeatureIds: List<string>) {
-    this.map.data.forEach(f => {
-      if (!newFeatureIds.contains(f.getProperty('featureId'))) {
-        this.map.data.remove(f);
+    for (let i = this.polygons.length - 1; i >= 0; i--) {
+      if (!newFeatureIds.contains(this.polygons[i].id!)) {
+        this.polygons[i].setMap(null);
+        this.polygons.splice(i, 1);
       }
-    });
+    }
   }
 
   private addFeaturesToMap(project: Project, features: List<Feature>) {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
-    const polygonFeatureIds: String[] = [];
+    const polygonFeatureIds = this.polygons.map(m => m.id);
+    console.log(this.map.data);
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
-      polygonFeatureIds.push(f.getProperty('featureId'));
     });
 
     features.forEach(feature => {
@@ -206,7 +212,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       if (feature instanceof PolygonFeature) {
         if (!polygonFeatureIds.includes(feature.id)) {
-          this.addPolygonToMap(feature);
+          this.addPolygonToMap(project, feature);
         }
       }
     });
@@ -320,20 +326,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private addPolygonToMap(feature: PolygonFeature) {
+  private addPolygonToMap(project: Project, feature: PolygonFeature) {
+    const color = project.layers.get(feature.layerId)?.color;
     const vertices: google.maps.LatLng[] = [];
     feature.polygonVertices.map(vertex => {
       vertices.push(new google.maps.LatLng(vertex.latitude, vertex.longitude));
     });
     // Construct the polygon.
-    const polygon = new google.maps.Polygon({
+    const polygon = Polygon(feature.id , new google.maps.Polygon({
       paths: vertices,
-      strokeColor: '#ff9131',
+      clickable: true,
+      strokeColor: color,
       strokeOpacity: 1,
       strokeWeight: 4,
       fillOpacity: 0,
-    });
+    }));
     polygon.addListener('click', () => {
+      polygon.setOptions({ strokeWeight: 6 });
       this.panAndZoom(vertices[0]);
       this.zone.run(() => {
         this.navigationService.selectFeature(feature.id);
@@ -342,6 +351,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.map.googleMap !== undefined) {
       polygon.setMap(this.map.googleMap);
     }
+    this.polygons.push(polygon);
   }
 
   private updateStylingFunctionForAllGeoJsons(project: Project) {
@@ -352,5 +362,5 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         fillColor: color,
       };
     });
-  }
+  }  
 }
