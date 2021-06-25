@@ -48,11 +48,14 @@ import { startWith } from 'rxjs/operators';
 const normalIconScale = 30;
 const enlargedIconScale = 50;
 const zoomedInLevel = 13;
+const normalPolygonStrokeWeight = 3;
+const enlargedPolygonStrokeWeight = 6;
 
-function Polygon(id: string, polygon: google.maps.Polygon): google.maps.Polygon & { id: string } {
+type Polygon = google.maps.Polygon & { id: string };
+
+function Polygon(id: string, polygon: google.maps.Polygon): Polygon {
   return Object.assign(polygon, { id });
 }
-type Polygon = google.maps.Polygon & { id: string };
 
 @Component({
   selector: 'ground-map',
@@ -193,7 +196,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
     const polygonFeatureIds = this.polygons.map(m => m.id);
-    console.log(this.map.data);
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
     });
@@ -333,20 +335,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       vertices.push(new google.maps.LatLng(vertex.latitude, vertex.longitude));
     });
     // Construct the polygon.
-    const polygon = Polygon(feature.id , new google.maps.Polygon({
-      paths: vertices,
-      clickable: true,
-      strokeColor: color,
-      strokeOpacity: 1,
-      strokeWeight: 4,
-      fillOpacity: 0,
-    }));
+    const polygon = Polygon(
+      feature.id,
+      new google.maps.Polygon({
+        paths: vertices,
+        clickable: true,
+        strokeColor: color,
+        strokeOpacity: 1,
+        strokeWeight: normalPolygonStrokeWeight,
+        fillOpacity: 0,
+      })
+    );
     polygon.addListener('click', () => {
-      polygon.setOptions({ strokeWeight: 6 });
+      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
       this.panAndZoom(vertices[0]);
-      this.zone.run(() => {
-        this.navigationService.selectFeature(feature.id);
-      });
+      this.navigationService.selectFeature(feature.id);
     });
     if (this.map.googleMap !== undefined) {
       polygon.setMap(this.map.googleMap);
@@ -362,5 +365,5 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         fillColor: color,
       };
     });
-  }  
+  }
 }
