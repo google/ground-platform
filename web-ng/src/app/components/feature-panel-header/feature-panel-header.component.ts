@@ -44,7 +44,6 @@ export class FeaturePanelHeaderComponent
   implements OnInit, OnDestroy, OnChanges {
   @Input() layer?: Layer;
   @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
-  @Input() feature?: GeoJsonFeature | LocationFeature;
   projectId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
