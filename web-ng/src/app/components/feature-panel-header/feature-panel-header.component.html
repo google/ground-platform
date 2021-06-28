@@ -15,11 +15,17 @@ limitations under the License.
 -->
 
 <mat-list-item>
-  <img *ngIf="featureType === 'POINT'" matListAvatar [src]="pinUrl" />
+  <img
+    *ngIf="featureType === 'POINT'"
+    matListAvatar
+    [src]="pinUrl"
+    alt="point"
+  />
   <img
     *ngIf="featureType === 'POLYGON'"
     matListAvatar
     src="/assets/img/polygon_icon.svg"
+    alt="polygon"
   />
   <h3 matLine><!-- TODO: Add feature label here --></h3>
   <div matLine>
