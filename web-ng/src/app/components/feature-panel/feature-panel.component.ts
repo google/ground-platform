@@ -46,7 +46,6 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
-  feature?: Feature;
 
   constructor(
     private navigationService: NavigationService,
@@ -76,7 +75,6 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
       switchMap(project =>
         featureService.getSelectedFeature$().pipe(
           map(feature => {
-            this.feature = feature;
             return project.layers.get(feature.layerId)!;
           })
         )

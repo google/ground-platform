@@ -20,7 +20,7 @@ import {
   OnInit,
   OnDestroy,
   NgZone,
-  SimpleChanges,
+  OnChanges,
 } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { getPinImageSource } from '../map/ground-pin';
@@ -33,13 +33,15 @@ import {
   GeoJsonFeature,
   LocationFeature,
 } from '../../shared/models/feature.model';
+import { FeatureService } from '../../services/feature/feature.service';
 
 @Component({
   selector: 'ground-feature-panel-header',
   templateUrl: './feature-panel-header.component.html',
   styleUrls: ['./feature-panel-header.component.scss'],
 })
-export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
+export class FeaturePanelHeaderComponent
+  implements OnInit, OnDestroy, OnChanges {
   @Input() layer?: Layer;
   @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   @Input() feature?: GeoJsonFeature | LocationFeature;
@@ -49,18 +51,26 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
   readonly lang: string;
   readonly featureHeaderActionType = FeatureHeaderActionType;
   subscription: Subscription = new Subscription();
-  featureType?: 'point' | 'polygon';
+  featureType?: FeatureType;
 
   constructor(
     private sanitizer: DomSanitizer,
     private dialogService: DialogService,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    private zone: NgZone
+    private zone: NgZone,
+    readonly featureService: FeatureService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    featureService.getSelectedFeature$().subscribe(feature => {
+      if (feature instanceof GeoJsonFeature) {
+        this.featureType = FeatureType.Polygon;
+      } else if (feature instanceof LocationFeature) {
+        this.featureType = FeatureType.Point;
+      }
+    });
   }
 
   ngOnInit() {
@@ -79,20 +89,10 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges() {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
       getPinImageSource(this.layer?.color)
     );
-    if (
-      changes.feature &&
-      changes.feature.currentValue !== changes.feature.previousValue
-    ) {
-      if (this.feature instanceof GeoJsonFeature) {
-        this.featureType = 'polygon';
-      } else if (this.feature instanceof LocationFeature) {
-        this.featureType = 'point';
-      }
-    }
   }
 
   onCloseClick() {
@@ -138,4 +138,9 @@ export class FeaturePanelHeaderComponent implements OnInit, OnDestroy {
 export enum FeatureHeaderActionType {
   MENU = 1,
   BACK = 2,
+}
+
+enum FeatureType {
+  Point = 'POINT',
+  Polygon = 'POLYGON',
 }

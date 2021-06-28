@@ -15,10 +15,12 @@ limitations under the License.
 -->
 
 <mat-list-item>
-  <img *ngIf="featureType === 'point'" matListAvatar [src]="pinUrl" />
-  <ng-container *ngIf="featureType === 'polygon'">
-    Polygon will be added here
-  </ng-container>
+  <img *ngIf="featureType === 'POINT'" matListAvatar [src]="pinUrl" />
+  <img
+    *ngIf="featureType === 'POLYGON'"
+    matListAvatar
+    src="/assets/img/polygon_icon.svg"
+  />
   <h3 matLine><!-- TODO: Add feature label here --></h3>
   <div matLine>
     <div class="layer-name">{{ layer?.name?.get(lang) }}</div>
