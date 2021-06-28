@@ -64,13 +64,15 @@ export class FeaturePanelHeaderComponent
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
-    featureService.getSelectedFeature$().subscribe(feature => {
-      if (feature instanceof GeoJsonFeature) {
-        this.featureType = FeatureType.Polygon;
-      } else if (feature instanceof LocationFeature) {
-        this.featureType = FeatureType.Point;
-      }
-    });
+    this.subscription.add(
+      featureService.getSelectedFeature$().subscribe(feature => {
+        if (feature instanceof GeoJsonFeature) {
+          this.featureType = FeatureType.Polygon;
+        } else if (feature instanceof LocationFeature) {
+          this.featureType = FeatureType.Point;
+        }
+      })
+    );
   }
 
   ngOnInit() {
