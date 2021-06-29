@@ -21,6 +21,8 @@ import {
   Output,
   EventEmitter,
   OnChanges,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import {
   FormGroup,
@@ -40,6 +42,7 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() index?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+  @ViewChild('optionInput', { static: true }) optionInput?: ElementRef;
 
   optionGroup: FormGroup;
 
