@@ -17,12 +17,14 @@
 <form [formGroup]="formGroup" class="question-container">
   <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
   <div fxLayout>
-    <mat-form-field appearance="fill" fxFlex="2 1 auto">
+    <mat-form-field class="question" appearance="fill" fxFlex="2 1 auto">
       <mat-label>Question</mat-label>
       <input
+        #questionInput
         matInput
         formControlName="label"
         autocomplete="off"
+        (focus)="onFormFocus()"
         (blur)="onLabelBlur()"
       />
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
@@ -36,6 +38,7 @@
         formControlName="selectFieldOption"
         class="field-type-select"
         (selectionChange)="onFieldTypeSelect($event.value)"
+        (openedChange)="onFormFocus()"
       >
         <mat-select-trigger>
           <mat-icon class="icon-field-type">{{
@@ -50,48 +53,55 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div
-    *ngIf="formOptions?.options"
-    cdkDropList
-    (cdkDropListDropped)="drop($event)"
-  >
+  <div *ngIf="expanded">
     <div
-      *ngFor="
-        let option of formOptions.options;
-        let i = index;
-        trackBy: trackByFn
-      "
-      cdkDrag
-      fxLayout
+      *ngIf="formOptions?.options"
+      cdkDropList
+      (cdkDropListDropped)="drop($event)"
     >
-      <app-option-editor
-        [label]="option.label?.get('en')"
-        [code]="option.code"
-        [index]="i"
-        (update)="onOptionUpdate($event, i)"
-        (delete)="onOptionDelete(i)"
-      ></app-option-editor>
+      <div
+        *ngFor="
+          let option of formOptions.options;
+          let i = index;
+          trackBy: trackByFn
+        "
+        cdkDrag
+        fxLayout
+      >
+        <app-option-editor
+          [label]="option.label?.get('en')"
+          [code]="option.code"
+          [index]="i"
+          (update)="onOptionUpdate($event, i)"
+          (delete)="onOptionDelete(i)"
+        ></app-option-editor>
+      </div>
+      <button
+        mat-button
+        type="button"
+        (click)="onAddOption()"
+        color="primary"
+        class="add-option"
+      >
+        Add option
+      </button>
     </div>
-    <button
-      mat-button
-      type="button"
-      (click)="onAddOption()"
-      color="primary"
-      class="add-option"
+    <hr class="horizontal-line" />
+    <div
+      fxLayout
+      fxLayoutAlign="end"
+      (focusout)="onFormBlur()"
+      class="question-actions"
     >
-      Add option
-    </button>
-  </div>
-  <hr class="horizontal-line" />
-  <div fxLayout fxLayoutAlign="end" class="question-actions">
-    <button type="button" mat-icon-button (click)="onFieldDelete()">
-      <mat-icon>delete_forever</mat-icon>
-    </button>
-    <span class="vertical-divider"></span>
-    <div class="required-toggle">
-      <span class="required-label">Required</span>
-      <mat-slide-toggle formControlName="required" color="primary">
-      </mat-slide-toggle>
+      <button type="button" mat-icon-button (click)="onFieldDelete()">
+        <mat-icon>delete_forever</mat-icon>
+      </button>
+      <span class="vertical-divider"></span>
+      <div class="required-toggle">
+        <span class="required-label">Required</span>
+        <mat-slide-toggle formControlName="required" color="primary">
+        </mat-slide-toggle>
+      </div>
     </div>
   </div>
 </form>
