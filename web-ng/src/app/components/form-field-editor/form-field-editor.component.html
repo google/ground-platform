@@ -90,7 +90,7 @@
     <div
       fxLayout
       fxLayoutAlign="end"
-      (focusout)="onFormBlur()"
+      (keydown.Tab)="onFormBlur()"
       class="question-actions"
     >
       <button type="button" mat-icon-button (click)="onFieldDelete()">
