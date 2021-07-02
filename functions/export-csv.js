@@ -41,8 +41,8 @@ async function exportCsv(req, res) {
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push("Place ID");
-  headers.push("Place name");
+  headers.push("Feature ID");
+  headers.push("Feature label");
   headers.push("Latitude");
   headers.push("Longitude");
   elements.forEach((element) => {
@@ -87,8 +87,8 @@ async function exportCsv(req, res) {
     const observations = observationsByFeature[featureId] || [{}];
     observations.forEach((observation) => {
       const row = [];
-      row.push(feature.get("id") || "");
-      row.push(feature.get("caption") || "");
+      row.push(getId(feature));
+      row.push(getLabel(feature));
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
       const responses = observation["responses"] || {};
@@ -101,6 +101,23 @@ async function exportCsv(req, res) {
   csvStream.end();
 }
 
+function getId(feature) {
+  const properties = feature.get("properties") || {};
+  return (
+    feature.get("id") ||
+    properties["ID"] ||
+    properties["id"] ||
+    properties["id_prod"] ||
+    ""
+  );
+}
+
+function getLabel(feature) {
+  const properties = feature.get("properties") || {};
+  return (
+    properties["caption"] || properties["label"] || properties["title"] || ""
+  );
+}
 /**
  * Returns the string representation of a specific form element response.
  */
