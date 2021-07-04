@@ -115,7 +115,10 @@ export class ObservationFormComponent {
         );
         this.dataStoreService
           .updateObservation(this.projectId!, updatedObservation)
-          .then(() => this.navigateToFeature())
+          .then(() => {
+            this.observationForm?.markAsPristine();
+            return this.navigateToFeature();
+          })
           .catch(() => {
             alert('Observation update failed.');
           });
@@ -168,14 +171,14 @@ export class ObservationFormComponent {
         case FieldType.TEXT:
           this.addControlsForTextField(group, field, response);
           break;
+        case FieldType.NUMBER:
+          this.addControlsForNumberField(group, field, response);
+          break;
         case FieldType.MULTIPLE_CHOICE:
           this.addControlsForMultipleChoiceField(group, field, response);
           break;
         default:
-          throw Error(
-            `Unimplemented conversion to FormControl(s) for Field with
-             Type:${field.type}`
-          );
+          console.debug(`Skipping unsupported field type: ${field.type}`);
       }
     }
     return this.formBuilder.group(group);
@@ -194,6 +197,8 @@ export class ObservationFormComponent {
     switch (field.type) {
       case FieldType.TEXT:
         return this.extractResponseForTextField(field);
+      case FieldType.NUMBER:
+        return this.extractResponseForNumberField(field);
       case FieldType.MULTIPLE_CHOICE:
         return this.extractResponseForMultipleChoiceField(field);
       default:
@@ -215,7 +220,22 @@ export class ObservationFormComponent {
       : new FormControl(value);
   }
 
+  private addControlsForNumberField(
+    group: { [fieldId: string]: FormControl },
+    field: Field,
+    response?: Response
+  ): void {
+    const value = response?.value as number;
+    group[field.id] = field.required
+      ? new FormControl(value, Validators.required)
+      : new FormControl(value);
+  }
+
   private extractResponseForTextField(field: Field): Response {
+    return new Response(this.observationForm?.value[field.id]);
+  }
+
+  private extractResponseForNumberField(field: Field): Response {
     return new Response(this.observationForm?.value[field.id]);
   }
 

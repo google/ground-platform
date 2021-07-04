@@ -40,7 +40,6 @@ import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
-import { startWith } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global google*/
@@ -60,7 +59,7 @@ function Polygon(id: string, polygon: google.maps.Polygon): Polygon {
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css'],
+  styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
@@ -84,6 +83,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     draggableCursor: '',
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
+  showRepositionConfirmDialog = false;
+  newFeatureToReposition?: LocationFeature;
+  oldLatLng?: google.maps.LatLng;
+  newLatLng?: google.maps.LatLng;
+  markerToReposition?: google.maps.Marker;
+  disableMapClicks = false;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -103,7 +108,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       combineLatest([
         this.activeProject$,
         this.features$,
-        this.featureService.getSelectedFeatureId$().pipe(startWith('')),
+        this.navigationService.getFeatureId$(),
       ]).subscribe(([project, features, selectedFeatureId]) =>
         this.onProjectAndFeaturesUpdate(project, features, selectedFeatureId)
       )
@@ -114,48 +119,60 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         .getEditMode$()
         .subscribe(editMode => this.onEditModeChange(editMode))
     );
+
+    this.subscription.add(
+      combineLatest([
+        this.navigationService.getFeatureId$(),
+        this.navigationService.getObservationId$(),
+      ]).subscribe(() => this.cancelReposition())
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  onMapClick(event: google.maps.MouseEvent): Promise<void> {
+  async onMapClick(event: google.maps.MouseEvent) {
+    if (this.disableMapClicks) {
+      return;
+    }
     this.selectMarker(undefined);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
     switch (editMode) {
-      case EditMode.AddPoint:
+      case EditMode.AddPoint: {
         if (!selectedLayerId) {
-          return Promise.resolve();
+          return;
         }
         this.drawingToolsService.setEditMode(EditMode.None);
-        return this.featureService.addPoint(
+        const newFeature = await this.featureService.addPoint(
           event.latLng.lat(),
           event.latLng.lng(),
           selectedLayerId
         );
+        if (newFeature) {
+          this.navigationService.selectFeature(newFeature.id);
+        }
+        return;
+      }
       case EditMode.AddPolygon:
         // TODO: Implement adding polygon.
-        if (!selectedLayerId) {
-          return Promise.resolve();
-        }
-        return Promise.resolve();
+        return;
       case EditMode.None:
       default:
         this.navigationService.clearFeatureId();
-        return Promise.resolve();
+        return;
     }
   }
 
   private onProjectAndFeaturesUpdate(
     project: Project,
     features: List<Feature>,
-    selectedFeatureId: string
+    selectedFeatureId: string | null
   ): void {
     this.removeMarkersAndGeoJsonsOnMap(features);
     this.addFeaturesToMap(project, features);
-    this.updateStylingFunctionForAllGeoJsons(project);
+    this.updateStylingFunctionForAllGeoJsons(project, selectedFeatureId);
     this.selectMarkerWithFeatureId(selectedFeatureId);
   }
 
@@ -199,8 +216,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
     });
+    this.map.data.addListener('click', (event: google.maps.Data.MouseEvent) => {
+      const featureId = event.feature.getProperty('featureId');
+      if (this.disableMapClicks) {
+        return;
+      }
+      this.zone.run(() => {
+        this.navigationService.selectFeature(featureId);
+      });
+    });
 
     features.forEach(feature => {
+      if (!project.getLayer(feature.layerId)) {
+        // Ignore features whose layer has been removed.
+        console.debug(
+          `Ignoring feature ${feature.id} with missing layer ${feature.layerId}`
+        );
+        return;
+      }
       if (feature instanceof LocationFeature) {
         if (!locationFeatureIds.includes(feature.id)) {
           this.addMarkerToMap(project, feature);
@@ -240,19 +273,52 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       title: feature.id,
     };
     const marker = new google.maps.Marker(options);
-    marker.addListener('click', () => {
-      this.selectMarker(marker);
-      this.navigationService.selectFeature(feature.id);
-    });
-    marker.addListener('dragend', (event: google.maps.MouseEvent) => {
-      const newFeature = new LocationFeature(
-        feature.id,
-        feature.layerId,
-        new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
-      );
-      this.featureService.updatePoint(newFeature);
-    });
+    marker.addListener('click', () => this.onMarkerClick(feature.id));
+    marker.addListener('dragstart', (event: google.maps.MouseEvent) =>
+      this.onMarkerDragStart(event, marker)
+    );
+    marker.addListener('dragend', (event: google.maps.MouseEvent) =>
+      this.onMarkerDragEnd(event, feature)
+    );
     this.markers.push(marker);
+  }
+
+  private onMarkerClick(featureId: string) {
+    if (this.disableMapClicks) {
+      return;
+    }
+    this.navigationService.selectFeature(featureId);
+  }
+
+  private onMarkerDragStart(
+    event: google.maps.MouseEvent,
+    marker: google.maps.Marker
+  ) {
+    // TODO: Show confirm dialog and disable other components when entering reposition state.
+    // Currently we are figuring out how should the UI trigger this state.
+    this.showRepositionConfirmDialog = true;
+    this.disableMapClicks = true;
+    this.drawingToolsService.setDisabled$(true);
+    this.markerToReposition = marker;
+    this.oldLatLng = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+  }
+
+  private onMarkerDragEnd(
+    event: google.maps.MouseEvent,
+    feature: LocationFeature
+  ) {
+    this.newLatLng = new google.maps.LatLng(
+      event.latLng.lat(),
+      event.latLng.lng()
+    );
+    this.newFeatureToReposition = new LocationFeature(
+      feature.id,
+      feature.layerId,
+      new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
+    );
   }
 
   private panAndZoom(position: google.maps.LatLng | null | undefined) {
@@ -267,7 +333,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onEditModeChange(editMode: EditMode) {
     if (editMode !== EditMode.None) {
-      this.selectMarker(undefined);
       this.navigationService.clearFeatureId();
       for (const marker of this.markers) {
         marker.setClickable(false);
@@ -299,12 +364,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(marker?.getPosition());
   }
 
-  private selectMarkerWithFeatureId(selectedFeatureId: string) {
-    for (const marker of this.markers) {
-      if (marker.getTitle() === selectedFeatureId) {
-        this.selectMarker(marker);
-      }
-    }
+  private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
+    const markerToSelect = this.markers.find(
+      marker => marker.getTitle() === selectedFeatureId
+    );
+    this.selectMarker(markerToSelect);
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {
@@ -357,13 +421,49 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.polygons.push(polygon);
   }
 
-  private updateStylingFunctionForAllGeoJsons(project: Project) {
+  private updateStylingFunctionForAllGeoJsons(
+    project: Project,
+    selectedFeatureId: string | null
+  ) {
     this.map.data.setStyle(mapFeature => {
       const layerId = mapFeature.getProperty('layerId');
       const color = project.layers.get(layerId)?.color;
+      const featureId = mapFeature.getProperty('featureId');
+      const isSelefted = featureId === selectedFeatureId;
       return {
-        fillColor: color,
+        fillOpacity: 0,
+        strokeColor: color,
+        strokeWeight: isSelefted
+          ? enlargedPolygonStrokeWeight
+          : normalPolygonStrokeWeight,
       };
     });
+  }
+
+  onSaveRepositionClick() {
+    this.markerToReposition?.setPosition(this.newLatLng!);
+    this.featureService.updatePoint(this.newFeatureToReposition!);
+    this.resetReposition();
+  }
+
+  onCancelRepositionClick() {
+    this.markerToReposition?.setPosition(this.oldLatLng!);
+    this.resetReposition();
+  }
+
+  private resetReposition() {
+    this.showRepositionConfirmDialog = false;
+    this.newFeatureToReposition = undefined;
+    this.oldLatLng = undefined;
+    this.newLatLng = undefined;
+    this.markerToReposition = undefined;
+    this.disableMapClicks = false;
+    this.drawingToolsService.setDisabled$(false);
+  }
+
+  private cancelReposition() {
+    if (this.showRepositionConfirmDialog) {
+      this.onCancelRepositionClick();
+    }
   }
 }

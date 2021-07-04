@@ -107,7 +107,7 @@
     match /projects/{projectId} {
       allow read: if canViewProject(projectId, email())
       allow read, write: if canManageProject(projectId, email())
-      allow read, write, create: if canAccess(email())
+      allow create, read, write: if canAccess(email())
     }
 
     // Apply project-level ACLs and passlist to feature documents.

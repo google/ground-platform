@@ -20,16 +20,14 @@
 const functions = require("firebase-functions");
 const onCreateUser = require("./on-create-user");
 const exportCsv = require("./export-csv");
-const exportKml = require("./export-kml");
 const importCsv = require("./import-csv");
-const updateColumns = require("./update-columns");
-const onCreateRecord = require("./on-create-record");
-const onUpdateRecord = require("./on-update-record");
+const importGeoJson = require("./import-geojson");
+
 const cors = require("cors")({ origin: true });
 
 /**
  * Wrapper for HTTP request handlers. Captures uncaught exceptions to prevent
- * debug details from being returned to user.
+ * leaking stack traces or other debug details to clients.
  */
 function onHttpsRequest(handler) {
   return functions.https.onRequest((req, res) =>
@@ -46,5 +44,7 @@ function onError(res, err) {
 exports.onCreateUser = functions.auth.user().onCreate(onCreateUser);
 
 exports.importCsv = onHttpsRequest(importCsv);
+
+exports.importGeoJson = onHttpsRequest(importGeoJson);
 
 exports.exportCsv = onHttpsRequest(exportCsv);

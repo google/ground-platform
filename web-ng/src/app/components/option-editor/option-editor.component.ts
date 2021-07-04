@@ -21,8 +21,15 @@ import {
   Output,
   EventEmitter,
   OnChanges,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  AbstractControl,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-option-editor',
@@ -35,6 +42,7 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() index?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+  @ViewChild('optionInput', { static: true }) optionInput?: ElementRef;
 
   optionGroup: FormGroup;
 
@@ -55,18 +63,30 @@ export class OptionEditorComponent implements OnInit, OnChanges {
     });
   }
 
-  ngOnChanges() {
+  ngOnChanges(): void {
     this.optionGroup.setValue({
       code: this.code,
       label: this.label,
     });
   }
 
-  onDeleteOption(index: number) {
+  onDeleteOption(index: number): void {
     this.delete.emit(index);
   }
 
-  get labelControl() {
+  get labelControl(): AbstractControl {
     return this.optionGroup.get('label')!;
+  }
+
+  get codeControl(): AbstractControl {
+    return this.optionGroup.get('code')!;
+  }
+
+  onLabelBlur(): void {
+    this.labelControl.setValue(this.labelControl.value.trim());
+  }
+
+  onCodeBlur(): void {
+    this.codeControl.setValue(this.codeControl.value.trim());
   }
 }

@@ -17,24 +17,7 @@
 @import '_variables';
 
 .mat-dialog-content {
-  width: 600px;
-}
-
-.btn-save {
-  color: white;
-  height: 36px;
-  width: 82px;
-  border-radius: 5px;
-  font-family: 'Open Sans', Arial, sans-serif;
-  margin-left: 10px;
-}
-
-.btn-cancel {
-  height: 36px;
-  width: 82px;
-  border-radius: 5px;
-  font-family: 'Open Sans', Arial, sans-serif;
-  color: mat-color($primary);
+  width: 100%;
 }
 
 .link-add-question {
