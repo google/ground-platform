@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@import '_variables';
 
 .project-card {
   background-image: url(/assets/img/happy-land.png);
@@ -29,10 +30,10 @@
 
 .title-project {
   width: 100px;
-  color: #fff;
+  color: white;
   word-wrap: break-word;
 }
 
 .container-projects {
-  background-color: #f0f1f2;
+  background-color: var(--project-list-background);
 }

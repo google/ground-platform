@@ -27,7 +27,7 @@ import { AuthService } from '../../services/auth/auth.service';
 @Component({
   selector: 'app-card-view-project',
   templateUrl: './card-view-project.component.html',
-  styleUrls: ['./card-view-project.component.css'],
+  styleUrls: ['./card-view-project.component.scss'],
 })
 export class CardViewProjectComponent implements OnInit, OnDestroy {
   projects?: Project[];

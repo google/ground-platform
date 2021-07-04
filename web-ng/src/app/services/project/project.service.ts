@@ -137,6 +137,7 @@ export class ProjectService {
       .sortBy(entry => entry.email)
       .toArray();
   }
+
   /**
    * Checks if a user can add points to a specific layer.
    */
