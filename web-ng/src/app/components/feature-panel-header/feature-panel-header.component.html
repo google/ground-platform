@@ -14,6 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<button mat-button
+        color="primary"
+        aria-label="back"
+        (click)="onCloseClick()">
+  <mat-icon>arrow_back</mat-icon>
+  <span>Back to layers list</span>
+</button>
 <mat-list-item>
   <img matListAvatar [src]="pinUrl" />
   <h3 matLine>
@@ -26,10 +33,6 @@ limitations under the License.
     <button mat-menu-item aria-label="delete" (click)="onDeleteFeatureClick()">
       <mat-icon>delete_forever</mat-icon>
       <span>Delete feature</span>
-    </button>
-    <button mat-menu-item aria-label="back" (click)="onCloseClick()">
-      <mat-icon>close</mat-icon>
-      <span>Back</span>
     </button>
   </mat-menu>
 </mat-list-item>
