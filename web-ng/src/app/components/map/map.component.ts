@@ -20,6 +20,7 @@ import {
   ViewChild,
   OnDestroy,
   NgZone,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { Project } from '../../shared/models/project.model';
 import {
@@ -97,7 +98,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private projectService: ProjectService,
     private featureService: FeatureService,
     private navigationService: NavigationService,
-    private zone: NgZone
+    private zone: NgZone,
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -304,6 +306,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       event.latLng.lat(),
       event.latLng.lng()
     );
+    this.changeDetectorRef.detectChanges();
   }
 
   private onMarkerDragEnd(
