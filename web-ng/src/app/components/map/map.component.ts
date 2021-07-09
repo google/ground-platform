@@ -51,12 +51,6 @@ const zoomedInLevel = 13;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
 
-type Polygon = google.maps.Polygon & { id: string };
-
-function Polygon(id: string, polygon: google.maps.Polygon): Polygon {
-  return Object.assign(polygon, { id });
-}
-
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
@@ -76,7 +70,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   private selectedMarker?: google.maps.Marker;
   private markers: google.maps.Marker[] = [];
-  private polygons: Polygon[] = [];
+  private polygons: google.maps.Polygon[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
   };
@@ -204,7 +198,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private removePolygonOnMap(newFeatureIds: List<string>) {
     for (let i = this.polygons.length - 1; i >= 0; i--) {
-      if (!newFeatureIds.contains(this.polygons[i].id!)) {
+      if (!newFeatureIds.contains(this.polygons[i].get('id'))) {
         this.polygons[i].setMap(null);
         this.polygons.splice(i, 1);
       }
@@ -214,7 +208,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private addFeaturesToMap(project: Project, features: List<Feature>) {
     const locationFeatureIds = this.markers.map(m => m.getTitle());
     const geoJsonFeatureIds: String[] = [];
-    const polygonFeatureIds = this.polygons.map(m => m.id);
+    const polygonFeatureIds = this.polygons.map(m => m.get('id'));
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
     });
@@ -401,17 +395,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     feature.polygonVertices.map(vertex => {
       vertices.push(new google.maps.LatLng(vertex.latitude, vertex.longitude));
     });
-    const polygon = Polygon(
-      feature.id,
-      new google.maps.Polygon({
-        paths: vertices,
-        clickable: true,
-        strokeColor: color,
-        strokeOpacity: 1,
-        strokeWeight: normalPolygonStrokeWeight,
-        fillOpacity: 0,
-      })
-    );
+
+    const polygon = new google.maps.Polygon({
+      paths: vertices,
+      clickable: true,
+      strokeColor: color,
+      strokeOpacity: 1,
+      strokeWeight: normalPolygonStrokeWeight,
+      fillOpacity: 0,
+    });
+
+    polygon.set('id', feature.id);
     polygon.addListener('click', () => {
       polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
       this.panAndZoom(vertices[0]);
