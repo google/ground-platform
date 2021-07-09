@@ -418,7 +418,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.navigationService.selectFeature(feature.id);
     });
     if (this.map.googleMap !== undefined) {
-      polygon.setMap(this.map.googleMap!!);
+      polygon.setMap(this.map.googleMap);
     }
     this.polygons.push(polygon);
   }
