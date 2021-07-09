@@ -47,7 +47,6 @@ export class FeaturePanelHeaderComponent
   featureId?: string | null;
   pinUrl: SafeUrl;
   readonly lang: string;
-  readonly featureHeaderActionType = FeatureHeaderActionType;
   readonly featureType = FeatureType;
   subscription: Subscription = new Subscription();
   featureTypeValue?: FeatureType;
@@ -134,11 +133,6 @@ export class FeaturePanelHeaderComponent
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-}
-
-export enum FeatureHeaderActionType {
-  MENU = 1,
-  BACK = 2,
 }
 
 enum FeatureType {
