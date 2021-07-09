@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+<button mat-button color="primary" aria-label="back" (click)="onCloseClick()">
+  <mat-icon>arrow_back</mat-icon>
+  <span>Back</span>
+</button>
 <mat-list-item>
   <img
     *ngIf="featureTypeValue === featureType.Point"

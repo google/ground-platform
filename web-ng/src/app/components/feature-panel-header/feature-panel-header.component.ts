@@ -43,7 +43,6 @@ import { FeatureService } from '../../services/feature/feature.service';
 export class FeaturePanelHeaderComponent
   implements OnInit, OnDestroy, OnChanges {
   @Input() layer?: Layer;
-  @Input() actionsType: FeatureHeaderActionType = FeatureHeaderActionType.MENU;
   projectId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
