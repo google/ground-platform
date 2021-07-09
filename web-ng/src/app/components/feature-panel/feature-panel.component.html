@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<mat-list *ngIf="layer$ | async as layer">
+<mat-list *ngIf="layer">
   <!--
     TODO: create separate component for layer as a header instead of
     using LayerListItem here.
@@ -23,7 +23,7 @@ limitations under the License.
   >
   </ground-feature-panel-header>
 </mat-list>
-<div *ngIf="layer$ | async as layer" class="button-container">
+<div *ngIf="layer" class="button-container">
   <button
     *ngIf="!layer.forms?.isEmpty()"
     mat-flat-button

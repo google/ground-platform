@@ -17,10 +17,10 @@
 import { Observation } from './../../shared/models/observation/observation.model';
 import { ObservationService } from './../../services/observation/observation.service';
 import { FeatureService } from './../../services/feature/feature.service';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { ProjectService } from './../../services/project/project.service';
 import { List } from 'immutable';
-import { Observable, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
@@ -38,11 +38,11 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   projectId?: string;
   observationId?: string;
   readonly observations$: Observable<List<Observation>>;
-  readonly layer$: Observable<Layer>;
   readonly lang: string;
   readonly fieldTypes = FieldType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
+  layer?: Layer;
 
   constructor(
     private navigationService: NavigationService,
@@ -68,15 +68,12 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
             )
         )
       );
-    this.layer$ = projectService
-      .getActiveProject$()
-      .pipe(
-        switchMap(project =>
-          featureService
-            .getSelectedFeature$()
-            .pipe(map(feature => project.layers.get(feature.layerId)!))
-        )
-      );
+    combineLatest([
+      projectService.getActiveProject$(),
+      featureService.getSelectedFeature$(),
+    ]).subscribe(
+      ([project, feature]) => (this.layer = project.layers.get(feature.layerId))
+    );
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {
       observations.forEach(observation => {
