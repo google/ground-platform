@@ -49,8 +49,9 @@ export class FeaturePanelHeaderComponent
   pinUrl: SafeUrl;
   readonly lang: string;
   readonly featureHeaderActionType = FeatureHeaderActionType;
+  readonly featureType = FeatureType;
   subscription: Subscription = new Subscription();
-  featureType?: FeatureType;
+  featureTypeValue?: FeatureType;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -66,9 +67,9 @@ export class FeaturePanelHeaderComponent
     this.subscription.add(
       featureService.getSelectedFeature$().subscribe(feature => {
         if (feature instanceof GeoJsonFeature) {
-          this.featureType = FeatureType.Polygon;
+          this.featureTypeValue = FeatureType.Polygon;
         } else if (feature instanceof LocationFeature) {
-          this.featureType = FeatureType.Point;
+          this.featureTypeValue = FeatureType.Point;
         }
       })
     );
