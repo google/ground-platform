@@ -398,7 +398,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     feature.polygonVertices.map(vertex => {
       vertices.push(new google.maps.LatLng(vertex.latitude, vertex.longitude));
     });
-    // Construct the polygon.
     const polygon = Polygon(
       feature.id,
       new google.maps.Polygon({
@@ -416,7 +415,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.navigationService.selectFeature(feature.id);
     });
     if (this.map.googleMap !== undefined) {
-      polygon.setMap(this.map.googleMap);
+      polygon.setMap(this.map.googleMap!!);
     }
     this.polygons.push(polygon);
   }

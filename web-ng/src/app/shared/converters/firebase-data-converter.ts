@@ -582,15 +582,6 @@ export class FirebaseDataConverter {
     return Role[role].toLowerCase();
   }
 
-  private static isFeatureValid(data: DocumentData): boolean {
-    return (
-      data?.layerId &&
-      (this.isLocationFeature(data) ||
-        this.isGeoJsonFeature(data) ||
-        this.isPolygonFeature(data))
-    );
-  }
-
   private static isLocationFeature(data: DocumentData): boolean {
     return data?.location?.latitude && data?.location?.longitude;
   }
