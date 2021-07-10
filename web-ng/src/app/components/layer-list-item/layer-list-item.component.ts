@@ -135,7 +135,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     if (!this.layer?.id) {
       return;
     }
-    this.navigationService.selectLayerFeature(this.layer.id);
+    this.navigationService.showFeatureList(this.layer.id);
   }
 
   ngOnDestroy(): void {

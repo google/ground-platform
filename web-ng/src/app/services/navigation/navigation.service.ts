@@ -155,9 +155,9 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  selectLayerFeature(id: string) {
+  showFeatureList(layerId: string) {
     const newParam: { [key: string]: string } = {};
-    newParam[NavigationService.FEATURE_LAYER_ID_FRAGMENT_PARAM] = id;
+    newParam[NavigationService.FEATURE_LAYER_ID_FRAGMENT_PARAM] = layerId;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
