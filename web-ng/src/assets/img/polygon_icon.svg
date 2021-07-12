@@ -1,0 +1,25 @@
+<!--
+Copyright 2021 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="5.28202" cy="31.2394" r="4.30888" fill="#F1F3F4" />
+    <circle cx="30.7181" cy="31.2394" r="4.30888" fill="#F1F3F4" />
+    <circle cx="30.5794" cy="18.3127" r="4.30888" fill="#F1F3F4" />
+    <circle cx="5.28202" cy="5.28184" r="4.30888" fill="#F1F3F4" />
+    <rect x="10.7026" y="29.1892" width="14.5946" height="3.89189" fill="#F1F3F4" />
+    <rect x="11.6094" y="5.83783" width="17.0166" height="4.30888" transform="rotate(25.8625 11.6094 5.83783)" fill="#F1F3F4" />
+    <rect x="28.564" y="25.8533" width="2.15444" height="4.30888" transform="rotate(-90 28.564 25.8533)" fill="#F1F3F4" />
+    <rect x="2.91895" y="25.2973" width="14.5946" height="4.86487" transform="rotate(-90 2.91895 25.2973)" fill="#F1F3F4" />
+</svg>

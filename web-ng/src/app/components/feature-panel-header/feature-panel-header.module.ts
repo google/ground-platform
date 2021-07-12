@@ -23,6 +23,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   declarations: [FeaturePanelHeaderComponent],
@@ -35,6 +36,7 @@ import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
     MatButtonModule,
     MatMenuModule,
     MatDialogModule,
+    FlexLayoutModule,
   ],
   exports: [FeaturePanelHeaderComponent],
 })
