@@ -112,7 +112,7 @@
 
     // Allow passlisted users to access Terms of Service and other config.
     match /config/{id} {
-      allow read: if isInPassList(email())
+      allow read: if canAccess(email())
     }
 
     // Apply project-level ACLs and passlist to feature documents.
