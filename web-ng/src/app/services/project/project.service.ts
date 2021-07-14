@@ -137,25 +137,4 @@ export class ProjectService {
       .sortBy(entry => entry.email)
       .toArray();
   }
-
-  /**
-   * Checks if a user can add points to a specific layer.
-   */
-  canUserAddPointsToLayer(layer: Layer): boolean {
-    const user = this.authService.getCurrentUser();
-    if (!user) {
-      return false;
-    }
-    const userRole = this.currentProject.acl.get(user.email);
-    switch (userRole) {
-      case Role.OWNER:
-      case Role.MANAGER:
-        return true;
-      case Role.CONTRIBUTOR:
-        return layer.contributorsCanAdd?.includes('points') ?? false;
-      case Role.VIEWER:
-      default:
-        return false;
-    }
-  }
 }
