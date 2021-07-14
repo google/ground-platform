@@ -19,7 +19,16 @@
   background-image: url(/assets/img/happy-land.png);
   background-repeat: no-repeat;
   background-size: cover;
-  max-width: 400px;
+  width: 160px;
+  height: 120px;
+  margin: 32px;
+  padding: 32px;
+}
+.project-add {
+  background-color: white;
+  width: 160px;
+  height: 120px;
+  margin: 32px;
   padding: 32px;
 }
 
@@ -28,10 +37,24 @@
   height: 64px;
 }
 
+.container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .title-project {
-  width: 100px;
   color: white;
   word-wrap: break-word;
+}
+
+.title-add {
+  position: absolute;
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .container-projects {

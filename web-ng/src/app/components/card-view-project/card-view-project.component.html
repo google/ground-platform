@@ -15,31 +15,27 @@
 -->
 
 <div fxLayout="column">
-    <gnd-header-layout>
-    </gnd-header-layout>
-  
-    <h1 fxFlex style="padding: 16px;"> Recent Projects</h1>
-    <div fxFlex class="container-projects">
-          <mat-grid-list [cols]="breakpoint" rowHeight="2:1" (window:resize)="onResize($event)">
-            <mat-grid-tile>
-              <mat-card  (click)="onNewProject()" class="project-card">
-                  <mat-card-header>
-                    <mat-card-title>
-                    <button mat-icon-button color="primary">
-                      <mat-icon [ngStyle]="{'color':'white'}">add</mat-icon>
-                    </button>
-                  </mat-card-title>
-                  </mat-card-header>
-              </mat-card>
-            </mat-grid-tile>
-            <mat-grid-tile *ngFor="let project of projects; let i = index" >
-              <mat-card (click)="onProjectClicked(i)"  class="project-card">
-                    <mat-card-header>
-                      <mat-card-title class="title-project" [style.width.px]="width - 50">{{project.title.get("en")}}</mat-card-title>
-                    </mat-card-header>
-              </mat-card> 
-            </mat-grid-tile>
-          </mat-grid-list>
-        </div>
+  <gnd-header-layout> </gnd-header-layout>
+
+  <h1 fxFlex style="padding: 16px">Recent Projects</h1>
+  <div fxFlex class="container-projects">
+    <div class="container">
+      <mat-card (click)="onNewProject()" class="project-add">
+        <mat-card-content style="height: 100%; width: 100%">
+          <mat-icon color="primary" class="title-add">add</mat-icon>
+        </mat-card-content>
+      </mat-card>
+      <mat-card
+        (click)="onProjectClicked(i)"
+        class="project-card"
+        *ngFor="let project of projects; let i = index"
+      >
+        <mat-card-header>
+          <mat-card-title class="title-project">{{
+            project.title.get('en')
+          }}</mat-card-title>
+        </mat-card-header>
+      </mat-card>
     </div>
-  
+  </div>
+</div>
