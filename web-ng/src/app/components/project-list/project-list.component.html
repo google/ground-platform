@@ -13,15 +13,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
 <div fxLayout="column">
   <gnd-header-layout> </gnd-header-layout>
 
-  <h1 fxFlex style="padding: 16px">Recent Projects</h1>
+  <h1 fxFlex class="recent-projects">Recent Projects</h1>
   <div fxFlex class="container-projects">
     <div class="container">
       <mat-card (click)="onNewProject()" class="project-add">
-        <mat-card-content style="height: 100%; width: 100%">
+        <mat-card-content class="card-content">
           <mat-icon color="primary" class="title-add">add</mat-icon>
         </mat-card-content>
       </mat-card>

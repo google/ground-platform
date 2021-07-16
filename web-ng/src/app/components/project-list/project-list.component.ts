@@ -19,20 +19,19 @@ import { Component, OnDestroy, ElementRef, OnInit } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
+import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { Project } from '../../shared/models/project.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
-  selector: 'app-card-view-project',
-  templateUrl: './card-view-project.component.html',
-  styleUrls: ['./card-view-project.component.scss'],
+  selector: 'app-project-list',
+  templateUrl: './project-list.component.html',
+  styleUrls: ['./project-list.component.scss'],
 })
-export class CardViewProjectComponent implements OnInit, OnDestroy {
+export class ProjectListComponent implements OnInit, OnDestroy {
   projects?: Project[];
   private subscription = new Subscription();
-  breakpoint: number;
 
   constructor(
     public auth: AuthService,
@@ -40,9 +39,7 @@ export class CardViewProjectComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     private dialog: MatDialog,
     private authService: AuthService
-  ) {
-    this.breakpoint = window.innerWidth <= 400 ? 1 : 6;
-  }
+  ) {}
 
   ngOnInit(): void {
     const allProjects = this.projectService.getAllProjects$();
@@ -79,9 +76,5 @@ export class CardViewProjectComponent implements OnInit, OnDestroy {
     this.dialog.open(UserProfilePopupComponent, {
       data: { trigger: target },
     });
-  }
-
-  onResize(event: any) {
-    this.breakpoint = event.target.innerWidth <= 400 ? 1 : 6;
   }
 }

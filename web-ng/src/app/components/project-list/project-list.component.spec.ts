@@ -29,7 +29,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { ProjectService } from '../../services/project/project.service';
 import { Map, List } from 'immutable';
-import { CardViewProjectComponent } from './card-view-project.component';
+import { ProjectListComponent } from './project-list.component';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -44,9 +44,9 @@ import { Role } from '../../shared/models/role.model';
 @Component({ selector: 'gnd-header-layout', template: '' })
 class HeaderLayoutComponent {}
 
-describe('CardViewProjectComponent', () => {
-  let component: CardViewProjectComponent;
-  let fixture: ComponentFixture<CardViewProjectComponent>;
+describe('ProjectListComponent', () => {
+  let component: ProjectListComponent;
+  let fixture: ComponentFixture<ProjectListComponent>;
   const dialog: Partial<MatDialog> = {};
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
 
@@ -103,7 +103,7 @@ describe('CardViewProjectComponent', () => {
           MatButtonModule,
           MatIconModule,
         ],
-        declarations: [CardViewProjectComponent, HeaderLayoutComponent],
+        declarations: [ProjectListComponent, HeaderLayoutComponent],
         providers: [
           { provide: MatDialog, useValue: dialog },
           { provide: MatDialogRef, useValue: dialogRef },
@@ -125,7 +125,7 @@ describe('CardViewProjectComponent', () => {
       new AclEntry('test@gmail.com', Role.MANAGER),
     ]);
     authServiceSpy.canManageProject.and.returnValue(true);
-    fixture = TestBed.createComponent(CardViewProjectComponent);
+    fixture = TestBed.createComponent(ProjectListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

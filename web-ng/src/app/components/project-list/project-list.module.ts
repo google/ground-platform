@@ -17,8 +17,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutModule } from './../header-layout/header-layout.module';
-import { CardViewProjectComponent } from './card-view-project.component';
+import { HeaderLayoutModule } from '../header-layout/header-layout.module';
+import { ProjectListComponent } from './project-list.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -29,7 +29,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
-  declarations: [CardViewProjectComponent],
+  declarations: [ProjectListComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -43,6 +43,6 @@ import { MatCardModule } from '@angular/material/card';
     MatGridListModule,
     InlineEditorModule,
   ],
-  exports: [CardViewProjectComponent],
+  exports: [ProjectListComponent],
 })
-export class CardViewProjectModule {}
+export class ProjectListModule {}

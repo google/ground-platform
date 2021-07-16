@@ -37,7 +37,7 @@ import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { CardViewProjectModule } from './components/card-view-project/card-view-project.module';
+import { ProjectListModule } from './components/project-list/project-list.module';
 import { MatInputModule } from '@angular/material/input';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
@@ -79,7 +79,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     MatInputModule,
     LayerDialogModule,
     MatCardModule,
-    CardViewProjectModule,
+    ProjectListModule,
     MatGridListModule,
     ShareDialogModule,
     TitleDialogModule,

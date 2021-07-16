@@ -69,8 +69,8 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
     return this.projectService.updateTitle(this.projectId, value);
   }
 
-  redirectMainPage(): void {
-    this.navigationService.viewProjects();
+  onProjectsButtonClick(): void {
+    this.navigationService.navigateToProjectList();
   }
 
   ngOnDestroy() {

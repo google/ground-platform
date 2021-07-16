@@ -24,8 +24,18 @@
   margin: 32px;
   padding: 32px;
 }
+
+.recent-projects {
+  padding: 16px;
+}
+
+.card-content {
+  height: 100%;
+  width: 100%;
+}
+
 .project-add {
-  background-color: white;
+  background-color: var(--white);
   width: 160px;
   height: 120px;
   margin: 32px;
@@ -43,7 +53,7 @@
 }
 
 .title-project {
-  color: white;
+  color: var(--white);
   word-wrap: break-word;
 }
 

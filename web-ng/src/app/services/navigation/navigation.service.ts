@@ -214,7 +214,7 @@ export class NavigationService {
   /**
    * Navigate to the URL for viewing the projects.
    */
-  viewProjects() {
+  navigateToProjectList() {
     this.router.navigate([NavigationService.HOME_SEGMENT]);
   }
 
