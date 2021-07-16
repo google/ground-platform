@@ -25,6 +25,10 @@ import {
   OnDestroy,
   ViewChildren,
   QueryList,
+  HostListener,
+  ElementRef,
+  ViewChild,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormGroup,
@@ -72,9 +76,30 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   formOptions: MultipleChoice | undefined;
   selectFieldOptions: FieldTypeSelectOption[];
 
+  /** When expanded, options and actions below the fold are visible to the user. */
+  expanded: boolean;
+
+  /** Set to true when question gets focus, false when it loses focus. */
+  selected: boolean;
+
   subscription: Subscription = new Subscription();
 
   formGroup: FormGroup;
+  @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
+
+  @HostListener('click')
+  onFormFocus() {
+    this.expanded = true;
+    this.selected = true;
+  }
+
+  @HostListener('document:click')
+  onFormBlur() {
+    if (!this.selected) {
+      this.expanded = false;
+    }
+    this.selected = false;
+  }
 
   @ViewChildren(OptionEditorComponent)
   optionEditors?: QueryList<OptionEditorComponent>;
@@ -82,8 +107,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
-    private layerService: LayerService
+    private layerService: LayerService,
+    private readonly cdr: ChangeDetectorRef
   ) {
+    this.expanded = false;
+    this.selected = false;
     this.selectFieldOptions = [
       {
         icon: 'short_text',
@@ -265,6 +293,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     );
     const options = this.setFormOptions(index, option);
     this.emitFormOptions(options);
+    this.focusNewOption();
   }
 
   setFormOptions(index: number, option: Option): List<Option> {
@@ -319,5 +348,13 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
+  }
+
+  private focusNewOption(): void {
+    this.cdr.detectChanges();
+    if (this.optionEditors?.length) {
+      const option = this.optionEditors.last;
+      option?.optionInput?.nativeElement.focus();
+    }
   }
 }
