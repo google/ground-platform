@@ -41,6 +41,7 @@ import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
+import { keyframes } from '@angular/animations';
 
 // To make ESLint happy:
 /*global google*/
@@ -69,8 +70,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
   private selectedMarker?: google.maps.Marker;
-  private markers: google.maps.Marker[] = [];
-  private polygons: google.maps.Polygon[] = [];
+  private markers: Map<string, google.maps.Marker> = new Map<
+    string,
+    google.maps.Marker
+  >();
+  private polygons: Map<string, google.maps.Polygon> = new Map<
+    string,
+    google.maps.Polygon
+  >();
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
   };
@@ -180,10 +187,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private removeMarkersOnMap(newFeatureIds: List<string>) {
-    for (let i = this.markers.length - 1; i >= 0; i--) {
-      if (!newFeatureIds.contains(this.markers[i].getTitle()!)) {
-        this.markers[i].setMap(null);
-        this.markers.splice(i, 1);
+    for (let id of this.markers.keys()) {
+      if (!newFeatureIds.contains(id)) {
+        this.markers.get(id)!.setMap(null);
+        this.markers.delete(id);
       }
     }
   }
@@ -197,18 +204,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private removePolygonOnMap(newFeatureIds: List<string>) {
-    for (let i = this.polygons.length - 1; i >= 0; i--) {
-      if (!newFeatureIds.contains(this.polygons[i].get('id'))) {
-        this.polygons[i].setMap(null);
-        this.polygons.splice(i, 1);
+    for (let id of this.polygons.keys()) {
+      if (!newFeatureIds.contains(id)) {
+        this.polygons.get(id)!.setMap(null);
+        this.polygons.delete(id);
       }
     }
   }
 
   private addFeaturesToMap(project: Project, features: List<Feature>) {
-    const locationFeatureIds = this.markers.map(m => m.getTitle());
+    const locationFeatureIds = Array.from(this.markers.keys());
     const geoJsonFeatureIds: String[] = [];
-    const polygonFeatureIds = this.polygons.map(m => m.get('id'));
+    const polygonFeatureIds = Array.from(this.polygons.keys());
     this.map.data.forEach(f => {
       geoJsonFeatureIds.push(f.getProperty('featureId'));
     });
@@ -276,7 +283,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('dragend', (event: google.maps.MouseEvent) =>
       this.onMarkerDragEnd(event, feature)
     );
-    this.markers.push(marker);
+    this.markers.set(feature.id, marker);
   }
 
   private onMarkerClick(featureId: string) {
@@ -332,11 +339,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (editMode !== EditMode.None) {
       this.navigationService.clearFeatureId();
       for (const marker of this.markers) {
-        marker.setClickable(false);
+        marker[1].setClickable(false);
       }
     } else {
       for (const marker of this.markers) {
-        marker.setClickable(true);
+        marker[1].setClickable(true);
       }
     }
     this.mapOptions =
@@ -362,9 +369,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
-    const markerToSelect = this.markers.find(
-      marker => marker.getTitle() === selectedFeatureId
-    );
+    const markerToSelect = this.markers.get(selectedFeatureId as string);
+    // const markerToSelect = this.markers.find(
+    //   marker => marker.getTitle() === selectedFeatureId
+    // );
     this.selectMarker(markerToSelect);
   }
 
@@ -411,10 +419,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.panAndZoom(vertices[0]);
       this.navigationService.selectFeature(feature.id);
     });
-    if (this.map.googleMap !== undefined) {
-      polygon.setMap(this.map.googleMap);
-    }
-    this.polygons.push(polygon);
+
+    polygon.setMap(this.map.googleMap!);
+
+    this.polygons.set(feature.id, polygon);
   }
 
   private updateStylingFunctionForAllGeoJsons(
