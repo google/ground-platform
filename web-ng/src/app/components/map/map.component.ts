@@ -370,9 +370,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
     const markerToSelect = this.markers.get(selectedFeatureId as string);
-    // const markerToSelect = this.markers.find(
-    //   marker => marker.getTitle() === selectedFeatureId
-    // );
     this.selectMarker(markerToSelect);
   }
 
