@@ -41,7 +41,6 @@ import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
-import { keyframes } from '@angular/animations';
 
 // To make ESLint happy:
 /*global google*/
@@ -187,7 +186,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private removeMarkersOnMap(newFeatureIds: List<string>) {
-    for (let id of this.markers.keys()) {
+    for (const id of this.markers.keys()) {
       if (!newFeatureIds.contains(id)) {
         this.markers.get(id)!.setMap(null);
         this.markers.delete(id);
@@ -204,7 +203,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private removePolygonOnMap(newFeatureIds: List<string>) {
-    for (let id of this.polygons.keys()) {
+    for (const id of this.polygons.keys()) {
       if (!newFeatureIds.contains(id)) {
         this.polygons.get(id)!.setMap(null);
         this.polygons.delete(id);
