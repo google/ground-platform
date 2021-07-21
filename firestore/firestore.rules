@@ -110,6 +110,11 @@
       allow create, read, write: if canAccess(email())
     }
 
+    // Allow passlisted users to access Terms of Service and other config.
+    match /config/{id} {
+      allow read: if canAccess(email())
+    }
+
     // Apply project-level ACLs and passlist to feature documents.
     match /projects/{projectId}/features/{featureId} {
       allow read: if canViewProject(projectId, email())

@@ -15,6 +15,7 @@
  */
 
 import {
+  ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
@@ -68,7 +69,8 @@ export class LayerDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dialogService: DialogService,
     private layerService: LayerService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.lang = 'en';
     this.defaultLayerColor = '#ff9131';
@@ -90,6 +92,7 @@ export class LayerDialogComponent implements OnDestroy {
     );
     this.fields = this.fields.push(newField);
     this.markFormFieldsTouched();
+    this.focusNewQuestion();
   }
 
   /**
@@ -259,5 +262,13 @@ export class LayerDialogComponent implements OnDestroy {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
+  }
+
+  private focusNewQuestion(): void {
+    if (this.formFieldEditors?.length) {
+      this.cdr.detectChanges();
+      const question = this.formFieldEditors.last;
+      question?.questionInput?.nativeElement.focus();
+    }
   }
 }
