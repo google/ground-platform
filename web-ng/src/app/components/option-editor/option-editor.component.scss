@@ -32,6 +32,12 @@
   align-self: center;
   color: mat-color($foreground, icon);
   margin-right: 5px !important;
+  visibility: hidden;
+}
+
+:host:hover .drag-icon,
+:host:focus-within .drag-icon {
+  visibility: visible;
 }
 
 .field-option {
