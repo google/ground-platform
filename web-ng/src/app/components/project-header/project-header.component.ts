@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
   selector: 'app-project-header',
@@ -71,6 +72,13 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
 
   onProjectsButtonClick(): void {
     this.navigationService.navigateToProjectList();
+  }
+
+  private openShareDialog(): void {
+    this.dialog.open(ShareDialogComponent, {
+      width: '580px',
+      autoFocus: false,
+    });
   }
 
   ngOnDestroy() {
