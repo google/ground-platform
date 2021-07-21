@@ -173,7 +173,7 @@ export class LayerDialogComponent implements OnDestroy {
       /* index */ this.layer?.index || -1,
       this.color,
       // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName }),
+      StringMap({ [this.lang]: this.layerName.trim() }),
       forms,
       this.contributorsCanAdd ? ['points'] : []
     );
