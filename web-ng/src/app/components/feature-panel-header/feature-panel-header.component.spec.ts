@@ -22,7 +22,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
 
@@ -41,7 +41,7 @@ describe('FeaturePanelHeaderComponent', () => {
       providers: [
         { provide: Router, useValue: {} },
         { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
+        { provide: AngularFireAuth, useValue: { authState: NEVER } },
         { provide: NavigationService, useValue: navigationService },
       ],
     }).compileComponents();
