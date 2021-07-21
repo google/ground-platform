@@ -71,8 +71,13 @@ export class ProjectService {
     return this.activeProject$;
   }
 
-  getAllProjects$(): Observable<Project[]> {
-    return this.dataStore.loadAllProject$();
+  getAccessibleProjects$(): Observable<Project[]> {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      return new Observable<Project[]>();
+    }
+    const userEmail = user.email;
+    return this.dataStore.loadAccessibleProject$(userEmail);
   }
 
   /**
@@ -124,17 +129,5 @@ export class ProjectService {
     const userEmail = user.email;
     const acl = this.getCurrentProjectAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
-  }
-
-  /**
-   * Returns the acl of the project.
-   */
-  getProjectAcl(project: Project): AclEntry[] {
-    return project?.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
   }
 }

@@ -25,6 +25,9 @@
 $primary: mat-palette($mat-green, 700, 600, 800);
 $accent: mat-palette($mat-amber, 700, 600, 800);
 $warn: mat-palette($mat-pink, 600, 500, 700);
+$white: mat-palette($mat-grey, A100);
+$black: mat-palette($mat-blue-grey, 900);
+$offWhite: mat-palette($mat-grey, 100);
 
 // Create the theme object (a Sass map containing all of the palettes).
 $theme: mat-light-theme($primary, $accent, $warn);
@@ -33,10 +36,3 @@ $theme: mat-light-theme($primary, $accent, $warn);
 // https://github.com/angular/components/blob/16f5f793dea3d83a6f08de14e3787ce97d82ff15/src/material/core/theming/_palette.scss#L674
 $foreground: map-get($theme, foreground);
 $background: map-get($theme, background);
-
-:root {
-  --drawing-tools-black: #202225;
-  --drawing-tools-green: #3d7d40;
-  --project-list-background: #f0f1f2;
-  --white: #ffffff;
-}

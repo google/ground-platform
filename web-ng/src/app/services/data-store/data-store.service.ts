@@ -56,21 +56,27 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the projects with the specified
-   * uuid.
+   * Returns an Observable that loads and emits the projects to which the user
+   * is part of.
    *
    */
-  loadAllProject$(): Observable<Project[]> {
+  loadAccessibleProject$(userEmail: string): Observable<Project[]> {
     return this.db
       .collection('projects')
       .snapshotChanges()
       .pipe(
         map(actions =>
-          actions.map(a => {
-            const data = a.payload.doc.data() as Project;
-            const id = a.payload.doc.id;
-            return FirebaseDataConverter.toProject(id, data as DocumentData);
-          })
+          actions
+            .filter(a => {
+              const data = a.payload.doc.data() as Project;
+              const emails = Object.keys(data.acl);
+              return emails.indexOf(userEmail) > -1;
+            })
+            .map(a => {
+              const data = a.payload.doc.data() as Project;
+              const id = a.payload.doc.id;
+              return FirebaseDataConverter.toProject(id, data as DocumentData);
+            })
         )
       );
   }

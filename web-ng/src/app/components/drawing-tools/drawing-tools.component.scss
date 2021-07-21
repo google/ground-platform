@@ -16,7 +16,7 @@
 
 @import '_variables';
 
- .drawing-buttons {
+.drawing-buttons {
   position: absolute;
   bottom: 3em;
   left: 3em;
@@ -31,13 +31,13 @@
 }
 
 .add-point-button {
-  background-color: var(--drawing-tools-black);
+  background-color: mat-color($black);
 }
 
 .add-point-button:hover {
-  background-color: var(--drawing-tools-green);
+  background-color: mat-color($primary);
 }
 
 .mat-button-toggle-checked {
-  background-color: var(--drawing-tools-green);
+  background-color: mat-color($primary);
 }

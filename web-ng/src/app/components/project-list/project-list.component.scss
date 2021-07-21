@@ -35,7 +35,7 @@
 }
 
 .project-add {
-  background-color: var(--white);
+  background-color: mat-color($white);
   width: 160px;
   height: 120px;
   margin: 32px;
@@ -53,7 +53,7 @@
 }
 
 .title-project {
-  color: var(--white);
+  color: mat-color($white);
   word-wrap: break-word;
 }
 
@@ -68,5 +68,5 @@
 }
 
 .container-projects {
-  background-color: var(--project-list-background);
+  background-color: mat-color($offWhite);
 }

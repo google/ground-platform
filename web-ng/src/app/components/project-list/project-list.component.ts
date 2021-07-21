@@ -22,7 +22,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { Project } from '../../shared/models/project.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { AuthService } from '../../services/auth/auth.service';
 
 @Component({
   selector: 'app-project-list',
@@ -34,24 +33,15 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
 
   constructor(
-    public auth: AuthService,
     private projectService: ProjectService,
     private navigationService: NavigationService,
-    private dialog: MatDialog,
-    private authService: AuthService
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    const allProjects = this.projectService.getAllProjects$();
+    const allProjects = this.projectService.getAccessibleProjects$();
     this.subscription.add(
-      allProjects.subscribe(projects => {
-        projects?.forEach(element => {
-          const acl = this.projectService.getProjectAcl(element);
-          const isValid = this.authService.canManageProject(acl);
-          if (!isValid) {
-            projects.splice(projects.indexOf(element), 1);
-          }
-        });
+      allProjects?.subscribe(projects => {
         this.projects = projects;
       })
     );
