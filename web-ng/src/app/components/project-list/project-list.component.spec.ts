@@ -83,7 +83,7 @@ describe('ProjectListComponent', () => {
   );
 
   const projectServiceSpy = jasmine.createSpyObj('ProjectService', [
-    'getAllProjects$',
+    'getAccessibleProjects$',
     'getProjectAcl',
   ]);
   const authServiceSpy = jasmine.createSpyObj('AuthService', [
@@ -118,7 +118,7 @@ describe('ProjectListComponent', () => {
   );
 
   beforeEach(() => {
-    projectServiceSpy.getAllProjects$.and.returnValue(
+    projectServiceSpy.getAccessibleProjects$.and.returnValue(
       of<Project[]>([mockProject1, mockProject2])
     );
     projectServiceSpy.getProjectAcl.and.returnValue([
