@@ -78,6 +78,11 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.fields = List<Field>();
     this.init(data.projectId, data.createLayer, data.layer);
+    this.dialogRef.keydownEvents().subscribe(event => {
+      if (event.key === 'Escape') {
+        this.onClose();
+      }
+    });
   }
 
   addQuestion() {
@@ -168,7 +173,7 @@ export class LayerDialogComponent implements OnDestroy {
       /* index */ this.layer?.index || -1,
       this.color,
       // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName }),
+      StringMap({ [this.lang]: this.layerName.trim() }),
       forms,
       this.contributorsCanAdd ? ['points'] : []
     );
