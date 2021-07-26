@@ -15,6 +15,7 @@
  */
 
 import {
+  ChangeDetectorRef,
   Component,
   Inject,
   OnDestroy,
@@ -68,7 +69,8 @@ export class LayerDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<LayerDialogComponent>,
     private dialogService: DialogService,
     private layerService: LayerService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.lang = 'en';
     this.defaultLayerColor = '#ff9131';
@@ -76,6 +78,11 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.fields = List<Field>();
     this.init(data.projectId, data.createLayer, data.layer);
+    this.dialogRef.keydownEvents().subscribe(event => {
+      if (event.key === 'Escape') {
+        this.onClose();
+      }
+    });
   }
 
   addQuestion() {
@@ -90,6 +97,7 @@ export class LayerDialogComponent implements OnDestroy {
     );
     this.fields = this.fields.push(newField);
     this.markFormFieldsTouched();
+    this.focusNewQuestion();
   }
 
   /**
@@ -165,7 +173,7 @@ export class LayerDialogComponent implements OnDestroy {
       /* index */ this.layer?.index || -1,
       this.color,
       // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName }),
+      StringMap({ [this.lang]: this.layerName.trim() }),
       forms,
       this.contributorsCanAdd ? ['points'] : []
     );
@@ -259,5 +267,13 @@ export class LayerDialogComponent implements OnDestroy {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
+  }
+
+  private focusNewQuestion(): void {
+    if (this.formFieldEditors?.length) {
+      this.cdr.detectChanges();
+      const question = this.formFieldEditors.last;
+      question?.questionInput?.nativeElement.focus();
+    }
   }
 }

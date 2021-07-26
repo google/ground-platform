@@ -20,12 +20,9 @@
 const functions = require("firebase-functions");
 const onCreateUser = require("./on-create-user");
 const exportCsv = require("./export-csv");
-const exportKml = require("./export-kml");
 const importCsv = require("./import-csv");
 const importGeoJson = require("./import-geojson");
-const updateColumns = require("./update-columns");
-const onCreateRecord = require("./on-create-record");
-const onUpdateRecord = require("./on-update-record");
+
 const cors = require("cors")({ origin: true });
 
 /**
