@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,15 @@
  * limitations under the License.
  */
 
-@import 'variables';
+import { Component, OnInit } from '@angular/core';
 
-:host {
-  display: flex;
-}
+@Component({
+  selector: 'ground-feature-list',
+  templateUrl: './feature-list.component.html',
+  styleUrls: ['./feature-list.component.scss'],
+})
+export class FeatureListComponent implements OnInit {
+  constructor() {}
 
-.dot {
-  color: mat-color($foreground, icon);
-  align-self: center;
-}
-
-.drag-icon {
-  display: block;
-  margin: 0px auto;
-  cursor: move;
-  align-self: center;
-  color: mat-color($foreground, icon);
-  margin-right: 5px !important;
-  visibility: hidden;
-}
-
-:host:hover .drag-icon,
-:host:focus-within .drag-icon {
-  visibility: visible;
-}
-
-.field-option {
-  width: 300px;
-}
-
-.code-option {
-  width: 100px;
+  ngOnInit(): void {}
 }

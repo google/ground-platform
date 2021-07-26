@@ -1,5 +1,5 @@
 <!--
-Copyright 2020 Google LLC
+Copyright 2021 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,20 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div [ngSwitch]="sideNavMode$ | async">
-  <div *ngSwitchCase="sideNavMode.OBSERVATION">
-    <ground-observation-form></ground-observation-form>
-  </div>
 
-  <div *ngSwitchCase="sideNavMode.FEATURE">
-    <ground-feature-panel></ground-feature-panel>
-  </div>
-
-  <div *ngSwitchCase="sideNavMode.LAYER_LIST">
-    <ground-layer-list></ground-layer-list>
-  </div>
-
-  <div *ngSwitchCase="sideNavMode.FEATURE_LIST">
-    <ground-feature-list></ground-feature-list>
-  </div>
-</div>
+<!--
+    TODO(#777): Display list of features for the layer
+-->

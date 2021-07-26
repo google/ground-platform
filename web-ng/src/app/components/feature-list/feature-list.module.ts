@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,13 @@
  * limitations under the License.
  */
 
-@import 'variables';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FeatureListComponent } from './feature-list.component';
 
-:host {
-  display: flex;
-}
-
-.dot {
-  color: mat-color($foreground, icon);
-  align-self: center;
-}
-
-.drag-icon {
-  display: block;
-  margin: 0px auto;
-  cursor: move;
-  align-self: center;
-  color: mat-color($foreground, icon);
-  margin-right: 5px !important;
-  visibility: hidden;
-}
-
-:host:hover .drag-icon,
-:host:focus-within .drag-icon {
-  visibility: visible;
-}
-
-.field-option {
-  width: 300px;
-}
-
-.code-option {
-  width: 100px;
-}
+@NgModule({
+  declarations: [FeatureListComponent],
+  imports: [CommonModule],
+  exports: [FeatureListComponent],
+})
+export class FeatureListModule {}
