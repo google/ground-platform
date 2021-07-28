@@ -390,15 +390,33 @@ export class FirebaseDataConverter {
       if (!data.layerId) {
         throw new Error('Missing layer id');
       }
+      // Convert properties object to map.
+      const featureProperties = Map<string, string | number>(
+        keys(data.properties).map((property: string) => [
+          property,
+          data.properties[property],
+        ])
+      );
+
       if (this.isLocationFeature(data)) {
-        return new LocationFeature(id, data.layerId, data.location);
+        return new LocationFeature(
+          id,
+          data.layerId,
+          data.location,
+          featureProperties
+        );
       }
       if (this.isGeoJsonFeature(data)) {
         const geoJson = JSON.parse(data.geoJson);
-        return new GeoJsonFeature(id, data.layerId, geoJson);
+        return new GeoJsonFeature(id, data.layerId, geoJson, featureProperties);
       }
       if (this.isPolygonFeature(data)) {
-        return new PolygonFeature(id, data.layerId, data.geometry.coordinates);
+        return new PolygonFeature(
+          id,
+          data.layerId,
+          data.geometry.coordinates,
+          featureProperties
+        );
       }
       throw new Error('Missing location and geoJson');
     } catch (err) {
