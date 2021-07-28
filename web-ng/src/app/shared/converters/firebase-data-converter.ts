@@ -390,7 +390,6 @@ export class FirebaseDataConverter {
       if (!data.layerId) {
         throw new Error('Missing layer id');
       }
-      // Convert properties object to map.
       const featureProperties = Map<string, string | number>(
         keys(data.properties).map((property: string) => [
           property,
