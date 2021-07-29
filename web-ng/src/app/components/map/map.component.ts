@@ -69,6 +69,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
   private selectedMarker?: google.maps.Marker;
+  private selectedPolygon?: google.maps.Polygon;
   private markers: Map<string, google.maps.Marker> = new Map<
     string,
     google.maps.Marker
@@ -138,7 +139,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.disableMapClicks) {
       return;
     }
-    this.selectMarker(undefined);
     const editMode = this.drawingToolsService.getEditMode$().getValue();
     const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
     switch (editMode) {
@@ -174,7 +174,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ): void {
     this.removeObsoleteMarkersAndPolygons(features);
     this.addNewFeatures(project, features);
-    this.selectMarkerWithFeatureId(selectedFeatureId);
+    this.selectFeature(selectedFeatureId);
   }
 
   private removeObsoleteMarkersAndPolygons(features: List<Feature>) {
@@ -224,7 +224,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (feature instanceof GeoJsonFeature) {
         this.addGeoJsonFeature(color, feature);
       }
-
       if (feature instanceof PolygonFeature) {
         this.addPolygonFeature(color, feature);
       }
@@ -345,9 +344,27 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(marker?.getPosition());
   }
 
-  private selectMarkerWithFeatureId(selectedFeatureId: string | null) {
+  private selectPolygon(polygon: google.maps.Polygon | undefined) {
+    if (polygon === this.selectedPolygon) {
+      return;
+    }
+    if (polygon) {
+      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
+    }
+    if (this.selectedPolygon) {
+      this.selectedPolygon.setOptions({
+        strokeWeight: normalPolygonStrokeWeight,
+      });
+    }
+    this.selectedPolygon = polygon;
+    this.panAndZoom(polygon?.getPaths().getAt(0).getAt(0));
+  }
+
+  private selectFeature(selectedFeatureId: string | null) {
     const markerToSelect = this.markers.get(selectedFeatureId as string);
     this.selectMarker(markerToSelect);
+    const polygonToSelect = this.polygons.get(selectedFeatureId as string);
+    this.selectPolygon(polygonToSelect);
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {
@@ -429,8 +446,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         return;
       }
       const featureId = polygon.get('id');
-      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
-      this.panAndZoom(paths[0][0]);
       this.zone.run(() => {
         this.navigationService.selectFeature(featureId);
       });
