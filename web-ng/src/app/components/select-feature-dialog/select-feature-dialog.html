@@ -14,19 +14,21 @@
   limitations under the License.
 -->
 
-<h1>Please choose a feature to select</h1>
+<h1 mat-dialog-title>Select Feature</h1>
+<h4>Several overlapping features found at this location. Please select one:</h4>
 <div mat-dialog-content>
-  <div *ngFor="let clickedPolygon of data.clickedPolygons">
-    <button mat-button [mat-dialog-close]="clickedPolygon.get('id')">
+  <div *ngFor="let clickedFeature of data.clickedFeatures">
+    <button mat-button [mat-dialog-close]="clickedFeature.featureId">
       <mat-icon
-          [ngStyle]="{ color: clickedPolygon.get('color') }">
+          [ngStyle]="{ color: clickedFeature.color }">
         layers
       </mat-icon>
-      {{ clickedPolygon.get('layerName') }}
-      {{ clickedPolygon.get('id') }}
+      {{ clickedFeature.layerName }}
+      {{ clickedFeature.featureId }}
     </button>
   </div>
 </div>
-<div mat-dialog-actions>
+<div mat-dialog-actions
+     class="button-row">
   <button mat-button (click)="onCancelClick()">Cancel</button>
 </div>

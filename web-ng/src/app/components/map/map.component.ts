@@ -42,7 +42,10 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
 import { MatDialog } from '@angular/material/dialog';
-import { SelectDialogComponent } from '../select-dialog/select-dialog.component';
+import {
+  FeatureData,
+  SelectFeatureDialogComponent,
+} from '../select-feature-dialog/select-feature-dialog.component';
 
 // To make ESLint happy:
 /*global google*/
@@ -468,9 +471,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
 
       this.zone.run(() => {
-        const dialogRef = this.dialog.open(SelectDialogComponent, {
+        const dialogRef = this.dialog.open(SelectFeatureDialogComponent, {
           width: '500px',
-          data: { clickedPolygons: clickedPolygons },
+          data: {
+            clickedFeatures: clickedPolygons.map(this.polygonToFeatureData),
+          },
         });
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
@@ -480,6 +485,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       });
     });
     this.polygons.set(featureId, polygon);
+  }
+
+  private polygonToFeatureData(polygon: google.maps.Polygon): FeatureData {
+    return {
+      featureId: polygon.get('id'),
+      color: polygon.get('color'),
+      layerName: polygon.get('layerName'),
+    };
   }
 
   onSaveRepositionClick() {

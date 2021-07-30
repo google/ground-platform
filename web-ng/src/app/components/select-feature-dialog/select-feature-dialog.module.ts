@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatDialogModule } from '@angular/material/dialog';
+import { SelectFeatureDialogComponent } from './select-feature-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
-export interface DialogData {
-  clickedPolygons: google.maps.Polygon[];
-}
-
-@Component({
-  selector: 'select-dialog',
-  templateUrl: 'select-dialog.html',
+@NgModule({
+  declarations: [SelectFeatureDialogComponent],
+  imports: [CommonModule, MatButtonModule, MatDialogModule, MatIconModule],
 })
-export class SelectDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<SelectDialogComponent, string | undefined>,
-    @Inject(MAT_DIALOG_DATA)
-    public data: DialogData
-  ) {}
-
-  onCancelClick(): void {
-    this.dialogRef.close();
-  }
-}
+export class SelectFeatureDialogModule {}
