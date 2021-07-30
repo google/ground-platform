@@ -41,6 +41,8 @@ import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
+import { MatDialog } from '@angular/material/dialog';
+import { SelectDialogComponent } from '../select-dialog/select-dialog.component';
 
 // To make ESLint happy:
 /*global google*/
@@ -100,7 +102,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private featureService: FeatureService,
     private navigationService: NavigationService,
     private zone: NgZone,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.features$ = this.featureService.getFeatures$();
     this.activeProject$ = this.projectService.getActiveProject$();
@@ -218,14 +221,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         return;
       }
       const color = project.layers.get(feature.layerId)?.color;
+      const layerName = project.layers.get(feature.layerId)?.name?.get('en');
       if (feature instanceof LocationFeature) {
         this.addLocationFeature(color, feature);
       }
       if (feature instanceof GeoJsonFeature) {
-        this.addGeoJsonFeature(color, feature);
+        this.addGeoJsonFeature(color, layerName, feature);
       }
       if (feature instanceof PolygonFeature) {
-        this.addPolygonFeature(color, feature);
+        this.addPolygonFeature(color, layerName, feature);
       }
     });
   }
@@ -381,6 +385,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private addGeoJsonFeature(
     color: string | undefined,
+    layerName: string | undefined,
     feature: GeoJsonFeature
   ) {
     const paths: google.maps.LatLng[][] = [];
@@ -403,7 +408,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
 
-    this.addPolygonToMap(feature.id, color, paths);
+    this.addPolygonToMap(feature.id, color, layerName, paths);
   }
 
   private geoJsonPolygonToPaths(
@@ -417,18 +422,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private addPolygonFeature(
     color: string | undefined,
+    layerName: string | undefined,
     feature: PolygonFeature
   ) {
     const vertices: google.maps.LatLng[] = feature.polygonVertices.map(
       vertex => new google.maps.LatLng(vertex.latitude, vertex.longitude)
     );
 
-    this.addPolygonToMap(feature.id, color, [vertices]);
+    this.addPolygonToMap(feature.id, color, layerName, [vertices]);
   }
 
   private addPolygonToMap(
     featureId: string,
     color: string | undefined,
+    layerName: string | undefined,
     paths: google.maps.LatLng[][]
   ) {
     const polygon = new google.maps.Polygon({
@@ -441,13 +448,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       map: this.map.googleMap,
     });
     polygon.set('id', featureId);
-    polygon.addListener('click', () => {
+    polygon.set('color', color);
+    polygon.set('layerName', layerName);
+    polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
       if (this.disableMapClicks) {
         return;
       }
-      const featureId = polygon.get('id');
+      const clickedPolygons: google.maps.Polygon[] = [];
+      for (const polygon of this.polygons.values()) {
+        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+          clickedPolygons.push(polygon);
+        }
+      }
+      if (clickedPolygons.length === 1) {
+        this.zone.run(() => {
+          this.navigationService.selectFeature(clickedPolygons[0].get('id'));
+        });
+        return;
+      }
+
       this.zone.run(() => {
-        this.navigationService.selectFeature(featureId);
+        const dialogRef = this.dialog.open(SelectDialogComponent, {
+          width: '500px',
+          data: { clickedPolygons: clickedPolygons },
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            this.navigationService.selectFeature(result);
+          }
+        });
       });
     });
     this.polygons.set(featureId, polygon);

@@ -32,6 +32,7 @@ import { ProjectHeaderModule } from './components/project-header/project-header.
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
 import { ShareDialogModule } from './components/share-dialog/share-dialog.module';
+import { SelectDialogModule } from './components/select-dialog/select-dialog.module';
 import { HttpClientModule } from '@angular/common/http';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
@@ -72,6 +73,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     UserProfilePopupModule,
     LayerDialogModule,
     ShareDialogModule,
+    SelectDialogModule,
     TitleDialogModule,
   ],
   bootstrap: [AppComponent],

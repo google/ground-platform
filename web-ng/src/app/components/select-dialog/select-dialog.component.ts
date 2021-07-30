@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { MapComponent } from './map.component';
-import { GoogleMapsModule } from '@angular/google-maps';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-@NgModule({
-  imports: [BrowserModule, GoogleMapsModule, MatButtonModule, MatDialogModule],
-  exports: [MapComponent],
-  declarations: [MapComponent],
+export interface DialogData {
+  clickedPolygons: google.maps.Polygon[];
+}
+
+@Component({
+  selector: 'select-dialog',
+  templateUrl: 'select-dialog.html',
 })
-export class MapModule {}
+export class SelectDialogComponent {
+  constructor(
+    public dialogRef: MatDialogRef<SelectDialogComponent, string | undefined>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: DialogData
+  ) {}
+
+  onCancelClick(): void {
+    this.dialogRef.close();
+  }
+}

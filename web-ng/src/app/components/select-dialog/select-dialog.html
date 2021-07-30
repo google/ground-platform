@@ -1,0 +1,32 @@
+<!--
+  Copyright 2021 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<h1>Please choose a feature to select</h1>
+<div mat-dialog-content>
+  <div *ngFor="let clickedPolygon of data.clickedPolygons">
+    <button mat-button [mat-dialog-close]="clickedPolygon.get('id')">
+      <mat-icon
+          [ngStyle]="{ color: clickedPolygon.get('color') }">
+        layers
+      </mat-icon>
+      {{ clickedPolygon.get('layerName') }}
+      {{ clickedPolygon.get('id') }}
+    </button>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+</div>
