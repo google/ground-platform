@@ -13,37 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-@import 'variables';
-
-:host {
-  display: flex;
-}
-
-.dot {
-  color: mat-color($foreground, icon);
-  align-self: center;
-}
-
-.drag-icon {
-  display: block;
-  margin: 0px auto;
-  cursor: move;
-  align-self: center;
-  color: mat-color($foreground, icon);
-  margin-right: 5px !important;
-  visibility: hidden;
-}
-
-:host:hover .drag-icon,
-:host:focus-within .drag-icon {
-  visibility: visible;
-}
-
-.field-option {
-  width: 300px;
-}
-
-.code-option {
-  width: 100px;
-}
