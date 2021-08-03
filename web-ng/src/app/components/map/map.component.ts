@@ -178,18 +178,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     features: List<Feature>,
     selectedFeatureId: string | null
   ): void {
-    this.removeObsoleteMarkersAndPolygons(features);
+    this.removeDeletedFeatures(features);
     this.addNewFeatures(project, features);
     this.selectFeature(selectedFeatureId);
   }
 
-  private removeObsoleteMarkersAndPolygons(features: List<Feature>) {
-    const newFeatureIds: List<string> = features.map(f => f.id);
-    this.removeObsoleteMarkers(newFeatureIds);
-    this.removeObsoletePolygons(newFeatureIds);
+  /**
+   * Remove deleted features to map. The features that were displayed on
+   * the map but not in the `newFeatures` are considered as deleted.
+   */
+  private removeDeletedFeatures(newFeatures: List<Feature>) {
+    const newFeatureIds: List<string> = newFeatures.map(f => f.id);
+    this.removeDeletedMarkers(newFeatureIds);
+    this.removeDeletedPolygons(newFeatureIds);
   }
 
-  private removeObsoleteMarkers(newFeatureIds: List<string>) {
+  private removeDeletedMarkers(newFeatureIds: List<string>) {
     for (const id of this.markers.keys()) {
       if (!newFeatureIds.contains(id)) {
         this.markers.get(id)!.setMap(null);
@@ -198,7 +202,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private removeObsoletePolygons(newFeatureIds: List<string>) {
+  private removeDeletedPolygons(newFeatureIds: List<string>) {
     for (const id of this.polygons.keys()) {
       if (!newFeatureIds.contains(id)) {
         this.polygons.get(id)!.setMap(null);
@@ -207,6 +211,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Add new features to map. The features that were not displayed on
+   * the map but in the `newFeatures` are considered as new.
+   */
   private addNewFeatures(project: Project, features: List<Feature>) {
     const existingFeatureIds = Array.from(this.markers.keys()).concat(
       Array.from(this.polygons.keys())
@@ -335,6 +343,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         : this.defaultCursorMapOptions;
   }
 
+  /**
+   * Selecting feature enlarges the marker or border of the polygon,
+   * pans and zooms to the marker/polygon. Selecting null is considered
+   * as deselecting which will change the selected back to normal size.
+   */
+  private selectFeature(selectedFeatureId: string | null) {
+    const markerToSelect = this.markers.get(selectedFeatureId as string);
+    this.selectMarker(markerToSelect);
+    const polygonToSelect = this.polygons.get(selectedFeatureId as string);
+    this.selectPolygon(polygonToSelect);
+  }
+
   private selectMarker(marker: google.maps.Marker | undefined) {
     if (marker === this.selectedMarker) {
       return;
@@ -351,6 +371,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(marker?.getPosition());
   }
 
+  private setIconSize(marker: google.maps.Marker, size: number) {
+    const icon = marker.getIcon() as google.maps.ReadonlyIcon;
+    const newIcon = {
+      url: icon.url,
+      scaledSize: {
+        width: size,
+        height: size,
+      },
+    } as google.maps.Icon;
+    marker.setIcon(newIcon);
+  }
+
   private selectPolygon(polygon: google.maps.Polygon | undefined) {
     if (polygon === this.selectedPolygon) {
       return;
@@ -365,25 +397,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     this.selectedPolygon = polygon;
     this.panAndZoom(polygon?.getPaths().getAt(0).getAt(0));
-  }
-
-  private selectFeature(selectedFeatureId: string | null) {
-    const markerToSelect = this.markers.get(selectedFeatureId as string);
-    this.selectMarker(markerToSelect);
-    const polygonToSelect = this.polygons.get(selectedFeatureId as string);
-    this.selectPolygon(polygonToSelect);
-  }
-
-  private setIconSize(marker: google.maps.Marker, size: number) {
-    const icon = marker.getIcon() as google.maps.ReadonlyIcon;
-    const newIcon = {
-      url: icon.url,
-      scaledSize: {
-        width: size,
-        height: size,
-      },
-    } as google.maps.Icon;
-    marker.setIcon(newIcon);
   }
 
   private addGeoJsonFeature(
@@ -454,37 +467,44 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     polygon.set('color', color);
     polygon.set('layerName', layerName);
     polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
-      if (this.disableMapClicks) {
-        return;
-      }
-      const clickedPolygons: google.maps.Polygon[] = [];
-      for (const polygon of this.polygons.values()) {
-        if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
-          clickedPolygons.push(polygon);
-        }
-      }
-      if (clickedPolygons.length === 1) {
-        this.zone.run(() => {
-          this.navigationService.selectFeature(clickedPolygons[0].get('id'));
-        });
-        return;
-      }
-
-      this.zone.run(() => {
-        const dialogRef = this.dialog.open(SelectFeatureDialogComponent, {
-          width: '500px',
-          data: {
-            clickedFeatures: clickedPolygons.map(this.polygonToFeatureData),
-          },
-        });
-        dialogRef.afterClosed().subscribe(result => {
-          if (result) {
-            this.navigationService.selectFeature(result);
-          }
-        });
-      });
+      this.onPolygonClick(event);
     });
     this.polygons.set(featureId, polygon);
+  }
+
+  private onPolygonClick(event: google.maps.PolyMouseEvent) {
+    if (this.disableMapClicks) {
+      return;
+    }
+    const candidatePolygons: google.maps.Polygon[] = [];
+    for (const polygon of this.polygons.values()) {
+      if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+        candidatePolygons.push(polygon);
+      }
+    }
+    if (candidatePolygons.length === 1) {
+      this.zone.run(() => {
+        this.navigationService.selectFeature(candidatePolygons[0].get('id'));
+      });
+      return;
+    }
+    this.openSelectFeatureDialog(candidatePolygons);
+  }
+
+  private openSelectFeatureDialog(candidatePolygons: google.maps.Polygon[]) {
+    this.zone.run(() => {
+      const dialogRef = this.dialog.open(SelectFeatureDialogComponent, {
+        width: '500px',
+        data: {
+          clickedFeatures: candidatePolygons.map(this.polygonToFeatureData),
+        },
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.navigationService.selectFeature(result);
+        }
+      });
+    });
   }
 
   private polygonToFeatureData(polygon: google.maps.Polygon): FeatureData {
