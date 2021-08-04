@@ -70,15 +70,12 @@ export class DataStoreService {
             .filter(a => {
               const docData = a.payload.doc.data() as DocumentData;
               const emails = Object.keys(docData.acl);
-              return emails.indexOf(userEmail) > -1;
+              return emails.includes(userEmail);
             })
             .map(a => {
               const docData = a.payload.doc.data() as DocumentData;
               const id = a.payload.doc.id;
-              return FirebaseDataConverter.toProject(
-                id,
-                docData as DocumentData
-              );
+              return FirebaseDataConverter.toProject(id, docData);
             })
         )
       );
