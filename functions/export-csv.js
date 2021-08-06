@@ -45,6 +45,7 @@ async function exportCsv(req, res) {
   headers.push("Feature label");
   headers.push("Latitude");
   headers.push("Longitude");
+  headers.push("GeoJSON");
   elements.forEach((element) => {
     const labelMap = element["label"] || {};
     const label = Object.values(labelMap)[0] || "Unnamed field";
@@ -91,6 +92,7 @@ async function exportCsv(req, res) {
       row.push(getLabel(feature));
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
+      row.push(feature.get("geoJson") || "");
       const responses = observation["responses"] || {};
       elements
         .map((element) => getValue(element, responses))
