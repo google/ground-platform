@@ -41,11 +41,11 @@ async function exportCsv(req, res) {
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push("Feature ID");
-  headers.push("Feature label");
-  headers.push("Latitude");
-  headers.push("Longitude");
-  headers.push("GeoJSON");
+  headers.push("feature_id");
+  headers.push("feature_name");
+  headers.push("latitude");
+  headers.push("longitude");
+  headers.push("geometry");
   elements.forEach((element) => {
     const labelMap = element["label"] || {};
     const label = Object.values(labelMap)[0] || "Unnamed field";
