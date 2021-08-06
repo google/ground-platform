@@ -19,6 +19,7 @@
 
 const csv = require("@fast-csv/format");
 const { db } = require("./common/context");
+const wkt = require("wkt");
 
 // TODO: Refactor into meaningful pieces.
 async function exportCsv(req, res) {
@@ -92,7 +93,7 @@ async function exportCsv(req, res) {
       row.push(getLabel(feature));
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
-      row.push(feature.get("geoJson") || "");
+      row.push(toWkt(feature.get("geoJson")) || "");
       const responses = observation["responses"] || {};
       elements
         .map((element) => getValue(element, responses))
@@ -101,6 +102,30 @@ async function exportCsv(req, res) {
     });
   });
   csvStream.end();
+}
+
+function toWkt(geoJsonString) {
+  const geoJsonObject = parseGeoJson(geoJsonString);
+  const geometry = getGeometry(geoJsonObject);
+  return geometry ? wkt.stringify(geometry) : "";
+}
+
+function parseGeoJson(jsonString) {
+  if (!jsonString) {
+    return null;
+  }
+  try {
+    return JSON.parse(jsonString);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getGeometry(geoJsonObject) {
+  if (!geoJsonObject || typeof geoJsonObject !== "object") {
+    return null;
+  }
+  return geoJsonObject.geometry;
 }
 
 function getId(feature) {
