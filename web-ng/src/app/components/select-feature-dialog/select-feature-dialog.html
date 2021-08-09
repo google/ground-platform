@@ -1,0 +1,34 @@
+<!--
+  Copyright 2021 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<h1 mat-dialog-title>Select feature</h1>
+<h4>Several overlapping features found at this location. Please select one:</h4>
+<div mat-dialog-content>
+  <div *ngFor="let clickedFeature of data.clickedFeatures">
+    <button mat-button [mat-dialog-close]="clickedFeature.featureId">
+      <mat-icon
+          [ngStyle]="{ color: clickedFeature.color }">
+        layers
+      </mat-icon>
+      {{ clickedFeature.layerName }}
+      {{ clickedFeature.featureId }}
+    </button>
+  </div>
+</div>
+<div mat-dialog-actions
+     class="button-row">
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+</div>
