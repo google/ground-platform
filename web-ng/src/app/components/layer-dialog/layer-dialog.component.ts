@@ -205,9 +205,24 @@ export class LayerDialogComponent implements OnDestroy {
       });
   }
 
-  onClose() {
-    this.dialogRef.close();
-    return this.navigationService.selectProject(this.projectId!);
+  onCancel(): void | undefined {
+    if (!this.hasUnsavedChanges()) {
+      this.onClose();
+      return;
+    }
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'You have made unsaved changes to the layer. Would you like to save them?'
+      )
+      .afterClosed()
+      .subscribe(async dialogResult => {
+        if (dialogResult) {
+          await this.onSave();
+        } else {
+          this.onClose();
+        }
+      });
   }
 
   setLayerName(value: string) {
@@ -275,5 +290,36 @@ export class LayerDialogComponent implements OnDestroy {
       const question = this.formFieldEditors.last;
       question?.questionInput?.nativeElement.focus();
     }
+  }
+
+  private isFieldOptionsDirty(
+    formFieldEditor: FormFieldEditorComponent
+  ): boolean {
+    if (!formFieldEditor.optionEditors) {
+      return true;
+    }
+    for (const editor of formFieldEditor.optionEditors) {
+      if (editor.optionGroup.dirty) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private hasUnsavedChanges(): boolean {
+    if (!this.formFieldEditors) {
+      return false;
+    }
+    for (const editor of this.formFieldEditors) {
+      if (editor.formGroup.dirty || !this.isFieldOptionsDirty(editor)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private onClose(): void {
+    this.dialogRef.close();
+    return this.navigationService.selectProject(this.projectId!);
   }
 }
