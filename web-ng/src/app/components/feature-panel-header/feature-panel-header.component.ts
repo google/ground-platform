@@ -34,7 +34,7 @@ import {
   LocationFeature,
 } from '../../shared/models/feature.model';
 import { FeatureService } from '../../services/feature/feature.service';
-
+import { Map } from 'immutable';
 @Component({
   selector: 'ground-feature-panel-header',
   templateUrl: './feature-panel-header.component.html',
@@ -50,6 +50,9 @@ export class FeaturePanelHeaderComponent
   readonly featureType = FeatureType;
   subscription: Subscription = new Subscription();
   featureTypeValue?: FeatureType;
+  private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
+  private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
+  private featureProperties?: Map<string, string | number>;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -69,6 +72,7 @@ export class FeaturePanelHeaderComponent
         } else if (feature instanceof LocationFeature) {
           this.featureTypeValue = FeatureType.Point;
         }
+        this.featureProperties = feature.properties;
       })
     );
   }
@@ -128,6 +132,34 @@ export class FeaturePanelHeaderComponent
     this.zone.run(() => {
       this.navigationService.selectProject(this.projectId!);
     });
+  }
+
+  getFeatureName(): string | number {
+    const caption = this.findProperty(this.CAPTION_PROPERTIES);
+    if (caption) {
+      return caption;
+    }
+    const featureType =
+      this.featureTypeValue === FeatureType.Point ? 'Point' : 'Polygon';
+    const id = this.findProperty(this.ID_PROPERTIES);
+    if (id) {
+      return featureType + ' ' + id;
+    }
+    return featureType;
+  }
+
+  private findProperty(matchKeys: string[]): string | number | undefined {
+    if (!this.featureProperties) {
+      return;
+    }
+    for (const matchKey of matchKeys) {
+      for (const property of this.featureProperties.keys()) {
+        if (property.toLowerCase() === matchKey) {
+          return this.featureProperties.get(property);
+        }
+      }
+    }
+    return;
   }
 
   ngOnDestroy(): void {

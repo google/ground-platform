@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { MapComponent } from './map.component';
-import { GoogleMapsModule } from '@angular/google-maps';
-import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
-import { SelectFeatureDialogModule } from '../select-feature-dialog/select-feature-dialog.module';
+import { SelectFeatureDialogComponent } from './select-feature-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    GoogleMapsModule,
-    MatButtonModule,
-    MatDialogModule,
-    SelectFeatureDialogModule,
-  ],
-  exports: [MapComponent],
-  declarations: [MapComponent],
+  declarations: [SelectFeatureDialogComponent],
+  imports: [CommonModule, MatButtonModule, MatDialogModule, MatIconModule],
 })
-export class MapModule {}
+export class SelectFeatureDialogModule {}
