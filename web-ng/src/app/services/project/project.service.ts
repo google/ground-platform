@@ -27,7 +27,6 @@ import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Layer } from '../../shared/models/layer.model';
 
 @Injectable({
   providedIn: 'root',

@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-import {
-  ComponentFixture,
-  inject,
-  TestBed,
-  waitForAsync,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component } from '@angular/core';
 import { NEVER, of } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { ProjectService } from '../../services/project/project.service';
-import { Map, List } from 'immutable';
+import { Map } from 'immutable';
 import { ProjectListComponent } from './project-list.component';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { MatCardModule } from '@angular/material/card';
