@@ -49,7 +49,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   }
 
   onProjectClicked(index: number) {
-    this.navigationService.selectProject(this.projects!!.get(index)!!.id);
+    this.navigationService.selectProject(this.projects.get(index)!.id);
   }
 
   onNewProject() {
