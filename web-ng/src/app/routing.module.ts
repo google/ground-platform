@@ -34,7 +34,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.HOME_SEGMENT}`,
+    path: `${NavigationService.PROJECTS_SEGMENT}`,
     component: ProjectListComponent,
     canActivate: [AuthGuard],
   },

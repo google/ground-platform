@@ -60,23 +60,25 @@ export class DataStoreService {
    * is part of.
    *
    */
-  loadAccessibleProject$(userEmail: string): Observable<Project[]> {
+  loadAccessibleProject$(userEmail: string): Observable<List<Project>> {
     return this.db
       .collection('projects')
       .snapshotChanges()
       .pipe(
         map(actions =>
-          actions
-            .filter(a => {
-              const docData = a.payload.doc.data() as DocumentData;
-              const emails = Object.keys(docData.acl);
-              return emails.includes(userEmail);
-            })
-            .map(a => {
-              const docData = a.payload.doc.data() as DocumentData;
-              const id = a.payload.doc.id;
-              return FirebaseDataConverter.toProject(id, docData);
-            })
+          List(
+            actions
+              .filter(a => {
+                const docData = a.payload.doc.data() as DocumentData;
+                const emails = Object.keys(docData.acl);
+                return emails.includes(userEmail);
+              })
+              .map(a => {
+                const docData = a.payload.doc.data() as DocumentData;
+                const id = a.payload.doc.id;
+                return FirebaseDataConverter.toProject(id, docData);
+              })
+          )
         )
       );
   }

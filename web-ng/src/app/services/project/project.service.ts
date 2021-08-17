@@ -21,7 +21,7 @@ import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -71,10 +71,10 @@ export class ProjectService {
     return this.activeProject$;
   }
 
-  getAccessibleProjects$(): Observable<Project[]> {
+  getAccessibleProjects$(): Observable<List<Project>> {
     const user = this.authService.getCurrentUser();
     if (!user) {
-      return new Observable<Project[]>();
+      return new Observable<List<Project>>();
     }
     const userEmail = user.email;
     return this.dataStore.loadAccessibleProject$(userEmail);

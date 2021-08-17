@@ -22,6 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { Project } from '../../shared/models/project.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { List } from 'immutable';
 
 @Component({
   selector: 'app-project-list',
@@ -29,7 +30,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
   styleUrls: ['./project-list.component.scss'],
 })
 export class ProjectListComponent implements OnInit, OnDestroy {
-  projects?: Project[];
+  projects = List<Project>();
   private subscription = new Subscription();
 
   constructor(
@@ -48,7 +49,7 @@ export class ProjectListComponent implements OnInit, OnDestroy {
   }
 
   onProjectClicked(index: number) {
-    this.navigationService.selectProject(this.projects![index].id);
+    this.navigationService.selectProject(this.projects.get(index)!!.id);
   }
 
   onNewProject() {
