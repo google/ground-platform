@@ -65,11 +65,11 @@ export class DataStoreService {
       .collection('projects')
       .snapshotChanges()
       .pipe(
-        map(actions =>
+        map(projects =>
           List(
-            actions
-              .filter(a => {
-                const docData = a.payload.doc.data() as DocumentData;
+            projects
+              .filter(p => {
+                const docData = p.payload.doc.data() as DocumentData;
                 const emails = Object.keys(docData.acl);
                 return emails.includes(userEmail);
               })
