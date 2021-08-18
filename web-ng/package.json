@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "pretest": "./pretest.sh",
     "test": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -13,7 +14,7 @@
     "compile": "tsc -p .",
     "fix": "gts fix",
     "postinstall": "ngcc",
-    "posttest": "npm run check"
+    "posttest": "./posttest.sh && npm run check"
   },
   "private": true,
   "dependencies": {

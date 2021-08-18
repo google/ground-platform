@@ -29,8 +29,11 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent {
   public constructor(@Inject(DOCUMENT) private doc: Document) {
-    this.initGoogleMap();
+    if (environment.googleMapsApiKey !== '') {
+      this.initGoogleMap();
+    }
   }
+
   private initGoogleMap(): void {
     const script = this.doc.createElement('script');
     script.type = 'text/javascript';

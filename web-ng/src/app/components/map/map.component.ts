@@ -75,7 +75,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   private selectedMarker?: google.maps.Marker;
   private selectedPolygon?: google.maps.Polygon;
-  private markers: Map<string, google.maps.Marker> = new Map<
+  markers: Map<string, google.maps.Marker> = new Map<
     string,
     google.maps.Marker
   >();
