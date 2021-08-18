@@ -111,10 +111,8 @@ function toWkt(geoJsonString) {
 }
 
 function parseGeoJson(jsonString) {
-  if (!jsonString) {
-    return null;
-  }
   try {
+    // Note: Returns null when jsonString is null.
     return JSON.parse(jsonString);
   } catch (e) {
     return null;
