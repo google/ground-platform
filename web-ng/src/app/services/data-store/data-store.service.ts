@@ -62,7 +62,14 @@ export class DataStoreService {
    */
   loadAccessibleProject$(userEmail: string): Observable<List<Project>> {
     return this.db
-      .collection('projects')
+      .collection('projects', ref =>
+        ref.where(new firebase.firestore.FieldPath('acl', userEmail), 'in', [
+          'owner',
+          'contributor',
+          'manager',
+          'viewer',
+        ])
+      )
       .snapshotChanges()
       .pipe(
         map(projects =>
