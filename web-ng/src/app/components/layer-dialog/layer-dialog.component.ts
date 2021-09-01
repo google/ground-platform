@@ -80,7 +80,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.init(data.projectId, data.createLayer, data.layer);
     this.dialogRef.keydownEvents().subscribe(event => {
       if (event.key === 'Escape') {
-        this.onClose();
+        this.close();
       }
     });
   }
@@ -198,29 +198,28 @@ export class LayerDialogComponent implements OnDestroy {
     // TODO: Inform user layer was saved
     this.layerService
       .addOrUpdateLayer(projectId, layer)
-      .then(() => this.onClose())
+      .then(() => this.close())
       .catch(err => {
         console.error(err);
         alert('Layer update failed.');
       });
   }
 
-  onCancel(): void | undefined {
+  onCancel(): void {
     if (!this.hasUnsavedChanges()) {
-      this.onClose();
+      this.close();
       return;
     }
     this.dialogService
       .openConfirmationDialog(
-        'Warning',
-        'You have made unsaved changes to the layer. Would you like to save them?'
+        'Discard changes',
+        'Unsaved changes to this layer will be lost. Are you sure?',
+        /* showDiscardActions= */ true
       )
       .afterClosed()
       .subscribe(async dialogResult => {
         if (dialogResult) {
-          await this.onSave();
-        } else {
-          this.onClose();
+          this.close();
         }
       });
   }
@@ -318,8 +317,9 @@ export class LayerDialogComponent implements OnDestroy {
     return false;
   }
 
-  private onClose(): void {
+  private close(): void {
     this.dialogRef.close();
+    // TODO: Add closeLayerDialog() in NavigationService that removes the layer fragment.
     return this.navigationService.selectProject(this.projectId!);
   }
 }
