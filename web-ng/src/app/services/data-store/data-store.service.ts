@@ -36,6 +36,7 @@ import 'firebase/storage';
   providedIn: 'root',
 })
 export class DataStoreService {
+  private readonly VALID_ROLES = ['owner', 'contributor', 'manager', 'viewer'];
   constructor(private db: AngularFirestore) {}
 
   /**
@@ -56,35 +57,27 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the projects to which the user
-   * is part of.
+   * Returns an Observable that loads and emits the list of projects accessible to the specified user.
    *
    */
   loadAccessibleProject$(userEmail: string): Observable<List<Project>> {
     return this.db
       .collection('projects', ref =>
-        ref.where(new firebase.firestore.FieldPath('acl', userEmail), 'in', [
-          'owner',
-          'contributor',
-          'manager',
-          'viewer',
-        ])
+        ref.where(
+          new firebase.firestore.FieldPath('acl', userEmail),
+          'in',
+          this.VALID_ROLES
+        )
       )
       .snapshotChanges()
       .pipe(
         map(projects =>
           List(
-            projects
-              .filter(p => {
-                const docData = p.payload.doc.data() as DocumentData;
-                const emails = Object.keys(docData.acl);
-                return emails.includes(userEmail);
-              })
-              .map(a => {
-                const docData = a.payload.doc.data() as DocumentData;
-                const id = a.payload.doc.id;
-                return FirebaseDataConverter.toProject(id, docData);
-              })
+            projects.map(a => {
+              const docData = a.payload.doc.data() as DocumentData;
+              const id = a.payload.doc.id;
+              return FirebaseDataConverter.toProject(id, docData);
+            })
           )
         )
       );
