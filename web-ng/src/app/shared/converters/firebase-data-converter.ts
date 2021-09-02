@@ -28,6 +28,7 @@ import {
   Feature,
   LocationFeature,
   GeoJsonFeature,
+  PolygonFeature,
 } from '../models/feature.model';
 import { Observation } from '../models/observation/observation.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -209,6 +210,12 @@ export class FirebaseDataConverter {
         layerId,
         geoJson,
       };
+    } else if (feature instanceof PolygonFeature) {
+      const { layerId, polygonVertices } = feature;
+      return {
+        layerId,
+        polygonVertices,
+      };
     } else {
       throw new Error(
         `Cannot convert unexpected feature class ${feature.constructor.name} to json.`
@@ -383,17 +390,38 @@ export class FirebaseDataConverter {
       if (!data.layerId) {
         throw new Error('Missing layer id');
       }
+      const featureProperties = Map<string, string | number>(
+        keys(data.properties).map((property: string) => [
+          property,
+          data.properties[property],
+        ])
+      );
+
       if (this.isLocationFeature(data)) {
-        return new LocationFeature(id, data.layerId, data.location);
+        return new LocationFeature(
+          id,
+          data.layerId,
+          data.location,
+          featureProperties
+        );
       }
       if (this.isGeoJsonFeature(data)) {
         const geoJson = JSON.parse(data.geoJson);
-        return new GeoJsonFeature(id, data.layerId, geoJson);
+        return new GeoJsonFeature(id, data.layerId, geoJson, featureProperties);
+      }
+      if (this.isPolygonFeature(data)) {
+        return new PolygonFeature(
+          id,
+          data.layerId,
+          data.geometry.coordinates,
+          featureProperties
+        );
       }
       throw new Error('Missing location and geoJson');
     } catch (err) {
       console.error(`Invalid feature ${id}, ${err}`);
     }
+    console.warn(`Invalid feature ${id} in remote data store ignored`);
     return;
   }
 
@@ -577,5 +605,8 @@ export class FirebaseDataConverter {
 
   private static isGeoJsonFeature(data: DocumentData): boolean {
     return data?.geoJson;
+  }
+  private static isPolygonFeature(data: DocumentData): boolean {
+    return data?.geometry;
   }
 }

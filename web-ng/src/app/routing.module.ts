@@ -20,6 +20,7 @@ import { MainPageContainerComponent } from './components/main-page-container/mai
 import { AuthGuard } from './services/auth/auth.guard';
 import { SignInPageComponent } from './components/sign-in-page/sign-in-page.component';
 import { NavigationService } from './services/navigation/navigation.service';
+import { ProjectListComponent } from './components/project-list/project-list.component';
 
 const routes: Routes = [
   {
@@ -30,6 +31,11 @@ const routes: Routes = [
   {
     path: `${NavigationService.PROJECT_SEGMENT}/:${NavigationService.PROJECT_ID}`,
     component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.PROJECTS_SEGMENT}`,
+    component: ProjectListComponent,
     canActivate: [AuthGuard],
   },
 ];

@@ -79,6 +79,11 @@ export class LayerDialogComponent implements OnDestroy {
     dialogRef.disableClose = true;
     this.fields = List<Field>();
     this.init(data.projectId, data.createLayer, data.layer);
+    this.dialogRef.keydownEvents().subscribe(event => {
+      if (event.key === 'Escape') {
+        this.close();
+      }
+    });
   }
 
   addQuestion() {
@@ -178,7 +183,7 @@ export class LayerDialogComponent implements OnDestroy {
       /* index */ this.layer?.index || -1,
       this.color,
       // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName }),
+      StringMap({ [this.lang]: this.layerName.trim() }),
       forms,
       allowedFeatureTypes
     );
@@ -203,16 +208,30 @@ export class LayerDialogComponent implements OnDestroy {
     // TODO: Inform user layer was saved
     this.layerService
       .addOrUpdateLayer(projectId, layer)
-      .then(() => this.onClose())
+      .then(() => this.close())
       .catch(err => {
         console.error(err);
         alert('Layer update failed.');
       });
   }
 
-  onClose() {
-    this.dialogRef.close();
-    return this.navigationService.selectProject(this.projectId!);
+  onCancel(): void {
+    if (!this.hasUnsavedChanges()) {
+      this.close();
+      return;
+    }
+    this.dialogService
+      .openConfirmationDialog(
+        'Discard changes',
+        'Unsaved changes to this layer will be lost. Are you sure?',
+        /* showDiscardActions= */ true
+      )
+      .afterClosed()
+      .subscribe(async dialogResult => {
+        if (dialogResult) {
+          this.close();
+        }
+      });
   }
 
   setLayerName(value: string) {
@@ -280,5 +299,37 @@ export class LayerDialogComponent implements OnDestroy {
       const question = this.formFieldEditors.last;
       question?.questionInput?.nativeElement.focus();
     }
+  }
+
+  private isFieldOptionsDirty(
+    formFieldEditor: FormFieldEditorComponent
+  ): boolean {
+    if (!formFieldEditor.optionEditors) {
+      return true;
+    }
+    for (const editor of formFieldEditor.optionEditors) {
+      if (editor.optionGroup.dirty) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private hasUnsavedChanges(): boolean {
+    if (!this.formFieldEditors) {
+      return false;
+    }
+    for (const editor of this.formFieldEditors) {
+      if (editor.formGroup.dirty || !this.isFieldOptionsDirty(editor)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private close(): void {
+    this.dialogRef.close();
+    // TODO: Add closeLayerDialog() in NavigationService that removes the layer fragment.
+    return this.navigationService.selectProject(this.projectId!);
   }
 }

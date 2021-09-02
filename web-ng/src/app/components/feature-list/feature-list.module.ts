@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,13 @@
  * limitations under the License.
  */
 
-@import '_variables';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FeatureListComponent } from './feature-list.component';
 
-.drawing-buttons {
-  position: absolute;
-  bottom: 3em;
-  left: 3em;
-}
-
-.drawing-layer-selector {
-  position: absolute;
-  top: 2em;
-  left: 50%;
-  background-color: white;
-  transform: translate(-50%, 0);
-}
-
-.add-point-button {
-  background-color: var(--drawing-tools-black);
-}
-
-.add-point-button:hover {
-  background-color: mat-color($primary);
-}
-
-.mat-button-toggle-checked {
-  background-color: mat-color($primary);
-}
+@NgModule({
+  declarations: [FeatureListComponent],
+  imports: [CommonModule],
+  exports: [FeatureListComponent],
+})
+export class FeatureListModule {}

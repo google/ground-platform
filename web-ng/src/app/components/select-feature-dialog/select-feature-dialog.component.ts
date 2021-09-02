@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,32 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
+interface DialogData {
+  clickedFeatures: FeatureData[];
+}
+
+export interface FeatureData {
+  featureId: string;
+  color: string;
+  layerName: string;
+}
+
 @Component({
-  selector: 'app-confirmation-dialog',
-  templateUrl: './confirmation-dialog.component.html',
-  styleUrls: ['./confirmation-dialog.component.css'],
+  selector: 'select-feature-dialog',
+  templateUrl: 'select-feature-dialog.html',
+  styleUrls: ['./select-feature-dialog.component.scss'],
 })
-export class ConfirmationDialogComponent {
-  title: string;
-  message: string;
-  showDiscardActions = false;
-
+export class SelectFeatureDialogComponent {
   constructor(
-    public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogComponent
-  ) {
-    this.title = data.title;
-    this.message = data.message;
-    this.showDiscardActions = data.showDiscardActions;
-  }
+    public dialogRef: MatDialogRef<
+      SelectFeatureDialogComponent,
+      string | undefined
+    >,
+    @Inject(MAT_DIALOG_DATA)
+    public data: DialogData
+  ) {}
 
-  onConfirm() {
-    this.dialogRef.close(true);
-  }
-
-  onClose() {
-    this.dialogRef.close(false);
+  onCancelClick(): void {
+    this.dialogRef.close();
   }
 }

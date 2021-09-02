@@ -20,6 +20,7 @@ import { UserProfilePopupComponent } from '../../components/user-profile-popup/u
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectService } from '../../services/project/project.service';
 import { Subscription } from 'rxjs';
+import { NavigationService } from '../../services/navigation/navigation.service';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
@@ -35,6 +36,7 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
   constructor(
     public auth: AuthService,
+    public navigationService: NavigationService,
     private dialog: MatDialog,
     private projectService: ProjectService
   ) {
@@ -66,6 +68,10 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   updateProjectTitle(value: string): Promise<void> {
     if (value === this.title) return Promise.resolve();
     return this.projectService.updateTitle(this.projectId, value);
+  }
+
+  onProjectsButtonClick(): void {
+    this.navigationService.navigateToProjectList();
   }
 
   private openShareDialog(): void {

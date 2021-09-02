@@ -26,7 +26,8 @@ export class DialogService {
 
   openConfirmationDialog(
     title: string,
-    message: string
+    message: string,
+    showDiscardActions = false
   ): MatDialogRef<ConfirmationDialogComponent> {
     return this.dialog.open(ConfirmationDialogComponent, {
       maxWidth: '500px',
@@ -34,6 +35,7 @@ export class DialogService {
       data: {
         title,
         message,
+        showDiscardActions,
       },
     });
   }
