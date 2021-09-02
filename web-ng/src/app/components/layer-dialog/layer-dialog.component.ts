@@ -131,12 +131,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.addQuestion();
       return;
     }
-    this.contributorsCanAddPoints = this.layer?.contributorsCanAdd?.includes(
-      'points'
-    )!!;
-    this.contributorsCanAddPolygons = this.layer?.contributorsCanAdd?.includes(
-      'polygons'
-    )!!;
+    this.contributorsCanAddPoints =
+      this.layer?.contributorsCanAdd?.includes('points') || false;
+    this.contributorsCanAddPolygons =
+      this.layer?.contributorsCanAdd?.includes('polygons') || false;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
@@ -166,7 +164,7 @@ export class LayerDialogComponent implements OnDestroy {
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
-    let allowedFeatureTypes: string[] = [];
+    const allowedFeatureTypes: string[] = [];
     if (this.contributorsCanAddPoints && this.contributorsCanAddPolygons) {
       allowedFeatureTypes.push('points');
       allowedFeatureTypes.push('polygons');
