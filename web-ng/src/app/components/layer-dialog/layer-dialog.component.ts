@@ -133,10 +133,10 @@ export class LayerDialogComponent implements OnDestroy {
     }
     this.contributorsCanAddPoints = this.layer?.contributorsCanAdd?.includes(
       'points'
-    )!;
+    )!!;
     this.contributorsCanAddPolygons = this.layer?.contributorsCanAdd?.includes(
       'polygons'
-    )!;
+    )!!;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
