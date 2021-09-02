@@ -28,6 +28,7 @@ $warn: mat-palette($mat-pink, 600, 500, 700);
 
 // Create the theme object (a Sass map containing all of the palettes).
 $theme: mat-light-theme($primary, $accent, $warn);
+$white: mat-palette($mat-grey, A100);
 
 // Get generated palettes from theme. Sub-palettes listed in:
 // https://github.com/angular/components/blob/16f5f793dea3d83a6f08de14e3787ce97d82ff15/src/material/core/theming/_palette.scss#L674
@@ -37,4 +38,5 @@ $background: map-get($theme, background);
 :root {
   --drawing-tools-black: #202225;
   --drawing-tools-green: #3d7d40;
+  --project-list-background: #f0f1f2;
 }
