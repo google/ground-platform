@@ -168,7 +168,7 @@ export class LayerDialogComponent implements OnDestroy {
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
-    var contributions: string[] = [];
+    let contributions: string[] = [];
     if (this.contributorsCanAddPoint && this.contributorsCanAddPolygon) {
       contributions = ['points', 'polygons'];
     } else if (this.contributorsCanAddPolygon) {
