@@ -57,7 +57,8 @@ export class LayerDialogComponent implements OnDestroy {
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
-  contributorsCanAdd = true;
+  contributorsCanAddPoint = true;
+  contributorsCanAddPolygon = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -133,7 +134,11 @@ export class LayerDialogComponent implements OnDestroy {
     const canAddPoints = this.layer?.contributorsCanAdd?.find(
       val => val === 'points'
     );
-    this.contributorsCanAdd = canAddPoints ? true : false;
+    const canAddPolygons = this.layer?.contributorsCanAdd?.find(
+      val => val === 'polygons'
+    );
+    this.contributorsCanAddPoint = canAddPoints ? true : false;
+    this.contributorsCanAddPolygon = canAddPolygons ? true : false;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
@@ -163,6 +168,14 @@ export class LayerDialogComponent implements OnDestroy {
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
+    var contributions: string[] = [];
+    if (this.contributorsCanAddPoint && this.contributorsCanAddPolygon) {
+      contributions = ['points', 'polygons'];
+    } else if (this.contributorsCanAddPolygon) {
+      contributions = ['polygons'];
+    } else if (this.contributorsCanAddPoint) {
+      contributions = ['points'];
+    }
     const layer = new Layer(
       this.layer?.id || '',
       /* index */ this.layer?.index || -1,
@@ -170,7 +183,7 @@ export class LayerDialogComponent implements OnDestroy {
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
       forms,
-      this.contributorsCanAdd ? ['points'] : []
+      contributions
     );
     this.addOrUpdateLayer(this.projectId, layer);
   }
