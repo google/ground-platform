@@ -30,12 +30,15 @@
     <div fxLayout>
       <div fxLayout="column" fxLayoutGap="10px" fxFlex fxFlexAlign="center">
         <label>
-          <mat-checkbox [(ngModel)]="contributorsCanAddPoint" color="primary">
+          <mat-checkbox [(ngModel)]="contributorsCanAddPoints" color="primary">
             Contributors may add points
           </mat-checkbox>
         </label>
         <label>
-          <mat-checkbox [(ngModel)]="contributorsCanAddPolygon" color="primary">
+          <mat-checkbox
+            [(ngModel)]="contributorsCanAddPolygons"
+            color="primary"
+          >
             Contributors may add polygons
           </mat-checkbox>
         </label>

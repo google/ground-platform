@@ -57,8 +57,8 @@ export class LayerDialogComponent implements OnDestroy {
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
-  contributorsCanAddPoint = true;
-  contributorsCanAddPolygon = true;
+  contributorsCanAddPoints = true;
+  contributorsCanAddPolygons = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -131,14 +131,12 @@ export class LayerDialogComponent implements OnDestroy {
       this.addQuestion();
       return;
     }
-    const canAddPoints = this.layer?.contributorsCanAdd?.find(
-      val => val === 'points'
-    );
-    const canAddPolygons = this.layer?.contributorsCanAdd?.find(
-      val => val === 'polygons'
-    );
-    this.contributorsCanAddPoint = canAddPoints ? true : false;
-    this.contributorsCanAddPolygon = canAddPolygons ? true : false;
+    this.contributorsCanAddPoints = this.layer?.contributorsCanAdd?.includes(
+      'points'
+    )!;
+    this.contributorsCanAddPolygons = this.layer?.contributorsCanAdd?.includes(
+      'polygons'
+    )!;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
@@ -168,13 +166,14 @@ export class LayerDialogComponent implements OnDestroy {
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
-    let contributions: string[] = [];
-    if (this.contributorsCanAddPoint && this.contributorsCanAddPolygon) {
-      contributions = ['points', 'polygons'];
-    } else if (this.contributorsCanAddPolygon) {
-      contributions = ['polygons'];
-    } else if (this.contributorsCanAddPoint) {
-      contributions = ['points'];
+    let allowedFeatureTypes: string[] = [];
+    if (this.contributorsCanAddPoints && this.contributorsCanAddPolygons) {
+      allowedFeatureTypes.push('points');
+      allowedFeatureTypes.push('polygons');
+    } else if (this.contributorsCanAddPolygons) {
+      allowedFeatureTypes.push('polygons');
+    } else if (this.contributorsCanAddPoints) {
+      allowedFeatureTypes.push('points');
     }
     const layer = new Layer(
       this.layer?.id || '',
@@ -183,7 +182,7 @@ export class LayerDialogComponent implements OnDestroy {
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName }),
       forms,
-      contributions
+      allowedFeatureTypes
     );
     this.addOrUpdateLayer(this.projectId, layer);
   }
