@@ -165,13 +165,11 @@ export class LayerDialogComponent implements OnDestroy {
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
     const allowedFeatureTypes: string[] = [];
-    if (this.contributorsCanAddPoints && this.contributorsCanAddPolygons) {
+    if (this.contributorsCanAddPoints) {
       allowedFeatureTypes.push('points');
+    }
+    if (this.contributorsCanAddPolygons) {
       allowedFeatureTypes.push('polygons');
-    } else if (this.contributorsCanAddPolygons) {
-      allowedFeatureTypes.push('polygons');
-    } else if (this.contributorsCanAddPoints) {
-      allowedFeatureTypes.push('points');
     }
     const layer = new Layer(
       this.layer?.id || '',
