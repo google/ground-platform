@@ -15,6 +15,7 @@
  */
 
 import { Component, OnInit } from '@angular/core';
+import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
   selector: 'gnd-header-layout',
@@ -22,7 +23,11 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./header-layout.component.scss'],
 })
 export class HeaderLayoutComponent implements OnInit {
-  constructor() {}
+  constructor(public navigationService: NavigationService) {}
 
   ngOnInit(): void {}
+
+  onProjectsButtonClick(): void {
+    this.navigationService.navigateToProjectList();
+  }
 }
