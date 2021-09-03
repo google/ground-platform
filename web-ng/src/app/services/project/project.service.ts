@@ -21,13 +21,12 @@ import { Project } from '../../shared/models/project.model';
 import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Layer } from '../../shared/models/layer.model';
 
 @Injectable({
   providedIn: 'root',
@@ -69,6 +68,15 @@ export class ProjectService {
 
   getActiveProject$(): Observable<Project> {
     return this.activeProject$;
+  }
+
+  getAccessibleProjects$(): Observable<List<Project>> {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      return new Observable<List<Project>>();
+    }
+    const userEmail = user.email;
+    return this.dataStore.loadAccessibleProject$(userEmail);
   }
 
   /**
@@ -120,26 +128,5 @@ export class ProjectService {
     const userEmail = user.email;
     const acl = this.getCurrentProjectAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
-  }
-
-  /**
-   * Checks if a user can add points to a specific layer.
-   */
-  canUserAddPointsToLayer(layer: Layer): boolean {
-    const user = this.authService.getCurrentUser();
-    if (!user) {
-      return false;
-    }
-    const userRole = this.currentProject.acl.get(user.email);
-    switch (userRole) {
-      case Role.OWNER:
-      case Role.MANAGER:
-        return true;
-      case Role.CONTRIBUTOR:
-        return layer.contributorsCanAdd?.includes('points') ?? false;
-      case Role.VIEWER:
-      default:
-        return false;
-    }
   }
 }

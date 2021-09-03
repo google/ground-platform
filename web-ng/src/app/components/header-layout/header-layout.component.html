@@ -15,7 +15,11 @@
 -->
 <div fxLayout class="header" fxLayoutAlign="flex-self center">
   <div fxFlex>
-    <img class="logo" src="/assets/img/logo.svg" />
+    <img
+      class="logo"
+      src="/assets/img/logo.svg"
+      (click)="onProjectsButtonClick()"
+    />
     <span class="app-title">Ground</span>
     <ng-content select="[left]"></ng-content>
   </div>
