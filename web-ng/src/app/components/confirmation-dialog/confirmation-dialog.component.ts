@@ -25,6 +25,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 export class ConfirmationDialogComponent {
   title: string;
   message: string;
+  showDiscardActions = false;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
@@ -32,6 +33,7 @@ export class ConfirmationDialogComponent {
   ) {
     this.title = data.title;
     this.message = data.message;
+    this.showDiscardActions = data.showDiscardActions;
   }
 
   onConfirm() {

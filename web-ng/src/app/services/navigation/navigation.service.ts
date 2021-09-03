@@ -38,6 +38,7 @@ export class NavigationService {
   static readonly PROJECT_ID = 'projectId';
   static readonly PROJECT_SEGMENT = 'project';
   static readonly SIGN_IN_SEGMENT = 'signin';
+  static readonly PROJECTS_SEGMENT = 'projects';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
@@ -218,6 +219,13 @@ export class NavigationService {
       NavigationService.PROJECT_SEGMENT,
       NavigationService.PROJECT_ID_NEW,
     ]);
+  }
+
+  /**
+   * Navigate to the URL for viewing a list of available projects.
+   */
+  navigateToProjectList() {
+    this.router.navigate([NavigationService.PROJECTS_SEGMENT]);
   }
 
   /**
