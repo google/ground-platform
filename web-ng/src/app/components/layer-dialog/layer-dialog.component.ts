@@ -57,7 +57,8 @@ export class LayerDialogComponent implements OnDestroy {
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList<FormFieldEditorComponent>;
-  contributorsCanAdd = true;
+  contributorsCanAddPoints = true;
+  contributorsCanAddPolygons = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -80,7 +81,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.init(data.projectId, data.createLayer, data.layer);
     this.dialogRef.keydownEvents().subscribe(event => {
       if (event.key === 'Escape') {
-        this.onClose();
+        this.close();
       }
     });
   }
@@ -135,10 +136,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.addQuestion();
       return;
     }
-    const canAddPoints = this.layer?.contributorsCanAdd?.find(
-      val => val === 'points'
-    );
-    this.contributorsCanAdd = canAddPoints ? true : false;
+    this.contributorsCanAddPoints =
+      this.layer?.contributorsCanAdd?.includes('points') || false;
+    this.contributorsCanAddPolygons =
+      this.layer?.contributorsCanAdd?.includes('polygons') || false;
     this.form = this.layerService.getForm(this.layer);
     if (this.form) {
       this.fields =
@@ -168,6 +169,13 @@ export class LayerDialogComponent implements OnDestroy {
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
+    const allowedFeatureTypes: string[] = [];
+    if (this.contributorsCanAddPoints) {
+      allowedFeatureTypes.push('points');
+    }
+    if (this.contributorsCanAddPolygons) {
+      allowedFeatureTypes.push('polygons');
+    }
     const layer = new Layer(
       this.layer?.id || '',
       /* index */ this.layer?.index || -1,
@@ -175,7 +183,7 @@ export class LayerDialogComponent implements OnDestroy {
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName.trim() }),
       forms,
-      this.contributorsCanAdd ? ['points'] : []
+      allowedFeatureTypes
     );
     this.addOrUpdateLayer(this.projectId, layer);
   }
@@ -198,16 +206,30 @@ export class LayerDialogComponent implements OnDestroy {
     // TODO: Inform user layer was saved
     this.layerService
       .addOrUpdateLayer(projectId, layer)
-      .then(() => this.onClose())
+      .then(() => this.close())
       .catch(err => {
         console.error(err);
         alert('Layer update failed.');
       });
   }
 
-  onClose() {
-    this.dialogRef.close();
-    return this.navigationService.selectProject(this.projectId!);
+  onCancel(): void {
+    if (!this.hasUnsavedChanges()) {
+      this.close();
+      return;
+    }
+    this.dialogService
+      .openConfirmationDialog(
+        'Discard changes',
+        'Unsaved changes to this layer will be lost. Are you sure?',
+        /* showDiscardActions= */ true
+      )
+      .afterClosed()
+      .subscribe(async dialogResult => {
+        if (dialogResult) {
+          this.close();
+        }
+      });
   }
 
   setLayerName(value: string) {
@@ -275,5 +297,37 @@ export class LayerDialogComponent implements OnDestroy {
       const question = this.formFieldEditors.last;
       question?.questionInput?.nativeElement.focus();
     }
+  }
+
+  private isFieldOptionsDirty(
+    formFieldEditor: FormFieldEditorComponent
+  ): boolean {
+    if (!formFieldEditor.optionEditors) {
+      return true;
+    }
+    for (const editor of formFieldEditor.optionEditors) {
+      if (editor.optionGroup.dirty) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private hasUnsavedChanges(): boolean {
+    if (!this.formFieldEditors) {
+      return false;
+    }
+    for (const editor of this.formFieldEditors) {
+      if (editor.formGroup.dirty || !this.isFieldOptionsDirty(editor)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private close(): void {
+    this.dialogRef.close();
+    // TODO: Add closeLayerDialog() in NavigationService that removes the layer fragment.
+    return this.navigationService.selectProject(this.projectId!);
   }
 }

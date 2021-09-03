@@ -19,7 +19,8 @@
     "google-auth-library": "^6.1.3",
     "googleapis": "^64.0.0",
     "http-status-codes": "^1.4.0",
-    "requests": "^0.3.0"
+    "requests": "^0.3.0",
+    "wkt": "^0.1.1"
   },
   "engines": {
     "node": "12"

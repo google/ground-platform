@@ -28,10 +28,18 @@
       <div fxFlex>Default style</div>
     </div>
     <div fxLayout>
-      <div fxFlex fxFlexAlign="center">
+      <div fxLayout="column" fxLayoutGap="10px" fxFlex fxFlexAlign="center">
         <label>
-          <mat-checkbox [(ngModel)]="contributorsCanAdd" color="primary">
+          <mat-checkbox [(ngModel)]="contributorsCanAddPoints" color="primary">
             Contributors may add points
+          </mat-checkbox>
+        </label>
+        <label>
+          <mat-checkbox
+            [(ngModel)]="contributorsCanAddPolygons"
+            color="primary"
+          >
+            Contributors may add polygons
           </mat-checkbox>
         </label>
       </div>
@@ -76,7 +84,7 @@
 </mat-dialog-content>
 <mat-dialog-actions fxLayout fxLayoutAlign="end">
   <div fxLayoutAlign="end">
-    <button mat-button (click)="onClose()">Cancel</button>
+    <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-flat-button color="primary" type="submit" (click)="onSave()">
       Save
     </button>

@@ -19,6 +19,7 @@
 
 const csv = require("@fast-csv/format");
 const { db } = require("./common/context");
+const wkt = require("wkt");
 
 // TODO: Refactor into meaningful pieces.
 async function exportCsv(req, res) {
@@ -41,10 +42,11 @@ async function exportCsv(req, res) {
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push("Feature ID");
-  headers.push("Feature label");
-  headers.push("Latitude");
-  headers.push("Longitude");
+  headers.push("feature_id");
+  headers.push("feature_name");
+  headers.push("latitude");
+  headers.push("longitude");
+  headers.push("geometry");
   elements.forEach((element) => {
     const labelMap = element["label"] || {};
     const label = Object.values(labelMap)[0] || "Unnamed field";
@@ -91,6 +93,7 @@ async function exportCsv(req, res) {
       row.push(getLabel(feature));
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
+      row.push(toWkt(feature.get("geoJson")) || "");
       const responses = observation["responses"] || {};
       elements
         .map((element) => getValue(element, responses))
@@ -99,6 +102,28 @@ async function exportCsv(req, res) {
     });
   });
   csvStream.end();
+}
+
+function toWkt(geoJsonString) {
+  const geoJsonObject = parseGeoJson(geoJsonString);
+  const geometry = getGeometry(geoJsonObject);
+  return geometry ? wkt.stringify(geometry) : "";
+}
+
+function parseGeoJson(jsonString) {
+  try {
+    // Note: Returns null when jsonString is null.
+    return JSON.parse(jsonString);
+  } catch (e) {
+    return null;
+  }
+}
+
+function getGeometry(geoJsonObject) {
+  if (!geoJsonObject || typeof geoJsonObject !== "object") {
+    return null;
+  }
+  return geoJsonObject.geometry;
 }
 
 function getId(feature) {
