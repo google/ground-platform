@@ -46,7 +46,9 @@ class MatDialogActions {}
 describe('LayerDialogComponent', () => {
   let component: LayerDialogComponent;
   let fixture: ComponentFixture<LayerDialogComponent>;
-  const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {};
+  const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {
+    keydownEvents: () => NEVER,
+  };
 
   beforeEach(
     waitForAsync(() => {

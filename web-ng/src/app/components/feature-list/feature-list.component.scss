@@ -13,31 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-@import '_variables';
-
-.drawing-buttons {
-  position: absolute;
-  bottom: 3em;
-  left: 3em;
-}
-
-.drawing-layer-selector {
-  position: absolute;
-  top: 2em;
-  left: 50%;
-  background-color: white;
-  transform: translate(-50%, 0);
-}
-
-.add-point-button {
-  background-color: var(--drawing-tools-black);
-}
-
-.add-point-button:hover {
-  background-color: mat-color($primary);
-}
-
-.mat-button-toggle-checked {
-  background-color: mat-color($primary);
-}
