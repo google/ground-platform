@@ -166,9 +166,10 @@ function getValue(element, responses) {
  * the code is not defined, returns the label in English.
  */
 function getMultipleChoiceValues(id, element) {
-  const option = element.options[id];
+  const option = element.options[id] || {};
+  const label = option.label || {};
   // TODO: i18n.
-  return option.code || option.label["en"] || "";
+  return option.code || label["en"] || "";
 }
 
 /**
