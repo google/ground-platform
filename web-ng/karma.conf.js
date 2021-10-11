@@ -54,15 +54,6 @@ module.exports = function (config) {
         flags: ['--no-sandbox'],
       },
     },
-    // files: ['src/app/shared/mocks/google-maps-api.js'],
     files: ['google-maps-api.js'],
-    // vendor: [
-    //   'http://maps.googleapis.com/maps/api/js?sensor=false&language=en',
-    //   'bower_components/jquery/jquery.js',
-    //   'bower_components/angular/angular.js',
-    //   'bower_components/angular-mocks/angular-mocks.js',
-    //   'bower_components/underscore/underscore.js',
-    //   'dist/angular-google-maps.js',
-    // ],
   });
 };

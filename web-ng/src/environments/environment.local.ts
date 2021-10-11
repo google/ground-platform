@@ -21,6 +21,7 @@
 
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
+import { Env } from './environment-enums';
 
 export const environment = {
   production: false,
@@ -29,4 +30,5 @@ export const environment = {
   cloudFunctionsUrl: `http://localhost:5001/${firebaseConfig.projectId}/us-central1`,
   offlineBaseMapSources: [{ url: '' }],
   useEmulators: true,
+  env: Env.Local,
 };

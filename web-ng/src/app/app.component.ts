@@ -17,6 +17,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { environment } from '../environments/environment';
+import { Env } from '../environments/environment-enums';
 
 /**
  * Top-level component. Delegates routing of sub-components to paths defined
@@ -29,7 +30,7 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent {
   public constructor(@Inject(DOCUMENT) private doc: Document) {
-    if (environment.googleMapsApiKey !== '') {
+    if (environment.env !== Env.Test) {
       this.initGoogleMap();
     }
   }
