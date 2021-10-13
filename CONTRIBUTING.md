@@ -52,7 +52,7 @@ to contribute to the ground-platform codebase.
     
     `git remote add upstream https://github.com/google/ground-platform.git`
 
-4. Follow the instructions in the README files of each of the directories listed under [About this Repository](#about-this-repository) section of this readme to set up your development environment.
+4. Follow the instructions in the README files of each of the directories listed under [About this Repository](README.md#about-this-repository) section of this readme to set up your development environment.
 
 ## Development Workflow
 
