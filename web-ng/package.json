@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:local": "ng serve --configuration=local",
+    "start:emulators": "firebase emulators:start --config ../firebase.local.json",
     "build": "ng build",
     "test": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "lint": "ng lint",
