@@ -8,27 +8,7 @@
 The following sections describe how to set up your development environment to
 modify, run, and deploy Ground Cloud Functions source code.
 
-> **Note:** All instructions in this guide assume `ground-platform/functions/` is your current working directory.
-
-### Node.js
-
-> **Note**: This guide recommends using Node Version Manager (nvm) to install and manage versions
-> of Node.js and assumes nvm is installed. For more information on nvm, as well
-> as installation instructions, see: <https://github.com/creationix/nvm#installation>
-
-Firestore Cloud Functions currently require version 6.11.5 of Node.js.
-
-1. Install a [supported version](https://firebase.google.com/docs/functions/manage-functions#set_nodejs_version) of Node.js:
-
-   ```
-   $ nvm install <version>
-   ```
-
-   To set this as the default version run:
-
-   ```
-   $ nvm alias default <version>
-   ```
+Before proceeding, be sure to follow instructions in [../README.md].
 
 2. Download project dependencies:
 
@@ -116,13 +96,12 @@ Ground Cloud Functions source code.
    ```
    $ firebase emulators:start
    ```
-   
+
    Alternatively, you can test functions from a command-line shell using:
 
    ```
    $ firebase functions:shell
    ```
-
 
    For more information on using the Firebase shell, see
    <https://firebase.google.com/docs/functions/local-emulator>.

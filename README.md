@@ -37,3 +37,52 @@ We'd love to accept your patches and contributions to this project. For more
 information, including details on the required Contributor License Agreement
 (CLA), code reviews, and environment setup, see
 [Contributing to Ground Platform](CONTRIBUTING.md).
+
+## Getting started
+
+### Node.js
+
+> **Note**: This guide recommends using Node Version Manager (nvm) to install and manage versions
+> of Node.js and assumes nvm is installed. For more information on nvm,
+> including how to download and install, see: <https://github.com/creationix/nvm#installation>
+
+Once you have NVM installed, install Node.js with:
+
+```
+$ nvm install 14 && nvm use 14
+```
+
+Then install the Angular CLI using npm with:
+
+```
+$ npm install -g @angular/cli
+```
+
+### Quickstart
+
+To get up and running quickly, you run the web app against the local Firebase
+emulator.
+
+To install dependencies and start the emulator:
+
+```
+$ cd functions && npm install && npm run emulator
+```
+
+Leave the emulator running, and in a new shell execute the following:
+
+```
+$ cd web-ng && npm install && npm run start:local
+```
+
+Once started, you can navigate to http://localhost:4200/project/new to create
+a new Ground project. Note that for expediency, the above commands start the app
+without valid API keys, so related warnings are expected.
+
+### Next steps
+
+To set up your environment for developing Cloud Functions against a real
+Firebase project, see [functions/README.md].
+
+For further instructions on working with the Angular web app, see
+[web-ng/README.md].
