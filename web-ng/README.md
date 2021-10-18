@@ -1,4 +1,8 @@
-# Ground Web Console in Angular (WIP)
+# Ground Web Console in Angular
+
+## First-time setup
+
+Before proceeding, follow instructions in [../README.md](../README.md).
 
 ### Add Google Maps API key
 
@@ -59,19 +63,7 @@ Create a file in `environments/.backend-config.json` containing the following:
 }
 ```
 
-## Dev Environment Setup
-
-Install Node.js using nvm:
-
-```
-$ nvm install 13 && nvm use 13
-```
-
-Install ng CLI using npm:
-
-```
-$ npm install -g @angular/cli
-```
+## Install dependencies
 
 Install required npm dependencies:
 
@@ -79,16 +71,11 @@ Install required npm dependencies:
 $ npm install
 ```
 
-This last step will fail if you haven't yet following instructions above in
-[Add Google Maps API key](#Add Google Maps API key).
-
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to http://localhost:4200/. Add
-`project/<project_name>` as a suffix to the url to see an existing project interface
-in your browser. Alternatively, go to http://localhost:4200/project/new for a
-new project.
-The app will automatically reload if you change any of the source files.
+Run `npm run start` to host your web app locally, then navigate to
+<http://localhost:4200/project/new> to create a new Ground project. The app will
+automatically rebuild and reload if you change any of the source files.
 
 ## Code scaffolding
 
