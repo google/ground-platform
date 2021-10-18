@@ -8,7 +8,7 @@
 The following sections describe how to set up your development environment to
 modify, run, and deploy Ground Cloud Functions source code.
 
-Before proceeding, follow instructions in <../README.md>. Then, download project
+Before proceeding, follow instructions in [../README.md](../README.md). Then, download project
 dependencies with:
 
 ```
