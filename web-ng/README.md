@@ -74,7 +74,7 @@ $ npm install
 ## Development server
 
 Run `npm run start` to host your web app locally, then navigate to
-<http://localhost:4200/project/new> start a new Ground project. The app will
+<http://localhost:4200/project/new> to create a new Ground project. The app will
 automatically rebuild and reload if you change any of the source files.
 
 ## Code scaffolding
