@@ -2,7 +2,7 @@
 
 ## First-time setup
 
-Before proceeding, follow instructions in [../README.md].
+Before proceeding, follow instructions in [../README.md](../README.md).
 
 ### Add Google Maps API key
 
