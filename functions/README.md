@@ -8,14 +8,12 @@
 The following sections describe how to set up your development environment to
 modify, run, and deploy Ground Cloud Functions source code.
 
-Before proceeding, be sure to follow instructions in [../README.md].
+Before proceeding, follow instructions in [../README.md]. Then, download project
+dependencies with:
 
-2. Download project dependencies:
-
-   ```
-   $ cd functions
-   $ npm install
-   ```
+```
+$ npm install
+```
 
 ### Set up Firebase
 
@@ -62,7 +60,10 @@ cloud functions.
 
 ### Set up a service account and keys
 
-Ground uses a Google Cloud Service Account to manage and synchronize data in Google Sheets.
+Ground uses a Google Cloud Service Account to manage and synchronize data to
+Google Sheets.
+
+> **Note**: This feature is experimental and may be currently broken.
 
 1. Create a new service account:
 
