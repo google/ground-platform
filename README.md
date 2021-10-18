@@ -84,7 +84,7 @@ warnings related to missing API keys are expected.
 ### Next steps
 
 To set up your environment for developing Cloud Functions against a real
-Firebase project, see <functions/README.md>.
+Firebase project, see [functions/README.md](functions/README.md).
 
 For further instructions on working with the Angular web app, see
-<web-ng/README.md>.
+[web-ng/README.md](web-ng/README.md).
