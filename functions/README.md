@@ -79,28 +79,22 @@ Ground uses a Google Cloud Service Account to manage and synchronize data in Goo
 The following steps are useful for testing or examining modifications to the
 Ground Cloud Functions source code.
 
-1. Select a Node.js version:
-
-   ```
-   $ nvm use <version>
-   ```
-
-2. Confirm you're logged into firebase:
+1. Confirm you're logged into firebase:
 
    ```
    $ firebase login
    ```
 
-3. Test Cloud Functions in a browser using a local emulator with:
+2. Test Cloud Functions in a browser using a local emulator with:
 
    ```
-   $ firebase emulators:start
+   $ npm run emulators
    ```
 
    Alternatively, you can test functions from a command-line shell using:
 
    ```
-   $ firebase functions:shell
+   $ npm run shell
    ```
 
    For more information on using the Firebase shell, see
