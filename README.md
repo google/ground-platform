@@ -67,7 +67,7 @@ Firebase emulator.
 To install dependencies and start the emulator, run:
 
 ```
-$ cd functions && npm install && npm run emulator
+$ cd functions && npm install && npm run emulators
 ```
 
 Leave the emulator running, and in a new shell execute the following:
