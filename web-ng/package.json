@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:local": "ng serve --configuration=local",
     "build": "ng build",
     "pretest": "./pretest.sh",
     "test": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
