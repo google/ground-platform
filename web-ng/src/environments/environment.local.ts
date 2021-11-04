@@ -19,14 +19,11 @@
 // `environment.test.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { googleMapsConfig } from './.google-maps-config';
-import { firebaseConfig } from './.firebase-config';
-
 export const environment = {
   production: false,
-  googleMapsApiKey: googleMapsConfig.apiKey,
-  firebase: firebaseConfig,
-  cloudFunctionsUrl: `http://localhost:5001/${firebaseConfig.projectId}/us-central1`,
+  googleMapsApiKey: '',
+  firebase: { projectId: 'fake-project-id', apiKey: 'fake-api-key' },
+  cloudFunctionsUrl: `http://localhost:5001/fake-project-id/us-central1`,
   offlineBaseMapSources: [{ url: '' }],
   useEmulators: true,
 };
