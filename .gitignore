@@ -3,6 +3,7 @@
 !.eslintignore
 !.eslintrc.json
 !.prettierrc.js
+!.github/
 **/dist/
 **/firebase-debug.log
 **/firebase-init.html
@@ -12,3 +13,5 @@
 **/node_modules
 **/build/
 **/*.log
+web-ng/google-maps-api.js
+web-ng/coverage/

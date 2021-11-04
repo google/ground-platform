@@ -103,7 +103,8 @@
               "includePaths": ["src/app/shared/styles"]
             },
             "styles": ["src/custom-theme.scss", "src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "codeCoverage": true
           }
         },
         "lint": {
