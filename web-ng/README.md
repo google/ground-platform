@@ -1,5 +1,3 @@
-[![code-coverage](https://codecov.io/gh/os-micmec/ground-platform/branch/master/graph/badge.svg?token=0K8HS3IIEA)](https://codecov.io/gh/os-micmec/ground-platform)
-
 # Ground Web Console in Angular
 
 ## First-time setup
