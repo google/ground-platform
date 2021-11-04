@@ -1,0 +1,30 @@
+name: karma-test-pull-request
+on:
+  pull_request:
+    paths:
+      - 'web-ng/**'
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web-ng
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+        with:
+          path: web-ng
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm i
+        
+      - name: Install Angular-CLI
+        run: npm install -g @angular/cli > /dev/null
+
+      - name: Run Jasmine tests
+        run: npm run test

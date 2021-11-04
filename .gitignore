@@ -3,6 +3,8 @@
 !.eslintignore
 !.eslintrc.json
 !.prettierrc.js
+!.github/
+!.travis.yml
 **/dist/
 **/firebase-debug.log
 **/firebase-init.html
@@ -12,3 +14,4 @@
 **/node_modules
 **/build/
 **/*.log
+web-ng/coverage/
