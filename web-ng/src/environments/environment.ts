@@ -21,6 +21,7 @@
 import { googleMapsConfig } from './.google-maps-config';
 import { firebaseConfig } from './.firebase-config';
 import { offlineBaseMapSources } from './.backend-config.json';
+import { Env } from './environment-enums';
 
 const { projectId } = firebaseConfig;
 
@@ -31,6 +32,7 @@ export const environment = {
   cloudFunctionsUrl: `https://us-central1-${projectId}.cloudfunctions.net`,
   offlineBaseMapSources,
   useEmulators: false,
+  env: Env.Local,
 };
 
 /*
