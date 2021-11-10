@@ -93,4 +93,4 @@ For further instructions on working with the Angular web app, see
 
 For step-by-step instructions setting up your own instance of Ground, see the
 documentation for [building and deploying Ground from the
-source](docs/build-and-deploy-ground-from-source).
+source](docs/build-and-deploy-ground-from-source.md).
