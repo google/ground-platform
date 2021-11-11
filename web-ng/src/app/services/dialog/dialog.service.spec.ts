@@ -17,17 +17,38 @@
 import { TestBed } from '@angular/core/testing';
 
 import { DialogService } from './dialog.service';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { of } from 'rxjs';
+import { ConfirmationDialogComponent } from '../../components/confirmation-dialog/confirmation-dialog.component';
 
 describe('DialogService', () => {
   let service: DialogService;
+  let dialogSpy: jasmine.Spy;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ imports: [MatDialogModule] });
     service = TestBed.inject(DialogService);
+
+    dialogSpy = spyOn(TestBed.inject(MatDialog), 'open');
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('should return correct dialog without discard actions', () => {
+    service.openConfirmationDialog('testTitle', 'testMessage');
+
+    expect(dialogSpy).toHaveBeenCalled();
+
+    expect(dialogSpy).toHaveBeenCalledWith(ConfirmationDialogComponent, {
+      maxWidth: '500px',
+      autoFocus: false,
+      data: {
+        title: 'testTitle',
+        message: 'testMessage',
+        showDiscardActions: false,
+      },
+    });
   });
 });
