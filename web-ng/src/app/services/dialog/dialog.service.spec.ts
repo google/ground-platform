@@ -39,8 +39,6 @@ describe('DialogService', () => {
   it('should return correct dialog without discard actions', () => {
     service.openConfirmationDialog('testTitle', 'testMessage');
 
-    expect(dialogSpy).toHaveBeenCalled();
-
     expect(dialogSpy).toHaveBeenCalledWith(ConfirmationDialogComponent, {
       maxWidth: '500px',
       autoFocus: false,
