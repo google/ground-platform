@@ -119,3 +119,9 @@ repository. Reference the [issue](https://github.com/google/ground-platform/issu
     To learn more about referencing issues in your pull request or commit messages, see <https://help.github.com/articles/closing-issues-using-keywords/>.
 
 1. Celebrate!
+
+## Building and Deploying Ground from Source
+
+For step-by-step instructions setting up your own instance of Ground, see the
+documentation for [building and deploying Ground from the
+source](docs/build-and-deploy-ground-from-source.md).
