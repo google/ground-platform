@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/google/ground-platform/branch/master/graph/badge.svg?token=arOkyNs0m9)](https://codecov.io/gh/google/ground-platform)
+
 # Ground Web Console in Angular
 
 ## First-time setup
