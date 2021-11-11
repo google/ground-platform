@@ -18,7 +18,6 @@ import { TestBed } from '@angular/core/testing';
 
 import { DialogService } from './dialog.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { of } from 'rxjs';
 import { ConfirmationDialogComponent } from '../../components/confirmation-dialog/confirmation-dialog.component';
 
 describe('DialogService', () => {
@@ -38,8 +37,6 @@ describe('DialogService', () => {
 
   it('should return correct dialog without discard actions', () => {
     service.openConfirmationDialog('testTitle', 'testMessage');
-
-    expect(dialogSpy).toHaveBeenCalled();
 
     expect(dialogSpy).toHaveBeenCalledWith(ConfirmationDialogComponent, {
       maxWidth: '500px',
