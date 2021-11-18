@@ -145,180 +145,188 @@ describe('DrawingToolsComponent', () => {
     fixture.destroy();
   });
 
-  it('button group is enabled by default', () => {
-    const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
-      .nativeElement;
-    expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('false');
+  describe('button group', () => {
+    it('is enabled by default', () => {
+      const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
+        .nativeElement;
+      expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('false');
+    });
+
+    it('is disabled when an observation is selected', fakeAsync(() => {
+      mockObservationId$.next('oid1');
+      tick();
+      // wait for async pipe to reflect
+      fixture.detectChanges();
+
+      const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
+        .nativeElement;
+      expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
+    }));
+
+    it('is disabled when drawing tools service disables it', fakeAsync(() => {
+      mockDisabled$.next(true);
+      tick();
+      // wait for async pipe to reflect
+      fixture.detectChanges();
+
+      const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
+        .nativeElement;
+      expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
+    }));
   });
 
-  it('button group is disabled when an observation is selected', fakeAsync(() => {
-    mockObservationId$.next('oid1');
-    tick();
-    // wait for async pipe to reflect
-    fixture.detectChanges();
+  describe('add point button', () => {
+    it('displays add point button by default', () => {
+      const addPointButton = fixture.debugElement.query(
+        By.css('#add-point-button')
+      ).nativeElement;
+      expect(addPointButton).not.toBeNull();
+    });
 
-    const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
-      .nativeElement;
-    expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
-  }));
+    it('does not display add point button when user cannot add point to any layer', () => {
+      authServiceSpy.canUserAddPointsToLayer.and.returnValue(false);
+      resetFixture();
 
-  it('button group is  disabled when drawing tools service disables it', fakeAsync(() => {
-    mockDisabled$.next(true);
-    tick();
-    // wait for async pipe to reflect
-    fixture.detectChanges();
+      const addPointButton = fixture.debugElement.query(
+        By.css('#add-point-button')
+      );
+      expect(addPointButton).toBeNull();
+    });
 
-    const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
-      .nativeElement;
-    expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
-  }));
+    it('sets edit mode to "add point" when add point button clicked', () => {
+      const addPointButton = fixture.debugElement.query(
+        By.css('#add-point-button')
+      ).nativeElement as Element;
+      (addPointButton.querySelector('button') as HTMLElement).click();
 
-  it('displays add point button by default', () => {
-    const addPointButton = fixture.debugElement.query(
-      By.css('#add-point-button')
-    ).nativeElement;
-    expect(addPointButton).not.toBeNull();
+      expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
+        EditMode.AddPoint
+      );
+    });
+
+    it('sets edit mode back to "none" when add point button clicked twice', () => {
+      const addPointButton = fixture.debugElement.query(
+        By.css('#add-point-button')
+      ).nativeElement as Element;
+      (addPointButton.querySelector('button') as HTMLElement).click();
+      (addPointButton.querySelector('button') as HTMLElement).click();
+
+      expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
+        EditMode.None
+      );
+    });
+
+    it('turns icon in button green when edit mode set to "add point"', fakeAsync(() => {
+      mockEditMode$.next(EditMode.AddPoint);
+      tick();
+
+      const greenColor = '#3d7d40';
+      const addPointIcon = fixture.debugElement.query(By.css('#add-point-icon'))
+        .nativeElement as Element;
+      assertElementSrcColor(addPointIcon, greenColor);
+    }));
+
+    it('turns icon in button black when edit mode set to "none"', fakeAsync(() => {
+      mockEditMode$.next(EditMode.None);
+      tick();
+
+      const blackColor = '#202225';
+      const addPointIcon = fixture.debugElement.query(By.css('#add-point-icon'))
+        .nativeElement as Element;
+      assertElementSrcColor(addPointIcon, blackColor);
+    }));
   });
 
-  it('does not display add point button when user cannot add point to any layer', () => {
-    authServiceSpy.canUserAddPointsToLayer.and.returnValue(false);
-    resetFixture();
+  describe('layer selector section', () => {
+    it('does not display layer selector section by default', () => {
+      const layerSelectorSection = fixture.debugElement.query(
+        By.css('#layer-selector-section')
+      );
+      expect(layerSelectorSection).toBeNull();
+    });
 
-    const addPointButton = fixture.debugElement.query(
-      By.css('#add-point-button')
-    );
-    expect(addPointButton).toBeNull();
+    it('displays layer selector section when edit mode set to "add point"', fakeAsync(() => {
+      mockEditMode$.next(EditMode.AddPoint);
+      tick();
+
+      const layerSelectorSection = fixture.debugElement.query(
+        By.css('#layer-selector-section')
+      ).nativeElement;
+      expect(layerSelectorSection).not.toBeNull();
+      const layerSelectorLabel = fixture.debugElement.query(
+        By.css('#layer-selector-label')
+      ).nativeElement;
+      expect(layerSelectorLabel.innerHTML).toEqual('Adding point for');
+    }));
+
+    it('selects first layer id by default', () => {
+      expect(drawingToolsServiceSpy.setSelectedLayerId).toHaveBeenCalledWith(
+        layerId1
+      );
+    });
+
+    it('selects layer id when layer selected', fakeAsync(() => {
+      mockEditMode$.next(EditMode.AddPoint);
+      tick();
+
+      const layerSelector = fixture.debugElement.query(
+        By.css('#layer-selector')
+      ).nativeElement;
+      layerSelector.click();
+      // wait for dropdown menu to reflect
+      fixture.detectChanges();
+      const layer2Item = fixture.debugElement.query(
+        By.css(`#layer-selector-item-${layerId2}`)
+      ).nativeElement;
+      layer2Item.click();
+      flush();
+
+      expect(drawingToolsServiceSpy.setSelectedLayerId).toHaveBeenCalledWith(
+        layerId2
+      );
+    }));
+
+    it('sets edit mode to "none" when cancel button clicked', fakeAsync(() => {
+      mockEditMode$.next(EditMode.AddPoint);
+      tick();
+
+      const cancelButton = fixture.debugElement.query(By.css('#cancel-button'))
+        .nativeElement;
+      cancelButton.click();
+
+      expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
+        EditMode.None
+      );
+    }));
+
+    it('displays icons with layer color and name in layer selector items', fakeAsync(() => {
+      mockEditMode$.next(EditMode.AddPoint);
+      tick();
+
+      const layerSelector = fixture.debugElement.query(
+        By.css('#layer-selector')
+      ).nativeElement;
+      layerSelector.click();
+      // wait for dropdown menu to reflect
+      fixture.detectChanges();
+      flush();
+
+      const layer1Item = fixture.debugElement.query(
+        By.css(`#layer-selector-item-${layerId1}`)
+      ).nativeElement as Element;
+      const layer2Item = fixture.debugElement.query(
+        By.css(`#layer-selector-item-${layerId2}`)
+      ).nativeElement as Element;
+      assertElementSrcColor(
+        layer1Item.querySelector('img') as Element,
+        layerColor1
+      );
+      assertElementSrcColor(
+        layer2Item.querySelector('img') as Element,
+        layerColor2
+      );
+      expect(layer1Item.innerHTML).toContain(layerName1);
+      expect(layer2Item.innerHTML).toContain(layerName2);
+    }));
   });
-
-  it('selects first layer id by default', () => {
-    expect(drawingToolsServiceSpy.setSelectedLayerId).toHaveBeenCalledWith(
-      layerId1
-    );
-  });
-
-  it('sets edit mode to "add point" when add point button clicked', () => {
-    const addPointButton = fixture.debugElement.query(
-      By.css('#add-point-button')
-    ).nativeElement as Element;
-    (addPointButton.querySelector('button') as HTMLElement).click();
-
-    expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
-      EditMode.AddPoint
-    );
-  });
-
-  it('sets edit mode back to "none" when add point button clicked twice', () => {
-    const addPointButton = fixture.debugElement.query(
-      By.css('#add-point-button')
-    ).nativeElement as Element;
-    (addPointButton.querySelector('button') as HTMLElement).click();
-    (addPointButton.querySelector('button') as HTMLElement).click();
-
-    expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
-      EditMode.None
-    );
-  });
-
-  it('turns icon in button green when edit mode set to "add point"', fakeAsync(() => {
-    mockEditMode$.next(EditMode.AddPoint);
-    tick();
-
-    const greenColor = '#3d7d40';
-    const addPointIcon = fixture.debugElement.query(By.css('#add-point-icon'))
-      .nativeElement as Element;
-    assertElementSrcColor(addPointIcon, greenColor);
-  }));
-
-  it('turns icon in button black when edit mode set to "none"', fakeAsync(() => {
-    mockEditMode$.next(EditMode.None);
-    tick();
-
-    const blackColor = '#202225';
-    const addPointIcon = fixture.debugElement.query(By.css('#add-point-icon'))
-      .nativeElement as Element;
-    assertElementSrcColor(addPointIcon, blackColor);
-  }));
-
-  it('does not display layer selector section by default', () => {
-    const layerSelectorSection = fixture.debugElement.query(
-      By.css('#layer-selector-section')
-    );
-    expect(layerSelectorSection).toBeNull();
-  });
-
-  it('displays layer selector section when edit mode set to "add point"', fakeAsync(() => {
-    mockEditMode$.next(EditMode.AddPoint);
-    tick();
-
-    const layerSelectorSection = fixture.debugElement.query(
-      By.css('#layer-selector-section')
-    ).nativeElement;
-    expect(layerSelectorSection).not.toBeNull();
-    const layerSelectorLabel = fixture.debugElement.query(
-      By.css('#layer-selector-label')
-    ).nativeElement;
-    expect(layerSelectorLabel.innerHTML).toEqual('Adding point for');
-  }));
-
-  it('selects layer id when layer selected', fakeAsync(() => {
-    mockEditMode$.next(EditMode.AddPoint);
-    tick();
-
-    const layerSelector = fixture.debugElement.query(By.css('#layer-selector'))
-      .nativeElement;
-    layerSelector.click();
-    // wait for dropdown menu to reflect
-    fixture.detectChanges();
-    const layer2Item = fixture.debugElement.query(
-      By.css(`#layer-selector-item-${layerId2}`)
-    ).nativeElement;
-    layer2Item.click();
-    flush();
-
-    expect(drawingToolsServiceSpy.setSelectedLayerId).toHaveBeenCalledWith(
-      layerId2
-    );
-  }));
-
-  it('sets edit mode to "none" when cancel button clicked', fakeAsync(() => {
-    mockEditMode$.next(EditMode.AddPoint);
-    tick();
-
-    const cancelButton = fixture.debugElement.query(By.css('#cancel-button'))
-      .nativeElement;
-    cancelButton.click();
-
-    expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
-      EditMode.None
-    );
-  }));
-
-  it('displays icons with layer color and name in layer selector items', fakeAsync(() => {
-    mockEditMode$.next(EditMode.AddPoint);
-    tick();
-
-    const layerSelector = fixture.debugElement.query(By.css('#layer-selector'))
-      .nativeElement;
-    layerSelector.click();
-    // wait for dropdown menu to reflect
-    fixture.detectChanges();
-    flush();
-
-    const layer1Item = fixture.debugElement.query(
-      By.css(`#layer-selector-item-${layerId1}`)
-    ).nativeElement as Element;
-    const layer2Item = fixture.debugElement.query(
-      By.css(`#layer-selector-item-${layerId2}`)
-    ).nativeElement as Element;
-    assertElementSrcColor(
-      layer1Item.querySelector('img') as Element,
-      layerColor1
-    );
-    assertElementSrcColor(
-      layer2Item.querySelector('img') as Element,
-      layerColor2
-    );
-    expect(layer1Item.innerHTML).toContain(layerName1);
-    expect(layer2Item.innerHTML).toContain(layerName2);
-  }));
 });
