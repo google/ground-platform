@@ -44,6 +44,8 @@ const FIELD_TYPE_ENUMS_BY_STRING = Map([
   [FieldType.MULTIPLE_CHOICE, 'multiple_choice'],
   [FieldType.PHOTO, 'photo'],
   [FieldType.NUMBER, 'number'],
+  [FieldType.DATE, 'date'],
+  [FieldType.TIME, 'time'],
 ]);
 
 const FIELD_TYPE_STRINGS_BY_ENUM = Map(

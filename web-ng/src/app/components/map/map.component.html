@@ -21,19 +21,23 @@ limitations under the License.
   (mapClick)="onMapClick($event)">
 </google-map>
 
-<div *ngIf="showRepositionConfirmDialog" class="reposition-confirm-dialog">
+<div *ngIf="showRepositionConfirmDialog"
+     id="reposition-confirm-dialog"
+     class="reposition-confirm-dialog">
   <div class="dialog-content">
     <div class="dialog-text">
       Drag point to reposition
     </div>
     <button
       class="dialog-button"
+      id="cancel-reposition"
       mat-flat-button
       (click)="onCancelRepositionClick()">
       <label>Cancel</label>
     </button>
     <button
       class="dialog-button"
+      id="confirm-reposition"
       mat-flat-button
       (click)="onSaveRepositionClick()">
       <label>Save</label>

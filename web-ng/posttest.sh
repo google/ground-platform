@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This build is run automatically on pushes and pull requests.
-
-# The first time the Docker image is created, the total build time can exceed
-# the 10 min default. Increase the max. build time to 20 min to prevent
-# timeouts.
-codecov:
-  token: ${{secrets.CODECOV_TOKEN}}
-comment:
-  layout: "reach, diff, flags, files"
-  behavior: default
-  require_changes: false  # if true: only post the comment if coverage changes
-  require_base: no        # [yes :: must have a base report to post]
-  require_head: yes       # [yes :: must have a head report to post]
+echo "Running 'posttest.sh' script to remove Google Maps API file..."
+rm google-maps-api.js
+echo "'posttest.sh' finished"
