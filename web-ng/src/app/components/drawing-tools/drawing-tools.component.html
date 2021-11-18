@@ -15,29 +15,44 @@
 -->
 
 <mat-button-toggle-group
-  class="drawing-buttons"
+  id="button-group"
+  class="button-group"
   [disabled]="(isObservationSelected$ | async) || (disabled$ | async)"
   [(value)] = "selectedValue">
   <mat-button-toggle
       *ngIf="!(layers$ | async).isEmpty()"
+      id="add-point-button"
       class="add-point-button"
       value = "{{pointValue}}"
       (click)="onButtonClick()">
-    <img class="add-point-icon" [src]="addPointIcon" />
+    <img id="add-point-icon"
+         class="add-point-icon"
+         [src]="addPointIcon" />
   </mat-button-toggle>
-  <mat-button-toggle hidden value = "{{ polygonValue }}" (click)="onButtonClick()">
+  <mat-button-toggle hidden value = "{{polygonValue}}" (click)="onButtonClick()">
     add polygon
   </mat-button-toggle>
 </mat-button-toggle-group>
 
-<div *ngIf="selectedValue" class="drawing-layer-selector">
+<div *ngIf="selectedValue"
+     id="layer-selector-section"
+     class="layer-selector-section">
   <mat-form-field appearance="fill">
-    <mat-label>Adding {{selectedValue}} for</mat-label>
-    <mat-select [(value)]="selectedLayerId" (selectionChange)="onLayerIdChange()">
-      <mat-option *ngFor="let layer of layers$ | async" [value]="layer.id">
+    <mat-label id="layer-selector-label">Adding {{selectedValue}} for</mat-label>
+    <mat-select
+        id="layer-selector"
+        [(value)]="selectedLayerId"
+        (selectionChange)="onLayerIdChange()">
+      <mat-option
+          *ngFor="let layer of layers$ | async"
+          id="layer-selector-item-{{layer.id}}"
+          [value]="layer.id">
         <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <button mat-button (click)="onCancel()">Cancel</button>
+  <button
+      id="cancel-button"
+      mat-button
+      (click)="onCancel()">Cancel</button>
 </div>
