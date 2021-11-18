@@ -94,9 +94,6 @@ export class ObservationService {
     project: Project,
     feature: Feature
   ): Observation | LoadingState {
-    if (!user) {
-      throw Error('Login required to create new observation.');
-    }
     const form = project
       .getLayer(feature.layerId)!
       .forms?.first(/*notSetValue=*/ null);
