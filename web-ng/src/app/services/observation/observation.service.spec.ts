@@ -15,6 +15,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { TestData } from '../../../testing/test-data';
 import { ObservationService } from './observation.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { ProjectService } from '../project/project.service';
@@ -23,10 +24,13 @@ import { AuthService } from './../../services/auth/auth.service';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 
+const { newUser, newProject, newLayer, newLocationFeature } = TestData;
+
 describe('ObservationService', () => {
   const user$ = new Subject<User | null>();
+  let service: ObservationService;
 
-  beforeEach(() =>
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: {} },
@@ -39,11 +43,23 @@ describe('ObservationService', () => {
           },
         },
       ],
-    })
-  );
+    });
+    service = TestBed.inject(ObservationService);
+  });
 
   it('should be created', () => {
-    const service: ObservationService = TestBed.inject(ObservationService);
     expect(service).toBeTruthy();
+  });
+
+  describe('createNewObservation', () => {
+    it('fail if form missing', () => {
+      expect(() =>
+        service.createNewObservation(
+          newUser(),
+          newProject({ layers: { layer001: newLayer({ forms: {} }) } }),
+          newLocationFeature()
+        )
+      ).toThrow(new Error('No form in layer layer001'));
+    });
   });
 });
