@@ -33,7 +33,7 @@ export class DrawingToolsService {
     return this.disabled$;
   }
 
-  setDisabled$(disabled: boolean) {
+  setDisabled(disabled: boolean) {
     return this.disabled$.next(disabled);
   }
 

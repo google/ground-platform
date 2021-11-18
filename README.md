@@ -88,3 +88,9 @@ Firebase project, see [functions/README.md](functions/README.md).
 
 For further instructions on working with the Angular web app, see
 [web-ng/README.md](web-ng/README.md).
+
+### Building and Deploying Ground from Source
+
+For step-by-step instructions setting up your own instance of Ground, see the
+documentation for [building and deploying Ground from the
+source](docs/build-and-deploy-ground-from-source.md).

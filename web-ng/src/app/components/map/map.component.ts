@@ -75,11 +75,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   private selectedMarker?: google.maps.Marker;
   private selectedPolygon?: google.maps.Polygon;
-  private markers: Map<string, google.maps.Marker> = new Map<
+  markers: Map<string, google.maps.Marker> = new Map<
     string,
     google.maps.Marker
   >();
-  private polygons: Map<string, google.maps.Polygon> = new Map<
+  polygons: Map<string, google.maps.Polygon> = new Map<
     string,
     google.maps.Polygon
   >();
@@ -292,7 +292,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Currently we are figuring out how should the UI trigger this state.
     this.showRepositionConfirmDialog = true;
     this.disableMapClicks = true;
-    this.drawingToolsService.setDisabled$(true);
+    this.drawingToolsService.setDisabled(true);
     this.markerToReposition = marker;
     this.oldLatLng = new google.maps.LatLng(
       event.latLng.lat(),
@@ -533,7 +533,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.newLatLng = undefined;
     this.markerToReposition = undefined;
     this.disableMapClicks = false;
-    this.drawingToolsService.setDisabled$(false);
+    this.drawingToolsService.setDisabled(false);
   }
 
   private cancelReposition() {

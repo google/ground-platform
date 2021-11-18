@@ -100,12 +100,30 @@ class MockModel {
     2
   );
 
+  static element004: Field = new Field(
+    'element004',
+    FieldType.DATE,
+    StringMap({ en: 'What is the current date?' }),
+    /*required=*/ true,
+    2
+  );
+
+  static element005: Field = new Field(
+    'element005',
+    FieldType.TIME,
+    StringMap({ en: 'What time is it?' }),
+    /*required=*/ true,
+    2
+  );
+
   static form001: Form = new Form(
     'form001',
     Map({
       element001: MockModel.element001,
       element002: MockModel.element002,
       element003: MockModel.element003,
+      element004: MockModel.element003,
+      element005: MockModel.element003,
     })
   );
 }

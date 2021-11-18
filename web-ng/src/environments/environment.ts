@@ -18,9 +18,10 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { googleMapsConfig } from './.google-maps-config';
-import { firebaseConfig } from './.firebase-config';
-import { offlineBaseMapSources } from './.backend-config.json';
+import { googleMapsConfig } from './keys/.google-maps-config';
+import { firebaseConfig } from './keys/.firebase-config';
+import { offlineBaseMapSources } from './keys/.backend-config.json';
+import { Env } from './environment-enums';
 
 const { projectId } = firebaseConfig;
 
@@ -31,6 +32,7 @@ export const environment = {
   cloudFunctionsUrl: `https://us-central1-${projectId}.cloudfunctions.net`,
   offlineBaseMapSources,
   useEmulators: false,
+  env: Env.Local,
 };
 
 /*
