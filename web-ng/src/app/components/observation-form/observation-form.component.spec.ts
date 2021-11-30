@@ -227,19 +227,20 @@ describe('ObservationFormComponent', () => {
     for (const el of fixture.debugElement.queryAll(
       By.css('.field-response div mat-form-field input')
     )) {
-      if (component.observationFields) {
-        const indexEl = component.observationFields.findIndex(
-          field => field.id === el.nativeElement.id
-        );
-
-        expect(indexEl).toBeGreaterThanOrEqual(0);
-
-        const want = component.observationFields.get(indexEl)?.required;
-
-        const got = el.nativeElement.required as boolean | undefined;
-
-        expect(want).toBe(got);
+      if (!component.observationFields) {
+        break;
       }
+      const indexEl = component.observationFields.findIndex(
+        field => field.id === el.nativeElement.id
+      );
+
+      expect(indexEl).toBeGreaterThanOrEqual(0);
+
+      const want = component.observationFields.get(indexEl)?.required;
+
+      const got = el.nativeElement.required as boolean | undefined;
+
+      expect(want).toBe(got);
     }
   });
 
@@ -247,19 +248,20 @@ describe('ObservationFormComponent', () => {
     for (const el of fixture.debugElement.queryAll(
       By.css('.field-response .multiple-choice-field mat-label')
     )) {
-      if (component.observationFields) {
-        const indexEl = component.observationFields.findIndex(
-          field => field.id === el.nativeElement.id
-        );
-
-        expect(indexEl).toBeGreaterThanOrEqual(0);
-
-        const want = component.observationFields.get(indexEl)?.required;
-
-        const got = el.classes['asterix--after'] as boolean | undefined;
-
-        expect(want).toBe(got);
+      if (!component.observationFields) {
+        break;
       }
+      const indexEl = component.observationFields.findIndex(
+        field => field.id === el.nativeElement.id
+      );
+
+      expect(indexEl).toBeGreaterThanOrEqual(0);
+
+      const want = component.observationFields.get(indexEl)?.required;
+
+      const got = el.classes['asterix--after'] as boolean | undefined;
+
+      expect(want).toBe(got);
     }
   });
 });
