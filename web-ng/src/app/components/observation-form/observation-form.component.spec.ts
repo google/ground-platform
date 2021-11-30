@@ -52,6 +52,7 @@ import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { By } from '@angular/platform-browser';
 
 class MockModel {
   static element001: Field = new Field(
@@ -59,6 +60,14 @@ class MockModel {
     FieldType.TEXT,
     StringMap({ en: 'Text Field' }),
     /*required=*/ true,
+    0
+  );
+
+  static element002: Field = new Field(
+    'element002',
+    FieldType.TEXT,
+    StringMap({ en: 'Text Field' }),
+    /*required=*/ false,
     0
   );
 
@@ -76,8 +85,8 @@ class MockModel {
     2
   );
 
-  static element002: Field = new Field(
-    'element002',
+  static element003: Field = new Field(
+    'element003',
     FieldType.MULTIPLE_CHOICE,
     StringMap({ en: 'Multiple Select' }),
     /*required=*/ true,
@@ -93,6 +102,7 @@ class MockModel {
     Map({
       element001: MockModel.element001,
       element002: MockModel.element002,
+      element003: MockModel.element003,
     })
   );
 
@@ -133,7 +143,7 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
       element001: new Response('response'),
-      element002: new Response(List([MockModel.option001])),
+      element003: new Response(List([MockModel.option001])),
     })
   );
 }
@@ -162,7 +172,7 @@ const projectService = new MockProjectService();
 const featureService = new MockFeatureService();
 const observationService = new MockObservationService();
 
-describe('ObservationFormComponent', () => {
+fdescribe('ObservationFormComponent', () => {
   let component: ObservationFormComponent;
   let fixture: ComponentFixture<ObservationFormComponent>;
 
@@ -211,6 +221,46 @@ describe('ObservationFormComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should create text fields with right "required" option', () => {
+    for (const el of fixture.debugElement.queryAll(
+      By.css('.field-response div mat-form-field input')
+    )) {
+      if (component.observationFields) {
+        const indexEl = component.observationFields.findIndex(
+          field => field.id === el.nativeElement.id
+        );
+
+        expect(indexEl).toBeGreaterThanOrEqual(0);
+
+        const want = component.observationFields.get(indexEl)?.required;
+
+        const got = el.nativeElement.required as boolean | undefined;
+
+        expect(want).toBe(got);
+      }
+    }
+  });
+
+  it('should create radio button fields with right "asterix" class', () => {
+    for (const el of fixture.debugElement.queryAll(
+      By.css('.field-response .multiple-choice-field mat-label')
+    )) {
+      if (component.observationFields) {
+        const indexEl = component.observationFields.findIndex(
+          field => field.id === el.nativeElement.id
+        );
+
+        expect(indexEl).toBeGreaterThanOrEqual(0);
+
+        const want = component.observationFields.get(indexEl)?.required;
+
+        const got = el.classes['asterix--before'] as boolean | undefined;
+
+        expect(want).toBe(got);
+      }
+    }
   });
 });
 
