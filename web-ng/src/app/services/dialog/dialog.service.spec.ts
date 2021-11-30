@@ -21,7 +21,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../../components/confirmation-dialog/confirmation-dialog.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-fdescribe('DialogService', () => {
+describe('DialogService', () => {
   let service: DialogService;
   let matDialog: jasmine.SpyObj<MatDialog>;
 
