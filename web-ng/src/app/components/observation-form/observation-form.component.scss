@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+@import 'variables';
+@import '~firebaseui/dist/firebaseui.css';
+
 .observation {
   margin: 16px;
 }
@@ -53,5 +56,5 @@
 }
 .asterix--after:after {
   content: '*';
-  color: red;
+  color: mat-color($warn);
 }
