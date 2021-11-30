@@ -58,7 +58,11 @@ fdescribe('DialogService', () => {
     });
 
     it('should return correct dialog with discard actions', () => {
-      service.openConfirmationDialog(testTitle, testMessage, true);
+      service.openConfirmationDialog(
+        testTitle,
+        testMessage,
+        /* showDiscardActions */ true
+      );
 
       expect(matDialog.open).toHaveBeenCalledWith(
         ConfirmationDialogComponent,
