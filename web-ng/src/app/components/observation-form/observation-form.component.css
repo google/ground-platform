@@ -51,7 +51,7 @@
 .mat-checkbox {
   margin-right: 1em;
 }
-.asterix--before:before {
+.asterix--after:after {
   content: '*';
   color: red;
 }

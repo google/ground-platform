@@ -172,7 +172,7 @@ const projectService = new MockProjectService();
 const featureService = new MockFeatureService();
 const observationService = new MockObservationService();
 
-fdescribe('ObservationFormComponent', () => {
+describe('ObservationFormComponent', () => {
   let component: ObservationFormComponent;
   let fixture: ComponentFixture<ObservationFormComponent>;
 
@@ -256,7 +256,7 @@ fdescribe('ObservationFormComponent', () => {
 
         const want = component.observationFields.get(indexEl)?.required;
 
-        const got = el.classes['asterix--before'] as boolean | undefined;
+        const got = el.classes['asterix--after'] as boolean | undefined;
 
         expect(want).toBe(got);
       }
