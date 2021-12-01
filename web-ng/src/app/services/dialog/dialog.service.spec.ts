@@ -17,17 +17,63 @@
 import { TestBed } from '@angular/core/testing';
 
 import { DialogService } from './dialog.service';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../../components/confirmation-dialog/confirmation-dialog.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('DialogService', () => {
   let service: DialogService;
+  let matDialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [MatDialogModule] });
+    matDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    TestBed.configureTestingModule({
+      imports: [MatDialogModule, NoopAnimationsModule],
+      providers: [DialogService, { provide: MatDialog, useValue: matDialog }],
+    });
     service = TestBed.inject(DialogService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('openConfirmationDialog', () => {
+    const testTitle = 'testTitle';
+    const testMessage = 'testMessage';
+
+    it('should return correct dialog without discard actions', () => {
+      service.openConfirmationDialog(testTitle, testMessage);
+
+      expect(matDialog.open).toHaveBeenCalledWith(
+        ConfirmationDialogComponent,
+        jasmine.objectContaining({
+          data: {
+            title: testTitle,
+            message: testMessage,
+            showDiscardActions: false,
+          },
+        })
+      );
+    });
+
+    it('should return correct dialog with discard actions', () => {
+      service.openConfirmationDialog(
+        testTitle,
+        testMessage,
+        /* showDiscardActions */ true
+      );
+
+      expect(matDialog.open).toHaveBeenCalledWith(
+        ConfirmationDialogComponent,
+        jasmine.objectContaining({
+          data: {
+            title: testTitle,
+            message: testMessage,
+            showDiscardActions: true,
+          },
+        })
+      );
+    });
   });
 });
