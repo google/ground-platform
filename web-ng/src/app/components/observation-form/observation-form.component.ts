@@ -48,7 +48,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 @Component({
   selector: 'ground-observation-form',
   templateUrl: './observation-form.component.html',
-  styleUrls: ['./observation-form.component.css'],
+  styleUrls: ['./observation-form.component.scss'],
 })
 export class ObservationFormComponent {
   readonly lang: string;
