@@ -530,7 +530,12 @@ export class FirebaseDataConverter {
         )
       );
     }
-    throw Error(`Unknown value type ${typeof responseValue}`);
+    console.error(
+      `Unknown value type ${typeof responseValue}: `,
+      responseValue
+    );
+    // Return placeholder response prevent app from crashing.
+    return new Response('');
   }
 
   private static responseToJS(response: Response): {} {
