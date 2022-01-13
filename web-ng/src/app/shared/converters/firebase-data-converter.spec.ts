@@ -53,7 +53,7 @@ class MockFirebaseData {
       element002: ['option001', 'option002'],
       element003: 123,
       element004: new firebase.firestore.Timestamp(1641533340, 0),
-      element005: new firebase.firestore.Timestamp(1641534444, 0)
+      element005: new firebase.firestore.Timestamp(1641534444, 0),
     },
   };
 }
