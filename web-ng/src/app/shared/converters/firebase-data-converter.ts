@@ -521,7 +521,7 @@ export class FirebaseDataConverter {
     if (typeof responseValue === 'number') {
       return new Response(responseValue as number);
     }
-    if (responseValue instanceof List) {
+    if (responseValue instanceof Array) {
       return new Response(
         List(
           responseValue.map(optionId =>
