@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import firebase from 'firebase/app';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { StringMap } from '../models/string-map.model';
 import { Form } from '../models/form/form.model';
@@ -52,6 +52,8 @@ class MockFirebaseData {
       element001: 'text response',
       element002: ['option001', 'option002'],
       element003: 123,
+      element004: new firebase.firestore.Timestamp(1641533340, 0),
+      element005: new firebase.firestore.Timestamp(1641534444, 0)
     },
   };
 }
@@ -122,8 +124,8 @@ class MockModel {
       element001: MockModel.element001,
       element002: MockModel.element002,
       element003: MockModel.element003,
-      element004: MockModel.element003,
-      element005: MockModel.element003,
+      element004: MockModel.element004,
+      element005: MockModel.element005,
     })
   );
 }
