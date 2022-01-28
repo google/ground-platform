@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import firebase from 'firebase/app';
+
 import { DocumentData } from '@angular/fire/firestore';
 import { Project } from '../models/project.model';
 import { StringMap } from '../models/string-map.model';
@@ -530,9 +530,6 @@ export class FirebaseDataConverter {
         )
       );
     }
-    if (responseValue instanceof firebase.firestore.Timestamp) {
-      return new Response(responseValue.toDate());
-    }
     throw Error(`Unknown value type ${typeof responseValue}`);
   }
 
@@ -547,9 +544,6 @@ export class FirebaseDataConverter {
       return (response.value as List<Option>)
         .map(option => option.id)
         .toArray();
-    }
-    if (response.value instanceof Date) {
-      return firebase.firestore.Timestamp.fromDate(response.value);
     }
     throw Error(`Unknown value type of ${response.value}`);
   }
