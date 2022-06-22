@@ -24,7 +24,7 @@
     "@angular/cdk": "^11.2.9",
     "@angular/common": "^11.0.0",
     "@angular/compiler": "^11.0.0",
-    "@angular/core": "^11.0.0",
+    "@angular/core": "^11.0.5",
     "@angular/fire": "^6.1.0",
     "@angular/flex-layout": "^11.0.0-beta.33",
     "@angular/forms": "^11.0.0",
