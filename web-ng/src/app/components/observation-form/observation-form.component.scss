@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+@import 'variables';
+@import '~firebaseui/dist/firebaseui.css';
+
 .observation {
   margin: 16px;
 }
@@ -41,4 +44,17 @@
 /* The spacing below text box should be smaller. */
 .mat-form-field-wrapper {
   margin-bottom: -1.34em;
+}
+/* The spacing between a field label and its options should be larger */
+.mat-label {
+  margin-bottom: 1em;
+}
+/* The spacing between radio buttons and checkboxes should be larger */
+.mat-radio-button,
+.mat-checkbox {
+  margin-right: 1em;
+}
+.asterix--after:after {
+  content: '*';
+  color: mat-color($warn);
 }

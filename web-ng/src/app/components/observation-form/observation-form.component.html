@@ -28,13 +28,19 @@
   <h3>Add/edit observation</h3>
   <form [formGroup]="observationForm" (ngSubmit)="onSave()" autocomplete="off">
     <div *ngFor="let field of observationFields">
-      <label class="field-label" [attr.for]="field.id">
-        {{ field.label.get(lang) }}
-      </label>
       <div class="field-response">
+        <!-- Text field -->
         <div *ngIf="field.type == fieldTypes.TEXT">
           <mat-form-field appearance="fill">
-            <input matInput [formControlName]="field.id" [id]="field.id" />
+            <mat-label class="field-label" [attr.for]="field.id">
+              {{ field.label.get(lang) }}
+            </mat-label>
+            <input
+              matInput
+              [formControlName]="field.id"
+              [id]="field.id"
+              [required]="field.required"
+            />
           </mat-form-field>
         </div>
         <div *ngIf="field.type == fieldTypes.NUMBER">
@@ -47,22 +53,36 @@
             />
           </mat-form-field>
         </div>
+
+        <!-- Multiple choice field -->
         <div
           *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
           class="multiple-choice-field"
         >
+          <!-- Radio button field -->
+          <mat-label
+            [class.asterix--after]="field.required"
+            [attr.for]="field.id"
+            [id]="field.id"
+          >
+            {{ field.label.get(lang) }}
+          </mat-label>
+          <br />
           <mat-radio-group
             [id]="field.id"
             [formControlName]="field.id"
             *ngIf="field.multipleChoice.cardinality == cardinality.SELECT_ONE"
+            [required]="field.required"
           >
             <mat-radio-button
-              *ngFor="let option of field.multipleChoice.options"
+              *ngFor="let option of field.multipleChoice.options; let i = index"
               [value]="option.id"
             >
               {{ option.label.get(lang) }}
             </mat-radio-button>
           </mat-radio-group>
+
+          <!-- Checkbox field -->
           <div
             *ngIf="
               field.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE
