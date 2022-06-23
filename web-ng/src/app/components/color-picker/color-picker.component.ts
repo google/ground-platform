@@ -77,6 +77,7 @@ export class ColorPickerComponent implements OnInit {
     this.color = $event.color.hex;
   }
 
+  // Test comment. Will remove later.
   onSave() {
     this.onColorPicked.emit(this.color);
     this.close();
