@@ -6,11 +6,16 @@ name: Deploy to Firebase Hosting on merge
   push:
     branches:
       - master
+    paths:
+      - "web-ng/**"
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: web-ng
+
       - name: Install dependencies
         run: npm i
 
