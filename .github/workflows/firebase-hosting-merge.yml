@@ -14,16 +14,15 @@ jobs:
       - run: npm run build --prod
         env:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          FIREBASE_CONFIG:
-            apiKey: ${{ secrets.FIREBASE_API_KEY }}
-            authDomain: "gnd-dev.firebaseapp.com"
-            databaseURL: "https://gnd-dev.firebaseio.com"
-            projectId: "gnd-dev"
-            storageBucket: "gnd-dev.appspot.com"
-            messagingSenderId: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-            appId: ${{ secrets.FIREBASE_APP_ID }}
-          CLOUD_FUNCTIONS_URL:
-          OFFLINE_BASE_MAP_SOURCES:
+          FIREBASE_CONFIG_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_CONFIG_AUTH_DOMAIN: "gnd-dev.firebaseapp.com"
+          FIREBASE_CONFIG_DATABASE_URL: "https://gnd-dev.firebaseio.com"
+          FIREBASE_CONFIG_PROJECT_ID: "gnd-dev"
+          FIREBASE_CONFIG_STORAGE_BUCKET: "gnd-dev.appspot.com"
+          FIREBASE_CONFIG_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_CONFIG_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          CLOUD_FUNCTIONS_URL: "us-central1-gnd-dev.cloudfunctions.net"
+          OFFLINE_BASE_MAP_SOURCES_URL: "https://storage.googleapis.com/ground-raster-basemaps/s2/br/ro/20200609-mbtiles/footprints.geojson"
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
