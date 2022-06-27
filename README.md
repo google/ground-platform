@@ -25,7 +25,7 @@ This repo contains all Ground cloud-based / hosted components:
 | [docs/](docs/)           | _Public documentation_, including Ground homepage                                                             |
 | [firestore/](firestore/) | _Firestore config_ defining Firebase rules and other database settings                                        |
 | [functions/](functions/) | _Firebase Cloud Functions_, used to sync with Google Sheets and import/export data to/from other data sources |
-| [web-ng/](web-ng/)       | _Ground web console_ used to set up and manage projects, and to view, edit, and analyze collected data online |
+| [web/](web/)       | _Ground web console_ used to set up and manage projects, and to view, edit, and analyze collected data online |
 
 Firestore Cloud Functions currently only supports Node.js v6.11.5,
 while the web dashboard is built using a newer version of Node.js. Contributors should use the appropriate version of Node for the component they are working on. Follow the instructions provided in the README of each subdirectory to set up the proper
@@ -73,7 +73,7 @@ $ cd functions && npm install && npm run emulators
 Leave the emulator running, and in a new shell execute the following:
 
 ```
-$ cd web-ng && npm install && npm run start:local
+$ cd web && npm install && npm run start:local
 ```
 
 Once the local server is ready, you can navigate to
@@ -87,7 +87,7 @@ To set up your environment for developing Cloud Functions against a real
 Firebase project, see [functions/README.md](functions/README.md).
 
 For further instructions on working with the Angular web app, see
-[web-ng/README.md](web-ng/README.md).
+[web/README.md](web/README.md).
 
 ### Building and Deploying Ground from Source
 

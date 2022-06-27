@@ -21,18 +21,18 @@ name: karma-test-and-coverage-pr
 on:
   pull_request:
     paths:
-      - "web-ng/**"
+      - "web/**"
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./web-ng
+        working-directory: ./web
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
         with:
-          path: web-ng
+          path: web
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
