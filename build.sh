@@ -20,7 +20,7 @@ set -e
 cd functions
 npm install
 cd ..
-cd web-ng
+cd web
 npm install
 ng build -c production
 cd ..
