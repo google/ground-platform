@@ -6,7 +6,8 @@
     "outDir": "build",
     "lib": ["es2018", "dom"],
     "experimentalDecorators": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
