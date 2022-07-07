@@ -15,7 +15,7 @@
  */
 
 name: Deploy to Firebase Hosting on merge
-"on":
+on:
   push:
     branches:
       - master
