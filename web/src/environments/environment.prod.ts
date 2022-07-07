@@ -31,7 +31,7 @@ export const environment = {
   cloudFunctionsUrl: process.env.CLOUD_FUNCTIONS_URL,
   offlineBaseMapSources: [
     {
-      url: process.env.OFFLINE_BASE_MAP_SOURCES_URL,
+      url: process.env.OFFLINE_BASE_MAP_SOURCES_URL!,
     },
   ],
   useEmulators: false,
