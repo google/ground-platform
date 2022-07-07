@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-name: "Deploy to Firebase Hosting on merge"
+name: deploy-to-firebase-hosting-on-merge
 on:
   push:
     branches:
-      - master
+      - continuousdep
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
