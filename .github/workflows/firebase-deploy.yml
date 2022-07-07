@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-name: Deploy to Firebase Hosting on merge
+name: "Deploy to Firebase Hosting on merge"
 on:
   push:
     branches:
