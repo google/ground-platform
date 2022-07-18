@@ -18,11 +18,11 @@
  service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * Reads access control list for specified projectId. The ACL is represented
+     * Reads access control list for specified surveyId. The ACL is represented
      * as a map keyed by email, with a single role as the value.
      */
-    function acl(projectId) {
-      return get(/databases/$(database)/documents/projects/$(projectId)).data.acl;
+    function acl(surveyId) {
+      return get(/databases/$(database)/documents/surveys/$(surveyId)).data.acl;
     }
 
     /**
@@ -40,10 +40,10 @@
     }
 
     /**
-     * Returns the role of the specified email address in the given project.
+     * Returns the role of the specified email address in the given survey.
      */
-    function role(projectId, email) {
-      return acl(projectId)[email];
+    function role(surveyId, email) {
+      return acl(surveyId)[email];
     }
 
     /**
@@ -70,27 +70,27 @@
 
     /**
      * Return true iff the user with the given email can read the specified
-     * project.
+     * survey.
      */
-    function canViewProject(projectId, email) {
-      return canAccess(email) && role(projectId, email) != null;
+    function canViewSurvey(surveyId, email) {
+      return canAccess(email) && role(surveyId, email) != null;
     }
 
     /**
      * Return true iff the user with the given email can manage the specified
-     * project (i.e., modify the project document).
+     * survey (i.e., modify the survey document).
      */
-    function canManageProject(projectId, email) {
-      return canAccess(email) && role(projectId, email) in ['owner', 'manager'];
+    function canManageSurvey(surveyId, email) {
+      return canAccess(email) && role(surveyId, email) in ['owner', 'manager'];
     }
 
     /**
-     * Return true iff the user with the given email can contribute features 
-     * and observations to the specified project (i.e., add/edit features and
-     * observations).
+     * Return true iff the user with the given email can contribute LOIs 
+     * and submissions to the specified survey (i.e., add/edit LOIs and
+     * submissions).
      */
-    function canContributeToProject(projectId, email) {
-      return canAccess(email) && role(projectId, email) in ['owner', 'manager', 'contributor'];
+    function canContributeToSurvey(surveyId, email) {
+      return canAccess(email) && role(surveyId, email) in ['owner', 'manager', 'contributor'];
     }
 
     // All users need to be able to read the passlist for rules to work.
@@ -103,10 +103,10 @@
       allow read;
     }
 
-    // Apply project-level ACLs and passlist to project documents.
-    match /projects/{projectId} {
-      allow read: if canViewProject(projectId, email())
-      allow read, write: if canManageProject(projectId, email())
+    // Apply survey-level ACLs and passlist to survey documents.
+    match /surveys/{surveyId} {
+      allow read: if canViewSurvey(surveyId, email())
+      allow read, write: if canManageSurvey(surveyId, email())
       allow create, read, write: if canAccess(email())
     }
 
@@ -115,16 +115,16 @@
       allow read: if canAccess(email())
     }
 
-    // Apply project-level ACLs and passlist to feature documents.
-    match /projects/{projectId}/features/{featureId} {
-      allow read: if canViewProject(projectId, email())
-      allow read, write, create: if canContributeToProject(projectId, email())
+    // Apply survey-level ACLs and passlist to LOI documents.
+    match /surveys/{surveyId}/lois/{loiId} {
+      allow read: if canViewSurvey(surveyId, email())
+      allow read, write, create: if canContributeToSurvey(surveyId, email())
     }
 
-    // Apply project-level ACLs and passlist to observation documents.
-    match /projects/{projectId}/observations/{observationId} {
-      allow read: if canViewProject(projectId, email())
-      allow read, write, create: if canContributeToProject(projectId, email())
+    // Apply survey-level ACLs and passlist to submission documents.
+    match /surveys/{surveyId}/submissions/{submissionId} {
+      allow read: if canViewSurvey(surveyId, email())
+      allow read, write, create: if canContributeToSurvey(surveyId, email())
     }
   }
 }
