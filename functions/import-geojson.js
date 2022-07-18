@@ -24,7 +24,7 @@ const JSONStream = require("JSONStream");
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
- * and required 'project' id and 'layer' id to the database.
+ * and required 'survey' id and 'layer' id to the database.
  */
 async function importGeoJson(req, res) {
   if (req.method !== "POST") {
@@ -40,7 +40,7 @@ async function importGeoJson(req, res) {
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the form. project and layer must appear
+  // Handle non-file fields in the form. survey and layer must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -48,14 +48,14 @@ async function importGeoJson(req, res) {
 
   // This code will process each file uploaded.
   busboy.on("file", (_field, file, _filename) => {
-    const { project: projectId, layer: layerId } = params;
-    if (!projectId || !layerId) {
+    const { survey: surveyId, layer: layerId } = params;
+    if (!surveyId || !layerId) {
       return res
         .status(HttpStatus.BAD_REQUEST)
         .end(JSON.stringify({ error: "Invalid request" }));
     }
     console.log(
-      `Importing GeoJSON into project '${projectId}', layer '${layerId}'`
+      `Importing GeoJSON into survey '${surveyId}', layer '${layerId}'`
     );
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
@@ -79,7 +79,7 @@ async function importGeoJson(req, res) {
         try {
           const feature = geoJsonToGroundFeature(geoJsonFeature, layerId);
           if (feature) {
-            inserts.push(db.insertFeature(projectId, feature));
+            inserts.push(db.insertFeature(surveyId, feature));
           }
         } catch (err) {
           console.error(err);

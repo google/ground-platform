@@ -24,10 +24,10 @@ import {
 } from '@angular/core/testing';
 import { MapComponent } from './map.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import {
   Feature,
   LocationFeature,
@@ -48,7 +48,7 @@ import {
 describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
-  let projectServiceSpy: jasmine.SpyObj<ProjectService>;
+  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let mockFeatures$: BehaviorSubject<List<Feature>>;
   let featureServiceSpy: jasmine.SpyObj<FeatureService>;
   let mockFeatureId$: BehaviorSubject<string | null>;
@@ -69,8 +69,8 @@ describe('MapComponent', () => {
   const layerId2 = 'layer002';
   const layerColor1 = 'red';
   const layerColor2 = 'green';
-  const mockProject = new Project(
-    'project001',
+  const mockSurvey = new Survey(
+    'survey001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
     /* layers= */ Map({
@@ -146,12 +146,12 @@ describe('MapComponent', () => {
 
   beforeEach(
     waitForAsync(() => {
-      projectServiceSpy = jasmine.createSpyObj<ProjectService>(
-        'ProjectService',
-        ['getActiveProject$']
+      surveyServiceSpy = jasmine.createSpyObj<SurveyService>(
+        'SurveyService',
+        ['getActiveSurvey$']
       );
-      projectServiceSpy.getActiveProject$.and.returnValue(
-        of<Project>(mockProject)
+      surveyServiceSpy.getActiveSurvey$.and.returnValue(
+        of<Survey>(mockSurvey)
       );
 
       featureServiceSpy = jasmine.createSpyObj<FeatureService>(
@@ -205,7 +205,7 @@ describe('MapComponent', () => {
         declarations: [MapComponent],
         providers: [
           { provide: MatDialog, useValue: dialogSpy },
-          { provide: ProjectService, useValue: projectServiceSpy },
+          { provide: SurveyService, useValue: surveyServiceSpy },
           { provide: FeatureService, useValue: featureServiceSpy },
           { provide: NavigationService, useValue: navigationServiceSpy },
           { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },

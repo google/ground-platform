@@ -18,18 +18,18 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { TitleDialogComponent } from './title-dialog.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
   let fixture: ComponentFixture<TitleDialogComponent>;
   const dialogRef: Partial<MatDialogRef<TitleDialogComponent>> = {};
-  const projectService = jasmine.createSpyObj('ProjectService', [
-    'createProject',
+  const surveyService = jasmine.createSpyObj('SurveyService', [
+    'createSurvey',
   ]);
   const navigationService = jasmine.createSpyObj('NavigationService', [
-    'selectProject',
+    'selectSurvey',
   ]);
 
   beforeEach(
@@ -39,7 +39,7 @@ describe('TitleDialogComponent', () => {
         imports: [MatDialogModule],
         providers: [
           { provide: MatDialogRef, useValue: dialogRef },
-          { provide: ProjectService, useValue: projectService },
+          { provide: SurveyService, useValue: surveyService },
           { provide: NavigationService, useValue: navigationService },
         ],
         schemas: [NO_ERRORS_SCHEMA],

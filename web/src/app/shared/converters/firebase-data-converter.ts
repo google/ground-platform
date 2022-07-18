@@ -15,7 +15,7 @@
  */
 import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
-import { Project } from '../models/project.model';
+import { Survey } from '../models/survey.model';
 import { StringMap } from '../models/string-map.model';
 import { Layer } from '../models/layer.model';
 import { Form } from '../models/form/form.model';
@@ -66,13 +66,13 @@ function keys(dict?: {}): string[] {
 export class FirebaseDataConverter {
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Project instance.
+   * immutable Survey instance.
    *
-   * @param id the uuid of the project instance.
+   * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  static toProject(id: string, data: DocumentData): Project {
-    return new Project(
+  static toSurvey(id: string, data: DocumentData): Survey {
+    return new Survey(
       id,
       StringMap(data.title),
       StringMap(data.description),
@@ -107,7 +107,7 @@ export class FirebaseDataConverter {
     }
   }
 
-  static newProjectJS(
+  static newSurveyJS(
     ownerEmail: string,
     title: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
@@ -228,7 +228,7 @@ export class FirebaseDataConverter {
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Field instance.
    *
-   * @param id the uuid of the project instance.
+   * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
    * {
@@ -352,7 +352,7 @@ export class FirebaseDataConverter {
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Field instance.
    *
-   * @param id the uuid of the project instance.
+   * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
    * {
@@ -384,7 +384,7 @@ export class FirebaseDataConverter {
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Feature instance.
    *
-   * @param id the uuid of the project instance.
+   * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
    */
   static toFeature(id: string, data: DocumentData): Feature | undefined {

@@ -12,13 +12,13 @@
         "type": 301
       },
       {
-        "source": "/p/[:]new",
-        "destination": "/project/new",
+        "source": "/s/[:]new",
+        "destination": "/survey/new",
         "type": 301
       },
       {
-        "source": "/p/:id",
-        "destination": "/project/:id",
+        "source": "/s/:id",
+        "destination": "/survey/:id",
         "type": 301
       }
     ],

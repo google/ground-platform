@@ -25,7 +25,7 @@ const { db } = require("./common/context");
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
- * 'project' id and 'layer' id to the database.
+ * 'survey' id and 'layer' id to the database.
  */
 async function importCsv(req, res) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
@@ -41,7 +41,7 @@ async function importCsv(req, res) {
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the form. project and layer must appear
+  // Handle non-file fields in the form. survey and layer must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -49,12 +49,12 @@ async function importCsv(req, res) {
 
   // This code will process each file uploaded.
   busboy.on("file", (key, file, _) => {
-    const { project: projectId, layer: layerId } = params;
-    if (!projectId || !layerId) {
+    const { survey: surveyId, layer: layerId } = params;
+    if (!surveyId || !layerId) {
       return res.status(HttpStatus.BAD_REQUEST).end();
     }
     console.log(
-      `Importing CSV into project '${projectId}', layer '${layerId}'`
+      `Importing CSV into survey '${surveyId}', layer '${layerId}'`
     );
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
@@ -62,7 +62,7 @@ async function importCsv(req, res) {
 
     file.pipe(csvParser()).on("data", async (row) => {
       try {
-        inserts.push(insertRow(projectId, layerId, row));
+        inserts.push(insertRow(surveyId, layerId, row));
       } catch (err) {
         console.error(err);
         res.unpipe(busboy);
@@ -113,10 +113,10 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   lng: ["lng", "lon", "long", "lng", "x"],
 });
 
-async function insertRow(projectId, layerId, row) {
+async function insertRow(surveyId, layerId, row) {
   const feature = csvRowToFeature(row, layerId);
   if (feature) {
-    await db.insertFeature(projectId, feature);
+    await db.insertFeature(surveyId, feature);
   }
 }
 

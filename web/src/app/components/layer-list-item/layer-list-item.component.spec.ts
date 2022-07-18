@@ -44,7 +44,7 @@ describe('LayerListItemComponent', () => {
   beforeEach(
     waitForAsync(() => {
       const navigationService = {
-        getProjectId$: () => of(''),
+        getSurveyId$: () => of(''),
         getFeatureId$: () => of(''),
       };
 

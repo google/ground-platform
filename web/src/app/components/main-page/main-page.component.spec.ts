@@ -19,7 +19,7 @@ import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
 import { MainPageComponent } from './main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { MatDialog } from '@angular/material/dialog';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
@@ -47,9 +47,9 @@ describe('MainPageComponent', () => {
     waitForAsync(() => {
       route = new ActivatedRouteStub();
 
-      const projectService = jasmine.createSpyObj('ProjectService', [
-        'getActiveProject$',
-        'activateProject',
+      const surveyService = jasmine.createSpyObj('SurveyService', [
+        'getActiveSurvey$',
+        'activateSurvey',
       ]);
 
       const featureService = jasmine.createSpyObj('FeatureService', [
@@ -61,7 +61,7 @@ describe('MainPageComponent', () => {
       ]);
 
       const navigationService = {
-        getProjectId$: () => NEVER,
+        getSurveyId$: () => NEVER,
         getLayerId$: () => NEVER,
         getFeatureId$: () => NEVER,
         getObservationId$: () => NEVER,
@@ -74,7 +74,7 @@ describe('MainPageComponent', () => {
           { provide: MatDialog, useValue: dialog },
           { provide: FeatureService, useValue: featureService },
           { provide: ObservationService, useValue: observationService },
-          { provide: ProjectService, useValue: projectService },
+          { provide: SurveyService, useValue: surveyService },
           { provide: NavigationService, useValue: navigationService },
           { provide: AngularFirestore, useValue: {} },
           { provide: AngularFireAuth, useValue: {} },

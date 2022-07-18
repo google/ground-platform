@@ -18,7 +18,7 @@ import { Observation } from './../../shared/models/observation/observation.model
 import { ObservationService } from './../../services/observation/observation.service';
 import { FeatureService } from './../../services/feature/feature.service';
 import { switchMap } from 'rxjs/operators';
-import { ProjectService } from './../../services/project/project.service';
+import { SurveyService } from './../../services/survey/survey.service';
 import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
@@ -35,7 +35,7 @@ import { DialogService } from '../../services/dialog/dialog.service';
   styleUrls: ['./feature-panel.component.scss'],
 })
 export class FeaturePanelComponent implements OnInit, OnDestroy {
-  projectId?: string;
+  surveyId?: string;
   observationId?: string;
   readonly observations$: Observable<List<Observation>>;
   readonly lang: string;
@@ -46,7 +46,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   constructor(
     private navigationService: NavigationService,
-    projectService: ProjectService,
+    surveyService: SurveyService,
     featureService: FeatureService,
     observationService: ObservationService,
     private dataStoreService: DataStoreService,
@@ -55,24 +55,24 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.observations$ = projectService
-      .getActiveProject$()
+    this.observations$ = surveyService
+      .getActiveSurvey$()
       .pipe(
-        switchMap(project =>
+        switchMap(survey =>
           featureService
             .getSelectedFeature$()
             .pipe(
               switchMap(feature =>
-                observationService.observations$(project, feature)
+                observationService.observations$(survey, feature)
               )
             )
         )
       );
     combineLatest([
-      projectService.getActiveProject$(),
+      surveyService.getActiveSurvey$(),
       featureService.getSelectedFeature$(),
     ]).subscribe(
-      ([project, feature]) => (this.layer = project.layers.get(feature.layerId))
+      ([survey, feature]) => (this.layer = survey.layers.get(feature.layerId))
     );
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {
@@ -109,8 +109,8 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.navigationService.getProjectId$().subscribe(id => {
-        this.projectId = id || undefined;
+      this.navigationService.getSurveyId$().subscribe(id => {
+        this.surveyId = id || undefined;
       })
     );
 
@@ -159,11 +159,11 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   }
 
   async deleteObservation() {
-    if (!this.projectId || !this.observationId) {
+    if (!this.surveyId || !this.observationId) {
       return;
     }
     await this.dataStoreService.deleteObservation(
-      this.projectId,
+      this.surveyId,
       this.observationId
     );
     this.onClose();
@@ -171,7 +171,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.zone.run(() => {
-      this.navigationService.selectProject(this.projectId!);
+      this.navigationService.selectSurvey(this.surveyId!);
     });
   }
 

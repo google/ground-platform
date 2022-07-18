@@ -18,9 +18,9 @@ import { Component, OnInit } from '@angular/core';
 import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { FeatureService } from '../../services/feature/feature.service';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -30,7 +30,7 @@ import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
 
 /**
  * Root component for main application page showing map, layers list, and
- * project header. Responsible for coordinating page-level URL states with
+ * survey header. Responsible for coordinating page-level URL states with
  * various services.
  */
 @Component({
@@ -39,12 +39,12 @@ import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
   styleUrls: ['./main-page.component.css'],
 })
 export class MainPageComponent implements OnInit {
-  activeProject$: Observable<Project>;
+  activeSurvey$: Observable<Survey>;
   subscription: Subscription = new Subscription();
   sideNavOpened: boolean;
   constructor(
     private navigationService: NavigationService,
-    private projectService: ProjectService,
+    private surveyService: SurveyService,
     private featureService: FeatureService,
     private observationService: ObservationService,
     private authService: AuthService,
@@ -52,14 +52,14 @@ export class MainPageComponent implements OnInit {
   ) {
     // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
-    this.activeProject$ = this.projectService.getActiveProject$();
+    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 
   ngOnInit() {
-    // Show title dialog to assign title on a new project.
+    // Show title dialog to assign title on a new survey.
     this.subscription.add(
       this.navigationService
-        .getProjectId$()
+        .getSurveyId$()
         .subscribe(
           id => id === NavigationService.LAYER_ID_NEW && this.showTitleDialog()
         )
@@ -104,15 +104,15 @@ export class MainPageComponent implements OnInit {
   }
 
   private showEditLayerDialog(layerId: string) {
-    this.activeProject$.pipe(take(1)).subscribe(project =>
+    this.activeSurvey$.pipe(take(1)).subscribe(survey =>
       this.dialog.open(LayerDialogComponent, {
         autoFocus: layerId === NavigationService.LAYER_ID_NEW,
         data: {
-          projectId: project.isUnsavedNew()
-            ? NavigationService.PROJECT_ID_NEW
-            : project.id,
-          createLayer: layerId === NavigationService.PROJECT_ID_NEW,
-          layer: project.layers?.get(layerId),
+          surveyId: survey.isUnsavedNew()
+            ? NavigationService.SURVEY_ID_NEW
+            : survey.id,
+          createLayer: layerId === NavigationService.SURVEY_ID_NEW,
+          layer: survey.layers?.get(layerId),
         },
         panelClass: 'layer-dialog-container',
       })

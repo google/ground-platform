@@ -22,16 +22,16 @@ const {getSheet} = require('./common/sheet-config');
 
 function updateColumns(req, res) {
   const {
-    project: projectId,
+    survey: surveyId,
     featureType: featureTypeId,
     form: formId,
     lang: lang
   } = req.query;
-  return getSheet(projectId).then(sheet => {
+  return getSheet(surveyId).then(sheet => {
     if (!sheet) {
-      return res.status(400).send('Project spreadsheet config not found');
+      return res.status(400).send('Survey spreadsheet config not found');
     }
-    return db.fetchForm(projectId, featureTypeId, formId).then(form => {
+    return db.fetchForm(surveyId, featureTypeId, formId).then(form => {
       if (!form) {
         return res.status(400).send('Form definition not found');
       }

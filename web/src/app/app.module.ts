@@ -28,7 +28,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageContainerModule } from './components/main-page-container/main-page-container.module';
 import { environment } from '../environments/environment';
-import { ProjectHeaderModule } from './components/project-header/project-header.module';
+import { SurveyHeaderModule } from './components/survey-header/survey-header.module';
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
 import { HttpClientModule } from '@angular/common/http';
@@ -67,7 +67,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     HttpClientModule,
     MainPageContainerModule,
-    ProjectHeaderModule,
+    SurveyHeaderModule,
     UserProfilePopupModule,
     LayerDialogModule,
     TitleDialogModule,

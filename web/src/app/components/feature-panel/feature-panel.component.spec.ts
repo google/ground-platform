@@ -24,17 +24,17 @@ import { Map, List } from 'immutable';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
-const mockProject = new Project(
-  'project001',
+const mockSurvey = new Survey(
+  'survey001',
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
   /* layers= */ Map({
@@ -57,9 +57,9 @@ const mockFeature = new LocationFeature(
 
 const mockObservations = List<Observation>([]);
 
-class MockProjectService {
-  getActiveProject$() {
-    return of<Project>(mockProject);
+class MockSurveyService {
+  getActiveSurvey$() {
+    return of<Survey>(mockSurvey);
   }
 }
 
@@ -75,11 +75,11 @@ class MockObservationService {
   }
 }
 
-const projectService = new MockProjectService();
+const surveyService = new MockSurveyService();
 const featureService = new MockFeatureService();
 const observationService = new MockObservationService();
 const navigationService = {
-  getProjectId$: () => of(''),
+  getSurveyId$: () => of(''),
   getObservationId$: () => of(''),
 };
 
@@ -96,7 +96,7 @@ describe('FeaturePanelComponent', () => {
         providers: [
           { provide: DataStoreService, useValue: {} },
           { provide: FeatureService, useValue: featureService },
-          { provide: ProjectService, useValue: projectService },
+          { provide: SurveyService, useValue: surveyService },
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },
           { provide: NavigationService, useValue: navigationService },

@@ -26,7 +26,7 @@ import { shareReplay } from 'rxjs/operators';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
 import { Layer } from '../../shared/models/layer.model';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { Role } from '../../shared/models/role.model';
 
 const ANONYMOUS_USER: User = {
@@ -87,9 +87,9 @@ export class AuthService {
   }
 
   /**
-   * Checks if a user has manager or owner level permissions of the project.
+   * Checks if a user has manager or owner level permissions of the survey.
    */
-  canManageProject(acl: AclEntry[]): boolean {
+  canManageSurvey(acl: AclEntry[]): boolean {
     const userEmail = this.currentUser?.email;
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
@@ -97,12 +97,12 @@ export class AuthService {
   /**
    * Checks if a user can add points to a specific layer.
    */
-  canUserAddPointsToLayer(project: Project, layer: Layer): boolean {
+  canUserAddPointsToLayer(survey: Survey, layer: Layer): boolean {
     const user = this.getCurrentUser();
     if (!user) {
       return false;
     }
-    const userRole: Role = project.acl.get(user.email)!;
+    const userRole: Role = survey.acl.get(user.email)!;
 
     return (
       this.isManager(userRole) ||

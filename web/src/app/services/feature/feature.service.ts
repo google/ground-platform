@@ -17,8 +17,8 @@
 import { DataStoreService } from './../data-store/data-store.service';
 import { switchMap, take } from 'rxjs/operators';
 import { Observable, ReplaySubject } from 'rxjs';
-import { Project } from './../../shared/models/project.model';
-import { ProjectService } from './../project/project.service';
+import { Survey } from './../../shared/models/survey.model';
+import { SurveyService } from './../survey/survey.service';
 import { Injectable } from '@angular/core';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { List } from 'immutable';
@@ -34,23 +34,23 @@ export class FeatureService {
 
   constructor(
     private dataStore: DataStoreService,
-    private projectService: ProjectService
+    private surveyService: SurveyService
   ) {
-    this.features$ = projectService
-      .getActiveProject$()
+    this.features$ = surveyService
+      .getActiveSurvey$()
       .pipe(
-        switchMap(project =>
-          project.isUnsavedNew() ? List() : dataStore.features$(project)
+        switchMap(survey =>
+          survey.isUnsavedNew() ? List() : dataStore.features$(survey)
         )
       );
 
     this.selectedFeature$ = this.selectedFeatureId$.pipe(
       switchMap(featureId =>
-        projectService
-          .getActiveProject$()
+        surveyService
+          .getActiveSurvey$()
           .pipe(
-            switchMap(project =>
-              this.dataStore.loadFeature$(project.id, featureId)
+            switchMap(survey =>
+              this.dataStore.loadFeature$(survey.id, featureId)
             )
           )
       )
@@ -74,32 +74,32 @@ export class FeatureService {
     lng: number,
     layerId: string
   ): Promise<Feature | null> {
-    // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
+    // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const project = await this.projectService
-      .getActiveProject$()
+    const survey = await this.surveyService
+      .getActiveSurvey$()
       .pipe(take(1))
       .toPromise();
-    return await this.addPointInternal(project, lat, lng, layerId);
+    return await this.addPointInternal(survey, lat, lng, layerId);
   }
 
   async updatePoint(feature: Feature): Promise<void> {
-    // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
+    // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const project = await this.projectService
-      .getActiveProject$()
+    const survey = await this.surveyService
+      .getActiveSurvey$()
       .pipe(take(1))
       .toPromise();
-    return await this.updatePointInternal(project, feature);
+    return await this.updatePointInternal(survey, feature);
   }
 
   private async addPointInternal(
-    project: Project,
+    survey: Survey,
     lat: number,
     lng: number,
     layerId: string
   ): Promise<Feature | null> {
-    if (!(project.layers || new Map()).get(layerId)) {
+    if (!(survey.layers || new Map()).get(layerId)) {
       return null;
     }
     const newFeature = new LocationFeature(
@@ -107,14 +107,14 @@ export class FeatureService {
       layerId,
       new firebase.firestore.GeoPoint(lat, lng)
     );
-    await this.dataStore.updateFeature(project.id, newFeature);
+    await this.dataStore.updateFeature(survey.id, newFeature);
     return newFeature;
   }
 
-  private async updatePointInternal(project: Project, feature: Feature) {
-    if (project.layers.isEmpty()) {
+  private async updatePointInternal(survey: Survey, feature: Feature) {
+    if (survey.layers.isEmpty()) {
       return;
     }
-    await this.dataStore.updateFeature(project.id, feature);
+    await this.dataStore.updateFeature(survey.id, feature);
   }
 }

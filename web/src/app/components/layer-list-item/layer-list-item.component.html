@@ -34,7 +34,7 @@ limitations under the License.
         <button
           mat-menu-item
           (click)="onCustomizeLayer()"
-          *ngIf="projectService.canManageProject()"
+          *ngIf="surveyService.canManageSurvey()"
         >
           <mat-icon>edit</mat-icon>
           <span>Customize layer</span>
@@ -42,7 +42,7 @@ limitations under the License.
         <button
           mat-menu-item
           (click)="onImportFeatures()"
-          *ngIf="projectService.canManageProject()"
+          *ngIf="surveyService.canManageSurvey()"
         >
           <mat-icon>cloud_upload</mat-icon>
           <span>Import features</span>

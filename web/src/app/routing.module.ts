@@ -20,7 +20,7 @@ import { MainPageContainerComponent } from './components/main-page-container/mai
 import { AuthGuard } from './services/auth/auth.guard';
 import { SignInPageComponent } from './components/sign-in-page/sign-in-page.component';
 import { NavigationService } from './services/navigation/navigation.service';
-import { ProjectListComponent } from './components/project-list/project-list.component';
+import { SurveyListComponent } from './components/survey-list/survey-list.component';
 
 const routes: Routes = [
   {
@@ -29,13 +29,13 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.PROJECT_SEGMENT}/:${NavigationService.PROJECT_ID}`,
+    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.PROJECTS_SEGMENT}`,
-    component: ProjectListComponent,
+    path: `${NavigationService.SURVEYS_SEGMENT}`,
+    component: SurveyListComponent,
     canActivate: [AuthGuard],
   },
 ];

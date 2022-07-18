@@ -34,7 +34,7 @@ import { Layer } from '../../shared/models/layer.model';
 })
 export class ColorPickerComponent implements OnInit {
   layer?: Layer;
-  projectId?: string;
+  surveyId?: string;
   color!: string;
   private readonly matDialogRef: MatDialogRef<ColorPickerComponent>;
   private readonly triggerElementRef: ElementRef;
