@@ -105,13 +105,10 @@ describe('DrawingToolsComponent', () => {
         mockObservationId$
       );
 
-      surveyServiceSpy = jasmine.createSpyObj<SurveyService>(
-        'SurveyService',
-        ['getActiveSurvey$']
-      );
-      surveyServiceSpy.getActiveSurvey$.and.returnValue(
-        of<Survey>(mockSurvey)
-      );
+      surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+        'getActiveSurvey$',
+      ]);
+      surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
 
       TestBed.configureTestingModule({
         imports: [DrawingToolsModule, BrowserAnimationsModule],

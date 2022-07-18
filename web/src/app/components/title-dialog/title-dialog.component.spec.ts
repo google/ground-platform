@@ -25,9 +25,7 @@ describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
   let fixture: ComponentFixture<TitleDialogComponent>;
   const dialogRef: Partial<MatDialogRef<TitleDialogComponent>> = {};
-  const surveyService = jasmine.createSpyObj('SurveyService', [
-    'createSurvey',
-  ]);
+  const surveyService = jasmine.createSpyObj('SurveyService', ['createSurvey']);
   const navigationService = jasmine.createSpyObj('NavigationService', [
     'selectSurvey',
   ]);
