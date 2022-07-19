@@ -30,9 +30,9 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { Survey } from '../../shared/models/survey.model';
 import {
   LocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
   GeoJsonLocationOfInterest,
-  PolygonLocationOfInterest,
+  AreaOfInterest,
 } from '../../shared/models/loi.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
@@ -59,12 +59,12 @@ describe('MapComponent', () => {
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
 
-  const locationLocationOfInterestId1 = 'loaction_loi001';
-  const locationLocationOfInterestId2 = 'loaction_loi002';
-  const locationLocationOfInterestId3 = 'loaction_loi003';
-  const locationLocationOfInterestId4 = 'loaction_loi004';
-  const geoJsonLocationOfInterestId1 = 'geo_json_loi001';
-  const polygonLocationOfInterestId1 = 'polygon_loi001';
+  const poiId1 = 'loaction_loi001';
+  const poiId2 = 'loaction_loi002';
+  const poiId3 = 'loaction_loi003';
+  const poiId4 = 'loaction_loi004';
+  const geoJsonLoiId1 = 'geo_json_loi001';
+  const aoiId1 = 'polygon_loi001';
   const layerId1 = 'layer001';
   const layerId2 = 'layer002';
   const layerColor1 = 'red';
@@ -91,23 +91,23 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map()
   );
-  const locationLocationOfInterest1 = new LocationLocationOfInterest(
-    locationLocationOfInterestId1,
+  const poi1 = new PointOfInterest(
+    poiId1,
     layerId1,
     new firebase.firestore.GeoPoint(1.23, 4.56)
   );
-  const locationLocationOfInterest2 = new LocationLocationOfInterest(
-    locationLocationOfInterestId2,
+  const poi2 = new PointOfInterest(
+    poiId2,
     layerId2,
     new firebase.firestore.GeoPoint(12.3, 45.6)
   );
-  const locationLocationOfInterest3 = new LocationLocationOfInterest(
-    locationLocationOfInterestId3,
+  const poi3 = new PointOfInterest(
+    poiId3,
     layerId2,
     new firebase.firestore.GeoPoint(78.9, 78.9)
   );
-  const locationLocationOfInterest4 = new LocationLocationOfInterest(
-    locationLocationOfInterestId4,
+  const poi4 = new PointOfInterest(
+    poiId4,
     layerId2,
     new firebase.firestore.GeoPoint(45, 45)
   );
@@ -131,22 +131,18 @@ describe('MapComponent', () => {
       },
     ],
   };
-  const geoJsonLocationOfInterest1 = new GeoJsonLocationOfInterest(
-    geoJsonLocationOfInterestId1,
+  const geoJsonLoi1 = new GeoJsonLocationOfInterest(
+    geoJsonLoiId1,
     layerId1,
     geoJson1
   );
-  const polygonLocationOfInterest1 = new PolygonLocationOfInterest(
-    polygonLocationOfInterestId1,
-    layerId2,
-    [
-      new firebase.firestore.GeoPoint(-10, -10),
-      new firebase.firestore.GeoPoint(20, -10),
-      new firebase.firestore.GeoPoint(20, 20),
-      new firebase.firestore.GeoPoint(-10, 20),
-      new firebase.firestore.GeoPoint(-10, -10),
-    ]
-  );
+  const aoi1 = new AreaOfInterest(aoiId1, layerId2, [
+    new firebase.firestore.GeoPoint(-10, -10),
+    new firebase.firestore.GeoPoint(20, -10),
+    new firebase.firestore.GeoPoint(20, 20),
+    new firebase.firestore.GeoPoint(-10, 20),
+    new firebase.firestore.GeoPoint(-10, -10),
+  ]);
 
   beforeEach(
     waitForAsync(() => {
@@ -160,12 +156,7 @@ describe('MapComponent', () => {
         ['getLocationOfInterests$', 'updatePoint', 'addPoint']
       );
       mockLocationOfInterests$ = new BehaviorSubject<List<LocationOfInterest>>(
-        List<LocationOfInterest>([
-          locationLocationOfInterest1,
-          locationLocationOfInterest2,
-          geoJsonLocationOfInterest1,
-          polygonLocationOfInterest1,
-        ])
+        List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
       );
       loiServiceSpy.getLocationOfInterests$.and.returnValue(
         mockLocationOfInterests$
@@ -230,18 +221,18 @@ describe('MapComponent', () => {
 
   it('should render markers on map', () => {
     expect(component.markers.size).toEqual(2);
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, layerColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
-    const marker2 = component.markers.get(locationLocationOfInterestId2)!;
+    const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
     assertMarkerIcon(marker2, layerColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
   });
 
   it('should render polygons on map - geojson loi', () => {
-    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(0, 0),
@@ -255,7 +246,7 @@ describe('MapComponent', () => {
   });
 
   it('should render polygons on map - polygon loi', () => {
-    const polygon = component.polygons.get(polygonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(aoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(-10, -10),
@@ -271,25 +262,21 @@ describe('MapComponent', () => {
 
   it('should update lois when backend lois update', fakeAsync(() => {
     mockLocationOfInterests$.next(
-      List<LocationOfInterest>([
-        locationLocationOfInterest1,
-        locationLocationOfInterest3,
-        geoJsonLocationOfInterest1,
-      ])
+      List<LocationOfInterest>([poi1, poi3, geoJsonLoi1])
     );
     tick();
 
     expect(component.markers.size).toEqual(2);
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, layerColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
-    const marker2 = component.markers.get(locationLocationOfInterestId3)!;
+    const marker2 = component.markers.get(poiId3)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
     assertMarkerIcon(marker2, layerColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
     expect(component.polygons.size).toEqual(1);
-    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(0, 0),
@@ -303,43 +290,43 @@ describe('MapComponent', () => {
   }));
 
   it('should select loi when marker is clicked', () => {
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker1, 'click');
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(locationLocationOfInterestId1);
+    ).toHaveBeenCalledOnceWith(poiId1);
   });
 
   it('should enlarge the marker when loi is selected', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     assertMarkerIcon(marker1, layerColor1, 50);
   }));
 
   it('should select loi when polygon is clicked', () => {
-    const polygon = component.polygons.get(polygonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(aoiId1)!;
     google.maps.event.trigger(polygon, 'click', {
       latLng: new google.maps.LatLng(-9, -9),
     });
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(polygonLocationOfInterestId1);
+    ).toHaveBeenCalledOnceWith(aoiId1);
   });
 
   it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
-    mockLocationOfInterestId$.next(geoJsonLocationOfInterestId1);
+    mockLocationOfInterestId$.next(geoJsonLoiId1);
     tick();
 
-    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonStyle(polygon, layerColor1, 6);
   }));
 
   it('should clear selected loi when map is clicked', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     google.maps.event.trigger(component.map.googleMap!, 'click', {
@@ -352,17 +339,17 @@ describe('MapComponent', () => {
   }));
 
   it('markers are not draggable by default', () => {
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     expect(marker1.getDraggable()).toBeFalse();
-    const marker2 = component.markers.get(locationLocationOfInterestId2)!;
+    const marker2 = component.markers.get(poiId2)!;
     expect(marker2.getDraggable()).toBeFalse();
   });
 
   it('should set marker draggable when loi is selected', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     expect(marker1.getDraggable()).toBeTrue();
   }));
 
@@ -374,10 +361,10 @@ describe('MapComponent', () => {
   });
 
   it('should pop up reposition dialog when marker dragged', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -389,10 +376,10 @@ describe('MapComponent', () => {
   }));
 
   it('should disable drawing tools when marker dragged', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -401,14 +388,14 @@ describe('MapComponent', () => {
   }));
 
   it('should disable marker click while repositioning a marker', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker1 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker1, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
-    const marker2 = component.markers.get(locationLocationOfInterestId1)!;
+    const marker2 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker2, 'click');
 
     expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledTimes(
@@ -417,14 +404,14 @@ describe('MapComponent', () => {
   }));
 
   it('should disable polygon click while repositioning a marker', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
-    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     google.maps.event.trigger(polygon, 'click');
 
     expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledTimes(
@@ -433,10 +420,10 @@ describe('MapComponent', () => {
   }));
 
   it('should disable map click while repositioning a marker', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -450,10 +437,10 @@ describe('MapComponent', () => {
   }));
 
   it('should reposition marker when confirmed in reposition dialog', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -467,19 +454,19 @@ describe('MapComponent', () => {
 
     assertMarkerLatLng(marker, new google.maps.LatLng(2.23, 5.56));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
-      new LocationLocationOfInterest(
-        locationLocationOfInterest1.id,
-        locationLocationOfInterest1.layerId,
+      new PointOfInterest(
+        poi1.id,
+        poi1.layerId,
         new firebase.firestore.GeoPoint(2.23, 5.56)
       )
     );
   }));
 
   it('should enable drawing tools when confirmed in reposition dialog', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -497,10 +484,10 @@ describe('MapComponent', () => {
   }));
 
   it('should move marker back when canceled in reposition dialog', fakeAsync(() => {
-    mockLocationOfInterestId$.next(locationLocationOfInterestId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationLocationOfInterestId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -517,25 +504,25 @@ describe('MapComponent', () => {
   }));
 
   it('should pop up dialog when overlapping polygons are clicked', fakeAsync(() => {
-    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     google.maps.event.trigger(polygon, 'click', {
       latLng: new google.maps.LatLng(0, 0),
     });
-    mockDialogAfterClosed$.next(polygonLocationOfInterestId1);
+    mockDialogAfterClosed$.next(aoiId1);
     tick();
 
     expect(dialogSpy.open).toHaveBeenCalledTimes(1);
     expect(dialogRefSpy.afterClosed).toHaveBeenCalledTimes(1);
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(polygonLocationOfInterestId1);
+    ).toHaveBeenCalledOnceWith(aoiId1);
   }));
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {
     mockEditMode$.next(EditMode.AddPoint);
     drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(layerId2);
     loiServiceSpy.addPoint.and.returnValue(
-      new Promise(resolve => resolve(locationLocationOfInterest4))
+      new Promise(resolve => resolve(poi4))
     );
     tick();
 

@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ObservationFormComponent } from './observation-form.component';
 import {
   LocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { NEVER, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
@@ -125,7 +125,7 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static loi001 = new LocationLocationOfInterest(
+  static loi001 = new PointOfInterest(
     'loi001',
     MockModel.layer001.id,
     new firebase.firestore.GeoPoint(0.0, 0.0)

@@ -31,7 +31,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { Subscription } from 'rxjs';
 import {
   GeoJsonLocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { Map } from 'immutable';
@@ -69,7 +69,7 @@ export class LocationOfInterestPanelHeaderComponent
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
         if (loi instanceof GeoJsonLocationOfInterest) {
           this.loiTypeValue = LocationOfInterestType.Polygon;
-        } else if (loi instanceof LocationLocationOfInterest) {
+        } else if (loi instanceof PointOfInterest) {
           this.loiTypeValue = LocationOfInterestType.Point;
         }
         this.loiProperties = loi.properties;

@@ -26,9 +26,9 @@ import {
 } from '../models/form/multiple-choice.model';
 import {
   LocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
   GeoJsonLocationOfInterest,
-  PolygonLocationOfInterest,
+  AreaOfInterest,
 } from '../models/loi.model';
 import { Observation } from '../models/observation/observation.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -200,7 +200,7 @@ export class FirebaseDataConverter {
 
   public static loiToJS(loi: LocationOfInterest): {} {
     // TODO: Set audit info (created / last modified user and timestamp).
-    if (loi instanceof LocationLocationOfInterest) {
+    if (loi instanceof PointOfInterest) {
       const { layerId, location } = loi;
       return {
         layerId,
@@ -212,7 +212,7 @@ export class FirebaseDataConverter {
         layerId,
         geoJson,
       };
-    } else if (loi instanceof PolygonLocationOfInterest) {
+    } else if (loi instanceof AreaOfInterest) {
       const { layerId, polygonVertices } = loi;
       return {
         layerId,
@@ -402,8 +402,8 @@ export class FirebaseDataConverter {
         ])
       );
 
-      if (this.isLocationLocationOfInterest(data)) {
-        return new LocationLocationOfInterest(
+      if (this.isPointOfInterest(data)) {
+        return new PointOfInterest(
           id,
           data.layerId,
           data.location,
@@ -419,8 +419,8 @@ export class FirebaseDataConverter {
           loiProperties
         );
       }
-      if (this.isPolygonLocationOfInterest(data)) {
-        return new PolygonLocationOfInterest(
+      if (this.isAreaOfInterest(data)) {
+        return new AreaOfInterest(
           id,
           data.layerId,
           data.geometry.coordinates,
@@ -615,14 +615,14 @@ export class FirebaseDataConverter {
     return Role[role].toLowerCase();
   }
 
-  private static isLocationLocationOfInterest(data: DocumentData): boolean {
+  private static isPointOfInterest(data: DocumentData): boolean {
     return data?.location?.latitude && data?.location?.longitude;
   }
 
   private static isGeoJsonLocationOfInterest(data: DocumentData): boolean {
     return data?.geoJson;
   }
-  private static isPolygonLocationOfInterest(data: DocumentData): boolean {
+  private static isAreaOfInterest(data: DocumentData): boolean {
     return data?.geometry;
   }
 }

@@ -23,7 +23,7 @@ import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import {
   LocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { Layer } from '../../shared/models/layer.model';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -52,7 +52,7 @@ const mockSurvey = new Survey(
   /* acl= */ Map()
 );
 
-const mockLocationOfInterest = new LocationLocationOfInterest(
+const mockLocationOfInterest = new PointOfInterest(
   'loi001',
   'layer001',
   new firebase.firestore.GeoPoint(0.0, 0.0)

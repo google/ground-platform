@@ -23,7 +23,7 @@ export interface LocationOfInterest {
   readonly properties?: Map<string, string | number>;
 }
 
-export class LocationLocationOfInterest implements LocationOfInterest {
+export class PointOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly layerId: string,
@@ -42,7 +42,7 @@ export class GeoJsonLocationOfInterest implements LocationOfInterest {
   ) {}
 }
 
-export class PolygonLocationOfInterest implements LocationOfInterest {
+export class AreaOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly layerId: string,

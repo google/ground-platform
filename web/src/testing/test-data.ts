@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocationLocationOfInterest } from './../app/shared/models/loi.model';
+import { PointOfInterest } from './../app/shared/models/loi.model';
 import { Project } from '../app/shared/models/project.model';
 import { Map } from 'immutable';
 import { Layer } from './../app/shared/models/layer.model';
@@ -69,8 +69,8 @@ export class TestData {
     );
   }
 
-  public static newLocationLocationOfInterest(): LocationLocationOfInterest {
-    return new LocationLocationOfInterest(
+  public static newPointOfInterest(): PointOfInterest {
+    return new PointOfInterest(
       'loi001',
       'layer001',
       new firebase.firestore.GeoPoint(0, 0),

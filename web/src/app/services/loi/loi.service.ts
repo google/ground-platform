@@ -22,7 +22,7 @@ import { SurveyService } from './../survey/survey.service';
 import { Injectable } from '@angular/core';
 import {
   LocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { List } from 'immutable';
 import firebase from 'firebase/app';
@@ -105,7 +105,7 @@ export class LocationOfInterestService {
     if (!(survey.layers || new Map()).get(layerId)) {
       return null;
     }
-    const newLocationOfInterest = new LocationLocationOfInterest(
+    const newLocationOfInterest = new PointOfInterest(
       this.dataStore.generateId(),
       layerId,
       new firebase.firestore.GeoPoint(lat, lng)

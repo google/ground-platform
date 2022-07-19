@@ -66,23 +66,18 @@ async function importGeoJson(req, res) {
 
     file
       .pipe(JSONStream.parse(["lois", true]))
-      .on("data", async (geoJsonLocationOfInterest) => {
+      .on("data", async (geoJsonLoi) => {
         if (geoJsonType !== "LocationOfInterestCollection") {
           // TODO: report error to user
           console.debug(`Invalid ${geoJsonType}`);
           return res.status(HttpStatus.BAD_REQUEST).end();
         }
-        if (geoJsonLocationOfInterest.type != "LocationOfInterest") {
-          console.debug(
-            `Skipping loi with type ${geoJsonLocationOfInterest.type}`
-          );
+        if (geoJsonLoi.type != "LocationOfInterest") {
+          console.debug(`Skipping loi with type ${geoJsonLoi.type}`);
           return;
         }
         try {
-          const loi = geoJsonToGroundLocationOfInterest(
-            geoJsonLocationOfInterest,
-            layerId
-          );
+          const loi = geoJsonToGroundLocationOfInterest(geoJsonLoi, layerId);
           if (loi) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
@@ -117,13 +112,13 @@ async function importGeoJson(req, res) {
  * Convert the provided GeoJSON LocationOfInterest and layerId into a LocationOfInterest for
  * insertion into the Ground data store.
  */
-function geoJsonToGroundLocationOfInterest(geoJsonLocationOfInterest, layerId) {
+function geoJsonToGroundLocationOfInterest(geoJsonLoi, layerId) {
   // TODO: Migrate Android app to use geometry for points instead of 'location'.
   return {
     layerId,
-    properties: geoJsonLocationOfInterest.properties,
+    properties: geoJsonLoi.properties,
     // TODO: Remove once web app moves over to using 'geometry' field.
-    geoJson: JSON.stringify(geoJsonLocationOfInterest),
+    geoJson: JSON.stringify(geoJsonLoi),
     // TODO: Convert to object (incl nested arrays) and store in 'geometry'.
     // TODO: Add created/modified metadata.
   };

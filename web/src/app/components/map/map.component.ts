@@ -25,9 +25,9 @@ import {
 import { Survey } from '../../shared/models/survey.model';
 import {
   LocationOfInterest,
-  LocationLocationOfInterest,
+  PointOfInterest,
   GeoJsonLocationOfInterest,
-  PolygonLocationOfInterest,
+  AreaOfInterest,
 } from '../../shared/models/loi.model';
 import {
   DrawingToolsService,
@@ -91,7 +91,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
   showRepositionConfirmDialog = false;
-  newLocationOfInterestToReposition?: LocationLocationOfInterest;
+  newLocationOfInterestToReposition?: PointOfInterest;
   oldLatLng?: google.maps.LatLng;
   newLatLng?: google.maps.LatLng;
   markerToReposition?: google.maps.Marker;
@@ -246,22 +246,19 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
       const color = survey.layers.get(loi.layerId)?.color;
       const layerName = survey.layers.get(loi.layerId)?.name?.get('en');
-      if (loi instanceof LocationLocationOfInterest) {
-        this.addLocationLocationOfInterest(color, loi);
+      if (loi instanceof PointOfInterest) {
+        this.addPointOfInterest(color, loi);
       }
       if (loi instanceof GeoJsonLocationOfInterest) {
         this.addGeoJsonLocationOfInterest(color, layerName, loi);
       }
-      if (loi instanceof PolygonLocationOfInterest) {
-        this.addPolygonLocationOfInterest(color, layerName, loi);
+      if (loi instanceof AreaOfInterest) {
+        this.addAreaOfInterest(color, layerName, loi);
       }
     });
   }
 
-  private addLocationLocationOfInterest(
-    color: string | undefined,
-    loi: LocationLocationOfInterest
-  ) {
+  private addPointOfInterest(color: string | undefined, loi: PointOfInterest) {
     const icon = {
       url: getPinImageSource(color),
       scaledSize: {
@@ -314,15 +311,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
   }
 
-  private onMarkerDragEnd(
-    event: google.maps.MouseEvent,
-    loi: LocationLocationOfInterest
-  ) {
+  private onMarkerDragEnd(event: google.maps.MouseEvent, loi: PointOfInterest) {
     this.newLatLng = new google.maps.LatLng(
       event.latLng.lat(),
       event.latLng.lng()
     );
-    this.newLocationOfInterestToReposition = new LocationLocationOfInterest(
+    this.newLocationOfInterestToReposition = new PointOfInterest(
       loi.id,
       loi.layerId,
       new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
@@ -455,10 +449,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return paths;
   }
 
-  private addPolygonLocationOfInterest(
+  private addAreaOfInterest(
     color: string | undefined,
     layerName: string | undefined,
-    loi: PolygonLocationOfInterest
+    loi: AreaOfInterest
   ) {
     const vertices: google.maps.LatLng[] = loi.polygonVertices.map(
       vertex => new google.maps.LatLng(vertex.latitude, vertex.longitude)
