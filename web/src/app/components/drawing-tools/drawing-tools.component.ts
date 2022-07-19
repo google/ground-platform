@@ -25,7 +25,7 @@ import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Layer } from '../../shared/models/layer.model';
@@ -35,7 +35,7 @@ import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 
 @Component({
   selector: 'ground-drawing-tools',
@@ -50,7 +50,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   selectedValue = '';
   private lastSelectedValue = '';
   selectedLayerId = '';
-  private activeProject!: Project;
+  private activeSurvey!: Survey;
   readonly layers$: Observable<List<Layer>>;
   readonly lang: string;
   readonly black = '#202225';
@@ -70,7 +70,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     private drawingToolsService: DrawingToolsService,
     private sanitizer: DomSanitizer,
     private navigationService: NavigationService,
-    projectService: ProjectService,
+    surveyService: SurveyService,
     authService: AuthService
   ) {
     this.isObservationSelected$ = this.navigationService
@@ -79,17 +79,17 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     this.disabled$ = drawingToolsService.getDisabled$();
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = projectService.getActiveProject$().pipe(
-      tap(project => {
-        this.activeProject = project;
-        this.selectedLayerId = project.layers.keySeq().first();
+    this.layers$ = surveyService.getActiveSurvey$().pipe(
+      tap(survey => {
+        this.activeSurvey = survey;
+        this.selectedLayerId = survey.layers.keySeq().first();
         this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
       }),
-      map(project =>
-        List(project.layers.valueSeq().toArray())
+      map(survey =>
+        List(survey.layers.valueSeq().toArray())
           .sortBy(l => l.index)
           .filter(l =>
-            authService.canUserAddPointsToLayer(this.activeProject, l)
+            authService.canUserAddPointsToLayer(this.activeSurvey, l)
           )
       )
     );

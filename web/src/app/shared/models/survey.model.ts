@@ -19,8 +19,8 @@ import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
 import { Role } from './role.model';
 
-export class Project {
-  static readonly UNSAVED_NEW = new Project(
+export class Survey {
+  static readonly UNSAVED_NEW = new Survey(
     /* id= */
     '',
     /* title= */

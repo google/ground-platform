@@ -18,18 +18,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { HeaderLayoutModule } from '../header-layout/header-layout.module';
-import { ProjectListComponent } from './project-list.component';
+import { SurveyListComponent } from './survey-list.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserAvatarModule } from '../user-avatar/user-avatar.module';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
-import { ProjectHeaderModule } from '../project-header/project-header.module';
+import { SurveyHeaderModule } from '../survey-header/survey-header.module';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
-  declarations: [ProjectListComponent],
+  declarations: [SurveyListComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -37,12 +37,12 @@ import { MatCardModule } from '@angular/material/card';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    ProjectHeaderModule,
+    SurveyHeaderModule,
     UserAvatarModule,
     MatCardModule,
     MatGridListModule,
     InlineEditorModule,
   ],
-  exports: [ProjectListComponent],
+  exports: [SurveyListComponent],
 })
-export class ProjectListModule {}
+export class SurveyListModule {}

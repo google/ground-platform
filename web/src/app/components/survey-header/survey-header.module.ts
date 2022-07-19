@@ -18,7 +18,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { HeaderLayoutModule } from './../header-layout/header-layout.module';
-import { ProjectHeaderComponent } from './project-header.component';
+import { SurveyHeaderComponent } from './survey-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -26,7 +26,7 @@ import { UserAvatarModule } from '../user-avatar/user-avatar.module';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
 
 @NgModule({
-  declarations: [ProjectHeaderComponent],
+  declarations: [SurveyHeaderComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -37,6 +37,6 @@ import { InlineEditorModule } from '../inline-editor/inline-editor.module';
     UserAvatarModule,
     InlineEditorModule,
   ],
-  exports: [ProjectHeaderComponent],
+  exports: [SurveyHeaderComponent],
 })
-export class ProjectHeaderModule {}
+export class SurveyHeaderModule {}

@@ -20,7 +20,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { ObservationFormComponent } from './observation-form.component';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
 import { NEVER, of } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
@@ -36,7 +36,7 @@ import { FieldType, Field } from '../../shared/models/form/field.model';
 import { Form } from '../../shared/models/form/form.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { FeatureService } from '../../services/feature/feature.service';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -114,8 +114,8 @@ class MockModel {
     Map({ form001: MockModel.form001 })
   );
 
-  static project001 = new Project(
-    'project001',
+  static survey001 = new Survey(
+    'survey001',
     StringMap({ en: 'title' }),
     StringMap({ en: 'description' }),
     Map({ layer001: MockModel.layer001 }),
@@ -148,12 +148,12 @@ class MockModel {
   );
 }
 
-class MockProjectService {
-  getActiveProject$() {
-    return of<Project>(MockModel.project001);
+class MockSurveyService {
+  getActiveSurvey$() {
+    return of<Survey>(MockModel.survey001);
   }
-  getProjectAcl() {}
-  getCurrentProject() {}
+  getSurveyAcl() {}
+  getCurrentSurvey() {}
 }
 
 class MockFeatureService {
@@ -168,7 +168,7 @@ class MockObservationService {
   }
 }
 
-const projectService = new MockProjectService();
+const surveyService = new MockSurveyService();
 const featureService = new MockFeatureService();
 const observationService = new MockObservationService();
 
@@ -179,7 +179,7 @@ describe('ObservationFormComponent', () => {
   beforeEach(
     waitForAsync(() => {
       const navigationService = {
-        getProjectId$: () => of(''),
+        getSurveyId$: () => of(''),
         getFeatureId$: () => NEVER,
       };
       const routerSpy = createRouterSpy();
@@ -202,7 +202,7 @@ describe('ObservationFormComponent', () => {
         providers: [
           { provide: DataStoreService, useValue: {} },
           { provide: FeatureService, useValue: featureService },
-          { provide: ProjectService, useValue: projectService },
+          { provide: SurveyService, useValue: surveyService },
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },
           { provide: NavigationService, useValue: navigationService },

@@ -25,7 +25,7 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 
 @Component({
   selector: 'ground-layer-list-item',
@@ -36,7 +36,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() layer?: Layer;
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
-  projectId?: string | null;
+  surveyId?: string | null;
   featureId?: string | null;
   layerPinUrl: SafeUrl;
   readonly lang: string;
@@ -49,7 +49,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     private importDialog: MatDialog,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    readonly projectService: ProjectService
+    readonly surveyService: SurveyService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -66,8 +66,8 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       })
     );
     this.subscription.add(
-      this.navigationService.getProjectId$().subscribe(id => {
-        this.projectId = id;
+      this.navigationService.getSurveyId$().subscribe(id => {
+        this.surveyId = id;
       })
     );
   }
@@ -105,20 +105,20 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   async deleteLayer() {
-    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);
+    await this.dataStoreService.deleteLayer(this.surveyId!, this.layer!.id);
     this.onClose();
   }
 
   onClose() {
-    return this.navigationService.selectProject(this.projectId!);
+    return this.navigationService.selectSurvey(this.surveyId!);
   }
 
   onImportFeatures() {
-    if (!this.projectId || !this.layer?.id) {
+    if (!this.surveyId || !this.layer?.id) {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
-      data: { projectId: this.projectId, layerId: this.layer?.id },
+      data: { surveyId: this.surveyId, layerId: this.layer?.id },
       width: '350px',
       maxHeight: '800px',
     });
@@ -127,7 +127,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   getDownloadCsvUrl() {
     return (
       `${environment.cloudFunctionsUrl}/exportCsv?` +
-      `project=${this.projectId}&layer=${this.layer?.id}`
+      `survey=${this.surveyId}&layer=${this.layer?.id}`
     );
   }
 

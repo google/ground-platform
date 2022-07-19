@@ -26,7 +26,7 @@ import { NotificationService } from '../../services/notification/notification.se
   styleUrls: ['./import-dialog.component.scss'],
 })
 export class ImportDialogComponent {
-  private projectId: string;
+  private surveyId: string;
   private layerId: string;
   public readonly acceptedExtensions = 'csv,geojson';
   uploadForm: FormGroup;
@@ -35,14 +35,14 @@ export class ImportDialogComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { projectId: string; layerId: string },
+    public data: { surveyId: string; layerId: string },
     private formBuilder: FormBuilder,
     private dataImportService: DataImportService,
     private readonly dialogRef: MatDialogRef<ImportDialogComponent>,
     private readonly notificationService: NotificationService,
     private ngZone: NgZone
   ) {
-    this.projectId = data.projectId;
+    this.surveyId = data.surveyId;
     this.layerId = data.layerId;
     this.uploadForm = this.formBuilder.group({
       file: new FormControl(),
@@ -58,7 +58,7 @@ export class ImportDialogComponent {
     try {
       this.isImporting = true;
       const response = await this.dataImportService.importFeatures(
-        this.projectId,
+        this.surveyId,
         this.layerId,
         files[0] as File
       );

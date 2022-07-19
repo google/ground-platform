@@ -16,44 +16,44 @@
 
 import { Component, OnDestroy, ElementRef, OnInit } from '@angular/core';
 
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { List } from 'immutable';
 
 @Component({
-  selector: 'app-project-list',
-  templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.scss'],
+  selector: 'app-survey-list',
+  templateUrl: './survey-list.component.html',
+  styleUrls: ['./survey-list.component.scss'],
 })
-export class ProjectListComponent implements OnInit, OnDestroy {
-  projects = List<Project>();
+export class SurveyListComponent implements OnInit, OnDestroy {
+  surveys = List<Survey>();
   private subscription = new Subscription();
 
   constructor(
-    private projectService: ProjectService,
+    private surveyService: SurveyService,
     private navigationService: NavigationService,
     private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    const allProjects = this.projectService.getAccessibleProjects$();
+    const allSurveys = this.surveyService.getAccessibleSurveys$();
     this.subscription.add(
-      allProjects?.subscribe(projects => {
-        this.projects = projects;
+      allSurveys?.subscribe(surveys => {
+        this.surveys = surveys;
       })
     );
   }
 
-  onProjectClicked(index: number) {
-    this.navigationService.selectProject(this.projects.get(index)!.id);
+  onSurveyClicked(index: number) {
+    this.navigationService.selectSurvey(this.surveys.get(index)!.id);
   }
 
-  onNewProject() {
-    this.navigationService.newProject();
+  onNewSurvey() {
+    this.navigationService.newSurvey();
   }
   /**
    * Clean up Rx subscription when cleaning up the component.

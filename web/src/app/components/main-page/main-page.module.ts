@@ -26,7 +26,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgModule } from '@angular/core';
 import { SidePanelModule } from '../side-panel/side-panel.module';
-import { ProjectHeaderModule } from '../project-header/project-header.module';
+import { SurveyHeaderModule } from '../survey-header/survey-header.module';
 import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
@@ -44,7 +44,7 @@ import { MatIconModule } from '@angular/material/icon';
     MatProgressSpinnerModule,
     MatSidenavModule,
     SidePanelModule,
-    ProjectHeaderModule,
+    SurveyHeaderModule,
   ],
 })
 export class MainPageModule {}

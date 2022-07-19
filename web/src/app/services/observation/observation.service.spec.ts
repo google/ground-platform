@@ -17,7 +17,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ObservationService } from './observation.service';
 import { DataStoreService } from '../data-store/data-store.service';
-import { ProjectService } from '../project/project.service';
+import { SurveyService } from '../survey/survey.service';
 import { FeatureService } from '../feature/feature.service';
 import { AuthService } from './../../services/auth/auth.service';
 import { Subject } from 'rxjs';
@@ -30,7 +30,7 @@ describe('ObservationService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: {} },
-        { provide: ProjectService, useValue: {} },
+        { provide: SurveyService, useValue: {} },
         { provide: FeatureService, useValue: {} },
         {
           provide: AuthService,

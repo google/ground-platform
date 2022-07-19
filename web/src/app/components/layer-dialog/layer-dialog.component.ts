@@ -48,7 +48,7 @@ export class LayerDialogComponent implements OnDestroy {
   lang: string;
   layer?: Layer;
   layerName!: string;
-  projectId?: string;
+  surveyId?: string;
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
@@ -63,7 +63,7 @@ export class LayerDialogComponent implements OnDestroy {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     data: {
-      projectId: string;
+      surveyId: string;
       layer?: Layer;
       createLayer: boolean;
     },
@@ -78,7 +78,7 @@ export class LayerDialogComponent implements OnDestroy {
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
-    this.init(data.projectId, data.createLayer, data.layer);
+    this.init(data.surveyId, data.createLayer, data.layer);
     this.dialogRef.keydownEvents().subscribe(event => {
       if (event.key === 'Escape') {
         this.close();
@@ -123,11 +123,11 @@ export class LayerDialogComponent implements OnDestroy {
       });
   }
 
-  init(projectId: string, createLayer: boolean, layer?: Layer) {
+  init(surveyId: string, createLayer: boolean, layer?: Layer) {
     if (!createLayer && !layer) {
       console.warn('User passed an invalid layer id');
     }
-    this.projectId = projectId;
+    this.surveyId = surveyId;
     this.layer = layer;
     this.layerName = this.layer?.name?.get(this.lang) || '';
     this.color = this.layer?.color || this.defaultLayerColor;
@@ -151,8 +151,8 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   async onSave() {
-    if (!this.projectId) {
-      throw Error('Project not yet loaded');
+    if (!this.surveyId) {
+      throw Error('Survey not yet loaded');
     }
 
     if (!this.formFieldEditors) {
@@ -185,7 +185,7 @@ export class LayerDialogComponent implements OnDestroy {
       forms,
       allowedFeatureTypes
     );
-    this.addOrUpdateLayer(this.projectId, layer);
+    this.addOrUpdateLayer(this.surveyId, layer);
   }
 
   private isFieldOptionsValid(
@@ -202,10 +202,10 @@ export class LayerDialogComponent implements OnDestroy {
     return true;
   }
 
-  private addOrUpdateLayer(projectId: string, layer: Layer) {
+  private addOrUpdateLayer(surveyId: string, layer: Layer) {
     // TODO: Inform user layer was saved
     this.layerService
-      .addOrUpdateLayer(projectId, layer)
+      .addOrUpdateLayer(surveyId, layer)
       .then(() => this.close())
       .catch(err => {
         console.error(err);
@@ -328,6 +328,6 @@ export class LayerDialogComponent implements OnDestroy {
   private close(): void {
     this.dialogRef.close();
     // TODO: Add closeLayerDialog() in NavigationService that removes the layer fragment.
-    return this.navigationService.selectProject(this.projectId!);
+    return this.navigationService.selectSurvey(this.surveyId!);
   }
 }

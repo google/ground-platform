@@ -23,7 +23,7 @@ limitations under the License.
       [layer]="entry"
     ></ground-layer-list-item>
   </div>
-  <div class="add-layer" *ngIf="projectService.canManageProject()">
+  <div class="add-layer" *ngIf="surveyService.canManageSurvey()">
     <button
       fxFill
       mat-stroked-button

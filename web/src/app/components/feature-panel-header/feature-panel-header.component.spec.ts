@@ -32,7 +32,7 @@ describe('FeaturePanelHeaderComponent', () => {
 
   beforeEach(async () => {
     const navigationService = {
-      getProjectId$: () => of(''),
+      getSurveyId$: () => of(''),
       getFeatureId$: () => of(''),
     };
     await TestBed.configureTestingModule({

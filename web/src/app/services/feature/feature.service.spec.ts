@@ -17,26 +17,26 @@
 import { TestBed } from '@angular/core/testing';
 import { FeatureService } from './feature.service';
 import { DataStoreService } from '../data-store/data-store.service';
-import { ProjectService } from '../project/project.service';
+import { SurveyService } from '../survey/survey.service';
 import { Subject, of } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 describe('FeatureService', () => {
-  const activeProject$ = new Subject<Project | null>();
+  const activeSurvey$ = new Subject<Survey | null>();
 
   beforeEach(() => {
     const navigationService = {
-      getProjectId$: () => of(''),
+      getSurveyId$: () => of(''),
       getFeatureId$: () => of(''),
     };
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: {} },
         {
-          provide: ProjectService,
+          provide: SurveyService,
           useValue: {
-            getActiveProject$: () => activeProject$,
+            getActiveSurvey$: () => activeSurvey$,
           },
         },
         { provide: NavigationService, useValue: navigationService },

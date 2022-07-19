@@ -18,35 +18,35 @@ import { Component, OnInit, ElementRef, OnDestroy } from '@angular/core';
 import { AuthService } from './../../services/auth/auth.service';
 import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Subscription } from 'rxjs';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
-  selector: 'app-project-header',
-  templateUrl: './project-header.component.html',
-  styleUrls: ['./project-header.component.scss'],
+  selector: 'app-survey-header',
+  templateUrl: './survey-header.component.html',
+  styleUrls: ['./survey-header.component.scss'],
 })
-export class ProjectHeaderComponent implements OnInit, OnDestroy {
+export class SurveyHeaderComponent implements OnInit, OnDestroy {
   lang: string;
   title: string;
-  projectId!: string;
+  surveyId!: string;
 
   subscription: Subscription = new Subscription();
   constructor(
     public auth: AuthService,
     public navigationService: NavigationService,
     private dialog: MatDialog,
-    private projectService: ProjectService
+    private surveyService: SurveyService
   ) {
     this.lang = 'en';
     this.title = '';
-    const activeProject$ = this.projectService.getActiveProject$();
+    const activeSurvey$ = this.surveyService.getActiveSurvey$();
     this.subscription.add(
-      activeProject$.subscribe(project => {
-        this.title = project.title.get(this.lang)! || '';
-        this.projectId = project.id;
+      activeSurvey$.subscribe(survey => {
+        this.title = survey.title.get(this.lang)! || '';
+        this.surveyId = survey.id;
       })
     );
   }
@@ -61,17 +61,17 @@ export class ProjectHeaderComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Updates the project title with input element value.
+   * Updates the survey title with input element value.
    *
    * @param evt the event emitted from the input element on blur.
    */
-  updateProjectTitle(value: string): Promise<void> {
+  updateSurveyTitle(value: string): Promise<void> {
     if (value === this.title) return Promise.resolve();
-    return this.projectService.updateTitle(this.projectId, value);
+    return this.surveyService.updateTitle(this.surveyId, value);
   }
 
-  onProjectsButtonClick(): void {
-    this.navigationService.navigateToProjectList();
+  onSurveysButtonClick(): void {
+    this.navigationService.navigateToSurveyList();
   }
 
   private openShareDialog(): void {

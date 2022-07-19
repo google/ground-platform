@@ -24,7 +24,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { Map } from 'immutable';
@@ -52,10 +52,10 @@ describe('ShareDialogComponent', () => {
         providers: [
           { provide: MatDialogRef, useValue: {} },
           {
-            provide: ProjectService,
+            provide: SurveyService,
             useValue: {
-              getActiveProject$: () => of({ acl: Map() }),
-              getCurrentProjectAcl: () => {},
+              getActiveSurvey$: () => of({ acl: Map() }),
+              getCurrentSurveyAcl: () => {},
             },
           },
         ],

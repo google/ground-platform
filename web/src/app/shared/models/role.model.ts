@@ -15,7 +15,7 @@
  */
 
 /**
- * Represents a possible role in a project's ACLs. Each user can be assigned
+ * Represents a possible role in a survey's ACLs. Each user can be assigned
  * at most one role.
  */
 export enum Role {

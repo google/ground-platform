@@ -27,7 +27,7 @@ export class HeaderLayoutComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  onProjectsButtonClick(): void {
-    this.navigationService.navigateToProjectList();
+  onSurveysButtonClick(): void {
+    this.navigationService.navigateToSurveyList();
   }
 }

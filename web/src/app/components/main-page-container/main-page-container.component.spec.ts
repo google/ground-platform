@@ -21,17 +21,17 @@ import { MainPageContainerComponent } from './main-page-container.component';
 import { MainPageComponent } from './../main-page/main-page.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
-import { ProjectService } from './../../services/project/project.service';
+import { SurveyService } from './../../services/survey/survey.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 const navigationService = {
   init: () => {},
-  getProjectId$: () => NEVER,
+  getSurveyId$: () => NEVER,
 };
 
-const projectService = jasmine.createSpyObj('ProjectService', [
-  'getActiveProject$',
-  'activateProject',
+const surveyService = jasmine.createSpyObj('SurveyService', [
+  'getActiveSurvey$',
+  'activateSurvey',
 ]);
 
 describe('MainPageContainerComponent', () => {
@@ -47,7 +47,7 @@ describe('MainPageContainerComponent', () => {
         providers: [
           { provide: ActivatedRoute, useValue: route },
           { provide: NavigationService, useValue: navigationService },
-          { provide: ProjectService, useValue: projectService },
+          { provide: SurveyService, useValue: surveyService },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();

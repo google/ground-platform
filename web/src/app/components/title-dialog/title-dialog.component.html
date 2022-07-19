@@ -14,10 +14,10 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>New project</h1>
+<h1 mat-dialog-title>New survey</h1>
 <mat-dialog-content>
-  <form [formGroup]="projectTitleForm">
-    <p>Please enter the project title to get started.</p>
+  <form [formGroup]="surveyTitleForm">
+    <p>Please enter the survey title to get started.</p>
     <mat-form-field class="title-input">
       <input matInput formControlName="title" autocomplete="off" />
     </mat-form-field>
@@ -26,10 +26,10 @@
 <mat-dialog-actions align="end">
   <button
     mat-raised-button
-    class="create-project-btn"
-    [disabled]="!projectTitleForm.value['title']"
-    (click)="onCreateProject()"
+    class="create-survey-btn"
+    [disabled]="!surveyTitleForm.value['title']"
+    (click)="onCreateSurvey()"
   >
-    Create project
+    Create survey
   </button>
 </mat-dialog-actions>

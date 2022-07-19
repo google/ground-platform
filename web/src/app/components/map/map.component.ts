@@ -22,7 +22,7 @@ import {
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import {
   Feature,
   LocationFeature,
@@ -33,7 +33,7 @@ import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { FeatureService } from '../../services/feature/feature.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
@@ -64,7 +64,7 @@ const enlargedPolygonStrokeWeight = 6;
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   features$: Observable<List<Feature>>;
-  activeProject$: Observable<Project>;
+  activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
@@ -101,7 +101,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private drawingToolsService: DrawingToolsService,
-    private projectService: ProjectService,
+    private surveyService: SurveyService,
     private featureService: FeatureService,
     private navigationService: NavigationService,
     private zone: NgZone,
@@ -109,17 +109,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private dialog: MatDialog
   ) {
     this.features$ = this.featureService.getFeatures$();
-    this.activeProject$ = this.projectService.getActiveProject$();
+    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 
   ngAfterViewInit() {
     this.subscription.add(
       combineLatest([
-        this.activeProject$,
+        this.activeSurvey$,
         this.features$,
         this.navigationService.getFeatureId$(),
-      ]).subscribe(([project, features, selectedFeatureId]) =>
-        this.onProjectAndFeaturesUpdate(project, features, selectedFeatureId)
+      ]).subscribe(([survey, features, selectedFeatureId]) =>
+        this.onSurveyAndFeaturesUpdate(survey, features, selectedFeatureId)
       )
     );
 
@@ -173,13 +173,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private onProjectAndFeaturesUpdate(
-    project: Project,
+  private onSurveyAndFeaturesUpdate(
+    survey: Survey,
     features: List<Feature>,
     selectedFeatureId: string | null
   ): void {
     this.removeDeletedFeatures(features);
-    this.addNewFeatures(project, features);
+    this.addNewFeatures(survey, features);
     this.selectFeature(selectedFeatureId);
   }
 
@@ -215,13 +215,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    * Add new features to map. The features that were not displayed on
    * the map but in the `newFeatures` are considered as new.
    */
-  private addNewFeatures(project: Project, features: List<Feature>) {
+  private addNewFeatures(survey: Survey, features: List<Feature>) {
     const existingFeatureIds = Array.from(this.markers.keys()).concat(
       Array.from(this.polygons.keys())
     );
 
     features.forEach(feature => {
-      if (!project.getLayer(feature.layerId)) {
+      if (!survey.getLayer(feature.layerId)) {
         // Ignore features whose layer has been removed.
         console.debug(
           `Ignoring feature ${feature.id} with missing layer ${feature.layerId}`
@@ -231,8 +231,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (existingFeatureIds.includes(feature.id)) {
         return;
       }
-      const color = project.layers.get(feature.layerId)?.color;
-      const layerName = project.layers.get(feature.layerId)?.name?.get('en');
+      const color = survey.layers.get(feature.layerId)?.color;
+      const layerName = survey.layers.get(feature.layerId)?.name?.get('en');
       if (feature instanceof LocationFeature) {
         this.addLocationFeature(color, feature);
       }
