@@ -15,7 +15,7 @@
 -->
 
 <ground-main-page
-  *ngIf="activeProject$ | async; else loading"
+  *ngIf="activeSurvey$ | async; else loading"
 ></ground-main-page>
 <ng-template #loading>
   <div fxLayout="row" fxLayoutAlign="center center" fxFill>

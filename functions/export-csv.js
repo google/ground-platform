@@ -23,15 +23,15 @@ const wkt = require("wkt");
 
 // TODO: Refactor into meaningful pieces.
 async function exportCsv(req, res) {
-  const { project: projectId, layer: layerId } = req.query;
-  const project = await db.fetchProject(projectId);
-  if (!project.exists) {
-    res.status(404).send("Project not found");
+  const { survey: surveyId, layer: layerId } = req.query;
+  const survey = await db.fetchSurvey(surveyId);
+  if (!survey.exists) {
+    res.status(404).send("Survey not found");
     return;
   }
-  console.log(`Exporting project '${projectId}', layer '${layerId}'`);
+  console.log(`Exporting survey '${surveyId}', layer '${layerId}'`);
 
-  const layers = project.get("layers") || {};
+  const layers = survey.get("layers") || {};
   const layer = layers[layerId] || {};
   const layerName = layer.name && layer.name["en"];
   const forms = layer["forms"] || {};
@@ -68,8 +68,8 @@ async function exportCsv(req, res) {
   });
   csvStream.pipe(res);
 
-  const features = await db.fetchFeaturesByLayerId(project.id, layerId);
-  const observations = await db.fetchObservationsByLayerId(project.id, layerId);
+  const features = await db.fetchFeaturesByLayerId(survey.id, layerId);
+  const observations = await db.fetchObservationsByLayerId(survey.id, layerId);
 
   // Index observations by feature id in memory. This consumes more
   // memory than iterating over and streaming both feature and observation`

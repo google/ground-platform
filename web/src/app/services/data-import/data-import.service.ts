@@ -34,12 +34,12 @@ export class DataImportService {
   constructor(private httpClient: HttpClient) {}
 
   importFeatures(
-    projectId: string,
+    surveyId: string,
     layerId: string,
     file: File
   ): Promise<ImportResponse> {
     const formData = new FormData();
-    formData.set('project', projectId);
+    formData.set('survey', surveyId);
     formData.set('layer', layerId);
     formData.append('file', file);
     let importUrl;

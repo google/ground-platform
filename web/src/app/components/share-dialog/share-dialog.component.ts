@@ -23,10 +23,10 @@ import {
   AbstractControl,
   ValidatorFn,
 } from '@angular/forms';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Role } from '../../shared/models/role.model';
 import { Subscription } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { MatSelectChange } from '@angular/material/select';
 import { take } from 'rxjs/operators';
 import { Map } from 'immutable';
@@ -66,22 +66,22 @@ export class ShareDialogComponent {
 
   hasChanges = false;
 
-  /** The id of the currently active project. */
-  private projectId?: string;
+  /** The id of the currently active survey. */
+  private surveyId?: string;
   private subscription = new Subscription();
 
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    readonly projectService: ProjectService
+    readonly surveyService: SurveyService
   ) {
     this.subscription.add(
-      // Grab only the first value from getActiveProject$() so that
-      // successive changes to the remote project config don't overwrite the
+      // Grab only the first value from getActiveSurvey$() so that
+      // successive changes to the remote survey config don't overwrite the
       // contents of the contributors list in the dialog.
-      this.projectService
-        .getActiveProject$()
+      this.surveyService
+        .getActiveSurvey$()
         .pipe(take(1))
-        .subscribe(p => this.onProjectLoaded(p))
+        .subscribe(p => this.onSurveyLoaded(p))
     );
   }
 
@@ -90,8 +90,8 @@ export class ShareDialogComponent {
    * enter is pressed.
    */
   onAddUserSubmit(): void {
-    // UI is hidden until project is loaded, so this should never happen.
-    if (!this.projectId || !this.acl) {
+    // UI is hidden until survey is loaded, so this should never happen.
+    if (!this.surveyId || !this.acl) {
       return;
     }
     const { email, role } = this.addUserForm.value;
@@ -128,12 +128,12 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Store the ACL associated with the project.
+   * Store the ACL associated with the survey.
    */
   onSaveClicked(): void {
     // TODO: Show saving spinner.
-    this.projectService
-      .updateAcl(this.projectId!, this.getAclMap())
+    this.surveyService
+      .updateAcl(this.surveyId!, this.getAclMap())
       .then(() => this.dialogRef.close());
   }
 
@@ -145,13 +145,13 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Update ACL and projectId when project is loaded.
+   * Update ACL and surveyId when survey is loaded.
    */
-  private onProjectLoaded(project: Project): void {
-    this.projectId = project.id;
-    this.originalAcl = project.acl;
+  private onSurveyLoaded(survey: Survey): void {
+    this.surveyId = survey.id;
+    this.originalAcl = survey.acl;
     // Sort users by email address.
-    this.acl = this.projectService.getCurrentProjectAcl();
+    this.acl = this.surveyService.getCurrentSurveyAcl();
   }
 
   private updateChangeState() {

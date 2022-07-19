@@ -17,8 +17,8 @@
 import { ActivatedRoute } from '@angular/router';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Observable, Subscription } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
-import { ProjectService } from './../../services/project/project.service';
+import { Survey } from '../../shared/models/survey.model';
+import { SurveyService } from './../../services/survey/survey.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component({
@@ -27,23 +27,23 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   styleUrls: ['./main-page-container.component.css'],
 })
 export class MainPageContainerComponent implements OnInit, OnDestroy {
-  activeProject$: Observable<Project>;
+  activeSurvey$: Observable<Survey>;
   private subscription = new Subscription();
 
   constructor(
     private navigationService: NavigationService,
-    private projectService: ProjectService,
+    private surveyService: SurveyService,
     route: ActivatedRoute
   ) {
-    this.activeProject$ = projectService.getActiveProject$();
+    this.activeSurvey$ = surveyService.getActiveSurvey$();
     navigationService.init(route);
   }
 
   ngOnInit() {
-    // Activate new project on route changes.
+    // Activate new survey on route changes.
     this.subscription.add(
-      this.navigationService.getProjectId$().subscribe(id => {
-        id && this.projectService.activateProject(id);
+      this.navigationService.getSurveyId$().subscribe(id => {
+        id && this.surveyService.activateSurvey(id);
       })
     );
   }

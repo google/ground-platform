@@ -18,8 +18,8 @@
     <span class="header-divider"></span>
     <inline-editor
       [data]="title"
-      [placeholder]="'Untitled project'"
-      (focusOut)="updateProjectTitle($event)"
+      [placeholder]="'Untitled survey'"
+      (focusOut)="updateSurveyTitle($event)"
       class="inline-editor"
     ></inline-editor>
   </span>
@@ -29,7 +29,7 @@
       class="rhs-widgets"
     >
       <button
-        [disabled]="!projectService.canManageProject()"
+        [disabled]="!surveyService.canManageSurvey()"
         mat-flat-button
         color="primary"
         (click)="openShareDialog($event)"
@@ -37,7 +37,7 @@
         <mat-icon>people_alt</mat-icon>
         <label>Share</label>
       </button>
-      <button mat-icon-button aria-label="More project settings">
+      <button mat-icon-button aria-label="More survey settings">
         <mat-icon>more_vert</mat-icon>
       </button>
       <button mat-icon-button>

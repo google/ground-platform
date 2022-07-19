@@ -17,7 +17,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
@@ -26,25 +26,25 @@ import { NavigationService } from '../../services/navigation/navigation.service'
   styleUrls: ['./title-dialog.component.css'],
 })
 export class TitleDialogComponent {
-  projectTitleForm: FormGroup;
+  surveyTitleForm: FormGroup;
 
   constructor(
     private readonly matDialogRef: MatDialogRef<TitleDialogComponent>,
     private navigationService: NavigationService,
-    private projectService: ProjectService
+    private surveyService: SurveyService
   ) {
-    this.projectTitleForm = new FormGroup({ title: new FormControl() });
+    this.surveyTitleForm = new FormGroup({ title: new FormControl() });
   }
 
-  async onCreateProject() {
+  async onCreateSurvey() {
     try {
-      const projectId = await this.projectService.createProject(
-        this.projectTitleForm.get('title')?.value
+      const surveyId = await this.surveyService.createSurvey(
+        this.surveyTitleForm.get('title')?.value
       );
-      this.navigationService.selectProject(projectId);
+      this.navigationService.selectSurvey(surveyId);
       this.matDialogRef.close();
     } catch (e) {
-      console.warn('Project creation failed', e);
+      console.warn('Survey creation failed', e);
     }
   }
 }

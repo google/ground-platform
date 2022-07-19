@@ -29,8 +29,8 @@ import {
 } from '@angular/forms';
 import { List, Map } from 'immutable';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-import { Project } from '../../shared/models/project.model';
-import { ProjectService } from '../../services/project/project.service';
+import { Survey } from '../../shared/models/survey.model';
+import { SurveyService } from '../../services/survey/survey.service';
 import { LoadingState } from '../../services/loading-state.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -56,7 +56,7 @@ export class ObservationFormComponent {
   readonly cardinality = Cardinality;
   readonly layerListItemActionsType = LayerListItemActionsType;
   readonly layer$: Observable<Layer>;
-  projectId?: string;
+  surveyId?: string;
   observation?: Observation;
   observationForm?: FormGroup;
   observationFields?: List<Field>;
@@ -67,26 +67,26 @@ export class ObservationFormComponent {
     private formBuilder: FormBuilder,
     private navigationService: NavigationService,
     observationService: ObservationService,
-    projectService: ProjectService,
+    surveyService: SurveyService,
     featureService: FeatureService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    projectService.getActiveProject$().subscribe((project?: Project) => {
-      this.projectId = project?.id;
+    surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
+      this.surveyId = survey?.id;
     });
     observationService
       .getSelectedObservation$()
       .subscribe((observation?: Observation | LoadingState) =>
         this.onSelectObservation(observation)
       );
-    this.layer$ = projectService
-      .getActiveProject$()
+    this.layer$ = surveyService
+      .getActiveSurvey$()
       .pipe(
-        switchMap(project =>
+        switchMap(survey =>
           featureService
             .getSelectedFeature$()
-            .pipe(map(feature => project.layers.get(feature.layerId)!))
+            .pipe(map(feature => survey.layers.get(feature.layerId)!))
         )
       );
   }
@@ -114,7 +114,7 @@ export class ObservationFormComponent {
           lastModified
         );
         this.dataStoreService
-          .updateObservation(this.projectId!, updatedObservation)
+          .updateObservation(this.surveyId!, updatedObservation)
           .then(() => {
             this.observationForm?.markAsPristine();
             return this.navigateToFeature();

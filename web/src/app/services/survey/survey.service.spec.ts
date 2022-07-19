@@ -16,13 +16,13 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { ProjectService } from './project.service';
+import { SurveyService } from './survey.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 
-describe('ProjectService', () => {
+describe('SurveyService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
   const user$ = new Subject<User | null>();
   beforeEach(() =>
@@ -42,7 +42,7 @@ describe('ProjectService', () => {
 
   it('should be created', () => {
     // TODO(gino-m): Implement tests.
-    const service: ProjectService = TestBed.inject(ProjectService);
+    const service: SurveyService = TestBed.inject(SurveyService);
     expect(service).toBeTruthy();
   });
 });

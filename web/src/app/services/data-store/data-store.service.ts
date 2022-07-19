@@ -19,7 +19,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { Observable } from 'rxjs';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Feature } from '../../shared/models/feature.model';
@@ -40,29 +40,29 @@ export class DataStoreService {
   constructor(private db: AngularFirestore) {}
 
   /**
-   * Returns an Observable that loads and emits the project with the specified
+   * Returns an Observable that loads and emits the survey with the specified
    * uuid.
    *
-   * @param id the id of the requested project.
+   * @param id the id of the requested survey.
    */
-  loadProject$(id: string) {
+  loadSurvey$(id: string) {
     return this.db
-      .collection('projects')
+      .collection('surveys')
       .doc(id)
       .valueChanges()
       .pipe(
-        // Convert object to Project instance.
-        map(data => FirebaseDataConverter.toProject(id, data as DocumentData))
+        // Convert object to Survey instance.
+        map(data => FirebaseDataConverter.toSurvey(id, data as DocumentData))
       );
   }
 
   /**
-   * Returns an Observable that loads and emits the list of projects accessible to the specified user.
+   * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
    *
    */
-  loadAccessibleProject$(userEmail: string): Observable<List<Project>> {
+  loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
     return this.db
-      .collection('projects', ref =>
+      .collection('surveys', ref =>
         ref.where(
           new firebase.firestore.FieldPath('acl', userEmail),
           'in',
@@ -71,12 +71,12 @@ export class DataStoreService {
       )
       .snapshotChanges()
       .pipe(
-        map(projects =>
+        map(surveys =>
           List(
-            projects.map(a => {
+            surveys.map(a => {
               const docData = a.payload.doc.data() as DocumentData;
               const id = a.payload.doc.id;
-              return FirebaseDataConverter.toProject(id, docData);
+              return FirebaseDataConverter.toSurvey(id, docData);
             })
           )
         )
@@ -84,44 +84,44 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the project with new title.
+   * Updates the survey with new title.
    *
-   * @param projectId the id of the project.
-   * @param newTitle the new title of the project.
+   * @param surveyId the id of the survey.
+   * @param newTitle the new title of the survey.
    */
-  updateProjectTitle(projectId: string, newTitle: string): Promise<void> {
+  updateSurveyTitle(surveyId: string, newTitle: string): Promise<void> {
     return this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .set({ title: { en: newTitle } }, { merge: true });
   }
 
-  addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
+  addOrUpdateLayer(surveyId: string, layer: Layer): Promise<void> {
     return this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .update({
         [`layers.${layer.id}`]: FirebaseDataConverter.layerToJS(layer),
       });
   }
 
-  async deleteLayer(projectId: string, layerId: string) {
-    await this.deleteAllFeaturesInLayer(projectId, layerId);
-    await this.deleteAllObservationsInLayer(projectId, layerId);
+  async deleteLayer(surveyId: string, layerId: string) {
+    await this.deleteAllFeaturesInLayer(surveyId, layerId);
+    await this.deleteAllObservationsInLayer(surveyId, layerId);
     return await this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .update({
         [`layers.${layerId}`]: firebase.firestore.FieldValue.delete(),
       });
   }
 
   private async deleteAllObservationsInLayer(
-    projectId: string,
+    surveyId: string,
     layerId: string
   ) {
     const observations = this.db.collection(
-      `projects/${projectId}/observations`,
+      `surveys/${surveyId}/observations`,
       ref => ref.where('layerId', '==', layerId)
     );
     const querySnapshot = await observations.get().toPromise();
@@ -129,48 +129,48 @@ export class DataStoreService {
   }
 
   private async deleteAllObservationsInFeature(
-    projectId: string,
+    surveyId: string,
     featureId: string
   ) {
     const observations = this.db.collection(
-      `projects/${projectId}/observations`,
+      `surveys/${surveyId}/observations`,
       ref => ref.where('featureId', '==', featureId)
     );
     const querySnapshot = await observations.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllFeaturesInLayer(projectId: string, layerId: string) {
+  private async deleteAllFeaturesInLayer(surveyId: string, layerId: string) {
     const featuresInLayer = this.db.collection(
-      `projects/${projectId}/features`,
+      `surveys/${surveyId}/features`,
       ref => ref.where('layerId', '==', layerId)
     );
     const querySnapshot = await featuresInLayer.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  async deleteFeature(projectId: string, featureId: string) {
-    await this.deleteAllObservationsInFeature(projectId, featureId);
+  async deleteFeature(surveyId: string, featureId: string) {
+    await this.deleteAllObservationsInFeature(surveyId, featureId);
     return await this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .collection('features')
       .doc(featureId)
       .delete();
   }
 
-  async deleteObservation(projectId: string, observationId: string) {
+  async deleteObservation(surveyId: string, observationId: string) {
     return await this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .collection('observations')
       .doc(observationId)
       .delete();
   }
 
-  updateObservation(projectId: string, observation: Observation) {
+  updateObservation(surveyId: string, observation: Observation) {
     return this.db
-      .collection(`projects/${projectId}/observations`)
+      .collection(`surveys/${surveyId}/observations`)
       .doc(observation.id)
       .set(FirebaseDataConverter.observationToJS(observation));
   }
@@ -179,12 +179,12 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the feature with the specified
    * uuid.
    *
-   * @param projectId the id of the project in which requested feature is.
+   * @param surveyId the id of the survey in which requested feature is.
    * @param featureId the id of the requested feature.
    */
-  loadFeature$(projectId: string, featureId: string): Observable<Feature> {
+  loadFeature$(surveyId: string, featureId: string): Observable<Feature> {
     return this.db
-      .collection(`projects/${projectId}/features`)
+      .collection(`surveys/${surveyId}/features`)
       .doc(featureId)
       .get()
       .pipe(
@@ -212,9 +212,9 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  features$({ id }: Project): Observable<List<Feature>> {
+  features$({ id }: Survey): Observable<List<Feature>> {
     return this.db
-      .collection(`projects/${id}/features`)
+      .collection(`surveys/${id}/features`)
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
@@ -234,15 +234,15 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the observations with the specified
    * uuid.
    *
-   * @param id the id of the requested project (it should have forms inside).
+   * @param id the id of the requested survey (it should have forms inside).
    * @param featureId the id of the requested feature.
    */
   observations$(
-    project: Project,
+    survey: Survey,
     feature: Feature
   ): Observable<List<Observation>> {
     return this.db
-      .collection(`projects/${project.id}/observations`, ref =>
+      .collection(`surveys/${survey.id}/observations`, ref =>
         ref.where('featureId', '==', feature.id)
       )
       .valueChanges({ idField: 'id' })
@@ -251,7 +251,7 @@ export class DataStoreService {
           List(
             array.map(obj => {
               return FirebaseDataConverter.toObservation(
-                project
+                survey
                   .getLayer(feature.layerId)!
                   .getForm((obj as DocumentData).formId)!,
                 obj.id,
@@ -264,15 +264,15 @@ export class DataStoreService {
   }
 
   // TODO: Define return type here and throughout.
-  loadObservation$(project: Project, feature: Feature, observationId: string) {
+  loadObservation$(survey: Survey, feature: Feature, observationId: string) {
     return this.db
-      .collection(`projects/${project.id}/observations`)
+      .collection(`surveys/${survey.id}/observations`)
       .doc(observationId)
       .get()
       .pipe(
         map(doc => {
           return FirebaseDataConverter.toObservation(
-            project
+            survey
               .getLayer(feature.layerId)!
               .getForm((doc.data()! as DocumentData).formId)!,
             doc.id,
@@ -283,16 +283,16 @@ export class DataStoreService {
   }
 
   /**
-   * Adds or overwrites the role of the specified user in the project with the
+   * Adds or overwrites the role of the specified user in the survey with the
    * specified id.
-   * @param projectId the id of the project to be updated.
+   * @param surveyId the id of the survey to be updated.
    * @param email the email of the user whose role is to be updated.
    * @param role the new role of the specified user.
    */
-  updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
+  updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
     return this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .update({ acl: FirebaseDataConverter.aclToJs(acl) });
   }
 
@@ -304,38 +304,38 @@ export class DataStoreService {
     return firebase.firestore.FieldValue.serverTimestamp();
   }
 
-  updateFeature(projectId: string, feature: Feature): Promise<void> {
+  updateFeature(surveyId: string, feature: Feature): Promise<void> {
     return this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .collection('features')
       .doc(feature.id)
       .set(FirebaseDataConverter.featureToJS(feature));
   }
 
   /**
-   * Creates a new project in the remote db using the specified title,
-   * returning the id of the newly created project. ACLs are initialized
-   * to include the specified user email as project owner.
+   * Creates a new survey in the remote db using the specified title,
+   * returning the id of the newly created survey. ACLs are initialized
+   * to include the specified user email as survey owner.
    */
-  async createProject(
+  async createSurvey(
     ownerEmail: string,
     title: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ): Promise<string> {
-    const projectId = this.generateId();
-    await this.updateProjectTitle(projectId, title);
+    const surveyId = this.generateId();
+    await this.updateSurveyTitle(surveyId, title);
     await this.db
-      .collection('projects')
-      .doc(projectId)
+      .collection('surveys')
+      .doc(surveyId)
       .set(
-        FirebaseDataConverter.newProjectJS(
+        FirebaseDataConverter.newSurveyJS(
           ownerEmail,
           title,
           offlineBaseMapSources
         )
       );
-    return Promise.resolve(projectId);
+    return Promise.resolve(surveyId);
   }
 
   getImageDownloadURL(path: string) {

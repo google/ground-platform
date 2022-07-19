@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { switchMap, shareReplay } from 'rxjs/operators';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { DataStoreService } from '../data-store/data-store.service';
 import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
@@ -31,85 +31,85 @@ import { AclEntry } from '../../shared/models/acl-entry.model';
 @Injectable({
   providedIn: 'root',
 })
-export class ProjectService {
-  private activeProjectId$ = new ReplaySubject<string>(1);
-  private activeProject$: Observable<Project>;
-  private currentProject!: Project;
+export class SurveyService {
+  private activeSurveyId$ = new ReplaySubject<string>(1);
+  private activeSurvey$: Observable<Survey>;
+  private currentSurvey!: Survey;
 
   constructor(
     private dataStore: DataStoreService,
     private authService: AuthService
   ) {
-    // Reload active project each time authenticated user changes.
-    this.activeProject$ = authService.getUser$().pipe(
+    // Reload active survey each time authenticated user changes.
+    this.activeSurvey$ = authService.getUser$().pipe(
       switchMap(() =>
-        //  on each change to project id.
-        this.activeProjectId$.pipe(
-          // Asynchronously load project. switchMap() internally disposes
+        //  on each change to survey id.
+        this.activeSurveyId$.pipe(
+          // Asynchronously load survey. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => {
-            if (id === NavigationService.PROJECT_ID_NEW) {
-              return of(Project.UNSAVED_NEW);
+            if (id === NavigationService.SURVEY_ID_NEW) {
+              return of(Survey.UNSAVED_NEW);
             }
-            return this.dataStore.loadProject$(id);
+            return this.dataStore.loadSurvey$(id);
           })
         )
       ),
-      // Cache last loaded project so that late subscribers don't cause
-      // project to be reloaded.
+      // Cache last loaded survey so that late subscribers don't cause
+      // survey to be reloaded.
       shareReplay(1)
     );
-    this.activeProject$.subscribe(project => (this.currentProject = project));
+    this.activeSurvey$.subscribe(survey => (this.currentSurvey = survey));
   }
 
-  activateProject(id: string) {
-    this.activeProjectId$.next(id);
+  activateSurvey(id: string) {
+    this.activeSurveyId$.next(id);
   }
 
-  getActiveProject$(): Observable<Project> {
-    return this.activeProject$;
+  getActiveSurvey$(): Observable<Survey> {
+    return this.activeSurvey$;
   }
 
-  getAccessibleProjects$(): Observable<List<Project>> {
+  getAccessibleSurveys$(): Observable<List<Survey>> {
     const user = this.authService.getCurrentUser();
     if (!user) {
-      return new Observable<List<Project>>();
+      return new Observable<List<Survey>>();
     }
     const userEmail = user.email;
-    return this.dataStore.loadAccessibleProject$(userEmail);
+    return this.dataStore.loadAccessibleSurvey$(userEmail);
   }
 
   /**
-   * Updates the project with new title by calling the data-store service.
+   * Updates the survey with new title by calling the data-store service.
    *
-   * @param projectId the id of the project.
-   * @param newTitle the new title of the project.
+   * @param surveyId the id of the survey.
+   * @param newTitle the new title of the survey.
    */
-  updateTitle(projectId: string, newTitle: string): Promise<void> {
-    return this.dataStore.updateProjectTitle(projectId, newTitle);
+  updateTitle(surveyId: string, newTitle: string): Promise<void> {
+    return this.dataStore.updateSurveyTitle(surveyId, newTitle);
   }
 
-  updateAcl(projectId: string, acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateAcl(projectId, acl);
+  updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateAcl(surveyId, acl);
   }
 
-  async createProject(title: string): Promise<string> {
+  async createSurvey(title: string): Promise<string> {
     const offlineBaseMapSources = environment.offlineBaseMapSources;
     const user = await this.authService.getUser$().pipe(take(1)).toPromise();
     const email = user?.email || 'Unknown email';
-    const projectId = await this.dataStore.createProject(
+    const surveyId = await this.dataStore.createSurvey(
       email,
       title,
       offlineBaseMapSources
     );
-    return Promise.resolve(projectId);
+    return Promise.resolve(surveyId);
   }
 
   /**
-   * Returns the acl of the current project.
+   * Returns the acl of the current survey.
    */
-  getCurrentProjectAcl(): AclEntry[] {
-    return this.currentProject.acl
+  getCurrentSurveyAcl(): AclEntry[] {
+    return this.currentSurvey.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()
@@ -118,15 +118,15 @@ export class ProjectService {
   }
 
   /**
-   * Checks if a user has manager or owner level permissions of the project.
+   * Checks if a user has manager or owner level permissions of the survey.
    */
-  canManageProject(): boolean {
+  canManageSurvey(): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) {
       return false;
     }
     const userEmail = user.email;
-    const acl = this.getCurrentProjectAcl();
+    const acl = this.getCurrentSurveyAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }

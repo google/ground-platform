@@ -28,9 +28,9 @@ import {
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Layer } from '../../shared/models/layer.model';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { DrawingToolsComponent } from './drawing-tools.component';
 import { DrawingToolsModule } from './drawing-tools.module';
@@ -49,7 +49,7 @@ describe('DrawingToolsComponent', () => {
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
   let mockObservationId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  let projectServiceSpy: jasmine.SpyObj<ProjectService>;
+  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
   const layerId1 = 'layer001';
   const layerId2 = 'layer002';
@@ -57,8 +57,8 @@ describe('DrawingToolsComponent', () => {
   const layerColor2 = 'green';
   const layerName1 = 'layer001 name';
   const layerName2 = 'layer002 name';
-  const mockProject = new Project(
-    'project001',
+  const mockSurvey = new Survey(
+    'survey001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
     /* layers= */ Map({
@@ -105,13 +105,10 @@ describe('DrawingToolsComponent', () => {
         mockObservationId$
       );
 
-      projectServiceSpy = jasmine.createSpyObj<ProjectService>(
-        'ProjectService',
-        ['getActiveProject$']
-      );
-      projectServiceSpy.getActiveProject$.and.returnValue(
-        of<Project>(mockProject)
-      );
+      surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+        'getActiveSurvey$',
+      ]);
+      surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
 
       TestBed.configureTestingModule({
         imports: [DrawingToolsModule, BrowserAnimationsModule],
@@ -120,7 +117,7 @@ describe('DrawingToolsComponent', () => {
           { provide: AuthService, useValue: authServiceSpy },
           { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
           { provide: NavigationService, useValue: navigationServiceSpy },
-          { provide: ProjectService, useValue: projectServiceSpy },
+          { provide: SurveyService, useValue: surveyServiceSpy },
         ],
       }).compileComponents();
     })

@@ -34,11 +34,11 @@ export class NavigationService {
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
   static readonly LAYER_ID_NEW = 'new';
   static readonly OBSERVATION_ID_NEW = 'new';
-  static readonly PROJECT_ID_NEW = 'new';
-  static readonly PROJECT_ID = 'projectId';
-  static readonly PROJECT_SEGMENT = 'project';
+  static readonly SURVEY_ID_NEW = 'new';
+  static readonly SURVEY_ID = 'surveyId';
+  static readonly SURVEY_SEGMENT = 'survey';
   static readonly SIGN_IN_SEGMENT = 'signin';
-  static readonly PROJECTS_SEGMENT = 'projects';
+  static readonly SURVEYS_SEGMENT = 'surveys';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
@@ -54,7 +54,7 @@ export class NavigationService {
   }
 
   private activatedRoute?: ActivatedRoute;
-  private projectId$?: Observable<string | null>;
+  private surveyId$?: Observable<string | null>;
   private layerId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
@@ -69,8 +69,8 @@ export class NavigationService {
   init(route: ActivatedRoute) {
     this.activatedRoute = route;
     // Pipe values from URL query parameters.
-    this.projectId$ = route.paramMap.pipe(
-      map(params => params.get(NavigationService.PROJECT_ID))
+    this.surveyId$ = route.paramMap.pipe(
+      map(params => params.get(NavigationService.SURVEY_ID))
     );
     // Pipe values from URL fragment.
     const fragmentParams$ = route.fragment.pipe(
@@ -90,8 +90,8 @@ export class NavigationService {
     );
   }
 
-  getProjectId$(): Observable<string | null> {
-    return this.projectId$!;
+  getSurveyId$(): Observable<string | null> {
+    return this.surveyId$!;
   }
 
   getLayerId$(): Observable<string | null> {
@@ -205,27 +205,27 @@ export class NavigationService {
   }
 
   /**
-   * Navigate to the URL with new project id.
+   * Navigate to the URL with new survey id.
    */
-  selectProject(id: string) {
-    this.router.navigateByUrl(`${NavigationService.PROJECT_SEGMENT}/${id}`);
+  selectSurvey(id: string) {
+    this.router.navigateByUrl(`${NavigationService.SURVEY_SEGMENT}/${id}`);
   }
 
   /**
-   * Navigate to the URL for new project creation.
+   * Navigate to the URL for new survey creation.
    */
-  newProject() {
+  newSurvey() {
     this.router.navigate([
-      NavigationService.PROJECT_SEGMENT,
-      NavigationService.PROJECT_ID_NEW,
+      NavigationService.SURVEY_SEGMENT,
+      NavigationService.SURVEY_ID_NEW,
     ]);
   }
 
   /**
-   * Navigate to the URL for viewing a list of available projects.
+   * Navigate to the URL for viewing a list of available surveys.
    */
-  navigateToProjectList() {
-    this.router.navigate([NavigationService.PROJECTS_SEGMENT]);
+  navigateToSurveyList() {
+    this.router.navigate([NavigationService.SURVEYS_SEGMENT]);
   }
 
   /**

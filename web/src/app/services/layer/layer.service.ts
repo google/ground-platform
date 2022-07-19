@@ -23,7 +23,7 @@ import { Option } from '../../shared/models/form/option.model';
 import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
 import { List, Map } from 'immutable';
 import { Form } from '../../shared/models/form/form.model';
-import { ProjectService } from '../project/project.service';
+import { SurveyService } from '../survey/survey.service';
 import { take } from 'rxjs/operators';
 
 @Injectable({
@@ -32,7 +32,7 @@ import { take } from 'rxjs/operators';
 export class LayerService {
   constructor(
     private dataStoreService: DataStoreService,
-    private projectService: ProjectService
+    private surveyService: SurveyService
   ) {}
 
   /**
@@ -81,14 +81,14 @@ export class LayerService {
   }
 
   /**
-   * Adds/Updates the layer of a project with a given layer value.
+   * Adds/Updates the layer of a survey with a given layer value.
    */
-  async addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
+  async addOrUpdateLayer(surveyId: string, layer: Layer): Promise<void> {
     if (layer.index === -1) {
       const index = await this.getLayerCount();
       layer = layer.withIndex(index);
     }
-    return this.dataStoreService.addOrUpdateLayer(projectId, layer);
+    return this.dataStoreService.addOrUpdateLayer(surveyId, layer);
   }
 
   /**
@@ -155,10 +155,10 @@ export class LayerService {
   }
 
   private async getLayerCount(): Promise<number> {
-    const project = await this.projectService
-      .getActiveProject$()
+    const survey = await this.surveyService
+      .getActiveSurvey$()
       .pipe(take(1))
       .toPromise();
-    return project.layers?.size;
+    return survey.layers?.size;
   }
 }

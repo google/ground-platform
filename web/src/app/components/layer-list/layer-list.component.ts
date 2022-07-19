@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
 import { Layer } from '../../shared/models/layer.model';
@@ -32,16 +32,16 @@ export class LayerListComponent {
   readonly lang: string;
 
   constructor(
-    readonly projectService: ProjectService,
+    readonly surveyService: SurveyService,
     private navigationService: NavigationService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = projectService
-      .getActiveProject$()
+    this.layers$ = surveyService
+      .getActiveSurvey$()
       .pipe(
-        map(project =>
-          List(project.layers.valueSeq().toArray()).sortBy(l => l.index)
+        map(survey =>
+          List(survey.layers.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
   }

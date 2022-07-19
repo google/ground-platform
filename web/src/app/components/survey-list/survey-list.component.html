@@ -16,22 +16,22 @@
 <div fxLayout="column">
   <gnd-header-layout> </gnd-header-layout>
 
-  <h1 fxFlex class="recent-projects">All Projects</h1>
-  <div fxFlex class="container-projects">
+  <h1 fxFlex class="recent-surveys">All Surveys</h1>
+  <div fxFlex class="container-surveys">
     <div class="container">
-      <mat-card (click)="onNewProject()" class="project-add">
+      <mat-card (click)="onNewSurvey()" class="survey-add">
         <mat-card-content class="card-content">
           <mat-icon color="primary" class="title-add">add</mat-icon>
         </mat-card-content>
       </mat-card>
       <mat-card
-        (click)="onProjectClicked(i)"
-        class="project-card"
-        *ngFor="let project of projects; let i = index"
+        (click)="onSurveyClicked(i)"
+        class="survey-card"
+        *ngFor="let survey of surveys; let i = index"
       >
         <mat-card-header>
-          <mat-card-title class="title-project">{{
-            project.title.get('en')
+          <mat-card-title class="title-survey">{{
+            survey.title.get('en')
           }}</mat-card-title>
         </mat-card-header>
       </mat-card>

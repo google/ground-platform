@@ -17,8 +17,8 @@
 import { AuthService } from './../../services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { InlineEditorModule } from './../inline-editor/inline-editor.module';
-import { ProjectHeaderComponent } from './project-header.component';
-import { ProjectService } from './../../services/project/project.service';
+import { SurveyHeaderComponent } from './survey-header.component';
+import { SurveyService } from './../../services/survey/survey.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -27,9 +27,9 @@ import { NEVER, Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 import { Router } from '@angular/router';
 
-describe('ProjectHeaderComponent', () => {
-  let component: ProjectHeaderComponent;
-  let fixture: ComponentFixture<ProjectHeaderComponent>;
+describe('SurveyHeaderComponent', () => {
+  let component: SurveyHeaderComponent;
+  let fixture: ComponentFixture<SurveyHeaderComponent>;
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
   const user$ = new Subject<User | null>();
 
@@ -37,16 +37,16 @@ describe('ProjectHeaderComponent', () => {
     waitForAsync(() => {
       TestBed.configureTestingModule({
         imports: [InlineEditorModule, MatIconModule, MatDialogModule],
-        declarations: [ProjectHeaderComponent],
+        declarations: [SurveyHeaderComponent],
         providers: [
           { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
           { provide: MAT_DIALOG_DATA, useValue: {} },
           { provide: MatDialogRef, useValue: dialogRef },
           {
-            provide: ProjectService,
+            provide: SurveyService,
             useValue: {
-              getActiveProject$: () => NEVER,
-              getCurrentProject: () => {},
+              getActiveSurvey$: () => NEVER,
+              getCurrentSurvey: () => {},
             },
           },
           { provide: Router, useValue: {} },
@@ -56,7 +56,7 @@ describe('ProjectHeaderComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ProjectHeaderComponent);
+    fixture = TestBed.createComponent(SurveyHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -43,7 +43,7 @@ import { Map } from 'immutable';
 export class FeaturePanelHeaderComponent
   implements OnInit, OnDestroy, OnChanges {
   @Input() layer?: Layer;
-  projectId?: string | null;
+  surveyId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
   readonly lang: string;
@@ -87,8 +87,8 @@ export class FeaturePanelHeaderComponent
       })
     );
     this.subscription.add(
-      this.navigationService.getProjectId$().subscribe(id => {
-        this.projectId = id;
+      this.navigationService.getSurveyId$().subscribe(id => {
+        this.surveyId = id;
       })
     );
   }
@@ -120,17 +120,17 @@ export class FeaturePanelHeaderComponent
   }
 
   async deleteFeature() {
-    if (!this.projectId || !this.featureId) {
+    if (!this.surveyId || !this.featureId) {
       return;
     }
-    await this.dataStoreService.deleteFeature(this.projectId, this.featureId);
+    await this.dataStoreService.deleteFeature(this.surveyId, this.featureId);
     this.onClose();
   }
 
   onClose() {
     // ng zone is run to fix navigation triggered outside Angular zone warning.
     this.zone.run(() => {
-      this.navigationService.selectProject(this.projectId!);
+      this.navigationService.selectSurvey(this.surveyId!);
     });
   }
 

@@ -44,49 +44,49 @@ class Datastore {
     return this.db_.collection(path).get();
   }
 
-  fetchProject(projectId) {
-    return this.db_.doc(`projects/${projectId}`).get();
+  fetchSurvey(surveyId) {
+    return this.db_.doc(`surveys/${surveyId}`).get();
   }
 
-  fetchRecord(projectId, featureId, recordId) {
+  fetchRecord(surveyId, featureId, recordId) {
     return this.fetchDoc_(
-      `projects/${projectId}/features/${featureId}/records/${recordId}`
+      `surveys/${surveyId}/features/${featureId}/records/${recordId}`
     );
   }
 
-  fetchObservationsByLayerId(projectId, layerId) {
+  fetchObservationsByLayerId(surveyId, layerId) {
     return this.db_
-      .collection(`projects/${projectId}/observations`)
+      .collection(`surveys/${surveyId}/observations`)
       .where("layerId", "==", layerId)
       .get();
   }
 
-  fetchFeature(projectId, featureId) {
-    return this.fetchDoc_(`projects/${projectId}/features/${featureId}`);
+  fetchFeature(surveyId, featureId) {
+    return this.fetchDoc_(`surveys/${surveyId}/features/${featureId}`);
   }
 
-  fetchFeaturesByLayerId(projectId, layerId) {
+  fetchFeaturesByLayerId(surveyId, layerId) {
     return this.db_
-      .collection(`projects/${projectId}/features`)
+      .collection(`surveys/${surveyId}/features`)
       .where("layerId", "==", layerId)
       .get();
   }
 
-  fetchForm(projectId, featureTypeId, formId) {
+  fetchForm(surveyId, featureTypeId, formId) {
     return this.fetchDoc_(
-      `projects/${projectId}/featureTypes/${featureTypeId}/forms/${formId}`
+      `surveys/${surveyId}/featureTypes/${featureTypeId}/forms/${formId}`
     );
   }
 
-  fetchSheetsConfig(projectId) {
-    return this.fetchDoc_(`projects/${projectId}/sheets/config`);
+  fetchSheetsConfig(surveyId) {
+    return this.fetchDoc_(`surveys/${surveyId}/sheets/config`);
   }
 
-  async insertFeature(projectId, feature) {
-    const docRef = await this.db_.collection("projects").doc(projectId);
+  async insertFeature(surveyId, feature) {
+    const docRef = await this.db_.collection("surveys").doc(surveyId);
     const doc = await docRef.get();
     if (!doc.exists) {
-      throw new Error(`/projects/${projectId} not found`);
+      throw new Error(`/surveys/${surveyId} not found`);
     }
     await docRef.collection("features").add(feature);
   }

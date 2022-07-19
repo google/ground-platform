@@ -18,9 +18,9 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { LayerListComponent } from './layer-list.component';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { of } from 'rxjs';
 import { Map } from 'immutable';
 import { StringMap } from '../../shared/models/string-map.model';
@@ -30,8 +30,8 @@ import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 
-const mockProject = new Project(
-  'project001',
+const mockSurvey = new Survey(
+  'survey001',
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
   /* layers= */ Map({
@@ -56,16 +56,16 @@ const mockAngularFireAuth = {
   authState: of(authState),
 };
 
-class MockProjectService {
-  getActiveProject$() {
-    return of<Project>(mockProject);
+class MockSurveyService {
+  getActiveSurvey$() {
+    return of<Survey>(mockSurvey);
   }
-  getCurrentProject() {}
-  getCurrentProjectAcl() {}
-  canManageProject() {}
+  getCurrentSurvey() {}
+  getCurrentSurveyAcl() {}
+  canManageSurvey() {}
 }
 
-const projectService = new MockProjectService();
+const surveyService = new MockSurveyService();
 
 describe('LayerListComponent', () => {
   let component: LayerListComponent;
@@ -74,7 +74,7 @@ describe('LayerListComponent', () => {
   beforeEach(
     waitForAsync(() => {
       const navigationService = {
-        getProjectId$: () => of(''),
+        getSurveyId$: () => of(''),
         getFeatureId$: () => of(''),
       };
       const routerSpy = createRouterSpy();
@@ -82,7 +82,7 @@ describe('LayerListComponent', () => {
         declarations: [LayerListComponent],
         imports: [MatListModule],
         providers: [
-          { provide: ProjectService, useValue: projectService },
+          { provide: SurveyService, useValue: surveyService },
           {
             provide: Router,
             useValue: routerSpy,

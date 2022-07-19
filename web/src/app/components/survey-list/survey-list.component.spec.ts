@@ -22,15 +22,15 @@ import { Component } from '@angular/core';
 import { NEVER, of } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { ProjectService } from '../../services/project/project.service';
+import { SurveyService } from '../../services/survey/survey.service';
 import { Map } from 'immutable';
-import { ProjectListComponent } from './project-list.component';
+import { SurveyListComponent } from './survey-list.component';
 import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Project } from '../../shared/models/project.model';
+import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
 import { AclEntry } from '../../shared/models/acl-entry.model';
@@ -39,14 +39,14 @@ import { Role } from '../../shared/models/role.model';
 @Component({ selector: 'gnd-header-layout', template: '' })
 class HeaderLayoutComponent {}
 
-describe('ProjectListComponent', () => {
-  let component: ProjectListComponent;
-  let fixture: ComponentFixture<ProjectListComponent>;
+describe('SurveyListComponent', () => {
+  let component: SurveyListComponent;
+  let fixture: ComponentFixture<SurveyListComponent>;
   const dialog: Partial<MatDialog> = {};
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
 
-  const mockProject1 = new Project(
-    'project001',
+  const mockSurvey1 = new Survey(
+    'survey001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
     /* layers= */ Map({
@@ -61,8 +61,8 @@ describe('ProjectListComponent', () => {
     /* acl= */ Map()
   );
 
-  const mockProject2 = new Project(
-    'project002',
+  const mockSurvey2 = new Survey(
+    'survey002',
     StringMap({ en: 'title2' }),
     StringMap({ en: 'description2' }),
     /* layers= */ Map({
@@ -77,18 +77,18 @@ describe('ProjectListComponent', () => {
     /* acl= */ Map()
   );
 
-  const projectServiceSpy = jasmine.createSpyObj('ProjectService', [
-    'getAccessibleProjects$',
-    'getProjectAcl',
+  const surveyServiceSpy = jasmine.createSpyObj('SurveyService', [
+    'getAccessibleSurveys$',
+    'getSurveyAcl',
   ]);
   const authServiceSpy = jasmine.createSpyObj('AuthService', [
-    'canManageProject',
+    'canManageSurvey',
   ]);
 
   beforeEach(
     waitForAsync(() => {
       const navigationService = {
-        newProject: () => NEVER,
+        newSurvey: () => NEVER,
       };
 
       TestBed.configureTestingModule({
@@ -98,11 +98,11 @@ describe('ProjectListComponent', () => {
           MatButtonModule,
           MatIconModule,
         ],
-        declarations: [ProjectListComponent, HeaderLayoutComponent],
+        declarations: [SurveyListComponent, HeaderLayoutComponent],
         providers: [
           { provide: MatDialog, useValue: dialog },
           { provide: MatDialogRef, useValue: dialogRef },
-          { provide: ProjectService, useValue: projectServiceSpy },
+          { provide: SurveyService, useValue: surveyServiceSpy },
           { provide: NavigationService, useValue: navigationService },
           { provide: AngularFirestore, useValue: {} },
           { provide: AngularFireAuth, useValue: {} },
@@ -113,14 +113,14 @@ describe('ProjectListComponent', () => {
   );
 
   beforeEach(() => {
-    projectServiceSpy.getAccessibleProjects$.and.returnValue(
-      of<Project[]>([mockProject1, mockProject2])
+    surveyServiceSpy.getAccessibleSurveys$.and.returnValue(
+      of<Survey[]>([mockSurvey1, mockSurvey2])
     );
-    projectServiceSpy.getProjectAcl.and.returnValue([
+    surveyServiceSpy.getSurveyAcl.and.returnValue([
       new AclEntry('test@gmail.com', Role.MANAGER),
     ]);
-    authServiceSpy.canManageProject.and.returnValue(true);
-    fixture = TestBed.createComponent(ProjectListComponent);
+    authServiceSpy.canManageSurvey.and.returnValue(true);
+    fixture = TestBed.createComponent(SurveyListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

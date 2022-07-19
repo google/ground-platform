@@ -23,12 +23,12 @@ import {
   BehaviorSubject,
 } from 'rxjs';
 import { Feature } from './../../shared/models/feature.model';
-import { Project } from './../../shared/models/project.model';
+import { Survey } from './../../shared/models/survey.model';
 import { Injectable } from '@angular/core';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { List, Map } from 'immutable';
 import { switchMap } from 'rxjs/operators';
-import { ProjectService } from '../project/project.service';
+import { SurveyService } from '../survey/survey.service';
 import { FeatureService } from '../feature/feature.service';
 import { LoadingState } from '../loading-state.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
@@ -51,7 +51,7 @@ export class ObservationService {
 
   constructor(
     private dataStore: DataStoreService,
-    projectService: ProjectService,
+    surveyService: SurveyService,
     featureService: FeatureService,
     authService: AuthService
   ) {
@@ -59,8 +59,8 @@ export class ObservationService {
       this.selectedObservationId$
         .pipe(
           switchMap(observationId =>
-            projectService.getActiveProject$().pipe(
-              switchMap(project =>
+            surveyService.getActiveSurvey$().pipe(
+              switchMap(survey =>
                 featureService.getSelectedFeature$().pipe(
                   switchMap(feature =>
                     authService.getUser$().pipe(
@@ -69,11 +69,11 @@ export class ObservationService {
                           observationId === NavigationService.OBSERVATION_ID_NEW
                         ) {
                           return of(
-                            this.createNewObservation(user, project, feature)
+                            this.createNewObservation(user, survey, feature)
                           );
                         }
                         return this.dataStore.loadObservation$(
-                          project,
+                          survey,
                           feature,
                           observationId
                         );
@@ -91,10 +91,13 @@ export class ObservationService {
 
   createNewObservation(
     user: User,
-    project: Project,
+    survey: Survey,
     feature: Feature
   ): Observation | LoadingState {
-    const form = project
+    if (!user) {
+      throw Error('Login required to create new observation.');
+    }
+    const form = survey
       .getLayer(feature.layerId)!
       .forms?.first(/*notSetValue=*/ null);
     if (!form) {
@@ -118,10 +121,10 @@ export class ObservationService {
   }
 
   observations$(
-    project: Project,
+    survey: Survey,
     feature: Feature
   ): Observable<List<Observation>> {
-    return this.dataStore.observations$(project, feature);
+    return this.dataStore.observations$(survey, feature);
   }
 
   selectObservation(observationId: string) {
