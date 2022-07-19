@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormFieldEditorComponent } from './form-field-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { LayerService } from './../../services/layer/layer.service';
+import { JobService } from './../../services/job/job.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -51,7 +51,7 @@ describe('FormFieldEditorComponent', () => {
         ],
         providers: [
           { provide: Router, useValue: {} },
-          { provide: LayerService, useValue: {} },
+          { provide: JobService, useValue: {} },
         ],
         schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();

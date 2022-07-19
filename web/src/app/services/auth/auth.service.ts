@@ -25,7 +25,7 @@ import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Project } from '../../shared/models/project.model';
 import { Role } from '../../shared/models/role.model';
 
@@ -95,9 +95,9 @@ export class AuthService {
   }
 
   /**
-   * Checks if a user can add points to a specific layer.
+   * Checks if a user can add points to a specific job.
    */
-  canUserAddPointsToLayer(project: Project, layer: Layer): boolean {
+  canUserAddPointsToJob(project: Project, job: Job): boolean {
     const user = this.getCurrentUser();
     if (!user) {
       return false;
@@ -107,7 +107,7 @@ export class AuthService {
     return (
       this.isManager(userRole) ||
       (this.isContributor(userRole) &&
-        (layer.contributorsCanAdd?.includes('points') ?? false))
+        (job.contributorsCanAdd?.includes('points') ?? false))
     );
   }
 

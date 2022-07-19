@@ -326,7 +326,7 @@ import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Project } from '../../shared/models/project.model';
 import { Role } from '../../shared/models/role.model';
 &nbsp;
@@ -396,9 +396,9 @@ export class AuthService {
   }
 &nbsp;
   /**
-   * Checks if a user can add points to a specific layer.
+   * Checks if a user can add points to a specific job.
    */
-<span class="fstat-no" title="function not covered" >  canUserAddPointsToLayer(</span>project: Project, layer: Layer): boolean {
+<span class="fstat-no" title="function not covered" >  canUserAddPointsToJob(</span>project: Project, job: Job): boolean {
     const user = <span class="cstat-no" title="statement not covered" >this.getCurrentUser();</span>
 <span class="cstat-no" title="statement not covered" >    if (!user) {</span>
 <span class="cstat-no" title="statement not covered" >      return false;</span>
@@ -408,7 +408,7 @@ export class AuthService {
 <span class="cstat-no" title="statement not covered" >    return (</span>
       this.isManager(userRole) ||
       (this.isContributor(userRole) &amp;&amp;
-        (layer.contributorsCanAdd?.includes('points') ?? false))
+        (job.contributorsCanAdd?.includes('points') ?? false))
     );
   }
 &nbsp;

@@ -23,18 +23,18 @@ const wkt = require("wkt");
 
 // TODO: Refactor into meaningful pieces.
 async function exportCsv(req, res) {
-  const { project: projectId, layer: layerId } = req.query;
+  const { project: projectId, job: jobId } = req.query;
   const project = await db.fetchProject(projectId);
   if (!project.exists) {
     res.status(404).send("Project not found");
     return;
   }
-  console.log(`Exporting project '${projectId}', layer '${layerId}'`);
+  console.log(`Exporting project '${projectId}', job '${jobId}'`);
 
-  const layers = project.get("layers") || {};
-  const layer = layers[layerId] || {};
-  const layerName = layer.name && layer.name["en"];
-  const forms = layer["forms"] || {};
+  const jobs = project.get("jobs") || {};
+  const job = jobs[jobId] || {};
+  const jobName = job.name && job.name["en"];
+  const forms = job["forms"] || {};
   const form = Object.values(forms)[0] || {};
   const elementMap = form["elements"] || {};
   const elements = Object.keys(elementMap)
@@ -56,7 +56,7 @@ async function exportCsv(req, res) {
   res.type("text/csv");
   res.setHeader(
     "Content-Disposition",
-    "attachment; filename=" + getFileName(layerName)
+    "attachment; filename=" + getFileName(jobName)
   );
   const csvStream = csv.format({
     delimiter: ",",
@@ -68,8 +68,8 @@ async function exportCsv(req, res) {
   });
   csvStream.pipe(res);
 
-  const features = await db.fetchFeaturesByLayerId(project.id, layerId);
-  const observations = await db.fetchObservationsByLayerId(project.id, layerId);
+  const features = await db.fetchFeaturesByJobId(project.id, jobId);
+  const observations = await db.fetchObservationsByJobId(project.id, jobId);
 
   // Index observations by feature id in memory. This consumes more
   // memory than iterating over and streaming both feature and observation`
@@ -176,9 +176,9 @@ function getMultipleChoiceValues(id, element) {
 /**
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
-function getFileName(layerName) {
-  layerName = layerName || "ground-export";
-  const fileBase = layerName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
+function getFileName(jobName) {
+  jobName = jobName || "ground-export";
+  const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
   return `${fileBase}.csv`;
 }
 

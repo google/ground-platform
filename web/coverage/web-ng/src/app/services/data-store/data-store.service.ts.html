@@ -770,7 +770,7 @@ import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Feature } from '../../shared/models/feature.model';
-import { Layer } from './../../shared/models/layer.model';
+import { Job } from './../../shared/models/job.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
@@ -843,33 +843,33 @@ export class DataStoreService {
       .set({ title: { en: newTitle } }, { merge: true });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  addOrUpdateLayer(</span>projectId: string, layer: Layer): Promise&lt;void&gt; {
+<span class="fstat-no" title="function not covered" >  addOrUpdateJob(</span>projectId: string, job: Job): Promise&lt;void&gt; {
 <span class="cstat-no" title="statement not covered" >    return this.db</span>
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layer.id}`]: FirebaseDataConverter.layerToJS(layer),
+        [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
       });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>deleteLayer(projectId: string, layerId: string) {
-<span class="cstat-no" title="statement not covered" >    await this.deleteAllFeaturesInLayer(projectId, layerId);</span>
-<span class="cstat-no" title="statement not covered" >    await this.deleteAllObservationsInLayer(projectId, layerId);</span>
+<span class="fstat-no" title="function not covered" >  async </span>deleteJob(projectId: string, jobId: string) {
+<span class="cstat-no" title="statement not covered" >    await this.deleteAllFeaturesInJob(projectId, jobId);</span>
+<span class="cstat-no" title="statement not covered" >    await this.deleteAllObservationsInJob(projectId, jobId);</span>
 <span class="cstat-no" title="statement not covered" >    return await this.db</span>
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layerId}`]: firebase.firestore.FieldValue.delete(),
+        [`jobs.${jobId}`]: firebase.firestore.FieldValue.delete(),
       });
   }
 &nbsp;
-  private <span class="fstat-no" title="function not covered" >async </span>deleteAllObservationsInLayer(
+  private <span class="fstat-no" title="function not covered" >async </span>deleteAllObservationsInJob(
     projectId: string,
-    layerId: string
+    jobId: string
   ) {
     const observations = <span class="cstat-no" title="statement not covered" >this.db.collection(</span>
       `projects/${projectId}/observations`,
-<span class="fstat-no" title="function not covered" >      ref </span>=&gt; <span class="cstat-no" title="statement not covered" >ref.where('layerId', '==', layerId)</span>
+<span class="fstat-no" title="function not covered" >      ref </span>=&gt; <span class="cstat-no" title="statement not covered" >ref.where('jobId', '==', jobId)</span>
     );
     const querySnapshot = <span class="cstat-no" title="statement not covered" >await observations.get().toPromise();</span>
 <span class="cstat-no" title="statement not covered" >    return await Promise.all(querySnapshot.docs.map(<span class="fstat-no" title="function not covered" >doc </span>=&gt; <span class="cstat-no" title="statement not covered" >doc.ref.delete())</span>);</span>
@@ -887,12 +887,12 @@ export class DataStoreService {
 <span class="cstat-no" title="statement not covered" >    return await Promise.all(querySnapshot.docs.map(<span class="fstat-no" title="function not covered" >doc </span>=&gt; <span class="cstat-no" title="statement not covered" >doc.ref.delete())</span>);</span>
   }
 &nbsp;
-  private <span class="fstat-no" title="function not covered" >async </span>deleteAllFeaturesInLayer(projectId: string, layerId: string) {
-    const featuresInLayer = <span class="cstat-no" title="statement not covered" >this.db.collection(</span>
+  private <span class="fstat-no" title="function not covered" >async </span>deleteAllFeaturesInJob(projectId: string, jobId: string) {
+    const featuresInJob = <span class="cstat-no" title="statement not covered" >this.db.collection(</span>
       `projects/${projectId}/features`,
-<span class="fstat-no" title="function not covered" >      ref </span>=&gt; <span class="cstat-no" title="statement not covered" >ref.where('layerId', '==', layerId)</span>
+<span class="fstat-no" title="function not covered" >      ref </span>=&gt; <span class="cstat-no" title="statement not covered" >ref.where('jobId', '==', jobId)</span>
     );
-    const querySnapshot = <span class="cstat-no" title="statement not covered" >await featuresInLayer.get().toPromise();</span>
+    const querySnapshot = <span class="cstat-no" title="statement not covered" >await featuresInJob.get().toPromise();</span>
 <span class="cstat-no" title="statement not covered" >    return await Promise.all(querySnapshot.docs.map(<span class="fstat-no" title="function not covered" >doc </span>=&gt; <span class="cstat-no" title="statement not covered" >doc.ref.delete())</span>);</span>
   }
 &nbsp;
@@ -999,7 +999,7 @@ export class DataStoreService {
             array.map(<span class="fstat-no" title="function not covered" >obj </span>=&gt; {
 <span class="cstat-no" title="statement not covered" >              return FirebaseDataConverter.toObservation(</span>
                 project
-                  .getLayer(feature.layerId)!
+                  .getJob(feature.jobId)!
                   .getForm((obj as DocumentData).formId)!,
                 obj.id,
                 obj
@@ -1020,7 +1020,7 @@ export class DataStoreService {
         map(<span class="fstat-no" title="function not covered" >doc </span>=&gt; {
 <span class="cstat-no" title="statement not covered" >          return FirebaseDataConverter.toObservation(</span>
             project
-              .getLayer(feature.layerId)!
+              .getJob(feature.jobId)!
               .getForm((doc.data()! as DocumentData).formId)!,
             doc.id,
             doc.data()! as DocumentData

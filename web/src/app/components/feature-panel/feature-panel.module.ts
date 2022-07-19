@@ -23,7 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { JobListItemModule } from '../job-list-item/job-list-item.module';
 import { FeaturePanelHeaderModule } from '../feature-panel-header/feature-panel-header.module';
 
 @NgModule({
@@ -31,7 +31,7 @@ import { FeaturePanelHeaderModule } from '../feature-panel-header/feature-panel-
     BrowserModule,
     MatCardModule,
     MatListModule,
-    LayerListItemModule,
+    JobListItemModule,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,

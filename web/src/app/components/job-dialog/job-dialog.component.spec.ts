@@ -16,10 +16,10 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { DataStoreService } from './../../services/data-store/data-store.service';
-import { EditStyleButtonModule } from './../edit-style-button/edit-style-button.module';
-import { FormFieldEditorModule } from './../form-field-editor/form-field-editor.module';
-import { LayerDialogComponent } from './layer-dialog.component';
+import { DataStoreService } from '../../services/data-store/data-store.service';
+import { EditStyleButtonModule } from '../edit-style-button/edit-style-button.module';
+import { FormFieldEditorModule } from '../form-field-editor/form-field-editor.module';
+import { JobDialogComponent } from './job-dialog.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
@@ -43,10 +43,10 @@ class MatDialogContent {}
 @Component({ selector: 'mat-dialog-actions', template: '' })
 class MatDialogActions {}
 
-describe('LayerDialogComponent', () => {
-  let component: LayerDialogComponent;
-  let fixture: ComponentFixture<LayerDialogComponent>;
-  const dialogRef: Partial<MatDialogRef<LayerDialogComponent>> = {
+describe('JobDialogComponent', () => {
+  let component: JobDialogComponent;
+  let fixture: ComponentFixture<JobDialogComponent>;
+  const dialogRef: Partial<MatDialogRef<JobDialogComponent>> = {
     keydownEvents: () => NEVER,
   };
 
@@ -55,7 +55,7 @@ describe('LayerDialogComponent', () => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
         declarations: [
-          LayerDialogComponent,
+          JobDialogComponent,
           MatDialogContent,
           MatDialogActions,
         ],
@@ -75,7 +75,7 @@ describe('LayerDialogComponent', () => {
         ],
         providers: [
           { provide: DataStoreService, useValue: { generateId: () => '123' } },
-          { provide: MAT_DIALOG_DATA, useValue: { createLayer: true } },
+          { provide: MAT_DIALOG_DATA, useValue: { createJob: true } },
           { provide: MatDialogRef, useValue: dialogRef },
           { provide: Router, useValue: routerSpy },
           {
@@ -88,7 +88,7 @@ describe('LayerDialogComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LayerDialogComponent);
+    fixture = TestBed.createComponent(JobDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

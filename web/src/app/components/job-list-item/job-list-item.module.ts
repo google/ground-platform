@@ -17,7 +17,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { NgModule } from '@angular/core';
-import { LayerListItemComponent } from './layer-list-item.component';
+import { JobListItemComponent } from './job-list-item.component';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,7 +36,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatDialogModule,
     MatSnackBarModule,
   ],
-  exports: [LayerListItemComponent],
-  declarations: [LayerListItemComponent],
+  exports: [JobListItemComponent],
+  declarations: [JobListItemComponent],
 })
-export class LayerListItemModule {}
+export class JobListItemModule {}

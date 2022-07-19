@@ -208,12 +208,12 @@ export class DataImportService {
 &nbsp;
 <span class="fstat-no" title="function not covered" >  importFeatures(</span>
     projectId: string,
-    layerId: string,
+    jobId: string,
     file: File
   ): Promise&lt;ImportResponse&gt; {
     const formData = <span class="cstat-no" title="statement not covered" >new FormData();</span>
 <span class="cstat-no" title="statement not covered" >    formData.set('project', projectId);</span>
-<span class="cstat-no" title="statement not covered" >    formData.set('layer', layerId);</span>
+<span class="cstat-no" title="statement not covered" >    formData.set('job', jobId);</span>
 <span class="cstat-no" title="statement not covered" >    formData.append('file', file);</span>
     let importUrl;
 <span class="cstat-no" title="statement not covered" >    if (file.name.endsWith('.geojson')) {</span>

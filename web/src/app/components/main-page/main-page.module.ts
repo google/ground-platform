@@ -16,7 +16,7 @@
 
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { LayerDialogModule } from '../layer-dialog/layer-dialog.module';
+import { JobDialogModule } from '../job-dialog/job-dialog.module';
 import { DrawingToolsModule } from '../drawing-tools/drawing-tools.module';
 import { MainPageComponent } from './main-page.component';
 import { MapModule } from '../map/map.module';
@@ -36,7 +36,7 @@ import { MatIconModule } from '@angular/material/icon';
     CommonModule,
     DrawingToolsModule,
     FlexLayoutModule,
-    LayerDialogModule,
+    JobDialogModule,
     MapModule,
     MatButtonModule,
     MatDialogModule,

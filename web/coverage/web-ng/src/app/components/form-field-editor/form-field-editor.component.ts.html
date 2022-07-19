@@ -847,7 +847,7 @@ import {
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { LayerService } from '../../services/layer/layer.service';
+import { JobService } from '../../services/job/job.service';
 import { Subscription } from 'rxjs';
 import { OptionEditorComponent } from '../option-editor/option-editor.component';
 &nbsp;
@@ -906,7 +906,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
-    private layerService: LayerService,
+    private jobService: JobService,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.expanded = false;
@@ -971,7 +971,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 &nbsp;
   ngOnInit(): void {
-    // As the form fields value change we are emitting the updated value to the layer-dialog.
+    // As the form fields value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
       this.formGroup.valueChanges.subscribe(<span class="fstat-no" title="function not covered" >value </span>=&gt; {
 <span class="cstat-no" title="statement not covered" >        this.update.emit({</span>
@@ -985,7 +985,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 &nbsp;
   /*
-   * This method is used to get the updated values of field from the layer-dialog.
+   * This method is used to get the updated values of field from the job-dialog.
    */
   ngOnChanges(changes: SimpleChanges): void {
     <span class="missing-if-branch" title="else path not taken" >E</span>if (changes.multipleChoice) {
@@ -1013,7 +1013,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 &nbsp;
   /**
-   * Emits the delete field event to the layer dialog component.
+   * Emits the delete field event to the job dialog component.
    *
    * @returns void
    */
@@ -1065,7 +1065,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @returns void
    */
 <span class="fstat-no" title="function not covered" >  onOptionUpdate(</span>event: { label: string; code: string }, index: number): void {
-    const option = <span class="cstat-no" title="statement not covered" >this.layerService.createOption(</span>
+    const option = <span class="cstat-no" title="statement not covered" >this.jobService.createOption(</span>
       event.code,
       event.label,
       index
@@ -1095,7 +1095,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 &nbsp;
 <span class="fstat-no" title="function not covered" >  onAddOption(</span>): void {
     const index = <span class="cstat-no" title="statement not covered" >this.formOptions?.options.size || 0;</span>
-    const option = <span class="cstat-no" title="statement not covered" >this.layerService.createOption(</span>
+    const option = <span class="cstat-no" title="statement not covered" >this.jobService.createOption(</span>
       /* code= */ '',
       /* label= */ '',
       index

@@ -449,10 +449,10 @@ export class ObservationService {
 <span class="cstat-no" title="statement not covered" >      throw Error('Login required to create new observation.');</span>
     }
     const form<span class="cstat-no" title="statement not covered" > = project</span>
-      .getLayer(feature.layerId)!
+      .getJob(feature.jobId)!
       .forms?.first(/*notSetValue=*/ null);
 <span class="cstat-no" title="statement not covered" >    if (!form) {</span>
-<span class="cstat-no" title="statement not covered" >      throw Error(`No form in layer ${feature.layerId}`);</span>
+<span class="cstat-no" title="statement not covered" >      throw Error(`No form in job ${feature.jobId}`);</span>
     }
     const newObservationId = <span class="cstat-no" title="statement not covered" >this.dataStore.generateId();</span>
     const auditInfo = <span class="cstat-no" title="statement not covered" >new AuditInfo(</span>
@@ -463,7 +463,7 @@ export class ObservationService {
 <span class="cstat-no" title="statement not covered" >    return new Observation(</span>
       newObservationId,
       feature.id,
-      feature.layerId,
+      feature.jobId,
       form!,
       auditInfo,
       auditInfo,

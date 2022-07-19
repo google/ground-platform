@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/app/components/layer-list/layer-list.component.ts</title>
+    <title>Code coverage report for src/app/components/job-list/job-list.component.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/components/layer-list</a> layer-list.component.ts</h1>
+        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/components/job-list</a> job-list.component.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -181,17 +181,17 @@ import { Component } from '@angular/core';
 import { ProjectService } from '../../services/project/project.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/navigation/navigation.service';
 &nbsp;
 @Component({
-  selector: 'ground-layer-list',
-  templateUrl: './layer-list.component.html',
-  styleUrls: ['./layer-list.component.scss'],
+  selector: 'ground-job-list',
+  templateUrl: './job-list.component.html',
+  styleUrls: ['./job-list.component.scss'],
 })
-export class LayerListComponent {
-  readonly layers$: Observable&lt;List&lt;Layer&gt;&gt;;
+export class JobListComponent {
+  readonly jobs$: Observable&lt;List&lt;Job&gt;&gt;;
   readonly lang: string;
 &nbsp;
   constructor(
@@ -200,17 +200,17 @@ export class LayerListComponent {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = projectService
+    this.jobs$ = projectService
       .getActiveProject$()
       .pipe(
         map(project =&gt;
-          List(project.layers.valueSeq().toArray()).sortBy(l =&gt; l.index)
+          List(project.jobs.valueSeq().toArray()).sortBy(l =&gt; l.index)
         )
       );
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  onAddLayer(</span>) {
-<span class="cstat-no" title="statement not covered" >    this.navigationService.customizeLayer(NavigationService.LAYER_ID_NEW);</span>
+<span class="fstat-no" title="function not covered" >  onAddJob(</span>) {
+<span class="cstat-no" title="statement not covered" >    this.navigationService.customizeJob(NavigationService.JOB_ID_NEW);</span>
   }
 }
 &nbsp;</pre></td></tr></table></pre>

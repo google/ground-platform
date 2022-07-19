@@ -36,7 +36,7 @@ import {
 } from '../../shared/models/feature.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { urlPrefix } from './ground-pin';
@@ -65,27 +65,27 @@ describe('MapComponent', () => {
   const locationFeatureId4 = 'loaction_feature004';
   const geoJsonFeatureId1 = 'geo_json_feature001';
   const polygonFeatureId1 = 'polygon_feature001';
-  const layerId1 = 'layer001';
-  const layerId2 = 'layer002';
-  const layerColor1 = 'red';
-  const layerColor2 = 'green';
+  const jobId1 = 'job001';
+  const jobId2 = 'job002';
+  const jobColor1 = 'red';
+  const jobColor2 = 'green';
   const mockProject = new Project(
     'project001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
-    /* layers= */ Map({
-      layer001: new Layer(
-        layerId1,
+    /* jobs= */ Map({
+      job001: new Job(
+        jobId1,
         /* index */ -1,
-        layerColor1,
-        StringMap({ en: 'layer001 name' }),
+        jobColor1,
+        StringMap({ en: 'job001 name' }),
         /* forms= */ Map()
       ),
-      layer002: new Layer(
-        layerId2,
+      job002: new Job(
+        jobId2,
         /* index */ -1,
-        layerColor2,
-        StringMap({ en: 'layer002 name' }),
+        jobColor2,
+        StringMap({ en: 'job002 name' }),
         /* forms= */ Map()
       ),
     }),
@@ -93,22 +93,22 @@ describe('MapComponent', () => {
   );
   const locationFeature1 = new LocationFeature(
     locationFeatureId1,
-    layerId1,
+    jobId1,
     new firebase.firestore.GeoPoint(1.23, 4.56)
   );
   const locationFeature2 = new LocationFeature(
     locationFeatureId2,
-    layerId2,
+    jobId2,
     new firebase.firestore.GeoPoint(12.3, 45.6)
   );
   const locationFeature3 = new LocationFeature(
     locationFeatureId3,
-    layerId2,
+    jobId2,
     new firebase.firestore.GeoPoint(78.9, 78.9)
   );
   const locationFeature4 = new LocationFeature(
     locationFeatureId4,
-    layerId2,
+    jobId2,
     new firebase.firestore.GeoPoint(45, 45)
   );
   const geoJson1 = {
@@ -133,10 +133,10 @@ describe('MapComponent', () => {
   };
   const geoJsonFeature1 = new GeoJsonFeature(
     geoJsonFeatureId1,
-    layerId1,
+    jobId1,
     geoJson1
   );
-  const polygonFeature1 = new PolygonFeature(polygonFeatureId1, layerId2, [
+  const polygonFeature1 = new PolygonFeature(polygonFeatureId1, jobId2, [
     new firebase.firestore.GeoPoint(-10, -10),
     new firebase.firestore.GeoPoint(20, -10),
     new firebase.firestore.GeoPoint(20, 20),
@@ -195,10 +195,10 @@ describe('MapComponent', () => {
       mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
       drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
         'DrawingToolsService',
-        ['getEditMode$', 'setEditMode', 'getSelectedLayerId', 'setDisabled']
+        ['getEditMode$', 'setEditMode', 'getSelectedJobId', 'setDisabled']
       );
       drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
-      drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(layerId1);
+      drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId1);
 
       TestBed.configureTestingModule({
         imports: [GoogleMapsModule],
@@ -224,11 +224,11 @@ describe('MapComponent', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(locationFeatureId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
-    assertMarkerIcon(marker1, layerColor1, 30);
+    assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
     const marker2 = component.markers.get(locationFeatureId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
-    assertMarkerIcon(marker2, layerColor2, 30);
+    assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
   });
 
@@ -242,7 +242,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(10, 0),
       ],
     ]);
-    assertPolygonStyle(polygon, layerColor1, 3);
+    assertPolygonStyle(polygon, jobColor1, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
@@ -257,7 +257,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(-10, -10),
       ],
     ]);
-    assertPolygonStyle(polygon, layerColor2, 3);
+    assertPolygonStyle(polygon, jobColor2, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
@@ -270,11 +270,11 @@ describe('MapComponent', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(locationFeatureId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
-    assertMarkerIcon(marker1, layerColor1, 30);
+    assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
     const marker2 = component.markers.get(locationFeatureId3)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
-    assertMarkerIcon(marker2, layerColor2, 30);
+    assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
     expect(component.polygons.size).toEqual(1);
     const polygon = component.polygons.get(geoJsonFeatureId1)!;
@@ -286,7 +286,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(10, 0),
       ],
     ]);
-    assertPolygonStyle(polygon, layerColor1, 3);
+    assertPolygonStyle(polygon, jobColor1, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   }));
 
@@ -304,7 +304,7 @@ describe('MapComponent', () => {
     tick();
 
     const marker1 = component.markers.get(locationFeatureId1)!;
-    assertMarkerIcon(marker1, layerColor1, 50);
+    assertMarkerIcon(marker1, jobColor1, 50);
   }));
 
   it('should select feature when polygon is clicked', () => {
@@ -323,7 +323,7 @@ describe('MapComponent', () => {
     tick();
 
     const polygon = component.polygons.get(geoJsonFeatureId1)!;
-    assertPolygonStyle(polygon, layerColor1, 6);
+    assertPolygonStyle(polygon, jobColor1, 6);
   }));
 
   it('should clear selected feature when map is clicked', fakeAsync(() => {
@@ -449,7 +449,7 @@ describe('MapComponent', () => {
     expect(featureServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
       new LocationFeature(
         locationFeature1.id,
-        locationFeature1.layerId,
+        locationFeature1.jobId,
         new firebase.firestore.GeoPoint(2.23, 5.56)
       )
     );
@@ -513,7 +513,7 @@ describe('MapComponent', () => {
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {
     mockEditMode$.next(EditMode.AddPoint);
-    drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(layerId2);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId2);
     featureServiceSpy.addPoint.and.returnValue(
       new Promise(resolve => resolve(locationFeature4))
     );
@@ -526,13 +526,13 @@ describe('MapComponent', () => {
     expect(featureServiceSpy.addPoint).toHaveBeenCalledOnceWith(
       45,
       45,
-      layerId2
+      jobId2
     );
   }));
 
-  it('should not add marker when layer id is undefined', fakeAsync(() => {
+  it('should not add marker when job id is undefined', fakeAsync(() => {
     mockEditMode$.next(EditMode.AddPoint);
-    drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(undefined);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(undefined);
     tick();
 
     google.maps.event.trigger(component.map.googleMap!, 'click', {

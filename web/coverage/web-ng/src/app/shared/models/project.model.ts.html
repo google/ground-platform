@@ -187,7 +187,7 @@
  * limitations under the License.
  */
 &nbsp;
-import { Layer } from './layer.model';
+import { Job } from './job.model';
 import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
 import { Role } from './role.model';
@@ -200,8 +200,8 @@ export class Project {
     StringMap({}),
     /* description= */
     StringMap({}),
-    /* layers= */
-    Map&lt;string, Layer&gt;(),
+    /* jobs= */
+    Map&lt;string, Job&gt;(),
     /* acl= */
     Map&lt;string, Role&gt;()
   );
@@ -210,12 +210,12 @@ export class Project {
     readonly id: string,
     readonly title: StringMap,
     readonly description: StringMap,
-    readonly layers: Map&lt;string, Layer&gt;,
+    readonly jobs: Map&lt;string, Job&gt;,
     readonly acl: Map&lt;string, Role&gt;
   ) {}
 &nbsp;
-  getLayer(layerId: string): Layer | undefined {
-    return this.layers.get(layerId);
+  getJob(jobId: string): Job | undefined {
+    return this.jobs.get(jobId);
   }
 &nbsp;
 <span class="fstat-no" title="function not covered" >  isUnsavedNew(</span>) {
@@ -223,7 +223,7 @@ export class Project {
       !this.id &amp;&amp;
       !this.title.size &amp;&amp;
       !this.description.size &amp;&amp;
-      !this.layers.size &amp;&amp;
+      !this.jobs.size &amp;&amp;
       !this.acl.size
     );
   }

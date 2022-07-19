@@ -1293,17 +1293,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const editMode = this.drawingToolsService.getEditMode$().getValue();
-    const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
+    const selectedJobId = this.drawingToolsService.getSelectedJobId();
     switch (editMode) {
       case EditMode.AddPoint: {
-        if (!selectedLayerId) {
+        if (!selectedJobId) {
           return;
         }
         this.drawingToolsService.setEditMode(EditMode.None);
         const newFeature = await this.featureService.addPoint(
           event.latLng.lat(),
           event.latLng.lng(),
-          selectedLayerId
+          selectedJobId
         );
         <span class="missing-if-branch" title="else path not taken" >E</span>if (newFeature) {
           this.navigationService.selectFeature(newFeature.id);
@@ -1368,26 +1368,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
 &nbsp;
     features.forEach(feature =&gt; {
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (!project.getLayer(feature.layerId)) {
-        // Ignore features whose layer has been removed.
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!project.getJob(feature.jobId)) {
+        // Ignore features whose job has been removed.
 <span class="cstat-no" title="statement not covered" >        console.debug(</span>
-          `Ignoring feature ${feature.id} with missing layer ${feature.layerId}`
+          `Ignoring feature ${feature.id} with missing job ${feature.jobId}`
         );
 <span class="cstat-no" title="statement not covered" >        return;</span>
       }
       if (existingFeatureIds.includes(feature.id)) {
         return;
       }
-      const color = project.layers.get(feature.layerId)<span class="branch-0 cbranch-no" title="branch not covered" >?.c</span>olor;
-      const layerName = project.layers.get(feature.layerId)<span class="branch-0 cbranch-no" title="branch not covered" >?.n</span>ame<span class="branch-0 cbranch-no" title="branch not covered" >?.g</span>et('en');
+      const color = project.jobs.get(feature.jobId)<span class="branch-0 cbranch-no" title="branch not covered" >?.c</span>olor;
+      const jobName = project.jobs.get(feature.jobId)<span class="branch-0 cbranch-no" title="branch not covered" >?.n</span>ame<span class="branch-0 cbranch-no" title="branch not covered" >?.g</span>et('en');
       if (feature instanceof LocationFeature) {
         this.addLocationFeature(color, feature);
       }
       if (feature instanceof GeoJsonFeature) {
-        this.addGeoJsonFeature(color, layerName, feature);
+        this.addGeoJsonFeature(color, jobName, feature);
       }
       if (feature instanceof PolygonFeature) {
-        this.addPolygonFeature(color, layerName, feature);
+        this.addPolygonFeature(color, jobName, feature);
       }
     });
   }
@@ -1458,7 +1458,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
     this.newFeatureToReposition = new LocationFeature(
       feature.id,
-      feature.layerId,
+      feature.jobId,
       new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
     );
   }
@@ -1548,13 +1548,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 &nbsp;
   private addGeoJsonFeature(
     color: string | undefined,
-    layerName: string | undefined,
+    jobName: string | undefined,
     feature: GeoJsonFeature
   ) {
     const paths: google.maps.LatLng[][] = [];
-    const layer = new google.maps.Data();
-    layer.addGeoJson(feature.geoJson);
-    layer.forEach(f =&gt; {
+    const job = new google.maps.Data();
+    job.addGeoJson(feature.geoJson);
+    job.forEach(f =&gt; {
       <span class="missing-if-branch" title="else path not taken" >E</span>if (f.getGeometry() instanceof google.maps.Data.Polygon) {
         paths.push(
           ...this.geoJsonPolygonToPaths(
@@ -1571,7 +1571,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
 &nbsp;
-    this.addPolygonToMap(feature.id, color, layerName, paths);
+    this.addPolygonToMap(feature.id, color, jobName, paths);
   }
 &nbsp;
   private geoJsonPolygonToPaths(
@@ -1585,20 +1585,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 &nbsp;
   private addPolygonFeature(
     color: string | undefined,
-    layerName: string | undefined,
+    jobName: string | undefined,
     feature: PolygonFeature
   ) {
     const vertices: google.maps.LatLng[] = feature.polygonVertices.map(
       vertex =&gt; new google.maps.LatLng(vertex.latitude, vertex.longitude)
     );
 &nbsp;
-    this.addPolygonToMap(feature.id, color, layerName, [vertices]);
+    this.addPolygonToMap(feature.id, color, jobName, [vertices]);
   }
 &nbsp;
   private addPolygonToMap(
     featureId: string,
     color: string | undefined,
-    layerName: string | undefined,
+    jobName: string | undefined,
     paths: google.maps.LatLng[][]
   ) {
     const polygon = new google.maps.Polygon({
@@ -1612,7 +1612,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
     polygon.set('id', featureId);
     polygon.set('color', color);
-    polygon.set('layerName', layerName);
+    polygon.set('jobName', jobName);
     polygon.addListener('click', (event: google.maps.PolyMouseEvent) =&gt; {
       this.onPolygonClick(event);
     });
@@ -1658,7 +1658,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return {
       featureId: polygon.get('id'),
       color: polygon.get('color'),
-      layerName: polygon.get('layerName'),
+      jobName: polygon.get('jobName'),
     };
   }
 &nbsp;

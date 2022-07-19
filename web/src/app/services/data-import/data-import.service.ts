@@ -35,12 +35,12 @@ export class DataImportService {
 
   importFeatures(
     projectId: string,
-    layerId: string,
+    jobId: string,
     file: File
   ): Promise<ImportResponse> {
     const formData = new FormData();
     formData.set('project', projectId);
-    formData.set('layer', layerId);
+    formData.set('job', jobId);
     formData.append('file', file);
     let importUrl;
     if (file.name.endsWith('.geojson')) {

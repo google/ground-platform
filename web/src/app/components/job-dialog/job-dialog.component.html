@@ -16,9 +16,9 @@
 
 <inline-editor
   mat-dialog-title
-  [data]="layerName"
-  placeholder="Unnamed layer"
-  (focusOut)="setLayerName($event)"
+  [data]="jobName"
+  placeholder="Unnamed job"
+  (focusOut)="setJobName($event)"
 ></inline-editor>
 <hr class="horizontal-line" />
 <mat-dialog-content>
@@ -45,7 +45,7 @@
       </div>
       <app-edit-style-button
         fxFlex
-        [markerColor]="layer!.color || defaultLayerColor"
+        [markerColor]="job!.color || defaultJobColor"
         (markerColorChange)="onMarkerColorChange($event)"
       ></app-edit-style-button>
     </div>
@@ -54,7 +54,7 @@
     <h3>Form Layout</h3>
     <div class="label-helper-text">
       Add questions that should be asked to observers about each point, line, or
-      polygon in this layer.
+      polygon in this job.
     </div>
   </div>
   <div cdkDropList (cdkDropListDropped)="drop($event)">

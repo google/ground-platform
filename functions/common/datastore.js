@@ -54,10 +54,10 @@ class Datastore {
     );
   }
 
-  fetchObservationsByLayerId(projectId, layerId) {
+  fetchObservationsByJobId(projectId, jobId) {
     return this.db_
       .collection(`projects/${projectId}/observations`)
-      .where("layerId", "==", layerId)
+      .where("jobId", "==", jobId)
       .get();
   }
 
@@ -65,10 +65,10 @@ class Datastore {
     return this.fetchDoc_(`projects/${projectId}/features/${featureId}`);
   }
 
-  fetchFeaturesByLayerId(projectId, layerId) {
+  fetchFeaturesByJobId(projectId, jobId) {
     return this.db_
       .collection(`projects/${projectId}/features`)
-      .where("layerId", "==", layerId)
+      .where("jobId", "==", jobId)
       .get();
   }
 

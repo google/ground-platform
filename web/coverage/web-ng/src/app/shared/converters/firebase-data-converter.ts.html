@@ -1304,7 +1304,7 @@
 import { DocumentData } from '@angular/fire/firestore';
 import { Project } from '../models/project.model';
 import { StringMap } from '../models/string-map.model';
-import { Layer } from '../models/layer.model';
+import { Job } from '../models/job.model';
 import { Form } from '../models/form/form.model';
 import { Field, FieldType } from '../models/form/field.model';
 import {
@@ -1363,10 +1363,10 @@ export class FirebaseDataConverter {
       id,
       StringMap(data.title),
       StringMap(data.description),
-      Map&lt;string, Layer&gt;(
-        keys(data.layers).map(<span class="fstat-no" title="function not covered" >(i</span>d: string) =&gt; <span class="cstat-no" title="statement not covered" >[</span>
+      Map&lt;string, Job&gt;(
+        keys(data.jobs).map(<span class="fstat-no" title="function not covered" >(i</span>d: string) =&gt; <span class="cstat-no" title="statement not covered" >[</span>
           id as string,
-          FirebaseDataConverter.toLayer(id, data.layers[id]),
+          FirebaseDataConverter.toJob(id, data.jobs[id]),
         ])
       ),
       Map&lt;string, Role&gt;(
@@ -1409,13 +1409,13 @@ export class FirebaseDataConverter {
 &nbsp;
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Layer instance.
+   * immutable Job instance.
    *
-   * @param id the uuid of the layer instance.
+   * @param id the uuid of the job instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  private <span class="fstat-no" title="function not covered" >static </span>toLayer(id: string, data: DocumentData): Layer {
-<span class="cstat-no" title="statement not covered" >    return new Layer(</span>
+  private <span class="fstat-no" title="function not covered" >static </span>toJob(id: string, data: DocumentData): Job {
+<span class="cstat-no" title="statement not covered" >    return new Job(</span>
       id,
       // Fall back to constant so old dev databases do not break.
       data.index || -1,
@@ -1431,8 +1431,8 @@ export class FirebaseDataConverter {
     );
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  static </span>layerToJS(layer: Layer): {} {
-    const { name, forms, color, contributorsCanAdd, ...layerDoc } = <span class="cstat-no" title="statement not covered" >layer;</span>
+<span class="fstat-no" title="function not covered" >  static </span>jobToJS(job: Job): {} {
+    const { name, forms, color, contributorsCanAdd, ...jobDoc } = <span class="cstat-no" title="statement not covered" >job;</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
       contributorsCanAdd,
       name: name?.toJS() || {},
@@ -1447,7 +1447,7 @@ export class FirebaseDataConverter {
           }
         : {}),
       defaultStyle: { color },
-      ...layerDoc,
+      ...jobDoc,
     };
   }
 &nbsp;
@@ -1488,21 +1488,21 @@ export class FirebaseDataConverter {
   public <span class="fstat-no" title="function not covered" >static </span>featureToJS(feature: Feature): {} {
     // TODO: Set audit info (created / last modified user and timestamp).
 <span class="cstat-no" title="statement not covered" >    if (feature instanceof LocationFeature) {</span>
-      const { layerId, location } = <span class="cstat-no" title="statement not covered" >feature;</span>
+      const { jobId, location } = <span class="cstat-no" title="statement not covered" >feature;</span>
 <span class="cstat-no" title="statement not covered" >      return {</span>
-        layerId,
+        jobId,
         location,
       };
     } else <span class="cstat-no" title="statement not covered" >if (feature instanceof GeoJsonFeature) {</span>
-      const { layerId, geoJson } = <span class="cstat-no" title="statement not covered" >feature;</span>
+      const { jobId, geoJson } = <span class="cstat-no" title="statement not covered" >feature;</span>
 <span class="cstat-no" title="statement not covered" >      return {</span>
-        layerId,
+        jobId,
         geoJson,
       };
     } else <span class="cstat-no" title="statement not covered" >if (feature instanceof PolygonFeature) {</span>
-      const { layerId, polygonVertices } = <span class="cstat-no" title="statement not covered" >feature;</span>
+      const { jobId, polygonVertices } = <span class="cstat-no" title="statement not covered" >feature;</span>
 <span class="cstat-no" title="statement not covered" >      return {</span>
-        layerId,
+        jobId,
         polygonVertices,
       };
     } else {
@@ -1676,8 +1676,8 @@ export class FirebaseDataConverter {
    */
 <span class="fstat-no" title="function not covered" >  static </span>toFeature(id: string, data: DocumentData): Feature | undefined {
 <span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      if (!data.layerId) {</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error('Missing layer id');</span>
+<span class="cstat-no" title="statement not covered" >      if (!data.jobId) {</span>
+<span class="cstat-no" title="statement not covered" >        throw new Error('Missing job id');</span>
       }
       const featureProperties = <span class="cstat-no" title="statement not covered" >Map&lt;string, string | number&gt;(</span>
         keys(data.properties).map(<span class="fstat-no" title="function not covered" >(p</span>roperty: string) =&gt; <span class="cstat-no" title="statement not covered" >[</span>
@@ -1689,19 +1689,19 @@ export class FirebaseDataConverter {
 <span class="cstat-no" title="statement not covered" >      if (this.isLocationFeature(data)) {</span>
 <span class="cstat-no" title="statement not covered" >        return new LocationFeature(</span>
           id,
-          data.layerId,
+          data.jobId,
           data.location,
           featureProperties
         );
       }
 <span class="cstat-no" title="statement not covered" >      if (this.isGeoJsonFeature(data)) {</span>
         const geoJson = <span class="cstat-no" title="statement not covered" >JSON.parse(data.geoJson);</span>
-<span class="cstat-no" title="statement not covered" >        return new GeoJsonFeature(id, data.layerId, geoJson, featureProperties);</span>
+<span class="cstat-no" title="statement not covered" >        return new GeoJsonFeature(id, data.jobId, geoJson, featureProperties);</span>
       }
 <span class="cstat-no" title="statement not covered" >      if (this.isPolygonFeature(data)) {</span>
 <span class="cstat-no" title="statement not covered" >        return new PolygonFeature(</span>
           id,
-          data.layerId,
+          data.jobId,
           data.geometry.coordinates,
           featureProperties
         );
@@ -1744,7 +1744,7 @@ export class FirebaseDataConverter {
     return new Observation(
       id,
       data.featureId,
-      data.layerId,
+      data.jobId,
       form,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
@@ -1764,7 +1764,7 @@ export class FirebaseDataConverter {
   static observationToJS(observation: Observation): {} {
     return {
       featureId: observation.featureId,
-      layerId: observation.layerId,
+      jobId: observation.jobId,
       formId: observation.form<span class="branch-0 cbranch-no" title="branch not covered" >?.i</span>d,
       created: FirebaseDataConverter.auditInfoToJs(observation.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(

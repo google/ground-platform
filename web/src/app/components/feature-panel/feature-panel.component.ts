@@ -22,7 +22,7 @@ import { ProjectService } from './../../services/project/project.service';
 import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
@@ -42,7 +42,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   readonly fieldTypes = FieldType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
-  layer?: Layer;
+  job?: Job;
 
   constructor(
     private navigationService: NavigationService,
@@ -72,7 +72,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
       projectService.getActiveProject$(),
       featureService.getSelectedFeature$(),
     ]).subscribe(
-      ([project, feature]) => (this.layer = project.layers.get(feature.layerId))
+      ([project, feature]) => (this.job = project.jobs.get(feature.jobId))
     );
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {

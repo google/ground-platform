@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-import { Form } from './form/form.model';
-import { StringMap } from './string-map.model';
-import { Map } from 'immutable';
+.jobs {
+  margin-top: 6px;
+}
 
-export class Layer {
-  constructor(
-    readonly id: string,
-    readonly index: number,
-    readonly color?: string,
-    readonly name?: StringMap,
-    readonly forms?: Map<string, Form>,
-    readonly contributorsCanAdd?: string[]
-  ) {}
+.job-list-title {
+  padding: 20px;
+}
 
-  getForm(formId: string): Form | undefined {
-    return this.forms?.get(formId);
-  }
+.add-job {
+  padding: 8px 10px 0 10px;
+}
 
-  withIndex(index: number): Layer {
-    return { ...this, index };
-  }
+.add-job-btn {
+  text-align: left;
+}
+
+.add-job-icon {
+  padding: 10px;
 }

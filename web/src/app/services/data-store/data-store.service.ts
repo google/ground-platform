@@ -23,7 +23,7 @@ import { Project } from '../../shared/models/project.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Feature } from '../../shared/models/feature.model';
-import { Layer } from './../../shared/models/layer.model';
+import { Job } from './../../shared/models/job.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Role } from '../../shared/models/role.model';
@@ -96,33 +96,33 @@ export class DataStoreService {
       .set({ title: { en: newTitle } }, { merge: true });
   }
 
-  addOrUpdateLayer(projectId: string, layer: Layer): Promise<void> {
+  addOrUpdateJob(projectId: string, job: Job): Promise<void> {
     return this.db
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layer.id}`]: FirebaseDataConverter.layerToJS(layer),
+        [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
       });
   }
 
-  async deleteLayer(projectId: string, layerId: string) {
-    await this.deleteAllFeaturesInLayer(projectId, layerId);
-    await this.deleteAllObservationsInLayer(projectId, layerId);
+  async deleteJob(projectId: string, jobId: string) {
+    await this.deleteAllFeaturesInJob(projectId, jobId);
+    await this.deleteAllObservationsInJob(projectId, jobId);
     return await this.db
       .collection('projects')
       .doc(projectId)
       .update({
-        [`layers.${layerId}`]: firebase.firestore.FieldValue.delete(),
+        [`jobs.${jobId}`]: firebase.firestore.FieldValue.delete(),
       });
   }
 
-  private async deleteAllObservationsInLayer(
+  private async deleteAllObservationsInJob(
     projectId: string,
-    layerId: string
+    jobId: string
   ) {
     const observations = this.db.collection(
       `projects/${projectId}/observations`,
-      ref => ref.where('layerId', '==', layerId)
+      ref => ref.where('jobId', '==', jobId)
     );
     const querySnapshot = await observations.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -140,12 +140,12 @@ export class DataStoreService {
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllFeaturesInLayer(projectId: string, layerId: string) {
-    const featuresInLayer = this.db.collection(
+  private async deleteAllFeaturesInJob(projectId: string, jobId: string) {
+    const featuresInJob = this.db.collection(
       `projects/${projectId}/features`,
-      ref => ref.where('layerId', '==', layerId)
+      ref => ref.where('jobId', '==', jobId)
     );
-    const querySnapshot = await featuresInLayer.get().toPromise();
+    const querySnapshot = await featuresInJob.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -252,7 +252,7 @@ export class DataStoreService {
             array.map(obj => {
               return FirebaseDataConverter.toObservation(
                 project
-                  .getLayer(feature.layerId)!
+                  .getJob(feature.jobId)!
                   .getForm((obj as DocumentData).formId)!,
                 obj.id,
                 obj
@@ -273,7 +273,7 @@ export class DataStoreService {
         map(doc => {
           return FirebaseDataConverter.toObservation(
             project
-              .getLayer(feature.layerId)!
+              .getJob(feature.jobId)!
               .getForm((doc.data()! as DocumentData).formId)!,
             doc.id,
             doc.data()! as DocumentData

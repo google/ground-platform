@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/app/services/layer/layer.service.ts</title>
+    <title>Code coverage report for src/app/services/job/job.service.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/services/layer</a> layer.service.ts</h1>
+        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/services/job</a> job.service.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -403,7 +403,7 @@
 &nbsp;
 import { Injectable } from '@angular/core';
 import { DataStoreService } from '../data-store/data-store.service';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Field, FieldType } from '../../shared/models/form/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/form/option.model';
@@ -416,18 +416,18 @@ import { take } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
-export class LayerService {
+export class JobService {
   constructor(
     private dataStoreService: DataStoreService,
     private projectService: ProjectService
   ) {}
 &nbsp;
   /**
-   * Creates and returns a new layer with a generated unique identifier.
+   * Creates and returns a new job with a generated unique identifier.
    */
-  createNewLayer(): Layer {
-    const layerId = this.dataStoreService.generateId();
-    return new Layer(layerId, /* index */ -1);
+  createNewJob(): Job {
+    const jobId = this.dataStoreService.generateId();
+    return new Job(jobId, /* index */ -1);
   }
 &nbsp;
   /**
@@ -468,14 +468,14 @@ export class LayerService {
   }
 &nbsp;
   /**
-   * Adds/Updates the layer of a project with a given layer value.
+   * Adds/Updates the job of a project with a given job value.
    */
-<span class="fstat-no" title="function not covered" >  async </span>addOrUpdateLayer(projectId: string, layer: Layer): Promise&lt;void&gt; {
-<span class="cstat-no" title="statement not covered" >    if (layer.index === -1) {</span>
-      const index = <span class="cstat-no" title="statement not covered" >await this.getLayerCount();</span>
-<span class="cstat-no" title="statement not covered" >      layer = layer.withIndex(index);</span>
+<span class="fstat-no" title="function not covered" >  async </span>addOrUpdateJob(projectId: string, job: Job): Promise&lt;void&gt; {
+<span class="cstat-no" title="statement not covered" >    if (job.index === -1) {</span>
+      const index = <span class="cstat-no" title="statement not covered" >await this.getJobCount();</span>
+<span class="cstat-no" title="statement not covered" >      job = job.withIndex(index);</span>
     }
-<span class="cstat-no" title="statement not covered" >    return this.dataStoreService.addOrUpdateLayer(projectId, layer);</span>
+<span class="cstat-no" title="statement not covered" >    return this.dataStoreService.addOrUpdateJob(projectId, job);</span>
   }
 &nbsp;
   /**
@@ -484,9 +484,9 @@ export class LayerService {
 <span class="fstat-no" title="function not covered" >  convertFieldsListToMap(</span>fields: List&lt;Field&gt;): Map&lt;string, Field&gt; {
     let fieldsMap = <span class="cstat-no" title="statement not covered" >Map&lt;string, Field&gt;();</span>
 <span class="cstat-no" title="statement not covered" >    fields.forEach(<span class="fstat-no" title="function not covered" >(f</span>ield: Field, index: number) =&gt; {</span>
-      const layerFieldId = <span class="cstat-no" title="statement not covered" >fields &amp;&amp; fields.get(index)?.id;</span>
-      const fieldId = <span class="cstat-no" title="statement not covered" >layerFieldId</span>
-        ? layerFieldId
+      const jobFieldId = <span class="cstat-no" title="statement not covered" >fields &amp;&amp; fields.get(index)?.id;</span>
+      const fieldId = <span class="cstat-no" title="statement not covered" >jobFieldId</span>
+        ? jobFieldId
         : this.dataStoreService.generateId();
 <span class="cstat-no" title="statement not covered" >      fieldsMap = fieldsMap.set(fieldId, field);</span>
     });
@@ -503,11 +503,11 @@ export class LayerService {
     id: string | undefined,
     fields: Map&lt;string, Field&gt;
   ): Map&lt;string, Form&gt; | undefined {
-<span class="cstat-no" title="statement not covered" >    if (LayerService.isFormEmpty(fields)) {</span>
+<span class="cstat-no" title="statement not covered" >    if (JobService.isFormEmpty(fields)) {</span>
 <span class="cstat-no" title="statement not covered" >      return undefined;</span>
     }
     const formId = <span class="cstat-no" title="statement not covered" >id || this.dataStoreService.generateId();</span>
-<span class="cstat-no" title="statement not covered" >    return LayerService.createFormMap(formId, new Form(formId, fields));</span>
+<span class="cstat-no" title="statement not covered" >    return JobService.createFormMap(formId, new Form(formId, fields));</span>
   }
 &nbsp;
   /**
@@ -525,7 +525,7 @@ export class LayerService {
   private <span class="fstat-no" title="function not covered" >static </span>isFormEmpty(fields: Map&lt;string, Field&gt;): boolean {
 <span class="cstat-no" title="statement not covered" >    return (</span>
       fields.isEmpty() ||
-      (fields.size === 1 &amp;&amp; !LayerService.getFieldLabel(fields.first()))
+      (fields.size === 1 &amp;&amp; !JobService.getFieldLabel(fields.first()))
     );
   }
 &nbsp;
@@ -534,19 +534,19 @@ export class LayerService {
   }
 &nbsp;
   /**
-   * Returns the form value from a layer passed.
+   * Returns the form value from a job passed.
    */
-<span class="fstat-no" title="function not covered" >  getForm(</span>layer?: Layer): Form | undefined {
-    const forms = <span class="cstat-no" title="statement not covered" >layer?.forms;</span>
+<span class="fstat-no" title="function not covered" >  getForm(</span>job?: Job): Form | undefined {
+    const forms = <span class="cstat-no" title="statement not covered" >job?.forms;</span>
 <span class="cstat-no" title="statement not covered" >    return forms ? forms.valueSeq().first() : undefined;</span>
   }
 &nbsp;
-  private <span class="fstat-no" title="function not covered" >async </span>getLayerCount(): Promise&lt;number&gt; {
+  private <span class="fstat-no" title="function not covered" >async </span>getJobCount(): Promise&lt;number&gt; {
     const project = <span class="cstat-no" title="statement not covered" >await this.projectService</span>
       .getActiveProject$()
       .pipe(take(1))
       .toPromise();
-<span class="cstat-no" title="statement not covered" >    return project.layers?.size;</span>
+<span class="cstat-no" title="statement not covered" >    return project.jobs?.size;</span>
   }
 }
 &nbsp;</pre></td></tr></table></pre>

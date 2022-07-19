@@ -182,15 +182,15 @@ import { Map } from 'immutable';
 &nbsp;
 export interface Feature {
   readonly id: string;
-  readonly layerId: string;
+  readonly jobId: string;
   readonly properties?: Map&lt;string, string | number&gt;;
 }
 &nbsp;
 export class LocationFeature implements Feature {
   constructor(
     readonly id: string,
-    readonly layerId: string,
-    // TODO: User custom type instead of exposing types from data layer.
+    readonly jobId: string,
+    // TODO: User custom type instead of exposing types from data job.
     readonly location: firebase.firestore.GeoPoint,
     readonly properties?: Map&lt;string, string | number&gt;
   ) {}
@@ -199,7 +199,7 @@ export class LocationFeature implements Feature {
 export class GeoJsonFeature implements Feature {
   constructor(
     readonly id: string,
-    readonly layerId: string,
+    readonly jobId: string,
     readonly geoJson: object,
     readonly properties?: Map&lt;string, string | number&gt;
   ) {}
@@ -208,7 +208,7 @@ export class GeoJsonFeature implements Feature {
 export class PolygonFeature implements Feature {
   constructor(
     readonly id: string,
-    readonly layerId: string,
+    readonly jobId: string,
     readonly polygonVertices: firebase.firestore.GeoPoint[],
     readonly properties?: Map&lt;string, string | number&gt;
   ) {}

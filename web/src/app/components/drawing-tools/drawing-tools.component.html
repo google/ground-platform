@@ -20,7 +20,7 @@
   [disabled]="(isObservationSelected$ | async) || (disabled$ | async)"
   [(value)] = "selectedValue">
   <mat-button-toggle
-      *ngIf="!(layers$ | async).isEmpty()"
+      *ngIf="!(jobs$ | async).isEmpty()"
       id="add-point-button"
       class="add-point-button"
       value = "{{pointValue}}"
@@ -35,19 +35,19 @@
 </mat-button-toggle-group>
 
 <div *ngIf="selectedValue"
-     id="layer-selector-section"
-     class="layer-selector-section">
+     id="job-selector-section"
+     class="job-selector-section">
   <mat-form-field appearance="fill">
-    <mat-label id="layer-selector-label">Adding {{selectedValue}} for</mat-label>
+    <mat-label id="job-selector-label">Adding {{selectedValue}} for</mat-label>
     <mat-select
-        id="layer-selector"
-        [(value)]="selectedLayerId"
-        (selectionChange)="onLayerIdChange()">
+        id="job-selector"
+        [(value)]="selectedJobId"
+        (selectionChange)="onJobIdChange()">
       <mat-option
-          *ngFor="let layer of layers$ | async"
-          id="layer-selector-item-{{layer.id}}"
-          [value]="layer.id">
-        <img [src]="layerPinUrl(layer)" />&nbsp;{{ layer?.name?.get(lang) }}
+          *ngFor="let job of jobs$ | async"
+          id="job-selector-item-{{job.id}}"
+          [value]="job.id">
+        <img [src]="jobPinUrl(job)" />&nbsp;{{ job?.name?.get(lang) }}
       </mat-option>
     </mat-select>
   </mat-form-field>

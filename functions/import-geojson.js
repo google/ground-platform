@@ -24,7 +24,7 @@ const JSONStream = require("JSONStream");
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
- * and required 'project' id and 'layer' id to the database.
+ * and required 'project' id and 'job' id to the database.
  */
 async function importGeoJson(req, res) {
   if (req.method !== "POST") {
@@ -40,7 +40,7 @@ async function importGeoJson(req, res) {
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the form. project and layer must appear
+  // Handle non-file fields in the form. project and job must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -48,14 +48,14 @@ async function importGeoJson(req, res) {
 
   // This code will process each file uploaded.
   busboy.on("file", (_field, file, _filename) => {
-    const { project: projectId, layer: layerId } = params;
-    if (!projectId || !layerId) {
+    const { project: projectId, job: jobId } = params;
+    if (!projectId || !jobId) {
       return res
         .status(HttpStatus.BAD_REQUEST)
         .end(JSON.stringify({ error: "Invalid request" }));
     }
     console.log(
-      `Importing GeoJSON into project '${projectId}', layer '${layerId}'`
+      `Importing GeoJSON into project '${projectId}', job '${jobId}'`
     );
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
@@ -77,7 +77,7 @@ async function importGeoJson(req, res) {
           return;
         }
         try {
-          const feature = geoJsonToGroundFeature(geoJsonFeature, layerId);
+          const feature = geoJsonToGroundFeature(geoJsonFeature, jobId);
           if (feature) {
             inserts.push(db.insertFeature(projectId, feature));
           }
@@ -109,13 +109,13 @@ async function importGeoJson(req, res) {
 }
 
 /**
- * Convert the provided GeoJSON Feature and layerId into a Feature for
+ * Convert the provided GeoJSON Feature and jobId into a Feature for
  * insertion into the Ground data store.
  */
-function geoJsonToGroundFeature(geoJsonFeature, layerId) {
+function geoJsonToGroundFeature(geoJsonFeature, jobId) {
   // TODO: Migrate Android app to use geometry for points instead of 'location'.
   return {
-    layerId,
+    jobId,
     properties: geoJsonFeature.properties,
     // TODO: Remove once web app moves over to using 'geometry' field.
     geoJson: JSON.stringify(geoJsonFeature),

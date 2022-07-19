@@ -48,7 +48,7 @@ import {
   Cardinality,
 } from '../../shared/models/form/multiple-choice.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { LayerService } from '../../services/layer/layer.service';
+import { JobService } from '../../services/job/job.service';
 import { Subscription } from 'rxjs';
 import { OptionEditorComponent } from '../option-editor/option-editor.component';
 
@@ -107,7 +107,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private formBuilder: FormBuilder,
     private dialogService: DialogService,
-    private layerService: LayerService,
+    private jobService: JobService,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.expanded = false;
@@ -172,7 +172,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    // As the form fields value change we are emitting the updated value to the layer-dialog.
+    // As the form fields value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
       this.formGroup.valueChanges.subscribe(value => {
         this.update.emit({
@@ -186,7 +186,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /*
-   * This method is used to get the updated values of field from the layer-dialog.
+   * This method is used to get the updated values of field from the job-dialog.
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.multipleChoice) {
@@ -214,7 +214,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Emits the delete field event to the layer dialog component.
+   * Emits the delete field event to the job dialog component.
    *
    * @returns void
    */
@@ -266,7 +266,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @returns void
    */
   onOptionUpdate(event: { label: string; code: string }, index: number): void {
-    const option = this.layerService.createOption(
+    const option = this.jobService.createOption(
       event.code,
       event.label,
       index
@@ -296,7 +296,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   onAddOption(): void {
     const index = this.formOptions?.options.size || 0;
-    const option = this.layerService.createOption(
+    const option = this.jobService.createOption(
       /* code= */ '',
       /* label= */ '',
       index

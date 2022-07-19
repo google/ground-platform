@@ -72,7 +72,7 @@ export class FeatureService {
   async addPoint(
     lat: number,
     lng: number,
-    layerId: string
+    jobId: string
   ): Promise<Feature | null> {
     // TODO: Update to use `await firstValueFrom(getActiveProject$()` when
     // upgrading to RxJS 7.
@@ -80,7 +80,7 @@ export class FeatureService {
       .getActiveProject$()
       .pipe(take(1))
       .toPromise();
-    return await this.addPointInternal(project, lat, lng, layerId);
+    return await this.addPointInternal(project, lat, lng, jobId);
   }
 
   async updatePoint(feature: Feature): Promise<void> {
@@ -97,14 +97,14 @@ export class FeatureService {
     project: Project,
     lat: number,
     lng: number,
-    layerId: string
+    jobId: string
   ): Promise<Feature | null> {
-    if (!(project.layers || new Map()).get(layerId)) {
+    if (!(project.jobs || new Map()).get(jobId)) {
       return null;
     }
     const newFeature = new LocationFeature(
       this.dataStore.generateId(),
-      layerId,
+      jobId,
       new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateFeature(project.id, newFeature);
@@ -112,7 +112,7 @@ export class FeatureService {
   }
 
   private async updatePointInternal(project: Project, feature: Feature) {
-    if (project.layers.isEmpty()) {
+    if (project.jobs.isEmpty()) {
       return;
     }
     await this.dataStore.updateFeature(project.id, feature);

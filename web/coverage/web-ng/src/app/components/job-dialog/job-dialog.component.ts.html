@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/app/components/layer-dialog/layer-dialog.component.ts</title>
+    <title>Code coverage report for src/app/components/job-dialog/job-dialog.component.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/components/layer-dialog</a> layer-dialog.component.ts</h1>
+        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/components/job-dialog</a> job-dialog.component.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -749,7 +749,7 @@ import {
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogService } from '../../services/dialog/dialog.service';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Form } from '../../shared/models/form/form.model';
 import { Subscription } from 'rxjs';
 import { FieldType, Field } from '../../shared/models/form/field.model';
@@ -757,7 +757,7 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { LayerService } from '../../services/layer/layer.service';
+import { JobService } from '../../services/job/job.service';
 import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 &nbsp;
@@ -765,20 +765,20 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 /*global alert*/
 &nbsp;
 @Component({
-  selector: 'app-layer-dialog',
-  templateUrl: './layer-dialog.component.html',
-  styleUrls: ['./layer-dialog.component.scss'],
+  selector: 'app-job-dialog',
+  templateUrl: './job-dialog.component.html',
+  styleUrls: ['./job-dialog.component.scss'],
 })
-export class LayerDialogComponent implements OnDestroy {
+export class JobDialogComponent implements OnDestroy {
   lang: string;
-  layer?: Layer;
-  layerName!: string;
+  job?: Job;
+  jobName!: string;
   projectId?: string;
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List&lt;Field&gt;;
   color!: string;
-  defaultLayerColor: string;
+  defaultJobColor: string;
   form?: Form;
   @ViewChildren(FormFieldEditorComponent)
   formFieldEditors?: QueryList&lt;FormFieldEditorComponent&gt;;
@@ -789,21 +789,21 @@ export class LayerDialogComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     data: {
       projectId: string;
-      layer?: Layer;
-      createLayer: boolean;
+      job?: Job;
+      createJob: boolean;
     },
-    private dialogRef: MatDialogRef&lt;LayerDialogComponent&gt;,
+    private dialogRef: MatDialogRef&lt;JobDialogComponent&gt;,
     private dialogService: DialogService,
-    private layerService: LayerService,
+    private jobService: JobService,
     private navigationService: NavigationService,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.lang = 'en';
-    this.defaultLayerColor = '#ff9131';
+    this.defaultJobColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List&lt;Field&gt;();
-    this.init(data.projectId, data.createLayer, data.layer);
+    this.init(data.projectId, data.createJob, data.job);
     this.dialogRef.keydownEvents().subscribe(<span class="fstat-no" title="function not covered" >event </span>=&gt; {
 <span class="cstat-no" title="statement not covered" >      if (event.key === 'Escape') {</span>
 <span class="cstat-no" title="statement not covered" >        this.close();</span>
@@ -812,7 +812,7 @@ export class LayerDialogComponent implements OnDestroy {
   }
 &nbsp;
   addQuestion() {
-    const newField = this.layerService.createField(
+    const newField = this.jobService.createField(
       FieldType.TEXT,
       /* label= */
       '',
@@ -848,24 +848,24 @@ export class LayerDialogComponent implements OnDestroy {
       });
   }
 &nbsp;
-  init(projectId: string, createLayer: boolean, layer?: Layer) {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!createLayer &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >!layer)</span> {
-<span class="cstat-no" title="statement not covered" >      console.warn('User passed an invalid layer id');</span>
+  init(projectId: string, createJob: boolean, job?: Job) {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!createJob &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >!job)</span> {
+<span class="cstat-no" title="statement not covered" >      console.warn('User passed an invalid job id');</span>
     }
     this.projectId = projectId;
-    this.layer = layer;
-    this.layerName = this.layer<span class="branch-1 cbranch-no" title="branch not covered" >?.name<span class="branch-1 cbranch-no" title="branch not covered" >?</span>.get(this.lang) || '</span>';
-    this.color = this.layer<span class="branch-1 cbranch-no" title="branch not covered" >?.color </span>|| this.defaultLayerColor;
-    <span class="missing-if-branch" title="else path not taken" >E</span>if (!layer) {
-      this.layer = this.layerService.createNewLayer();
+    this.job = job;
+    this.jobName = this.job<span class="branch-1 cbranch-no" title="branch not covered" >?.name<span class="branch-1 cbranch-no" title="branch not covered" >?</span>.get(this.lang) || '</span>';
+    this.color = this.job<span class="branch-1 cbranch-no" title="branch not covered" >?.color </span>|| this.defaultJobColor;
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!job) {
+      this.job = this.jobService.createNewJob();
       this.addQuestion();
       return;
     }
 <span class="cstat-no" title="statement not covered" >    this.contributorsCanAddPoints =</span>
-      this.layer?.contributorsCanAdd?.includes('points') || false;
+      this.job?.contributorsCanAdd?.includes('points') || false;
 <span class="cstat-no" title="statement not covered" >    this.contributorsCanAddPolygons =</span>
-      this.layer?.contributorsCanAdd?.includes('polygons') || false;
-<span class="cstat-no" title="statement not covered" >    this.form = this.layerService.getForm(this.layer);</span>
+      this.job?.contributorsCanAdd?.includes('polygons') || false;
+<span class="cstat-no" title="statement not covered" >    this.form = this.jobService.getForm(this.job);</span>
 <span class="cstat-no" title="statement not covered" >    if (this.form) {</span>
 <span class="cstat-no" title="statement not covered" >      this.fields =</span>
         this.form?.fields.toList().sortBy(<span class="fstat-no" title="function not covered" >field </span>=&gt; <span class="cstat-no" title="statement not covered" >field.index)</span> ||
@@ -891,9 +891,9 @@ export class LayerDialogComponent implements OnDestroy {
 <span class="cstat-no" title="statement not covered" >        return;</span>
       }
     }
-    const fields = <span class="cstat-no" title="statement not covered" >this.layerService.convertFieldsListToMap(this.fields);</span>
+    const fields = <span class="cstat-no" title="statement not covered" >this.jobService.convertFieldsListToMap(this.fields);</span>
     const formId<span class="cstat-no" title="statement not covered" > = this.form?.id;</span>
-    const forms = <span class="cstat-no" title="statement not covered" >this.layerService.createForm(formId, fields);</span>
+    const forms = <span class="cstat-no" title="statement not covered" >this.jobService.createForm(formId, fields);</span>
     const allowedFeatureTypes: string[] = <span class="cstat-no" title="statement not covered" >[];</span>
 <span class="cstat-no" title="statement not covered" >    if (this.contributorsCanAddPoints) {</span>
 <span class="cstat-no" title="statement not covered" >      allowedFeatureTypes.push('points');</span>
@@ -901,16 +901,16 @@ export class LayerDialogComponent implements OnDestroy {
 <span class="cstat-no" title="statement not covered" >    if (this.contributorsCanAddPolygons) {</span>
 <span class="cstat-no" title="statement not covered" >      allowedFeatureTypes.push('polygons');</span>
     }
-    const layer = <span class="cstat-no" title="statement not covered" >new Layer(</span>
-      this.layer?.id || '',
-      /* index */ this.layer?.index || -1,
+    const job = <span class="cstat-no" title="statement not covered" >new Job(</span>
+      this.job?.id || '',
+      /* index */ this.job?.index || -1,
       this.color,
-      // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName.trim() }),
+      // TODO: Make jobName Map
+      StringMap({ [this.lang]: this.jobName.trim() }),
       forms,
       allowedFeatureTypes
     );
-<span class="cstat-no" title="statement not covered" >    this.addOrUpdateLayer(this.projectId, layer);</span>
+<span class="cstat-no" title="statement not covered" >    this.addOrUpdateJob(this.projectId, job);</span>
   }
 &nbsp;
   private <span class="fstat-no" title="function not covered" >isFieldOptionsValid(</span>
@@ -927,14 +927,14 @@ export class LayerDialogComponent implements OnDestroy {
 <span class="cstat-no" title="statement not covered" >    return true;</span>
   }
 &nbsp;
-  private <span class="fstat-no" title="function not covered" >addOrUpdateLayer(</span>projectId: string, layer: Layer) {
-    // TODO: Inform user layer was saved
-<span class="cstat-no" title="statement not covered" >    this.layerService</span>
-      .addOrUpdateLayer(projectId, layer)
+  private <span class="fstat-no" title="function not covered" >addOrUpdateJob(</span>projectId: string, job: Job) {
+    // TODO: Inform user job was saved
+<span class="cstat-no" title="statement not covered" >    this.jobService</span>
+      .addOrUpdateJob(projectId, job)
       .then(<span class="fstat-no" title="function not covered" >() =</span>&gt; <span class="cstat-no" title="statement not covered" >this.close())</span>
       .catch(<span class="fstat-no" title="function not covered" >err </span>=&gt; {
 <span class="cstat-no" title="statement not covered" >        console.error(err);</span>
-<span class="cstat-no" title="statement not covered" >        alert('Layer update failed.');</span>
+<span class="cstat-no" title="statement not covered" >        alert('Job update failed.');</span>
       });
   }
 &nbsp;
@@ -946,7 +946,7 @@ export class LayerDialogComponent implements OnDestroy {
 <span class="cstat-no" title="statement not covered" >    this.dialogService</span>
       .openConfirmationDialog(
         'Discard changes',
-        'Unsaved changes to this layer will be lost. Are you sure?',
+        'Unsaved changes to this job will be lost. Are you sure?',
         /* showDiscardActions= */ true
       )
       .afterClosed()
@@ -957,8 +957,8 @@ export class LayerDialogComponent implements OnDestroy {
       });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  setLayerName(</span>value: string) {
-<span class="cstat-no" title="statement not covered" >    this.layerName = value;</span>
+<span class="fstat-no" title="function not covered" >  setJobName(</span>value: string) {
+<span class="cstat-no" title="statement not covered" >    this.jobName = value;</span>
   }
 &nbsp;
   /**
@@ -1052,7 +1052,7 @@ export class LayerDialogComponent implements OnDestroy {
 &nbsp;
   private <span class="fstat-no" title="function not covered" >close(</span>): void {
 <span class="cstat-no" title="statement not covered" >    this.dialogRef.close();</span>
-    // TODO: Add closeLayerDialog() in NavigationService that removes the layer fragment.
+    // TODO: Add closeJobDialog() in NavigationService that removes the job fragment.
 <span class="cstat-no" title="statement not covered" >    return this.navigationService.selectProject(this.projectId!);</span>
   }
 }

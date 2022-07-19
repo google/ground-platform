@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LayerDialogComponent } from './layer-dialog.component';
+import { JobDialogComponent } from './job-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -33,7 +33,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
-  declarations: [LayerDialogComponent, ConfirmationDialogComponent],
+  declarations: [JobDialogComponent, ConfirmationDialogComponent],
   imports: [
     CommonModule,
     MatDialogModule,
@@ -52,4 +52,4 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatCheckboxModule,
   ],
 })
-export class LayerDialogModule {}
+export class JobDialogModule {}

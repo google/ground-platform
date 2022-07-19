@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/app/components/layer-list-item/layer-list-item.component.ts</title>
+    <title>Code coverage report for src/app/components/job-list-item/job-list-item.component.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../../prettify.css" />
     <link rel="stylesheet" href="../../../../base.css" />
@@ -19,7 +19,7 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/components/layer-list-item</a> layer-list-item.component.ts</h1>
+        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">src/app/components/job-list-item</a> job-list-item.component.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
@@ -374,7 +374,7 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
@@ -385,19 +385,19 @@ import { Subscription } from 'rxjs';
 import { ProjectService } from '../../services/project/project.service';
 &nbsp;
 @Component({
-  selector: 'ground-layer-list-item',
-  templateUrl: './layer-list-item.component.html',
-  styleUrls: ['./layer-list-item.component.scss'],
+  selector: 'ground-job-list-item',
+  templateUrl: './job-list-item.component.html',
+  styleUrls: ['./job-list-item.component.scss'],
 })
-export class LayerListItemComponent implements OnInit, OnDestroy {
-  @Input() layer?: Layer;
-  @Input() actionsType: LayerListItemActionsType =
-    LayerListItemActionsType.MENU;
+export class JobListItemComponent implements OnInit, OnDestroy {
+  @Input() job?: Job;
+  @Input() actionsType: JobListItemActionsType =
+    JobListItemActionsType.MENU;
   projectId?: string | null;
   featureId?: string | null;
-  layerPinUrl: SafeUrl;
+  jobPinUrl: SafeUrl;
   readonly lang: string;
-  readonly layerListItemActionsType = LayerListItemActionsType;
+  readonly jobListItemActionsType = JobListItemActionsType;
   subscription: Subscription = new Subscription();
 &nbsp;
   constructor(
@@ -410,12 +410,12 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
   }
 &nbsp;
   ngOnInit() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer?.color)
+    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.job?.color)
     );
     this.subscription.add(
       this.navigationService.getFeatureId$().subscribe(id =&gt; {
@@ -430,14 +430,14 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 &nbsp;
   ngOnChanges() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer<span class="branch-0 cbranch-no" title="branch not covered" >?.c</span>olor)
+    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.job<span class="branch-0 cbranch-no" title="branch not covered" >?.c</span>olor)
     );
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  onCustomizeLayer(</span>) {
-<span class="cstat-no" title="statement not covered" >    if (this.layer?.id) {</span>
-<span class="cstat-no" title="statement not covered" >      this.navigationService.customizeLayer(this.layer?.id);</span>
+<span class="fstat-no" title="function not covered" >  onCustomizeJob(</span>) {
+<span class="cstat-no" title="statement not covered" >    if (this.job?.id) {</span>
+<span class="cstat-no" title="statement not covered" >      this.navigationService.customizeJob(this.job?.id);</span>
     }
   }
 &nbsp;
@@ -445,24 +445,24 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
 <span class="cstat-no" title="statement not covered" >    this.navigationService.clearFeatureId();</span>
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  onDeleteLayer(</span>) {
+<span class="fstat-no" title="function not covered" >  onDeleteJob(</span>) {
 <span class="cstat-no" title="statement not covered" >    this.dialogService</span>
       .openConfirmationDialog(
         'Warning',
-        'Are you sure you wish to delete this layer? Any associated data ' +
-          'including all features and observations in this layer will be ' +
+        'Are you sure you wish to delete this job? Any associated data ' +
+          'including all features and observations in this job will be ' +
           'lost. This cannot be undone.'
       )
       .afterClosed()
       .subscribe(<span class="fstat-no" title="function not covered" >async </span>dialogResult =&gt; {
 <span class="cstat-no" title="statement not covered" >        if (dialogResult) {</span>
-<span class="cstat-no" title="statement not covered" >          await this.deleteLayer();</span>
+<span class="cstat-no" title="statement not covered" >          await this.deleteJob();</span>
         }
       });
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  async </span>deleteLayer() {
-<span class="cstat-no" title="statement not covered" >    await this.dataStoreService.deleteLayer(this.projectId!, this.layer!.id);</span>
+<span class="fstat-no" title="function not covered" >  async </span>deleteJob() {
+<span class="cstat-no" title="statement not covered" >    await this.dataStoreService.deleteJob(this.projectId!, this.job!.id);</span>
 <span class="cstat-no" title="statement not covered" >    this.onClose();</span>
   }
 &nbsp;
@@ -471,11 +471,11 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 &nbsp;
 <span class="fstat-no" title="function not covered" >  onImportFeatures(</span>) {
-<span class="cstat-no" title="statement not covered" >    if (!this.projectId || !this.layer?.id) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!this.projectId || !this.job?.id) {</span>
 <span class="cstat-no" title="statement not covered" >      return;</span>
     }
 <span class="cstat-no" title="statement not covered" >    this.importDialog.open(ImportDialogComponent, {</span>
-      data: { projectId: this.projectId, layerId: this.layer?.id },
+      data: { projectId: this.projectId, jobId: this.job?.id },
       width: '350px',
       maxHeight: '800px',
     });
@@ -484,15 +484,15 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   getDownloadCsvUrl() {
     return (
       `${environment.cloudFunctionsUrl}/exportCsv?` +
-      `project=${this.projectId}&amp;layer=${this.layer<span class="branch-1 cbranch-no" title="branch not covered" >?.id}</span>`
+      `project=${this.projectId}&amp;job=${this.job<span class="branch-1 cbranch-no" title="branch not covered" >?.id}</span>`
     );
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  onLayerListSelect(</span>): void | undefined {
-<span class="cstat-no" title="statement not covered" >    if (!this.layer?.id) {</span>
+<span class="fstat-no" title="function not covered" >  onJobListSelect(</span>): void | undefined {
+<span class="cstat-no" title="statement not covered" >    if (!this.job?.id) {</span>
 <span class="cstat-no" title="statement not covered" >      return;</span>
     }
-<span class="cstat-no" title="statement not covered" >    this.navigationService.showFeatureList(this.layer.id);</span>
+<span class="cstat-no" title="statement not covered" >    this.navigationService.showFeatureList(this.job.id);</span>
   }
 &nbsp;
   ngOnDestroy(): void {
@@ -500,7 +500,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 }
 &nbsp;
-export enum LayerListItemActionsType {
+export enum JobListItemActionsType {
   MENU = 1,
   BACK = 2,
 }

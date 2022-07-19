@@ -62,7 +62,7 @@ describe('MainPageComponent', () => {
 
       const navigationService = {
         getProjectId$: () => NEVER,
-        getLayerId$: () => NEVER,
+        getJobId$: () => NEVER,
         getFeatureId$: () => NEVER,
         getObservationId$: () => NEVER,
       };

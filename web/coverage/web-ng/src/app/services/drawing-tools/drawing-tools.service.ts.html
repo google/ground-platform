@@ -208,7 +208,7 @@ export class DrawingToolsService {
   private <span class="cstat-no" title="statement not covered" >disabled$: BehaviorSubject&lt;boolean&gt; = new BehaviorSubject&lt;boolean&gt;(</span>
     false
   );
-  private selectedLayerId: string | undefined;
+  private selectedJobId: string | undefined;
 &nbsp;
 <span class="fstat-no" title="function not covered" >  getDisabled$(</span>): BehaviorSubject&lt;boolean&gt; {
 <span class="cstat-no" title="statement not covered" >    return this.disabled$;</span>
@@ -218,12 +218,12 @@ export class DrawingToolsService {
 <span class="cstat-no" title="statement not covered" >    return this.disabled$.next(disabled);</span>
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  getSelectedLayerId(</span>): string | undefined {
-<span class="cstat-no" title="statement not covered" >    return this.selectedLayerId;</span>
+<span class="fstat-no" title="function not covered" >  getSelectedJobId(</span>): string | undefined {
+<span class="cstat-no" title="statement not covered" >    return this.selectedJobId;</span>
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  setSelectedLayerId(</span>selectedLayerId: string | undefined) {
-<span class="cstat-no" title="statement not covered" >    this.selectedLayerId = selectedLayerId;</span>
+<span class="fstat-no" title="function not covered" >  setSelectedJobId(</span>selectedJobId: string | undefined) {
+<span class="cstat-no" title="statement not covered" >    this.selectedJobId = selectedJobId;</span>
   }
 &nbsp;
 <span class="fstat-no" title="function not covered" >  getEditMode$(</span>): BehaviorSubject&lt;EditMode&gt; {

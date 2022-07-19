@@ -427,7 +427,7 @@ import {
   NgZone,
   OnChanges,
 } from '@angular/core';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { DialogService } from '../../services/dialog/dialog.service';
@@ -447,7 +447,7 @@ import { Map } from 'immutable';
 })
 export class FeaturePanelHeaderComponent
   implements OnInit, OnDestroy, OnChanges {
-  @Input() layer?: Layer;
+  @Input() job?: Job;
   projectId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
@@ -484,7 +484,7 @@ export class FeaturePanelHeaderComponent
 &nbsp;
   ngOnInit() {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer<span class="branch-1 cbranch-no" title="branch not covered" >?.color)</span>
+      getPinImageSource(this.job<span class="branch-1 cbranch-no" title="branch not covered" >?.color)</span>
     );
     this.subscription.add(
       this.navigationService.getFeatureId$().subscribe(id =&gt; {
@@ -500,7 +500,7 @@ export class FeaturePanelHeaderComponent
 &nbsp;
 <span class="fstat-no" title="function not covered" >  ngOnChanges(</span>) {
 <span class="cstat-no" title="statement not covered" >    this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(</span>
-      getPinImageSource(this.layer?.color)
+      getPinImageSource(this.job?.color)
     );
   }
 &nbsp;

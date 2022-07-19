@@ -17,7 +17,7 @@ import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import { Project } from '../models/project.model';
 import { StringMap } from '../models/string-map.model';
-import { Layer } from '../models/layer.model';
+import { Job } from '../models/job.model';
 import { Form } from '../models/form/form.model';
 import { Field, FieldType } from '../models/form/field.model';
 import {
@@ -76,10 +76,10 @@ export class FirebaseDataConverter {
       id,
       StringMap(data.title),
       StringMap(data.description),
-      Map<string, Layer>(
-        keys(data.layers).map((id: string) => [
+      Map<string, Job>(
+        keys(data.jobs).map((id: string) => [
           id as string,
-          FirebaseDataConverter.toLayer(id, data.layers[id]),
+          FirebaseDataConverter.toJob(id, data.jobs[id]),
         ])
       ),
       Map<string, Role>(
@@ -122,13 +122,13 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Layer instance.
+   * immutable Job instance.
    *
-   * @param id the uuid of the layer instance.
+   * @param id the uuid of the job instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  private static toLayer(id: string, data: DocumentData): Layer {
-    return new Layer(
+  private static toJob(id: string, data: DocumentData): Job {
+    return new Job(
       id,
       // Fall back to constant so old dev databases do not break.
       data.index || -1,
@@ -144,8 +144,8 @@ export class FirebaseDataConverter {
     );
   }
 
-  static layerToJS(layer: Layer): {} {
-    const { name, forms, color, contributorsCanAdd, ...layerDoc } = layer;
+  static jobToJS(job: Job): {} {
+    const { name, forms, color, contributorsCanAdd, ...jobDoc } = job;
     return {
       contributorsCanAdd,
       name: name?.toJS() || {},
@@ -160,7 +160,7 @@ export class FirebaseDataConverter {
           }
         : {}),
       defaultStyle: { color },
-      ...layerDoc,
+      ...jobDoc,
     };
   }
 
@@ -201,21 +201,21 @@ export class FirebaseDataConverter {
   public static featureToJS(feature: Feature): {} {
     // TODO: Set audit info (created / last modified user and timestamp).
     if (feature instanceof LocationFeature) {
-      const { layerId, location } = feature;
+      const { jobId, location } = feature;
       return {
-        layerId,
+        jobId,
         location,
       };
     } else if (feature instanceof GeoJsonFeature) {
-      const { layerId, geoJson } = feature;
+      const { jobId, geoJson } = feature;
       return {
-        layerId,
+        jobId,
         geoJson,
       };
     } else if (feature instanceof PolygonFeature) {
-      const { layerId, polygonVertices } = feature;
+      const { jobId, polygonVertices } = feature;
       return {
-        layerId,
+        jobId,
         polygonVertices,
       };
     } else {
@@ -389,8 +389,8 @@ export class FirebaseDataConverter {
    */
   static toFeature(id: string, data: DocumentData): Feature | undefined {
     try {
-      if (!data.layerId) {
-        throw new Error('Missing layer id');
+      if (!data.jobId) {
+        throw new Error('Missing job id');
       }
       const featureProperties = Map<string, string | number>(
         keys(data.properties).map((property: string) => [
@@ -402,19 +402,19 @@ export class FirebaseDataConverter {
       if (this.isLocationFeature(data)) {
         return new LocationFeature(
           id,
-          data.layerId,
+          data.jobId,
           data.location,
           featureProperties
         );
       }
       if (this.isGeoJsonFeature(data)) {
         const geoJson = JSON.parse(data.geoJson);
-        return new GeoJsonFeature(id, data.layerId, geoJson, featureProperties);
+        return new GeoJsonFeature(id, data.jobId, geoJson, featureProperties);
       }
       if (this.isPolygonFeature(data)) {
         return new PolygonFeature(
           id,
-          data.layerId,
+          data.jobId,
           data.geometry.coordinates,
           featureProperties
         );
@@ -457,7 +457,7 @@ export class FirebaseDataConverter {
     return new Observation(
       id,
       data.featureId,
-      data.layerId,
+      data.jobId,
       form,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
@@ -477,7 +477,7 @@ export class FirebaseDataConverter {
   static observationToJS(observation: Observation): {} {
     return {
       featureId: observation.featureId,
-      layerId: observation.layerId,
+      jobId: observation.jobId,
       formId: observation.form?.id,
       created: FirebaseDataConverter.auditInfoToJs(observation.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(

@@ -16,8 +16,8 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { LayerListComponent } from './layer-list.component';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { JobListComponent } from './job-list.component';
+import { JobListItemModule } from '../job-list-item/job-list-item.module';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,12 +27,12 @@ import { FlexLayoutModule } from '@angular/flex-layout';
   imports: [
     BrowserModule,
     MatListModule,
-    LayerListItemModule,
+    JobListItemModule,
     MatButtonModule,
     MatIconModule,
     FlexLayoutModule,
   ],
-  exports: [LayerListComponent],
-  declarations: [LayerListComponent],
+  exports: [JobListComponent],
+  declarations: [JobListComponent],
 })
-export class LayerListModule {}
+export class JobListModule {}

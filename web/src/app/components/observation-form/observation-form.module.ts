@@ -23,7 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { JobListItemModule } from '../job-list-item/job-list-item.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 
@@ -38,7 +38,7 @@ import { MatListModule } from '@angular/material/list';
     MatCheckboxModule,
     MatIconModule,
     MatListModule,
-    LayerListItemModule,
+    JobListItemModule,
   ],
   exports: [ObservationFormComponent],
   declarations: [ObservationFormComponent],
