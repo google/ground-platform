@@ -15,7 +15,7 @@
  */
 
 import { List } from 'immutable';
-import { Option } from '../form/option.model';
+import { Option } from '../task/option.model';
 
 export class Response {
   constructor(readonly value: number | string | List<Option> | Date) {}

@@ -79,14 +79,14 @@ describe('MapComponent', () => {
         /* index */ -1,
         layerColor1,
         StringMap({ en: 'layer001 name' }),
-        /* forms= */ Map()
+        /* tasks= */ Map()
       ),
       layer002: new Layer(
         layerId2,
         /* index */ -1,
         layerColor2,
         StringMap({ en: 'layer002 name' }),
-        /* forms= */ Map()
+        /* tasks= */ Map()
       ),
     }),
     /* acl= */ Map()

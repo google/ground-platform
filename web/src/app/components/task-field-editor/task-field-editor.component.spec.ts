@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { FormFieldEditorComponent } from './form-field-editor.component';
+import { TaskFieldEditorComponent } from './task-field-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { LayerService } from './../../services/layer/layer.service';
@@ -29,14 +29,14 @@ import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-describe('FormFieldEditorComponent', () => {
-  let component: FormFieldEditorComponent;
-  let fixture: ComponentFixture<FormFieldEditorComponent>;
+describe('TaskFieldEditorComponent', () => {
+  let component: TaskFieldEditorComponent;
+  let fixture: ComponentFixture<TaskFieldEditorComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [FormFieldEditorComponent],
+        declarations: [TaskFieldEditorComponent],
         imports: [
           FormsModule,
           ReactiveFormsModule,
@@ -59,7 +59,7 @@ describe('FormFieldEditorComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FormFieldEditorComponent);
+    fixture = TestBed.createComponent(TaskFieldEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

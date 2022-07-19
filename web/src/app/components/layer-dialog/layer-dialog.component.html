@@ -51,7 +51,7 @@
     </div>
   </div>
   <div>
-    <h3>Form Layout</h3>
+    <h3>Task Layout</h3>
     <div class="label-helper-text">
       Add questions that should be asked to observers about each point, line, or
       polygon in this layer.
@@ -63,7 +63,7 @@
       fxLayout
       cdkDrag
     >
-      <app-form-field-editor
+      <app-task-field-editor
         [label]="field.label.get('en')"
         [required]="field.required"
         [fieldType]="field.type"
@@ -74,7 +74,7 @@
         (delete)="onFieldDelete(i)"
         fxFlex="2 1 auto"
       >
-      </app-form-field-editor>
+      </app-task-field-editor>
     </div>
   </div>
   <button mat-button class="add-question" type="button" (click)="addQuestion()">

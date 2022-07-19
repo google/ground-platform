@@ -67,14 +67,14 @@ describe('DrawingToolsComponent', () => {
         /* index */ -1,
         layerColor1,
         StringMap({ en: layerName1 }),
-        /* forms= */ Map()
+        /* tasks= */ Map()
       ),
       layer002: new Layer(
         layerId2,
         /* index */ -1,
         layerColor2,
         StringMap({ en: layerName2 }),
-        /* forms= */ Map()
+        /* tasks= */ Map()
       ),
     }),
     /* acl= */ Map()

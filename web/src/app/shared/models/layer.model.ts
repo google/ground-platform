@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Form } from './form/form.model';
+import { Task } from './task/task.model';
 import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
 
@@ -24,12 +24,12 @@ export class Layer {
     readonly index: number,
     readonly color?: string,
     readonly name?: StringMap,
-    readonly forms?: Map<string, Form>,
+    readonly tasks?: Map<string, Task>,
     readonly contributorsCanAdd?: string[]
   ) {}
 
-  getForm(formId: string): Form | undefined {
-    return this.forms?.get(formId);
+  getTask(taskId: string): Task | undefined {
+    return this.tasks?.get(taskId);
   }
 
   withIndex(index: number): Layer {
