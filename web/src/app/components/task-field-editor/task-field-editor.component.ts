@@ -39,14 +39,14 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { DialogService } from '../../services/dialog/dialog.service';
-import { FieldType } from '../../shared/models/form/field.model';
+import { FieldType } from '../../shared/models/task/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Option } from '../../shared/models/form/option.model';
+import { Option } from '../../shared/models/task/option.model';
 import { List } from 'immutable';
 import {
   MultipleChoice,
   Cardinality,
-} from '../../shared/models/form/multiple-choice.model';
+} from '../../shared/models/task/multiple-choice.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
 import { Subscription } from 'rxjs';
