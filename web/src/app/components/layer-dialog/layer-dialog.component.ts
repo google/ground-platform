@@ -25,15 +25,15 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { Layer } from '../../shared/models/layer.model';
-import { Form } from '../../shared/models/form/form.model';
+import { Task } from '../../shared/models/task/task.model';
 import { Subscription } from 'rxjs';
-import { FieldType, Field } from '../../shared/models/form/field.model';
+import { FieldType, Field } from '../../shared/models/task/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { LayerService } from '../../services/layer/layer.service';
-import { FormFieldEditorComponent } from '../form-field-editor/form-field-editor.component';
+import { TaskFieldEditorComponent } from '../task-field-editor/task-field-editor.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 // To make ESLint happy:
@@ -54,9 +54,9 @@ export class LayerDialogComponent implements OnDestroy {
   fields: List<Field>;
   color!: string;
   defaultLayerColor: string;
-  form?: Form;
-  @ViewChildren(FormFieldEditorComponent)
-  formFieldEditors?: QueryList<FormFieldEditorComponent>;
+  task?: Task;
+  @ViewChildren(TaskFieldEditorComponent)
+  taskFieldEditors?: QueryList<TaskFieldEditorComponent>;
   contributorsCanAddPoints = true;
   contributorsCanAddPolygons = true;
 
@@ -97,7 +97,7 @@ export class LayerDialogComponent implements OnDestroy {
       this.fields.size
     );
     this.fields = this.fields.push(newField);
-    this.markFormFieldsTouched();
+    this.markTaskFieldsTouched();
     this.focusNewQuestion();
   }
 
@@ -140,10 +140,10 @@ export class LayerDialogComponent implements OnDestroy {
       this.layer?.contributorsCanAdd?.includes('points') || false;
     this.contributorsCanAddPolygons =
       this.layer?.contributorsCanAdd?.includes('polygons') || false;
-    this.form = this.layerService.getForm(this.layer);
-    if (this.form) {
+    this.task = this.layerService.getTask(this.layer);
+    if (this.task) {
       this.fields =
-        this.form?.fields.toList().sortBy(field => field.index) ||
+        this.task?.fields.toList().sortBy(field => field.index) ||
         List<Field>();
     } else {
       this.addQuestion();
@@ -155,20 +155,20 @@ export class LayerDialogComponent implements OnDestroy {
       throw Error('Survey not yet loaded');
     }
 
-    if (!this.formFieldEditors) {
+    if (!this.taskFieldEditors) {
       return;
     }
 
-    this.markFormFieldsTouched();
+    this.markTaskFieldsTouched();
 
-    for (const editor of this.formFieldEditors) {
-      if (editor.formGroup.invalid || !this.isFieldOptionsValid(editor)) {
+    for (const editor of this.taskFieldEditors) {
+      if (editor.taskGroup.invalid || !this.isFieldOptionsValid(editor)) {
         return;
       }
     }
     const fields = this.layerService.convertFieldsListToMap(this.fields);
-    const formId = this.form?.id;
-    const forms = this.layerService.createForm(formId, fields);
+    const taskId = this.task?.id;
+    const tasks = this.layerService.createTask(taskId, fields);
     const allowedFeatureTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
       allowedFeatureTypes.push('points');
@@ -182,19 +182,19 @@ export class LayerDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName.trim() }),
-      forms,
+      tasks,
       allowedFeatureTypes
     );
     this.addOrUpdateLayer(this.surveyId, layer);
   }
 
   private isFieldOptionsValid(
-    formFieldEditor: FormFieldEditorComponent
+    taskFieldEditor: TaskFieldEditorComponent
   ): boolean {
-    if (!formFieldEditor.optionEditors) {
+    if (!taskFieldEditor.optionEditors) {
       return true;
     }
-    for (const editor of formFieldEditor.optionEditors) {
+    for (const editor of taskFieldEditor.optionEditors) {
       if (editor.optionGroup.invalid) {
         return false;
       }
@@ -237,10 +237,10 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   /**
-   * Updates the field at given index from event emitted from form-field-editor
+   * Updates the field at given index from event emitted from task-field-editor
    *
    * @param index - The index of the field
-   * @param event - updated field emitted from form-field-editor
+   * @param event - updated field emitted from task-field-editor
    * @returns void
    *
    */
@@ -278,34 +278,34 @@ export class LayerDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  private markFormFieldsTouched(): void {
-    this.formFieldEditors?.forEach(editor => {
+  private markTaskFieldsTouched(): void {
+    this.taskFieldEditors?.forEach(editor => {
       this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
     });
   }
 
-  private markOptionsTouched(editor: FormFieldEditorComponent): void {
+  private markOptionsTouched(editor: TaskFieldEditorComponent): void {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
   }
 
   private focusNewQuestion(): void {
-    if (this.formFieldEditors?.length) {
+    if (this.taskFieldEditors?.length) {
       this.cdr.detectChanges();
-      const question = this.formFieldEditors.last;
+      const question = this.taskFieldEditors.last;
       question?.questionInput?.nativeElement.focus();
     }
   }
 
   private isFieldOptionsDirty(
-    formFieldEditor: FormFieldEditorComponent
+    taskFieldEditor: TaskFieldEditorComponent
   ): boolean {
-    if (!formFieldEditor.optionEditors) {
+    if (!taskFieldEditor.optionEditors) {
       return true;
     }
-    for (const editor of formFieldEditor.optionEditors) {
+    for (const editor of taskFieldEditor.optionEditors) {
       if (editor.optionGroup.dirty) {
         return false;
       }
@@ -314,11 +314,11 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   private hasUnsavedChanges(): boolean {
-    if (!this.formFieldEditors) {
+    if (!this.taskFieldEditors) {
       return false;
     }
-    for (const editor of this.formFieldEditors) {
-      if (editor.formGroup.dirty || !this.isFieldOptionsDirty(editor)) {
+    for (const editor of this.taskFieldEditors) {
+      if (editor.taskGroup.dirty || !this.isFieldOptionsDirty(editor)) {
         return true;
       }
     }

@@ -16,9 +16,9 @@
 
 import { Map } from 'immutable';
 import { Field } from './field.model';
-import { Option } from '../form/option.model';
+import { Option } from '../task/option.model';
 
-export class Form {
+export class Task {
   constructor(readonly id: string, readonly fields: Map<string, Field>) {}
 
   /**
@@ -28,7 +28,7 @@ export class Form {
   getMultipleChoiceFieldOption(fieldId: string, optionId: string): Option {
     const field = this.fields.get(fieldId);
     if (!field) {
-      throw Error(`Field ${fieldId} not found in form ${this.id}.`);
+      throw Error(`Field ${fieldId} not found in task ${this.id}.`);
     }
     return field.getMultipleChoiceOption(optionId);
   }

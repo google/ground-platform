@@ -55,7 +55,7 @@ describe('SurveyListComponent', () => {
         /* index */ -1,
         'red',
         StringMap({ en: 'name' }),
-        /* forms= */ Map()
+        /* tasks= */ Map()
       ),
     }),
     /* acl= */ Map()
@@ -71,7 +71,7 @@ describe('SurveyListComponent', () => {
         /* index */ -1,
         'green',
         StringMap({ en: 'name' }),
-        /* forms= */ Map()
+        /* tasks= */ Map()
       ),
     }),
     /* acl= */ Map()

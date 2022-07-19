@@ -60,11 +60,11 @@ export interface FieldTypeSelectOption {
 }
 
 @Component({
-  selector: 'app-form-field-editor',
-  templateUrl: './form-field-editor.component.html',
-  styleUrls: ['./form-field-editor.component.scss'],
+  selector: 'app-task-field-editor',
+  templateUrl: './task-field-editor.component.html',
+  styleUrls: ['./task-field-editor.component.scss'],
 })
-export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
+export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
   @Input() fieldType?: FieldType;
@@ -73,7 +73,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() fieldCount?: Number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
-  formOptions: MultipleChoice | undefined;
+  taskOptions: MultipleChoice | undefined;
   selectFieldOptions: FieldTypeSelectOption[];
 
   /** When expanded, options and actions below the fold are visible to the user. */
@@ -84,17 +84,17 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
 
   subscription: Subscription = new Subscription();
 
-  formGroup: FormGroup;
+  taskGroup: FormGroup;
   @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
 
   @HostListener('click')
-  onFormFocus() {
+  onTaskFocus() {
     this.expanded = true;
     this.selected = true;
   }
 
   @HostListener('document:click')
-  onFormBlur() {
+  onTaskBlur() {
     if (!this.selected) {
       this.expanded = false;
     }
@@ -105,7 +105,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   optionEditors?: QueryList<OptionEditorComponent>;
 
   constructor(
-    private formBuilder: FormBuilder,
+    private taskBuilder: FormBuilder,
     private dialogService: DialogService,
     private layerService: LayerService,
     private readonly cdr: ChangeDetectorRef
@@ -151,7 +151,7 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         type: FieldType.TIME,
       },
     ];
-    this.formGroup = this.formBuilder.group({
+    this.taskGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select field to be of text type.
@@ -160,10 +160,10 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private validateLabel(control: FormControl): ValidationErrors | null {
-    return this.isFormEmpty() ? null : Validators.required(control);
+    return this.isTaskEmpty() ? null : Validators.required(control);
   }
 
-  private isFormEmpty(): boolean {
+  private isTaskEmpty(): boolean {
     return (
       this.label?.trim().length === 0 &&
       this.fieldCount === 1 &&
@@ -172,14 +172,14 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    // As the form fields value change we are emitting the updated value to the layer-dialog.
+    // As the task fields value change we are emitting the updated value to the layer-dialog.
     this.subscription.add(
-      this.formGroup.valueChanges.subscribe(value => {
+      this.taskGroup.valueChanges.subscribe(value => {
         this.update.emit({
           label: StringMap({ en: value.label }),
           required: value.required,
           type: value.selectFieldOption.type,
-          multipleChoice: this.formOptions,
+          multipleChoice: this.taskOptions,
         });
       })
     );
@@ -190,9 +190,9 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.multipleChoice) {
-      this.formOptions = this.multipleChoice;
+      this.taskOptions = this.multipleChoice;
     }
-    this.formGroup.setValue({
+    this.taskGroup.setValue({
       label: this.label,
       required: this.required,
       selectFieldOption: this.getSelectedFieldTypeOption(),
@@ -223,11 +223,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getSelectFieldType(): FieldTypeSelectOption {
-    return this.formGroup.get('selectFieldOption')?.value;
+    return this.taskGroup.get('selectFieldOption')?.value;
   }
 
   /**
-   * Updates the type in the formGroup on the select change event.
+   * Updates the type in the taskGroup on the select change event.
    *
    * @param event: FieldTypeSelectOption
    * @returns void
@@ -235,19 +235,19 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   onFieldTypeSelect(event: FieldTypeSelectOption): void {
     this.fieldType = event.type;
     this.cardinality = event.cardinality;
-    if (this.cardinality && this.formOptions?.options) {
-      this.formOptions = new MultipleChoice(
+    if (this.cardinality && this.taskOptions?.options) {
+      this.taskOptions = new MultipleChoice(
         this.cardinality,
-        this.formOptions.options
+        this.taskOptions.options
       );
     }
-    this.formGroup.patchValue({ selectFieldOption: event });
+    this.taskGroup.patchValue({ selectFieldOption: event });
     if (event.type === FieldType.MULTIPLE_CHOICE) {
-      if (!this.formOptions?.options?.size) {
+      if (!this.taskOptions?.options?.size) {
         this.onAddOption();
       }
     } else {
-      this.formOptions = undefined;
+      this.taskOptions = undefined;
     }
   }
 
@@ -271,8 +271,8 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       event.label,
       index
     );
-    const options = this.setFormOptions(index, option);
-    this.emitFormOptions(options);
+    const options = this.setTaskOptions(index, option);
+    this.emitTaskOptions(options);
   }
 
   onOptionDelete(index: number) {
@@ -286,49 +286,49 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       .toPromise()
       .then(dialogResult => {
         if (dialogResult) {
-          let options = this.formOptions?.options;
+          let options = this.taskOptions?.options;
           if (!options) return;
           options = options.delete(index);
-          this.emitFormOptions(options);
+          this.emitTaskOptions(options);
         }
       });
   }
 
   onAddOption(): void {
-    const index = this.formOptions?.options.size || 0;
+    const index = this.taskOptions?.options.size || 0;
     const option = this.layerService.createOption(
       /* code= */ '',
       /* label= */ '',
       index
     );
-    const options = this.setFormOptions(index, option);
-    this.emitFormOptions(options);
+    const options = this.setTaskOptions(index, option);
+    this.emitTaskOptions(options);
     this.focusNewOption();
   }
 
-  setFormOptions(index: number, option: Option): List<Option> {
-    let options = this.formOptions?.options || List<Option>();
+  setTaskOptions(index: number, option: Option): List<Option> {
+    let options = this.taskOptions?.options || List<Option>();
     options = options?.set(index, option);
     return options;
   }
 
-  emitFormOptions(options: List<Option>): void {
+  emitTaskOptions(options: List<Option>): void {
     const cardinality =
-      this.formOptions?.cardinality ||
+      this.taskOptions?.cardinality ||
       this.cardinality ||
       Cardinality.SELECT_MULTIPLE;
-    this.formOptions = new MultipleChoice(cardinality, options);
+    this.taskOptions = new MultipleChoice(cardinality, options);
     this.update.emit({
       label: StringMap({ en: this.label }),
       required: this.required,
       type: this.fieldType,
-      multipleChoice: this.formOptions,
+      multipleChoice: this.taskOptions,
     });
   }
 
   drop(event: CdkDragDrop<string[]>): void {
-    if (!this.formOptions) return;
-    let options = this.formOptions.options;
+    if (!this.taskOptions) return;
+    let options = this.taskOptions.options;
     const optionAtPrevIndex = options.get(event.previousIndex);
     if (!optionAtPrevIndex) return;
 
@@ -339,11 +339,11 @@ export class FormFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
       option.withIndex(index)
     );
 
-    this.emitFormOptions(options);
+    this.emitTaskOptions(options);
   }
 
   get labelControl(): AbstractControl {
-    return this.formGroup.get('label')!;
+    return this.taskGroup.get('label')!;
   }
 
   ngOnDestroy(): void {

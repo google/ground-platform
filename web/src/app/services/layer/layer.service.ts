@@ -17,12 +17,12 @@
 import { Injectable } from '@angular/core';
 import { DataStoreService } from '../data-store/data-store.service';
 import { Layer } from '../../shared/models/layer.model';
-import { Field, FieldType } from '../../shared/models/form/field.model';
+import { Field, FieldType } from '../../shared/models/task/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Option } from '../../shared/models/form/option.model';
-import { MultipleChoice } from '../../shared/models/form/multiple-choice.model';
+import { Option } from '../../shared/models/task/option.model';
+import { MultipleChoice } from '../../shared/models/task/multiple-choice.model';
 import { List, Map } from 'immutable';
-import { Form } from '../../shared/models/form/form.model';
+import { Task } from '../../shared/models/task/task.model';
 import { SurveyService } from '../survey/survey.service';
 import { take } from 'rxjs/operators';
 
@@ -107,35 +107,35 @@ export class LayerService {
   }
 
   /**
-   * Creates and returns a new form map with a with a generated unique identifier and fields value.
+   * Creates and returns a new task map with a generated unique identifier and fields value.
    *
-   * @param id the id of the new form.
-   * @param fields the fields of the new form.
+   * @param id the id of the new task.
+   * @param fields the fields of the new task.
    */
-  createForm(
+  createTask(
     id: string | undefined,
     fields: Map<string, Field>
-  ): Map<string, Form> | undefined {
-    if (LayerService.isFormEmpty(fields)) {
+  ): Map<string, Task> | undefined {
+    if (LayerService.isTaskEmpty(fields)) {
       return undefined;
     }
-    const formId = id || this.dataStoreService.generateId();
-    return LayerService.createFormMap(formId, new Form(formId, fields));
+    const taskId = id || this.dataStoreService.generateId();
+    return LayerService.createTaskMap(taskId, new Task(taskId, fields));
   }
 
   /**
-   * Creates and returns a form map with a given id and form value.
+   * Creates and returns a task map with a given id and task value.
    */
-  private static createFormMap(id: string, form: Form): Map<string, Form> {
-    let forms = Map<string, Form>();
-    forms = forms.set(id, form);
-    return forms;
+  private static createTaskMap(id: string, task: Task): Map<string, Task> {
+    let tasks = Map<string, Task>();
+    tasks = tasks.set(id, task);
+    return tasks;
   }
 
   /**
-   * Checks if there are no fields or first field in the form is empty.
+   * Checks if there are no fields or first field in the task is empty.
    */
-  private static isFormEmpty(fields: Map<string, Field>): boolean {
+  private static isTaskEmpty(fields: Map<string, Field>): boolean {
     return (
       fields.isEmpty() ||
       (fields.size === 1 && !LayerService.getFieldLabel(fields.first()))
@@ -147,11 +147,11 @@ export class LayerService {
   }
 
   /**
-   * Returns the form value from a layer passed.
+   * Returns the task value from a layer passed.
    */
-  getForm(layer?: Layer): Form | undefined {
-    const forms = layer?.forms;
-    return forms ? forms.valueSeq().first() : undefined;
+  getTask(layer?: Layer): Task | undefined {
+    const tasks = layer?.tasks;
+    return tasks ? tasks.valueSeq().first() : undefined;
   }
 
   private async getLayerCount(): Promise<number> {

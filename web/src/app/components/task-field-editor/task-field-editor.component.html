@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="question-container">
+<form [formGroup]="taskGroup" class="question-container">
   <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
   <div fxLayout>
     <mat-form-field class="question" appearance="fill" fxFlex="2 1 auto">
@@ -24,7 +24,7 @@
         matInput
         formControlName="label"
         autocomplete="off"
-        (focus)="onFormFocus()"
+        (focus)="onTaskFocus()"
         (blur)="onLabelBlur()"
       />
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
@@ -38,7 +38,7 @@
         formControlName="selectFieldOption"
         class="field-type-select"
         (selectionChange)="onFieldTypeSelect($event.value)"
-        (openedChange)="onFormFocus()"
+        (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
           <mat-icon class="icon-field-type">{{
@@ -55,13 +55,13 @@
   </div>
   <div *ngIf="expanded">
     <div
-      *ngIf="formOptions?.options"
+      *ngIf="taskOptions?.options"
       cdkDropList
       (cdkDropListDropped)="drop($event)"
     >
       <div
         *ngFor="
-          let option of formOptions.options;
+          let option of taskOptions.options;
           let i = index;
           trackBy: trackByFn
         "
@@ -90,7 +90,7 @@
     <div
       fxLayout
       fxLayoutAlign="end"
-      (keydown.Tab)="onFormBlur()"
+      (keydown.Tab)="onTaskBlur()"
       class="question-actions"
     >
       <button type="button" mat-icon-button (click)="onFieldDelete()">

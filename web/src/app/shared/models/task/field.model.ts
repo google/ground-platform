@@ -16,7 +16,7 @@
 
 import { StringMap } from '../string-map.model';
 import { MultipleChoice } from './multiple-choice.model';
-import { Option } from '../form/option.model';
+import { Option } from './/option.model';
 
 /**
  *

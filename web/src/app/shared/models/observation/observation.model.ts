@@ -15,7 +15,7 @@
  */
 
 import { AuditInfo } from '../audit-info.model';
-import { Form } from '../form/form.model';
+import { Task } from '../task/task.model';
 import { Response } from './response.model';
 import { Map } from 'immutable';
 
@@ -24,7 +24,7 @@ export class Observation {
     readonly id: string,
     readonly featureId: string,
     readonly layerId: string,
-    readonly form: Form | null,
+    readonly task: Task | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
     readonly responses: Map<string, Response>
@@ -39,7 +39,7 @@ export class Observation {
       this.id,
       this.featureId,
       this.layerId,
-      this.form,
+      this.task,
       this.created,
       lastModified,
       responses

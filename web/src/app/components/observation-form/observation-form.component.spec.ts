@@ -27,13 +27,13 @@ import { Response } from '../../shared/models/observation/response.model';
 import firebase from 'firebase/app';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Layer } from '../../shared/models/layer.model';
-import { Option } from '../../shared/models/form/option.model';
+import { Option } from '../../shared/models/task/option.model';
 import {
   MultipleChoice,
   Cardinality,
-} from '../../shared/models/form/multiple-choice.model';
-import { FieldType, Field } from '../../shared/models/form/field.model';
-import { Form } from '../../shared/models/form/form.model';
+} from '../../shared/models/task/multiple-choice.model';
+import { FieldType, Field } from '../../shared/models/task/field.model';
+import { Task } from '../../shared/models/task/task.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { SurveyService } from '../../services/survey/survey.service';
@@ -97,7 +97,7 @@ class MockModel {
     )
   );
 
-  static form001: Form = new Form(
+  static form001: Task = new Task(
     'form001',
     Map({
       element001: MockModel.element001,

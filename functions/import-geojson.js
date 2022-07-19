@@ -33,14 +33,14 @@ async function importGeoJson(req, res) {
 
   const busboy = new Busboy({ headers: req.headers });
 
-  // Dictionary used to accumulate form field values, keyed by field name.
+  // Dictionary used to accumulate task field values, keyed by field name.
   const params = {};
 
-  // Accumulates Promises for insert operations so we don't finalize the res
+  // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the form. survey and layer must appear
+  // Handle non-file fields in the task. survey and layer must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;

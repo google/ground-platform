@@ -46,4 +46,4 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   ],
   exports: [TaskFieldEditorComponent],
 })
-export class FormFieldEditorModule {}
+export class TaskFieldEditorModule {}

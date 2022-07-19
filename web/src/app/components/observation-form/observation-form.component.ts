@@ -15,9 +15,9 @@
  */
 
 import { Component } from '@angular/core';
-import { FieldType, Field } from '../../shared/models/form/field.model';
-import { Cardinality } from '../../shared/models/form/multiple-choice.model';
-import { Option } from '../../shared/models/form/option.model';
+import { FieldType, Field } from '../../shared/models/task/field.model';
+import { Cardinality } from '../../shared/models/task/multiple-choice.model';
+import { Option } from '../../shared/models/task/option.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
 import { ObservationService } from '../../services/observation/observation.service';
@@ -143,7 +143,7 @@ export class ObservationFormComponent {
     if (observation instanceof Observation) {
       this.observation = observation;
       this.observationFields = observation!
-        .form!.fields!.toOrderedMap()
+        .task!.fields!.toOrderedMap()
         .sortBy(entry => entry.index)
         .toList();
       this.initForm();
@@ -165,7 +165,7 @@ export class ObservationFormComponent {
 
   private convertObservationToFormGroup(observation: Observation): FormGroup {
     const group: { [fieldId: string]: FormControl } = {};
-    for (const [fieldId, field] of observation.form!.fields) {
+    for (const [fieldId, field] of observation.task!.fields) {
       const response = observation!.responses?.get(fieldId);
       switch (field.type) {
         case FieldType.TEXT:

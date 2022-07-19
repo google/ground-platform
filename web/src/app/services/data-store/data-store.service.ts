@@ -234,7 +234,7 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the observations with the specified
    * uuid.
    *
-   * @param id the id of the requested survey (it should have forms inside).
+   * @param id the id of the requested survey (it should have tasks inside).
    * @param featureId the id of the requested feature.
    */
   observations$(
@@ -253,7 +253,7 @@ export class DataStoreService {
               return FirebaseDataConverter.toObservation(
                 survey
                   .getLayer(feature.layerId)!
-                  .getForm((obj as DocumentData).formId)!,
+                  .getTask((obj as DocumentData).taskId)!,
                 obj.id,
                 obj
               );
@@ -274,7 +274,7 @@ export class DataStoreService {
           return FirebaseDataConverter.toObservation(
             survey
               .getLayer(feature.layerId)!
-              .getForm((doc.data()! as DocumentData).formId)!,
+              .getTask((doc.data()! as DocumentData).taskId)!,
             doc.id,
             doc.data()! as DocumentData
           );
