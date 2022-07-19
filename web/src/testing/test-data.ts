@@ -15,7 +15,7 @@
  */
 
 import { PointOfInterest } from './../app/shared/models/loi.model';
-import { Project } from '../app/shared/models/project.model';
+import { Survey } from '../app/shared/models/survey.model';
 import { Map } from 'immutable';
 import { Layer } from './../app/shared/models/layer.model';
 import { StringMap } from './../app/shared/models/string-map.model';
@@ -41,14 +41,14 @@ export class TestData {
     );
   }
 
-  public static newProject({
-    id = 'project001',
+  public static newSurvey({
+    id = 'survey001',
     title = { en: 'title' } as Record<string, string>,
     description = { en: 'description' } as Record<string, string>,
     layers = {} as Record<string, Layer>,
     acl = {} as Record<string, Role>,
-  }): Project {
-    return new Project(id, Map(title), Map(description), Map(layers), Map(acl));
+  }): Survey {
+    return new Survey(id, Map(title), Map(description), Map(layers), Map(acl));
   }
 
   public static newLayer({
