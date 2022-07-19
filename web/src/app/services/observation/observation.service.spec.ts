@@ -19,12 +19,17 @@ import { TestData } from '../../../testing/test-data';
 import { ObservationService } from './observation.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { SurveyService } from '../survey/survey.service';
-import { FeatureService } from '../feature/feature.service';
+import { LocationOfInterestService } from '../loi/loi.service';
 import { AuthService } from './../../services/auth/auth.service';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 
-const { newUser, newProject, newLayer, newLocationFeature } = TestData;
+const {
+  newUser,
+  newProject,
+  newLayer,
+  newLocationLocationOfInterest,
+} = TestData;
 
 describe('ObservationService', () => {
   const user$ = new Subject<User | null>();
@@ -35,7 +40,7 @@ describe('ObservationService', () => {
       providers: [
         { provide: DataStoreService, useValue: {} },
         { provide: SurveyService, useValue: {} },
-        { provide: FeatureService, useValue: {} },
+        { provide: LocationOfInterestService, useValue: {} },
         {
           provide: AuthService,
           useValue: {
@@ -57,7 +62,7 @@ describe('ObservationService', () => {
         service.createNewObservation(
           newUser(),
           newProject({ layers: { layer001: newLayer({ forms: {} }) } }),
-          newLocationFeature()
+          newLocationLocationOfInterest()
         )
       ).toThrow(new Error('No form in layer layer001'));
     });

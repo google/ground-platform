@@ -169,12 +169,12 @@ export class LayerDialogComponent implements OnDestroy {
     const fields = this.layerService.convertFieldsListToMap(this.fields);
     const formId = this.form?.id;
     const forms = this.layerService.createForm(formId, fields);
-    const allowedFeatureTypes: string[] = [];
+    const allowedLocationOfInterestTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
-      allowedFeatureTypes.push('points');
+      allowedLocationOfInterestTypes.push('points');
     }
     if (this.contributorsCanAddPolygons) {
-      allowedFeatureTypes.push('polygons');
+      allowedLocationOfInterestTypes.push('polygons');
     }
     const layer = new Layer(
       this.layer?.id || '',
@@ -183,7 +183,7 @@ export class LayerDialogComponent implements OnDestroy {
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName.trim() }),
       forms,
-      allowedFeatureTypes
+      allowedLocationOfInterestTypes
     );
     this.addOrUpdateLayer(this.surveyId, layer);
   }

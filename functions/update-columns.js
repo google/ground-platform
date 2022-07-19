@@ -15,38 +15,39 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
-const {db} = require('./common/context');
-const {getSheet} = require('./common/sheet-config');
+const { db } = require("./common/context");
+const { getSheet } = require("./common/sheet-config");
 
 function updateColumns(req, res) {
   const {
     survey: surveyId,
-    featureType: featureTypeId,
+    loiType: loiTypeId,
     form: formId,
-    lang: lang
+    lang: lang,
   } = req.query;
-  return getSheet(surveyId).then(sheet => {
+  return getSheet(surveyId).then((sheet) => {
     if (!sheet) {
-      return res.status(400).send('Survey spreadsheet config not found');
+      return res.status(400).send("Survey spreadsheet config not found");
     }
-    return db.fetchForm(surveyId, featureTypeId, formId).then(form => {
+    return db.fetchForm(surveyId, loiTypeId, formId).then((form) => {
       if (!form) {
-        return res.status(400).send('Form definition not found');
+        return res.status(400).send("Form definition not found");
       }
       const elements = form.elements || [];
       if (!elements.length) {
         return res.status(200).send("Form definition is empty");
       }
-      return sheet.getColumnMetadata().then(cols => {
+      return sheet.getColumnMetadata().then((cols) => {
         // Use the end index of the last column as our insertion point.
-        const insertAt = cols.length ?
-          cols[cols.length - 1].location.dimensionRange.endIndex : 0;
-        const existingColumnIds = cols.map(col => col.metadataValue);
+        const insertAt = cols.length
+          ? cols[cols.length - 1].location.dimensionRange.endIndex
+          : 0;
+        const existingColumnIds = cols.map((col) => col.metadataValue);
         return sheet
           .updateColumns(existingColumnIds, form.elements, insertAt, lang)
-          .then(cnt => res.send(`${cnt} columns added`));
+          .then((cnt) => res.send(`${cnt} columns added`));
       });
     });
   });

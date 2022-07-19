@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocationFeature } from './../app/shared/models/feature.model';
+import { LocationLocationOfInterest } from './../app/shared/models/loi.model';
 import { Project } from '../app/shared/models/project.model';
 import { Map } from 'immutable';
 import { Layer } from './../app/shared/models/layer.model';
@@ -69,9 +69,9 @@ export class TestData {
     );
   }
 
-  public static newLocationFeature(): LocationFeature {
-    return new LocationFeature(
-      'feature001',
+  public static newLocationLocationOfInterest(): LocationLocationOfInterest {
+    return new LocationLocationOfInterest(
+      'loi001',
       'layer001',
       new firebase.firestore.GeoPoint(0, 0),
       Map()

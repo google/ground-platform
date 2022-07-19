@@ -30,29 +30,29 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
 import {
-  GeoJsonFeature,
-  LocationFeature,
-} from '../../shared/models/feature.model';
-import { FeatureService } from '../../services/feature/feature.service';
+  GeoJsonLocationOfInterest,
+  LocationLocationOfInterest,
+} from '../../shared/models/loi.model';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { Map } from 'immutable';
 @Component({
-  selector: 'ground-feature-panel-header',
-  templateUrl: './feature-panel-header.component.html',
-  styleUrls: ['./feature-panel-header.component.scss'],
+  selector: 'ground-loi-panel-header',
+  templateUrl: './loi-panel-header.component.html',
+  styleUrls: ['./loi-panel-header.component.scss'],
 })
-export class FeaturePanelHeaderComponent
+export class LocationOfInterestPanelHeaderComponent
   implements OnInit, OnDestroy, OnChanges {
   @Input() layer?: Layer;
   surveyId?: string | null;
-  featureId?: string | null;
+  loiId?: string | null;
   pinUrl: SafeUrl;
   readonly lang: string;
-  readonly featureType = FeatureType;
+  readonly loiType = LocationOfInterestType;
   subscription: Subscription = new Subscription();
-  featureTypeValue?: FeatureType;
+  loiTypeValue?: LocationOfInterestType;
   private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
   private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
-  private featureProperties?: Map<string, string | number>;
+  private loiProperties?: Map<string, string | number>;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -60,19 +60,19 @@ export class FeaturePanelHeaderComponent
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private zone: NgZone,
-    readonly featureService: FeatureService
+    readonly loiService: LocationOfInterestService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
     this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
     this.subscription.add(
-      featureService.getSelectedFeature$().subscribe(feature => {
-        if (feature instanceof GeoJsonFeature) {
-          this.featureTypeValue = FeatureType.Polygon;
-        } else if (feature instanceof LocationFeature) {
-          this.featureTypeValue = FeatureType.Point;
+      loiService.getSelectedLocationOfInterest$().subscribe(loi => {
+        if (loi instanceof GeoJsonLocationOfInterest) {
+          this.loiTypeValue = LocationOfInterestType.Polygon;
+        } else if (loi instanceof LocationLocationOfInterest) {
+          this.loiTypeValue = LocationOfInterestType.Point;
         }
-        this.featureProperties = feature.properties;
+        this.loiProperties = loi.properties;
       })
     );
   }
@@ -82,8 +82,8 @@ export class FeaturePanelHeaderComponent
       getPinImageSource(this.layer?.color)
     );
     this.subscription.add(
-      this.navigationService.getFeatureId$().subscribe(id => {
-        this.featureId = id;
+      this.navigationService.getLocationOfInterestId$().subscribe(id => {
+        this.loiId = id;
       })
     );
     this.subscription.add(
@@ -100,30 +100,33 @@ export class FeaturePanelHeaderComponent
   }
 
   onCloseClick() {
-    this.navigationService.clearFeatureId();
+    this.navigationService.clearLocationOfInterestId();
   }
 
-  onDeleteFeatureClick() {
+  onDeleteLocationOfInterestClick() {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
-        'Are you sure you wish to delete this feature? ' +
+        'Are you sure you wish to delete this loi? ' +
           'Any associated data, including all observations, will be lost. ' +
           'This cannot be undone.'
       )
       .afterClosed()
       .subscribe(async dialogResult => {
         if (dialogResult) {
-          await this.deleteFeature();
+          await this.deleteLocationOfInterest();
         }
       });
   }
 
-  async deleteFeature() {
-    if (!this.surveyId || !this.featureId) {
+  async deleteLocationOfInterest() {
+    if (!this.surveyId || !this.loiId) {
       return;
     }
-    await this.dataStoreService.deleteFeature(this.surveyId, this.featureId);
+    await this.dataStoreService.deleteLocationOfInterest(
+      this.surveyId,
+      this.loiId
+    );
     this.onClose();
   }
 
@@ -134,28 +137,28 @@ export class FeaturePanelHeaderComponent
     });
   }
 
-  getFeatureName(): string | number {
+  getLocationOfInterestName(): string | number {
     const caption = this.findProperty(this.CAPTION_PROPERTIES);
     if (caption) {
       return caption;
     }
-    const featureType =
-      this.featureTypeValue === FeatureType.Point ? 'Point' : 'Polygon';
+    const loiType =
+      this.loiTypeValue === LocationOfInterestType.Point ? 'Point' : 'Polygon';
     const id = this.findProperty(this.ID_PROPERTIES);
     if (id) {
-      return featureType + ' ' + id;
+      return loiType + ' ' + id;
     }
-    return featureType;
+    return loiType;
   }
 
   private findProperty(matchKeys: string[]): string | number | undefined {
-    if (!this.featureProperties) {
+    if (!this.loiProperties) {
       return;
     }
     for (const matchKey of matchKeys) {
-      for (const property of this.featureProperties.keys()) {
+      for (const property of this.loiProperties.keys()) {
         if (property.toLowerCase() === matchKey) {
-          return this.featureProperties.get(property);
+          return this.loiProperties.get(property);
         }
       }
     }
@@ -167,7 +170,7 @@ export class FeaturePanelHeaderComponent
   }
 }
 
-enum FeatureType {
+enum LocationOfInterestType {
   Point = 'POINT',
   Polygon = 'POLYGON',
 }

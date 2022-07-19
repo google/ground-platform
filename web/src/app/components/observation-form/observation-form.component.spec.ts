@@ -18,7 +18,10 @@ import { DataStoreService } from './../../services/data-store/data-store.service
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ObservationFormComponent } from './observation-form.component';
-import { Feature, LocationFeature } from '../../shared/models/feature.model';
+import {
+  LocationOfInterest,
+  LocationLocationOfInterest,
+} from '../../shared/models/loi.model';
 import { NEVER, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { List, Map } from 'immutable';
@@ -35,7 +38,7 @@ import {
 import { FieldType, Field } from '../../shared/models/form/field.model';
 import { Form } from '../../shared/models/form/form.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
@@ -122,8 +125,8 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static feature001 = new LocationFeature(
-    'feature001',
+  static loi001 = new LocationLocationOfInterest(
+    'loi001',
     MockModel.layer001.id,
     new firebase.firestore.GeoPoint(0.0, 0.0)
   );
@@ -136,8 +139,8 @@ class MockModel {
 
   static observation001 = new Observation(
     'observation001',
-    MockModel.feature001.id,
-    MockModel.feature001.layerId,
+    MockModel.loi001.id,
+    MockModel.loi001.layerId,
     MockModel.form001,
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
@@ -156,9 +159,9 @@ class MockSurveyService {
   getCurrentSurvey() {}
 }
 
-class MockFeatureService {
-  getSelectedFeature$() {
-    return of<Feature>(MockModel.feature001);
+class MockLocationOfInterestService {
+  getSelectedLocationOfInterest$() {
+    return of<LocationOfInterest>(MockModel.loi001);
   }
 }
 
@@ -169,7 +172,7 @@ class MockObservationService {
 }
 
 const surveyService = new MockSurveyService();
-const featureService = new MockFeatureService();
+const loiService = new MockLocationOfInterestService();
 const observationService = new MockObservationService();
 
 describe('ObservationFormComponent', () => {
@@ -180,7 +183,7 @@ describe('ObservationFormComponent', () => {
     waitForAsync(() => {
       const navigationService = {
         getSurveyId$: () => of(''),
-        getFeatureId$: () => NEVER,
+        getLocationOfInterestId$: () => NEVER,
       };
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
@@ -201,7 +204,10 @@ describe('ObservationFormComponent', () => {
         ],
         providers: [
           { provide: DataStoreService, useValue: {} },
-          { provide: FeatureService, useValue: featureService },
+          {
+            provide: LocationOfInterestService,
+            useValue: loiService,
+          },
           { provide: SurveyService, useValue: surveyService },
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },

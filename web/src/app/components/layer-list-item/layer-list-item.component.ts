@@ -37,7 +37,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   @Input() actionsType: LayerListItemActionsType =
     LayerListItemActionsType.MENU;
   surveyId?: string | null;
-  featureId?: string | null;
+  loiId?: string | null;
   layerPinUrl: SafeUrl;
   readonly lang: string;
   readonly layerListItemActionsType = LayerListItemActionsType;
@@ -61,8 +61,8 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       getPinImageSource(this.layer?.color)
     );
     this.subscription.add(
-      this.navigationService.getFeatureId$().subscribe(id => {
-        this.featureId = id;
+      this.navigationService.getLocationOfInterestId$().subscribe(id => {
+        this.loiId = id;
       })
     );
     this.subscription.add(
@@ -85,7 +85,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onGoBackClick() {
-    this.navigationService.clearFeatureId();
+    this.navigationService.clearLocationOfInterestId();
   }
 
   onDeleteLayer() {
@@ -93,7 +93,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
       .openConfirmationDialog(
         'Warning',
         'Are you sure you wish to delete this layer? Any associated data ' +
-          'including all features and observations in this layer will be ' +
+          'including all lois and observations in this layer will be ' +
           'lost. This cannot be undone.'
       )
       .afterClosed()
@@ -113,7 +113,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     return this.navigationService.selectSurvey(this.surveyId!);
   }
 
-  onImportFeatures() {
+  onImportLocationOfInterests() {
     if (!this.surveyId || !this.layer?.id) {
       return;
     }
@@ -135,7 +135,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     if (!this.layer?.id) {
       return;
     }
-    this.navigationService.showFeatureList(this.layer.id);
+    this.navigationService.showLocationOfInterestList(this.layer.id);
   }
 
   ngOnDestroy(): void {

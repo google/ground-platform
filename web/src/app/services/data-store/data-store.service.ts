@@ -22,7 +22,7 @@ import { Observable } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
-import { Feature } from '../../shared/models/feature.model';
+import { LocationOfInterest } from '../../shared/models/loi.model';
 import { Layer } from './../../shared/models/layer.model';
 import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -106,7 +106,7 @@ export class DataStoreService {
   }
 
   async deleteLayer(surveyId: string, layerId: string) {
-    await this.deleteAllFeaturesInLayer(surveyId, layerId);
+    await this.deleteAllLocationOfInterestsInLayer(surveyId, layerId);
     await this.deleteAllObservationsInLayer(surveyId, layerId);
     return await this.db
       .collection('surveys')
@@ -128,34 +128,36 @@ export class DataStoreService {
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllObservationsInFeature(
+  private async deleteAllObservationsInLocationOfInterest(
     surveyId: string,
-    featureId: string
+    loiId: string
   ) {
     const observations = this.db.collection(
       `surveys/${surveyId}/observations`,
-      ref => ref.where('featureId', '==', featureId)
+      ref => ref.where('loiId', '==', loiId)
     );
     const querySnapshot = await observations.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllFeaturesInLayer(surveyId: string, layerId: string) {
-    const featuresInLayer = this.db.collection(
-      `surveys/${surveyId}/features`,
-      ref => ref.where('layerId', '==', layerId)
+  private async deleteAllLocationOfInterestsInLayer(
+    surveyId: string,
+    layerId: string
+  ) {
+    const loisInLayer = this.db.collection(`surveys/${surveyId}/lois`, ref =>
+      ref.where('layerId', '==', layerId)
     );
-    const querySnapshot = await featuresInLayer.get().toPromise();
+    const querySnapshot = await loisInLayer.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  async deleteFeature(surveyId: string, featureId: string) {
-    await this.deleteAllObservationsInFeature(surveyId, featureId);
+  async deleteLocationOfInterest(surveyId: string, loiId: string) {
+    await this.deleteAllObservationsInLocationOfInterest(surveyId, loiId);
     return await this.db
       .collection('surveys')
       .doc(surveyId)
-      .collection('features')
-      .doc(featureId)
+      .collection('lois')
+      .doc(loiId)
       .delete();
   }
 
@@ -176,26 +178,32 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the feature with the specified
+   * Returns an Observable that loads and emits the loi with the specified
    * uuid.
    *
-   * @param surveyId the id of the survey in which requested feature is.
-   * @param featureId the id of the requested feature.
+   * @param surveyId the id of the survey in which requested loi is.
+   * @param loiId the id of the requested loi.
    */
-  loadFeature$(surveyId: string, featureId: string): Observable<Feature> {
+  loadLocationOfInterest$(
+    surveyId: string,
+    loiId: string
+  ): Observable<LocationOfInterest> {
     return this.db
-      .collection(`surveys/${surveyId}/features`)
-      .doc(featureId)
+      .collection(`surveys/${surveyId}/lois`)
+      .doc(loiId)
       .get()
       .pipe(
-        // Fail with error if feature could not be loaded.
+        // Fail with error if loi could not be loaded.
         map(doc =>
-          FirebaseDataConverter.toFeature(doc.id, doc.data()! as DocumentData)
+          FirebaseDataConverter.toLocationOfInterest(
+            doc.id,
+            doc.data()! as DocumentData
+          )
         ),
-        // Cast to Feature to remove undefined from type. Done as separate
+        // Cast to LocationOfInterest to remove undefined from type. Done as separate
         // map() operation since compiler doesn't recognize cast when defined in
         // previous map() step.
-        map(f => f as Feature)
+        map(f => f as LocationOfInterest)
       );
   }
 
@@ -212,19 +220,21 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  features$({ id }: Survey): Observable<List<Feature>> {
+  lois$({ id }: Survey): Observable<List<LocationOfInterest>> {
     return this.db
-      .collection(`surveys/${id}/features`)
+      .collection(`surveys/${id}/lois`)
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
           List(
             array
-              .map(obj => FirebaseDataConverter.toFeature(obj.id, obj))
-              // Filter out features that could not be loaded (i.e., undefined).
+              .map(obj =>
+                FirebaseDataConverter.toLocationOfInterest(obj.id, obj)
+              )
+              // Filter out lois that could not be loaded (i.e., undefined).
               .filter(f => !!f)
-              // Cast items in List to Feature to remove undefined from type.
-              .map(f => f as Feature)
+              // Cast items in List to LocationOfInterest to remove undefined from type.
+              .map(f => f as LocationOfInterest)
           )
         )
       );
@@ -235,15 +245,15 @@ export class DataStoreService {
    * uuid.
    *
    * @param id the id of the requested survey (it should have forms inside).
-   * @param featureId the id of the requested feature.
+   * @param loiId the id of the requested loi.
    */
   observations$(
     survey: Survey,
-    feature: Feature
+    loi: LocationOfInterest
   ): Observable<List<Observation>> {
     return this.db
       .collection(`surveys/${survey.id}/observations`, ref =>
-        ref.where('featureId', '==', feature.id)
+        ref.where('loiId', '==', loi.id)
       )
       .valueChanges({ idField: 'id' })
       .pipe(
@@ -252,7 +262,7 @@ export class DataStoreService {
             array.map(obj => {
               return FirebaseDataConverter.toObservation(
                 survey
-                  .getLayer(feature.layerId)!
+                  .getLayer(loi.layerId)!
                   .getForm((obj as DocumentData).formId)!,
                 obj.id,
                 obj
@@ -264,7 +274,11 @@ export class DataStoreService {
   }
 
   // TODO: Define return type here and throughout.
-  loadObservation$(survey: Survey, feature: Feature, observationId: string) {
+  loadObservation$(
+    survey: Survey,
+    loi: LocationOfInterest,
+    observationId: string
+  ) {
     return this.db
       .collection(`surveys/${survey.id}/observations`)
       .doc(observationId)
@@ -273,7 +287,7 @@ export class DataStoreService {
         map(doc => {
           return FirebaseDataConverter.toObservation(
             survey
-              .getLayer(feature.layerId)!
+              .getLayer(loi.layerId)!
               .getForm((doc.data()! as DocumentData).formId)!,
             doc.id,
             doc.data()! as DocumentData
@@ -304,13 +318,16 @@ export class DataStoreService {
     return firebase.firestore.FieldValue.serverTimestamp();
   }
 
-  updateFeature(surveyId: string, feature: Feature): Promise<void> {
+  updateLocationOfInterest(
+    surveyId: string,
+    loi: LocationOfInterest
+  ): Promise<void> {
     return this.db
       .collection('surveys')
       .doc(surveyId)
-      .collection('features')
-      .doc(feature.id)
-      .set(FirebaseDataConverter.featureToJS(feature));
+      .collection('lois')
+      .doc(loi.id)
+      .set(FirebaseDataConverter.loiToJS(loi));
   }
 
   /**

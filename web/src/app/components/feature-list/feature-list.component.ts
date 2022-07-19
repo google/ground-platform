@@ -17,11 +17,11 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'ground-feature-list',
-  templateUrl: './feature-list.component.html',
-  styleUrls: ['./feature-list.component.scss'],
+  selector: 'ground-loi-list',
+  templateUrl: './loi-list.component.html',
+  styleUrls: ['./loi-list.component.scss'],
 })
-export class FeatureListComponent implements OnInit {
+export class LocationOfInterestListComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {}

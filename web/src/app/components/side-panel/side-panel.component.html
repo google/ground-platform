@@ -18,15 +18,15 @@ limitations under the License.
     <ground-observation-form></ground-observation-form>
   </div>
 
-  <div *ngSwitchCase="sideNavMode.FEATURE">
-    <ground-feature-panel></ground-feature-panel>
+  <div *ngSwitchCase="sideNavMode.LOCATIONOFINTEREST">
+    <ground-loi-panel></ground-loi-panel>
   </div>
 
   <div *ngSwitchCase="sideNavMode.LAYER_LIST">
     <ground-layer-list></ground-layer-list>
   </div>
 
-  <div *ngSwitchCase="sideNavMode.FEATURE_LIST">
-    <ground-feature-list></ground-feature-list>
+  <div *ngSwitchCase="sideNavMode.LOCATIONOFINTEREST_LIST">
+    <ground-loi-list></ground-loi-list>
   </div>
 </div>

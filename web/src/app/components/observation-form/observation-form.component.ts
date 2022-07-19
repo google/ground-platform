@@ -35,7 +35,7 @@ import { LoadingState } from '../../services/loading-state.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { Layer } from '../../shared/models/layer.model';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { switchMap, map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuditInfo } from '../../shared/models/audit-info.model';
@@ -68,7 +68,7 @@ export class ObservationFormComponent {
     private navigationService: NavigationService,
     observationService: ObservationService,
     surveyService: SurveyService,
-    featureService: FeatureService
+    loiService: LocationOfInterestService
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
@@ -84,15 +84,15 @@ export class ObservationFormComponent {
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          featureService
-            .getSelectedFeature$()
-            .pipe(map(feature => survey.layers.get(feature.layerId)!))
+          loiService
+            .getSelectedLocationOfInterest$()
+            .pipe(map(loi => survey.layers.get(loi.layerId)!))
         )
       );
   }
 
   onCancel() {
-    this.navigateToFeature();
+    this.navigateToLocationOfInterest();
   }
 
   onSave() {
@@ -117,7 +117,7 @@ export class ObservationFormComponent {
           .updateObservation(this.surveyId!, updatedObservation)
           .then(() => {
             this.observationForm?.markAsPristine();
-            return this.navigateToFeature();
+            return this.navigateToLocationOfInterest();
           })
           .catch(() => {
             alert('Observation update failed.');
@@ -159,7 +159,7 @@ export class ObservationFormComponent {
     );
   }
 
-  private navigateToFeature() {
+  private navigateToLocationOfInterest() {
     this.navigationService.clearObservationId();
   }
 

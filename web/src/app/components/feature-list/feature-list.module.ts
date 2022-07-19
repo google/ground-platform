@@ -16,11 +16,11 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FeatureListComponent } from './feature-list.component';
+import { LocationOfInterestListComponent } from './loi-list.component';
 
 @NgModule({
-  declarations: [FeatureListComponent],
+  declarations: [LocationOfInterestListComponent],
   imports: [CommonModule],
-  exports: [FeatureListComponent],
+  exports: [LocationOfInterestListComponent],
 })
-export class FeatureListModule {}
+export class LocationOfInterestListModule {}

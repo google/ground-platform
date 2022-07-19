@@ -24,17 +24,17 @@ import {
 } from '@angular/core';
 import { Survey } from '../../shared/models/survey.model';
 import {
-  Feature,
-  LocationFeature,
-  GeoJsonFeature,
-  PolygonFeature,
-} from '../../shared/models/feature.model';
+  LocationOfInterest,
+  LocationLocationOfInterest,
+  GeoJsonLocationOfInterest,
+  PolygonLocationOfInterest,
+} from '../../shared/models/loi.model';
 import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
 import { SurveyService } from '../../services/survey/survey.service';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { List } from 'immutable';
 import { getPinImageSource } from './ground-pin';
@@ -43,9 +43,9 @@ import { GoogleMap } from '@angular/google-maps';
 import firebase from 'firebase/app';
 import { MatDialog } from '@angular/material/dialog';
 import {
-  FeatureData,
-  SelectFeatureDialogComponent,
-} from '../select-feature-dialog/select-feature-dialog.component';
+  LocationOfInterestData,
+  SelectLocationOfInterestDialogComponent,
+} from '../select-loi-dialog/select-loi-dialog.component';
 
 // To make ESLint happy:
 /*global google*/
@@ -63,7 +63,7 @@ const enlargedPolygonStrokeWeight = 6;
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
-  features$: Observable<List<Feature>>;
+  lois$: Observable<List<LocationOfInterest>>;
   activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
@@ -91,7 +91,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
   showRepositionConfirmDialog = false;
-  newFeatureToReposition?: LocationFeature;
+  newLocationOfInterestToReposition?: LocationLocationOfInterest;
   oldLatLng?: google.maps.LatLng;
   newLatLng?: google.maps.LatLng;
   markerToReposition?: google.maps.Marker;
@@ -102,13 +102,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   constructor(
     private drawingToolsService: DrawingToolsService,
     private surveyService: SurveyService,
-    private featureService: FeatureService,
+    private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private zone: NgZone,
     private changeDetectorRef: ChangeDetectorRef,
     private dialog: MatDialog
   ) {
-    this.features$ = this.featureService.getFeatures$();
+    this.lois$ = this.loiService.getLocationOfInterests$();
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 
@@ -116,10 +116,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscription.add(
       combineLatest([
         this.activeSurvey$,
-        this.features$,
-        this.navigationService.getFeatureId$(),
-      ]).subscribe(([survey, features, selectedFeatureId]) =>
-        this.onSurveyAndFeaturesUpdate(survey, features, selectedFeatureId)
+        this.lois$,
+        this.navigationService.getLocationOfInterestId$(),
+      ]).subscribe(([survey, lois, selectedLocationOfInterestId]) =>
+        this.onSurveyAndLocationOfInterestsUpdate(
+          survey,
+          lois,
+          selectedLocationOfInterestId
+        )
       )
     );
 
@@ -131,7 +135,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.subscription.add(
       combineLatest([
-        this.navigationService.getFeatureId$(),
+        this.navigationService.getLocationOfInterestId$(),
         this.navigationService.getObservationId$(),
       ]).subscribe(() => this.cancelReposition())
     );
@@ -153,13 +157,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           return;
         }
         this.drawingToolsService.setEditMode(EditMode.None);
-        const newFeature = await this.featureService.addPoint(
+        const newLocationOfInterest = await this.loiService.addPoint(
           event.latLng.lat(),
           event.latLng.lng(),
           selectedLayerId
         );
-        if (newFeature) {
-          this.navigationService.selectFeature(newFeature.id);
+        if (newLocationOfInterest) {
+          this.navigationService.selectLocationOfInterest(
+            newLocationOfInterest.id
+          );
         }
         return;
       }
@@ -168,43 +174,47 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         return;
       case EditMode.None:
       default:
-        this.navigationService.clearFeatureId();
+        this.navigationService.clearLocationOfInterestId();
         return;
     }
   }
 
-  private onSurveyAndFeaturesUpdate(
+  private onSurveyAndLocationOfInterestsUpdate(
     survey: Survey,
-    features: List<Feature>,
-    selectedFeatureId: string | null
+    lois: List<LocationOfInterest>,
+    selectedLocationOfInterestId: string | null
   ): void {
-    this.removeDeletedFeatures(features);
-    this.addNewFeatures(survey, features);
-    this.selectFeature(selectedFeatureId);
+    this.removeDeletedLocationOfInterests(lois);
+    this.addNewLocationOfInterests(survey, lois);
+    this.selectLocationOfInterest(selectedLocationOfInterestId);
   }
 
   /**
-   * Remove deleted features to map. The features that were displayed on
-   * the map but not in the `newFeatures` are considered as deleted.
+   * Remove deleted lois to map. The lois that were displayed on
+   * the map but not in the `newLocationOfInterests` are considered as deleted.
    */
-  private removeDeletedFeatures(newFeatures: List<Feature>) {
-    const newFeatureIds: List<string> = newFeatures.map(f => f.id);
-    this.removeDeletedMarkers(newFeatureIds);
-    this.removeDeletedPolygons(newFeatureIds);
+  private removeDeletedLocationOfInterests(
+    newLocationOfInterests: List<LocationOfInterest>
+  ) {
+    const newLocationOfInterestIds: List<string> = newLocationOfInterests.map(
+      f => f.id
+    );
+    this.removeDeletedMarkers(newLocationOfInterestIds);
+    this.removeDeletedPolygons(newLocationOfInterestIds);
   }
 
-  private removeDeletedMarkers(newFeatureIds: List<string>) {
+  private removeDeletedMarkers(newLocationOfInterestIds: List<string>) {
     for (const id of this.markers.keys()) {
-      if (!newFeatureIds.contains(id)) {
+      if (!newLocationOfInterestIds.contains(id)) {
         this.markers.get(id)!.setMap(null);
         this.markers.delete(id);
       }
     }
   }
 
-  private removeDeletedPolygons(newFeatureIds: List<string>) {
+  private removeDeletedPolygons(newLocationOfInterestIds: List<string>) {
     for (const id of this.polygons.keys()) {
-      if (!newFeatureIds.contains(id)) {
+      if (!newLocationOfInterestIds.contains(id)) {
         this.polygons.get(id)!.setMap(null);
         this.polygons.delete(id);
       }
@@ -212,42 +222,45 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Add new features to map. The features that were not displayed on
-   * the map but in the `newFeatures` are considered as new.
+   * Add new lois to map. The lois that were not displayed on
+   * the map but in the `newLocationOfInterests` are considered as new.
    */
-  private addNewFeatures(survey: Survey, features: List<Feature>) {
-    const existingFeatureIds = Array.from(this.markers.keys()).concat(
-      Array.from(this.polygons.keys())
-    );
+  private addNewLocationOfInterests(
+    survey: Survey,
+    lois: List<LocationOfInterest>
+  ) {
+    const existingLocationOfInterestIds = Array.from(
+      this.markers.keys()
+    ).concat(Array.from(this.polygons.keys()));
 
-    features.forEach(feature => {
-      if (!survey.getLayer(feature.layerId)) {
-        // Ignore features whose layer has been removed.
+    lois.forEach(loi => {
+      if (!survey.getLayer(loi.layerId)) {
+        // Ignore lois whose layer has been removed.
         console.debug(
-          `Ignoring feature ${feature.id} with missing layer ${feature.layerId}`
+          `Ignoring loi ${loi.id} with missing layer ${loi.layerId}`
         );
         return;
       }
-      if (existingFeatureIds.includes(feature.id)) {
+      if (existingLocationOfInterestIds.includes(loi.id)) {
         return;
       }
-      const color = survey.layers.get(feature.layerId)?.color;
-      const layerName = survey.layers.get(feature.layerId)?.name?.get('en');
-      if (feature instanceof LocationFeature) {
-        this.addLocationFeature(color, feature);
+      const color = survey.layers.get(loi.layerId)?.color;
+      const layerName = survey.layers.get(loi.layerId)?.name?.get('en');
+      if (loi instanceof LocationLocationOfInterest) {
+        this.addLocationLocationOfInterest(color, loi);
       }
-      if (feature instanceof GeoJsonFeature) {
-        this.addGeoJsonFeature(color, layerName, feature);
+      if (loi instanceof GeoJsonLocationOfInterest) {
+        this.addGeoJsonLocationOfInterest(color, layerName, loi);
       }
-      if (feature instanceof PolygonFeature) {
-        this.addPolygonFeature(color, layerName, feature);
+      if (loi instanceof PolygonLocationOfInterest) {
+        this.addPolygonLocationOfInterest(color, layerName, loi);
       }
     });
   }
 
-  private addLocationFeature(
+  private addLocationLocationOfInterest(
     color: string | undefined,
-    feature: LocationFeature
+    loi: LocationLocationOfInterest
   ) {
     const icon = {
       url: getPinImageSource(color),
@@ -259,29 +272,29 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const options: google.maps.MarkerOptions = {
       map: this.map.googleMap,
       position: new google.maps.LatLng(
-        feature.location.latitude,
-        feature.location.longitude
+        loi.location.latitude,
+        loi.location.longitude
       ),
       icon,
       draggable: false,
-      title: feature.id,
+      title: loi.id,
     };
     const marker = new google.maps.Marker(options);
-    marker.addListener('click', () => this.onMarkerClick(feature.id));
+    marker.addListener('click', () => this.onMarkerClick(loi.id));
     marker.addListener('dragstart', (event: google.maps.MouseEvent) =>
       this.onMarkerDragStart(event, marker)
     );
     marker.addListener('dragend', (event: google.maps.MouseEvent) =>
-      this.onMarkerDragEnd(event, feature)
+      this.onMarkerDragEnd(event, loi)
     );
-    this.markers.set(feature.id, marker);
+    this.markers.set(loi.id, marker);
   }
 
-  private onMarkerClick(featureId: string) {
+  private onMarkerClick(loiId: string) {
     if (this.disableMapClicks) {
       return;
     }
-    this.navigationService.selectFeature(featureId);
+    this.navigationService.selectLocationOfInterest(loiId);
   }
 
   private onMarkerDragStart(
@@ -303,15 +316,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onMarkerDragEnd(
     event: google.maps.MouseEvent,
-    feature: LocationFeature
+    loi: LocationLocationOfInterest
   ) {
     this.newLatLng = new google.maps.LatLng(
       event.latLng.lat(),
       event.latLng.lng()
     );
-    this.newFeatureToReposition = new LocationFeature(
-      feature.id,
-      feature.layerId,
+    this.newLocationOfInterestToReposition = new LocationLocationOfInterest(
+      loi.id,
+      loi.layerId,
       new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
     );
   }
@@ -328,7 +341,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onEditModeChange(editMode: EditMode) {
     if (editMode !== EditMode.None) {
-      this.navigationService.clearFeatureId();
+      this.navigationService.clearLocationOfInterestId();
       for (const marker of this.markers) {
         marker[1].setClickable(false);
       }
@@ -344,14 +357,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Selecting feature enlarges the marker or border of the polygon,
+   * Selecting loi enlarges the marker or border of the polygon,
    * pans and zooms to the marker/polygon. Selecting null is considered
    * as deselecting which will change the selected back to normal size.
    */
-  private selectFeature(selectedFeatureId: string | null) {
-    const markerToSelect = this.markers.get(selectedFeatureId as string);
+  private selectLocationOfInterest(
+    selectedLocationOfInterestId: string | null
+  ) {
+    const markerToSelect = this.markers.get(
+      selectedLocationOfInterestId as string
+    );
     this.selectMarker(markerToSelect);
-    const polygonToSelect = this.polygons.get(selectedFeatureId as string);
+    const polygonToSelect = this.polygons.get(
+      selectedLocationOfInterestId as string
+    );
     this.selectPolygon(polygonToSelect);
   }
 
@@ -399,14 +418,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(polygon?.getPaths().getAt(0).getAt(0));
   }
 
-  private addGeoJsonFeature(
+  private addGeoJsonLocationOfInterest(
     color: string | undefined,
     layerName: string | undefined,
-    feature: GeoJsonFeature
+    loi: GeoJsonLocationOfInterest
   ) {
     const paths: google.maps.LatLng[][] = [];
     const layer = new google.maps.Data();
-    layer.addGeoJson(feature.geoJson);
+    layer.addGeoJson(loi.geoJson);
     layer.forEach(f => {
       if (f.getGeometry() instanceof google.maps.Data.Polygon) {
         paths.push(
@@ -424,7 +443,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
 
-    this.addPolygonToMap(feature.id, color, layerName, paths);
+    this.addPolygonToMap(loi.id, color, layerName, paths);
   }
 
   private geoJsonPolygonToPaths(
@@ -436,20 +455,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return paths;
   }
 
-  private addPolygonFeature(
+  private addPolygonLocationOfInterest(
     color: string | undefined,
     layerName: string | undefined,
-    feature: PolygonFeature
+    loi: PolygonLocationOfInterest
   ) {
-    const vertices: google.maps.LatLng[] = feature.polygonVertices.map(
+    const vertices: google.maps.LatLng[] = loi.polygonVertices.map(
       vertex => new google.maps.LatLng(vertex.latitude, vertex.longitude)
     );
 
-    this.addPolygonToMap(feature.id, color, layerName, [vertices]);
+    this.addPolygonToMap(loi.id, color, layerName, [vertices]);
   }
 
   private addPolygonToMap(
-    featureId: string,
+    loiId: string,
     color: string | undefined,
     layerName: string | undefined,
     paths: google.maps.LatLng[][]
@@ -463,13 +482,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       fillOpacity: 0,
       map: this.map.googleMap,
     });
-    polygon.set('id', featureId);
+    polygon.set('id', loiId);
     polygon.set('color', color);
     polygon.set('layerName', layerName);
     polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
       this.onPolygonClick(event);
     });
-    this.polygons.set(featureId, polygon);
+    this.polygons.set(loiId, polygon);
   }
 
   private onPolygonClick(event: google.maps.PolyMouseEvent) {
@@ -484,32 +503,43 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     if (candidatePolygons.length === 1) {
       this.zone.run(() => {
-        this.navigationService.selectFeature(candidatePolygons[0].get('id'));
+        this.navigationService.selectLocationOfInterest(
+          candidatePolygons[0].get('id')
+        );
       });
       return;
     }
-    this.openSelectFeatureDialog(candidatePolygons);
+    this.openSelectLocationOfInterestDialog(candidatePolygons);
   }
 
-  private openSelectFeatureDialog(candidatePolygons: google.maps.Polygon[]) {
+  private openSelectLocationOfInterestDialog(
+    candidatePolygons: google.maps.Polygon[]
+  ) {
     this.zone.run(() => {
-      const dialogRef = this.dialog.open(SelectFeatureDialogComponent, {
-        width: '500px',
-        data: {
-          clickedFeatures: candidatePolygons.map(this.polygonToFeatureData),
-        },
-      });
+      const dialogRef = this.dialog.open(
+        SelectLocationOfInterestDialogComponent,
+        {
+          width: '500px',
+          data: {
+            clickedLocationOfInterests: candidatePolygons.map(
+              this.polygonToLocationOfInterestData
+            ),
+          },
+        }
+      );
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          this.navigationService.selectFeature(result);
+          this.navigationService.selectLocationOfInterest(result);
         }
       });
     });
   }
 
-  private polygonToFeatureData(polygon: google.maps.Polygon): FeatureData {
+  private polygonToLocationOfInterestData(
+    polygon: google.maps.Polygon
+  ): LocationOfInterestData {
     return {
-      featureId: polygon.get('id'),
+      loiId: polygon.get('id'),
       color: polygon.get('color'),
       layerName: polygon.get('layerName'),
     };
@@ -517,7 +547,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   onSaveRepositionClick() {
     this.markerToReposition?.setPosition(this.newLatLng!);
-    this.featureService.updatePoint(this.newFeatureToReposition!);
+    this.loiService.updatePoint(this.newLocationOfInterestToReposition!);
     this.resetReposition();
   }
 
@@ -528,7 +558,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private resetReposition() {
     this.showRepositionConfirmDialog = false;
-    this.newFeatureToReposition = undefined;
+    this.newLocationOfInterestToReposition = undefined;
     this.oldLatLng = undefined;
     this.newLatLng = undefined;
     this.markerToReposition = undefined;

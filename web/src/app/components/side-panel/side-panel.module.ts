@@ -17,18 +17,18 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { SidePanelComponent } from './side-panel.component';
-import { FeaturePanelModule } from '../feature-panel/feature-panel.module';
+import { LocationOfInterestPanelModule } from '../loi-panel/loi-panel.module';
 import { LayerListModule } from '../layer-list/layer-list.module';
 import { ObservationFormModule } from '../observation-form/observation-form.module';
-import { FeatureListModule } from '../feature-list/feature-list.module';
+import { LocationOfInterestListModule } from '../loi-list/loi-list.module';
 
 @NgModule({
   imports: [
     BrowserModule,
-    FeaturePanelModule,
+    LocationOfInterestPanelModule,
     LayerListModule,
     ObservationFormModule,
-    FeatureListModule,
+    LocationOfInterestListModule,
   ],
   exports: [SidePanelComponent],
   declarations: [SidePanelComponent],

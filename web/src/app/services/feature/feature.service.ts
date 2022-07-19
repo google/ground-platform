@@ -20,60 +20,63 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { Survey } from './../../shared/models/survey.model';
 import { SurveyService } from './../survey/survey.service';
 import { Injectable } from '@angular/core';
-import { Feature, LocationFeature } from '../../shared/models/feature.model';
+import {
+  LocationOfInterest,
+  LocationLocationOfInterest,
+} from '../../shared/models/loi.model';
 import { List } from 'immutable';
 import firebase from 'firebase/app';
 
 @Injectable({
   providedIn: 'root',
 })
-export class FeatureService {
-  private features$: Observable<List<Feature>>;
-  private selectedFeatureId$ = new ReplaySubject<string>(1);
-  private selectedFeature$: Observable<Feature>;
+export class LocationOfInterestService {
+  private lois$: Observable<List<LocationOfInterest>>;
+  private selectedLocationOfInterestId$ = new ReplaySubject<string>(1);
+  private selectedLocationOfInterest$: Observable<LocationOfInterest>;
 
   constructor(
     private dataStore: DataStoreService,
     private surveyService: SurveyService
   ) {
-    this.features$ = surveyService
+    this.lois$ = surveyService
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          survey.isUnsavedNew() ? List() : dataStore.features$(survey)
+          survey.isUnsavedNew() ? List() : dataStore.lois$(survey)
         )
       );
 
-    this.selectedFeature$ = this.selectedFeatureId$.pipe(
-      switchMap(featureId =>
+    this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
+      switchMap(loiId =>
         surveyService
           .getActiveSurvey$()
           .pipe(
             switchMap(survey =>
-              this.dataStore.loadFeature$(survey.id, featureId)
+              this.dataStore.loadLocationOfInterest$(survey.id, loiId)
             )
           )
       )
     );
   }
 
-  getFeatures$(): Observable<List<Feature>> {
-    return this.features$;
+  getLocationOfInterests$(): Observable<List<LocationOfInterest>> {
+    return this.lois$;
   }
 
-  selectFeature(featureId: string) {
-    this.selectedFeatureId$.next(featureId);
+  selectLocationOfInterest(loiId: string) {
+    this.selectedLocationOfInterestId$.next(loiId);
   }
 
-  getSelectedFeature$(): Observable<Feature> {
-    return this.selectedFeature$;
+  getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
+    return this.selectedLocationOfInterest$;
   }
 
   async addPoint(
     lat: number,
     lng: number,
     layerId: string
-  ): Promise<Feature | null> {
+  ): Promise<LocationOfInterest | null> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
     const survey = await this.surveyService
@@ -83,14 +86,14 @@ export class FeatureService {
     return await this.addPointInternal(survey, lat, lng, layerId);
   }
 
-  async updatePoint(feature: Feature): Promise<void> {
+  async updatePoint(loi: LocationOfInterest): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
     const survey = await this.surveyService
       .getActiveSurvey$()
       .pipe(take(1))
       .toPromise();
-    return await this.updatePointInternal(survey, feature);
+    return await this.updatePointInternal(survey, loi);
   }
 
   private async addPointInternal(
@@ -98,23 +101,26 @@ export class FeatureService {
     lat: number,
     lng: number,
     layerId: string
-  ): Promise<Feature | null> {
+  ): Promise<LocationOfInterest | null> {
     if (!(survey.layers || new Map()).get(layerId)) {
       return null;
     }
-    const newFeature = new LocationFeature(
+    const newLocationOfInterest = new LocationLocationOfInterest(
       this.dataStore.generateId(),
       layerId,
       new firebase.firestore.GeoPoint(lat, lng)
     );
-    await this.dataStore.updateFeature(survey.id, newFeature);
-    return newFeature;
+    await this.dataStore.updateLocationOfInterest(
+      survey.id,
+      newLocationOfInterest
+    );
+    return newLocationOfInterest;
   }
 
-  private async updatePointInternal(survey: Survey, feature: Feature) {
+  private async updatePointInternal(survey: Survey, loi: LocationOfInterest) {
     if (survey.layers.isEmpty()) {
       return;
     }
-    await this.dataStore.updateFeature(survey.id, feature);
+    await this.dataStore.updateLocationOfInterest(survey.id, loi);
   }
 }

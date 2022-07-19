@@ -41,11 +41,11 @@ limitations under the License.
         </button>
         <button
           mat-menu-item
-          (click)="onImportFeatures()"
+          (click)="onImportLocationOfInterests()"
           *ngIf="surveyService.canManageSurvey()"
         >
           <mat-icon>cloud_upload</mat-icon>
-          <span>Import features</span>
+          <span>Import lois</span>
         </button>
         <a class="download" [href]="getDownloadCsvUrl()" target="_blank">
           <button mat-menu-item>

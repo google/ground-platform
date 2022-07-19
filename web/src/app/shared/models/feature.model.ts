@@ -17,13 +17,13 @@
 import firebase from 'firebase/app';
 import { Map } from 'immutable';
 
-export interface Feature {
+export interface LocationOfInterest {
   readonly id: string;
   readonly layerId: string;
   readonly properties?: Map<string, string | number>;
 }
 
-export class LocationFeature implements Feature {
+export class LocationLocationOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly layerId: string,
@@ -33,7 +33,7 @@ export class LocationFeature implements Feature {
   ) {}
 }
 
-export class GeoJsonFeature implements Feature {
+export class GeoJsonLocationOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly layerId: string,
@@ -42,7 +42,7 @@ export class GeoJsonFeature implements Feature {
   ) {}
 }
 
-export class PolygonFeature implements Feature {
+export class PolygonLocationOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly layerId: string,

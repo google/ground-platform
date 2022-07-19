@@ -15,20 +15,20 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FeatureListComponent } from './feature-list.component';
+import { LocationOfInterestListComponent } from './loi-list.component';
 
-describe('FeatureListComponent', () => {
-  let component: FeatureListComponent;
-  let fixture: ComponentFixture<FeatureListComponent>;
+describe('LocationOfInterestListComponent', () => {
+  let component: LocationOfInterestListComponent;
+  let fixture: ComponentFixture<LocationOfInterestListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [FeatureListComponent],
+      declarations: [LocationOfInterestListComponent],
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FeatureListComponent);
+    fixture = TestBed.createComponent(LocationOfInterestListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

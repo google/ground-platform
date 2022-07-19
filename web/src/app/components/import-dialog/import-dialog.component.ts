@@ -49,7 +49,7 @@ export class ImportDialogComponent {
     });
   }
 
-  async onImportFeatures(): Promise<void> {
+  async onImportLocationOfInterests(): Promise<void> {
     const files = this.uploadForm.get('file')?.value;
     if (!files || files.length === 0) {
       console.error('File missing');
@@ -57,16 +57,16 @@ export class ImportDialogComponent {
     }
     try {
       this.isImporting = true;
-      const response = await this.dataImportService.importFeatures(
+      const response = await this.dataImportService.importLocationOfInterests(
         this.surveyId,
         this.layerId,
         files[0] as File
       );
       this.notificationService.success(
-        `Successfully imported ${response.count} features`
+        `Successfully imported ${response.count} lois`
       );
     } catch (err) {
-      this.notificationService.error('Importing features failed');
+      this.notificationService.error('Importing lois failed');
     }
     this.isImporting = false;
     this.ngZone.run(() => {

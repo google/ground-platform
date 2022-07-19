@@ -75,7 +75,7 @@ describe('LayerListComponent', () => {
     waitForAsync(() => {
       const navigationService = {
         getSurveyId$: () => of(''),
-        getFeatureId$: () => of(''),
+        getLocationOfInterestId$: () => of(''),
       };
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
