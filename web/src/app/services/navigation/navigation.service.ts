@@ -143,7 +143,7 @@ export class NavigationService {
   }
 
   /**
-   * Get current loi id in the URL fragment.
+   * Get current LOI id in the URL fragment.
    */
   getLocationOfInterestId(): string | null {
     return this.getFragmentParams().get(
@@ -152,7 +152,7 @@ export class NavigationService {
   }
 
   /**
-   * Navigate to the current URL, updating the loi id in the URL fragment.
+   * Navigate to the current URL, updating the LOI id in the URL fragment.
    */
   selectLocationOfInterest(id: string) {
     const newParam: { [key: string]: string } = {};

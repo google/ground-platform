@@ -442,7 +442,7 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
    * {
-   *   loiId: 'loi123'
+   *   loiId: 'LOI123'
    *   formId: 'form001',
    *   responses: {
    *     'element001': 'Response text',  // For 'text_field  elements.

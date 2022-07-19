@@ -101,8 +101,8 @@ function invertAndFlatten(obj) {
 }
 
 /**
- * Dictionary of lowercase aliases for recognized loi attributes. Case
- * is ignored when mapping column aliases to loi attributes.
+ * Dictionary of lowercase aliases for recognized LOI attributes. Case
+ * is ignored when mapping column aliases to LOI attributes.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   id: ["id", "key"],

@@ -71,8 +71,8 @@ async function exportCsv(req, res) {
   const lois = await db.fetchLocationOfInterestsByLayerId(survey.id, layerId);
   const observations = await db.fetchObservationsByLayerId(survey.id, layerId);
 
-  // Index observations by loi id in memory. This consumes more
-  // memory than iterating over and streaming both loi and observation`
+  // Index observations by LOI id in memory. This consumes more
+  // memory than iterating over and streaming both LOI and observation`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
   const observationsByLocationOfInterest = {};

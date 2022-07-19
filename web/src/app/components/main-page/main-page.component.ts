@@ -70,7 +70,7 @@ export class MainPageComponent implements OnInit {
         .getLayerId$()
         .subscribe(id => id && this.showEditLayerDialog(id))
     );
-    // Show loi details when non-null loi id set in URL.
+    // Show loi details when non-null LOI id set in URL.
     this.subscription.add(
       this.navigationService
         .getLocationOfInterestId$()

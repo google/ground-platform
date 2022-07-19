@@ -23,7 +23,7 @@ class Datastore {
   }
 
   /**
-   * Stores user email, name, and avatar to db for use in application lois.
+   * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
   mergeUserProfile({ uid, email, displayName, photoURL }) {

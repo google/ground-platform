@@ -190,7 +190,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Remove deleted lois to map. The lois that were displayed on
+   * Remove deleted lois to map. The LOIs that were displayed on
    * the map but not in the `newLocationOfInterests` are considered as deleted.
    */
   private removeDeletedLocationOfInterests(
@@ -222,7 +222,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Add new lois to map. The lois that were not displayed on
+   * Add new lois to map. The LOIs that were not displayed on
    * the map but in the `newLocationOfInterests` are considered as new.
    */
   private addNewLocationOfInterests(
@@ -235,7 +235,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     lois.forEach(loi => {
       if (!survey.getLayer(loi.layerId)) {
-        // Ignore lois whose layer has been removed.
+        // Ignore LOIs whose layer has been removed.
         console.debug(
           `Ignoring loi ${loi.id} with missing layer ${loi.layerId}`
         );
@@ -357,7 +357,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Selecting loi enlarges the marker or border of the polygon,
+   * Selecting LOI enlarges the marker or border of the polygon,
    * pans and zooms to the marker/polygon. Selecting null is considered
    * as deselecting which will change the selected back to normal size.
    */

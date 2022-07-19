@@ -178,11 +178,11 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the loi with the specified
+   * Returns an Observable that loads and emits the LOI with the specified
    * uuid.
    *
-   * @param surveyId the id of the survey in which requested loi is.
-   * @param loiId the id of the requested loi.
+   * @param surveyId the id of the survey in which requested LOI is.
+   * @param loiId the id of the requested LOI.
    */
   loadLocationOfInterest$(
     surveyId: string,
@@ -193,7 +193,7 @@ export class DataStoreService {
       .doc(loiId)
       .get()
       .pipe(
-        // Fail with error if loi could not be loaded.
+        // Fail with error if LOI could not be loaded.
         map(doc =>
           FirebaseDataConverter.toLocationOfInterest(
             doc.id,
@@ -231,7 +231,7 @@ export class DataStoreService {
               .map(obj =>
                 FirebaseDataConverter.toLocationOfInterest(obj.id, obj)
               )
-              // Filter out lois that could not be loaded (i.e., undefined).
+              // Filter out LOIs that could not be loaded (i.e., undefined).
               .filter(f => !!f)
               // Cast items in List to LocationOfInterest to remove undefined from type.
               .map(f => f as LocationOfInterest)
@@ -245,7 +245,7 @@ export class DataStoreService {
    * uuid.
    *
    * @param id the id of the requested survey (it should have forms inside).
-   * @param loiId the id of the requested loi.
+   * @param loiId the id of the requested LOI.
    */
   observations$(
     survey: Survey,
