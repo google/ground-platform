@@ -147,7 +147,7 @@ export class FirebaseDataConverter {
     const { name, tasks, color, contributorsCanAdd, ...jobDoc } = job;
     return {
       contributorsCanAdd,
-      name: name?.toJS() || {},
+      name,
       ...(tasks
         ? {
             tasks: tasks
@@ -285,13 +285,13 @@ export class FirebaseDataConverter {
     if (multipleChoice === undefined) {
       return {
         type: FirebaseDataConverter.stepTypeToString(type),
-        label: label.toJS(),
+        label,
         ...stepDoc,
       };
     } else {
       return {
         type: FirebaseDataConverter.stepTypeToString(type),
-        label: label.toJS(),
+        label,
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
         ),
@@ -374,7 +374,7 @@ export class FirebaseDataConverter {
   private static optionToJS(option: Option): {} {
     const { label, ...optionDoc } = option;
     return {
-      label: label.toJS(),
+      label,
       ...optionDoc,
     };
   }

@@ -51,7 +51,6 @@ import { NavigationService } from '../../services/navigation/navigation.service'
   styleUrls: ['./observation-form.component.scss'],
 })
 export class ObservationFormComponent {
-  readonly lang: string;
   readonly stepTypes = StepType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
@@ -70,8 +69,6 @@ export class ObservationFormComponent {
     surveyService: SurveyService,
     loiService: LocationOfInterestService
   ) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
