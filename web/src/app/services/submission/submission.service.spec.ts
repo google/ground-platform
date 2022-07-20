@@ -16,7 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { TestData } from '../../../testing/test-data';
-import { ObservationService } from './observation.service';
+import { SubmissionService } from './submission.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { SurveyService } from '../survey/survey.service';
 import { LocationOfInterestService } from '../loi/loi.service';
@@ -26,9 +26,9 @@ import { User } from '../../shared/models/user.model';
 
 const { newUser, newSurvey, newJob, newPointOfInterest } = TestData;
 
-describe('ObservationService', () => {
+describe('SubmissionService', () => {
   const user$ = new Subject<User | null>();
-  let service: ObservationService;
+  let service: SubmissionService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -44,17 +44,17 @@ describe('ObservationService', () => {
         },
       ],
     });
-    service = TestBed.inject(ObservationService);
+    service = TestBed.inject(SubmissionService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('createNewObservation', () => {
+  describe('createNewSubmission', () => {
     it('fail if task missing', () => {
       expect(() =>
-        service.createNewObservation(
+        service.createNewSubmission(
           newUser(),
           newSurvey({ jobs: { job001: newJob({ tasks: {} }) } }),
           newPointOfInterest()

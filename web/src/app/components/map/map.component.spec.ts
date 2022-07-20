@@ -164,7 +164,7 @@ describe('MapComponent', () => {
         'NavigationService',
         [
           'getLocationOfInterestId$',
-          'getObservationId$',
+          'getSubmissionId$',
           'selectLocationOfInterest',
           'clearLocationOfInterestId',
         ]
@@ -173,7 +173,7 @@ describe('MapComponent', () => {
       navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
         mockLocationOfInterestId$
       );
-      navigationServiceSpy.getObservationId$.and.returnValue(
+      navigationServiceSpy.getSubmissionId$.and.returnValue(
         of<string | null>(null)
       );
 

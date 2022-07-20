@@ -25,7 +25,7 @@ import { User } from './../../shared/models/user.model';
 import { LocationOfInterest } from '../../shared/models/loi.model';
 import { Job } from './../../shared/models/job.model';
 import { List, Map } from 'immutable';
-import { Observation } from '../../shared/models/observation/observation.model';
+import { Submission } from '../../shared/models/submission/submission.model';
 import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 import 'firebase/storage';
@@ -109,7 +109,7 @@ export class DataStoreService {
 
   async deleteJob(surveyId: string, jobId: string) {
     await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-    await this.deleteAllObservationsInJob(surveyId, jobId);
+    await this.deleteAllSubmissionsInJob(surveyId, jobId);
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
@@ -118,24 +118,24 @@ export class DataStoreService {
       });
   }
 
-  private async deleteAllObservationsInJob(surveyId: string, jobId: string) {
-    const observations = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/observations`,
+  private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
+    const submissions = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where('jobId', '==', jobId)
     );
-    const querySnapshot = await observations.get().toPromise();
+    const querySnapshot = await submissions.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllObservationsInLocationOfInterest(
+  private async deleteAllSubmissionsInLocationOfInterest(
     surveyId: string,
     loiId: string
   ) {
-    const observations = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/observations`,
+    const submissions = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where('loiId', '==', loiId)
     );
-    const querySnapshot = await observations.get().toPromise();
+    const querySnapshot = await submissions.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -152,7 +152,7 @@ export class DataStoreService {
   }
 
   async deleteLocationOfInterest(surveyId: string, loiId: string) {
-    await this.deleteAllObservationsInLocationOfInterest(surveyId, loiId);
+    await this.deleteAllSubmissionsInLocationOfInterest(surveyId, loiId);
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
@@ -161,20 +161,20 @@ export class DataStoreService {
       .delete();
   }
 
-  async deleteObservation(surveyId: string, observationId: string) {
+  async deleteSubmission(surveyId: string, submissionId: string) {
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .collection('observations')
-      .doc(observationId)
+      .collection('submissions')
+      .doc(submissionId)
       .delete();
   }
 
-  updateObservation(surveyId: string, observation: Observation) {
+  updateSubmission(surveyId: string, submission: Submission) {
     return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/observations`)
-      .doc(observation.id)
-      .set(FirebaseDataConverter.observationToJS(observation));
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
+      .doc(submission.id)
+      .set(FirebaseDataConverter.submissionToJS(submission));
   }
 
   /**
@@ -241,18 +241,18 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the observations with the specified
+   * Returns an Observable that loads and emits the submissions with the specified
    * uuid.
    *
    * @param id the id of the requested survey (it should have tasks inside).
    * @param loiId the id of the requested loi.
    */
-  observations$(
+  submissions$(
     survey: Survey,
     loi: LocationOfInterest
-  ): Observable<List<Observation>> {
+  ): Observable<List<Submission>> {
     return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/observations`, ref =>
+      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
         ref.where('loiId', '==', loi.id)
       )
       .valueChanges({ idField: 'id' })
@@ -260,7 +260,7 @@ export class DataStoreService {
         map(array =>
           List(
             array.map(obj => {
-              return FirebaseDataConverter.toObservation(
+              return FirebaseDataConverter.toSubmission(
                 survey
                   .getJob(loi.jobId)!
                   .getTask((obj as DocumentData).taskId)!,
@@ -274,18 +274,18 @@ export class DataStoreService {
   }
 
   // TODO: Define return type here and throughout.
-  loadObservation$(
+  loadSubmission$(
     survey: Survey,
     loi: LocationOfInterest,
-    observationId: string
+    submissionId: string
   ) {
     return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/observations`)
-      .doc(observationId)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`)
+      .doc(submissionId)
       .get()
       .pipe(
         map(doc => {
-          return FirebaseDataConverter.toObservation(
+          return FirebaseDataConverter.toSubmission(
             survey
               .getJob(loi.jobId)!
               .getTask((doc.data()! as DocumentData).taskId)!,

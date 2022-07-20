@@ -17,7 +17,7 @@ import { DataStoreService } from './../../services/data-store/data-store.service
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { ObservationFormComponent } from './observation-form.component';
+import { SubmissionFormComponent } from './submission-form.component';
 import {
   LocationOfInterest,
   PointOfInterest,
@@ -25,8 +25,8 @@ import {
 import { NEVER, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { List, Map } from 'immutable';
-import { Observation } from '../../shared/models/observation/observation.model';
-import { Response } from '../../shared/models/observation/response.model';
+import { Submission } from '../../shared/models/submission/submission.model';
+import { Response } from '../../shared/models/submission/response.model';
 import firebase from 'firebase/app';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Job } from '../../shared/models/job.model';
@@ -40,7 +40,7 @@ import { Task } from '../../shared/models/task/task.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
-import { ObservationService } from '../../services/observation/observation.service';
+import { SubmissionService } from '../../services/submission/submission.service';
 import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -137,8 +137,8 @@ class MockModel {
     isAuthenticated: false,
   };
 
-  static observation001 = new Observation(
-    'observation001',
+  static submission001 = new Submission(
+    'submission001',
     MockModel.loi001.id,
     MockModel.loi001.jobId,
     MockModel.form001,
@@ -165,19 +165,19 @@ class MockLocationOfInterestService {
   }
 }
 
-class MockObservationService {
-  getSelectedObservation$() {
-    return of<Observation>(MockModel.observation001);
+class MockSubmissionService {
+  getSelectedSubmission$() {
+    return of<Submission>(MockModel.submission001);
   }
 }
 
 const surveyService = new MockSurveyService();
 const loiService = new MockLocationOfInterestService();
-const observationService = new MockObservationService();
+const submissionService = new MockSubmissionService();
 
-describe('ObservationFormComponent', () => {
-  let component: ObservationFormComponent;
-  let fixture: ComponentFixture<ObservationFormComponent>;
+describe('SubmissionFormComponent', () => {
+  let component: SubmissionFormComponent;
+  let fixture: ComponentFixture<SubmissionFormComponent>;
 
   beforeEach(
     waitForAsync(() => {
@@ -187,7 +187,7 @@ describe('ObservationFormComponent', () => {
       };
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
-        declarations: [ObservationFormComponent],
+        declarations: [SubmissionFormComponent],
         imports: [
           BrowserAnimationsModule,
           FormsModule,
@@ -209,7 +209,7 @@ describe('ObservationFormComponent', () => {
             useValue: loiService,
           },
           { provide: SurveyService, useValue: surveyService },
-          { provide: ObservationService, useValue: observationService },
+          { provide: SubmissionService, useValue: submissionService },
           { provide: Router, useValue: routerSpy },
           { provide: NavigationService, useValue: navigationService },
           { provide: AuthService, useValue: { getUser$: () => NEVER } },
@@ -220,7 +220,7 @@ describe('ObservationFormComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ObservationFormComponent);
+    fixture = TestBed.createComponent(SubmissionFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -233,16 +233,16 @@ describe('ObservationFormComponent', () => {
     for (const el of fixture.debugElement.queryAll(
       By.css('.step-response div mat-form-field input')
     )) {
-      if (!component.observationSteps) {
+      if (!component.submissionSteps) {
         break;
       }
-      const indexEl = component.observationSteps.findIndex(
+      const indexEl = component.submissionSteps.findIndex(
         step => step.id === el.nativeElement.id
       );
 
       expect(indexEl).toBeGreaterThanOrEqual(0);
 
-      const want = component.observationSteps.get(indexEl)?.required;
+      const want = component.submissionSteps.get(indexEl)?.required;
 
       const got = el.nativeElement.required as boolean | undefined;
 
@@ -254,16 +254,16 @@ describe('ObservationFormComponent', () => {
     for (const el of fixture.debugElement.queryAll(
       By.css('.step-response .multiple-choice-step mat-label')
     )) {
-      if (!component.observationSteps) {
+      if (!component.submissionSteps) {
         break;
       }
-      const indexEl = component.observationSteps.findIndex(
+      const indexEl = component.submissionSteps.findIndex(
         step => step.id === el.nativeElement.id
       );
 
       expect(indexEl).toBeGreaterThanOrEqual(0);
 
-      const want = component.observationSteps.get(indexEl)?.required;
+      const want = component.submissionSteps.get(indexEl)?.required;
 
       const got = el.classes['asterix--after'] as boolean | undefined;
 

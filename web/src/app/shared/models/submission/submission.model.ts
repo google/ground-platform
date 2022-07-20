@@ -19,7 +19,7 @@ import { Task } from '../task/task.model';
 import { Response } from './response.model';
 import { Map } from 'immutable';
 
-export class Observation {
+export class Submission {
   constructor(
     readonly id: string,
     readonly loiId: string,
@@ -30,12 +30,12 @@ export class Observation {
     readonly responses: Map<string, Response>
   ) {}
 
-  // Returns copy of Observation with responses and lastModified replaced.
+  // Returns copy of Submission with responses and lastModified replaced.
   withResponsesAndLastModified(
     responses: Map<string, Response>,
     lastModified: AuditInfo
-  ): Observation {
-    return new Observation(
+  ): Submission {
+    return new Submission(
       this.id,
       this.loiId,
       this.jobId,

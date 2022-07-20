@@ -25,51 +25,49 @@ limitations under the License.
     *ngIf="!job.tasks?.isEmpty()"
     mat-flat-button
     color="primary"
-    class="add-observation-btn"
-    (click)="onAddObservationClick()"
+    class="add-submission-btn"
+    (click)="onAddSubmissionClick()"
   >
-    <mat-icon class="add-observation-icon">add</mat-icon>
-    Add observation
+    <mat-icon class="add-submission-icon">add</mat-icon>
+    Add submission
   </button>
 </div>
-<div *ngIf="observations$ | async as observations">
-  <ng-container *ngIf="observations.size; else noObservations">
-    <mat-card class="observation card" *ngFor="let observation of observations">
+<div *ngIf="submissions$ | async as submissions">
+  <ng-container *ngIf="submissions.size; else noSubmissions">
+    <mat-card class="submission card" *ngFor="let submission of submissions">
       <mat-card-header>
         <mat-card-title>
-          {{ observation.created.user.displayName }}
+          {{ submission.created.user.displayName }}
         </mat-card-title>
         <!--TODO: figure out why serverTime is not working-->
         <mat-card-subtitle>
-          {{ observation.created.clientTime | date: 'medium' }}
+          {{ submission.created.clientTime | date: 'medium' }}
         </mat-card-subtitle>
         <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="actions">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="onEditObservationClick(observation)">
+          <button mat-menu-item (click)="onEditSubmissionClick(submission)">
             <mat-icon>edit</mat-icon>
-            <span>Edit observation</span>
+            <span>Edit submission</span>
           </button>
           <button
             mat-menu-item
-            (click)="onDeleteObservationClick(observation.id)"
+            (click)="onDeleteSubmissionClick(submission.id)"
           >
             <mat-icon>delete_forever</mat-icon>
-            <span>Delete observation</span>
+            <span>Delete submission</span>
           </button>
         </mat-menu>
       </mat-card-header>
       <mat-card-content>
-        <div *ngFor="let step of getSteps(observation)">
+        <div *ngFor="let step of getSteps(submission)">
           <label class="step-label">{{ step.label?.get(lang) }}</label>
           <div
             class="step-response"
-            *ngIf="
-              step.type == stepTypes.TEXT || step.type == stepTypes.NUMBER
-            "
+            *ngIf="step.type == stepTypes.TEXT || step.type == stepTypes.NUMBER"
           >
-            {{ observation.responses?.get(step.id)?.value }}
+            {{ submission.responses?.get(step.id)?.value }}
           </div>
           <div
             class="step-response"
@@ -77,7 +75,7 @@ limitations under the License.
           >
             <span
               class="option-label"
-              *ngFor="let option of observation.responses?.get(step.id)?.value"
+              *ngFor="let option of submission.responses?.get(step.id)?.value"
             >
               {{ option.label?.get(lang) }}
             </span>
@@ -93,9 +91,9 @@ limitations under the License.
       </mat-card-content>
     </mat-card>
   </ng-container>
-  <ng-template #noObservations>
-    <div class="no-observation-text">
-      No observations found for the selected loi.
+  <ng-template #noSubmissions>
+    <div class="no-submission-text">
+      No submissions found for the selected loi.
     </div>
   </ng-template>
 </div>

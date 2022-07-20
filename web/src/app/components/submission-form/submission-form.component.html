@@ -24,10 +24,10 @@
     [actionsType]="jobListItemActionsType.BACK"
   ></ground-job-list-item>
 </mat-list>
-<div *ngIf="observationForm" class="observation">
-  <h3>Add/edit observation</h3>
-  <form [formGroup]="observationForm" (ngSubmit)="onSave()" autocomplete="off">
-    <div *ngFor="let step of observationSteps">
+<div *ngIf="submissionForm" class="submission">
+  <h3>Add/edit submission</h3>
+  <form [formGroup]="submissionForm" (ngSubmit)="onSave()" autocomplete="off">
+    <div *ngFor="let step of submissionSteps">
       <div class="step-response">
         <!-- Text step -->
         <div *ngIf="step.type == stepTypes.TEXT">
@@ -108,7 +108,7 @@
         color="primary"
         type="submit"
         style="margin-left: 8px"
-        [disabled]="!observationForm.valid"
+        [disabled]="!submissionForm.valid"
       >
         Save
       </button>

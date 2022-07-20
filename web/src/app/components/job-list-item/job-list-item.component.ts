@@ -92,7 +92,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       .openConfirmationDialog(
         'Warning',
         'Are you sure you wish to delete this job? Any associated data ' +
-          'including all lois and observations in this job will be ' +
+          'including all lois and submissions in this job will be ' +
           'lost. This cannot be undone.'
       )
       .afterClosed()

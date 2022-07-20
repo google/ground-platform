@@ -21,7 +21,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
-import { ObservationService } from '../../services/observation/observation.service';
+import { SubmissionService } from '../../services/submission/submission.service';
 import { take } from 'rxjs/operators';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { AuthService } from '../../services/auth/auth.service';
@@ -46,7 +46,7 @@ export class MainPageComponent implements OnInit {
     private navigationService: NavigationService,
     private surveyService: SurveyService,
     private loiService: LocationOfInterestService,
-    private observationService: ObservationService,
+    private submissionService: SubmissionService,
     private authService: AuthService,
     private dialog: MatDialog
   ) {
@@ -76,11 +76,11 @@ export class MainPageComponent implements OnInit {
         .getLocationOfInterestId$()
         .subscribe(id => id && this.loadLocationOfInterestDetails(id))
     );
-    // Show/hide observation when observation id set in URL.
+    // Show/hide submission when submission id set in URL.
     this.subscription.add(
       this.navigationService
-        .getObservationId$()
-        .subscribe(id => this.editObservation(id))
+        .getSubmissionId$()
+        .subscribe(id => this.editSubmission(id))
     );
     // Redirect to sign in page if user is not authenticated.
     this.subscription.add(
@@ -123,11 +123,11 @@ export class MainPageComponent implements OnInit {
     this.loiService.selectLocationOfInterest(loiId);
   }
 
-  private editObservation(observationId: string | null) {
-    if (observationId) {
-      this.observationService.selectObservation(observationId);
+  private editSubmission(submissionId: string | null) {
+    if (submissionId) {
+      this.submissionService.selectSubmission(submissionId);
     } else {
-      this.observationService.deselectObservation();
+      this.submissionService.deselectSubmission();
     }
   }
 }

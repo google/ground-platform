@@ -16,16 +16,16 @@
 
 @import 'variables';
 
-.observation.card {
+.submission.card {
   margin: 16px;
 }
-.observation .step-label {
+.submission .step-label {
   font-size: 12px;
   line-height: 16px;
   color: mat-color($foreground, secondary-text);
   margin-bottom: 3px;
 }
-.observation .step-response {
+.submission .step-response {
   font-size: 14px;
   line-height: 20px;
   color: mat-color($foreground, text);
@@ -40,7 +40,7 @@
   padding: 0 16px;
 }
 
-.add-observation-btn {
+.add-submission-btn {
   position: absolute;
   bottom: 32px;
   border-radius: 100px;
@@ -50,7 +50,7 @@
   z-index: 1000;
 }
 
-.no-observation-text {
+.no-submission-text {
   font-style: italic;
   color: mat-color($foreground, secondary-text);
   margin: 16px;
@@ -59,6 +59,6 @@
   z-index: 1000;
 }
 
-.add-observation-icon {
+.add-submission-icon {
   padding: 10px;
 }

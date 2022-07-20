@@ -18,9 +18,9 @@ import { Component } from '@angular/core';
 import { StepType, Step } from '../../shared/models/task/step.model';
 import { Cardinality } from '../../shared/models/task/multiple-choice.model';
 import { Option } from '../../shared/models/task/option.model';
-import { Observation } from '../../shared/models/observation/observation.model';
-import { Response } from '../../shared/models/observation/response.model';
-import { ObservationService } from '../../services/observation/observation.service';
+import { Submission } from '../../shared/models/submission/submission.model';
+import { Response } from '../../shared/models/submission/response.model';
+import { SubmissionService } from '../../services/submission/submission.service';
 import {
   FormGroup,
   FormBuilder,
@@ -46,27 +46,27 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 /*global alert*/
 
 @Component({
-  selector: 'ground-observation-form',
-  templateUrl: './observation-form.component.html',
-  styleUrls: ['./observation-form.component.scss'],
+  selector: 'ground-submission-form',
+  templateUrl: './submission-form.component.html',
+  styleUrls: ['./submission-form.component.scss'],
 })
-export class ObservationFormComponent {
+export class SubmissionFormComponent {
   readonly lang: string;
   readonly stepTypes = StepType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
   readonly job$: Observable<Job>;
   surveyId?: string;
-  observation?: Observation;
-  observationForm?: FormGroup;
-  observationSteps?: List<Step>;
+  submission?: Submission;
+  submissionForm?: FormGroup;
+  submissionSteps?: List<Step>;
 
   constructor(
     private dataStoreService: DataStoreService,
     private authService: AuthService,
     private formBuilder: FormBuilder,
     private navigationService: NavigationService,
-    observationService: ObservationService,
+    submissionService: SubmissionService,
     surveyService: SurveyService,
     loiService: LocationOfInterestService
   ) {
@@ -75,10 +75,10 @@ export class ObservationFormComponent {
     surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
-    observationService
-      .getSelectedObservation$()
-      .subscribe((observation?: Observation | LoadingState) =>
-        this.onSelectObservation(observation)
+    submissionService
+      .getSelectedSubmission$()
+      .subscribe((submission?: Submission | LoadingState) =>
+        this.onSelectSubmission(submission)
       );
     this.job$ = surveyService
       .getActiveSurvey$()
@@ -101,7 +101,7 @@ export class ObservationFormComponent {
       .pipe(first())
       .subscribe(user => {
         if (!user) {
-          throw Error('Login required to update observation.');
+          throw Error('Login required to update submission.');
         }
         const lastModified = new AuditInfo(
           user,
@@ -109,40 +109,37 @@ export class ObservationFormComponent {
           /*serverTime=*/ this.dataStoreService.getServerTimestamp()
         );
         const updatedResponses: Map<string, Response> = this.extractResponses();
-        const updatedObservation = this.observation!.withResponsesAndLastModified(
+        const updatedSubmission = this.submission!.withResponsesAndLastModified(
           updatedResponses,
           lastModified
         );
         this.dataStoreService
-          .updateObservation(this.surveyId!, updatedObservation)
+          .updateSubmission(this.surveyId!, updatedSubmission)
           .then(() => {
-            this.observationForm?.markAsPristine();
+            this.submissionForm?.markAsPristine();
             return this.navigateToLocationOfInterest();
           })
           .catch(() => {
-            alert('Observation update failed.');
+            alert('Submission update failed.');
           });
       });
   }
 
-  private onSelectObservation(observation?: Observation | LoadingState) {
-    if (
-      observation === LoadingState.NOT_LOADED &&
-      this.observationForm?.dirty
-    ) {
+  private onSelectSubmission(submission?: Submission | LoadingState) {
+    if (submission === LoadingState.NOT_LOADED && this.submissionForm?.dirty) {
       if (
         confirm(
-          'You have unsaved changes in observation form, do you want to save them?'
+          'You have unsaved changes in submission form, do you want to save them?'
         )
       ) {
         this.onSave();
       } else {
-        this.observationForm = undefined;
+        this.submissionForm = undefined;
       }
     }
-    if (observation instanceof Observation) {
-      this.observation = observation;
-      this.observationSteps = observation!
+    if (submission instanceof Submission) {
+      this.submission = submission;
+      this.submissionSteps = submission!
         .task!.steps!.toOrderedMap()
         .sortBy(entry => entry.index)
         .toList();
@@ -151,22 +148,20 @@ export class ObservationFormComponent {
   }
 
   private initForm() {
-    if (this.observation === undefined) {
-      throw Error('Observation is not selected.');
+    if (this.submission === undefined) {
+      throw Error('Submission is not selected.');
     }
-    this.observationForm = this.convertObservationToFormGroup(
-      this.observation!
-    );
+    this.submissionForm = this.convertSubmissionToFormGroup(this.submission!);
   }
 
   private navigateToLocationOfInterest() {
-    this.navigationService.clearObservationId();
+    this.navigationService.clearSubmissionId();
   }
 
-  private convertObservationToFormGroup(observation: Observation): FormGroup {
+  private convertSubmissionToFormGroup(submission: Submission): FormGroup {
     const group: { [stepId: string]: FormControl } = {};
-    for (const [stepId, step] of observation.task!.steps) {
-      const response = observation!.responses?.get(stepId);
+    for (const [stepId, step] of submission.task!.steps) {
+      const response = submission!.responses?.get(stepId);
       switch (step.type) {
         case StepType.TEXT:
           this.addControlsForTextStep(group, step, response);
@@ -186,7 +181,7 @@ export class ObservationFormComponent {
 
   private extractResponses(): Map<string, Response> {
     return Map<string, Response>(
-      this.observationSteps!.map(step => [
+      this.submissionSteps!.map(step => [
         step.id,
         this.extractResponseForStep(step),
       ])
@@ -232,11 +227,11 @@ export class ObservationFormComponent {
   }
 
   private extractResponseForTextStep(step: Step): Response {
-    return new Response(this.observationForm?.value[step.id]);
+    return new Response(this.submissionForm?.value[step.id]);
   }
 
   private extractResponseForNumberStep(step: Step): Response {
-    return new Response(this.observationForm?.value[step.id]);
+    return new Response(this.submissionForm?.value[step.id]);
   }
 
   private addControlsForMultipleChoiceStep(
@@ -287,7 +282,7 @@ export class ObservationFormComponent {
 
   private extractResponseForSelectOneStep(step: Step): Response {
     const selectedOption: Option = step.getMultipleChoiceOption(
-      this.observationForm?.value[step.id]
+      this.submissionForm?.value[step.id]
     );
     return new Response(List([selectedOption]));
   }
@@ -305,7 +300,7 @@ export class ObservationFormComponent {
 
   private extractResponseForSelectMultipleStep(step: Step): Response {
     const selectedOptions: List<Option> = step.multipleChoice!.options!.filter(
-      option => this.observationForm?.value[option.id]
+      option => this.submissionForm?.value[option.id]
     );
     return new Response(selectedOptions);
   }

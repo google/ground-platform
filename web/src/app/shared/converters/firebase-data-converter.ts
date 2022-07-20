@@ -30,11 +30,11 @@ import {
   GeoJsonLocationOfInterest,
   AreaOfInterest,
 } from '../models/loi.model';
-import { Observation } from '../models/observation/observation.model';
+import { Submission } from '../models/submission/submission.model';
 import { Option } from '../models/task/option.model';
 import { List, Map } from 'immutable';
 import { AuditInfo } from '../models/audit-info.model';
-import { Response } from '../../shared/models/observation/response.model';
+import { Response } from '../../shared/models/submission/response.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
@@ -437,7 +437,7 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Observation instance.
+   * immutable Submission instance.
    *
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
@@ -454,15 +454,11 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toObservation(
-    task: Task,
-    id: string,
-    data: DocumentData
-  ): Observation {
+  static toSubmission(task: Task, id: string, data: DocumentData): Submission {
     if (data === undefined) {
-      throw Error(`Observation ${id} does not have document data.`);
+      throw Error(`Submission ${id} does not have document data.`);
     }
-    return new Observation(
+    return new Submission(
       id,
       data.loiId,
       data.jobId,
@@ -482,16 +478,16 @@ export class FirebaseDataConverter {
     );
   }
 
-  static observationToJS(observation: Observation): {} {
+  static submissionToJS(submission: Submission): {} {
     return {
-      loiId: observation.loiId,
-      jobId: observation.jobId,
-      taskId: observation.task?.id,
-      created: FirebaseDataConverter.auditInfoToJs(observation.created),
+      loiId: submission.loiId,
+      jobId: submission.jobId,
+      taskId: submission.task?.id,
+      created: FirebaseDataConverter.auditInfoToJs(submission.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(
-        observation.lastModified
+        submission.lastModified
       ),
-      responses: FirebaseDataConverter.responsesToJS(observation.responses),
+      responses: FirebaseDataConverter.responsesToJS(submission.responses),
     };
   }
 

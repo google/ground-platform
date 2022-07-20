@@ -108,7 +108,7 @@ export class LocationOfInterestPanelHeaderComponent
       .openConfirmationDialog(
         'Warning',
         'Are you sure you wish to delete this loi? ' +
-          'Any associated data, including all observations, will be lost. ' +
+          'Any associated data, including all submissions, will be lost. ' +
           'This cannot be undone.'
       )
       .afterClosed()

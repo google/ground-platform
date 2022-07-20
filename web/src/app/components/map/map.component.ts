@@ -136,7 +136,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscription.add(
       combineLatest([
         this.navigationService.getLocationOfInterestId$(),
-        this.navigationService.getObservationId$(),
+        this.navigationService.getSubmissionId$(),
       ]).subscribe(() => this.cancelReposition())
     );
   }

@@ -26,12 +26,12 @@ import {
   PointOfInterest,
 } from '../../shared/models/loi.model';
 import { Job } from '../../shared/models/job.model';
-import { Observation } from '../../shared/models/observation/observation.model';
+import { Submission } from '../../shared/models/submission/submission.model';
 import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { SurveyService } from '../../services/survey/survey.service';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { ObservationService } from '../../services/observation/observation.service';
+import { SubmissionService } from '../../services/submission/submission.service';
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -58,7 +58,7 @@ const mockLocationOfInterest = new PointOfInterest(
   new firebase.firestore.GeoPoint(0.0, 0.0)
 );
 
-const mockObservations = List<Observation>([]);
+const mockSubmissions = List<Submission>([]);
 
 class MockSurveyService {
   getActiveSurvey$() {
@@ -72,18 +72,18 @@ class MockLocationOfInterestService {
   }
 }
 
-class MockObservationService {
-  observations$() {
-    return of<List<Observation>>(mockObservations);
+class MockSubmissionService {
+  submissions$() {
+    return of<List<Submission>>(mockSubmissions);
   }
 }
 
 const surveyService = new MockSurveyService();
 const loiService = new MockLocationOfInterestService();
-const observationService = new MockObservationService();
+const submissionService = new MockSubmissionService();
 const navigationService = {
   getSurveyId$: () => of(''),
-  getObservationId$: () => of(''),
+  getSubmissionId$: () => of(''),
 };
 
 describe('LocationOfInterestPanelComponent', () => {
@@ -103,7 +103,7 @@ describe('LocationOfInterestPanelComponent', () => {
             useValue: loiService,
           },
           { provide: SurveyService, useValue: surveyService },
-          { provide: ObservationService, useValue: observationService },
+          { provide: SubmissionService, useValue: submissionService },
           { provide: Router, useValue: routerSpy },
           { provide: NavigationService, useValue: navigationService },
         ],
