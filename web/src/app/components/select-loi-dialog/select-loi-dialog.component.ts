@@ -24,7 +24,7 @@ interface DialogData {
 export interface LocationOfInterestData {
   loiId: string;
   color: string;
-  layerName: string;
+  jobName: string;
 }
 
 @Component({

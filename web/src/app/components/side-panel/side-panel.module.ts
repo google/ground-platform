@@ -18,7 +18,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { SidePanelComponent } from './side-panel.component';
 import { LocationOfInterestPanelModule } from '../loi-panel/loi-panel.module';
-import { LayerListModule } from '../layer-list/layer-list.module';
+import { JobListModule } from '../job-list/job-list.module';
 import { ObservationFormModule } from '../observation-form/observation-form.module';
 import { LocationOfInterestListModule } from '../loi-list/loi-list.module';
 
@@ -26,7 +26,7 @@ import { LocationOfInterestListModule } from '../loi-list/loi-list.module';
   imports: [
     BrowserModule,
     LocationOfInterestPanelModule,
-    LayerListModule,
+    JobListModule,
     ObservationFormModule,
     LocationOfInterestListModule,
   ],

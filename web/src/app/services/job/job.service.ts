@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { DataStoreService } from '../data-store/data-store.service';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Field, FieldType } from '../../shared/models/task/field.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/task/option.model';
@@ -29,18 +29,18 @@ import { take } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
-export class LayerService {
+export class JobService {
   constructor(
     private dataStoreService: DataStoreService,
     private surveyService: SurveyService
   ) {}
 
   /**
-   * Creates and returns a new layer with a generated unique identifier.
+   * Creates and returns a new job with a generated unique identifier.
    */
-  createNewLayer(): Layer {
-    const layerId = this.dataStoreService.generateId();
-    return new Layer(layerId, /* index */ -1);
+  createNewJob(): Job {
+    const jobId = this.dataStoreService.generateId();
+    return new Job(jobId, /* index */ -1);
   }
 
   /**
@@ -81,14 +81,14 @@ export class LayerService {
   }
 
   /**
-   * Adds/Updates the layer of a survey with a given layer value.
+   * Adds/Updates the job of a survey with a given job value.
    */
-  async addOrUpdateLayer(surveyId: string, layer: Layer): Promise<void> {
-    if (layer.index === -1) {
-      const index = await this.getLayerCount();
-      layer = layer.withIndex(index);
+  async addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
+    if (job.index === -1) {
+      const index = await this.getJobCount();
+      job = job.withIndex(index);
     }
-    return this.dataStoreService.addOrUpdateLayer(surveyId, layer);
+    return this.dataStoreService.addOrUpdateJob(surveyId, job);
   }
 
   /**
@@ -97,9 +97,9 @@ export class LayerService {
   convertFieldsListToMap(fields: List<Field>): Map<string, Field> {
     let fieldsMap = Map<string, Field>();
     fields.forEach((field: Field, index: number) => {
-      const layerFieldId = fields && fields.get(index)?.id;
-      const fieldId = layerFieldId
-        ? layerFieldId
+      const jobFieldId = fields && fields.get(index)?.id;
+      const fieldId = jobFieldId
+        ? jobFieldId
         : this.dataStoreService.generateId();
       fieldsMap = fieldsMap.set(fieldId, field);
     });
@@ -116,11 +116,11 @@ export class LayerService {
     id: string | undefined,
     fields: Map<string, Field>
   ): Map<string, Task> | undefined {
-    if (LayerService.isTaskEmpty(fields)) {
+    if (JobService.isTaskEmpty(fields)) {
       return undefined;
     }
     const taskId = id || this.dataStoreService.generateId();
-    return LayerService.createTaskMap(taskId, new Task(taskId, fields));
+    return JobService.createTaskMap(taskId, new Task(taskId, fields));
   }
 
   /**
@@ -138,7 +138,7 @@ export class LayerService {
   private static isTaskEmpty(fields: Map<string, Field>): boolean {
     return (
       fields.isEmpty() ||
-      (fields.size === 1 && !LayerService.getFieldLabel(fields.first()))
+      (fields.size === 1 && !JobService.getFieldLabel(fields.first()))
     );
   }
 
@@ -147,18 +147,18 @@ export class LayerService {
   }
 
   /**
-   * Returns the task value from a layer passed.
+   * Returns the task value from a job passed.
    */
-  getTask(layer?: Layer): Task | undefined {
-    const tasks = layer?.tasks;
+  getTask(job?: Job): Task | undefined {
+    const tasks = job?.tasks;
     return tasks ? tasks.valueSeq().first() : undefined;
   }
 
-  private async getLayerCount(): Promise<number> {
+  private async getJobCount(): Promise<number> {
     const survey = await this.surveyService
       .getActiveSurvey$()
       .pipe(take(1))
       .toPromise();
-    return survey.layers?.size;
+    return survey.jobs?.size;
   }
 }

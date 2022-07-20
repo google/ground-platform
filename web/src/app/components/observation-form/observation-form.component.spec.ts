@@ -29,7 +29,7 @@ import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
 import firebase from 'firebase/app';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Option } from '../../shared/models/task/option.model';
 import {
   MultipleChoice,
@@ -51,7 +51,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { LayerListItemModule } from '../layer-list-item/layer-list-item.module';
+import { JobListItemModule } from '../job-list-item/job-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -109,8 +109,8 @@ class MockModel {
     })
   );
 
-  static layer001 = new Layer(
-    'layer001',
+  static job001 = new Job(
+    'job001',
     1,
     'red',
     StringMap({ en: 'name' }),
@@ -121,13 +121,13 @@ class MockModel {
     'survey001',
     StringMap({ en: 'title' }),
     StringMap({ en: 'description' }),
-    Map({ layer001: MockModel.layer001 }),
+    Map({ job001: MockModel.job001 }),
     /*acl=*/ Map({})
   );
 
   static loi001 = new PointOfInterest(
     'loi001',
-    MockModel.layer001.id,
+    MockModel.job001.id,
     new firebase.firestore.GeoPoint(0.0, 0.0)
   );
 
@@ -140,7 +140,7 @@ class MockModel {
   static observation001 = new Observation(
     'observation001',
     MockModel.loi001.id,
-    MockModel.loi001.layerId,
+    MockModel.loi001.jobId,
     MockModel.form001,
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
@@ -200,7 +200,7 @@ describe('ObservationFormComponent', () => {
           MatCheckboxModule,
           MatIconModule,
           MatListModule,
-          LayerListItemModule,
+          JobListItemModule,
         ],
         providers: [
           { provide: DataStoreService, useValue: {} },

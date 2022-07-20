@@ -33,7 +33,7 @@ The web app is comprised of the following elements:
     - **Main page container component**: All of the UI components in the main map view are grouped into the main page container component, which is called by the router when the app is loaded. For example, the [Google Maps Angular component](https://github.com/angular/components/tree/master/src/google-maps) draws the map elements.
 - **Model**: The app model contains the objects that define the representations of the domain concepts, such as points, observations, surveys, location features, and geoJSON features.
 - **Services**:
-    - **High-level services**: Include `SurveyService` and `LayerService`.
+    - **High-level services**: Include `SurveyService` and `JobService`.
     - **Low-level services**: Include `DataStoreService` and `AuthService`.
 
 ## Data flows

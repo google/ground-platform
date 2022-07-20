@@ -17,27 +17,27 @@ limitations under the License.
   <h3 matLine>
     <mat-icon
       aria-hidden="false"
-      aria-label="Layer icon"
-      [ngStyle]="{ color: layer?.color }"
-      class="layer-icon"
+      aria-label="Job icon"
+      [ngStyle]="{ color: job?.color }"
+      class="job-icon"
     >
-      layers
+      jobs
     </mat-icon>
-    {{ layer?.name?.get(lang) }}
+    {{ job?.name?.get(lang) }}
   </h3>
   <div [ngSwitch]="actionsType">
-    <div *ngSwitchCase="layerListItemActionsType.MENU">
-      <button mat-icon-button [matMenuTriggerFor]="layerMenu">
+    <div *ngSwitchCase="jobListItemActionsType.MENU">
+      <button mat-icon-button [matMenuTriggerFor]="jobMenu">
         <mat-icon>more_vert</mat-icon>
       </button>
-      <mat-menu #layerMenu="matMenu">
+      <mat-menu #jobMenu="matMenu">
         <button
           mat-menu-item
-          (click)="onCustomizeLayer()"
+          (click)="onCustomizeJob()"
           *ngIf="surveyService.canManageSurvey()"
         >
           <mat-icon>edit</mat-icon>
-          <span>Customize layer</span>
+          <span>Customize job</span>
         </button>
         <button
           mat-menu-item
@@ -53,13 +53,13 @@ limitations under the License.
             <span>Download observations</span>
           </button>
         </a>
-        <button mat-menu-item (click)="onDeleteLayer()">
+        <button mat-menu-item (click)="onDeleteJob()">
           <mat-icon>delete_forever</mat-icon>
-          <span>Delete layer</span>
+          <span>Delete job</span>
         </button>
       </mat-menu>
     </div>
-    <div *ngSwitchCase="layerListItemActionsType.BACK">
+    <div *ngSwitchCase="jobListItemActionsType.BACK">
       <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
         <mat-icon>close</mat-icon>
       </button>

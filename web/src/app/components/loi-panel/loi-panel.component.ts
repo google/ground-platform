@@ -22,7 +22,7 @@ import { SurveyService } from './../../services/survey/survey.service';
 import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Field, FieldType } from '../../shared/models/task/field.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
@@ -42,7 +42,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   readonly fieldTypes = FieldType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
-  layer?: Layer;
+  job?: Job;
 
   constructor(
     private navigationService: NavigationService,
@@ -69,9 +69,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     combineLatest([
       surveyService.getActiveSurvey$(),
       loiService.getSelectedLocationOfInterest$(),
-    ]).subscribe(
-      ([survey, loi]) => (this.layer = survey.layers.get(loi.layerId))
-    );
+    ]).subscribe(([survey, loi]) => (this.job = survey.jobs.get(loi.jobId)));
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {
       observations.forEach(observation => {

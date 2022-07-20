@@ -36,7 +36,7 @@ import {
 } from '../../shared/models/loi.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { urlPrefix } from './ground-pin';
@@ -63,29 +63,29 @@ describe('MapComponent', () => {
   const poiId2 = 'loaction_loi002';
   const poiId3 = 'loaction_loi003';
   const poiId4 = 'loaction_loi004';
-  const geoJsonLoiId1 = 'geo_json_loi001';
+  const geoJsonLocationOfInterestId1 = 'geo_json_loi001';
   const aoiId1 = 'polygon_loi001';
-  const layerId1 = 'layer001';
-  const layerId2 = 'layer002';
-  const layerColor1 = 'red';
-  const layerColor2 = 'green';
+  const jobId1 = 'job001';
+  const jobId2 = 'job002';
+  const jobColor1 = 'red';
+  const jobColor2 = 'green';
   const mockSurvey = new Survey(
     'survey001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
-    /* layers= */ Map({
-      layer001: new Layer(
-        layerId1,
+    /* jobs= */ Map({
+      job001: new Job(
+        jobId1,
         /* index */ -1,
-        layerColor1,
-        StringMap({ en: 'layer001 name' }),
+        jobColor1,
+        StringMap({ en: 'job001 name' }),
         /* tasks= */ Map()
       ),
-      layer002: new Layer(
-        layerId2,
+      job002: new Job(
+        jobId2,
         /* index */ -1,
-        layerColor2,
-        StringMap({ en: 'layer002 name' }),
+        jobColor2,
+        StringMap({ en: 'job002 name' }),
         /* tasks= */ Map()
       ),
     }),
@@ -93,22 +93,22 @@ describe('MapComponent', () => {
   );
   const poi1 = new PointOfInterest(
     poiId1,
-    layerId1,
+    jobId1,
     new firebase.firestore.GeoPoint(1.23, 4.56)
   );
   const poi2 = new PointOfInterest(
     poiId2,
-    layerId2,
+    jobId2,
     new firebase.firestore.GeoPoint(12.3, 45.6)
   );
   const poi3 = new PointOfInterest(
     poiId3,
-    layerId2,
+    jobId2,
     new firebase.firestore.GeoPoint(78.9, 78.9)
   );
   const poi4 = new PointOfInterest(
     poiId4,
-    layerId2,
+    jobId2,
     new firebase.firestore.GeoPoint(45, 45)
   );
   const geoJson1 = {
@@ -131,12 +131,12 @@ describe('MapComponent', () => {
       },
     ],
   };
-  const geoJsonLoi1 = new GeoJsonLocationOfInterest(
-    geoJsonLoiId1,
-    layerId1,
+  const geoJsonLocationOfInterest1 = new GeoJsonLocationOfInterest(
+    geoJsonLocationOfInterestId1,
+    jobId1,
     geoJson1
   );
-  const aoi1 = new AreaOfInterest(aoiId1, layerId2, [
+  const aoi1 = new AreaOfInterest(aoiId1, jobId2, [
     new firebase.firestore.GeoPoint(-10, -10),
     new firebase.firestore.GeoPoint(20, -10),
     new firebase.firestore.GeoPoint(20, 20),
@@ -191,10 +191,10 @@ describe('MapComponent', () => {
       mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
       drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
         'DrawingToolsService',
-        ['getEditMode$', 'setEditMode', 'getSelectedLayerId', 'setDisabled']
+        ['getEditMode$', 'setEditMode', 'getSelectedJobId', 'setDisabled']
       );
       drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
-      drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(layerId1);
+      drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId1);
 
       TestBed.configureTestingModule({
         imports: [GoogleMapsModule],
@@ -223,11 +223,11 @@ describe('MapComponent', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
-    assertMarkerIcon(marker1, layerColor1, 30);
+    assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
     const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
-    assertMarkerIcon(marker2, layerColor2, 30);
+    assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
   });
 
@@ -241,7 +241,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(10, 0),
       ],
     ]);
-    assertPolygonStyle(polygon, layerColor1, 3);
+    assertPolygonStyle(polygon, jobColor1, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
@@ -256,7 +256,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(-10, -10),
       ],
     ]);
-    assertPolygonStyle(polygon, layerColor2, 3);
+    assertPolygonStyle(polygon, jobColor2, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
@@ -269,11 +269,11 @@ describe('MapComponent', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
-    assertMarkerIcon(marker1, layerColor1, 30);
+    assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
     const marker2 = component.markers.get(poiId3)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
-    assertMarkerIcon(marker2, layerColor2, 30);
+    assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
     expect(component.polygons.size).toEqual(1);
     const polygon = component.polygons.get(geoJsonLoiId1)!;
@@ -285,7 +285,7 @@ describe('MapComponent', () => {
         new google.maps.LatLng(10, 0),
       ],
     ]);
-    assertPolygonStyle(polygon, layerColor1, 3);
+    assertPolygonStyle(polygon, jobColor1, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   }));
 
@@ -303,7 +303,7 @@ describe('MapComponent', () => {
     tick();
 
     const marker1 = component.markers.get(poiId1)!;
-    assertMarkerIcon(marker1, layerColor1, 50);
+    assertMarkerIcon(marker1, jobColor1, 50);
   }));
 
   it('should select loi when polygon is clicked', () => {
@@ -321,8 +321,8 @@ describe('MapComponent', () => {
     mockLocationOfInterestId$.next(geoJsonLoiId1);
     tick();
 
-    const polygon = component.polygons.get(geoJsonLoiId1)!;
-    assertPolygonStyle(polygon, layerColor1, 6);
+    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    assertPolygonStyle(polygon, jobColor1, 6);
   }));
 
   it('should clear selected loi when map is clicked', fakeAsync(() => {
@@ -456,7 +456,7 @@ describe('MapComponent', () => {
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
       new PointOfInterest(
         poi1.id,
-        poi1.layerId,
+        poi1.jobId,
         new firebase.firestore.GeoPoint(2.23, 5.56)
       )
     );
@@ -520,7 +520,7 @@ describe('MapComponent', () => {
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {
     mockEditMode$.next(EditMode.AddPoint);
-    drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(layerId2);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId2);
     loiServiceSpy.addPoint.and.returnValue(
       new Promise(resolve => resolve(poi4))
     );
@@ -530,12 +530,12 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(loiServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, layerId2);
+    expect(loiServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, jobId2);
   }));
 
-  it('should not add marker when layer id is undefined', fakeAsync(() => {
+  it('should not add marker when job id is undefined', fakeAsync(() => {
     mockEditMode$.next(EditMode.AddPoint);
-    drawingToolsServiceSpy.getSelectedLayerId.and.returnValue(undefined);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(undefined);
     tick();
 
     google.maps.event.trigger(component.map.googleMap!, 'click', {

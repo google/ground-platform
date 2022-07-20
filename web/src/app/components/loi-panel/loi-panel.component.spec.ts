@@ -25,7 +25,7 @@ import {
   LocationOfInterest,
   PointOfInterest,
 } from '../../shared/models/loi.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
@@ -40,9 +40,9 @@ const mockSurvey = new Survey(
   'survey001',
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
-  /* layers= */ Map({
-    layer001: new Layer(
-      'layer001',
+  /* jobs= */ Map({
+    job001: new Job(
+      'job001',
       /* index */ -1,
       'red',
       StringMap({ en: 'name' }),
@@ -54,7 +54,7 @@ const mockSurvey = new Survey(
 
 const mockLocationOfInterest = new PointOfInterest(
   'loi001',
-  'layer001',
+  'job001',
   new firebase.firestore.GeoPoint(0.0, 0.0)
 );
 

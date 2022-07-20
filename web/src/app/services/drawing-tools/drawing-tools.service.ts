@@ -27,7 +27,7 @@ export class DrawingToolsService {
   private disabled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     false
   );
-  private selectedLayerId: string | undefined;
+  private selectedJobId: string | undefined;
 
   getDisabled$(): BehaviorSubject<boolean> {
     return this.disabled$;
@@ -37,12 +37,12 @@ export class DrawingToolsService {
     return this.disabled$.next(disabled);
   }
 
-  getSelectedLayerId(): string | undefined {
-    return this.selectedLayerId;
+  getSelectedJobId(): string | undefined {
+    return this.selectedJobId;
   }
 
-  setSelectedLayerId(selectedLayerId: string | undefined) {
-    this.selectedLayerId = selectedLayerId;
+  setSelectedJobId(selectedJobId: string | undefined) {
+    this.selectedJobId = selectedJobId;
   }
 
   getEditMode$(): BehaviorSubject<EditMode> {

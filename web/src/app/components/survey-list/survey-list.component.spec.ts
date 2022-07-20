@@ -32,7 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { AclEntry } from '../../shared/models/acl-entry.model';
 import { Role } from '../../shared/models/role.model';
 
@@ -49,9 +49,9 @@ describe('SurveyListComponent', () => {
     'survey001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
-    /* layers= */ Map({
-      layer001: new Layer(
-        'layer001',
+    /* jobs= */ Map({
+      job001: new Job(
+        'job001',
         /* index */ -1,
         'red',
         StringMap({ en: 'name' }),
@@ -65,9 +65,9 @@ describe('SurveyListComponent', () => {
     'survey002',
     StringMap({ en: 'title2' }),
     StringMap({ en: 'description2' }),
-    /* layers= */ Map({
-      layer002: new Layer(
-        'layer002',
+    /* jobs= */ Map({
+      job002: new Job(
+        'job002',
         /* index */ -1,
         'green',
         StringMap({ en: 'name' }),

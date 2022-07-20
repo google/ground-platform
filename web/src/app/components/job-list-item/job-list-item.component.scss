@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-import { Task } from './task/task.model';
-import { StringMap } from './string-map.model';
-import { Map } from 'immutable';
+@import 'variables';
 
-export class Layer {
-  constructor(
-    readonly id: string,
-    readonly index: number,
-    readonly color?: string,
-    readonly name?: StringMap,
-    readonly tasks?: Map<string, Task>,
-    readonly contributorsCanAdd?: string[]
-  ) {}
+/*
+  Workaround to eliminate double-padding between right-hand side overflow
+  menu control and list item.
+*/
+:host ::ng-deep .mat-list-item-content {
+  padding-right: 8px !important;
+}
 
-  getTask(taskId: string): Task | undefined {
-    return this.tasks?.get(taskId);
-  }
+.job-icon {
+  vertical-align: middle;
+  padding-right: 5px;
+}
 
-  withIndex(index: number): Layer {
-    return { ...this, index };
-  }
+.download {
+  color: mat-color($foreground, text) !important;
+  text-decoration: none;
 }

@@ -17,34 +17,15 @@
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { LayerListComponent } from './layer-list.component';
-import { SurveyService } from '../../services/survey/survey.service';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Survey } from '../../shared/models/survey.model';
-import { of } from 'rxjs';
-import { Map } from 'immutable';
-import { StringMap } from '../../shared/models/string-map.model';
-import { Layer } from '../../shared/models/layer.model';
-import { MatListModule } from '@angular/material/list';
-import { Router } from '@angular/router';
-import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
-
-const mockSurvey = new Survey(
-  'survey001',
-  StringMap({ en: 'title' }),
-  StringMap({ en: 'description' }),
-  /* layers= */ Map({
-    layer001: new Layer(
-      'layer001',
-      /* index */ -1,
-      'red',
-      StringMap({ en: 'name' }),
-      /* tasks= */ Map()
-    ),
-  }),
-  /* acl= */ Map()
-);
+import { JobListItemComponent } from './job-list-item.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatListModule } from '@angular/material/list';
+import { NavigationService } from '../../services/navigation/navigation.service';
+import { of } from 'rxjs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 
 const authState = {
   displayName: null,
@@ -56,20 +37,9 @@ const mockAngularFireAuth = {
   authState: of(authState),
 };
 
-class MockSurveyService {
-  getActiveSurvey$() {
-    return of<Survey>(mockSurvey);
-  }
-  getCurrentSurvey() {}
-  getCurrentSurveyAcl() {}
-  canManageSurvey() {}
-}
-
-const surveyService = new MockSurveyService();
-
-describe('LayerListComponent', () => {
-  let component: LayerListComponent;
-  let fixture: ComponentFixture<LayerListComponent>;
+describe('JobListItemComponent', () => {
+  let component: JobListItemComponent;
+  let fixture: ComponentFixture<JobListItemComponent>;
 
   beforeEach(
     waitForAsync(() => {
@@ -77,31 +47,26 @@ describe('LayerListComponent', () => {
         getSurveyId$: () => of(''),
         getLocationOfInterestId$: () => of(''),
       };
-      const routerSpy = createRouterSpy();
+
       TestBed.configureTestingModule({
-        declarations: [LayerListComponent],
-        imports: [MatListModule],
+        declarations: [JobListItemComponent],
+        imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
         providers: [
-          { provide: SurveyService, useValue: surveyService },
-          {
-            provide: Router,
-            useValue: routerSpy,
-          },
+          { provide: DataStoreService, useValue: { user$: () => of() } },
           { provide: NavigationService, useValue: navigationService },
+          { provide: Router, useValue: {} },
           { provide: AngularFirestore, useValue: {} },
           {
             provide: AngularFireAuth,
             useValue: mockAngularFireAuth,
           },
-          { provide: DataStoreService, useValue: { user$: () => of() } },
         ],
-        schemas: [NO_ERRORS_SCHEMA],
       }).compileComponents();
     })
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LayerListComponent);
+    fixture = TestBed.createComponent(JobListItemComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -110,7 +75,3 @@ describe('LayerListComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-
-function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
-}

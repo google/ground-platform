@@ -75,7 +75,7 @@ export class LocationOfInterestService {
   async addPoint(
     lat: number,
     lng: number,
-    layerId: string
+    jobId: string
   ): Promise<LocationOfInterest | null> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
@@ -83,7 +83,7 @@ export class LocationOfInterestService {
       .getActiveSurvey$()
       .pipe(take(1))
       .toPromise();
-    return await this.addPointInternal(survey, lat, lng, layerId);
+    return await this.addPointInternal(survey, lat, lng, jobId);
   }
 
   async updatePoint(loi: LocationOfInterest): Promise<void> {
@@ -100,14 +100,14 @@ export class LocationOfInterestService {
     survey: Survey,
     lat: number,
     lng: number,
-    layerId: string
+    jobId: string
   ): Promise<LocationOfInterest | null> {
-    if (!(survey.layers || new Map()).get(layerId)) {
+    if (!(survey.jobs || new Map()).get(jobId)) {
       return null;
     }
     const newLocationOfInterest = new PointOfInterest(
       this.dataStore.generateId(),
-      layerId,
+      jobId,
       new firebase.firestore.GeoPoint(lat, lng)
     );
     await this.dataStore.updateLocationOfInterest(
@@ -118,7 +118,7 @@ export class LocationOfInterestService {
   }
 
   private async updatePointInternal(survey: Survey, loi: LocationOfInterest) {
-    if (survey.layers.isEmpty()) {
+    if (survey.jobs.isEmpty()) {
       return;
     }
     await this.dataStore.updateLocationOfInterest(survey.id, loi);

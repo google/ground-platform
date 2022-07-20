@@ -97,11 +97,9 @@ export class ObservationService {
     if (!user) {
       throw Error('Login required to create new observation.');
     }
-    const form = survey
-      .getLayer(loi.layerId)!
-      .tasks?.first(/*notSetValue=*/ null);
+    const form = survey.getJob(loi.jobId)!.tasks?.first(/*notSetValue=*/ null);
     if (!form) {
-      throw Error(`No form in layer ${loi.layerId}`);
+      throw Error(`No form in job ${loi.jobId}`);
     }
     const newObservationId = this.dataStore.generateId();
     const auditInfo = new AuditInfo(
@@ -112,7 +110,7 @@ export class ObservationService {
     return new Observation(
       newObservationId,
       loi.id,
-      loi.layerId,
+      loi.jobId,
       form!,
       auditInfo,
       auditInfo,

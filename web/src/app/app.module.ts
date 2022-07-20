@@ -30,7 +30,7 @@ import { MainPageContainerModule } from './components/main-page-container/main-p
 import { environment } from '../environments/environment';
 import { SurveyHeaderModule } from './components/survey-header/survey-header.module';
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
-import { LayerDialogModule } from './components/layer-dialog/layer-dialog.module';
+import { JobDialogModule } from './components/job-dialog/job-dialog.module';
 import { HttpClientModule } from '@angular/common/http';
 import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
@@ -69,7 +69,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     MainPageContainerModule,
     SurveyHeaderModule,
     UserProfilePopupModule,
-    LayerDialogModule,
+    JobDialogModule,
     TitleDialogModule,
   ],
   bootstrap: [AppComponent],

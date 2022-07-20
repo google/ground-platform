@@ -24,7 +24,7 @@ import {
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogService } from '../../services/dialog/dialog.service';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Task } from '../../shared/models/task/task.model';
 import { Subscription } from 'rxjs';
 import { FieldType, Field } from '../../shared/models/task/field.model';
@@ -32,7 +32,7 @@ import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { LayerService } from '../../services/layer/layer.service';
+import { JobService } from '../../services/job/job.service';
 import { TaskFieldEditorComponent } from '../task-field-editor/task-field-editor.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
@@ -40,20 +40,20 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 /*global alert*/
 
 @Component({
-  selector: 'app-layer-dialog',
-  templateUrl: './layer-dialog.component.html',
-  styleUrls: ['./layer-dialog.component.scss'],
+  selector: 'app-job-dialog',
+  templateUrl: './job-dialog.component.html',
+  styleUrls: ['./job-dialog.component.scss'],
 })
-export class LayerDialogComponent implements OnDestroy {
+export class JobDialogComponent implements OnDestroy {
   lang: string;
-  layer?: Layer;
-  layerName!: string;
+  job?: Job;
+  jobName!: string;
   surveyId?: string;
   subscription: Subscription = new Subscription();
   fieldTypes = FieldType;
   fields: List<Field>;
   color!: string;
-  defaultLayerColor: string;
+  defaultJobColor: string;
   task?: Task;
   @ViewChildren(TaskFieldEditorComponent)
   taskFieldEditors?: QueryList<TaskFieldEditorComponent>;
@@ -64,21 +64,21 @@ export class LayerDialogComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     data: {
       surveyId: string;
-      layer?: Layer;
-      createLayer: boolean;
+      job?: Job;
+      createJob: boolean;
     },
-    private dialogRef: MatDialogRef<LayerDialogComponent>,
+    private dialogRef: MatDialogRef<JobDialogComponent>,
     private dialogService: DialogService,
-    private layerService: LayerService,
+    private jobService: JobService,
     private navigationService: NavigationService,
     private readonly cdr: ChangeDetectorRef
   ) {
     this.lang = 'en';
-    this.defaultLayerColor = '#ff9131';
+    this.defaultJobColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
     this.fields = List<Field>();
-    this.init(data.surveyId, data.createLayer, data.layer);
+    this.init(data.surveyId, data.createJob, data.job);
     this.dialogRef.keydownEvents().subscribe(event => {
       if (event.key === 'Escape') {
         this.close();
@@ -87,7 +87,7 @@ export class LayerDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const newField = this.layerService.createField(
+    const newField = this.jobService.createField(
       FieldType.TEXT,
       /* label= */
       '',
@@ -123,24 +123,24 @@ export class LayerDialogComponent implements OnDestroy {
       });
   }
 
-  init(surveyId: string, createLayer: boolean, layer?: Layer) {
-    if (!createLayer && !layer) {
-      console.warn('User passed an invalid layer id');
+  init(surveyId: string, createJob: boolean, job?: Job) {
+    if (!createJob && !job) {
+      console.warn('User passed an invalid job id');
     }
     this.surveyId = surveyId;
-    this.layer = layer;
-    this.layerName = this.layer?.name?.get(this.lang) || '';
-    this.color = this.layer?.color || this.defaultLayerColor;
-    if (!layer) {
-      this.layer = this.layerService.createNewLayer();
+    this.job = job;
+    this.jobName = this.job?.name?.get(this.lang) || '';
+    this.color = this.job?.color || this.defaultJobColor;
+    if (!job) {
+      this.job = this.jobService.createNewJob();
       this.addQuestion();
       return;
     }
     this.contributorsCanAddPoints =
-      this.layer?.contributorsCanAdd?.includes('points') || false;
+      this.job?.contributorsCanAdd?.includes('points') || false;
     this.contributorsCanAddPolygons =
-      this.layer?.contributorsCanAdd?.includes('polygons') || false;
-    this.task = this.layerService.getTask(this.layer);
+      this.job?.contributorsCanAdd?.includes('polygons') || false;
+    this.task = this.jobService.getTask(this.job);
     if (this.task) {
       this.fields =
         this.task?.fields.toList().sortBy(field => field.index) ||
@@ -166,26 +166,26 @@ export class LayerDialogComponent implements OnDestroy {
         return;
       }
     }
-    const fields = this.layerService.convertFieldsListToMap(this.fields);
+    const fields = this.jobService.convertFieldsListToMap(this.fields);
     const taskId = this.task?.id;
-    const tasks = this.layerService.createTask(taskId, fields);
-    const allowedloiTypes: string[] = [];
+    const tasks = this.jobService.createTask(taskId, fields);
+    const allowedLoiTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
-      allowedloiTypes.push('points');
+      allowedLoiTypes.push('points');
     }
     if (this.contributorsCanAddPolygons) {
-      allowedloiTypes.push('polygons');
+      allowedLoiTypes.push('polygons');
     }
-    const layer = new Layer(
-      this.layer?.id || '',
-      /* index */ this.layer?.index || -1,
+    const job = new Job(
+      this.job?.id || '',
+      /* index */ this.job?.index || -1,
       this.color,
-      // TODO: Make layerName Map
-      StringMap({ [this.lang]: this.layerName.trim() }),
+      // TODO: Make jobName Map
+      StringMap({ [this.lang]: this.jobName.trim() }),
       tasks,
-      allowedloiTypes
+      allowedLoiTypes
     );
-    this.addOrUpdateLayer(this.surveyId, layer);
+    this.addOrUpdateJob(this.surveyId, job);
   }
 
   private isFieldOptionsValid(
@@ -202,14 +202,14 @@ export class LayerDialogComponent implements OnDestroy {
     return true;
   }
 
-  private addOrUpdateLayer(surveyId: string, layer: Layer) {
-    // TODO: Inform user layer was saved
-    this.layerService
-      .addOrUpdateLayer(surveyId, layer)
+  private addOrUpdateJob(surveyId: string, job: Job) {
+    // TODO: Inform user job was saved
+    this.jobService
+      .addOrUpdateJob(surveyId, job)
       .then(() => this.close())
       .catch(err => {
         console.error(err);
-        alert('Layer update failed.');
+        alert('Job update failed.');
       });
   }
 
@@ -221,7 +221,7 @@ export class LayerDialogComponent implements OnDestroy {
     this.dialogService
       .openConfirmationDialog(
         'Discard changes',
-        'Unsaved changes to this layer will be lost. Are you sure?',
+        'Unsaved changes to this job will be lost. Are you sure?',
         /* showDiscardActions= */ true
       )
       .afterClosed()
@@ -232,8 +232,8 @@ export class LayerDialogComponent implements OnDestroy {
       });
   }
 
-  setLayerName(value: string) {
-    this.layerName = value;
+  setJobName(value: string) {
+    this.jobName = value;
   }
 
   /**
@@ -327,7 +327,7 @@ export class LayerDialogComponent implements OnDestroy {
 
   private close(): void {
     this.dialogRef.close();
-    // TODO: Add closeLayerDialog() in NavigationService that removes the layer fragment.
+    // TODO: Add closeJobDialog() in NavigationService that removes the job fragment.
     return this.navigationService.selectSurvey(this.surveyId!);
   }
 }

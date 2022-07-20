@@ -24,7 +24,7 @@ const JSONStream = require("JSONStream");
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
- * and required 'survey' id and 'layer' id to the database.
+ * and required 'survey' id and 'job' id to the database.
  */
 async function importGeoJson(req, res) {
   if (req.method !== "POST") {
@@ -40,7 +40,7 @@ async function importGeoJson(req, res) {
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the task. survey and layer must appear
+  // Handle non-file fields in the task. survey and job must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -48,15 +48,13 @@ async function importGeoJson(req, res) {
 
   // This code will process each file uploaded.
   busboy.on("file", (_field, file, _filename) => {
-    const { survey: surveyId, layer: layerId } = params;
-    if (!surveyId || !layerId) {
+    const { survey: surveyId, job: jobId } = params;
+    if (!surveyId || !jobId) {
       return res
         .status(HttpStatus.BAD_REQUEST)
         .end(JSON.stringify({ error: "Invalid request" }));
     }
-    console.log(
-      `Importing GeoJSON into survey '${surveyId}', layer '${layerId}'`
-    );
+    console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
     let geoJsonType = null;
@@ -77,7 +75,10 @@ async function importGeoJson(req, res) {
           return;
         }
         try {
-          const loi = geoJsonToGroundLocationOfInterest(geoJsonLoi, layerId);
+          const loi = geoJsonToGroundLocationOfInterest(
+            geoJsonLocationOfInterest,
+            jobId
+          );
           if (loi) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
@@ -109,14 +110,14 @@ async function importGeoJson(req, res) {
 }
 
 /**
- * Convert the provided GeoJSON LocationOfInterest and layerId into a LocationOfInterest for
+ * Convert the provided GeoJSON LocationOfInterest and jobId into a LocationOfInterest for
  * insertion into the Ground data store.
  */
-function geoJsonToGroundLocationOfInterest(geoJsonLoi, layerId) {
+function geoJsonToGroundLocationOfInterest(geoJsonLocationOfInterest, jobId) {
   // TODO: Migrate Android app to use geometry for points instead of 'location'.
   return {
-    layerId,
-    properties: geoJsonLoi.properties,
+    jobId,
+    properties: geoJsonLocationOfInterest.properties,
     // TODO: Remove once web app moves over to using 'geometry' field.
     geoJson: JSON.stringify(geoJsonLoi),
     // TODO: Convert to object (incl nested arrays) and store in 'geometry'.

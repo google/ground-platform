@@ -25,7 +25,7 @@ const { db } = require("./common/context");
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
- * 'survey' id and 'layer' id to the database.
+ * 'survey' id and 'job' id to the database.
  */
 async function importCsv(req, res) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
@@ -41,7 +41,7 @@ async function importCsv(req, res) {
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the task. survey and layer must appear
+  // Handle non-file fields in the task. survey and job must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -49,18 +49,18 @@ async function importCsv(req, res) {
 
   // This code will process each file uploaded.
   busboy.on("file", (key, file, _) => {
-    const { survey: surveyId, layer: layerId } = params;
-    if (!surveyId || !layerId) {
+    const { survey: surveyId, job: jobId } = params;
+    if (!surveyId || !jobId) {
       return res.status(HttpStatus.BAD_REQUEST).end();
     }
-    console.log(`Importing CSV into survey '${surveyId}', layer '${layerId}'`);
+    console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
     // received.
 
     file.pipe(csvParser()).on("data", async (row) => {
       try {
-        inserts.push(insertRow(surveyId, layerId, row));
+        inserts.push(insertRow(surveyId, jobId, row));
       } catch (err) {
         console.error(err);
         res.unpipe(busboy);
@@ -111,19 +111,19 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   lng: ["lng", "lon", "long", "lng", "x"],
 });
 
-async function insertRow(surveyId, layerId, row) {
-  const loi = csvRowToLocationOfInterest(row, layerId);
+async function insertRow(surveyId, jobId, row) {
+  const loi = csvRowToLocationOfInterest(row, jobId);
   if (loi) {
     await db.insertLocationOfInterest(surveyId, loi);
   }
 }
 
 /**
- * Convert the provided row (key-value pairs) and layerId into a LocationOfInterest for
+ * Convert the provided row (key-value pairs) and jobId into a LocationOfInterest for
  * insertion into the data store.
  */
-function csvRowToLocationOfInterest(row, layerId) {
-  let data = { layerId };
+function csvRowToLocationOfInterest(row, jobId) {
+  let data = { jobId };
   let attributes = {};
   for (const columnName in row) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];

@@ -14,15 +14,15 @@
   limitations under the License.
 -->
 
-<mat-list *ngIf="layer$ | async as layer">
+<mat-list *ngIf="job$ | async as job">
   <!--
-    TODO: create separate component for layer as a header instead of
-    using LayerListItem here.
+    TODO: create separate component for job as a header instead of
+    using JobListItem here.
   -->
-  <ground-layer-list-item
-    [layer]="layer"
-    [actionsType]="layerListItemActionsType.BACK"
-  ></ground-layer-list-item>
+  <ground-job-list-item
+    [job]="job"
+    [actionsType]="jobListItemActionsType.BACK"
+  ></ground-job-list-item>
 </mat-list>
 <div *ngIf="observationForm" class="observation">
   <h3>Add/edit observation</h3>
