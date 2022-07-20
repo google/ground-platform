@@ -47,7 +47,7 @@
         fxFlex
         [markerColor]="job!.color || defaultJobColor"
         (markerColorChange)="onMarkerColorChange($event)"
-      ></app-edit-style-button>
+      ></ground-edit-style-button>
     </div>
   </div>
   <div>
@@ -74,7 +74,7 @@
         (delete)="onStepDelete(i)"
         fxFlex="2 1 auto"
       >
-      </app-task-step-editor>
+      </ground-task-step-editor>
     </div>
   </div>
   <button mat-button class="add-question" type="button" (click)="addQuestion()">
