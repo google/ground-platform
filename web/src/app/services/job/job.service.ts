@@ -18,7 +18,6 @@ import { Injectable } from '@angular/core';
 import { DataStoreService } from '../data-store/data-store.service';
 import { Job } from '../../shared/models/job.model';
 import { Step, StepType } from '../../shared/models/task/step.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/task/option.model';
 import { MultipleChoice } from '../../shared/models/task/multiple-choice.model';
 import { List, Map } from 'immutable';
@@ -54,16 +53,7 @@ export class JobService {
     multipleChoice?: MultipleChoice
   ): Step {
     const stepId = this.dataStoreService.generateId();
-    return new Step(
-      stepId,
-      type,
-      StringMap({
-        en: label,
-      }),
-      required,
-      index,
-      multipleChoice
-    );
+    return new Step(stepId, type, label, required, index, multipleChoice);
   }
 
   /**
@@ -71,12 +61,7 @@ export class JobService {
    */
   createOption(code: string, label: string, index: number): Option {
     const optionId = this.dataStoreService.generateId();
-    const option = new Option(
-      optionId || '',
-      code,
-      StringMap({ en: label }),
-      index
-    );
+    const option = new Option(optionId || '', code, label, index);
     return option;
   }
 

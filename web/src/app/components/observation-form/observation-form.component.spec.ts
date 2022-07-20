@@ -28,7 +28,6 @@ import { List, Map } from 'immutable';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Response } from '../../shared/models/observation/response.model';
 import firebase from 'firebase/app';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Job } from '../../shared/models/job.model';
 import { Option } from '../../shared/models/task/option.model';
 import {
@@ -61,7 +60,7 @@ class MockModel {
   static element001: Step = new Step(
     'element001',
     StepType.TEXT,
-    StringMap({ en: 'Text Field' }),
+    'Text Field',
     /*required=*/ true,
     0
   );
@@ -69,29 +68,19 @@ class MockModel {
   static element002: Step = new Step(
     'element002',
     StepType.TEXT,
-    StringMap({ en: 'Text Field' }),
+    'Text Field',
     /*required=*/ false,
     0
   );
 
-  static option001 = new Option(
-    'option001',
-    'code001',
-    StringMap({ en: 'option 1' }),
-    1
-  );
+  static option001 = new Option('option001', 'code001', 'option 1', 1);
 
-  static option002 = new Option(
-    'option002',
-    'code002',
-    StringMap({ en: 'option 2' }),
-    2
-  );
+  static option002 = new Option('option002', 'code002', 'option 2', 2);
 
   static element003: Step = new Step(
     'element003',
     StepType.MULTIPLE_CHOICE,
-    StringMap({ en: 'Multiple Select' }),
+    'Multiple Select',
     /*required=*/ true,
     0,
     new MultipleChoice(
@@ -113,14 +102,14 @@ class MockModel {
     'job001',
     1,
     'red',
-    StringMap({ en: 'name' }),
+    'name',
     Map({ form001: MockModel.form001 })
   );
 
   static survey001 = new Survey(
     'survey001',
-    StringMap({ en: 'title' }),
-    StringMap({ en: 'description' }),
+    'title',
+    'description',
     Map({ job001: MockModel.job001 }),
     /*acl=*/ Map({})
   );

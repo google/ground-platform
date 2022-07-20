@@ -18,7 +18,7 @@ import { PointOfInterest } from './../app/shared/models/loi.model';
 import { Survey } from '../app/shared/models/survey.model';
 import { Map } from 'immutable';
 import { Job } from './../app/shared/models/job.model';
-import { StringMap } from './../app/shared/models/string-map.model';
+
 import { User } from './../app/shared/models/user.model';
 import firebase from 'firebase/app';
 import { Task } from '../app/shared/models/task/task.model';
@@ -43,12 +43,12 @@ export class TestData {
 
   public static newSurvey({
     id = 'survey001',
-    title = { en: 'title' } as Record<string, string>,
-    description = { en: 'description' } as Record<string, string>,
+    title = 'title',
+    description = 'description',
     jobs = {} as Record<string, Job>,
     acl = {} as Record<string, Role>,
   }): Survey {
-    return new Survey(id, Map(title), Map(description), Map(jobs), Map(acl));
+    return new Survey(id, title, description, Map(jobs), Map(acl));
   }
 
   public static newJob({
@@ -59,14 +59,7 @@ export class TestData {
     tasks = {} as Record<string, Task>,
     contributorsCanAdd = [] as string[],
   }): Job {
-    return new Job(
-      id,
-      index,
-      color,
-      StringMap(name),
-      Map(tasks),
-      contributorsCanAdd
-    );
+    return new Job(id, index, color, name, Map(tasks), contributorsCanAdd);
   }
 
   public static newPointOfInterest(): PointOfInterest {

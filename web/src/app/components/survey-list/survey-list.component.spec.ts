@@ -31,7 +31,6 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Survey } from '../../shared/models/survey.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Job } from '../../shared/models/job.model';
 import { AclEntry } from '../../shared/models/acl-entry.model';
 import { Role } from '../../shared/models/role.model';
@@ -47,14 +46,14 @@ describe('SurveyListComponent', () => {
 
   const mockSurvey1 = new Survey(
     'survey001',
-    StringMap({ en: 'title1' }),
-    StringMap({ en: 'description1' }),
+    'title1',
+    'description1',
     /* jobs= */ Map({
       job001: new Job(
         'job001',
         /* index */ -1,
         'red',
-        StringMap({ en: 'name' }),
+        'name',
         /* tasks= */ Map()
       ),
     }),
@@ -63,14 +62,14 @@ describe('SurveyListComponent', () => {
 
   const mockSurvey2 = new Survey(
     'survey002',
-    StringMap({ en: 'title2' }),
-    StringMap({ en: 'description2' }),
+    'title2',
+    'description2',
     /* jobs= */ Map({
       job002: new Job(
         'job002',
         /* index */ -1,
         'green',
-        StringMap({ en: 'name' }),
+        'name',
         /* tasks= */ Map()
       ),
     }),

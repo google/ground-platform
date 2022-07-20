@@ -15,7 +15,7 @@
  */
 
 import { Task } from './task/task.model';
-import { StringMap } from './string-map.model';
+
 import { Map } from 'immutable';
 
 export class Job {
@@ -23,7 +23,7 @@ export class Job {
     readonly id: string,
     readonly index: number,
     readonly color?: string,
-    readonly name?: StringMap,
+    readonly name?: string,
     readonly tasks?: Map<string, Task>,
     readonly contributorsCanAdd?: string[]
   ) {}

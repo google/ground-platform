@@ -31,7 +31,6 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { SurveyService } from '../../services/survey/survey.service';
 import { Job } from '../../shared/models/job.model';
 import { Survey } from '../../shared/models/survey.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { DrawingToolsComponent } from './drawing-tools.component';
 import { DrawingToolsModule } from './drawing-tools.module';
 import { Map } from 'immutable';
@@ -59,21 +58,21 @@ describe('DrawingToolsComponent', () => {
   const jobName2 = 'job002 name';
   const mockSurvey = new Survey(
     'survey001',
-    StringMap({ en: 'title1' }),
-    StringMap({ en: 'description1' }),
+    'title1',
+    'description1',
     /* jobs= */ Map({
       job001: new Job(
         jobId1,
         /* index */ -1,
         jobColor1,
-        StringMap({ en: jobName1 }),
+        jobName1,
         /* tasks= */ Map()
       ),
       job002: new Job(
         jobId2,
         /* index */ -1,
         jobColor2,
-        StringMap({ en: jobName2 }),
+        jobName2,
         /* tasks= */ Map()
       ),
     }),

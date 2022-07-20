@@ -16,7 +16,6 @@
 import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
-import { StringMap } from '../models/string-map.model';
 import { Job } from '../models/job.model';
 import { Task } from '../models/task/task.model';
 import { Step, StepType } from '../models/task/step.model';
@@ -74,8 +73,8 @@ export class FirebaseDataConverter {
   static toSurvey(id: string, data: DocumentData): Survey {
     return new Survey(
       id,
-      StringMap(data.title),
-      StringMap(data.description),
+      data.title,
+      data.description,
       Map<string, Job>(
         keys(data.jobs).map((id: string) => [
           id as string,
@@ -133,7 +132,7 @@ export class FirebaseDataConverter {
       // Fall back to constant so old dev databases do not break.
       data.index || -1,
       data.defaultStyle?.color || data.color,
-      StringMap(data.name),
+      data.name,
       Map<string, Task>(
         keys(data.tasks).map((id: string) => [
           id as string,
@@ -261,7 +260,7 @@ export class FirebaseDataConverter {
       return new Step(
         id,
         FirebaseDataConverter.stringToStepType(data.type),
-        StringMap(data.label),
+        data.label,
         data.required,
         // Fall back to constant so old dev databases do not break.
         data.index || -1,
@@ -366,7 +365,7 @@ export class FirebaseDataConverter {
     return new Option(
       id,
       data.code,
-      StringMap(data.label),
+      data.label,
       // Fall back to constant so old dev databases do not break.
       data.index || -1
     );
