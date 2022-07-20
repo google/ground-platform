@@ -97,9 +97,9 @@ export class ObservationService {
     if (!user) {
       throw Error('Login required to create new observation.');
     }
-    const form = survey.getJob(loi.jobId)!.tasks?.first(/*notSetValue=*/ null);
-    if (!form) {
-      throw Error(`No form in job ${loi.jobId}`);
+    const task = survey.getJob(loi.jobId)!.tasks?.first(/*notSetValue=*/ null);
+    if (!task) {
+      throw Error(`No task in job ${loi.jobId}`);
     }
     const newObservationId = this.dataStore.generateId();
     const auditInfo = new AuditInfo(
@@ -111,7 +111,7 @@ export class ObservationService {
       newObservationId,
       loi.id,
       loi.jobId,
-      form!,
+      task!,
       auditInfo,
       auditInfo,
       Map<string, Response>([])
