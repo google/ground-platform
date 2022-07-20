@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FieldType, Field } from '../../shared/models/task/field.model';
+import { StepType, Step } from '../../shared/models/task/step.model';
 import { Cardinality } from '../../shared/models/task/multiple-choice.model';
 import { Option } from '../../shared/models/task/option.model';
 import { Observation } from '../../shared/models/observation/observation.model';
@@ -52,14 +52,14 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 })
 export class ObservationFormComponent {
   readonly lang: string;
-  readonly fieldTypes = FieldType;
+  readonly stepTypes = StepType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
   readonly job$: Observable<Job>;
   surveyId?: string;
   observation?: Observation;
   observationForm?: FormGroup;
-  observationFields?: List<Field>;
+  observationSteps?: List<Step>;
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -142,8 +142,8 @@ export class ObservationFormComponent {
     }
     if (observation instanceof Observation) {
       this.observation = observation;
-      this.observationFields = observation!
-        .task!.fields!.toOrderedMap()
+      this.observationSteps = observation!
+        .task!.steps!.toOrderedMap()
         .sortBy(entry => entry.index)
         .toList();
       this.initForm();
@@ -164,21 +164,21 @@ export class ObservationFormComponent {
   }
 
   private convertObservationToFormGroup(observation: Observation): FormGroup {
-    const group: { [fieldId: string]: FormControl } = {};
-    for (const [fieldId, field] of observation.task!.fields) {
-      const response = observation!.responses?.get(fieldId);
-      switch (field.type) {
-        case FieldType.TEXT:
-          this.addControlsForTextField(group, field, response);
+    const group: { [stepId: string]: FormControl } = {};
+    for (const [stepId, step] of observation.task!.steps) {
+      const response = observation!.responses?.get(stepId);
+      switch (step.type) {
+        case StepType.TEXT:
+          this.addControlsForTextStep(group, step, response);
           break;
-        case FieldType.NUMBER:
-          this.addControlsForNumberField(group, field, response);
+        case StepType.NUMBER:
+          this.addControlsForNumberStep(group, step, response);
           break;
-        case FieldType.MULTIPLE_CHOICE:
-          this.addControlsForMultipleChoiceField(group, field, response);
+        case StepType.MULTIPLE_CHOICE:
+          this.addControlsForMultipleChoiceStep(group, step, response);
           break;
         default:
-          console.debug(`Skipping unsupported field type: ${field.type}`);
+          console.debug(`Skipping unsupported step type: ${step.type}`);
       }
     }
     return this.formBuilder.group(group);
@@ -186,125 +186,125 @@ export class ObservationFormComponent {
 
   private extractResponses(): Map<string, Response> {
     return Map<string, Response>(
-      this.observationFields!.map(field => [
-        field.id,
-        this.extractResponseForField(field),
+      this.observationSteps!.map(step => [
+        step.id,
+        this.extractResponseForStep(step),
       ])
     );
   }
 
-  private extractResponseForField(field: Field) {
-    switch (field.type) {
-      case FieldType.TEXT:
-        return this.extractResponseForTextField(field);
-      case FieldType.NUMBER:
-        return this.extractResponseForNumberField(field);
-      case FieldType.MULTIPLE_CHOICE:
-        return this.extractResponseForMultipleChoiceField(field);
+  private extractResponseForStep(step: Step) {
+    switch (step.type) {
+      case StepType.TEXT:
+        return this.extractResponseForTextStep(step);
+      case StepType.NUMBER:
+        return this.extractResponseForNumberStep(step);
+      case StepType.MULTIPLE_CHOICE:
+        return this.extractResponseForMultipleChoiceStep(step);
       default:
         throw Error(
-          `Unimplemented Response extraction for Field with
-           Type:${field.type}`
+          `Unimplemented Response extraction for Step with
+           Type:${step.type}`
         );
     }
   }
 
-  private addControlsForTextField(
-    group: { [fieldId: string]: FormControl },
-    field: Field,
+  private addControlsForTextStep(
+    group: { [stepId: string]: FormControl },
+    step: Step,
     response?: Response
   ): void {
     const value = response?.value as string;
-    group[field.id] = field.required
+    group[step.id] = step.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
   }
 
-  private addControlsForNumberField(
-    group: { [fieldId: string]: FormControl },
-    field: Field,
+  private addControlsForNumberStep(
+    group: { [stepId: string]: FormControl },
+    step: Step,
     response?: Response
   ): void {
     const value = response?.value as number;
-    group[field.id] = field.required
+    group[step.id] = step.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
   }
 
-  private extractResponseForTextField(field: Field): Response {
-    return new Response(this.observationForm?.value[field.id]);
+  private extractResponseForTextStep(step: Step): Response {
+    return new Response(this.observationForm?.value[step.id]);
   }
 
-  private extractResponseForNumberField(field: Field): Response {
-    return new Response(this.observationForm?.value[field.id]);
+  private extractResponseForNumberStep(step: Step): Response {
+    return new Response(this.observationForm?.value[step.id]);
   }
 
-  private addControlsForMultipleChoiceField(
-    group: { [fieldId: string]: FormControl },
-    field: Field,
+  private addControlsForMultipleChoiceStep(
+    group: { [stepId: string]: FormControl },
+    step: Step,
     response?: Response
   ): void {
-    switch (field.multipleChoice?.cardinality) {
+    switch (step.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        this.addControlsForSelectOneField(group, field, response);
+        this.addControlsForSelectOneStep(group, step, response);
         return;
       case Cardinality.SELECT_MULTIPLE:
-        this.addControlsForSelectMultipleField(group, field, response);
+        this.addControlsForSelectMultipleStep(group, step, response);
         return;
       default:
         throw Error(
-          `Unimplemented conversion to FormControl(s) for Field with
-           Cardinality:${field.multipleChoice?.cardinality}`
+          `Unimplemented conversion to FormControl(s) for Step with
+           Cardinality:${step.multipleChoice?.cardinality}`
         );
     }
   }
 
-  private extractResponseForMultipleChoiceField(field: Field): Response {
-    switch (field.multipleChoice?.cardinality) {
+  private extractResponseForMultipleChoiceStep(step: Step): Response {
+    switch (step.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        return this.extractResponseForSelectOneField(field);
+        return this.extractResponseForSelectOneStep(step);
       case Cardinality.SELECT_MULTIPLE:
-        return this.extractResponseForSelectMultipleField(field);
+        return this.extractResponseForSelectMultipleStep(step);
       default:
         throw Error(
-          `Unimplemented Response extraction for Field with
-           Cardinality:${field.multipleChoice?.cardinality}`
+          `Unimplemented Response extraction for Step with
+           Cardinality:${step.multipleChoice?.cardinality}`
         );
     }
   }
 
-  private addControlsForSelectOneField(
-    group: { [fieldId: string]: FormControl },
-    field: Field,
+  private addControlsForSelectOneStep(
+    group: { [stepId: string]: FormControl },
+    step: Step,
     response?: Response
   ): void {
     const selectedOptionId = ((response?.value as List<Option>)?.first() as Option)
       ?.id;
-    group[field.id] = field.required
+    group[step.id] = step.required
       ? new FormControl(selectedOptionId, Validators.required)
       : new FormControl(selectedOptionId);
   }
 
-  private extractResponseForSelectOneField(field: Field): Response {
-    const selectedOption: Option = field.getMultipleChoiceOption(
-      this.observationForm?.value[field.id]
+  private extractResponseForSelectOneStep(step: Step): Response {
+    const selectedOption: Option = step.getMultipleChoiceOption(
+      this.observationForm?.value[step.id]
     );
     return new Response(List([selectedOption]));
   }
 
-  private addControlsForSelectMultipleField(
-    group: { [fieldId: string]: FormControl },
-    field: Field,
+  private addControlsForSelectMultipleStep(
+    group: { [stepId: string]: FormControl },
+    step: Step,
     response?: Response
   ): void {
     const selectedOptions = response?.value as List<Option>;
-    for (const option of field.multipleChoice!.options) {
+    for (const option of step.multipleChoice!.options) {
       group[option.id] = new FormControl(selectedOptions?.contains(option));
     }
   }
 
-  private extractResponseForSelectMultipleField(field: Field): Response {
-    const selectedOptions: List<Option> = field.multipleChoice!.options!.filter(
+  private extractResponseForSelectMultipleStep(step: Step): Response {
+    const selectedOptions: List<Option> = step.multipleChoice!.options!.filter(
       option => this.observationForm?.value[option.id]
     );
     return new Response(selectedOptions);

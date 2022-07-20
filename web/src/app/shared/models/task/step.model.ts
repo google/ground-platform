@@ -16,7 +16,7 @@
 
 import { StringMap } from '../string-map.model';
 import { MultipleChoice } from './multiple-choice.model';
-import { Option } from './/option.model';
+import { Option } from './option.model';
 
 /**
  *
@@ -37,11 +37,11 @@ import { Option } from './/option.model';
  * }
  *
  * So to convert string to enum use:
- *  var value = FieldType["TEXT"]
+ *  var value = StepType["TEXT"]
  * Because then:
- *  value == FieldType.TEXT
+ *  value == StepType.TEXT
  */
-export enum FieldType {
+export enum StepType {
   TEXT = 1,
   MULTIPLE_CHOICE = 2,
   PHOTO = 3,
@@ -50,11 +50,11 @@ export enum FieldType {
   TIME = 6,
 }
 
-// TODO: add a subclass of Field for each field type.
-export class Field {
+// TODO: add a subclass of Step for each step type.
+export class Step {
   constructor(
     readonly id: string,
-    readonly type: FieldType,
+    readonly type: StepType,
     readonly label: StringMap,
     readonly required: boolean,
     readonly index: number,
@@ -62,21 +62,21 @@ export class Field {
   ) {}
 
   /**
-   * For MULTIPLE_CHOICE fields, returns the option with the specified id.
-   * Throws an Error if called for other field types.
+   * For MULTIPLE_CHOICE steps, returns the option with the specified id.
+   * Throws an Error if called for other step types.
    */
   getMultipleChoiceOption(optionId: string): Option {
-    if (this.type !== FieldType.MULTIPLE_CHOICE) {
+    if (this.type !== StepType.MULTIPLE_CHOICE) {
       throw Error(
-        `Field ${this.id} of type ${FieldType[this.type]} has no options.`
+        `Step ${this.id} of type ${StepType[this.type]} has no options.`
       );
     }
     if (this.multipleChoice === undefined) {
-      throw Error(`Field ${this.id} does not have choices defined.`);
+      throw Error(`Step ${this.id} does not have choices defined.`);
     }
     const option = this.multipleChoice.options.find(o => o.id === optionId);
     if (!option) {
-      throw Error(`Option ${optionId} not found in field ${this.id}.`);
+      throw Error(`Option ${optionId} not found in step ${this.id}.`);
     }
     return option;
   }

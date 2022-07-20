@@ -19,7 +19,7 @@ import { StringMap } from '../models/string-map.model';
 import { Task } from '../models/task/task.model';
 import { Map, List } from 'immutable';
 import { Option } from '../models/task/option.model';
-import { Field, FieldType } from '../models/task/field.model';
+import { Step, StepType } from '../models/task/step.model';
 import {
   MultipleChoice,
   Cardinality,
@@ -59,17 +59,17 @@ class MockFirebaseData {
 }
 
 class MockModel {
-  static element001: Field = new Field(
+  static element001: Step = new Step(
     'element001',
-    FieldType.TEXT,
+    StepType.TEXT,
     StringMap({ en: 'Text Field' }),
     /*required=*/ true,
     0
   );
 
-  static element002: Field = new Field(
+  static element002: Step = new Step(
     'element002',
-    FieldType.MULTIPLE_CHOICE,
+    StepType.MULTIPLE_CHOICE,
     StringMap({ en: 'Multiple Select' }),
     /*required=*/ true,
     1,
@@ -94,25 +94,25 @@ class MockModel {
     )
   );
 
-  static element003: Field = new Field(
+  static element003: Step = new Step(
     'element003',
-    FieldType.NUMBER,
+    StepType.NUMBER,
     StringMap({ en: 'How many sloths are there?' }),
     /*required=*/ true,
     2
   );
 
-  static element004: Field = new Field(
+  static element004: Step = new Step(
     'element004',
-    FieldType.DATE,
+    StepType.DATE,
     StringMap({ en: 'What is the current date?' }),
     /*required=*/ true,
     2
   );
 
-  static element005: Field = new Field(
+  static element005: Step = new Step(
     'element005',
-    FieldType.TIME,
+    StepType.TIME,
     StringMap({ en: 'What time is it?' }),
     /*required=*/ true,
     2

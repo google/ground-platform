@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { DataStoreService } from '../data-store/data-store.service';
 import { Job } from '../../shared/models/job.model';
-import { Field, FieldType } from '../../shared/models/task/field.model';
+import { Step, StepType } from '../../shared/models/task/step.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/task/option.model';
 import { MultipleChoice } from '../../shared/models/task/multiple-choice.model';
@@ -44,18 +44,18 @@ export class JobService {
   }
 
   /**
-   * Creates and returns a new field with a generated unique identifier and a single English label.
+   * Creates and returns a new step with a generated unique identifier and a single English label.
    */
-  createField(
-    type: FieldType,
+  createStep(
+    type: StepType,
     label: string,
     required: boolean,
     index: number,
     multipleChoice?: MultipleChoice
-  ): Field {
-    const fieldId = this.dataStoreService.generateId();
-    return new Field(
-      fieldId,
+  ): Step {
+    const stepId = this.dataStoreService.generateId();
+    return new Step(
+      stepId,
       type,
       StringMap({
         en: label,
@@ -92,35 +92,35 @@ export class JobService {
   }
 
   /**
-   * Converts list of fields to map.
+   * Converts list of steps to map.
    */
-  convertFieldsListToMap(fields: List<Field>): Map<string, Field> {
-    let fieldsMap = Map<string, Field>();
-    fields.forEach((field: Field, index: number) => {
-      const jobFieldId = fields && fields.get(index)?.id;
-      const fieldId = jobFieldId
+  convertStepsListToMap(steps: List<Step>): Map<string, Step> {
+    let stepsMap = Map<string, Step>();
+    steps.forEach((step: Step, index: number) => {
+      const jobFieldId = steps && steps.get(index)?.id;
+      const stepId = jobFieldId
         ? jobFieldId
         : this.dataStoreService.generateId();
-      fieldsMap = fieldsMap.set(fieldId, field);
+      stepsMap = stepsMap.set(stepId, step);
     });
-    return fieldsMap;
+    return stepsMap;
   }
 
   /**
-   * Creates and returns a new task map with a generated unique identifier and fields value.
+   * Creates and returns a new task map with a generated unique identifier and steps value.
    *
    * @param id the id of the new task.
-   * @param fields the fields of the new task.
+   * @param steps the steps of the new task.
    */
   createTask(
     id: string | undefined,
-    fields: Map<string, Field>
+    steps: Map<string, Step>
   ): Map<string, Task> | undefined {
-    if (JobService.isTaskEmpty(fields)) {
+    if (JobService.isTaskEmpty(steps)) {
       return undefined;
     }
     const taskId = id || this.dataStoreService.generateId();
-    return JobService.createTaskMap(taskId, new Task(taskId, fields));
+    return JobService.createTaskMap(taskId, new Task(taskId, steps));
   }
 
   /**
@@ -133,17 +133,17 @@ export class JobService {
   }
 
   /**
-   * Checks if there are no fields or first field in the task is empty.
+   * Checks if there are no steps or first step in the task is empty.
    */
-  private static isTaskEmpty(fields: Map<string, Field>): boolean {
+  private static isTaskEmpty(steps: Map<string, Step>): boolean {
     return (
-      fields.isEmpty() ||
-      (fields.size === 1 && !JobService.getFieldLabel(fields.first()))
+      steps.isEmpty() ||
+      (steps.size === 1 && !JobService.getStepLabel(steps.first()))
     );
   }
 
-  private static getFieldLabel(field: Field): string {
-    return field.label.get('en')?.trim() || '';
+  private static getStepLabel(step: Step): string {
+    return step.label.get('en')?.trim() || '';
   }
 
   /**

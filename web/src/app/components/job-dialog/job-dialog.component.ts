@@ -27,13 +27,13 @@ import { DialogService } from '../../services/dialog/dialog.service';
 import { Job } from '../../shared/models/job.model';
 import { Task } from '../../shared/models/task/task.model';
 import { Subscription } from 'rxjs';
-import { FieldType, Field } from '../../shared/models/task/field.model';
+import { StepType, Step } from '../../shared/models/task/step.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { JobService } from '../../services/job/job.service';
-import { TaskFieldEditorComponent } from '../task-field-editor/task-field-editor.component';
+import { TaskStepEditorComponent } from '../task-step-editor/task-step-editor.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 // To make ESLint happy:
@@ -50,13 +50,13 @@ export class JobDialogComponent implements OnDestroy {
   jobName!: string;
   surveyId?: string;
   subscription: Subscription = new Subscription();
-  fieldTypes = FieldType;
-  fields: List<Field>;
+  stepTypes = StepType;
+  steps: List<Step>;
   color!: string;
   defaultJobColor: string;
   task?: Task;
-  @ViewChildren(TaskFieldEditorComponent)
-  taskFieldEditors?: QueryList<TaskFieldEditorComponent>;
+  @ViewChildren(TaskStepEditorComponent)
+  taskStepEditors?: QueryList<TaskStepEditorComponent>;
   contributorsCanAddPoints = true;
   contributorsCanAddPolygons = true;
 
@@ -77,7 +77,7 @@ export class JobDialogComponent implements OnDestroy {
     this.defaultJobColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
-    this.fields = List<Field>();
+    this.steps = List<Step>();
     this.init(data.surveyId, data.createJob, data.job);
     this.dialogRef.keydownEvents().subscribe(event => {
       if (event.key === 'Escape') {
@@ -87,28 +87,28 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const newField = this.jobService.createField(
-      FieldType.TEXT,
+    const newStep = this.jobService.createStep(
+      StepType.TEXT,
       /* label= */
       '',
       /* required= */
       false,
       /* index= */
-      this.fields.size
+      this.steps.size
     );
-    this.fields = this.fields.push(newField);
-    this.markTaskFieldsTouched();
+    this.steps = this.steps.push(newStep);
+    this.markTaskStepsTouched();
     this.focusNewQuestion();
   }
 
   /**
-   * Delete the field of a given index.
+   * Delete the step of a given index.
    *
-   * @param index - The index of the field
+   * @param index - The index of the step
    * @returns void
    *
    */
-  onFieldDelete(index: number) {
+  onStepDelete(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
@@ -118,7 +118,7 @@ export class JobDialogComponent implements OnDestroy {
       .afterClosed()
       .subscribe(dialogResult => {
         if (dialogResult) {
-          this.fields = this.fields.splice(index, 1);
+          this.steps = this.steps.splice(index, 1);
         }
       });
   }
@@ -142,9 +142,8 @@ export class JobDialogComponent implements OnDestroy {
       this.job?.contributorsCanAdd?.includes('polygons') || false;
     this.task = this.jobService.getTask(this.job);
     if (this.task) {
-      this.fields =
-        this.task?.fields.toList().sortBy(field => field.index) ||
-        List<Field>();
+      this.steps =
+        this.task?.steps.toList().sortBy(step => step.index) || List<Step>();
     } else {
       this.addQuestion();
     }
@@ -155,20 +154,20 @@ export class JobDialogComponent implements OnDestroy {
       throw Error('Survey not yet loaded');
     }
 
-    if (!this.taskFieldEditors) {
+    if (!this.taskStepEditors) {
       return;
     }
 
-    this.markTaskFieldsTouched();
+    this.markTaskStepsTouched();
 
-    for (const editor of this.taskFieldEditors) {
-      if (editor.taskGroup.invalid || !this.isFieldOptionsValid(editor)) {
+    for (const editor of this.taskStepEditors) {
+      if (editor.taskGroup.invalid || !this.isStepOptionsValid(editor)) {
         return;
       }
     }
-    const fields = this.jobService.convertFieldsListToMap(this.fields);
+    const steps = this.jobService.convertStepsListToMap(this.steps);
     const taskId = this.task?.id;
-    const tasks = this.jobService.createTask(taskId, fields);
+    const tasks = this.jobService.createTask(taskId, steps);
     const allowedFeatureTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
       allowedFeatureTypes.push('points');
@@ -188,13 +187,11 @@ export class JobDialogComponent implements OnDestroy {
     this.addOrUpdateJob(this.surveyId, job);
   }
 
-  private isFieldOptionsValid(
-    taskFieldEditor: TaskFieldEditorComponent
-  ): boolean {
-    if (!taskFieldEditor.optionEditors) {
+  private isStepOptionsValid(taskStepEditor: TaskStepEditorComponent): boolean {
+    if (!taskStepEditor.optionEditors) {
       return true;
     }
-    for (const editor of taskFieldEditor.optionEditors) {
+    for (const editor of taskStepEditor.optionEditors) {
       if (editor.optionGroup.invalid) {
         return false;
       }
@@ -237,24 +234,24 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   /**
-   * Updates the field at given index from event emitted from task-field-editor
+   * Updates the step at given index from event emitted from task-step-editor
    *
-   * @param index - The index of the field
-   * @param event - updated field emitted from task-field-editor
+   * @param index - The index of the step
+   * @param event - updated step emitted from task-step-editor
    * @returns void
    *
    */
-  onFieldUpdate(event: Field, index: number) {
-    const fieldId = this.fields.get(index)?.id;
-    const field = new Field(
-      fieldId || '',
+  onStepUpdate(event: Step, index: number) {
+    const stepId = this.steps.get(index)?.id;
+    const step = new Step(
+      stepId || '',
       event.type,
       event.label,
       event.required,
       index,
       event.multipleChoice
     );
-    this.fields = this.fields.set(index, field);
+    this.steps = this.steps.set(index, step);
   }
 
   trackByFn(index: number) {
@@ -262,12 +259,12 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    const fieldAtPrevIndex = this.fields.get(event.previousIndex);
-    if (!fieldAtPrevIndex) {
+    const stepAtPrevIndex = this.steps.get(event.previousIndex);
+    if (!stepAtPrevIndex) {
       return;
     }
-    this.fields = this.fields.delete(event.previousIndex);
-    this.fields = this.fields.insert(event.currentIndex, fieldAtPrevIndex);
+    this.steps = this.steps.delete(event.previousIndex);
+    this.steps = this.steps.insert(event.currentIndex, stepAtPrevIndex);
   }
 
   ngOnDestroy() {
@@ -278,34 +275,32 @@ export class JobDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  private markTaskFieldsTouched(): void {
-    this.taskFieldEditors?.forEach(editor => {
+  private markTaskStepsTouched(): void {
+    this.taskStepEditors?.forEach(editor => {
       this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
     });
   }
 
-  private markOptionsTouched(editor: TaskFieldEditorComponent): void {
+  private markOptionsTouched(editor: TaskStepEditorComponent): void {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
   }
 
   private focusNewQuestion(): void {
-    if (this.taskFieldEditors?.length) {
+    if (this.taskStepEditors?.length) {
       this.cdr.detectChanges();
-      const question = this.taskFieldEditors.last;
+      const question = this.taskStepEditors.last;
       question?.questionInput?.nativeElement.focus();
     }
   }
 
-  private isFieldOptionsDirty(
-    taskFieldEditor: TaskFieldEditorComponent
-  ): boolean {
-    if (!taskFieldEditor.optionEditors) {
+  private isStepOptionsDirty(taskStepEditor: TaskStepEditorComponent): boolean {
+    if (!taskStepEditor.optionEditors) {
       return true;
     }
-    for (const editor of taskFieldEditor.optionEditors) {
+    for (const editor of taskStepEditor.optionEditors) {
       if (editor.optionGroup.dirty) {
         return false;
       }
@@ -314,11 +309,11 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   private hasUnsavedChanges(): boolean {
-    if (!this.taskFieldEditors) {
+    if (!this.taskStepEditors) {
       return false;
     }
-    for (const editor of this.taskFieldEditors) {
-      if (editor.taskGroup.dirty || !this.isFieldOptionsDirty(editor)) {
+    for (const editor of this.taskStepEditors) {
+      if (editor.taskGroup.dirty || !this.isStepOptionsDirty(editor)) {
         return true;
       }
     }
