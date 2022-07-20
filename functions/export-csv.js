@@ -68,7 +68,7 @@ async function exportCsv(req, res) {
   });
   csvStream.pipe(res);
 
-  const lois = await db.fetchLocationOfInterestsByLayerId(survey.id, layerId);
+  const lois = await db.fetchLocationsOfInterestByLayerId(survey.id, layerId);
   const observations = await db.fetchObservationsByLayerId(survey.id, layerId);
 
   // Index observations by LOI id in memory. This consumes more

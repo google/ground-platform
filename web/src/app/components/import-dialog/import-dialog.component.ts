@@ -49,7 +49,7 @@ export class ImportDialogComponent {
     });
   }
 
-  async onImportLocationOfInterests(): Promise<void> {
+  async onImportLocationsOfInterest(): Promise<void> {
     const files = this.uploadForm.get('file')?.value;
     if (!files || files.length === 0) {
       console.error('File missing');
@@ -57,7 +57,7 @@ export class ImportDialogComponent {
     }
     try {
       this.isImporting = true;
-      const response = await this.dataImportService.importLocationOfInterests(
+      const response = await this.dataImportService.importLocationsOfInterest(
         this.surveyId,
         this.layerId,
         files[0] as File

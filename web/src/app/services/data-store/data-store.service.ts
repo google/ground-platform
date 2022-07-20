@@ -106,7 +106,7 @@ export class DataStoreService {
   }
 
   async deleteLayer(surveyId: string, layerId: string) {
-    await this.deleteAllLocationOfInterestsInLayer(surveyId, layerId);
+    await this.deleteAllLocationsOfInterestInLayer(surveyId, layerId);
     await this.deleteAllObservationsInLayer(surveyId, layerId);
     return await this.db
       .collection('surveys')
@@ -140,7 +140,7 @@ export class DataStoreService {
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllLocationOfInterestsInLayer(
+  private async deleteAllLocationsOfInterestInLayer(
     surveyId: string,
     layerId: string
   ) {

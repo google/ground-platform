@@ -108,7 +108,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef,
     private dialog: MatDialog
   ) {
-    this.lois$ = this.loiService.getLocationOfInterests$();
+    this.lois$ = this.loiService.getLocationsOfInterest$();
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 
@@ -119,7 +119,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
       ]).subscribe(([survey, lois, selectedLocationOfInterestId]) =>
-        this.onSurveyAndLocationOfInterestsUpdate(
+        this.onSurveyAndLocationsOfInterestUpdate(
           survey,
           lois,
           selectedLocationOfInterestId
@@ -179,24 +179,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private onSurveyAndLocationOfInterestsUpdate(
+  private onSurveyAndLocationsOfInterestUpdate(
     survey: Survey,
     lois: List<LocationOfInterest>,
     selectedLocationOfInterestId: string | null
   ): void {
-    this.removeDeletedLocationOfInterests(lois);
-    this.addNewLocationOfInterests(survey, lois);
+    this.removeDeletedLocationsOfInterest(lois);
+    this.addNewLocationsOfInterest(survey, lois);
     this.selectLocationOfInterest(selectedLocationOfInterestId);
   }
 
   /**
    * Remove deleted lois to map. The LOIs that were displayed on
-   * the map but not in the `newLocationOfInterests` are considered as deleted.
+   * the map but not in the `newLocationsOfInterest` are considered as deleted.
    */
-  private removeDeletedLocationOfInterests(
-    newLocationOfInterests: List<LocationOfInterest>
+  private removeDeletedLocationsOfInterest(
+    newLocationsOfInterest: List<LocationOfInterest>
   ) {
-    const newLocationOfInterestIds: List<string> = newLocationOfInterests.map(
+    const newLocationOfInterestIds: List<string> = newLocationsOfInterest.map(
       f => f.id
     );
     this.removeDeletedMarkers(newLocationOfInterestIds);
@@ -223,9 +223,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   /**
    * Add new lois to map. The LOIs that were not displayed on
-   * the map but in the `newLocationOfInterests` are considered as new.
+   * the map but in the `newLocationsOfInterest` are considered as new.
    */
-  private addNewLocationOfInterests(
+  private addNewLocationsOfInterest(
     survey: Survey,
     lois: List<LocationOfInterest>
   ) {
@@ -515,7 +515,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         {
           width: '500px',
           data: {
-            clickedLocationOfInterests: candidatePolygons.map(
+            clickedLocationsOfInterest: candidatePolygons.map(
               this.polygonToLocationOfInterestData
             ),
           },

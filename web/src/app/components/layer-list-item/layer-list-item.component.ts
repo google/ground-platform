@@ -113,7 +113,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     return this.navigationService.selectSurvey(this.surveyId!);
   }
 
-  onImportLocationOfInterests() {
+  onImportLocationsOfInterest() {
     if (!this.surveyId || !this.layer?.id) {
       return;
     }

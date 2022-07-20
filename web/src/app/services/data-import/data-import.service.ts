@@ -33,7 +33,7 @@ export interface ImportResponse {
 export class DataImportService {
   constructor(private httpClient: HttpClient) {}
 
-  importLocationOfInterests(
+  importLocationsOfInterest(
     surveyId: string,
     layerId: string,
     file: File

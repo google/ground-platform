@@ -49,7 +49,7 @@ describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
-  let mockLocationOfInterests$: BehaviorSubject<List<LocationOfInterest>>;
+  let mockLocationsOfInterest$: BehaviorSubject<List<LocationOfInterest>>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
@@ -153,13 +153,13 @@ describe('MapComponent', () => {
 
       loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
         'LocationOfInterestService',
-        ['getLocationOfInterests$', 'updatePoint', 'addPoint']
+        ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
       );
-      mockLocationOfInterests$ = new BehaviorSubject<List<LocationOfInterest>>(
+      mockLocationsOfInterest$ = new BehaviorSubject<List<LocationOfInterest>>(
         List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
       );
-      loiServiceSpy.getLocationOfInterests$.and.returnValue(
-        mockLocationOfInterests$
+      loiServiceSpy.getLocationsOfInterest$.and.returnValue(
+        mockLocationsOfInterest$
       );
 
       navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
@@ -261,7 +261,7 @@ describe('MapComponent', () => {
   });
 
   it('should update lois when backend lois update', fakeAsync(() => {
-    mockLocationOfInterests$.next(
+    mockLocationsOfInterest$.next(
       List<LocationOfInterest>([poi1, poi3, geoJsonLoi1])
     );
     tick();

@@ -18,7 +18,7 @@
 <h4>Several overlapping lois found at this location. Please select one:</h4>
 <div mat-dialog-content>
   <div
-    *ngFor="let clickedLocationOfInterest of data.clickedLocationOfInterests"
+    *ngFor="let clickedLocationOfInterest of data.clickedLocationsOfInterest"
   >
     <button mat-button [mat-dialog-close]="clickedLocationOfInterest.loiId">
       <mat-icon [ngStyle]="{ color: clickedLocationOfInterest.color }">

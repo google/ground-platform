@@ -60,7 +60,7 @@ export class LocationOfInterestService {
     );
   }
 
-  getLocationOfInterests$(): Observable<List<LocationOfInterest>> {
+  getLocationsOfInterest$(): Observable<List<LocationOfInterest>> {
     return this.lois$;
   }
 

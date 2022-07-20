@@ -65,7 +65,7 @@ class Datastore {
     return this.fetchDoc_(`surveys/${surveyId}/lois/${loiId}`);
   }
 
-  fetchLocationOfInterestsByLayerId(surveyId, layerId) {
+  fetchLocationsOfInterestByLayerId(surveyId, layerId) {
     return this.db_
       .collection(`surveys/${surveyId}/lois`)
       .where("layerId", "==", layerId)
