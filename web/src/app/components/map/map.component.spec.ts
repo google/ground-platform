@@ -25,15 +25,15 @@ import {
 import { MapComponent } from './map.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SurveyService } from '../../services/survey/survey.service';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Survey } from '../../shared/models/survey.model';
 import {
-  Feature,
-  LocationFeature,
-  GeoJsonFeature,
-  PolygonFeature,
-} from '../../shared/models/feature.model';
+  LocationOfInterest,
+  PointOfInterest,
+  GeoJsonLocationOfInterest,
+  AreaOfInterest,
+} from '../../shared/models/loi.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
 import { Job } from '../../shared/models/job.model';
@@ -49,9 +49,9 @@ describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
-  let mockFeatures$: BehaviorSubject<List<Feature>>;
-  let featureServiceSpy: jasmine.SpyObj<FeatureService>;
-  let mockFeatureId$: BehaviorSubject<string | null>;
+  let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
+  let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
+  let mockLocationOfInterestId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let mockDialogAfterClosed$: BehaviorSubject<string>;
   let dialogRefSpy: jasmine.SpyObj<MatDialogRef<unknown, unknown>>;
@@ -59,12 +59,12 @@ describe('MapComponent', () => {
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
 
-  const locationFeatureId1 = 'loaction_feature001';
-  const locationFeatureId2 = 'loaction_feature002';
-  const locationFeatureId3 = 'loaction_feature003';
-  const locationFeatureId4 = 'loaction_feature004';
-  const geoJsonFeatureId1 = 'geo_json_feature001';
-  const polygonFeatureId1 = 'polygon_feature001';
+  const poiId1 = 'poi001';
+  const poiId2 = 'poi002';
+  const poiId3 = 'poi003';
+  const poiId4 = 'poi004';
+  const geoJsonLoiId1 = 'geo_json_loi001';
+  const aoiId1 = 'aoi001';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
   const jobColor1 = 'red';
@@ -91,23 +91,23 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map()
   );
-  const locationFeature1 = new LocationFeature(
-    locationFeatureId1,
+  const poi1 = new PointOfInterest(
+    poiId1,
     jobId1,
     new firebase.firestore.GeoPoint(1.23, 4.56)
   );
-  const locationFeature2 = new LocationFeature(
-    locationFeatureId2,
+  const poi2 = new PointOfInterest(
+    poiId2,
     jobId2,
     new firebase.firestore.GeoPoint(12.3, 45.6)
   );
-  const locationFeature3 = new LocationFeature(
-    locationFeatureId3,
+  const poi3 = new PointOfInterest(
+    poiId3,
     jobId2,
     new firebase.firestore.GeoPoint(78.9, 78.9)
   );
-  const locationFeature4 = new LocationFeature(
-    locationFeatureId4,
+  const poi4 = new PointOfInterest(
+    poiId4,
     jobId2,
     new firebase.firestore.GeoPoint(45, 45)
   );
@@ -131,12 +131,12 @@ describe('MapComponent', () => {
       },
     ],
   };
-  const geoJsonFeature1 = new GeoJsonFeature(
-    geoJsonFeatureId1,
+  const geoJsonLoi1 = new GeoJsonLocationOfInterest(
+    geoJsonLoiId1,
     jobId1,
     geoJson1
   );
-  const polygonFeature1 = new PolygonFeature(polygonFeatureId1, jobId2, [
+  const aoi1 = new AreaOfInterest(aoiId1, jobId2, [
     new firebase.firestore.GeoPoint(-10, -10),
     new firebase.firestore.GeoPoint(20, -10),
     new firebase.firestore.GeoPoint(20, 20),
@@ -151,31 +151,28 @@ describe('MapComponent', () => {
       ]);
       surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
 
-      featureServiceSpy = jasmine.createSpyObj<FeatureService>(
-        'FeatureService',
-        ['getFeatures$', 'updatePoint', 'addPoint']
+      loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+        'LocationOfInterestService',
+        ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
       );
-      mockFeatures$ = new BehaviorSubject<List<Feature>>(
-        List<Feature>([
-          locationFeature1,
-          locationFeature2,
-          geoJsonFeature1,
-          polygonFeature1,
-        ])
+      mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
+        List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
       );
-      featureServiceSpy.getFeatures$.and.returnValue(mockFeatures$);
+      loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
       navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
         'NavigationService',
         [
-          'getFeatureId$',
+          'getLocationOfInterestId$',
           'getObservationId$',
-          'selectFeature',
-          'clearFeatureId',
+          'selectLocationOfInterest',
+          'clearLocationOfInterestId',
         ]
       );
-      mockFeatureId$ = new BehaviorSubject<string | null>(null);
-      navigationServiceSpy.getFeatureId$.and.returnValue(mockFeatureId$);
+      mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
+      navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
+        mockLocationOfInterestId$
+      );
       navigationServiceSpy.getObservationId$.and.returnValue(
         of<string | null>(null)
       );
@@ -203,7 +200,10 @@ describe('MapComponent', () => {
         providers: [
           { provide: MatDialog, useValue: dialogSpy },
           { provide: SurveyService, useValue: surveyServiceSpy },
-          { provide: FeatureService, useValue: featureServiceSpy },
+          {
+            provide: LocationOfInterestService,
+            useValue: loiServiceSpy,
+          },
           { provide: NavigationService, useValue: navigationServiceSpy },
           { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
         ],
@@ -219,18 +219,18 @@ describe('MapComponent', () => {
 
   it('should render markers on map', () => {
     expect(component.markers.size).toEqual(2);
-    const marker1 = component.markers.get(locationFeatureId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
-    const marker2 = component.markers.get(locationFeatureId2)!;
+    const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
     assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
   });
 
-  it('should render polygons on map - geojson feature', () => {
-    const polygon = component.polygons.get(geoJsonFeatureId1)!;
+  it('should render polygons on map - geojson loi', () => {
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(0, 0),
@@ -243,8 +243,8 @@ describe('MapComponent', () => {
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
-  it('should render polygons on map - polygon feature', () => {
-    const polygon = component.polygons.get(polygonFeatureId1)!;
+  it('should render polygons on map - polygon loi', () => {
+    const polygon = component.polygons.get(aoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(-10, -10),
@@ -258,23 +258,23 @@ describe('MapComponent', () => {
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
-  it('should update features when backend features update', fakeAsync(() => {
-    mockFeatures$.next(
-      List<Feature>([locationFeature1, locationFeature3, geoJsonFeature1])
+  it('should update lois when backend lois update', fakeAsync(() => {
+    mockLois$.next(
+      List<LocationOfInterest>([poi1, poi3, geoJsonLoi1])
     );
     tick();
 
     expect(component.markers.size).toEqual(2);
-    const marker1 = component.markers.get(locationFeatureId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap);
-    const marker2 = component.markers.get(locationFeatureId3)!;
+    const marker2 = component.markers.get(poiId3)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
     assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap);
     expect(component.polygons.size).toEqual(1);
-    const polygon = component.polygons.get(geoJsonFeatureId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(0, 0),
@@ -287,65 +287,67 @@ describe('MapComponent', () => {
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   }));
 
-  it('should select feature when marker is clicked', () => {
-    const marker1 = component.markers.get(locationFeatureId1)!;
+  it('should select loi when marker is clicked', () => {
+    const marker1 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker1, 'click');
 
-    expect(navigationServiceSpy.selectFeature).toHaveBeenCalledOnceWith(
-      locationFeatureId1
-    );
+    expect(
+      navigationServiceSpy.selectLocationOfInterest
+    ).toHaveBeenCalledOnceWith(poiId1);
   });
 
-  it('should enlarge the marker when feature is selected', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+  it('should enlarge the marker when loi is selected', fakeAsync(() => {
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker1 = component.markers.get(locationFeatureId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     assertMarkerIcon(marker1, jobColor1, 50);
   }));
 
-  it('should select feature when polygon is clicked', () => {
-    const polygon = component.polygons.get(polygonFeatureId1)!;
+  it('should select loi when polygon is clicked', () => {
+    const polygon = component.polygons.get(aoiId1)!;
     google.maps.event.trigger(polygon, 'click', {
       latLng: new google.maps.LatLng(-9, -9),
     });
 
-    expect(navigationServiceSpy.selectFeature).toHaveBeenCalledOnceWith(
-      polygonFeatureId1
-    );
+    expect(
+      navigationServiceSpy.selectLocationOfInterest
+    ).toHaveBeenCalledOnceWith(aoiId1);
   });
 
-  it('should enlarge the stroke weight of the polygon when feature is selected', fakeAsync(() => {
-    mockFeatureId$.next(geoJsonFeatureId1);
+  it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
+    mockLocationOfInterestId$.next(geoJsonLoiId1);
     tick();
 
-    const polygon = component.polygons.get(geoJsonFeatureId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonStyle(polygon, jobColor1, 6);
   }));
 
-  it('should clear selected feature when map is clicked', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+  it('should clear selected loi when map is clicked', fakeAsync(() => {
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     google.maps.event.trigger(component.map.googleMap!, 'click', {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(navigationServiceSpy.clearFeatureId).toHaveBeenCalledTimes(1);
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).toHaveBeenCalledTimes(1);
   }));
 
   it('markers are not draggable by default', () => {
-    const marker1 = component.markers.get(locationFeatureId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     expect(marker1.getDraggable()).toBeFalse();
-    const marker2 = component.markers.get(locationFeatureId2)!;
+    const marker2 = component.markers.get(poiId2)!;
     expect(marker2.getDraggable()).toBeFalse();
   });
 
-  it('should set marker draggable when feature is selected', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+  it('should set marker draggable when loi is selected', fakeAsync(() => {
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker1 = component.markers.get(locationFeatureId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     expect(marker1.getDraggable()).toBeTrue();
   }));
 
@@ -357,10 +359,10 @@ describe('MapComponent', () => {
   });
 
   it('should pop up reposition dialog when marker dragged', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -372,10 +374,10 @@ describe('MapComponent', () => {
   }));
 
   it('should disable drawing tools when marker dragged', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -384,38 +386,42 @@ describe('MapComponent', () => {
   }));
 
   it('should disable marker click while repositioning a marker', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker1 = component.markers.get(locationFeatureId1)!;
+    const marker1 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker1, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
-    const marker2 = component.markers.get(locationFeatureId1)!;
+    const marker2 = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker2, 'click');
 
-    expect(navigationServiceSpy.selectFeature).toHaveBeenCalledTimes(0);
+    expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledTimes(
+      0
+    );
   }));
 
   it('should disable polygon click while repositioning a marker', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
-    const polygon = component.polygons.get(geoJsonFeatureId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     google.maps.event.trigger(polygon, 'click');
 
-    expect(navigationServiceSpy.selectFeature).toHaveBeenCalledTimes(0);
+    expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledTimes(
+      0
+    );
   }));
 
   it('should disable map click while repositioning a marker', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -423,14 +429,16 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(navigationServiceSpy.clearFeatureId).toHaveBeenCalledTimes(0);
+    expect(
+      navigationServiceSpy.clearLocationOfInterestId
+    ).toHaveBeenCalledTimes(0);
   }));
 
   it('should reposition marker when confirmed in reposition dialog', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -443,20 +451,20 @@ describe('MapComponent', () => {
     confirmRepositionButton.click();
 
     assertMarkerLatLng(marker, new google.maps.LatLng(2.23, 5.56));
-    expect(featureServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
-      new LocationFeature(
-        locationFeature1.id,
-        locationFeature1.jobId,
+    expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
+      new PointOfInterest(
+        poi1.id,
+        poi1.jobId,
         new firebase.firestore.GeoPoint(2.23, 5.56)
       )
     );
   }));
 
   it('should enable drawing tools when confirmed in reposition dialog', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -474,10 +482,10 @@ describe('MapComponent', () => {
   }));
 
   it('should move marker back when canceled in reposition dialog', fakeAsync(() => {
-    mockFeatureId$.next(locationFeatureId1);
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
-    const marker = component.markers.get(locationFeatureId1)!;
+    const marker = component.markers.get(poiId1)!;
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
@@ -490,29 +498,29 @@ describe('MapComponent', () => {
     cancelRepositionButton.click();
 
     assertMarkerLatLng(marker, new google.maps.LatLng(1.23, 4.56));
-    expect(featureServiceSpy.updatePoint).toHaveBeenCalledTimes(0);
+    expect(loiServiceSpy.updatePoint).toHaveBeenCalledTimes(0);
   }));
 
   it('should pop up dialog when overlapping polygons are clicked', fakeAsync(() => {
-    const polygon = component.polygons.get(geoJsonFeatureId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     google.maps.event.trigger(polygon, 'click', {
       latLng: new google.maps.LatLng(0, 0),
     });
-    mockDialogAfterClosed$.next(polygonFeatureId1);
+    mockDialogAfterClosed$.next(aoiId1);
     tick();
 
     expect(dialogSpy.open).toHaveBeenCalledTimes(1);
     expect(dialogRefSpy.afterClosed).toHaveBeenCalledTimes(1);
-    expect(navigationServiceSpy.selectFeature).toHaveBeenCalledOnceWith(
-      polygonFeatureId1
-    );
+    expect(
+      navigationServiceSpy.selectLocationOfInterest
+    ).toHaveBeenCalledOnceWith(aoiId1);
   }));
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {
     mockEditMode$.next(EditMode.AddPoint);
     drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId2);
-    featureServiceSpy.addPoint.and.returnValue(
-      new Promise(resolve => resolve(locationFeature4))
+    loiServiceSpy.addPoint.and.returnValue(
+      new Promise(resolve => resolve(poi4))
     );
     tick();
 
@@ -520,7 +528,7 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(featureServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, jobId2);
+    expect(loiServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, jobId2);
   }));
 
   it('should not add marker when job id is undefined', fakeAsync(() => {
@@ -532,7 +540,7 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(featureServiceSpy.addPoint).toHaveBeenCalledTimes(0);
+    expect(loiServiceSpy.addPoint).toHaveBeenCalledTimes(0);
   }));
 
   it('should do nothing when map clicked and edit mode is "AddPolygon"', fakeAsync(() => {
@@ -543,7 +551,7 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(featureServiceSpy.addPoint).toHaveBeenCalledTimes(0);
+    expect(loiServiceSpy.addPoint).toHaveBeenCalledTimes(0);
   }));
 
   function assertMarkerLatLng(

@@ -15,38 +15,39 @@
  * limitations under the License.
  */
 
-'use strict';
+"use strict";
 
-const {db} = require('./common/context');
-const {getSheet} = require('./common/sheet-config');
+const { db } = require("./common/context");
+const { getSheet } = require("./common/sheet-config");
 
 function updateColumns(req, res) {
   const {
     survey: surveyId,
-    featureType: featureTypeId,
+    loiType: loiTypeId,
     task: taskId,
-    lang: lang
+    lang: lang,
   } = req.query;
-  return getSheet(surveyId).then(sheet => {
+  return getSheet(surveyId).then((sheet) => {
     if (!sheet) {
-      return res.status(400).send('Survey spreadsheet config not found');
+      return res.status(400).send("Survey spreadsheet config not found");
     }
-    return db.fetchTask(surveyId, featureTypeId, taskId).then(task => {
+    return db.fetchTask(surveyId, loiTypeId, taskId).then((task) => {
       if (!task) {
-        return res.status(400).send('Task definition not found');
+        return res.status(400).send("Task definition not found");
       }
       const elements = task.elements || [];
       if (!elements.length) {
         return res.status(200).send("Task definition is empty");
       }
-      return sheet.getColumnMetadata().then(cols => {
+      return sheet.getColumnMetadata().then((cols) => {
         // Use the end index of the last column as our insertion point.
-        const insertAt = cols.length ?
-          cols[cols.length - 1].location.dimensionRange.endIndex : 0;
-        const existingColumnIds = cols.map(col => col.metadataValue);
+        const insertAt = cols.length
+          ? cols[cols.length - 1].location.dimensionRange.endIndex
+          : 0;
+        const existingColumnIds = cols.map((col) => col.metadataValue);
         return sheet
           .updateColumns(existingColumnIds, task.elements, insertAt, lang)
-          .then(cnt => res.send(`${cnt} columns added`));
+          .then((cnt) => res.send(`${cnt} columns added`));
       });
     });
   });

@@ -36,7 +36,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   @Input() job?: Job;
   @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
   surveyId?: string | null;
-  featureId?: string | null;
+  loiId?: string | null;
   jobPinUrl: SafeUrl;
   readonly lang: string;
   readonly jobListItemActionsType = JobListItemActionsType;
@@ -60,8 +60,8 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       getPinImageSource(this.job?.color)
     );
     this.subscription.add(
-      this.navigationService.getFeatureId$().subscribe(id => {
-        this.featureId = id;
+      this.navigationService.getLocationOfInterestId$().subscribe(id => {
+        this.loiId = id;
       })
     );
     this.subscription.add(
@@ -84,7 +84,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   }
 
   onGoBackClick() {
-    this.navigationService.clearFeatureId();
+    this.navigationService.clearLocationOfInterestId();
   }
 
   onDeleteJob() {
@@ -92,7 +92,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       .openConfirmationDialog(
         'Warning',
         'Are you sure you wish to delete this job? Any associated data ' +
-          'including all features and observations in this job will be ' +
+          'including all lois and observations in this job will be ' +
           'lost. This cannot be undone.'
       )
       .afterClosed()
@@ -112,7 +112,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     return this.navigationService.selectSurvey(this.surveyId!);
   }
 
-  onImportFeatures() {
+  onImportLocationsOfInterest() {
     if (!this.surveyId || !this.job?.id) {
       return;
     }
@@ -134,7 +134,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     if (!this.job?.id) {
       return;
     }
-    this.navigationService.showFeatureList(this.job.id);
+    this.navigationService.showLocationOfInterestList(this.job.id);
   }
 
   ngOnDestroy(): void {

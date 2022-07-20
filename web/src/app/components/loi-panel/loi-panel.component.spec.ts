@@ -17,17 +17,20 @@
 import firebase from 'firebase/app';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
-import { FeaturePanelComponent } from './feature-panel.component';
+import { LocationOfInterestPanelComponent } from './loi-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
-import { Feature, LocationFeature } from '../../shared/models/feature.model';
+import {
+  LocationOfInterest,
+  PointOfInterest,
+} from '../../shared/models/loi.model';
 import { Job } from '../../shared/models/job.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { SurveyService } from '../../services/survey/survey.service';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -49,8 +52,8 @@ const mockSurvey = new Survey(
   /* acl= */ Map()
 );
 
-const mockFeature = new LocationFeature(
-  'feature001',
+const mockLocationOfInterest = new PointOfInterest(
+  'loi001',
   'job001',
   new firebase.firestore.GeoPoint(0.0, 0.0)
 );
@@ -63,9 +66,9 @@ class MockSurveyService {
   }
 }
 
-class MockFeatureService {
-  getSelectedFeature$() {
-    return of<Feature>(mockFeature);
+class MockLocationOfInterestService {
+  getSelectedLocationOfInterest$() {
+    return of<LocationOfInterest>(mockLocationOfInterest);
   }
 }
 
@@ -76,26 +79,29 @@ class MockObservationService {
 }
 
 const surveyService = new MockSurveyService();
-const featureService = new MockFeatureService();
+const loiService = new MockLocationOfInterestService();
 const observationService = new MockObservationService();
 const navigationService = {
   getSurveyId$: () => of(''),
   getObservationId$: () => of(''),
 };
 
-describe('FeaturePanelComponent', () => {
-  let component: FeaturePanelComponent;
-  let fixture: ComponentFixture<FeaturePanelComponent>;
+describe('LocationOfInterestPanelComponent', () => {
+  let component: LocationOfInterestPanelComponent;
+  let fixture: ComponentFixture<LocationOfInterestPanelComponent>;
 
   beforeEach(
     waitForAsync(() => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
-        declarations: [FeaturePanelComponent],
+        declarations: [LocationOfInterestPanelComponent],
         imports: [MatDialogModule],
         providers: [
           { provide: DataStoreService, useValue: {} },
-          { provide: FeatureService, useValue: featureService },
+          {
+            provide: LocationOfInterestService,
+            useValue: loiService,
+          },
           { provide: SurveyService, useValue: surveyService },
           { provide: ObservationService, useValue: observationService },
           { provide: Router, useValue: routerSpy },
@@ -107,7 +113,7 @@ describe('FeaturePanelComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FeaturePanelComponent);
+    fixture = TestBed.createComponent(LocationOfInterestPanelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

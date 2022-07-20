@@ -24,19 +24,19 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
+import { LocationOfInterestPanelHeaderComponent } from './loi-panel-header.component';
 
-describe('FeaturePanelHeaderComponent', () => {
-  let component: FeaturePanelHeaderComponent;
-  let fixture: ComponentFixture<FeaturePanelHeaderComponent>;
+describe('LocationOfInterestPanelHeaderComponent', () => {
+  let component: LocationOfInterestPanelHeaderComponent;
+  let fixture: ComponentFixture<LocationOfInterestPanelHeaderComponent>;
 
   beforeEach(async () => {
     const navigationService = {
       getSurveyId$: () => of(''),
-      getFeatureId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
     };
     await TestBed.configureTestingModule({
-      declarations: [FeaturePanelHeaderComponent],
+      declarations: [LocationOfInterestPanelHeaderComponent],
       imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
       providers: [
         { provide: Router, useValue: {} },
@@ -48,7 +48,7 @@ describe('FeaturePanelHeaderComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FeaturePanelHeaderComponent);
+    fixture = TestBed.createComponent(LocationOfInterestPanelHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

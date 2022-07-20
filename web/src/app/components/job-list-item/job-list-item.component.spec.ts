@@ -45,7 +45,7 @@ describe('JobListItemComponent', () => {
     waitForAsync(() => {
       const navigationService = {
         getSurveyId$: () => of(''),
-        getFeatureId$: () => of(''),
+        getLocationOfInterestId$: () => of(''),
       };
 
       TestBed.configureTestingModule({

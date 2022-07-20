@@ -23,7 +23,7 @@ class Datastore {
   }
 
   /**
-   * Stores user email, name, and avatar to db for use in application features.
+   * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
   mergeUserProfile({ uid, email, displayName, photoURL }) {
@@ -48,9 +48,9 @@ class Datastore {
     return this.db_.doc(`surveys/${surveyId}`).get();
   }
 
-  fetchRecord(surveyId, featureId, recordId) {
+  fetchRecord(surveyId, loiId, recordId) {
     return this.fetchDoc_(
-      `surveys/${surveyId}/features/${featureId}/records/${recordId}`
+      `surveys/${surveyId}/lois/${loiId}/records/${recordId}`
     );
   }
 
@@ -61,20 +61,20 @@ class Datastore {
       .get();
   }
 
-  fetchFeature(surveyId, featureId) {
-    return this.fetchDoc_(`surveys/${surveyId}/features/${featureId}`);
+  fetchLocationOfInterest(surveyId, loiId) {
+    return this.fetchDoc_(`surveys/${surveyId}/lois/${loiId}`);
   }
 
-  fetchFeaturesByJobId(surveyId, jobId) {
+  fetchLocationsOfInterestByJobId(surveyId, jobId) {
     return this.db_
-      .collection(`surveys/${surveyId}/features`)
+      .collection(`surveys/${surveyId}/lois`)
       .where("jobId", "==", jobId)
       .get();
   }
 
-  fetchTask(surveyId, featureTypeId, taskId) {
+  fetchTask(surveyId, loiTypeId, taskId) {
     return this.fetchDoc_(
-      `surveys/${surveyId}/featureTypes/${featureTypeId}/tasks/${taskId}`
+      `surveys/${surveyId}/loiTypes/${loiTypeId}/tasks/${taskId}`
     );
   }
 
@@ -82,13 +82,13 @@ class Datastore {
     return this.fetchDoc_(`surveys/${surveyId}/sheets/config`);
   }
 
-  async insertFeature(surveyId, feature) {
+  async insertLocationOfInterest(surveyId, loi) {
     const docRef = await this.db_.collection("surveys").doc(surveyId);
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new Error(`/surveys/${surveyId} not found`);
     }
-    await docRef.collection("features").add(feature);
+    await docRef.collection("lois").add(loi);
   }
 }
 

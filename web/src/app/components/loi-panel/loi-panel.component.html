@@ -18,10 +18,7 @@ limitations under the License.
     TODO: create separate component for job as a header instead of
     using JobListItem here.
   -->
-  <ground-feature-panel-header
-    [job]="job"
-  >
-  </ground-feature-panel-header>
+  <ground-loi-panel-header [job]="job"> </ground-loi-panel-header>
 </mat-list>
 <div *ngIf="job" class="button-container">
   <button
@@ -98,7 +95,7 @@ limitations under the License.
   </ng-container>
   <ng-template #noObservations>
     <div class="no-observation-text">
-      No observations found for the selected feature.
+      No observations found for the selected loi.
     </div>
   </ng-template>
 </div>

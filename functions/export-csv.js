@@ -42,8 +42,8 @@ async function exportCsv(req, res) {
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push("feature_id");
-  headers.push("feature_name");
+  headers.push("loi_id");
+  headers.push("loi_name");
   headers.push("latitude");
   headers.push("longitude");
   headers.push("geometry");
@@ -68,32 +68,32 @@ async function exportCsv(req, res) {
   });
   csvStream.pipe(res);
 
-  const features = await db.fetchFeaturesByJobId(survey.id, jobId);
+  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
   const observations = await db.fetchObservationsByJobId(survey.id, jobId);
 
-  // Index observations by feature id in memory. This consumes more
-  // memory than iterating over and streaming both feature and observation`
+  // Index observations by LOI id in memory. This consumes more
+  // memory than iterating over and streaming both LOI and observation`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const observationsByFeature = {};
+  const observationsByLocationOfInterest = {};
   observations.forEach((observation) => {
-    const featureId = observation.get("featureId");
-    const arr = observationsByFeature[featureId] || [];
+    const loiId = observation.get("loiId");
+    const arr = observationsByLocationOfInterest[loiId] || [];
     arr.push(observation.data());
-    observationsByFeature[featureId] = arr;
+    observationsByLocationOfInterest[loiId] = arr;
   });
 
-  features.forEach((feature) => {
-    const featureId = feature.id;
-    const location = feature.get("location") || {};
-    const observations = observationsByFeature[featureId] || [{}];
+  lois.forEach((loi) => {
+    const loiId = loi.id;
+    const location = loi.get("location") || {};
+    const observations = observationsByLocationOfInterest[loiId] || [{}];
     observations.forEach((observation) => {
       const row = [];
-      row.push(getId(feature));
-      row.push(getLabel(feature));
+      row.push(getId(loi));
+      row.push(getLabel(loi));
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
-      row.push(toWkt(feature.get("geoJson")) || "");
+      row.push(toWkt(loi.get("geoJson")) || "");
       const responses = observation["responses"] || {};
       elements
         .map((element) => getValue(element, responses))
@@ -126,10 +126,10 @@ function getGeometry(geoJsonObject) {
   return geoJsonObject.geometry;
 }
 
-function getId(feature) {
-  const properties = feature.get("properties") || {};
+function getId(loi) {
+  const properties = loi.get("properties") || {};
   return (
-    feature.get("id") ||
+    loi.get("id") ||
     properties["ID"] ||
     properties["id"] ||
     properties["id_prod"] ||
@@ -137,8 +137,8 @@ function getId(feature) {
   );
 }
 
-function getLabel(feature) {
-  const properties = feature.get("properties") || {};
+function getLabel(loi) {
+  const properties = loi.get("properties") || {};
   return (
     properties["caption"] || properties["label"] || properties["title"] || ""
   );

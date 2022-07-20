@@ -25,11 +25,11 @@ import {
   Cardinality,
 } from '../models/task/multiple-choice.model';
 import {
-  Feature,
-  LocationFeature,
-  GeoJsonFeature,
-  PolygonFeature,
-} from '../models/feature.model';
+  LocationOfInterest,
+  PointOfInterest,
+  GeoJsonLocationOfInterest,
+  AreaOfInterest,
+} from '../models/loi.model';
 import { Observation } from '../models/observation/observation.model';
 import { Option } from '../models/task/option.model';
 import { List, Map } from 'immutable';
@@ -198,29 +198,29 @@ export class FirebaseDataConverter {
     };
   }
 
-  public static featureToJS(feature: Feature): {} {
+  public static loiToJS(loi: LocationOfInterest): {} {
     // TODO: Set audit info (created / last modified user and timestamp).
-    if (feature instanceof LocationFeature) {
-      const { jobId, location } = feature;
+    if (loi instanceof PointOfInterest) {
+      const { jobId, location } = loi;
       return {
         jobId,
         location,
       };
-    } else if (feature instanceof GeoJsonFeature) {
-      const { jobId, geoJson } = feature;
+    } else if (loi instanceof GeoJsonLocationOfInterest) {
+      const { jobId, geoJson } = loi;
       return {
         jobId,
         geoJson,
       };
-    } else if (feature instanceof PolygonFeature) {
-      const { jobId, polygonVertices } = feature;
+    } else if (loi instanceof AreaOfInterest) {
+      const { jobId, polygonVertices } = loi;
       return {
         jobId,
         polygonVertices,
       };
     } else {
       throw new Error(
-        `Cannot convert unexpected feature class ${feature.constructor.name} to json.`
+        `Cannot convert unexpected loi class ${loi.constructor.name} to json.`
       );
     }
   }
@@ -382,48 +382,56 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Feature instance.
+   * immutable LocationOfInterest instance.
    *
    * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  static toFeature(id: string, data: DocumentData): Feature | undefined {
+  static toLocationOfInterest(
+    id: string,
+    data: DocumentData
+  ): LocationOfInterest | undefined {
     try {
       if (!data.jobId) {
         throw new Error('Missing job id');
       }
-      const featureProperties = Map<string, string | number>(
+      const loiProperties = Map<string, string | number>(
         keys(data.properties).map((property: string) => [
           property,
           data.properties[property],
         ])
       );
 
-      if (this.isLocationFeature(data)) {
-        return new LocationFeature(
+      if (this.isPointOfInterest(data)) {
+        return new PointOfInterest(
           id,
           data.jobId,
           data.location,
-          featureProperties
+          loiProperties
         );
       }
-      if (this.isGeoJsonFeature(data)) {
+      if (this.isGeoJsonLocationOfInterest(data)) {
         const geoJson = JSON.parse(data.geoJson);
-        return new GeoJsonFeature(id, data.jobId, geoJson, featureProperties);
+        return new GeoJsonLocationOfInterest(
+          id,
+          data.jobId,
+          geoJson,
+          loiProperties
+        );
       }
-      if (this.isPolygonFeature(data)) {
-        return new PolygonFeature(
+      if (this.isAreaOfInterest(data)) {
+        return new AreaOfInterest(
           id,
           data.jobId,
           data.geometry.coordinates,
-          featureProperties
+          loiProperties
         );
       }
       throw new Error('Missing location and geoJson');
     } catch (err) {
-      console.error(`Invalid feature ${id}, ${err}`);
+      console.error(`Invalid loi ${id}, ${err}`);
     }
-    console.warn(`Invalid feature ${id} in remote data store ignored`);
+    console.warn(`Invalid loi ${id} in remote data store ignored`);
     return;
   }
 
@@ -434,7 +442,7 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
    * {
-   *   featureId: 'feature123'
+   *   loiId: 'loi123'
    *   taskId: 'task001',
    *   responses: {
    *     'element001': 'Response text',  // For 'text_field  elements.
@@ -456,7 +464,7 @@ export class FirebaseDataConverter {
     }
     return new Observation(
       id,
-      data.featureId,
+      data.loiId,
       data.jobId,
       task,
       FirebaseDataConverter.toAuditInfo(data.created),
@@ -476,7 +484,7 @@ export class FirebaseDataConverter {
 
   static observationToJS(observation: Observation): {} {
     return {
-      featureId: observation.featureId,
+      loiId: observation.loiId,
       jobId: observation.jobId,
       taskId: observation.task?.id,
       created: FirebaseDataConverter.auditInfoToJs(observation.created),
@@ -607,14 +615,14 @@ export class FirebaseDataConverter {
     return Role[role].toLowerCase();
   }
 
-  private static isLocationFeature(data: DocumentData): boolean {
+  private static isPointOfInterest(data: DocumentData): boolean {
     return data?.location?.latitude && data?.location?.longitude;
   }
 
-  private static isGeoJsonFeature(data: DocumentData): boolean {
+  private static isGeoJsonLocationOfInterest(data: DocumentData): boolean {
     return data?.geoJson;
   }
-  private static isPolygonFeature(data: DocumentData): boolean {
+  private static isAreaOfInterest(data: DocumentData): boolean {
     return data?.geometry;
   }
 }

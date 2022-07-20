@@ -15,20 +15,20 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { FeatureService } from './feature.service';
+import { LocationOfInterestService } from './loi.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { SurveyService } from '../survey/survey.service';
 import { Subject, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
-describe('FeatureService', () => {
+describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
 
   beforeEach(() => {
     const navigationService = {
       getSurveyId$: () => of(''),
-      getFeatureId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
     };
     TestBed.configureTestingModule({
       providers: [
@@ -45,7 +45,9 @@ describe('FeatureService', () => {
   });
 
   it('should be created', () => {
-    const service: FeatureService = TestBed.inject(FeatureService);
+    const service: LocationOfInterestService = TestBed.inject(
+      LocationOfInterestService
+    );
     expect(service).toBeTruthy();
   });
 });

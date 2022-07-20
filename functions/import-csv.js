@@ -53,9 +53,7 @@ async function importCsv(req, res) {
     if (!surveyId || !jobId) {
       return res.status(HttpStatus.BAD_REQUEST).end();
     }
-    console.log(
-      `Importing CSV into survey '${surveyId}', job '${jobId}'`
-    );
+    console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
     // received.
@@ -103,8 +101,8 @@ function invertAndFlatten(obj) {
 }
 
 /**
- * Dictionary of lowercase aliases for recognized feature attributes. Case
- * is ignored when mapping column aliases to feature attributes.
+ * Dictionary of lowercase aliases for recognized LOI attributes. Case
+ * is ignored when mapping column aliases to LOI attributes.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   id: ["id", "key"],
@@ -114,39 +112,39 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
 });
 
 async function insertRow(surveyId, jobId, row) {
-  const feature = csvRowToFeature(row, jobId);
-  if (feature) {
-    await db.insertFeature(surveyId, feature);
+  const loi = csvRowToLocationOfInterest(row, jobId);
+  if (loi) {
+    await db.insertLocationOfInterest(surveyId, loi);
   }
 }
 
 /**
- * Convert the provided row (key-value pairs) and jobId into a Feature for
+ * Convert the provided row (key-value pairs) and jobId into a LocationOfInterest for
  * insertion into the data store.
  */
-function csvRowToFeature(row, jobId) {
+function csvRowToLocationOfInterest(row, jobId) {
   let data = { jobId };
   let attributes = {};
   for (const columnName in row) {
-    const featureKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
+    const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];
-    if (featureKey) {
-      data[featureKey] = value;
+    if (loiKey) {
+      data[loiKey] = value;
     } else {
       attributes[columnName] = value;
     }
   }
-  let { lat, lng, ...feature } = data;
+  let { lat, lng, ...loi } = data;
   lat = Number.parseFloat(lat);
   lng = Number.parseFloat(lng);
   if (isNaN(lat) || isNaN(lng)) {
     return null;
   }
-  feature["location"] = new firestore.GeoPoint(lat, lng);
+  loi["location"] = new firestore.GeoPoint(lat, lng);
   if (Object.keys(attributes).length > 0) {
-    feature["attributes"] = attributes;
+    loi["attributes"] = attributes;
   }
-  return feature;
+  return loi;
 }
 
 module.exports = importCsv;

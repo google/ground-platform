@@ -22,11 +22,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatDialogModule } from '@angular/material/dialog';
-import { FeaturePanelHeaderComponent } from './feature-panel-header.component';
+import { LocationOfInterestPanelHeaderComponent } from './loi-panel-header.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
-  declarations: [FeaturePanelHeaderComponent],
+  declarations: [LocationOfInterestPanelHeaderComponent],
   imports: [
     BrowserModule,
     MatListModule,
@@ -38,6 +38,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatDialogModule,
     FlexLayoutModule,
   ],
-  exports: [FeaturePanelHeaderComponent],
+  exports: [LocationOfInterestPanelHeaderComponent],
 })
-export class FeaturePanelHeaderModule {}
+export class LocationOfInterestPanelHeaderModule {}

@@ -14,21 +14,21 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>Select feature</h1>
-<h4>Several overlapping features found at this location. Please select one:</h4>
+<h1 mat-dialog-title>Select loi</h1>
+<h4>Several overlapping lois found at this location. Please select one:</h4>
 <div mat-dialog-content>
-  <div *ngFor="let clickedFeature of data.clickedFeatures">
-    <button mat-button [mat-dialog-close]="clickedFeature.featureId">
-      <mat-icon
-          [ngStyle]="{ color: clickedFeature.color }">
+  <div
+    *ngFor="let clickedLocationOfInterest of data.clickedLocationsOfInterest"
+  >
+    <button mat-button [mat-dialog-close]="clickedLocationOfInterest.loiId">
+      <mat-icon [ngStyle]="{ color: clickedLocationOfInterest.color }">
         jobs
       </mat-icon>
-      {{ clickedFeature.jobName }}
-      {{ clickedFeature.featureId }}
+      {{ clickedLocationOfInterest.jobName }} {{ clickedLocationOfInterest.loiId
+      }}
     </button>
   </div>
 </div>
-<div mat-dialog-actions
-     class="button-row">
+<div mat-dialog-actions class="button-row">
   <button mat-button (click)="onCancelClick()">Cancel</button>
 </div>

@@ -16,11 +16,13 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FeatureListComponent } from './feature-list.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { SelectLocationOfInterestDialogComponent } from './select-loi-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
-  declarations: [FeatureListComponent],
-  imports: [CommonModule],
-  exports: [FeatureListComponent],
+  declarations: [SelectLocationOfInterestDialogComponent],
+  imports: [CommonModule, MatButtonModule, MatDialogModule, MatIconModule],
 })
-export class FeatureListModule {}
+export class SelectLocationOfInterestDialogModule {}

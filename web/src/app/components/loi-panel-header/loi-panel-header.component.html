@@ -20,28 +20,32 @@ limitations under the License.
 </button>
 <mat-list-item>
   <img
-    *ngIf="featureTypeValue === featureType.Point"
+    *ngIf="loiTypeValue === loiType.Point"
     matListAvatar
     [src]="pinUrl"
     alt="point"
   />
   <img
-    *ngIf="featureTypeValue === featureType.Polygon"
+    *ngIf="loiTypeValue === loiType.Polygon"
     matListAvatar
     src="/assets/img/polygon_icon.svg"
     alt="polygon"
   />
-  <h3 matLine>{{ getFeatureName() }}</h3>
+  <h3 matLine>{{ getLocationOfInterestName() }}</h3>
   <div matLine>
     <div class="job-name">{{ job?.name?.get(lang) }}</div>
   </div>
-  <button mat-icon-button [matMenuTriggerFor]="featureMenu">
+  <button mat-icon-button [matMenuTriggerFor]="loiMenu">
     <mat-icon>more_vert</mat-icon>
   </button>
-  <mat-menu #featureMenu="matMenu">
-    <button mat-menu-item aria-label="delete" (click)="onDeleteFeatureClick()">
+  <mat-menu #loiMenu="matMenu">
+    <button
+      mat-menu-item
+      aria-label="delete"
+      (click)="onDeleteLocationOfInterestClick()"
+    >
       <mat-icon>delete_forever</mat-icon>
-      <span>Delete feature</span>
+      <span>Delete loi</span>
     </button>
   </mat-menu>
 </mat-list-item>

@@ -19,7 +19,7 @@ import { JobDialogComponent } from '../job-dialog/job-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { take } from 'rxjs/operators';
@@ -45,7 +45,7 @@ export class MainPageComponent implements OnInit {
   constructor(
     private navigationService: NavigationService,
     private surveyService: SurveyService,
-    private featureService: FeatureService,
+    private loiService: LocationOfInterestService,
     private observationService: ObservationService,
     private authService: AuthService,
     private dialog: MatDialog
@@ -70,11 +70,11 @@ export class MainPageComponent implements OnInit {
         .getJobId$()
         .subscribe(id => id && this.showEditJobDialog(id))
     );
-    // Show feature details when non-null feature id set in URL.
+    // Show loi details when non-null LOI id set in URL.
     this.subscription.add(
       this.navigationService
-        .getFeatureId$()
-        .subscribe(id => id && this.loadFeatureDetails(id))
+        .getLocationOfInterestId$()
+        .subscribe(id => id && this.loadLocationOfInterestDetails(id))
     );
     // Show/hide observation when observation id set in URL.
     this.subscription.add(
@@ -119,8 +119,8 @@ export class MainPageComponent implements OnInit {
     );
   }
 
-  private loadFeatureDetails(featureId: string) {
-    this.featureService.selectFeature(featureId);
+  private loadLocationOfInterestDetails(loiId: string) {
+    this.loiService.selectLocationOfInterest(loiId);
   }
 
   private editObservation(observationId: string | null) {

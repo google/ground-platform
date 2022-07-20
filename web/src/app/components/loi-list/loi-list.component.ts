@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogModule } from '@angular/material/dialog';
-import { SelectFeatureDialogComponent } from './select-feature-dialog.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, OnInit } from '@angular/core';
 
-@NgModule({
-  declarations: [SelectFeatureDialogComponent],
-  imports: [CommonModule, MatButtonModule, MatDialogModule, MatIconModule],
+@Component({
+  selector: 'ground-loi-list',
+  templateUrl: './loi-list.component.html',
+  styleUrls: ['./loi-list.component.scss'],
 })
-export class SelectFeatureDialogModule {}
+export class LocationOfInterestListComponent implements OnInit {
+  constructor() {}
+
+  ngOnInit(): void {}
+}

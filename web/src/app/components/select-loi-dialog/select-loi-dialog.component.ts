@@ -18,24 +18,24 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 interface DialogData {
-  clickedFeatures: FeatureData[];
+  clickedLocationsOfInterest: LocationOfInterestData[];
 }
 
-export interface FeatureData {
-  featureId: string;
+export interface LocationOfInterestData {
+  loiId: string;
   color: string;
   jobName: string;
 }
 
 @Component({
-  selector: 'select-feature-dialog',
-  templateUrl: 'select-feature-dialog.html',
-  styleUrls: ['./select-feature-dialog.component.scss'],
+  selector: 'select-loi-dialog',
+  templateUrl: 'select-loi-dialog.html',
+  styleUrls: ['./select-loi-dialog.component.scss'],
 })
-export class SelectFeatureDialogComponent {
+export class SelectLocationOfInterestDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<
-      SelectFeatureDialogComponent,
+      SelectLocationOfInterestDialogComponent,
       string | undefined
     >,
     @Inject(MAT_DIALOG_DATA)

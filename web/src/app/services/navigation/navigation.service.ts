@@ -29,8 +29,8 @@ import { HttpParams } from '@angular/common/http';
 })
 export class NavigationService {
   private static readonly JOB_ID_FRAGMENT_PARAM = 'l';
-  private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
-  private static readonly FEATURE_JOB_ID_FRAGMENT_PARAM = 'fl';
+  private static readonly LOI_ID_FRAGMENT_PARAM = 'f';
+  private static readonly LOI_JOB_ID_FRAGMENT_PARAM = 'fl';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
   static readonly JOB_ID_NEW = 'new';
   static readonly OBSERVATION_ID_NEW = 'new';
@@ -44,11 +44,11 @@ export class NavigationService {
     if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
       return SideNavMode.OBSERVATION;
     }
-    if (params.get(NavigationService.FEATURE_ID_FRAGMENT_PARAM)) {
-      return SideNavMode.FEATURE;
+    if (params.get(NavigationService.LOI_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.LOI;
     }
-    if (params.get(NavigationService.FEATURE_JOB_ID_FRAGMENT_PARAM)) {
-      return SideNavMode.FEATURE_LIST;
+    if (params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.LOI_LIST;
     }
     return SideNavMode.JOB_LIST;
   }
@@ -56,7 +56,7 @@ export class NavigationService {
   private activatedRoute?: ActivatedRoute;
   private surveyId$?: Observable<string | null>;
   private jobId$?: Observable<string | null>;
-  private featureId$?: Observable<string | null>;
+  private loiId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
 
@@ -79,8 +79,8 @@ export class NavigationService {
     this.jobId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.JOB_ID_FRAGMENT_PARAM))
     );
-    this.featureId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.FEATURE_ID_FRAGMENT_PARAM))
+    this.loiId$ = fragmentParams$.pipe(
+      map(params => params.get(NavigationService.LOI_ID_FRAGMENT_PARAM))
     );
     this.observationId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM))
@@ -98,8 +98,8 @@ export class NavigationService {
     return this.jobId$!;
   }
 
-  getFeatureId$(): Observable<string | null> {
-    return this.featureId$!;
+  getLocationOfInterestId$(): Observable<string | null> {
+    return this.loiId$!;
   }
 
   getObservationId$(): Observable<string | null> {
@@ -139,30 +139,30 @@ export class NavigationService {
   }
 
   /**
-   * Get current feature id in the URL fragment.
+   * Get current LOI id in the URL fragment.
    */
-  getFeatureId(): string | null {
+  getLocationOfInterestId(): string | null {
     return this.getFragmentParams().get(
-      NavigationService.FEATURE_ID_FRAGMENT_PARAM
+      NavigationService.LOI_ID_FRAGMENT_PARAM
     );
   }
 
   /**
-   * Navigate to the current URL, updating the feature id in the URL fragment.
+   * Navigate to the current URL, updating the LOI id in the URL fragment.
    */
-  selectFeature(id: string) {
+  selectLocationOfInterest(id: string) {
     const newParam: { [key: string]: string } = {};
-    newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = id;
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = id;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  showFeatureList(jobId: string) {
+  showLocationOfInterestList(jobId: string) {
     const newParam: { [key: string]: string } = {};
-    newParam[NavigationService.FEATURE_JOB_ID_FRAGMENT_PARAM] = jobId;
+    newParam[NavigationService.LOI_JOB_ID_FRAGMENT_PARAM] = jobId;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  clearFeatureId() {
+  clearLocationOfInterestId() {
     this.setFragmentParams(new HttpParams({ fromString: '' }));
   }
 
@@ -179,9 +179,9 @@ export class NavigationService {
    * Navigate to the current URL, updating the observation id in the URL
    * fragment.
    */
-  editObservation(featureId: string, observationId: string) {
+  editObservation(loiId: string, observationId: string) {
     const newParam: { [key: string]: string } = {};
-    newParam[NavigationService.FEATURE_ID_FRAGMENT_PARAM] = featureId;
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = loiId;
     newParam[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = observationId;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
@@ -189,8 +189,8 @@ export class NavigationService {
   clearObservationId() {
     const newParam: { [key: string]: string } = {};
     newParam[
-      NavigationService.FEATURE_ID_FRAGMENT_PARAM
-    ] = this.getFeatureId()!;
+      NavigationService.LOI_ID_FRAGMENT_PARAM
+    ] = this.getLocationOfInterestId()!;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
@@ -246,6 +246,6 @@ export class NavigationService {
 export enum SideNavMode {
   JOB_LIST = 1,
   OBSERVATION = 2,
-  FEATURE = 3,
-  FEATURE_LIST = 4,
+  LOI = 3,
+  LOI_LIST = 4,
 }

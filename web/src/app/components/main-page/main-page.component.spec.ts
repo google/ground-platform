@@ -21,7 +21,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { SurveyService } from '../../services/survey/survey.service';
 import { MatDialog } from '@angular/material/dialog';
-import { FeatureService } from '../../services/feature/feature.service';
+import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { ObservationService } from '../../services/observation/observation.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
@@ -52,8 +52,8 @@ describe('MainPageComponent', () => {
         'activateSurvey',
       ]);
 
-      const featureService = jasmine.createSpyObj('FeatureService', [
-        'selectFeature$',
+      const loiService = jasmine.createSpyObj('LocationOfInterestService', [
+        'selectLocationOfInterest$',
       ]);
 
       const observationService = jasmine.createSpyObj('ObservationService', [
@@ -63,7 +63,7 @@ describe('MainPageComponent', () => {
       const navigationService = {
         getSurveyId$: () => NEVER,
         getJobId$: () => NEVER,
-        getFeatureId$: () => NEVER,
+        getLocationOfInterestId$: () => NEVER,
         getObservationId$: () => NEVER,
       };
 
@@ -72,7 +72,10 @@ describe('MainPageComponent', () => {
         providers: [
           { provide: ActivatedRoute, useValue: route },
           { provide: MatDialog, useValue: dialog },
-          { provide: FeatureService, useValue: featureService },
+          {
+            provide: LocationOfInterestService,
+            useValue: loiService,
+          },
           { provide: ObservationService, useValue: observationService },
           { provide: SurveyService, useValue: surveyService },
           { provide: NavigationService, useValue: navigationService },

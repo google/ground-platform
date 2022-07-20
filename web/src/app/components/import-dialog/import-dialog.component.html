@@ -15,11 +15,11 @@
 -->
 
 <div *ngIf="isImporting; else defaultView">
-  <h2 mat-dialog-title>Uploading features</h2>
+  <h2 mat-dialog-title>Uploading lois</h2>
   <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
 </div>
 <ng-template #defaultView>
-  <h2 mat-dialog-title>Import features</h2>
+  <h2 mat-dialog-title>Import lois</h2>
   <mat-dialog-content>
     <form [formGroup]="uploadForm">
       <div>
@@ -35,7 +35,7 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button (click)="onImportFeatures()" color="primary">
+    <button mat-button (click)="onImportLocationsOfInterest()" color="primary">
       Upload
     </button>
   </mat-dialog-actions>

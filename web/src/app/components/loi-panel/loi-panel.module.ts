@@ -16,7 +16,7 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FeaturePanelComponent } from './feature-panel.component';
+import { LocationOfInterestPanelComponent } from './loi-panel.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,7 +24,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { JobListItemModule } from '../job-list-item/job-list-item.module';
-import { FeaturePanelHeaderModule } from '../feature-panel-header/feature-panel-header.module';
+import { LocationOfInterestPanelHeaderModule } from '../loi-panel-header/loi-panel-header.module';
 
 @NgModule({
   imports: [
@@ -35,9 +35,9 @@ import { FeaturePanelHeaderModule } from '../feature-panel-header/feature-panel-
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
-    FeaturePanelHeaderModule,
+    LocationOfInterestPanelHeaderModule,
   ],
-  exports: [FeaturePanelComponent],
-  declarations: [FeaturePanelComponent],
+  exports: [LocationOfInterestPanelComponent],
+  declarations: [LocationOfInterestPanelComponent],
 })
-export class FeaturePanelModule {}
+export class LocationOfInterestPanelModule {}

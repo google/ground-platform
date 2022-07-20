@@ -168,12 +168,12 @@ export class JobDialogComponent implements OnDestroy {
     const steps = this.jobService.convertStepsListToMap(this.steps);
     const taskId = this.task?.id;
     const tasks = this.jobService.createTask(taskId, steps);
-    const allowedFeatureTypes: string[] = [];
+    const allowedLoiTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
-      allowedFeatureTypes.push('points');
+      allowedLoiTypes.push('points');
     }
     if (this.contributorsCanAddPolygons) {
-      allowedFeatureTypes.push('polygons');
+      allowedLoiTypes.push('polygons');
     }
     const job = new Job(
       this.job?.id || '',
@@ -182,7 +182,7 @@ export class JobDialogComponent implements OnDestroy {
       // TODO: Make jobName Map
       StringMap({ [this.lang]: this.jobName.trim() }),
       tasks,
-      allowedFeatureTypes
+      allowedLoiTypes
     );
     this.addOrUpdateJob(this.surveyId, job);
   }

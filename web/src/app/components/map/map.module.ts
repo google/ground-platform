@@ -20,7 +20,7 @@ import { MapComponent } from './map.component';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { SelectFeatureDialogModule } from '../select-feature-dialog/select-feature-dialog.module';
+import { SelectLocationOfInterestDialogModule } from '../select-loi-dialog/select-loi-dialog.module';
 
 @NgModule({
   imports: [
@@ -28,7 +28,7 @@ import { SelectFeatureDialogModule } from '../select-feature-dialog/select-featu
     GoogleMapsModule,
     MatButtonModule,
     MatDialogModule,
-    SelectFeatureDialogModule,
+    SelectLocationOfInterestDialogModule,
   ],
   exports: [MapComponent],
   declarations: [MapComponent],

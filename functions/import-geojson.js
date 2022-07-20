@@ -54,9 +54,7 @@ async function importGeoJson(req, res) {
         .status(HttpStatus.BAD_REQUEST)
         .end(JSON.stringify({ error: "Invalid request" }));
     }
-    console.log(
-      `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
-    );
+    console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
     let geoJsonType = null;
@@ -65,21 +63,21 @@ async function importGeoJson(req, res) {
     });
 
     file
-      .pipe(JSONStream.parse(["features", true]))
-      .on("data", async (geoJsonFeature) => {
+      .pipe(JSONStream.parse(["lois", true]))
+      .on("data", async (geoJsonLoi) => {
         if (geoJsonType !== "FeatureCollection") {
           // TODO: report error to user
           console.debug(`Invalid ${geoJsonType}`);
           return res.status(HttpStatus.BAD_REQUEST).end();
         }
-        if (geoJsonFeature.type != "Feature") {
-          console.debug(`Skipping feature with type ${geoJsonFeature.type}`);
+        if (geoJsonLoi.type != "Feature") {
+          console.debug(`Skipping loi with type ${geoJsonLoi.type}`);
           return;
         }
         try {
-          const feature = geoJsonToGroundFeature(geoJsonFeature, jobId);
-          if (feature) {
-            inserts.push(db.insertFeature(surveyId, feature));
+          const loi = geoJsonToGroundLocationOfInterest(geoJsonLoi, jobId);
+          if (loi) {
+            inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
         } catch (err) {
           console.error(err);
@@ -96,7 +94,7 @@ async function importGeoJson(req, res) {
   busboy.on("finish", async () => {
     await Promise.all(inserts);
     const count = inserts.length;
-    console.log(`${count} features imported`);
+    console.log(`${count} lois imported`);
     await res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
@@ -109,16 +107,16 @@ async function importGeoJson(req, res) {
 }
 
 /**
- * Convert the provided GeoJSON Feature and jobId into a Feature for
+ * Convert the provided GeoJSON LocationOfInterest and jobId into a LocationOfInterest for
  * insertion into the Ground data store.
  */
-function geoJsonToGroundFeature(geoJsonFeature, jobId) {
+function geoJsonToGroundLocationOfInterest(geoJsonLoi, jobId) {
   // TODO: Migrate Android app to use geometry for points instead of 'location'.
   return {
     jobId,
-    properties: geoJsonFeature.properties,
+    properties: geoJsonLoi.properties,
     // TODO: Remove once web app moves over to using 'geometry' field.
-    geoJson: JSON.stringify(geoJsonFeature),
+    geoJson: JSON.stringify(geoJsonLoi),
     // TODO: Convert to object (incl nested arrays) and store in 'geometry'.
     // TODO: Add created/modified metadata.
   };

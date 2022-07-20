@@ -15,23 +15,27 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { TestData } from '../../../testing/test-data';
 import { ObservationService } from './observation.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { SurveyService } from '../survey/survey.service';
-import { FeatureService } from '../feature/feature.service';
+import { LocationOfInterestService } from '../loi/loi.service';
 import { AuthService } from './../../services/auth/auth.service';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 
+const { newUser, newSurvey, newJob, newPointOfInterest } = TestData;
+
 describe('ObservationService', () => {
   const user$ = new Subject<User | null>();
+  let service: ObservationService;
 
-  beforeEach(() =>
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         { provide: DataStoreService, useValue: {} },
         { provide: SurveyService, useValue: {} },
-        { provide: FeatureService, useValue: {} },
+        { provide: LocationOfInterestService, useValue: {} },
         {
           provide: AuthService,
           useValue: {
@@ -39,11 +43,23 @@ describe('ObservationService', () => {
           },
         },
       ],
-    })
-  );
+    });
+    service = TestBed.inject(ObservationService);
+  });
 
   it('should be created', () => {
-    const service: ObservationService = TestBed.inject(ObservationService);
     expect(service).toBeTruthy();
+  });
+
+  describe('createNewObservation', () => {
+    it('fail if task missing', () => {
+      expect(() =>
+        service.createNewObservation(
+          newUser(),
+          newSurvey({ jobs: { job001: newJob({ tasks: {} }) } }),
+          newPointOfInterest()
+        )
+      ).toThrow(new Error('No task in job job001'));
+    });
   });
 });

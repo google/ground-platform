@@ -22,7 +22,7 @@ import { Map } from 'immutable';
 export class Observation {
   constructor(
     readonly id: string,
-    readonly featureId: string,
+    readonly loiId: string,
     readonly jobId: string,
     readonly task: Task | null,
     readonly created: AuditInfo,
@@ -37,7 +37,7 @@ export class Observation {
   ): Observation {
     return new Observation(
       this.id,
-      this.featureId,
+      this.loiId,
       this.jobId,
       this.task,
       this.created,

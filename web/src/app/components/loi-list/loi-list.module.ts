@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LocationOfInterestListComponent } from './loi-list.component';
 
-@Component({
-  selector: 'ground-feature-list',
-  templateUrl: './feature-list.component.html',
-  styleUrls: ['./feature-list.component.scss'],
+@NgModule({
+  declarations: [LocationOfInterestListComponent],
+  imports: [CommonModule],
+  exports: [LocationOfInterestListComponent],
 })
-export class FeatureListComponent implements OnInit {
-  constructor() {}
-
-  ngOnInit(): void {}
-}
+export class LocationOfInterestListModule {}

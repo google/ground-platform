@@ -16,7 +16,7 @@
 
 import { Observation } from './../../shared/models/observation/observation.model';
 import { ObservationService } from './../../services/observation/observation.service';
-import { FeatureService } from './../../services/feature/feature.service';
+import { LocationOfInterestService } from './../../services/loi/loi.service';
 import { switchMap } from 'rxjs/operators';
 import { SurveyService } from './../../services/survey/survey.service';
 import { List } from 'immutable';
@@ -28,13 +28,13 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { DialogService } from '../../services/dialog/dialog.service';
 
-// TODO: Rename "FeatureDetailsComponent".
+// TODO: Rename "LocationOfInterestDetailsComponent".
 @Component({
-  selector: 'ground-feature-panel',
-  templateUrl: './feature-panel.component.html',
-  styleUrls: ['./feature-panel.component.scss'],
+  selector: 'ground-loi-panel',
+  templateUrl: './loi-panel.component.html',
+  styleUrls: ['./loi-panel.component.scss'],
 })
-export class FeaturePanelComponent implements OnInit, OnDestroy {
+export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   surveyId?: string;
   observationId?: string;
   readonly observations$: Observable<List<Observation>>;
@@ -47,7 +47,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   constructor(
     private navigationService: NavigationService,
     surveyService: SurveyService,
-    featureService: FeatureService,
+    loiService: LocationOfInterestService,
     observationService: ObservationService,
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
@@ -59,21 +59,17 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          featureService
-            .getSelectedFeature$()
+          loiService
+            .getSelectedLocationOfInterest$()
             .pipe(
-              switchMap(feature =>
-                observationService.observations$(survey, feature)
-              )
+              switchMap(loi => observationService.observations$(survey, loi))
             )
         )
       );
     combineLatest([
       surveyService.getActiveSurvey$(),
-      featureService.getSelectedFeature$(),
-    ]).subscribe(
-      ([survey, feature]) => (this.job = survey.jobs.get(feature.jobId))
-    );
+      loiService.getSelectedLocationOfInterest$(),
+    ]).subscribe(([survey, loi]) => (this.job = survey.jobs.get(loi.jobId)));
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {
       observations.forEach(observation => {
@@ -127,21 +123,21 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
 
   onEditObservationClick(observation: Observation) {
     this.navigationService.editObservation(
-      this.navigationService.getFeatureId()!,
+      this.navigationService.getLocationOfInterestId()!,
       observation.id
     );
   }
 
   onAddObservationClick() {
     this.navigationService.editObservation(
-      this.navigationService.getFeatureId()!,
+      this.navigationService.getLocationOfInterestId()!,
       NavigationService.OBSERVATION_ID_NEW
     );
   }
 
   onDeleteObservationClick(id: string) {
     this.navigationService.editObservation(
-      this.navigationService.getFeatureId()!,
+      this.navigationService.getLocationOfInterestId()!,
       id
     );
     this.dialogService
