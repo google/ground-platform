@@ -19,13 +19,13 @@
 .observation.card {
   margin: 16px;
 }
-.observation .field-label {
+.observation .step-label {
   font-size: 12px;
   line-height: 16px;
   color: mat-color($foreground, secondary-text);
   margin-bottom: 3px;
 }
-.observation .field-response {
+.observation .step-response {
   font-size: 14px;
   line-height: 20px;
   color: mat-color($foreground, text);

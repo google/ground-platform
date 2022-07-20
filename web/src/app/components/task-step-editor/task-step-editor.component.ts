@@ -39,7 +39,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { DialogService } from '../../services/dialog/dialog.service';
-import { FieldType } from '../../shared/models/task/field.model';
+import { StepType } from '../../shared/models/task/step.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/task/option.model';
 import { List } from 'immutable';
@@ -52,29 +52,29 @@ import { JobService } from '../../services/job/job.service';
 import { Subscription } from 'rxjs';
 import { OptionEditorComponent } from '../option-editor/option-editor.component';
 
-export interface FieldTypeSelectOption {
+export interface StepTypeSelectOption {
   icon: string;
   label: string;
-  type: FieldType;
+  type: StepType;
   cardinality?: Cardinality;
 }
 
 @Component({
-  selector: 'app-task-field-editor',
-  templateUrl: './task-field-editor.component.html',
-  styleUrls: ['./task-field-editor.component.scss'],
+  selector: 'app-task-step-editor',
+  templateUrl: './task-step-editor.component.html',
+  styleUrls: ['./task-step-editor.component.scss'],
 })
-export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
+export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
-  @Input() fieldType?: FieldType;
+  @Input() stepType?: StepType;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
-  @Input() fieldCount?: Number;
+  @Input() stepCount?: Number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   taskOptions: MultipleChoice | undefined;
-  selectFieldOptions: FieldTypeSelectOption[];
+  selectStepOptions: StepTypeSelectOption[];
 
   /** When expanded, options and actions below the fold are visible to the user. */
   expanded: boolean;
@@ -112,50 +112,50 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   ) {
     this.expanded = false;
     this.selected = false;
-    this.selectFieldOptions = [
+    this.selectStepOptions = [
       {
         icon: 'short_text',
         label: 'Text',
-        type: FieldType.TEXT,
+        type: StepType.TEXT,
       },
       {
         icon: 'radio_button_checked',
         label: 'Select One',
-        type: FieldType.MULTIPLE_CHOICE,
+        type: StepType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_ONE,
       },
       {
         icon: 'library_add_check',
         label: 'Select multiple',
-        type: FieldType.MULTIPLE_CHOICE,
+        type: StepType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_MULTIPLE,
       },
       {
         icon: 'photo',
         label: 'Photo',
-        type: FieldType.PHOTO,
+        type: StepType.PHOTO,
       },
       {
         icon: 'tag',
         label: 'Number',
-        type: FieldType.NUMBER,
+        type: StepType.NUMBER,
       },
       {
         icon: 'calendar_today',
         label: 'Date',
-        type: FieldType.DATE,
+        type: StepType.DATE,
       },
       {
         icon: 'access_time',
         label: 'Time',
-        type: FieldType.TIME,
+        type: StepType.TIME,
       },
     ];
     this.taskGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
-      // By default we set the select field to be of text type.
-      selectFieldOption: this.selectFieldOptions[FieldType.TEXT],
+      // By default we set the select step to be of text type.
+      selectStepOption: this.selectStepOptions[StepType.TEXT],
     });
   }
 
@@ -166,19 +166,19 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   private isTaskEmpty(): boolean {
     return (
       this.label?.trim().length === 0 &&
-      this.fieldCount === 1 &&
-      this.fieldType === FieldType.TEXT
+      this.stepCount === 1 &&
+      this.stepType === StepType.TEXT
     );
   }
 
   ngOnInit(): void {
-    // As the task fields value change we are emitting the updated value to the job-dialog.
+    // As the task steps value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
       this.taskGroup.valueChanges.subscribe(value => {
         this.update.emit({
           label: StringMap({ en: value.label }),
           required: value.required,
-          type: value.selectFieldOption.type,
+          type: value.selectStepOption.type,
           multipleChoice: this.taskOptions,
         });
       })
@@ -186,7 +186,7 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /*
-   * This method is used to get the updated values of field from the job-dialog.
+   * This method is used to get the updated values of step from the job-dialog.
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.multipleChoice) {
@@ -195,45 +195,45 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.taskGroup.setValue({
       label: this.label,
       required: this.required,
-      selectFieldOption: this.getSelectedFieldTypeOption(),
+      selectStepOption: this.getSelectedStepTypeOption(),
     });
     this.markOptionEditorsTouched();
   }
 
-  getSelectedFieldTypeOption(): FieldTypeSelectOption {
-    const selectedOption = this.selectFieldOptions.find(
+  getSelectedStepTypeOption(): StepTypeSelectOption {
+    const selectedOption = this.selectStepOptions.find(
       option =>
-        option.type === this.fieldType &&
-        (option.type !== FieldType.MULTIPLE_CHOICE ||
+        option.type === this.stepType &&
+        (option.type !== StepType.MULTIPLE_CHOICE ||
           option.cardinality === this.cardinality)
     );
     if (!selectedOption) {
-      throw new Error(`Unsupported field type${this.fieldType}`);
+      throw new Error(`Unsupported step type${this.stepType}`);
     }
     return selectedOption;
   }
 
   /**
-   * Emits the delete field event to the job dialog component.
+   * Emits the delete step event to the job dialog component.
    *
    * @returns void
    */
-  onFieldDelete(): void {
+  onStepDelete(): void {
     this.delete.emit();
   }
 
-  getSelectFieldType(): FieldTypeSelectOption {
-    return this.taskGroup.get('selectFieldOption')?.value;
+  getSelectStepType(): StepTypeSelectOption {
+    return this.taskGroup.get('selectStepOption')?.value;
   }
 
   /**
    * Updates the type in the taskGroup on the select change event.
    *
-   * @param event: FieldTypeSelectOption
+   * @param event: StepTypeSelectOption
    * @returns void
    */
-  onFieldTypeSelect(event: FieldTypeSelectOption): void {
-    this.fieldType = event.type;
+  onStepTypeSelect(event: StepTypeSelectOption): void {
+    this.stepType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.taskOptions?.options) {
       this.taskOptions = new MultipleChoice(
@@ -241,8 +241,8 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({ selectFieldOption: event });
-    if (event.type === FieldType.MULTIPLE_CHOICE) {
+    this.taskGroup.patchValue({ selectStepOption: event });
+    if (event.type === StepType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
       }
@@ -252,7 +252,7 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /*
-   * This is used to track input added or removed in case of field options.
+   * This is used to track input added or removed in case of step options.
    */
   trackByFn(index: number): number {
     return index;
@@ -261,7 +261,7 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Emits event with updated Options. Called when label or code gets updated.
    *
-   * @param event: label and code value of the option field.
+   * @param event: label and code value of the option step.
    * @param index: index of the option to be updated.
    * @returns void
    */
@@ -317,7 +317,7 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.update.emit({
       label: StringMap({ en: this.label }),
       required: this.required,
-      type: this.fieldType,
+      type: this.stepType,
       multipleChoice: this.taskOptions,
     });
   }

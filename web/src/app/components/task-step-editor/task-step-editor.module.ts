@@ -24,12 +24,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { TaskFieldEditorComponent } from './task-field-editor.component';
+import { TaskStepEditorComponent } from './task-step-editor.component';
 import { OptionEditorModule } from '../option-editor/option-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
-  declarations: [TaskFieldEditorComponent],
+  declarations: [TaskStepEditorComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
@@ -44,6 +44,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     OptionEditorModule,
     DragDropModule,
   ],
-  exports: [TaskFieldEditorComponent],
+  exports: [TaskStepEditorComponent],
 })
-export class TaskFieldEditorModule {}
+export class TaskStepEditorModule {}

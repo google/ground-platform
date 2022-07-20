@@ -23,7 +23,7 @@ import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Job } from '../../shared/models/job.model';
-import { Field, FieldType } from '../../shared/models/task/field.model';
+import { Step, StepType } from '../../shared/models/task/step.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { DialogService } from '../../services/dialog/dialog.service';
@@ -39,7 +39,7 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
   observationId?: string;
   readonly observations$: Observable<List<Observation>>;
   readonly lang: string;
-  readonly fieldTypes = FieldType;
+  readonly stepTypes = StepType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
   job?: Job;
@@ -77,14 +77,14 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
     this.photoUrls = new Map();
     this.observations$.forEach(observations => {
       observations.forEach(observation => {
-        this.getFields(observation).forEach(field => {
+        this.getSteps(observation).forEach(step => {
           if (
-            field.type === FieldType.PHOTO &&
-            (observation.responses?.get(field.id)?.value as string)
+            step.type === StepType.PHOTO &&
+            (observation.responses?.get(step.id)?.value as string)
           ) {
             this.fillPhotoURL(
-              field.id,
-              observation.responses?.get(field.id)?.value as string
+              step.id,
+              observation.responses?.get(step.id)?.value as string
             );
           }
         });
@@ -96,11 +96,11 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
     window.open(url, '_blank');
   }
 
-  fillPhotoURL(fieldId: string, storageFilePath: string) {
+  fillPhotoURL(stepId: string, storageFilePath: string) {
     this.dataStoreService
       .getImageDownloadURL(storageFilePath)
       .then(url => {
-        this.photoUrls.set(fieldId, url);
+        this.photoUrls.set(stepId, url);
       })
       .catch(error => {
         console.log(error);
@@ -121,8 +121,8 @@ export class FeaturePanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  getFields(observation: Observation): List<Field> {
-    return List(observation.task?.fields?.valueSeq() || []);
+  getSteps(observation: Observation): List<Step> {
+    return List(observation.task?.steps?.valueSeq() || []);
   }
 
   onEditObservationClick(observation: Observation) {
