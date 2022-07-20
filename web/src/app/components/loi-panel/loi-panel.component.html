@@ -61,31 +61,31 @@ limitations under the License.
         </mat-menu>
       </mat-card-header>
       <mat-card-content>
-        <div *ngFor="let field of getFields(observation)">
-          <label class="field-label">{{ field.label?.get(lang) }}</label>
+        <div *ngFor="let step of getSteps(observation)">
+          <label class="step-label">{{ step.label?.get(lang) }}</label>
           <div
-            class="field-response"
+            class="step-response"
             *ngIf="
-              field.type == fieldTypes.TEXT || field.type == fieldTypes.NUMBER
+              step.type == stepTypes.TEXT || step.type == stepTypes.NUMBER
             "
           >
-            {{ observation.responses?.get(field.id)?.value }}
+            {{ observation.responses?.get(step.id)?.value }}
           </div>
           <div
-            class="field-response"
-            *ngIf="field.type == fieldTypes.MULTIPLE_CHOICE"
+            class="step-response"
+            *ngIf="step.type == stepTypes.MULTIPLE_CHOICE"
           >
             <span
               class="option-label"
-              *ngFor="let option of observation.responses?.get(field.id)?.value"
+              *ngFor="let option of observation.responses?.get(step.id)?.value"
             >
               {{ option.label?.get(lang) }}
             </span>
           </div>
-          <div class="field-response" *ngIf="field.type == fieldTypes.PHOTO">
+          <div class="step-response" *ngIf="step.type == stepTypes.PHOTO">
             <img
-              (click)="openUrlInNewTab(photoUrls.get(field.id))"
-              src="{{ photoUrls.get(field.id) }}"
+              (click)="openUrlInNewTab(photoUrls.get(step.id))"
+              src="{{ photoUrls.get(step.id) }}"
               width="100%"
             />
           </div>

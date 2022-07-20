@@ -35,7 +35,7 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../../shared/models/task/multiple-choice.model';
-import { FieldType, Field } from '../../shared/models/task/field.model';
+import { StepType, Step } from '../../shared/models/task/step.model';
 import { Task } from '../../shared/models/task/task.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
@@ -58,17 +58,17 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { By } from '@angular/platform-browser';
 
 class MockModel {
-  static element001: Field = new Field(
+  static element001: Step = new Step(
     'element001',
-    FieldType.TEXT,
+    StepType.TEXT,
     StringMap({ en: 'Text Field' }),
     /*required=*/ true,
     0
   );
 
-  static element002: Field = new Field(
+  static element002: Step = new Step(
     'element002',
-    FieldType.TEXT,
+    StepType.TEXT,
     StringMap({ en: 'Text Field' }),
     /*required=*/ false,
     0
@@ -88,9 +88,9 @@ class MockModel {
     2
   );
 
-  static element003: Field = new Field(
+  static element003: Step = new Step(
     'element003',
-    FieldType.MULTIPLE_CHOICE,
+    StepType.MULTIPLE_CHOICE,
     StringMap({ en: 'Multiple Select' }),
     /*required=*/ true,
     0,
@@ -229,20 +229,20 @@ describe('ObservationFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should create text fields with right "required" option', () => {
+  it('should create text steps with right "required" option', () => {
     for (const el of fixture.debugElement.queryAll(
-      By.css('.field-response div mat-form-field input')
+      By.css('.step-response div mat-form-field input')
     )) {
-      if (!component.observationFields) {
+      if (!component.observationSteps) {
         break;
       }
-      const indexEl = component.observationFields.findIndex(
-        field => field.id === el.nativeElement.id
+      const indexEl = component.observationSteps.findIndex(
+        step => step.id === el.nativeElement.id
       );
 
       expect(indexEl).toBeGreaterThanOrEqual(0);
 
-      const want = component.observationFields.get(indexEl)?.required;
+      const want = component.observationSteps.get(indexEl)?.required;
 
       const got = el.nativeElement.required as boolean | undefined;
 
@@ -250,20 +250,20 @@ describe('ObservationFormComponent', () => {
     }
   });
 
-  it('should create radio button fields with right "asterix" class', () => {
+  it('should create radio button steps with right "asterix" class', () => {
     for (const el of fixture.debugElement.queryAll(
-      By.css('.field-response .multiple-choice-field mat-label')
+      By.css('.step-response .multiple-choice-step mat-label')
     )) {
-      if (!component.observationFields) {
+      if (!component.observationSteps) {
         break;
       }
-      const indexEl = component.observationFields.findIndex(
-        field => field.id === el.nativeElement.id
+      const indexEl = component.observationSteps.findIndex(
+        step => step.id === el.nativeElement.id
       );
 
       expect(indexEl).toBeGreaterThanOrEqual(0);
 
-      const want = component.observationFields.get(indexEl)?.required;
+      const want = component.observationSteps.get(indexEl)?.required;
 
       const got = el.classes['asterix--after'] as boolean | undefined;
 

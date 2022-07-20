@@ -30,6 +30,8 @@ import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 import 'firebase/storage';
 
+const SURVEYS_COLLECTION_NAME = 'surveys';
+
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({
@@ -47,7 +49,7 @@ export class DataStoreService {
    */
   loadSurvey$(id: string) {
     return this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(id)
       .valueChanges()
       .pipe(
@@ -62,7 +64,7 @@ export class DataStoreService {
    */
   loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
     return this.db
-      .collection('surveys', ref =>
+      .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(
           new firebase.firestore.FieldPath('acl', userEmail),
           'in',
@@ -91,14 +93,14 @@ export class DataStoreService {
    */
   updateSurveyTitle(surveyId: string, newTitle: string): Promise<void> {
     return this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set({ title: { en: newTitle } }, { merge: true });
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     return this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
         [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
@@ -109,7 +111,7 @@ export class DataStoreService {
     await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
     await this.deleteAllObservationsInJob(surveyId, jobId);
     return await this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
         [`jobs.${jobId}`]: firebase.firestore.FieldValue.delete(),
@@ -118,7 +120,7 @@ export class DataStoreService {
 
   private async deleteAllObservationsInJob(surveyId: string, jobId: string) {
     const observations = this.db.collection(
-      `surveys/${surveyId}/observations`,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/observations`,
       ref => ref.where('jobId', '==', jobId)
     );
     const querySnapshot = await observations.get().toPromise();
@@ -130,7 +132,7 @@ export class DataStoreService {
     loiId: string
   ) {
     const observations = this.db.collection(
-      `surveys/${surveyId}/observations`,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/observations`,
       ref => ref.where('loiId', '==', loiId)
     );
     const querySnapshot = await observations.get().toPromise();
@@ -141,8 +143,9 @@ export class DataStoreService {
     surveyId: string,
     jobId: string
   ) {
-    const loisInJob = this.db.collection(`surveys/${surveyId}/lois`, ref =>
-      ref.where('jobId', '==', jobId)
+    const loisInJob = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      ref => ref.where('jobId', '==', jobId)
     );
     const querySnapshot = await loisInJob.get().toPromise();
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -151,7 +154,7 @@ export class DataStoreService {
   async deleteLocationOfInterest(surveyId: string, loiId: string) {
     await this.deleteAllObservationsInLocationOfInterest(surveyId, loiId);
     return await this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .collection('lois')
       .doc(loiId)
@@ -160,7 +163,7 @@ export class DataStoreService {
 
   async deleteObservation(surveyId: string, observationId: string) {
     return await this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .collection('observations')
       .doc(observationId)
@@ -169,7 +172,7 @@ export class DataStoreService {
 
   updateObservation(surveyId: string, observation: Observation) {
     return this.db
-      .collection(`surveys/${surveyId}/observations`)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/observations`)
       .doc(observation.id)
       .set(FirebaseDataConverter.observationToJS(observation));
   }
@@ -186,7 +189,7 @@ export class DataStoreService {
     loiId: string
   ): Observable<LocationOfInterest> {
     return this.db
-      .collection(`surveys/${surveyId}/lois`)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
       .doc(loiId)
       .get()
       .pipe(
@@ -219,7 +222,7 @@ export class DataStoreService {
 
   lois$({ id }: Survey): Observable<List<LocationOfInterest>> {
     return this.db
-      .collection(`surveys/${id}/lois`)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`)
       .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
@@ -249,7 +252,7 @@ export class DataStoreService {
     loi: LocationOfInterest
   ): Observable<List<Observation>> {
     return this.db
-      .collection(`surveys/${survey.id}/observations`, ref =>
+      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/observations`, ref =>
         ref.where('loiId', '==', loi.id)
       )
       .valueChanges({ idField: 'id' })
@@ -277,7 +280,7 @@ export class DataStoreService {
     observationId: string
   ) {
     return this.db
-      .collection(`surveys/${survey.id}/observations`)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/observations`)
       .doc(observationId)
       .get()
       .pipe(
@@ -302,7 +305,7 @@ export class DataStoreService {
    */
   updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
     return this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({ acl: FirebaseDataConverter.aclToJs(acl) });
   }
@@ -320,7 +323,7 @@ export class DataStoreService {
     loi: LocationOfInterest
   ): Promise<void> {
     return this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .collection('lois')
       .doc(loi.id)
@@ -340,7 +343,7 @@ export class DataStoreService {
     const surveyId = this.generateId();
     await this.updateSurveyTitle(surveyId, title);
     await this.db
-      .collection('surveys')
+      .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set(
         FirebaseDataConverter.newSurveyJS(

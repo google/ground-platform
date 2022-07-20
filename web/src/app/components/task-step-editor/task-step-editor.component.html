@@ -33,22 +33,22 @@
         </ng-container>
       </mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex class="field-type" appearance="outline">
+    <mat-form-field fxFlex class="step-type" appearance="outline">
       <mat-select
-        formControlName="selectFieldOption"
-        class="field-type-select"
-        (selectionChange)="onFieldTypeSelect($event.value)"
+        formControlName="selectStepOption"
+        class="step-type-select"
+        (selectionChange)="onStepTypeSelect($event.value)"
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-field-type">{{
-            getSelectFieldType().icon
+          <mat-icon class="icon-step-type">{{
+            getSelectStepType().icon
           }}</mat-icon>
-          <span> {{ getSelectFieldType().label }}</span>
+          <span> {{ getSelectStepType().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let field of selectFieldOptions" [value]="field">
-          <mat-icon>{{ field.icon }}</mat-icon>
-          <span>{{ field.label }}</span>
+        <mat-option *ngFor="let step of selectStepOptions" [value]="step">
+          <mat-icon>{{ step.icon }}</mat-icon>
+          <span>{{ step.label }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -93,7 +93,7 @@
       (keydown.Tab)="onTaskBlur()"
       class="question-actions"
     >
-      <button type="button" mat-icon-button (click)="onFieldDelete()">
+      <button type="button" mat-icon-button (click)="onStepDelete()">
         <mat-icon>delete_forever</mat-icon>
       </button>
       <span class="vertical-divider"></span>

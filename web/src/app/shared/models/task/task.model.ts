@@ -15,21 +15,21 @@
  */
 
 import { Map } from 'immutable';
-import { Field } from './field.model';
+import { Step } from './step.model';
 import { Option } from '../task/option.model';
 
 export class Task {
-  constructor(readonly id: string, readonly fields: Map<string, Field>) {}
+  constructor(readonly id: string, readonly steps: Map<string, Step>) {}
 
   /**
-   * For MULTIPLE_CHOICE fields, returns the option with the specified id.
-   * Throws an Error if called for other field types.
+   * For MULTIPLE_CHOICE steps, returns the option with the specified id.
+   * Throws an Error if called for other step types.
    */
-  getMultipleChoiceFieldOption(fieldId: string, optionId: string): Option {
-    const field = this.fields.get(fieldId);
-    if (!field) {
-      throw Error(`Field ${fieldId} not found in task ${this.id}.`);
+  getMultipleChoiceStepOption(stepId: string, optionId: string): Option {
+    const step = this.steps.get(stepId);
+    if (!step) {
+      throw Error(`Step ${stepId} not found in task ${this.id}.`);
     }
-    return field.getMultipleChoiceOption(optionId);
+    return step.getMultipleChoiceOption(optionId);
   }
 }

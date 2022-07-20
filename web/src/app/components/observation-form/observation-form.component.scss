@@ -20,17 +20,17 @@
 .observation {
   margin: 16px;
 }
-.observation .field-label {
+.observation .step-label {
   font-size: 12px;
   line-height: 16px;
   margin-bottom: 3px;
 }
-.observation .field-response {
+.observation .step-response {
   font-size: 14px;
   line-height: 20px;
   margin-bottom: 12px;
 }
-.field-response .mat-form-field {
+.step-response .mat-form-field {
   width: 100%;
 }
 /**
@@ -45,7 +45,7 @@
 .mat-form-field-wrapper {
   margin-bottom: -1.34em;
 }
-/* The spacing between a field label and its options should be larger */
+/* The spacing between a step label and its options should be larger */
 .mat-label {
   margin-bottom: 1em;
 }

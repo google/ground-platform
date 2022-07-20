@@ -19,7 +19,7 @@ import { Survey } from '../models/survey.model';
 import { StringMap } from '../models/string-map.model';
 import { Job } from '../models/job.model';
 import { Task } from '../models/task/task.model';
-import { Field, FieldType } from '../models/task/field.model';
+import { Step, StepType } from '../models/task/step.model';
 import {
   MultipleChoice,
   Cardinality,
@@ -39,19 +39,19 @@ import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
 
-const FIELD_TYPE_ENUMS_BY_STRING = Map([
-  [FieldType.TEXT, 'text_field'],
-  [FieldType.MULTIPLE_CHOICE, 'multiple_choice'],
-  [FieldType.PHOTO, 'photo'],
-  [FieldType.NUMBER, 'number'],
-  [FieldType.DATE, 'date'],
-  [FieldType.TIME, 'time'],
+const STEP_TYPE_ENUMS_BY_STRING = Map([
+  [StepType.TEXT, 'text_field'],
+  [StepType.MULTIPLE_CHOICE, 'multiple_choice'],
+  [StepType.PHOTO, 'photo'],
+  [StepType.NUMBER, 'number'],
+  [StepType.DATE, 'date'],
+  [StepType.TIME, 'time'],
 ]);
 
-const FIELD_TYPE_STRINGS_BY_ENUM = Map(
+const STEP_TYPE_STRINGS_BY_ENUM = Map(
   Array.from(
-    FIELD_TYPE_ENUMS_BY_STRING.toArray(),
-    el => el.reverse() as [string, FieldType]
+    STEP_TYPE_ENUMS_BY_STRING.toArray(),
+    el => el.reverse() as [string, StepType]
   )
 );
 
@@ -174,23 +174,23 @@ export class FirebaseDataConverter {
   private static toTask(id: string, data: DocumentData): Task {
     return new Task(
       id,
-      Map<string, Field>(
+      Map<string, Step>(
         keys(data.elements)
-          .map(id => FirebaseDataConverter.toField(id, data.elements[id]))
-          .filter(field => field !== null)
-          .map(field => [field!.id, field!])
+          .map(id => FirebaseDataConverter.toStep(id, data.elements[id]))
+          .filter(step => step !== null)
+          .map(step => [step!.id, step!])
       )
     );
   }
 
   private static taskToJS(task: Task): {} {
-    const { fields, ...taskDoc } = task;
+    const { steps, ...taskDoc } = task;
     return {
       elements:
-        fields?.reduce(
-          (map, field: Field) => ({
+        steps?.reduce(
+          (map, step: Step) => ({
             ...map,
-            [field.id]: this.fieldToJS(field),
+            [step.id]: this.stepToJS(step),
           }),
           {}
         ) || {},
@@ -226,7 +226,7 @@ export class FirebaseDataConverter {
   }
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Field instance.
+   * immutable Step instance.
    *
    * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
@@ -256,11 +256,11 @@ export class FirebaseDataConverter {
    *   }
    * </code></pre>
    */
-  private static toField(id: string, data: DocumentData): Field | null {
+  private static toStep(id: string, data: DocumentData): Step | null {
     try {
-      return new Field(
+      return new Step(
         id,
-        FirebaseDataConverter.stringToFieldType(data.type),
+        FirebaseDataConverter.stringToStepType(data.type),
         StringMap(data.label),
         data.required,
         // Fall back to constant so old dev databases do not break.
@@ -281,17 +281,17 @@ export class FirebaseDataConverter {
     }
   }
 
-  private static fieldToJS(field: Field): {} {
-    const { type, label, multipleChoice, ...fieldDoc } = field;
+  private static stepToJS(step: Step): {} {
+    const { type, label, multipleChoice, ...stepDoc } = step;
     if (multipleChoice === undefined) {
       return {
-        type: FirebaseDataConverter.fieldTypeToString(type),
+        type: FirebaseDataConverter.stepTypeToString(type),
         label: label.toJS(),
-        ...fieldDoc,
+        ...stepDoc,
       };
     } else {
       return {
-        type: FirebaseDataConverter.fieldTypeToString(type),
+        type: FirebaseDataConverter.stepTypeToString(type),
         label: label.toJS(),
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
@@ -305,7 +305,7 @@ export class FirebaseDataConverter {
             }),
             {}
           ) || {},
-        ...fieldDoc,
+        ...stepDoc,
       };
     }
   }
@@ -332,25 +332,25 @@ export class FirebaseDataConverter {
     }
   }
 
-  private static stringToFieldType(fieldType: string): FieldType {
-    const type = FIELD_TYPE_STRINGS_BY_ENUM.get(fieldType);
+  private static stringToStepType(stepType: string): StepType {
+    const type = STEP_TYPE_STRINGS_BY_ENUM.get(stepType);
     if (!type) {
-      throw new Error(`Ignoring unsupported field of type: ${fieldType}`);
+      throw new Error(`Ignoring unsupported step of type: ${stepType}`);
     }
     return type;
   }
 
-  private static fieldTypeToString(fieldType: FieldType): string {
-    const str = FIELD_TYPE_ENUMS_BY_STRING.get(fieldType);
+  private static stepTypeToString(stepType: StepType): string {
+    const str = STEP_TYPE_ENUMS_BY_STRING.get(stepType);
     if (!str) {
-      throw Error(`Unsupported field type ${fieldType}`);
+      throw Error(`Unsupported step type ${stepType}`);
     }
     return str;
   }
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Field instance.
+   * immutable Step instance.
    *
    * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
@@ -470,12 +470,12 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
       Map<string, Response>(
-        keys(data.responses).map((fieldId: string) => [
-          fieldId as string,
+        keys(data.responses).map((stepId: string) => [
+          stepId as string,
           FirebaseDataConverter.toResponse(
             task,
-            fieldId,
-            data.responses[fieldId]
+            stepId,
+            data.responses[stepId]
           ),
         ])
       )
@@ -510,9 +510,9 @@ export class FirebaseDataConverter {
 
   private static responsesToJS(responses: Map<string, Response>): {} {
     return responses.entrySeq().reduce(
-      (obj: {}, [fieldId, response]) => ({
+      (obj: {}, [stepId, response]) => ({
         ...obj,
-        [fieldId]: FirebaseDataConverter.responseToJS(response),
+        [stepId]: FirebaseDataConverter.responseToJS(response),
       }),
       {}
     );
@@ -520,7 +520,7 @@ export class FirebaseDataConverter {
 
   private static toResponse(
     task: Task,
-    fieldID: string,
+    stepID: string,
     responseValue: number | string | List<string>
   ): Response {
     if (typeof responseValue === 'string') {
@@ -533,7 +533,7 @@ export class FirebaseDataConverter {
       return new Response(
         List(
           responseValue.map(optionId =>
-            task.getMultipleChoiceFieldOption(fieldID, optionId)
+            task.getMultipleChoiceStepOption(stepID, optionId)
           )
         )
       );

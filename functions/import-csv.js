@@ -34,7 +34,7 @@ async function importCsv(req, res) {
   }
   const busboy = new Busboy({ headers: req.headers });
 
-  // Dictionary used to accumulate task field values, keyed by field name.
+  // Dictionary used to accumulate task step values, keyed by step name.
   const params = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res

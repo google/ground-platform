@@ -49,7 +49,7 @@ async function exportCsv(req, res) {
   headers.push("geometry");
   elements.forEach((element) => {
     const labelMap = element["label"] || {};
-    const label = Object.values(labelMap)[0] || "Unnamed field";
+    const label = Object.values(labelMap)[0] || "Unnamed step";
     headers.push(label);
   });
 
