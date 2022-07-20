@@ -55,7 +55,7 @@ export class TestData {
     id = 'job001',
     index = 0,
     color = '#ffff00',
-    name = { en: 'job' } as Record<string, string>,
+    name = 'job',
     tasks = {} as Record<string, Task>,
     contributorsCanAdd = [] as string[],
   }): Job {

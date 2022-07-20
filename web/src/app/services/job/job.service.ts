@@ -128,7 +128,7 @@ export class JobService {
   }
 
   private static getStepLabel(step: Step): string {
-    return step.label.get('en')?.trim() || '';
+    return step.label?.trim() || '';
   }
 
   /**

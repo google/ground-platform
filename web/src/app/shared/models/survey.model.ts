@@ -48,8 +48,8 @@ export class Survey {
   isUnsavedNew() {
     return (
       !this.id &&
-      !this.title.size &&
-      !this.description.size &&
+      !this.title &&
+      !this.description &&
       !this.jobs.size &&
       !this.acl.size
     );

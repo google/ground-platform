@@ -232,7 +232,7 @@ export class FirebaseDataConverter {
    * <pre><code>
    * {
    *   index: 0,
-   *   label: { 'en': 'Question 1' },
+   *   label: 'Question 1',
    *   required: true,
    *   type: 'text_field'
    * }
@@ -241,7 +241,7 @@ export class FirebaseDataConverter {
    * <pre><code>
    * {
    *   index: 1,
-   *   label: { 'en': 'Question 2' },
+   *   label: 'Question 2',
    *   required: false,
    *   type: 'multiple_choice',
    *   cardinality: 'select_one',
@@ -249,7 +249,7 @@ export class FirebaseDataConverter {
    *     option001: {
    *       index: 0,
    *       code: 'A',
-   *       label: { 'en': 'Option A' }
+   *       label: 'Option A'
    *     },
    *     // ...
    *   }
@@ -357,7 +357,7 @@ export class FirebaseDataConverter {
    * {
    *    index: 0,
    *    code: 'A',
-   *    label: { 'en': 'Option A' }
+   *    label: 'Option A'
    *  }
    * </code></pre>
    */
