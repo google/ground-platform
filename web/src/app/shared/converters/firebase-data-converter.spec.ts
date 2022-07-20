@@ -46,7 +46,7 @@ class MockFirebaseData {
       },
     },
     featureId: 'feature001',
-    layerId: 'layer001',
+    jobId: 'job001',
     taskId: 'task001',
     responses: {
       element001: 'text response',

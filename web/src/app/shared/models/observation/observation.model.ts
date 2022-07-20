@@ -23,7 +23,7 @@ export class Observation {
   constructor(
     readonly id: string,
     readonly featureId: string,
-    readonly layerId: string,
+    readonly jobId: string,
     readonly task: Task | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
@@ -38,7 +38,7 @@ export class Observation {
     return new Observation(
       this.id,
       this.featureId,
-      this.layerId,
+      this.jobId,
       this.task,
       this.created,
       lastModified,

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
-/*
-  Workaround to eliminate double-padding between right-hand side overflow
-  menu control and list item.
-*/
-:host ::ng-deep .mat-list-item-content {
-  padding-right: 8px !important;
+.jobs {
+  margin-top: 6px;
 }
 
-.layer-icon {
-  vertical-align: middle;
-  padding-right: 5px;
+.job-list-title {
+  padding: 20px;
 }
 
-.download {
-  color: mat-color($foreground, text) !important;
-  text-decoration: none;
+.add-job {
+  padding: 8px 10px 0 10px;
+}
+
+.add-job-btn {
+  text-align: left;
+}
+
+.add-job-icon {
+  padding: 10px;
 }

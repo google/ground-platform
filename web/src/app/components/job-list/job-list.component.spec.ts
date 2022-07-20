@@ -17,14 +17,14 @@
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { LayerListComponent } from './layer-list.component';
+import { JobListComponent } from './job-list.component';
 import { SurveyService } from '../../services/survey/survey.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Survey } from '../../shared/models/survey.model';
 import { of } from 'rxjs';
 import { Map } from 'immutable';
 import { StringMap } from '../../shared/models/string-map.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -34,9 +34,9 @@ const mockSurvey = new Survey(
   'survey001',
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
-  /* layers= */ Map({
-    layer001: new Layer(
-      'layer001',
+  /* jobs= */ Map({
+    job001: new Job(
+      'job001',
       /* index */ -1,
       'red',
       StringMap({ en: 'name' }),
@@ -67,9 +67,9 @@ class MockSurveyService {
 
 const surveyService = new MockSurveyService();
 
-describe('LayerListComponent', () => {
-  let component: LayerListComponent;
-  let fixture: ComponentFixture<LayerListComponent>;
+describe('JobListComponent', () => {
+  let component: JobListComponent;
+  let fixture: ComponentFixture<JobListComponent>;
 
   beforeEach(
     waitForAsync(() => {
@@ -79,7 +79,7 @@ describe('LayerListComponent', () => {
       };
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
-        declarations: [LayerListComponent],
+        declarations: [JobListComponent],
         imports: [MatListModule],
         providers: [
           { provide: SurveyService, useValue: surveyService },
@@ -101,7 +101,7 @@ describe('LayerListComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LayerListComponent);
+    fixture = TestBed.createComponent(JobListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

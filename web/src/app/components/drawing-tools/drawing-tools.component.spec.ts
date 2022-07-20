@@ -29,7 +29,7 @@ import {
 } from '../../services/drawing-tools/drawing-tools.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { SurveyService } from '../../services/survey/survey.service';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
 import { DrawingToolsComponent } from './drawing-tools.component';
@@ -51,29 +51,29 @@ describe('DrawingToolsComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
-  const layerId1 = 'layer001';
-  const layerId2 = 'layer002';
-  const layerColor1 = 'red';
-  const layerColor2 = 'green';
-  const layerName1 = 'layer001 name';
-  const layerName2 = 'layer002 name';
+  const jobId1 = 'job001';
+  const jobId2 = 'job002';
+  const jobColor1 = 'red';
+  const jobColor2 = 'green';
+  const jobName1 = 'job001 name';
+  const jobName2 = 'job002 name';
   const mockSurvey = new Survey(
     'survey001',
     StringMap({ en: 'title1' }),
     StringMap({ en: 'description1' }),
-    /* layers= */ Map({
-      layer001: new Layer(
-        layerId1,
+    /* jobs= */ Map({
+      job001: new Job(
+        jobId1,
         /* index */ -1,
-        layerColor1,
-        StringMap({ en: layerName1 }),
+        jobColor1,
+        StringMap({ en: jobName1 }),
         /* tasks= */ Map()
       ),
-      layer002: new Layer(
-        layerId2,
+      job002: new Job(
+        jobId2,
         /* index */ -1,
-        layerColor2,
-        StringMap({ en: layerName2 }),
+        jobColor2,
+        StringMap({ en: jobName2 }),
         /* tasks= */ Map()
       ),
     }),
@@ -83,15 +83,15 @@ describe('DrawingToolsComponent', () => {
   beforeEach(
     waitForAsync(() => {
       authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
-        'canUserAddPointsToLayer',
+        'canUserAddPointsToJob',
       ]);
-      authServiceSpy.canUserAddPointsToLayer.and.returnValue(true);
+      authServiceSpy.canUserAddPointsToJob.and.returnValue(true);
 
       mockDisabled$ = new BehaviorSubject<boolean>(false);
       mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
       drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
         'DrawingToolsService',
-        ['getDisabled$', 'getEditMode$', 'setSelectedLayerId', 'setEditMode']
+        ['getDisabled$', 'getEditMode$', 'setSelectedJobId', 'setEditMode']
       );
       drawingToolsServiceSpy.getDisabled$.and.returnValue(mockDisabled$);
       drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
@@ -180,8 +180,8 @@ describe('DrawingToolsComponent', () => {
       expect(addPointButton).not.toBeNull();
     });
 
-    it('does not display add point button when user cannot add point to any layer', () => {
-      authServiceSpy.canUserAddPointsToLayer.and.returnValue(false);
+    it('does not display add point button when user cannot add point to any job', () => {
+      authServiceSpy.canUserAddPointsToJob.and.returnValue(false);
       resetFixture();
 
       const addPointButton = fixture.debugElement.query(
@@ -234,52 +234,51 @@ describe('DrawingToolsComponent', () => {
     }));
   });
 
-  describe('layer selector section', () => {
-    it('does not display layer selector section by default', () => {
-      const layerSelectorSection = fixture.debugElement.query(
-        By.css('#layer-selector-section')
+  describe('job selector section', () => {
+    it('does not display job selector section by default', () => {
+      const jobSelectorSection = fixture.debugElement.query(
+        By.css('#job-selector-section')
       );
-      expect(layerSelectorSection).toBeNull();
+      expect(jobSelectorSection).toBeNull();
     });
 
-    it('displays layer selector section when edit mode set to "add point"', fakeAsync(() => {
+    it('displays job selector section when edit mode set to "add point"', fakeAsync(() => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const layerSelectorSection = fixture.debugElement.query(
-        By.css('#layer-selector-section')
+      const jobSelectorSection = fixture.debugElement.query(
+        By.css('#job-selector-section')
       ).nativeElement;
-      expect(layerSelectorSection).not.toBeNull();
-      const layerSelectorLabel = fixture.debugElement.query(
-        By.css('#layer-selector-label')
+      expect(jobSelectorSection).not.toBeNull();
+      const jobSelectorLabel = fixture.debugElement.query(
+        By.css('#job-selector-label')
       ).nativeElement;
-      expect(layerSelectorLabel.innerHTML).toEqual('Adding point for');
+      expect(jobSelectorLabel.innerHTML).toEqual('Adding point for');
     }));
 
-    it('selects first layer id by default', () => {
-      expect(drawingToolsServiceSpy.setSelectedLayerId).toHaveBeenCalledWith(
-        layerId1
+    it('selects first job id by default', () => {
+      expect(drawingToolsServiceSpy.setSelectedJobId).toHaveBeenCalledWith(
+        jobId1
       );
     });
 
-    it('selects layer id when layer selected', fakeAsync(() => {
+    it('selects job id when job selected', fakeAsync(() => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const layerSelector = fixture.debugElement.query(
-        By.css('#layer-selector')
-      ).nativeElement;
-      layerSelector.click();
+      const jobSelector = fixture.debugElement.query(By.css('#job-selector'))
+        .nativeElement;
+      jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();
-      const layer2Item = fixture.debugElement.query(
-        By.css(`#layer-selector-item-${layerId2}`)
+      const job2Item = fixture.debugElement.query(
+        By.css(`#job-selector-item-${jobId2}`)
       ).nativeElement;
-      layer2Item.click();
+      job2Item.click();
       flush();
 
-      expect(drawingToolsServiceSpy.setSelectedLayerId).toHaveBeenCalledWith(
-        layerId2
+      expect(drawingToolsServiceSpy.setSelectedJobId).toHaveBeenCalledWith(
+        jobId2
       );
     }));
 
@@ -296,34 +295,33 @@ describe('DrawingToolsComponent', () => {
       );
     }));
 
-    it('displays icons with layer color and name in layer selector items', fakeAsync(() => {
+    it('displays icons with job color and name in job selector items', fakeAsync(() => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const layerSelector = fixture.debugElement.query(
-        By.css('#layer-selector')
-      ).nativeElement;
-      layerSelector.click();
+      const jobSelector = fixture.debugElement.query(By.css('#job-selector'))
+        .nativeElement;
+      jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();
       flush();
 
-      const layer1Item = fixture.debugElement.query(
-        By.css(`#layer-selector-item-${layerId1}`)
+      const job1Item = fixture.debugElement.query(
+        By.css(`#job-selector-item-${jobId1}`)
       ).nativeElement as Element;
-      const layer2Item = fixture.debugElement.query(
-        By.css(`#layer-selector-item-${layerId2}`)
+      const job2Item = fixture.debugElement.query(
+        By.css(`#job-selector-item-${jobId2}`)
       ).nativeElement as Element;
       assertElementSrcColor(
-        layer1Item.querySelector('img') as Element,
-        layerColor1
+        job1Item.querySelector('img') as Element,
+        jobColor1
       );
       assertElementSrcColor(
-        layer2Item.querySelector('img') as Element,
-        layerColor2
+        job2Item.querySelector('img') as Element,
+        jobColor2
       );
-      expect(layer1Item.innerHTML).toContain(layerName1);
-      expect(layer2Item.innerHTML).toContain(layerName2);
+      expect(job1Item.innerHTML).toContain(jobName1);
+      expect(job2Item.innerHTML).toContain(jobName2);
     }));
   });
 });

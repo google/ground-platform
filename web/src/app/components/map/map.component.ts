@@ -146,17 +146,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const editMode = this.drawingToolsService.getEditMode$().getValue();
-    const selectedLayerId = this.drawingToolsService.getSelectedLayerId();
+    const selectedJobId = this.drawingToolsService.getSelectedJobId();
     switch (editMode) {
       case EditMode.AddPoint: {
-        if (!selectedLayerId) {
+        if (!selectedJobId) {
           return;
         }
         this.drawingToolsService.setEditMode(EditMode.None);
         const newFeature = await this.featureService.addPoint(
           event.latLng.lat(),
           event.latLng.lng(),
-          selectedLayerId
+          selectedJobId
         );
         if (newFeature) {
           this.navigationService.selectFeature(newFeature.id);
@@ -221,26 +221,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
 
     features.forEach(feature => {
-      if (!survey.getLayer(feature.layerId)) {
-        // Ignore features whose layer has been removed.
+      if (!survey.getJob(feature.jobId)) {
+        // Ignore features whose job has been removed.
         console.debug(
-          `Ignoring feature ${feature.id} with missing layer ${feature.layerId}`
+          `Ignoring feature ${feature.id} with missing job ${feature.jobId}`
         );
         return;
       }
       if (existingFeatureIds.includes(feature.id)) {
         return;
       }
-      const color = survey.layers.get(feature.layerId)?.color;
-      const layerName = survey.layers.get(feature.layerId)?.name?.get('en');
+      const color = survey.jobs.get(feature.jobId)?.color;
+      const jobName = survey.jobs.get(feature.jobId)?.name?.get('en');
       if (feature instanceof LocationFeature) {
         this.addLocationFeature(color, feature);
       }
       if (feature instanceof GeoJsonFeature) {
-        this.addGeoJsonFeature(color, layerName, feature);
+        this.addGeoJsonFeature(color, jobName, feature);
       }
       if (feature instanceof PolygonFeature) {
-        this.addPolygonFeature(color, layerName, feature);
+        this.addPolygonFeature(color, jobName, feature);
       }
     });
   }
@@ -311,7 +311,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     );
     this.newFeatureToReposition = new LocationFeature(
       feature.id,
-      feature.layerId,
+      feature.jobId,
       new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
     );
   }
@@ -401,13 +401,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private addGeoJsonFeature(
     color: string | undefined,
-    layerName: string | undefined,
+    jobName: string | undefined,
     feature: GeoJsonFeature
   ) {
     const paths: google.maps.LatLng[][] = [];
-    const layer = new google.maps.Data();
-    layer.addGeoJson(feature.geoJson);
-    layer.forEach(f => {
+    const job = new google.maps.Data();
+    job.addGeoJson(feature.geoJson);
+    job.forEach(f => {
       if (f.getGeometry() instanceof google.maps.Data.Polygon) {
         paths.push(
           ...this.geoJsonPolygonToPaths(
@@ -424,7 +424,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
 
-    this.addPolygonToMap(feature.id, color, layerName, paths);
+    this.addPolygonToMap(feature.id, color, jobName, paths);
   }
 
   private geoJsonPolygonToPaths(
@@ -438,20 +438,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private addPolygonFeature(
     color: string | undefined,
-    layerName: string | undefined,
+    jobName: string | undefined,
     feature: PolygonFeature
   ) {
     const vertices: google.maps.LatLng[] = feature.polygonVertices.map(
       vertex => new google.maps.LatLng(vertex.latitude, vertex.longitude)
     );
 
-    this.addPolygonToMap(feature.id, color, layerName, [vertices]);
+    this.addPolygonToMap(feature.id, color, jobName, [vertices]);
   }
 
   private addPolygonToMap(
     featureId: string,
     color: string | undefined,
-    layerName: string | undefined,
+    jobName: string | undefined,
     paths: google.maps.LatLng[][]
   ) {
     const polygon = new google.maps.Polygon({
@@ -465,7 +465,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
     polygon.set('id', featureId);
     polygon.set('color', color);
-    polygon.set('layerName', layerName);
+    polygon.set('jobName', jobName);
     polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
       this.onPolygonClick(event);
     });
@@ -511,7 +511,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return {
       featureId: polygon.get('id'),
       color: polygon.get('color'),
-      layerName: polygon.get('layerName'),
+      jobName: polygon.get('jobName'),
     };
   }
 

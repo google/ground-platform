@@ -16,12 +16,12 @@
 
 import { TestBed } from '@angular/core/testing';
 import { DataStoreService } from '../data-store/data-store.service';
-import { LayerService } from './layer.service';
-import { SurveyService } from './../survey/survey.service';
+import { JobService } from './job.service';
+import { SurveyService } from '../survey/survey.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NEVER } from 'rxjs';
 
-describe('LayerService', () => {
+describe('JobService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
   beforeEach(() =>
     TestBed.configureTestingModule({
@@ -34,7 +34,7 @@ describe('LayerService', () => {
   );
 
   it('should be created', () => {
-    const service: LayerService = TestBed.inject(LayerService);
+    const service: JobService = TestBed.inject(JobService);
     expect(service).toBeTruthy();
   });
 });
