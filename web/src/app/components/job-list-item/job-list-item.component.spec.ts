@@ -17,7 +17,7 @@
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from './../../services/data-store/data-store.service';
+import { DataStoreService } from '../../services/data-store/data-store.service';
 import { JobListItemComponent } from './job-list-item.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';

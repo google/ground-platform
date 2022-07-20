@@ -16,8 +16,8 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { DataStoreService } from './../../services/data-store/data-store.service';
-import { EditStyleButtonModule } from './../edit-style-button/edit-style-button.module';
+import { DataStoreService } from '../../services/data-store/data-store.service';
+import { EditStyleButtonModule } from '../edit-style-button/edit-style-button.module';
 import { TaskFieldEditorModule } from '../task-field-editor/task-field-editor.module';
 import { JobDialogComponent } from './job-dialog.component';
 import {
