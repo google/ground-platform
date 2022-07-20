@@ -24,7 +24,7 @@ import { AuthService } from './../../services/auth/auth.service';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 
-const { newUser, newProject, newLayer, newPointOfInterest } = TestData;
+const { newUser, newSurvey, newLayer, newPointOfInterest } = TestData;
 
 describe('ObservationService', () => {
   const user$ = new Subject<User | null>();
@@ -56,7 +56,7 @@ describe('ObservationService', () => {
       expect(() =>
         service.createNewObservation(
           newUser(),
-          newProject({ layers: { layer001: newLayer({ forms: {} }) } }),
+          newSurvey({ layers: { layer001: newLayer({ forms: {} }) } }),
           newPointOfInterest()
         )
       ).toThrow(new Error('No form in layer layer001'));
