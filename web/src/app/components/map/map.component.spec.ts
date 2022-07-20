@@ -45,7 +45,7 @@ import {
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
 
-describe('MapComponent', () => {
+fdescribe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
@@ -113,7 +113,7 @@ describe('MapComponent', () => {
   );
   const geoJson1 = {
     type: 'FeatureCollection',
-    lois: [
+    features: [
       {
         type: 'Feature',
         geometry: {
