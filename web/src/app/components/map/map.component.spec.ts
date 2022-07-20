@@ -45,7 +45,7 @@ import {
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
 
-fdescribe('MapComponent', () => {
+describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
