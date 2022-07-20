@@ -49,7 +49,7 @@ describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
-  let mockLocationsOfInterest$: BehaviorSubject<List<LocationOfInterest>>;
+  let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
@@ -59,12 +59,12 @@ describe('MapComponent', () => {
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
 
-  const poiId1 = 'loaction_loi001';
-  const poiId2 = 'loaction_loi002';
-  const poiId3 = 'loaction_loi003';
-  const poiId4 = 'loaction_loi004';
+  const poiId1 = 'poi001';
+  const poiId2 = 'poi002';
+  const poiId3 = 'poi003';
+  const poiId4 = 'poi004';
   const geoJsonLoiId1 = 'geo_json_loi001';
-  const aoiId1 = 'polygon_loi001';
+  const aoiId1 = 'aoi001';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
   const jobColor1 = 'red';
@@ -155,12 +155,10 @@ describe('MapComponent', () => {
         'LocationOfInterestService',
         ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
       );
-      mockLocationsOfInterest$ = new BehaviorSubject<List<LocationOfInterest>>(
+      mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
         List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
       );
-      loiServiceSpy.getLocationsOfInterest$.and.returnValue(
-        mockLocationsOfInterest$
-      );
+      loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
       navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
         'NavigationService',
@@ -261,7 +259,7 @@ describe('MapComponent', () => {
   });
 
   it('should update lois when backend lois update', fakeAsync(() => {
-    mockLocationsOfInterest$.next(
+    mockLois$.next(
       List<LocationOfInterest>([poi1, poi3, geoJsonLoi1])
     );
     tick();
