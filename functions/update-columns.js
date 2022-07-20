@@ -24,20 +24,20 @@ function updateColumns(req, res) {
   const {
     survey: surveyId,
     loiType: loiTypeId,
-    form: formId,
+    task: taskId,
     lang: lang,
   } = req.query;
   return getSheet(surveyId).then((sheet) => {
     if (!sheet) {
       return res.status(400).send("Survey spreadsheet config not found");
     }
-    return db.fetchForm(surveyId, loiTypeId, formId).then((form) => {
-      if (!form) {
-        return res.status(400).send("Form definition not found");
+    return db.fetchTask(surveyId, loiTypeId, taskId).then((task) => {
+      if (!task) {
+        return res.status(400).send("Task definition not found");
       }
-      const elements = form.elements || [];
+      const elements = task.elements || [];
       if (!elements.length) {
-        return res.status(200).send("Form definition is empty");
+        return res.status(200).send("Task definition is empty");
       }
       return sheet.getColumnMetadata().then((cols) => {
         // Use the end index of the last column as our insertion point.
@@ -46,7 +46,7 @@ function updateColumns(req, res) {
           : 0;
         const existingColumnIds = cols.map((col) => col.metadataValue);
         return sheet
-          .updateColumns(existingColumnIds, form.elements, insertAt, lang)
+          .updateColumns(existingColumnIds, task.elements, insertAt, lang)
           .then((cnt) => res.send(`${cnt} columns added`));
       });
     });

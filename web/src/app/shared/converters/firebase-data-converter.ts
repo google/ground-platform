@@ -18,12 +18,12 @@ import { DocumentData } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
 import { StringMap } from '../models/string-map.model';
 import { Layer } from '../models/layer.model';
-import { Form } from '../models/form/form.model';
-import { Field, FieldType } from '../models/form/field.model';
+import { Task } from '../models/task/task.model';
+import { Field, FieldType } from '../models/task/field.model';
 import {
   MultipleChoice,
   Cardinality,
-} from '../models/form/multiple-choice.model';
+} from '../models/task/multiple-choice.model';
 import {
   LocationOfInterest,
   PointOfInterest,
@@ -31,7 +31,7 @@ import {
   AreaOfInterest,
 } from '../models/loi.model';
 import { Observation } from '../models/observation/observation.model';
-import { Option } from '../../shared/models/form/option.model';
+import { Option } from '../models/task/option.model';
 import { List, Map } from 'immutable';
 import { AuditInfo } from '../models/audit-info.model';
 import { Response } from '../../shared/models/observation/response.model';
@@ -134,10 +134,10 @@ export class FirebaseDataConverter {
       data.index || -1,
       data.defaultStyle?.color || data.color,
       StringMap(data.name),
-      Map<string, Form>(
-        keys(data.forms).map((id: string) => [
+      Map<string, Task>(
+        keys(data.tasks).map((id: string) => [
           id as string,
-          FirebaseDataConverter.toForm(id, data.forms[id]),
+          FirebaseDataConverter.toTask(id, data.tasks[id]),
         ])
       ),
       data.contributorsCanAdd || []
@@ -145,16 +145,16 @@ export class FirebaseDataConverter {
   }
 
   static layerToJS(layer: Layer): {} {
-    const { name, forms, color, contributorsCanAdd, ...layerDoc } = layer;
+    const { name, tasks, color, contributorsCanAdd, ...layerDoc } = layer;
     return {
       contributorsCanAdd,
       name: name?.toJS() || {},
-      ...(forms
+      ...(tasks
         ? {
-            forms: forms
+            tasks: tasks
               ?.valueSeq()
               .reduce(
-                (map, form) => ({ ...map, [form.id]: this.formToJS(form) }),
+                (map, task) => ({ ...map, [task.id]: this.taskToJS(task) }),
                 {}
               ),
           }
@@ -166,13 +166,13 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Form instance.
+   * immutable Task instance.
    *
-   * @param id the uuid of the form instance.
+   * @param id the uuid of the task instance.
    * @param data the source data in a dictionary keyed by string.
    */
-  private static toForm(id: string, data: DocumentData): Form {
-    return new Form(
+  private static toTask(id: string, data: DocumentData): Task {
+    return new Task(
       id,
       Map<string, Field>(
         keys(data.elements)
@@ -183,8 +183,8 @@ export class FirebaseDataConverter {
     );
   }
 
-  private static formToJS(form: Form): {} {
-    const { fields, ...formDoc } = form;
+  private static taskToJS(task: Task): {} {
+    const { fields, ...taskDoc } = task;
     return {
       elements:
         fields?.reduce(
@@ -194,7 +194,7 @@ export class FirebaseDataConverter {
           }),
           {}
         ) || {},
-      ...formDoc,
+      ...taskDoc,
     };
   }
 
@@ -442,8 +442,8 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
    * {
-   *   loiId: 'LOI123'
-   *   formId: 'form001',
+   *   loiId: 'loi123'
+   *   taskId: 'task001',
    *   responses: {
    *     'element001': 'Response text',  // For 'text_field  elements.
    *     'element002': ['A', 'B'],       // For 'multiple_choice' elements.
@@ -455,7 +455,7 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   static toObservation(
-    form: Form,
+    task: Task,
     id: string,
     data: DocumentData
   ): Observation {
@@ -466,14 +466,14 @@ export class FirebaseDataConverter {
       id,
       data.loiId,
       data.layerId,
-      form,
+      task,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
       Map<string, Response>(
         keys(data.responses).map((fieldId: string) => [
           fieldId as string,
           FirebaseDataConverter.toResponse(
-            form,
+            task,
             fieldId,
             data.responses[fieldId]
           ),
@@ -486,7 +486,7 @@ export class FirebaseDataConverter {
     return {
       loiId: observation.loiId,
       layerId: observation.layerId,
-      formId: observation.form?.id,
+      taskId: observation.task?.id,
       created: FirebaseDataConverter.auditInfoToJs(observation.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(
         observation.lastModified
@@ -519,7 +519,7 @@ export class FirebaseDataConverter {
   }
 
   private static toResponse(
-    form: Form,
+    task: Task,
     fieldID: string,
     responseValue: number | string | List<string>
   ): Response {
@@ -533,7 +533,7 @@ export class FirebaseDataConverter {
       return new Response(
         List(
           responseValue.map(optionId =>
-            form.getMultipleChoiceFieldOption(fieldID, optionId)
+            task.getMultipleChoiceFieldOption(fieldID, optionId)
           )
         )
       );

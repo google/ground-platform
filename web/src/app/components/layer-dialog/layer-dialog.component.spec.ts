@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { EditStyleButtonModule } from './../edit-style-button/edit-style-button.module';
-import { FormFieldEditorModule } from './../form-field-editor/form-field-editor.module';
+import { TaskFieldEditorModule } from '../task-field-editor/task-field-editor.module';
 import { LayerDialogComponent } from './layer-dialog.component';
 import {
   MAT_DIALOG_DATA,
@@ -62,7 +62,7 @@ describe('LayerDialogComponent', () => {
         imports: [
           EditStyleButtonModule,
           FormsModule,
-          FormFieldEditorModule,
+          TaskFieldEditorModule,
           InlineEditorModule,
           ReactiveFormsModule,
           BrowserAnimationsModule,

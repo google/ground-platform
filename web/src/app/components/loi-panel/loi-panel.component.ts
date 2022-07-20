@@ -23,7 +23,7 @@ import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Layer } from '../../shared/models/layer.model';
-import { Field, FieldType } from '../../shared/models/form/field.model';
+import { Field, FieldType } from '../../shared/models/task/field.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { DialogService } from '../../services/dialog/dialog.service';
@@ -120,7 +120,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   getFields(observation: Observation): List<Field> {
-    return List(observation.form?.fields?.valueSeq() || []);
+    return List(observation.task?.fields?.valueSeq() || []);
   }
 
   onEditObservationClick(observation: Observation) {

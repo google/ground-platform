@@ -16,14 +16,14 @@
 import firebase from 'firebase/app';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { StringMap } from '../models/string-map.model';
-import { Form } from '../models/form/form.model';
+import { Task } from '../models/task/task.model';
 import { Map, List } from 'immutable';
-import { Option } from '../../shared/models/form/option.model';
-import { Field, FieldType } from '../models/form/field.model';
+import { Option } from '../models/task/option.model';
+import { Field, FieldType } from '../models/task/field.model';
 import {
   MultipleChoice,
   Cardinality,
-} from '../models/form/multiple-choice.model';
+} from '../models/task/multiple-choice.model';
 
 class MockFirebaseData {
   static observation001 = {
@@ -47,7 +47,7 @@ class MockFirebaseData {
     },
     loiId: 'loi001',
     layerId: 'layer001',
-    formId: 'form001',
+    taskId: 'task001',
     responses: {
       element001: 'text response',
       element002: ['option001', 'option002'],
@@ -118,8 +118,8 @@ class MockModel {
     2
   );
 
-  static form001: Form = new Form(
-    'form001',
+  static task001: Task = new Task(
+    'task001',
     Map({
       element001: MockModel.element001,
       element002: MockModel.element002,
@@ -135,7 +135,7 @@ describe('FirebaseDataConverter', () => {
     expect(
       FirebaseDataConverter.observationToJS(
         FirebaseDataConverter.toObservation(
-          MockModel.form001,
+          MockModel.task001,
           'observation001',
           MockFirebaseData.observation001
         )

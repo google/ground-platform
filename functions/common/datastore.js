@@ -72,9 +72,9 @@ class Datastore {
       .get();
   }
 
-  fetchForm(surveyId, loiTypeId, formId) {
+  fetchTask(surveyId, loiTypeId, taskId) {
     return this.fetchDoc_(
-      `surveys/${surveyId}/loiTypes/${loiTypeId}/forms/${formId}`
+      `surveys/${surveyId}/loiTypes/${loiTypeId}/tasks/${taskId}`
     );
   }
 

@@ -34,9 +34,9 @@ async function exportCsv(req, res) {
   const layers = survey.get("layers") || {};
   const layer = layers[layerId] || {};
   const layerName = layer.name && layer.name["en"];
-  const forms = layer["forms"] || {};
-  const form = Object.values(forms)[0] || {};
-  const elementMap = form["elements"] || {};
+  const tasks = layer["tasks"] || {};
+  const task = Object.values(tasks)[0] || {};
+  const elementMap = task["elements"] || {};
   const elements = Object.keys(elementMap)
     .map((elementId) => ({ id: elementId, ...elementMap[elementId] }))
     .sort((a, b) => a.index - b.index);
@@ -144,7 +144,7 @@ function getLabel(loi) {
   );
 }
 /**
- * Returns the string representation of a specific form element response.
+ * Returns the string representation of a specific task element response.
  */
 function getValue(element, responses) {
   const response = responses[element.id] || "";

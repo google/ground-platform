@@ -99,7 +99,7 @@ export class ObservationService {
     }
     const form = survey
       .getLayer(loi.layerId)!
-      .forms?.first(/*notSetValue=*/ null);
+      .tasks?.first(/*notSetValue=*/ null);
     if (!form) {
       throw Error(`No form in layer ${loi.layerId}`);
     }

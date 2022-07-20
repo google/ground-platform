@@ -40,7 +40,7 @@ const mockSurvey = new Survey(
       /* index */ -1,
       'red',
       StringMap({ en: 'name' }),
-      /* forms= */ Map()
+      /* tasks= */ Map()
     ),
   }),
   /* acl= */ Map()
