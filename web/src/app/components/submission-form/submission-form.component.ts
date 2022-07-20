@@ -19,7 +19,7 @@ import { StepType, Step } from '../../shared/models/task/step.model';
 import { Cardinality } from '../../shared/models/task/multiple-choice.model';
 import { Option } from '../../shared/models/task/option.model';
 import { Submission } from '../../shared/models/submission/submission.model';
-import { Response } from '../../shared/models/submission/response.model';
+import { Result } from '../../shared/models/submission/result.model';
 import { SubmissionService } from '../../services/submission/submission.service';
 import {
   FormGroup,
@@ -108,9 +108,9 @@ export class SubmissionFormComponent {
           /*clientTime=*/ new Date(),
           /*serverTime=*/ this.dataStoreService.getServerTimestamp()
         );
-        const updatedResponses: Map<string, Response> = this.extractResponses();
-        const updatedSubmission = this.submission!.withResponsesAndLastModified(
-          updatedResponses,
+        const updatedResults: Map<string, Result> = this.extractResults();
+        const updatedSubmission = this.submission!.withResultsAndLastModified(
+          updatedResults,
           lastModified
         );
         this.dataStoreService
@@ -161,16 +161,16 @@ export class SubmissionFormComponent {
   private convertSubmissionToFormGroup(submission: Submission): FormGroup {
     const group: { [stepId: string]: FormControl } = {};
     for (const [stepId, step] of submission.task!.steps) {
-      const response = submission!.responses?.get(stepId);
+      const result = submission!.results?.get(stepId);
       switch (step.type) {
         case StepType.TEXT:
-          this.addControlsForTextStep(group, step, response);
+          this.addControlsForTextStep(group, step, result);
           break;
         case StepType.NUMBER:
-          this.addControlsForNumberStep(group, step, response);
+          this.addControlsForNumberStep(group, step, result);
           break;
         case StepType.MULTIPLE_CHOICE:
-          this.addControlsForMultipleChoiceStep(group, step, response);
+          this.addControlsForMultipleChoiceStep(group, step, result);
           break;
         default:
           console.debug(`Skipping unsupported step type: ${step.type}`);
@@ -179,26 +179,26 @@ export class SubmissionFormComponent {
     return this.formBuilder.group(group);
   }
 
-  private extractResponses(): Map<string, Response> {
-    return Map<string, Response>(
+  private extractResults(): Map<string, Result> {
+    return Map<string, Result>(
       this.submissionSteps!.map(step => [
         step.id,
-        this.extractResponseForStep(step),
+        this.extractResultForStep(step),
       ])
     );
   }
 
-  private extractResponseForStep(step: Step) {
+  private extractResultForStep(step: Step) {
     switch (step.type) {
       case StepType.TEXT:
-        return this.extractResponseForTextStep(step);
+        return this.extractResultForTextStep(step);
       case StepType.NUMBER:
-        return this.extractResponseForNumberStep(step);
+        return this.extractResultForNumberStep(step);
       case StepType.MULTIPLE_CHOICE:
-        return this.extractResponseForMultipleChoiceStep(step);
+        return this.extractResultForMultipleChoiceStep(step);
       default:
         throw Error(
-          `Unimplemented Response extraction for Step with
+          `Unimplemented Result extraction for Step with
            Type:${step.type}`
         );
     }
@@ -207,9 +207,9 @@ export class SubmissionFormComponent {
   private addControlsForTextStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const value = response?.value as string;
+    const value = result?.value as string;
     group[step.id] = step.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
@@ -218,33 +218,33 @@ export class SubmissionFormComponent {
   private addControlsForNumberStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const value = response?.value as number;
+    const value = result?.value as number;
     group[step.id] = step.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
   }
 
-  private extractResponseForTextStep(step: Step): Response {
-    return new Response(this.submissionForm?.value[step.id]);
+  private extractResultForTextStep(step: Step): Result {
+    return new Result(this.submissionForm?.value[step.id]);
   }
 
-  private extractResponseForNumberStep(step: Step): Response {
-    return new Response(this.submissionForm?.value[step.id]);
+  private extractResultForNumberStep(step: Step): Result {
+    return new Result(this.submissionForm?.value[step.id]);
   }
 
   private addControlsForMultipleChoiceStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
     switch (step.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        this.addControlsForSelectOneStep(group, step, response);
+        this.addControlsForSelectOneStep(group, step, result);
         return;
       case Cardinality.SELECT_MULTIPLE:
-        this.addControlsForSelectMultipleStep(group, step, response);
+        this.addControlsForSelectMultipleStep(group, step, result);
         return;
       default:
         throw Error(
@@ -254,15 +254,15 @@ export class SubmissionFormComponent {
     }
   }
 
-  private extractResponseForMultipleChoiceStep(step: Step): Response {
+  private extractResultForMultipleChoiceStep(step: Step): Result {
     switch (step.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        return this.extractResponseForSelectOneStep(step);
+        return this.extractResultForSelectOneStep(step);
       case Cardinality.SELECT_MULTIPLE:
-        return this.extractResponseForSelectMultipleStep(step);
+        return this.extractResultForSelectMultipleStep(step);
       default:
         throw Error(
-          `Unimplemented Response extraction for Step with
+          `Unimplemented Result extraction for Step with
            Cardinality:${step.multipleChoice?.cardinality}`
         );
     }
@@ -271,37 +271,37 @@ export class SubmissionFormComponent {
   private addControlsForSelectOneStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const selectedOptionId = ((response?.value as List<Option>)?.first() as Option)
+    const selectedOptionId = ((result?.value as List<Option>)?.first() as Option)
       ?.id;
     group[step.id] = step.required
       ? new FormControl(selectedOptionId, Validators.required)
       : new FormControl(selectedOptionId);
   }
 
-  private extractResponseForSelectOneStep(step: Step): Response {
+  private extractResultForSelectOneStep(step: Step): Result {
     const selectedOption: Option = step.getMultipleChoiceOption(
       this.submissionForm?.value[step.id]
     );
-    return new Response(List([selectedOption]));
+    return new Result(List([selectedOption]));
   }
 
   private addControlsForSelectMultipleStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const selectedOptions = response?.value as List<Option>;
+    const selectedOptions = result?.value as List<Option>;
     for (const option of step.multipleChoice!.options) {
       group[option.id] = new FormControl(selectedOptions?.contains(option));
     }
   }
 
-  private extractResponseForSelectMultipleStep(step: Step): Response {
+  private extractResultForSelectMultipleStep(step: Step): Result {
     const selectedOptions: List<Option> = step.multipleChoice!.options!.filter(
       option => this.submissionForm?.value[option.id]
     );
-    return new Response(selectedOptions);
+    return new Result(selectedOptions);
   }
 }

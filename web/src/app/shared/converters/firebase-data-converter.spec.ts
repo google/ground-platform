@@ -48,8 +48,8 @@ class MockFirebaseData {
     loiId: 'loi001',
     jobId: 'job001',
     taskId: 'task001',
-    responses: {
-      element001: 'text response',
+    results: {
+      element001: 'text result',
       element002: ['option001', 'option002'],
       element003: 123,
       element004: new firebase.firestore.Timestamp(1641533340, 0),

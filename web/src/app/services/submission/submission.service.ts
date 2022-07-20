@@ -34,7 +34,7 @@ import { LoadingState } from '../loading-state.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { AuthService } from './../../services/auth/auth.service';
 import { User } from '../../shared/models/user.model';
-import { Response } from '../../shared/models/submission/response.model';
+import { Result } from '../../shared/models/submission/result.model';
 import { NavigationService } from '../navigation/navigation.service';
 
 @Injectable({
@@ -114,7 +114,7 @@ export class SubmissionService {
       task!,
       auditInfo,
       auditInfo,
-      Map<string, Response>([])
+      Map<string, Result>([])
     );
   }
 

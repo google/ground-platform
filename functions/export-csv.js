@@ -94,9 +94,9 @@ async function exportCsv(req, res) {
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
       row.push(toWkt(loi.get("geoJson")) || "");
-      const responses = submission["responses"] || {};
+      const results = submission["results"] || {};
       elements
-        .map((element) => getValue(element, responses))
+        .map((element) => getValue(element, results))
         .forEach((value) => row.push(value));
       csvStream.write(row);
     });
@@ -144,20 +144,18 @@ function getLabel(loi) {
   );
 }
 /**
- * Returns the string representation of a specific task element response.
+ * Returns the string representation of a specific task element result.
  */
-function getValue(element, responses) {
-  const response = responses[element.id] || "";
+function getValue(element, results) {
+  const result = results[element.id] || "";
   if (
     element.type === "multiple_choice" &&
-    Array.isArray(response) &&
+    Array.isArray(result) &&
     element.options
   ) {
-    return response
-      .map((id) => getMultipleChoiceValues(id, element))
-      .join(", ");
+    return result.map((id) => getMultipleChoiceValues(id, element)).join(", ");
   } else {
-    return response;
+    return result;
   }
 }
 

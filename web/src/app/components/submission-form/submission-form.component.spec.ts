@@ -26,7 +26,7 @@ import { NEVER, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { List, Map } from 'immutable';
 import { Submission } from '../../shared/models/submission/submission.model';
-import { Response } from '../../shared/models/submission/response.model';
+import { Result } from '../../shared/models/submission/result.model';
 import firebase from 'firebase/app';
 import { StringMap } from '../../shared/models/string-map.model';
 import { Job } from '../../shared/models/job.model';
@@ -145,8 +145,8 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
-      element001: new Response('response'),
-      element003: new Response(List([MockModel.option001])),
+      element001: new Result('result'),
+      element003: new Result(List([MockModel.option001])),
     })
   );
 }
@@ -231,7 +231,7 @@ describe('SubmissionFormComponent', () => {
 
   it('should create text steps with right "required" option', () => {
     for (const el of fixture.debugElement.queryAll(
-      By.css('.step-response div mat-form-field input')
+      By.css('.step-result div mat-form-field input')
     )) {
       if (!component.submissionSteps) {
         break;
@@ -252,7 +252,7 @@ describe('SubmissionFormComponent', () => {
 
   it('should create radio button steps with right "asterix" class', () => {
     for (const el of fixture.debugElement.queryAll(
-      By.css('.step-response .multiple-choice-step mat-label')
+      By.css('.step-result .multiple-choice-step mat-label')
     )) {
       if (!component.submissionSteps) {
         break;

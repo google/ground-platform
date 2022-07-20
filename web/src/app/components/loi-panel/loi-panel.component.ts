@@ -74,11 +74,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         this.getSteps(submission).forEach(step => {
           if (
             step.type === StepType.PHOTO &&
-            (submission.responses?.get(step.id)?.value as string)
+            (submission.results?.get(step.id)?.value as string)
           ) {
             this.fillPhotoURL(
               step.id,
-              submission.responses?.get(step.id)?.value as string
+              submission.results?.get(step.id)?.value as string
             );
           }
         });

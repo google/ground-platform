@@ -17,6 +17,6 @@
 import { List } from 'immutable';
 import { Option } from '../task/option.model';
 
-export class Response {
+export class Result {
   constructor(readonly value: number | string | List<Option> | Date) {}
 }

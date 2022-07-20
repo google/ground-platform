@@ -64,23 +64,23 @@ limitations under the License.
         <div *ngFor="let step of getSteps(submission)">
           <label class="step-label">{{ step.label?.get(lang) }}</label>
           <div
-            class="step-response"
+            class="step-result"
             *ngIf="step.type == stepTypes.TEXT || step.type == stepTypes.NUMBER"
           >
-            {{ submission.responses?.get(step.id)?.value }}
+            {{ submission.results?.get(step.id)?.value }}
           </div>
           <div
-            class="step-response"
+            class="step-result"
             *ngIf="step.type == stepTypes.MULTIPLE_CHOICE"
           >
             <span
               class="option-label"
-              *ngFor="let option of submission.responses?.get(step.id)?.value"
+              *ngFor="let option of submission.results?.get(step.id)?.value"
             >
               {{ option.label?.get(lang) }}
             </span>
           </div>
-          <div class="step-response" *ngIf="step.type == stepTypes.PHOTO">
+          <div class="step-result" *ngIf="step.type == stepTypes.PHOTO">
             <img
               (click)="openUrlInNewTab(photoUrls.get(step.id))"
               src="{{ photoUrls.get(step.id) }}"

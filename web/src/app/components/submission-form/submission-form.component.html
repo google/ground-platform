@@ -28,7 +28,7 @@
   <h3>Add/edit submission</h3>
   <form [formGroup]="submissionForm" (ngSubmit)="onSave()" autocomplete="off">
     <div *ngFor="let step of submissionSteps">
-      <div class="step-response">
+      <div class="step-result">
         <!-- Text step -->
         <div *ngIf="step.type == stepTypes.TEXT">
           <mat-form-field appearance="fill">

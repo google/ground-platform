@@ -16,7 +16,7 @@
 
 import { AuditInfo } from '../audit-info.model';
 import { Task } from '../task/task.model';
-import { Response } from './response.model';
+import { Result } from './result.model';
 import { Map } from 'immutable';
 
 export class Submission {
@@ -27,12 +27,12 @@ export class Submission {
     readonly task: Task | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
-    readonly responses: Map<string, Response>
+    readonly results: Map<string, Result>
   ) {}
 
-  // Returns copy of Submission with responses and lastModified replaced.
-  withResponsesAndLastModified(
-    responses: Map<string, Response>,
+  // Returns copy of Submission with results and lastModified replaced.
+  withResultsAndLastModified(
+    results: Map<string, Result>,
     lastModified: AuditInfo
   ): Submission {
     return new Submission(
@@ -42,7 +42,7 @@ export class Submission {
       this.task,
       this.created,
       lastModified,
-      responses
+      results
     );
   }
 }
