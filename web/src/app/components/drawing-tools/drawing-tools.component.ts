@@ -88,9 +88,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
       map(survey =>
         List(survey.jobs.valueSeq().toArray())
           .sortBy(l => l.index)
-          .filter(l =>
-            authService.canUserAddPointsToJob(this.activeSurvey, l)
-          )
+          .filter(l => authService.canUserAddPointsToJob(this.activeSurvey, l))
       )
     );
   }
@@ -120,9 +118,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   }
 
   jobPinUrl(job: Job): SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(job?.color)
-    );
+    return this.sanitizer.bypassSecurityTrustUrl(getPinImageSource(job?.color));
   }
 
   onJobIdChange() {

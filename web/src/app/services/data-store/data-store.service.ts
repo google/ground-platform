@@ -116,10 +116,7 @@ export class DataStoreService {
       });
   }
 
-  private async deleteAllObservationsInJob(
-    surveyId: string,
-    jobId: string
-  ) {
+  private async deleteAllObservationsInJob(surveyId: string, jobId: string) {
     const observations = this.db.collection(
       `surveys/${surveyId}/observations`,
       ref => ref.where('jobId', '==', jobId)

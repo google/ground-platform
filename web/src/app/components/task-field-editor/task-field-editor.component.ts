@@ -266,11 +266,7 @@ export class TaskFieldEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @returns void
    */
   onOptionUpdate(event: { label: string; code: string }, index: number): void {
-    const option = this.jobService.createOption(
-      event.code,
-      event.label,
-      index
-    );
+    const option = this.jobService.createOption(event.code, event.label, index);
     const options = this.setTaskOptions(index, option);
     this.emitTaskOptions(options);
   }

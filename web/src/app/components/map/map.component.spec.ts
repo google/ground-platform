@@ -520,11 +520,7 @@ describe('MapComponent', () => {
       latLng: new google.maps.LatLng(45, 45),
     });
 
-    expect(featureServiceSpy.addPoint).toHaveBeenCalledOnceWith(
-      45,
-      45,
-      jobId2
-    );
+    expect(featureServiceSpy.addPoint).toHaveBeenCalledOnceWith(45, 45, jobId2);
   }));
 
   it('should not add marker when job id is undefined', fakeAsync(() => {

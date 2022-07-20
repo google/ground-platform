@@ -34,8 +34,7 @@ import { SurveyService } from '../../services/survey/survey.service';
 })
 export class JobListItemComponent implements OnInit, OnDestroy {
   @Input() job?: Job;
-  @Input() actionsType: JobListItemActionsType =
-    JobListItemActionsType.MENU;
+  @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
   surveyId?: string | null;
   featureId?: string | null;
   jobPinUrl: SafeUrl;

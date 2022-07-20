@@ -266,9 +266,8 @@ describe('DrawingToolsComponent', () => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const jobSelector = fixture.debugElement.query(
-        By.css('#job-selector')
-      ).nativeElement;
+      const jobSelector = fixture.debugElement.query(By.css('#job-selector'))
+        .nativeElement;
       jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();
@@ -300,9 +299,8 @@ describe('DrawingToolsComponent', () => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const jobSelector = fixture.debugElement.query(
-        By.css('#job-selector')
-      ).nativeElement;
+      const jobSelector = fixture.debugElement.query(By.css('#job-selector'))
+        .nativeElement;
       jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();

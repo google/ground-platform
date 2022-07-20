@@ -54,11 +54,7 @@ describe('JobDialogComponent', () => {
     waitForAsync(() => {
       const routerSpy = createRouterSpy();
       TestBed.configureTestingModule({
-        declarations: [
-          JobDialogComponent,
-          MatDialogContent,
-          MatDialogActions,
-        ],
+        declarations: [JobDialogComponent, MatDialogContent, MatDialogActions],
         imports: [
           EditStyleButtonModule,
           FormsModule,
