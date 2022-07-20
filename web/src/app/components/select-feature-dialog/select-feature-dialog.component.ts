@@ -24,7 +24,7 @@ interface DialogData {
 export interface FeatureData {
   featureId: string;
   color: string;
-  layerName: string;
+  jobName: string;
 }
 
 @Component({

@@ -17,7 +17,7 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
@@ -28,19 +28,19 @@ import { Subscription } from 'rxjs';
 import { SurveyService } from '../../services/survey/survey.service';
 
 @Component({
-  selector: 'ground-layer-list-item',
-  templateUrl: './layer-list-item.component.html',
-  styleUrls: ['./layer-list-item.component.scss'],
+  selector: 'ground-job-list-item',
+  templateUrl: './job-list-item.component.html',
+  styleUrls: ['./job-list-item.component.scss'],
 })
-export class LayerListItemComponent implements OnInit, OnDestroy {
-  @Input() layer?: Layer;
-  @Input() actionsType: LayerListItemActionsType =
-    LayerListItemActionsType.MENU;
+export class JobListItemComponent implements OnInit, OnDestroy {
+  @Input() job?: Job;
+  @Input() actionsType: JobListItemActionsType =
+    JobListItemActionsType.MENU;
   surveyId?: string | null;
   featureId?: string | null;
-  layerPinUrl: SafeUrl;
+  jobPinUrl: SafeUrl;
   readonly lang: string;
-  readonly layerListItemActionsType = LayerListItemActionsType;
+  readonly jobListItemActionsType = JobListItemActionsType;
   subscription: Subscription = new Subscription();
 
   constructor(
@@ -53,12 +53,12 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layerPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
   }
 
   ngOnInit() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer?.color)
+    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.job?.color)
     );
     this.subscription.add(
       this.navigationService.getFeatureId$().subscribe(id => {
@@ -73,14 +73,14 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   ngOnChanges() {
-    this.layerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer?.color)
+    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      getPinImageSource(this.job?.color)
     );
   }
 
-  onCustomizeLayer() {
-    if (this.layer?.id) {
-      this.navigationService.customizeLayer(this.layer?.id);
+  onCustomizeJob() {
+    if (this.job?.id) {
+      this.navigationService.customizeJob(this.job?.id);
     }
   }
 
@@ -88,24 +88,24 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
     this.navigationService.clearFeatureId();
   }
 
-  onDeleteLayer() {
+  onDeleteJob() {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
-        'Are you sure you wish to delete this layer? Any associated data ' +
-          'including all features and observations in this layer will be ' +
+        'Are you sure you wish to delete this job? Any associated data ' +
+          'including all features and observations in this job will be ' +
           'lost. This cannot be undone.'
       )
       .afterClosed()
       .subscribe(async dialogResult => {
         if (dialogResult) {
-          await this.deleteLayer();
+          await this.deleteJob();
         }
       });
   }
 
-  async deleteLayer() {
-    await this.dataStoreService.deleteLayer(this.surveyId!, this.layer!.id);
+  async deleteJob() {
+    await this.dataStoreService.deleteJob(this.surveyId!, this.job!.id);
     this.onClose();
   }
 
@@ -114,11 +114,11 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 
   onImportFeatures() {
-    if (!this.surveyId || !this.layer?.id) {
+    if (!this.surveyId || !this.job?.id) {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
-      data: { surveyId: this.surveyId, layerId: this.layer?.id },
+      data: { surveyId: this.surveyId, jobId: this.job?.id },
       width: '350px',
       maxHeight: '800px',
     });
@@ -127,15 +127,15 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   getDownloadCsvUrl() {
     return (
       `${environment.cloudFunctionsUrl}/exportCsv?` +
-      `survey=${this.surveyId}&layer=${this.layer?.id}`
+      `survey=${this.surveyId}&job=${this.job?.id}`
     );
   }
 
-  onLayerListSelect(): void | undefined {
-    if (!this.layer?.id) {
+  onJobListSelect(): void | undefined {
+    if (!this.job?.id) {
       return;
     }
-    this.navigationService.showFeatureList(this.layer.id);
+    this.navigationService.showFeatureList(this.job.id);
   }
 
   ngOnDestroy(): void {
@@ -143,7 +143,7 @@ export class LayerListItemComponent implements OnInit, OnDestroy {
   }
 }
 
-export enum LayerListItemActionsType {
+export enum JobListItemActionsType {
   MENU = 1,
   BACK = 2,
 }

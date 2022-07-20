@@ -18,17 +18,17 @@ import { Component } from '@angular/core';
 import { SurveyService } from '../../services/survey/survey.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { List } from 'immutable';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
-  selector: 'ground-layer-list',
-  templateUrl: './layer-list.component.html',
-  styleUrls: ['./layer-list.component.scss'],
+  selector: 'ground-job-list',
+  templateUrl: './job-list.component.html',
+  styleUrls: ['./job-list.component.scss'],
 })
-export class LayerListComponent {
-  readonly layers$: Observable<List<Layer>>;
+export class JobListComponent {
+  readonly jobs$: Observable<List<Job>>;
   readonly lang: string;
 
   constructor(
@@ -37,16 +37,16 @@ export class LayerListComponent {
   ) {
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = surveyService
+    this.jobs$ = surveyService
       .getActiveSurvey$()
       .pipe(
         map(survey =>
-          List(survey.layers.valueSeq().toArray()).sortBy(l => l.index)
+          List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
   }
 
-  onAddLayer() {
-    this.navigationService.customizeLayer(NavigationService.LAYER_ID_NEW);
+  onAddJob() {
+    this.navigationService.customizeJob(NavigationService.JOB_ID_NEW);
   }
 }

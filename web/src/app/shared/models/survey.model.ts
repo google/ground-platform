@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Layer } from './layer.model';
+import { Job } from './job.model';
 import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
 import { Role } from './role.model';
@@ -27,8 +27,8 @@ export class Survey {
     StringMap({}),
     /* description= */
     StringMap({}),
-    /* layers= */
-    Map<string, Layer>(),
+    /* jobs= */
+    Map<string, Job>(),
     /* acl= */
     Map<string, Role>()
   );
@@ -37,12 +37,12 @@ export class Survey {
     readonly id: string,
     readonly title: StringMap,
     readonly description: StringMap,
-    readonly layers: Map<string, Layer>,
+    readonly jobs: Map<string, Job>,
     readonly acl: Map<string, Role>
   ) {}
 
-  getLayer(layerId: string): Layer | undefined {
-    return this.layers.get(layerId);
+  getJob(jobId: string): Job | undefined {
+    return this.jobs.get(jobId);
   }
 
   isUnsavedNew() {
@@ -50,7 +50,7 @@ export class Survey {
       !this.id &&
       !this.title.size &&
       !this.description.size &&
-      !this.layers.size &&
+      !this.jobs.size &&
       !this.acl.size
     );
   }

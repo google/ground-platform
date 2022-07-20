@@ -18,7 +18,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
-import { LayerListItemComponent } from './layer-list-item.component';
+import { JobListItemComponent } from './job-list-item.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
@@ -37,9 +37,9 @@ const mockAngularFireAuth = {
   authState: of(authState),
 };
 
-describe('LayerListItemComponent', () => {
-  let component: LayerListItemComponent;
-  let fixture: ComponentFixture<LayerListItemComponent>;
+describe('JobListItemComponent', () => {
+  let component: JobListItemComponent;
+  let fixture: ComponentFixture<JobListItemComponent>;
 
   beforeEach(
     waitForAsync(() => {
@@ -49,7 +49,7 @@ describe('LayerListItemComponent', () => {
       };
 
       TestBed.configureTestingModule({
-        declarations: [LayerListItemComponent],
+        declarations: [JobListItemComponent],
         imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
         providers: [
           { provide: DataStoreService, useValue: { user$: () => of() } },
@@ -66,7 +66,7 @@ describe('LayerListItemComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(LayerListItemComponent);
+    fixture = TestBed.createComponent(JobListItemComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

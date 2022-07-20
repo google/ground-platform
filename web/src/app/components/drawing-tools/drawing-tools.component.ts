@@ -28,7 +28,7 @@ import {
 import { SurveyService } from '../../services/survey/survey.service';
 import { Observable, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { List } from 'immutable';
 import { map } from 'rxjs/internal/operators/map';
 import { getPinImageSource } from '../map/ground-pin';
@@ -49,9 +49,9 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   polygonValue = 'polygon';
   selectedValue = '';
   private lastSelectedValue = '';
-  selectedLayerId = '';
+  selectedJobId = '';
   private activeSurvey!: Survey;
-  readonly layers$: Observable<List<Layer>>;
+  readonly jobs$: Observable<List<Job>>;
   readonly lang: string;
   readonly black = '#202225';
   readonly addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
@@ -79,17 +79,17 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     this.disabled$ = drawingToolsService.getDisabled$();
     // TODO: Make dynamic to support i18n.
     this.lang = 'en';
-    this.layers$ = surveyService.getActiveSurvey$().pipe(
+    this.jobs$ = surveyService.getActiveSurvey$().pipe(
       tap(survey => {
         this.activeSurvey = survey;
-        this.selectedLayerId = survey.layers.keySeq().first();
-        this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
+        this.selectedJobId = survey.jobs.keySeq().first();
+        this.drawingToolsService.setSelectedJobId(this.selectedJobId);
       }),
       map(survey =>
-        List(survey.layers.valueSeq().toArray())
+        List(survey.jobs.valueSeq().toArray())
           .sortBy(l => l.index)
           .filter(l =>
-            authService.canUserAddPointsToLayer(this.activeSurvey, l)
+            authService.canUserAddPointsToJob(this.activeSurvey, l)
           )
       )
     );
@@ -119,14 +119,14 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     this.lastSelectedValue = this.selectedValue;
   }
 
-  layerPinUrl(layer: Layer): SafeUrl {
+  jobPinUrl(job: Job): SafeUrl {
     return this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(layer?.color)
+      getPinImageSource(job?.color)
     );
   }
 
-  onLayerIdChange() {
-    this.drawingToolsService.setSelectedLayerId(this.selectedLayerId);
+  onJobIdChange() {
+    this.drawingToolsService.setSelectedJobId(this.selectedJobId);
   }
 
   onCancel() {

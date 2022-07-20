@@ -34,12 +34,12 @@ import { SurveyService } from '../../services/survey/survey.service';
 import { LoadingState } from '../../services/loading-state.model';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { FeatureService } from '../../services/feature/feature.service';
 import { switchMap, map } from 'rxjs/operators';
 import { AuthService } from '../../services/auth/auth.service';
 import { AuditInfo } from '../../shared/models/audit-info.model';
-import { LayerListItemActionsType } from '../layer-list-item/layer-list-item.component';
+import { JobListItemActionsType } from '../job-list-item/job-list-item.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 // To make ESLint happy:
@@ -54,8 +54,8 @@ export class ObservationFormComponent {
   readonly lang: string;
   readonly fieldTypes = FieldType;
   readonly cardinality = Cardinality;
-  readonly layerListItemActionsType = LayerListItemActionsType;
-  readonly layer$: Observable<Layer>;
+  readonly jobListItemActionsType = JobListItemActionsType;
+  readonly job$: Observable<Job>;
   surveyId?: string;
   observation?: Observation;
   observationForm?: FormGroup;
@@ -80,13 +80,13 @@ export class ObservationFormComponent {
       .subscribe((observation?: Observation | LoadingState) =>
         this.onSelectObservation(observation)
       );
-    this.layer$ = surveyService
+    this.job$ = surveyService
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
           featureService
             .getSelectedFeature$()
-            .pipe(map(feature => survey.layers.get(feature.layerId)!))
+            .pipe(map(feature => survey.jobs.get(feature.jobId)!))
         )
       );
   }

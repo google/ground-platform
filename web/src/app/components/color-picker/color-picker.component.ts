@@ -25,7 +25,7 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ColorEvent } from 'ngx-color';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 
 @Component({
   selector: 'app-color-picker',
@@ -33,7 +33,7 @@ import { Layer } from '../../shared/models/layer.model';
   styleUrls: ['./color-picker.component.scss'],
 })
 export class ColorPickerComponent implements OnInit {
-  layer?: Layer;
+  job?: Job;
   surveyId?: string;
   color!: string;
   private readonly matDialogRef: MatDialogRef<ColorPickerComponent>;

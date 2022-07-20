@@ -28,11 +28,11 @@ import { HttpParams } from '@angular/common/http';
   providedIn: 'root',
 })
 export class NavigationService {
-  private static readonly LAYER_ID_FRAGMENT_PARAM = 'l';
+  private static readonly JOB_ID_FRAGMENT_PARAM = 'l';
   private static readonly FEATURE_ID_FRAGMENT_PARAM = 'f';
-  private static readonly FEATURE_LAYER_ID_FRAGMENT_PARAM = 'fl';
+  private static readonly FEATURE_JOB_ID_FRAGMENT_PARAM = 'fl';
   private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
-  static readonly LAYER_ID_NEW = 'new';
+  static readonly JOB_ID_NEW = 'new';
   static readonly OBSERVATION_ID_NEW = 'new';
   static readonly SURVEY_ID_NEW = 'new';
   static readonly SURVEY_ID = 'surveyId';
@@ -47,15 +47,15 @@ export class NavigationService {
     if (params.get(NavigationService.FEATURE_ID_FRAGMENT_PARAM)) {
       return SideNavMode.FEATURE;
     }
-    if (params.get(NavigationService.FEATURE_LAYER_ID_FRAGMENT_PARAM)) {
+    if (params.get(NavigationService.FEATURE_JOB_ID_FRAGMENT_PARAM)) {
       return SideNavMode.FEATURE_LIST;
     }
-    return SideNavMode.LAYER_LIST;
+    return SideNavMode.JOB_LIST;
   }
 
   private activatedRoute?: ActivatedRoute;
   private surveyId$?: Observable<string | null>;
-  private layerId$?: Observable<string | null>;
+  private jobId$?: Observable<string | null>;
   private featureId$?: Observable<string | null>;
   private observationId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
@@ -76,8 +76,8 @@ export class NavigationService {
     const fragmentParams$ = route.fragment.pipe(
       map(fragment => new HttpParams({ fromString: fragment || '' }))
     );
-    this.layerId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.LAYER_ID_FRAGMENT_PARAM))
+    this.jobId$ = fragmentParams$.pipe(
+      map(params => params.get(NavigationService.JOB_ID_FRAGMENT_PARAM))
     );
     this.featureId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.FEATURE_ID_FRAGMENT_PARAM))
@@ -94,8 +94,8 @@ export class NavigationService {
     return this.surveyId$!;
   }
 
-  getLayerId$(): Observable<string | null> {
-    return this.layerId$!;
+  getJobId$(): Observable<string | null> {
+    return this.jobId$!;
   }
 
   getFeatureId$(): Observable<string | null> {
@@ -156,9 +156,9 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  showFeatureList(layerId: string) {
+  showFeatureList(jobId: string) {
     const newParam: { [key: string]: string } = {};
-    newParam[NavigationService.FEATURE_LAYER_ID_FRAGMENT_PARAM] = layerId;
+    newParam[NavigationService.FEATURE_JOB_ID_FRAGMENT_PARAM] = jobId;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
@@ -195,12 +195,12 @@ export class NavigationService {
   }
 
   /**
-   * Navigate to the current URL, updating the layer id in the URL
+   * Navigate to the current URL, updating the job id in the URL
    * fragment.
    */
-  customizeLayer(id: string) {
+  customizeJob(id: string) {
     const newParam: { [key: string]: string } = {};
-    newParam[NavigationService.LAYER_ID_FRAGMENT_PARAM] = id;
+    newParam[NavigationService.JOB_ID_FRAGMENT_PARAM] = id;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
@@ -244,7 +244,7 @@ export class NavigationService {
 }
 
 export enum SideNavMode {
-  LAYER_LIST = 1,
+  JOB_LIST = 1,
   OBSERVATION = 2,
   FEATURE = 3,
   FEATURE_LIST = 4,

@@ -18,7 +18,7 @@ import { Task } from './task/task.model';
 import { StringMap } from './string-map.model';
 import { Map } from 'immutable';
 
-export class Layer {
+export class Job {
   constructor(
     readonly id: string,
     readonly index: number,
@@ -32,7 +32,7 @@ export class Layer {
     return this.tasks?.get(taskId);
   }
 
-  withIndex(index: number): Layer {
+  withIndex(index: number): Job {
     return { ...this, index };
   }
 }

@@ -14,25 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<mat-list *ngIf="layers$ | async as layers" role="list" fxLayoutRow>
-  <h3 matSubheader>Layers</h3>
+<mat-list *ngIf="jobs$ | async as jobs" role="list" fxLayoutRow>
+  <h3 matSubheader>Jobs</h3>
   <mat-divider></mat-divider>
-  <div class="layers">
-    <ground-layer-list-item
-      *ngFor="let entry of layers"
-      [layer]="entry"
-    ></ground-layer-list-item>
+  <div class="jobs">
+    <ground-job-list-item
+      *ngFor="let entry of jobs"
+      [job]="entry"
+    ></ground-job-list-item>
   </div>
-  <div class="add-layer" *ngIf="surveyService.canManageSurvey()">
+  <div class="add-job" *ngIf="surveyService.canManageSurvey()">
     <button
       fxFill
       mat-stroked-button
       color="primary"
-      class="add-layer-btn"
-      (click)="onAddLayer()"
+      class="add-job-btn"
+      (click)="onAddJob()"
     >
-      <mat-icon class="add-layer-icon">add</mat-icon>
-      Add layer
+      <mat-icon class="add-job-icon">add</mat-icon>
+      Add job
     </button>
   </div>
 </mat-list>

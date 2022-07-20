@@ -22,7 +22,7 @@ import {
   NgZone,
   OnChanges,
 } from '@angular/core';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { getPinImageSource } from '../map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { DialogService } from '../../services/dialog/dialog.service';
@@ -42,7 +42,7 @@ import { Map } from 'immutable';
 })
 export class FeaturePanelHeaderComponent
   implements OnInit, OnDestroy, OnChanges {
-  @Input() layer?: Layer;
+  @Input() job?: Job;
   surveyId?: string | null;
   featureId?: string | null;
   pinUrl: SafeUrl;
@@ -79,7 +79,7 @@ export class FeaturePanelHeaderComponent
 
   ngOnInit() {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer?.color)
+      getPinImageSource(this.job?.color)
     );
     this.subscription.add(
       this.navigationService.getFeatureId$().subscribe(id => {
@@ -95,7 +95,7 @@ export class FeaturePanelHeaderComponent
 
   ngOnChanges() {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.layer?.color)
+      getPinImageSource(this.job?.color)
     );
   }
 

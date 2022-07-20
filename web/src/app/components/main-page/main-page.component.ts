@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { LayerDialogComponent } from '../layer-dialog/layer-dialog.component';
+import { JobDialogComponent } from '../job-dialog/job-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
@@ -29,7 +29,7 @@ import { environment } from '../../../environments/environment';
 import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
 
 /**
- * Root component for main application page showing map, layers list, and
+ * Root component for main application page showing map, jobs list, and
  * survey header. Responsible for coordinating page-level URL states with
  * various services.
  */
@@ -61,14 +61,14 @@ export class MainPageComponent implements OnInit {
       this.navigationService
         .getSurveyId$()
         .subscribe(
-          id => id === NavigationService.LAYER_ID_NEW && this.showTitleDialog()
+          id => id === NavigationService.JOB_ID_NEW && this.showTitleDialog()
         )
     );
-    // Show layer dialog when non-null layer id set in URL.
+    // Show job dialog when non-null job id set in URL.
     this.subscription.add(
       this.navigationService
-        .getLayerId$()
-        .subscribe(id => id && this.showEditLayerDialog(id))
+        .getJobId$()
+        .subscribe(id => id && this.showEditJobDialog(id))
     );
     // Show feature details when non-null feature id set in URL.
     this.subscription.add(
@@ -103,18 +103,18 @@ export class MainPageComponent implements OnInit {
     });
   }
 
-  private showEditLayerDialog(layerId: string) {
+  private showEditJobDialog(jobId: string) {
     this.activeSurvey$.pipe(take(1)).subscribe(survey =>
-      this.dialog.open(LayerDialogComponent, {
-        autoFocus: layerId === NavigationService.LAYER_ID_NEW,
+      this.dialog.open(JobDialogComponent, {
+        autoFocus: jobId === NavigationService.JOB_ID_NEW,
         data: {
           surveyId: survey.isUnsavedNew()
             ? NavigationService.SURVEY_ID_NEW
             : survey.id,
-          createLayer: layerId === NavigationService.SURVEY_ID_NEW,
-          layer: survey.layers?.get(layerId),
+          createJob: jobId === NavigationService.SURVEY_ID_NEW,
+          job: survey.jobs?.get(jobId),
         },
-        panelClass: 'layer-dialog-container',
+        panelClass: 'job-dialog-container',
       })
     );
   }

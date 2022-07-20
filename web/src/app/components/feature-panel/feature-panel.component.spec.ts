@@ -22,7 +22,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import { Feature, LocationFeature } from '../../shared/models/feature.model';
-import { Layer } from '../../shared/models/layer.model';
+import { Job } from '../../shared/models/job.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Survey } from '../../shared/models/survey.model';
 import { StringMap } from '../../shared/models/string-map.model';
@@ -37,9 +37,9 @@ const mockSurvey = new Survey(
   'survey001',
   StringMap({ en: 'title' }),
   StringMap({ en: 'description' }),
-  /* layers= */ Map({
-    layer001: new Layer(
-      'layer001',
+  /* jobs= */ Map({
+    job001: new Job(
+      'job001',
       /* index */ -1,
       'red',
       StringMap({ en: 'name' }),
@@ -51,7 +51,7 @@ const mockSurvey = new Survey(
 
 const mockFeature = new LocationFeature(
   'feature001',
-  'layer001',
+  'job001',
   new firebase.firestore.GeoPoint(0.0, 0.0)
 );
 
