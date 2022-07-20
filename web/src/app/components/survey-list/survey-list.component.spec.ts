@@ -36,7 +36,7 @@ import { Job } from '../../shared/models/job.model';
 import { AclEntry } from '../../shared/models/acl-entry.model';
 import { Role } from '../../shared/models/role.model';
 
-@Component({ selector: 'gnd-header-layout', template: '' })
+@Component({ selector: 'ground-header-layout', template: '' })
 class HeaderLayoutComponent {}
 
 describe('SurveyListComponent', () => {
