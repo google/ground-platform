@@ -196,25 +196,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private removeDeletedLocationsOfInterest(
     newLocationsOfInterest: List<LocationOfInterest>
   ) {
-    const newLocationOfInterestIds: List<string> = newLocationsOfInterest.map(
-      f => f.id
-    );
-    this.removeDeletedMarkers(newLocationOfInterestIds);
-    this.removeDeletedPolygons(newLocationOfInterestIds);
+    const newLoiIds: List<string> = newLocationsOfInterest.map(f => f.id);
+    this.removeDeletedMarkers(newLoiIds);
+    this.removeDeletedPolygons(newLoiIds);
   }
 
-  private removeDeletedMarkers(newLocationOfInterestIds: List<string>) {
+  private removeDeletedMarkers(newLoiIds: List<string>) {
     for (const id of this.markers.keys()) {
-      if (!newLocationOfInterestIds.contains(id)) {
+      if (!newLoiIds.contains(id)) {
         this.markers.get(id)!.setMap(null);
         this.markers.delete(id);
       }
     }
   }
 
-  private removeDeletedPolygons(newLocationOfInterestIds: List<string>) {
+  private removeDeletedPolygons(newLoiIds: List<string>) {
     for (const id of this.polygons.keys()) {
-      if (!newLocationOfInterestIds.contains(id)) {
+      if (!newLoiIds.contains(id)) {
         this.polygons.get(id)!.setMap(null);
         this.polygons.delete(id);
       }
