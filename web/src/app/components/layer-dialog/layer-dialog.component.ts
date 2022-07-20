@@ -167,15 +167,9 @@ export class LayerDialogComponent implements OnDestroy {
       }
     }
     const fields = this.layerService.convertFieldsListToMap(this.fields);
-<<<<<<< HEAD
-    const formId = this.form?.id;
-    const forms = this.layerService.createForm(formId, fields);
-    const allowedLocationOfInterestTypes: string[] = [];
-=======
     const taskId = this.task?.id;
     const tasks = this.layerService.createTask(taskId, fields);
-    const allowedFeatureTypes: string[] = [];
->>>>>>> 71fbacaa114bf83a170de8aaf5b4fc8b2c111d88
+    const allowedLocationOfInterestTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
       allowedLocationOfInterestTypes.push('points');
     }
@@ -188,13 +182,8 @@ export class LayerDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make layerName Map
       StringMap({ [this.lang]: this.layerName.trim() }),
-<<<<<<< HEAD
-      forms,
-      allowedLocationOfInterestTypes
-=======
       tasks,
-      allowedFeatureTypes
->>>>>>> 71fbacaa114bf83a170de8aaf5b4fc8b2c111d88
+      allowedLocationOfInterestTypes
     );
     this.addOrUpdateLayer(this.surveyId, layer);
   }
