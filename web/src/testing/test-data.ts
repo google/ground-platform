@@ -17,11 +17,11 @@
 import { PointOfInterest } from './../app/shared/models/loi.model';
 import { Survey } from '../app/shared/models/survey.model';
 import { Map } from 'immutable';
-import { Layer } from './../app/shared/models/layer.model';
+import { Job } from './../app/shared/models/job.model';
 import { StringMap } from './../app/shared/models/string-map.model';
 import { User } from './../app/shared/models/user.model';
 import firebase from 'firebase/app';
-import { Form } from '../app/shared/models/form/form.model';
+import { Task } from '../app/shared/models/task/task.model';
 import { Role } from './../app/shared/models/role.model';
 
 /**
@@ -45,26 +45,26 @@ export class TestData {
     id = 'survey001',
     title = { en: 'title' } as Record<string, string>,
     description = { en: 'description' } as Record<string, string>,
-    layers = {} as Record<string, Layer>,
+    jobs = {} as Record<string, Job>,
     acl = {} as Record<string, Role>,
   }): Survey {
-    return new Survey(id, Map(title), Map(description), Map(layers), Map(acl));
+    return new Survey(id, Map(title), Map(description), Map(jobs), Map(acl));
   }
 
-  public static newLayer({
-    id = 'layer001',
+  public static newJob({
+    id = 'job001',
     index = 0,
     color = '#ffff00',
-    name = { en: 'layer' } as Record<string, string>,
-    forms = {} as Record<string, Form>,
+    name = { en: 'job' } as Record<string, string>,
+    tasks = {} as Record<string, Task>,
     contributorsCanAdd = [] as string[],
-  }): Layer {
-    return new Layer(
+  }): Job {
+    return new Job(
       id,
       index,
       color,
       StringMap(name),
-      Map(forms),
+      Map(tasks),
       contributorsCanAdd
     );
   }
@@ -72,7 +72,7 @@ export class TestData {
   public static newPointOfInterest(): PointOfInterest {
     return new PointOfInterest(
       'loi001',
-      'layer001',
+      'job001',
       new firebase.firestore.GeoPoint(0, 0),
       Map()
     );

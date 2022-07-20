@@ -131,8 +131,8 @@ describe('MapComponent', () => {
       },
     ],
   };
-  const geoJsonLocationOfInterest1 = new GeoJsonLocationOfInterest(
-    geoJsonLocationOfInterestId1,
+  const geoJsonLoi1 = new GeoJsonLocationOfInterest(
+    geoJsonLoiId1,
     jobId1,
     geoJson1
   );
@@ -321,7 +321,7 @@ describe('MapComponent', () => {
     mockLocationOfInterestId$.next(geoJsonLoiId1);
     tick();
 
-    const polygon = component.polygons.get(geoJsonLocationOfInterestId1)!;
+    const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonStyle(polygon, jobColor1, 6);
   }));
 
