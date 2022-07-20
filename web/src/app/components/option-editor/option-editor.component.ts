@@ -32,7 +32,7 @@ import {
 } from '@angular/forms';
 
 @Component({
-  selector: 'app-option-editor',
+  selector: 'ground-option-editor',
   templateUrl: './option-editor.component.html',
   styleUrls: ['./option-editor.component.scss'],
 })

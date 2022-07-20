@@ -43,7 +43,7 @@
           </mat-checkbox>
         </label>
       </div>
-      <app-edit-style-button
+      <ground-edit-style-button
         fxFlex
         [markerColor]="job!.color || defaultJobColor"
         (markerColorChange)="onMarkerColorChange($event)"
@@ -63,7 +63,7 @@
       fxLayout
       cdkDrag
     >
-      <app-task-step-editor
+      <ground-task-step-editor
         [label]="step.label.get('en')"
         [required]="step.required"
         [stepType]="step.type"

@@ -39,7 +39,7 @@ class AclEntry {
 }
 
 @Component({
-  selector: 'app-share-dialog',
+  selector: 'ground-share-dialog',
   templateUrl: './share-dialog.component.html',
   styleUrls: ['./share-dialog.component.scss'],
 })

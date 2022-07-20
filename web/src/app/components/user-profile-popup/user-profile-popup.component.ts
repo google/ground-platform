@@ -20,7 +20,7 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { AuthService } from './../../services/auth/auth.service';
 
 @Component({
-  selector: 'app-user-profile-popup',
+  selector: 'ground-user-profile-popup',
   templateUrl: './user-profile-popup.component.html',
   styleUrls: ['./user-profile-popup.component.scss'],
 })
