@@ -112,10 +112,10 @@ describe('MapComponent', () => {
     new firebase.firestore.GeoPoint(45, 45)
   );
   const geoJson1 = {
-    type: 'LocationOfInterestCollection',
+    type: 'FeatureCollection',
     lois: [
       {
-        type: 'LocationOfInterest',
+        type: 'Feature',
         geometry: {
           type: 'Polygon',
           coordinates: [

@@ -65,12 +65,12 @@ async function importGeoJson(req, res) {
     file
       .pipe(JSONStream.parse(["lois", true]))
       .on("data", async (geoJsonLoi) => {
-        if (geoJsonType !== "LocationOfInterestCollection") {
+        if (geoJsonType !== "FeatureCollection") {
           // TODO: report error to user
           console.debug(`Invalid ${geoJsonType}`);
           return res.status(HttpStatus.BAD_REQUEST).end();
         }
-        if (geoJsonLoi.type != "LocationOfInterest") {
+        if (geoJsonLoi.type != "Feature") {
           console.debug(`Skipping loi with type ${geoJsonLoi.type}`);
           return;
         }
