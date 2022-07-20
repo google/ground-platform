@@ -38,7 +38,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   surveyId?: string | null;
   loiId?: string | null;
   jobPinUrl: SafeUrl;
-  readonly lang: string;
   readonly jobListItemActionsType = JobListItemActionsType;
   subscription: Subscription = new Subscription();
 
@@ -50,8 +49,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     readonly surveyService: SurveyService
   ) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
   }
 

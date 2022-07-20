@@ -29,12 +29,8 @@ import { Observable } from 'rxjs';
 export class SidePanelComponent {
   readonly sideNavMode = SideNavMode;
   readonly sideNavMode$: Observable<SideNavMode>;
-  readonly lang: string;
 
   constructor(private navigationService: NavigationService) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
-
     this.sideNavMode$ = navigationService.getSideNavMode$();
   }
 }

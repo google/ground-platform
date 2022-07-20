@@ -40,7 +40,6 @@ import {
 } from '@angular/forms';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { StepType } from '../../shared/models/task/step.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Option } from '../../shared/models/task/option.model';
 import { List } from 'immutable';
 import {
@@ -176,7 +175,7 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.subscription.add(
       this.taskGroup.valueChanges.subscribe(value => {
         this.update.emit({
-          label: StringMap({ en: value.label }),
+          label: value.label,
           required: value.required,
           type: value.selectStepOption.type,
           multipleChoice: this.taskOptions,
@@ -315,7 +314,7 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
       Cardinality.SELECT_MULTIPLE;
     this.taskOptions = new MultipleChoice(cardinality, options);
     this.update.emit({
-      label: StringMap({ en: this.label }),
+      label: this.label,
       required: this.required,
       type: this.stepType,
       multipleChoice: this.taskOptions,

@@ -241,7 +241,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         return;
       }
       const color = survey.jobs.get(loi.jobId)?.color;
-      const jobName = survey.jobs.get(loi.jobId)?.name?.get('en');
+      const jobName = survey.jobs.get(loi.jobId)?.name;
       if (loi instanceof PointOfInterest) {
         this.addPointOfInterest(color, loi);
       }

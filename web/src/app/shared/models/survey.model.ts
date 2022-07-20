@@ -15,7 +15,7 @@
  */
 
 import { Job } from './job.model';
-import { StringMap } from './string-map.model';
+
 import { Map } from 'immutable';
 import { Role } from './role.model';
 
@@ -24,9 +24,9 @@ export class Survey {
     /* id= */
     '',
     /* title= */
-    StringMap({}),
+    '',
     /* description= */
-    StringMap({}),
+    '',
     /* jobs= */
     Map<string, Job>(),
     /* acl= */
@@ -35,8 +35,8 @@ export class Survey {
 
   constructor(
     readonly id: string,
-    readonly title: StringMap,
-    readonly description: StringMap,
+    readonly title: string,
+    readonly description: string,
     readonly jobs: Map<string, Job>,
     readonly acl: Map<string, Role>
   ) {}
@@ -48,8 +48,8 @@ export class Survey {
   isUnsavedNew() {
     return (
       !this.id &&
-      !this.title.size &&
-      !this.description.size &&
+      !this.title &&
+      !this.description &&
       !this.jobs.size &&
       !this.acl.size
     );

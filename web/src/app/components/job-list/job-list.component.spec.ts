@@ -23,7 +23,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Survey } from '../../shared/models/survey.model';
 import { of } from 'rxjs';
 import { Map } from 'immutable';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Job } from '../../shared/models/job.model';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
@@ -32,14 +31,14 @@ import { DataStoreService } from '../../services/data-store/data-store.service';
 
 const mockSurvey = new Survey(
   'survey001',
-  StringMap({ en: 'title' }),
-  StringMap({ en: 'description' }),
+  'title',
+  'description',
   /* jobs= */ Map({
     job001: new Job(
       'job001',
       /* index */ -1,
       'red',
-      StringMap({ en: 'name' }),
+      'name',
       /* tasks= */ Map()
     ),
   }),
