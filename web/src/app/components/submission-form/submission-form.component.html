@@ -33,7 +33,7 @@
         <div *ngIf="step.type == stepTypes.TEXT">
           <mat-form-field appearance="fill">
             <mat-label class="step-label" [attr.for]="step.id">
-              {{ step.label.get(lang) }}
+              {{ step.label }}
             </mat-label>
             <input
               matInput
@@ -65,7 +65,7 @@
             [attr.for]="step.id"
             [id]="step.id"
           >
-            {{ step.label.get(lang) }}
+            {{ step.label }}
           </mat-label>
           <br />
           <mat-radio-group
@@ -78,7 +78,7 @@
               *ngFor="let option of step.multipleChoice.options; let i = index"
               [value]="option.id"
             >
-              {{ option.label.get(lang) }}
+              {{ option.label }}
             </mat-radio-button>
           </mat-radio-group>
 
@@ -93,7 +93,7 @@
               *ngFor="let option of step.multipleChoice.options"
               [value]="option.id"
             >
-              {{ option.label.get(lang) }}
+              {{ option.label }}
             </mat-checkbox>
           </div>
         </div>

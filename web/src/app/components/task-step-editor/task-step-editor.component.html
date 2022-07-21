@@ -69,7 +69,7 @@
         fxLayout
       >
         <app-option-editor
-          [label]="option.label?.get('en')"
+          [label]="option.label"
           [code]="option.code"
           [index]="i"
           (update)="onOptionUpdate($event, i)"

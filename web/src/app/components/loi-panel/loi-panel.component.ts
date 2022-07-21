@@ -38,7 +38,6 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   surveyId?: string;
   submissionId?: string;
   readonly submissions$: Observable<List<Submission>>;
-  readonly lang: string;
   readonly stepTypes = StepType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
@@ -53,8 +52,6 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     private dialogService: DialogService,
     private zone: NgZone
   ) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     this.submissions$ = surveyService
       .getActiveSurvey$()
       .pipe(

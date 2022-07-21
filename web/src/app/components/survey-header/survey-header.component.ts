@@ -29,7 +29,6 @@ import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
   styleUrls: ['./survey-header.component.scss'],
 })
 export class SurveyHeaderComponent implements OnInit, OnDestroy {
-  lang: string;
   title: string;
   surveyId!: string;
 
@@ -40,12 +39,11 @@ export class SurveyHeaderComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private surveyService: SurveyService
   ) {
-    this.lang = 'en';
     this.title = '';
     const activeSurvey$ = this.surveyService.getActiveSurvey$();
     this.subscription.add(
       activeSurvey$.subscribe(survey => {
-        this.title = survey.title.get(this.lang)! || '';
+        this.title = survey.title || '';
         this.surveyId = survey.id;
       })
     );

@@ -34,7 +34,6 @@ import {
   GeoJsonLocationOfInterest,
   AreaOfInterest,
 } from '../../shared/models/loi.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { Map, List } from 'immutable';
 import { Job } from '../../shared/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
@@ -71,21 +70,21 @@ describe('MapComponent', () => {
   const jobColor2 = 'green';
   const mockSurvey = new Survey(
     'survey001',
-    StringMap({ en: 'title1' }),
-    StringMap({ en: 'description1' }),
+    'title1',
+    'description1',
     /* jobs= */ Map({
       job001: new Job(
         jobId1,
         /* index */ -1,
         jobColor1,
-        StringMap({ en: 'job001 name' }),
+        'job001 name',
         /* tasks= */ Map()
       ),
       job002: new Job(
         jobId2,
         /* index */ -1,
         jobColor2,
-        StringMap({ en: 'job002 name' }),
+        'job002 name',
         /* tasks= */ Map()
       ),
     }),

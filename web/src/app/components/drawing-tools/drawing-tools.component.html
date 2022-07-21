@@ -57,7 +57,7 @@
         id="job-selector-item-{{ job.id }}"
         [value]="job.id"
       >
-        <img [src]="jobPinUrl(job)" />&nbsp;{{ job?.name?.get(lang) }}
+        <img [src]="jobPinUrl(job)" />&nbsp;{{ job?.name }}
       </mat-option>
     </mat-select>
   </mat-form-field>

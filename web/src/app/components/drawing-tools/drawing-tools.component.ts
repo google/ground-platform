@@ -52,7 +52,6 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   selectedJobId = '';
   private activeSurvey!: Survey;
   readonly jobs$: Observable<List<Job>>;
-  readonly lang: string;
   readonly black = '#202225';
   readonly addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
     getPinImageSource(this.black)
@@ -77,8 +76,6 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
       .getSubmissionId$()
       .pipe(map(obs => !!obs));
     this.disabled$ = drawingToolsService.getDisabled$();
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     this.jobs$ = surveyService.getActiveSurvey$().pipe(
       tap(survey => {
         this.activeSurvey = survey;

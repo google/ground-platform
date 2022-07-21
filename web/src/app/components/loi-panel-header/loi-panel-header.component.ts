@@ -46,7 +46,6 @@ export class LocationOfInterestPanelHeaderComponent
   surveyId?: string | null;
   loiId?: string | null;
   pinUrl: SafeUrl;
-  readonly lang: string;
   readonly loiType = LocationOfInterestType;
   subscription: Subscription = new Subscription();
   loiTypeValue?: LocationOfInterestType;
@@ -62,8 +61,6 @@ export class LocationOfInterestPanelHeaderComponent
     private zone: NgZone,
     readonly loiService: LocationOfInterestService
   ) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
     this.subscription.add(
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {

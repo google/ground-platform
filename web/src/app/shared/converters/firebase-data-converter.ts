@@ -16,7 +16,6 @@
 import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
-import { StringMap } from '../models/string-map.model';
 import { Job } from '../models/job.model';
 import { Task } from '../models/task/task.model';
 import { Step, StepType } from '../models/task/step.model';
@@ -74,8 +73,8 @@ export class FirebaseDataConverter {
   static toSurvey(id: string, data: DocumentData): Survey {
     return new Survey(
       id,
-      StringMap(data.title),
-      StringMap(data.description),
+      data.title,
+      data.description,
       Map<string, Job>(
         keys(data.jobs).map((id: string) => [
           id as string,
@@ -133,7 +132,7 @@ export class FirebaseDataConverter {
       // Fall back to constant so old dev databases do not break.
       data.index || -1,
       data.defaultStyle?.color || data.color,
-      StringMap(data.name),
+      data.name,
       Map<string, Task>(
         keys(data.tasks).map((id: string) => [
           id as string,
@@ -148,7 +147,7 @@ export class FirebaseDataConverter {
     const { name, tasks, color, contributorsCanAdd, ...jobDoc } = job;
     return {
       contributorsCanAdd,
-      name: name?.toJS() || {},
+      name,
       ...(tasks
         ? {
             tasks: tasks
@@ -233,7 +232,7 @@ export class FirebaseDataConverter {
    * <pre><code>
    * {
    *   index: 0,
-   *   label: { 'en': 'Question 1' },
+   *   label: 'Question 1',
    *   required: true,
    *   type: 'text_field'
    * }
@@ -242,7 +241,7 @@ export class FirebaseDataConverter {
    * <pre><code>
    * {
    *   index: 1,
-   *   label: { 'en': 'Question 2' },
+   *   label: 'Question 2',
    *   required: false,
    *   type: 'multiple_choice',
    *   cardinality: 'select_one',
@@ -250,7 +249,7 @@ export class FirebaseDataConverter {
    *     option001: {
    *       index: 0,
    *       code: 'A',
-   *       label: { 'en': 'Option A' }
+   *       label: 'Option A'
    *     },
    *     // ...
    *   }
@@ -261,7 +260,7 @@ export class FirebaseDataConverter {
       return new Step(
         id,
         FirebaseDataConverter.stringToStepType(data.type),
-        StringMap(data.label),
+        data.label,
         data.required,
         // Fall back to constant so old dev databases do not break.
         data.index || -1,
@@ -286,13 +285,13 @@ export class FirebaseDataConverter {
     if (multipleChoice === undefined) {
       return {
         type: FirebaseDataConverter.stepTypeToString(type),
-        label: label.toJS(),
+        label,
         ...stepDoc,
       };
     } else {
       return {
         type: FirebaseDataConverter.stepTypeToString(type),
-        label: label.toJS(),
+        label,
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
         ),
@@ -358,7 +357,7 @@ export class FirebaseDataConverter {
    * {
    *    index: 0,
    *    code: 'A',
-   *    label: { 'en': 'Option A' }
+   *    label: 'Option A'
    *  }
    * </code></pre>
    */
@@ -366,7 +365,7 @@ export class FirebaseDataConverter {
     return new Option(
       id,
       data.code,
-      StringMap(data.label),
+      data.label,
       // Fall back to constant so old dev databases do not break.
       data.index || -1
     );
@@ -375,7 +374,7 @@ export class FirebaseDataConverter {
   private static optionToJS(option: Option): {} {
     const { label, ...optionDoc } = option;
     return {
-      label: label.toJS(),
+      label,
       ...optionDoc,
     };
   }

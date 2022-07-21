@@ -50,7 +50,6 @@ export class MainPageComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog
   ) {
-    // TODO: Make dynamic to support i18n.
     this.sideNavOpened = true;
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
