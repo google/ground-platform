@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
-  selector: 'gnd-header-layout',
+  selector: 'ground-header-layout',
   templateUrl: './header-layout.component.html',
   styleUrls: ['./header-layout.component.scss'],
 })

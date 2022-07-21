@@ -39,7 +39,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 /*global alert*/
 
 @Component({
-  selector: 'app-job-dialog',
+  selector: 'ground-job-dialog',
   templateUrl: './job-dialog.component.html',
   styleUrls: ['./job-dialog.component.scss'],
 })

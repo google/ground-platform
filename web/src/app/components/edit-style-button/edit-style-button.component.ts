@@ -28,7 +28,7 @@ import { ColorPickerComponent } from '../color-picker/color-picker.component';
 import { getPinImageSource } from '../map/ground-pin';
 
 @Component({
-  selector: 'app-edit-style-button',
+  selector: 'ground-edit-style-button',
   templateUrl: './edit-style-button.component.html',
 })
 export class EditStyleButtonComponent implements OnInit {

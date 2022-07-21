@@ -28,7 +28,7 @@ import { ColorEvent } from 'ngx-color';
 import { Job } from '../../shared/models/job.model';
 
 @Component({
-  selector: 'app-color-picker',
+  selector: 'ground-color-picker',
   templateUrl: './color-picker.component.html',
   styleUrls: ['./color-picker.component.scss'],
 })
