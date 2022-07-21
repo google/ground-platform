@@ -17,7 +17,7 @@
 <mat-button-toggle-group
   id="button-group"
   class="button-group"
-  [disabled]="(isObservationSelected$ | async) || (disabled$ | async)"
+  [disabled]="(isSubmissionSelected$ | async) || (disabled$ | async)"
   [(value)]="selectedValue"
 >
   <mat-button-toggle

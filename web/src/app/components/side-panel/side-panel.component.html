@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <div [ngSwitch]="sideNavMode$ | async">
-  <div *ngSwitchCase="sideNavMode.OBSERVATION">
-    <ground-observation-form></ground-observation-form>
+  <div *ngSwitchCase="sideNavMode.SUBMISSION">
+    <ground-submission-form></ground-submission-form>
   </div>
 
   <div *ngSwitchCase="sideNavMode.LOI">

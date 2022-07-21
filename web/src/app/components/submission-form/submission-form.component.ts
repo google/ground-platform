@@ -18,9 +18,9 @@ import { Component } from '@angular/core';
 import { StepType, Step } from '../../shared/models/task/step.model';
 import { Cardinality } from '../../shared/models/task/multiple-choice.model';
 import { Option } from '../../shared/models/task/option.model';
-import { Observation } from '../../shared/models/observation/observation.model';
-import { Response } from '../../shared/models/observation/response.model';
-import { ObservationService } from '../../services/observation/observation.service';
+import { Submission } from '../../shared/models/submission/submission.model';
+import { Result } from '../../shared/models/submission/result.model';
+import { SubmissionService } from '../../services/submission/submission.service';
 import {
   FormGroup,
   FormBuilder,
@@ -46,36 +46,36 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 /*global alert*/
 
 @Component({
-  selector: 'ground-observation-form',
-  templateUrl: './observation-form.component.html',
-  styleUrls: ['./observation-form.component.scss'],
+  selector: 'ground-submission-form',
+  templateUrl: './submission-form.component.html',
+  styleUrls: ['./submission-form.component.scss'],
 })
-export class ObservationFormComponent {
+export class SubmissionFormComponent {
   readonly stepTypes = StepType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
   readonly job$: Observable<Job>;
   surveyId?: string;
-  observation?: Observation;
-  observationForm?: FormGroup;
-  observationSteps?: List<Step>;
+  submission?: Submission;
+  submissionForm?: FormGroup;
+  submissionSteps?: List<Step>;
 
   constructor(
     private dataStoreService: DataStoreService,
     private authService: AuthService,
     private formBuilder: FormBuilder,
     private navigationService: NavigationService,
-    observationService: ObservationService,
+    submissionService: SubmissionService,
     surveyService: SurveyService,
     loiService: LocationOfInterestService
   ) {
     surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
-    observationService
-      .getSelectedObservation$()
-      .subscribe((observation?: Observation | LoadingState) =>
-        this.onSelectObservation(observation)
+    submissionService
+      .getSelectedSubmission$()
+      .subscribe((submission?: Submission | LoadingState) =>
+        this.onSelectSubmission(submission)
       );
     this.job$ = surveyService
       .getActiveSurvey$()
@@ -98,48 +98,45 @@ export class ObservationFormComponent {
       .pipe(first())
       .subscribe(user => {
         if (!user) {
-          throw Error('Login required to update observation.');
+          throw Error('Login required to update submission.');
         }
         const lastModified = new AuditInfo(
           user,
           /*clientTime=*/ new Date(),
           /*serverTime=*/ this.dataStoreService.getServerTimestamp()
         );
-        const updatedResponses: Map<string, Response> = this.extractResponses();
-        const updatedObservation = this.observation!.withResponsesAndLastModified(
-          updatedResponses,
+        const updatedResults: Map<string, Result> = this.extractResults();
+        const updatedSubmission = this.submission!.withResultsAndLastModified(
+          updatedResults,
           lastModified
         );
         this.dataStoreService
-          .updateObservation(this.surveyId!, updatedObservation)
+          .updateSubmission(this.surveyId!, updatedSubmission)
           .then(() => {
-            this.observationForm?.markAsPristine();
+            this.submissionForm?.markAsPristine();
             return this.navigateToLocationOfInterest();
           })
           .catch(() => {
-            alert('Observation update failed.');
+            alert('Submission update failed.');
           });
       });
   }
 
-  private onSelectObservation(observation?: Observation | LoadingState) {
-    if (
-      observation === LoadingState.NOT_LOADED &&
-      this.observationForm?.dirty
-    ) {
+  private onSelectSubmission(submission?: Submission | LoadingState) {
+    if (submission === LoadingState.NOT_LOADED && this.submissionForm?.dirty) {
       if (
         confirm(
-          'You have unsaved changes in observation form, do you want to save them?'
+          'You have unsaved changes in submission form, do you want to save them?'
         )
       ) {
         this.onSave();
       } else {
-        this.observationForm = undefined;
+        this.submissionForm = undefined;
       }
     }
-    if (observation instanceof Observation) {
-      this.observation = observation;
-      this.observationSteps = observation!
+    if (submission instanceof Submission) {
+      this.submission = submission;
+      this.submissionSteps = submission!
         .task!.steps!.toOrderedMap()
         .sortBy(entry => entry.index)
         .toList();
@@ -148,31 +145,29 @@ export class ObservationFormComponent {
   }
 
   private initForm() {
-    if (this.observation === undefined) {
-      throw Error('Observation is not selected.');
+    if (this.submission === undefined) {
+      throw Error('Submission is not selected.');
     }
-    this.observationForm = this.convertObservationToFormGroup(
-      this.observation!
-    );
+    this.submissionForm = this.convertSubmissionToFormGroup(this.submission!);
   }
 
   private navigateToLocationOfInterest() {
-    this.navigationService.clearObservationId();
+    this.navigationService.clearSubmissionId();
   }
 
-  private convertObservationToFormGroup(observation: Observation): FormGroup {
+  private convertSubmissionToFormGroup(submission: Submission): FormGroup {
     const group: { [stepId: string]: FormControl } = {};
-    for (const [stepId, step] of observation.task!.steps) {
-      const response = observation!.responses?.get(stepId);
+    for (const [stepId, step] of submission.task!.steps) {
+      const result = submission!.results?.get(stepId);
       switch (step.type) {
         case StepType.TEXT:
-          this.addControlsForTextStep(group, step, response);
+          this.addControlsForTextStep(group, step, result);
           break;
         case StepType.NUMBER:
-          this.addControlsForNumberStep(group, step, response);
+          this.addControlsForNumberStep(group, step, result);
           break;
         case StepType.MULTIPLE_CHOICE:
-          this.addControlsForMultipleChoiceStep(group, step, response);
+          this.addControlsForMultipleChoiceStep(group, step, result);
           break;
         default:
           console.debug(`Skipping unsupported step type: ${step.type}`);
@@ -181,26 +176,26 @@ export class ObservationFormComponent {
     return this.formBuilder.group(group);
   }
 
-  private extractResponses(): Map<string, Response> {
-    return Map<string, Response>(
-      this.observationSteps!.map(step => [
+  private extractResults(): Map<string, Result> {
+    return Map<string, Result>(
+      this.submissionSteps!.map(step => [
         step.id,
-        this.extractResponseForStep(step),
+        this.extractResultForStep(step),
       ])
     );
   }
 
-  private extractResponseForStep(step: Step) {
+  private extractResultForStep(step: Step) {
     switch (step.type) {
       case StepType.TEXT:
-        return this.extractResponseForTextStep(step);
+        return this.extractResultForTextStep(step);
       case StepType.NUMBER:
-        return this.extractResponseForNumberStep(step);
+        return this.extractResultForNumberStep(step);
       case StepType.MULTIPLE_CHOICE:
-        return this.extractResponseForMultipleChoiceStep(step);
+        return this.extractResultForMultipleChoiceStep(step);
       default:
         throw Error(
-          `Unimplemented Response extraction for Step with
+          `Unimplemented Result extraction for Step with
            Type:${step.type}`
         );
     }
@@ -209,9 +204,9 @@ export class ObservationFormComponent {
   private addControlsForTextStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const value = response?.value as string;
+    const value = result?.value as string;
     group[step.id] = step.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
@@ -220,33 +215,33 @@ export class ObservationFormComponent {
   private addControlsForNumberStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const value = response?.value as number;
+    const value = result?.value as number;
     group[step.id] = step.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
   }
 
-  private extractResponseForTextStep(step: Step): Response {
-    return new Response(this.observationForm?.value[step.id]);
+  private extractResultForTextStep(step: Step): Result {
+    return new Result(this.submissionForm?.value[step.id]);
   }
 
-  private extractResponseForNumberStep(step: Step): Response {
-    return new Response(this.observationForm?.value[step.id]);
+  private extractResultForNumberStep(step: Step): Result {
+    return new Result(this.submissionForm?.value[step.id]);
   }
 
   private addControlsForMultipleChoiceStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
     switch (step.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        this.addControlsForSelectOneStep(group, step, response);
+        this.addControlsForSelectOneStep(group, step, result);
         return;
       case Cardinality.SELECT_MULTIPLE:
-        this.addControlsForSelectMultipleStep(group, step, response);
+        this.addControlsForSelectMultipleStep(group, step, result);
         return;
       default:
         throw Error(
@@ -256,15 +251,15 @@ export class ObservationFormComponent {
     }
   }
 
-  private extractResponseForMultipleChoiceStep(step: Step): Response {
+  private extractResultForMultipleChoiceStep(step: Step): Result {
     switch (step.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        return this.extractResponseForSelectOneStep(step);
+        return this.extractResultForSelectOneStep(step);
       case Cardinality.SELECT_MULTIPLE:
-        return this.extractResponseForSelectMultipleStep(step);
+        return this.extractResultForSelectMultipleStep(step);
       default:
         throw Error(
-          `Unimplemented Response extraction for Step with
+          `Unimplemented Result extraction for Step with
            Cardinality:${step.multipleChoice?.cardinality}`
         );
     }
@@ -273,37 +268,37 @@ export class ObservationFormComponent {
   private addControlsForSelectOneStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const selectedOptionId = ((response?.value as List<Option>)?.first() as Option)
+    const selectedOptionId = ((result?.value as List<Option>)?.first() as Option)
       ?.id;
     group[step.id] = step.required
       ? new FormControl(selectedOptionId, Validators.required)
       : new FormControl(selectedOptionId);
   }
 
-  private extractResponseForSelectOneStep(step: Step): Response {
+  private extractResultForSelectOneStep(step: Step): Result {
     const selectedOption: Option = step.getMultipleChoiceOption(
-      this.observationForm?.value[step.id]
+      this.submissionForm?.value[step.id]
     );
-    return new Response(List([selectedOption]));
+    return new Result(List([selectedOption]));
   }
 
   private addControlsForSelectMultipleStep(
     group: { [stepId: string]: FormControl },
     step: Step,
-    response?: Response
+    result?: Result
   ): void {
-    const selectedOptions = response?.value as List<Option>;
+    const selectedOptions = result?.value as List<Option>;
     for (const option of step.multipleChoice!.options) {
       group[option.id] = new FormControl(selectedOptions?.contains(option));
     }
   }
 
-  private extractResponseForSelectMultipleStep(step: Step): Response {
+  private extractResultForSelectMultipleStep(step: Step): Result {
     const selectedOptions: List<Option> = step.multipleChoice!.options!.filter(
-      option => this.observationForm?.value[option.id]
+      option => this.submissionForm?.value[option.id]
     );
-    return new Response(selectedOptions);
+    return new Result(selectedOptions);
   }
 }

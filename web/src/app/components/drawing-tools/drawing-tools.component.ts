@@ -61,7 +61,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     getPinImageSource(this.green)
   );
   addPointIcon = this.addPointIconBlack;
-  isObservationSelected$: Observable<boolean>;
+  isSubmissionSelected$: Observable<boolean>;
   disabled$: Observable<boolean>;
 
   constructor(
@@ -72,8 +72,8 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     surveyService: SurveyService,
     authService: AuthService
   ) {
-    this.isObservationSelected$ = this.navigationService
-      .getObservationId$()
+    this.isSubmissionSelected$ = this.navigationService
+      .getSubmissionId$()
       .pipe(map(obs => !!obs));
     this.disabled$ = drawingToolsService.getDisabled$();
     this.jobs$ = surveyService.getActiveSurvey$().pipe(

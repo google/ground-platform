@@ -29,11 +29,11 @@ import {
   GeoJsonLocationOfInterest,
   AreaOfInterest,
 } from '../models/loi.model';
-import { Observation } from '../models/observation/observation.model';
+import { Submission } from '../models/submission/submission.model';
 import { Option } from '../models/task/option.model';
 import { List, Map } from 'immutable';
 import { AuditInfo } from '../models/audit-info.model';
-import { Response } from '../../shared/models/observation/response.model';
+import { Result } from '../../shared/models/submission/result.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
@@ -436,15 +436,15 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Observation instance.
+   * immutable Submission instance.
    *
    * @param data the source data in a dictionary keyed by string.
    * <pre><code>
    * {
    *   loiId: 'loi123'
    *   taskId: 'task001',
-   *   responses: {
-   *     'element001': 'Response text',  // For 'text_field  elements.
+   *   results: {
+   *     'element001': 'Result text',  // For 'text_field  elements.
    *     'element002': ['A', 'B'],       // For 'multiple_choice' elements.
    *      // ...
    *   }
@@ -453,44 +453,36 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toObservation(
-    task: Task,
-    id: string,
-    data: DocumentData
-  ): Observation {
+  static toSubmission(task: Task, id: string, data: DocumentData): Submission {
     if (data === undefined) {
-      throw Error(`Observation ${id} does not have document data.`);
+      throw Error(`Submission ${id} does not have document data.`);
     }
-    return new Observation(
+    return new Submission(
       id,
       data.loiId,
       data.jobId,
       task,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
-      Map<string, Response>(
-        keys(data.responses).map((stepId: string) => [
+      Map<string, Result>(
+        keys(data.results).map((stepId: string) => [
           stepId as string,
-          FirebaseDataConverter.toResponse(
-            task,
-            stepId,
-            data.responses[stepId]
-          ),
+          FirebaseDataConverter.toResult(task, stepId, data.results[stepId]),
         ])
       )
     );
   }
 
-  static observationToJS(observation: Observation): {} {
+  static submissionToJS(submission: Submission): {} {
     return {
-      loiId: observation.loiId,
-      jobId: observation.jobId,
-      taskId: observation.task?.id,
-      created: FirebaseDataConverter.auditInfoToJs(observation.created),
+      loiId: submission.loiId,
+      jobId: submission.jobId,
+      taskId: submission.task?.id,
+      created: FirebaseDataConverter.auditInfoToJs(submission.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(
-        observation.lastModified
+        submission.lastModified
       ),
-      responses: FirebaseDataConverter.responsesToJS(observation.responses),
+      results: FirebaseDataConverter.resultsToJS(submission.results),
     };
   }
 
@@ -507,58 +499,56 @@ export class FirebaseDataConverter {
     );
   }
 
-  private static responsesToJS(responses: Map<string, Response>): {} {
-    return responses.entrySeq().reduce(
-      (obj: {}, [stepId, response]) => ({
+  private static resultsToJS(results: Map<string, Result>): {} {
+    return results.entrySeq().reduce(
+      (obj: {}, [stepId, result]) => ({
         ...obj,
-        [stepId]: FirebaseDataConverter.responseToJS(response),
+        [stepId]: FirebaseDataConverter.resultToJS(result),
       }),
       {}
     );
   }
 
-  private static toResponse(
+  private static toResult(
     task: Task,
     stepID: string,
-    responseValue: number | string | List<string>
-  ): Response {
-    if (typeof responseValue === 'string') {
-      return new Response(responseValue as string);
+    resultValue: number | string | List<string>
+  ): Result {
+    if (typeof resultValue === 'string') {
+      return new Result(resultValue as string);
     }
-    if (typeof responseValue === 'number') {
-      return new Response(responseValue as number);
+    if (typeof resultValue === 'number') {
+      return new Result(resultValue as number);
     }
-    if (responseValue instanceof Array) {
-      return new Response(
+    if (resultValue instanceof Array) {
+      return new Result(
         List(
-          responseValue.map(optionId =>
+          resultValue.map(optionId =>
             task.getMultipleChoiceStepOption(stepID, optionId)
           )
         )
       );
     }
-    if (responseValue instanceof firebase.firestore.Timestamp) {
-      return new Response(responseValue.toDate());
+    if (resultValue instanceof firebase.firestore.Timestamp) {
+      return new Result(resultValue.toDate());
     }
-    throw Error(`Unknown value type ${typeof responseValue}`);
+    throw Error(`Unknown value type ${typeof resultValue}`);
   }
 
-  private static responseToJS(response: Response): {} {
-    if (typeof response.value === 'string') {
-      return response.value;
+  private static resultToJS(result: Result): {} {
+    if (typeof result.value === 'string') {
+      return result.value;
     }
-    if (typeof response.value === 'number') {
-      return response.value;
+    if (typeof result.value === 'number') {
+      return result.value;
     }
-    if (response.value instanceof List) {
-      return (response.value as List<Option>)
-        .map(option => option.id)
-        .toArray();
+    if (result.value instanceof List) {
+      return (result.value as List<Option>).map(option => option.id).toArray();
     }
-    if (response.value instanceof Date) {
-      return firebase.firestore.Timestamp.fromDate(response.value);
+    if (result.value instanceof Date) {
+      return firebase.firestore.Timestamp.fromDate(result.value);
     }
-    throw Error(`Unknown value type of ${response.value}`);
+    throw Error(`Unknown value type of ${result.value}`);
   }
 
   /**

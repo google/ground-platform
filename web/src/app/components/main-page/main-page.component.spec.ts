@@ -22,7 +22,7 @@ import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
 import { SurveyService } from '../../services/survey/survey.service';
 import { MatDialog } from '@angular/material/dialog';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { ObservationService } from '../../services/observation/observation.service';
+import { SubmissionService } from '../../services/submission/submission.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/firestore';
@@ -56,15 +56,15 @@ describe('MainPageComponent', () => {
         'selectLocationOfInterest$',
       ]);
 
-      const observationService = jasmine.createSpyObj('ObservationService', [
-        'selectObservation$',
+      const submissionService = jasmine.createSpyObj('SubmissionService', [
+        'selectSubmission$',
       ]);
 
       const navigationService = {
         getSurveyId$: () => NEVER,
         getJobId$: () => NEVER,
         getLocationOfInterestId$: () => NEVER,
-        getObservationId$: () => NEVER,
+        getSubmissionId$: () => NEVER,
       };
 
       TestBed.configureTestingModule({
@@ -76,7 +76,7 @@ describe('MainPageComponent', () => {
             provide: LocationOfInterestService,
             useValue: loiService,
           },
-          { provide: ObservationService, useValue: observationService },
+          { provide: SubmissionService, useValue: submissionService },
           { provide: SurveyService, useValue: surveyService },
           { provide: NavigationService, useValue: navigationService },
           { provide: AngularFirestore, useValue: {} },
