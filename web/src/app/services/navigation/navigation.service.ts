@@ -31,9 +31,9 @@ export class NavigationService {
   private static readonly JOB_ID_FRAGMENT_PARAM = 'l';
   private static readonly LOI_ID_FRAGMENT_PARAM = 'f';
   private static readonly LOI_JOB_ID_FRAGMENT_PARAM = 'fl';
-  private static readonly OBSERVATION_ID_FRAGMENT_PARAM = 'o';
+  private static readonly SUBMISSION_ID_FRAGMENT_PARAM = 'o';
   static readonly JOB_ID_NEW = 'new';
-  static readonly OBSERVATION_ID_NEW = 'new';
+  static readonly SUBMISSION_ID_NEW = 'new';
   static readonly SURVEY_ID_NEW = 'new';
   static readonly SURVEY_ID = 'surveyId';
   static readonly SURVEY_SEGMENT = 'survey';
@@ -41,8 +41,8 @@ export class NavigationService {
   static readonly SURVEYS_SEGMENT = 'surveys';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
-    if (params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM)) {
-      return SideNavMode.OBSERVATION;
+    if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
+      return SideNavMode.SUBMISSION;
     }
     if (params.get(NavigationService.LOI_ID_FRAGMENT_PARAM)) {
       return SideNavMode.LOI;
@@ -57,7 +57,7 @@ export class NavigationService {
   private surveyId$?: Observable<string | null>;
   private jobId$?: Observable<string | null>;
   private loiId$?: Observable<string | null>;
-  private observationId$?: Observable<string | null>;
+  private submissionId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
 
   constructor(private router: Router) {}
@@ -82,8 +82,8 @@ export class NavigationService {
     this.loiId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.LOI_ID_FRAGMENT_PARAM))
     );
-    this.observationId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.OBSERVATION_ID_FRAGMENT_PARAM))
+    this.submissionId$ = fragmentParams$.pipe(
+      map(params => params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM))
     );
     this.sideNavMode$ = fragmentParams$.pipe(
       map(params => NavigationService.fragmentParamsToSideNavMode(params))
@@ -102,8 +102,8 @@ export class NavigationService {
     return this.loiId$!;
   }
 
-  getObservationId$(): Observable<string | null> {
-    return this.observationId$!;
+  getSubmissionId$(): Observable<string | null> {
+    return this.submissionId$!;
   }
 
   getSideNavMode$(): Observable<SideNavMode> {
@@ -167,26 +167,26 @@ export class NavigationService {
   }
 
   /**
-   * Get current observation id in the URL fragment.
+   * Get current submission id in the URL fragment.
    */
-  getObservationId(): string | null {
+  getSubmissionId(): string | null {
     return this.getFragmentParams().get(
-      NavigationService.OBSERVATION_ID_FRAGMENT_PARAM
+      NavigationService.SUBMISSION_ID_FRAGMENT_PARAM
     );
   }
 
   /**
-   * Navigate to the current URL, updating the observation id in the URL
+   * Navigate to the current URL, updating the submission id in the URL
    * fragment.
    */
-  editObservation(loiId: string, observationId: string) {
+  editSubmission(loiId: string, submissionId: string) {
     const newParam: { [key: string]: string } = {};
     newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = loiId;
-    newParam[NavigationService.OBSERVATION_ID_FRAGMENT_PARAM] = observationId;
+    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 
-  clearObservationId() {
+  clearSubmissionId() {
     const newParam: { [key: string]: string } = {};
     newParam[
       NavigationService.LOI_ID_FRAGMENT_PARAM
@@ -245,7 +245,7 @@ export class NavigationService {
 
 export enum SideNavMode {
   JOB_LIST = 1,
-  OBSERVATION = 2,
+  SUBMISSION = 2,
   LOI = 3,
   LOI_LIST = 4,
 }

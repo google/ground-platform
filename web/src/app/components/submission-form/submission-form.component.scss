@@ -17,25 +17,25 @@
 @import 'variables';
 @import '~firebaseui/dist/firebaseui.css';
 
-.observation {
+.submission {
   margin: 16px;
 }
-.observation .step-label {
+.submission .step-label {
   font-size: 12px;
   line-height: 16px;
   margin-bottom: 3px;
 }
-.observation .step-response {
+.submission .step-result {
   font-size: 14px;
   line-height: 20px;
   margin-bottom: 12px;
 }
-.step-response .mat-form-field {
+.step-result .mat-form-field {
   width: 100%;
 }
 /**
  * Make sure that inline items have proper spacing between them,
- * e.g. on Observation Form page.
+ * e.g. on Submission Form page.
  */
 .mat-radio-label-content,
 .mat-checkbox-label {

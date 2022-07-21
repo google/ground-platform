@@ -22,7 +22,7 @@ const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;
 
 const IMPORT_GEOJSON_URL = `${environment.cloudFunctionsUrl}/importGeoJson`;
 
-export interface ImportResponse {
+export interface ImportResult {
   message?: string;
   count: number;
 }
@@ -37,7 +37,7 @@ export class DataImportService {
     surveyId: string,
     jobId: string,
     file: File
-  ): Promise<ImportResponse> {
+  ): Promise<ImportResult> {
     const formData = new FormData();
     formData.set('survey', surveyId);
     formData.set('job', jobId);
@@ -50,8 +50,6 @@ export class DataImportService {
     } else {
       throw new Error('Invalid file format');
     }
-    return this.httpClient
-      .post<ImportResponse>(importUrl, formData)
-      .toPromise();
+    return this.httpClient.post<ImportResult>(importUrl, formData).toPromise();
   }
 }

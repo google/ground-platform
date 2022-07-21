@@ -17,7 +17,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ObservationFormComponent } from './observation-form.component';
+import { SubmissionFormComponent } from './submission-form.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
@@ -40,7 +40,7 @@ import { MatListModule } from '@angular/material/list';
     MatListModule,
     JobListItemModule,
   ],
-  exports: [ObservationFormComponent],
-  declarations: [ObservationFormComponent],
+  exports: [SubmissionFormComponent],
+  declarations: [SubmissionFormComponent],
 })
-export class ObservationFormModule {}
+export class SubmissionFormModule {}

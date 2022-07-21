@@ -25,7 +25,7 @@ import {
 } from '../models/task/multiple-choice.model';
 
 class MockFirebaseData {
-  static observation001 = {
+  static submission001 = {
     created: {
       clientTimestamp: undefined,
       serverTimestamp: undefined,
@@ -47,8 +47,8 @@ class MockFirebaseData {
     loiId: 'loi001',
     jobId: 'job001',
     taskId: 'task001',
-    responses: {
-      element001: 'text response',
+    results: {
+      element001: 'text result',
       element002: ['option001', 'option002'],
       element003: 123,
       element004: new firebase.firestore.Timestamp(1641533340, 0),
@@ -130,15 +130,15 @@ class MockModel {
 }
 
 describe('FirebaseDataConverter', () => {
-  it('Observation converts back and forth without loosing data.', () => {
+  it('Submission converts back and forth without loosing data.', () => {
     expect(
-      FirebaseDataConverter.observationToJS(
-        FirebaseDataConverter.toObservation(
+      FirebaseDataConverter.submissionToJS(
+        FirebaseDataConverter.toSubmission(
           MockModel.task001,
-          'observation001',
-          MockFirebaseData.observation001
+          'submission001',
+          MockFirebaseData.submission001
         )
       )
-    ).toEqual(MockFirebaseData.observation001);
+    ).toEqual(MockFirebaseData.submission001);
   });
 });

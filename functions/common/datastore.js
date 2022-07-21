@@ -54,9 +54,9 @@ class Datastore {
     );
   }
 
-  fetchObservationsByJobId(surveyId, jobId) {
+  fetchSubmissionsByJobId(surveyId, jobId) {
     return this.db_
-      .collection(`surveys/${surveyId}/observations`)
+      .collection(`surveys/${surveyId}/submissions`)
       .where("jobId", "==", jobId)
       .get();
   }
