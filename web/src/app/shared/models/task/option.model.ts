@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { StringMap } from '../string-map.model';
-
 export class Option {
   constructor(
     readonly id: string,
     readonly code: string,
-    readonly label: StringMap,
+    readonly label: string,
     readonly index: number
   ) {}
 

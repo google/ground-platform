@@ -15,7 +15,6 @@
  */
 import firebase from 'firebase/app';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { StringMap } from '../models/string-map.model';
 import { Task } from '../models/task/task.model';
 import { Map, List } from 'immutable';
 import { Option } from '../models/task/option.model';
@@ -62,7 +61,7 @@ class MockModel {
   static element001: Step = new Step(
     'element001',
     StepType.TEXT,
-    StringMap({ en: 'Text Field' }),
+    'Text Field',
     /*required=*/ true,
     0
   );
@@ -70,7 +69,7 @@ class MockModel {
   static element002: Step = new Step(
     'element002',
     StepType.MULTIPLE_CHOICE,
-    StringMap({ en: 'Multiple Select' }),
+    'Multiple Select',
     /*required=*/ true,
     1,
     new MultipleChoice(
@@ -79,14 +78,14 @@ class MockModel {
         new Option(
           'option001',
           'code001',
-          StringMap({ en: 'option 1' }),
+          'option 1',
           /* index= */
           0
         ),
         new Option(
           'option002',
           'code002',
-          StringMap({ en: 'option 2' }),
+          'option 2',
           /* index= */
           0
         ),
@@ -97,7 +96,7 @@ class MockModel {
   static element003: Step = new Step(
     'element003',
     StepType.NUMBER,
-    StringMap({ en: 'How many sloths are there?' }),
+    'How many sloths are there?',
     /*required=*/ true,
     2
   );
@@ -105,7 +104,7 @@ class MockModel {
   static element004: Step = new Step(
     'element004',
     StepType.DATE,
-    StringMap({ en: 'What is the current date?' }),
+    'What is the current date?',
     /*required=*/ true,
     2
   );
@@ -113,7 +112,7 @@ class MockModel {
   static element005: Step = new Step(
     'element005',
     StepType.TIME,
-    StringMap({ en: 'What time is it?' }),
+    'What time is it?',
     /*required=*/ true,
     2
   );

@@ -29,14 +29,11 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 })
 export class JobListComponent {
   readonly jobs$: Observable<List<Job>>;
-  readonly lang: string;
 
   constructor(
     readonly surveyService: SurveyService,
     private navigationService: NavigationService
   ) {
-    // TODO: Make dynamic to support i18n.
-    this.lang = 'en';
     this.jobs$ = surveyService
       .getActiveSurvey$()
       .pipe(

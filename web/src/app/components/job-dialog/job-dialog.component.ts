@@ -28,7 +28,6 @@ import { Job } from '../../shared/models/job.model';
 import { Task } from '../../shared/models/task/task.model';
 import { Subscription } from 'rxjs';
 import { StepType, Step } from '../../shared/models/task/step.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -45,7 +44,6 @@ import { NavigationService } from '../../services/navigation/navigation.service'
   styleUrls: ['./job-dialog.component.scss'],
 })
 export class JobDialogComponent implements OnDestroy {
-  lang: string;
   job?: Job;
   jobName!: string;
   surveyId?: string;
@@ -73,7 +71,6 @@ export class JobDialogComponent implements OnDestroy {
     private navigationService: NavigationService,
     private readonly cdr: ChangeDetectorRef
   ) {
-    this.lang = 'en';
     this.defaultJobColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
@@ -129,7 +126,7 @@ export class JobDialogComponent implements OnDestroy {
     }
     this.surveyId = surveyId;
     this.job = job;
-    this.jobName = this.job?.name?.get(this.lang) || '';
+    this.jobName = this.job?.name || '';
     this.color = this.job?.color || this.defaultJobColor;
     if (!job) {
       this.job = this.jobService.createNewJob();
@@ -180,7 +177,7 @@ export class JobDialogComponent implements OnDestroy {
       /* index */ this.job?.index || -1,
       this.color,
       // TODO: Make jobName Map
-      StringMap({ [this.lang]: this.jobName.trim() }),
+      this.jobName.trim(),
       tasks,
       allowedLoiTypes
     );

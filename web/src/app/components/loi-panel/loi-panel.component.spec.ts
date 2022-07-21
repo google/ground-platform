@@ -28,7 +28,6 @@ import {
 import { Job } from '../../shared/models/job.model';
 import { Observation } from '../../shared/models/observation/observation.model';
 import { Survey } from '../../shared/models/survey.model';
-import { StringMap } from '../../shared/models/string-map.model';
 import { SurveyService } from '../../services/survey/survey.service';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { ObservationService } from '../../services/observation/observation.service';
@@ -38,14 +37,14 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 
 const mockSurvey = new Survey(
   'survey001',
-  StringMap({ en: 'title' }),
-  StringMap({ en: 'description' }),
+  'title',
+  'description',
   /* jobs= */ Map({
     job001: new Job(
       'job001',
       /* index */ -1,
       'red',
-      StringMap({ en: 'name' }),
+      'name',
       /* tasks= */ Map()
     ),
   }),

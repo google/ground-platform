@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { StringMap } from '../string-map.model';
 import { MultipleChoice } from './multiple-choice.model';
 import { Option } from './option.model';
 
@@ -55,7 +54,7 @@ export class Step {
   constructor(
     readonly id: string,
     readonly type: StepType,
-    readonly label: StringMap,
+    readonly label: string,
     readonly required: boolean,
     readonly index: number,
     readonly multipleChoice?: MultipleChoice
