@@ -57,9 +57,9 @@ export class TestData {
     color = '#ffff00',
     name = 'job',
     tasks = {} as Record<string, Task>,
-    contributorsCanAdd = [] as string[],
+    dataCollectorsCanAdd = [] as string[],
   }): Job {
-    return new Job(id, index, color, name, Map(tasks), contributorsCanAdd);
+    return new Job(id, index, color, name, Map(tasks), dataCollectorsCanAdd);
   }
 
   public static newPointOfInterest(): PointOfInterest {
