@@ -57,16 +57,16 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { By } from '@angular/platform-browser';
 
 class MockModel {
-  static element001: Step = new Step(
-    'element001',
+  static step001: Step = new Step(
+    'step001',
     StepType.TEXT,
     'Text Field',
     /*required=*/ true,
     0
   );
 
-  static element002: Step = new Step(
-    'element002',
+  static step002: Step = new Step(
+    'step002',
     StepType.TEXT,
     'Text Field',
     /*required=*/ false,
@@ -77,8 +77,8 @@ class MockModel {
 
   static option002 = new Option('option002', 'code002', 'option 2', 2);
 
-  static element003: Step = new Step(
-    'element003',
+  static step003: Step = new Step(
+    'step003',
     StepType.MULTIPLE_CHOICE,
     'Multiple Select',
     /*required=*/ true,
@@ -92,9 +92,9 @@ class MockModel {
   static form001: Task = new Task(
     'form001',
     Map({
-      element001: MockModel.element001,
-      element002: MockModel.element002,
-      element003: MockModel.element003,
+      step001: MockModel.step001,
+      step002: MockModel.step002,
+      step003: MockModel.step003,
     })
   );
 
@@ -134,8 +134,8 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
-      element001: new Result('result'),
-      element003: new Result(List([MockModel.option001])),
+      step001: new Result('result'),
+      step003: new Result(List([MockModel.option001])),
     })
   );
 }
