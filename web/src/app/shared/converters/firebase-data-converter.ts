@@ -94,10 +94,10 @@ export class FirebaseDataConverter {
     switch (roleString) {
       case 'owner':
         return Role.OWNER;
-      case 'manager':
-        return Role.MANAGER;
-      case 'contributor':
-        return Role.CONTRIBUTOR;
+      case 'survey-organizer':
+        return Role.SURVEY_ORGANIZER;
+      case 'data-collector':
+        return Role.DATA_COLLECTOR;
       case 'viewer':
         return Role.VIEWER;
       default:
@@ -139,14 +139,14 @@ export class FirebaseDataConverter {
           FirebaseDataConverter.toTask(id, data.tasks[id]),
         ])
       ),
-      data.contributorsCanAdd || []
+      data.dataCollectorsCanAdd || []
     );
   }
 
   static jobToJS(job: Job): {} {
-    const { name, tasks, color, contributorsCanAdd, ...jobDoc } = job;
+    const { name, tasks, color, dataCollectorsCanAdd, ...jobDoc } = job;
     return {
-      contributorsCanAdd,
+      dataCollectorsCanAdd,
       name,
       ...(tasks
         ? {
