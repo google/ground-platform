@@ -90,16 +90,6 @@ export class JobService {
     return stepsMap;
   }
 
-  /**
-   * Checks if there are no steps or first step in the task is empty.
-   */
-  private static isTaskEmpty(steps: Map<string, Step>): boolean {
-    return (
-      steps.isEmpty() ||
-      (steps.size === 1 && !JobService.getStepLabel(steps.first()))
-    );
-  }
-
   private static getStepLabel(step: Step): string {
     return step.label?.trim() || '';
   }
