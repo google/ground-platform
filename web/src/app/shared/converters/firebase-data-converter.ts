@@ -144,20 +144,11 @@ export class FirebaseDataConverter {
   }
 
   static jobToJS(job: Job): {} {
-    const { name, tasks, color, contributorsCanAdd, ...jobDoc } = job;
+    const { name, steps, color, contributorsCanAdd, ...jobDoc } = job;
     return {
       contributorsCanAdd,
       name,
-      ...(tasks
-        ? {
-            tasks: tasks
-              ?.valueSeq()
-              .reduce(
-                (map, task) => ({ ...map, [task.id]: this.taskToJS(task) }),
-                {}
-              ),
-          }
-        : {}),
+      steps: steps?.map(step => this.stepToJS(step)),
       defaultStyle: { color },
       ...jobDoc,
     };
@@ -180,21 +171,6 @@ export class FirebaseDataConverter {
           .map(step => [step!.id, step!])
       )
     );
-  }
-
-  private static taskToJS(task: Task): {} {
-    const { steps, ...taskDoc } = task;
-    return {
-      steps:
-        steps?.reduce(
-          (map, step: Step) => ({
-            ...map,
-            [step.id]: this.stepToJS(step),
-          }),
-          {}
-        ) || {},
-      ...taskDoc,
-    };
   }
 
   public static loiToJS(loi: LocationOfInterest): {} {
