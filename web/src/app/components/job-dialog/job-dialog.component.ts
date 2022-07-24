@@ -53,7 +53,6 @@ export class JobDialogComponent implements OnDestroy {
   steps: List<Step>;
   color!: string;
   defaultJobColor: string;
-  task?: Task;
   @ViewChildren(TaskStepEditorComponent)
   taskStepEditors?: QueryList<TaskStepEditorComponent>;
   contributorsCanAddPoints = true;
