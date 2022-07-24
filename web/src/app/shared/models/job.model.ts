@@ -30,10 +30,6 @@ export class Job {
     readonly contributorsCanAdd?: string[]
   ) {}
 
-  getTask(taskId: string): Task | undefined {
-    return this.tasks?.get(taskId);
-  }
-
   withIndex(index: number): Job {
     return { ...this, index };
   }

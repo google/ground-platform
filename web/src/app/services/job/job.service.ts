@@ -131,14 +131,6 @@ export class JobService {
     return step.label?.trim() || '';
   }
 
-  /**
-   * Returns the task value from a job passed.
-   */
-  getTask(job?: Job): Task | undefined {
-    const tasks = job?.tasks;
-    return tasks ? tasks.valueSeq().first() : undefined;
-  }
-
   private async getJobCount(): Promise<number> {
     const survey = await this.surveyService
       .getActiveSurvey$()
