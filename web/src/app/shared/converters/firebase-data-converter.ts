@@ -421,21 +421,23 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toSubmission(task: Task, id: string, data: DocumentData): Submission {
+  static toSubmission(job: Job, id: string, data: DocumentData): Submission {
     if (data === undefined) {
       throw Error(`Submission ${id} does not have document data.`);
     }
     return new Submission(
       id,
       data.loiId,
-      data.jobId,
-      task,
+      job,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
       Map<string, Result>(
         keys(data.results).map((stepId: string) => [
           stepId as string,
-          FirebaseDataConverter.toResult(task, stepId, data.results[stepId]),
+          FirebaseDataConverter.toResult(
+            job.steps!.get(stepId)!,
+            data.results[stepId]
+          ),
         ])
       )
     );
@@ -444,8 +446,7 @@ export class FirebaseDataConverter {
   static submissionToJS(submission: Submission): {} {
     return {
       loiId: submission.loiId,
-      jobId: submission.jobId,
-      taskId: submission.task?.id,
+      jobId: submission.job?.id,
       created: FirebaseDataConverter.auditInfoToJs(submission.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(
         submission.lastModified
@@ -478,8 +479,7 @@ export class FirebaseDataConverter {
   }
 
   private static toResult(
-    task: Task,
-    stepId: string,
+    step: Step,
     resultValue: number | string | List<string>
   ): Result {
     if (typeof resultValue === 'string') {
@@ -491,9 +491,7 @@ export class FirebaseDataConverter {
     if (resultValue instanceof Array) {
       return new Result(
         List(
-          resultValue.map(optionId =>
-            task.getMultipleChoiceStepOption(stepId, optionId)
-          )
+          resultValue.map(optionId => step.getMultipleChoiceOption(optionId))
         )
       );
     }

@@ -137,7 +137,7 @@ export class SubmissionFormComponent {
     if (submission instanceof Submission) {
       this.submission = submission;
       this.submissionSteps = submission!
-        .task!.steps!.toOrderedMap()
+        .job!.steps!.toOrderedMap()
         .sortBy(entry => entry.index)
         .toList();
       this.initForm();
@@ -157,7 +157,7 @@ export class SubmissionFormComponent {
 
   private convertSubmissionToFormGroup(submission: Submission): FormGroup {
     const group: { [stepId: string]: FormControl } = {};
-    for (const [stepId, step] of submission.task!.steps) {
+    for (const [stepId, step] of submission.job!.steps!) {
       const result = submission!.results?.get(stepId);
       switch (step.type) {
         case StepType.TEXT:
