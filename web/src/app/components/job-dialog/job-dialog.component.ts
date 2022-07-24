@@ -164,8 +164,6 @@ export class JobDialogComponent implements OnDestroy {
       }
     }
     const steps = this.jobService.convertStepsListToMap(this.steps);
-    const taskId = this.task?.id;
-    const tasks = this.jobService.createTask(taskId, steps);
     const allowedLoiTypes: string[] = [];
     if (this.contributorsCanAddPoints) {
       allowedLoiTypes.push('points');
@@ -179,8 +177,8 @@ export class JobDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make jobName Map
       this.jobName.trim(),
-      tasks,
-      /* steps */ Map<string, Step>(),
+      /* tasks */ Map<string, Task>(),
+      steps,
       allowedLoiTypes
     );
     this.addOrUpdateJob(this.surveyId, job);
