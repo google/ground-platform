@@ -21,7 +21,6 @@ import { Step, StepType } from '../../shared/models/task/step.model';
 import { Option } from '../../shared/models/task/option.model';
 import { MultipleChoice } from '../../shared/models/task/multiple-choice.model';
 import { List, Map } from 'immutable';
-import { Task } from '../../shared/models/task/task.model';
 import { SurveyService } from '../survey/survey.service';
 import { take } from 'rxjs/operators';
 
@@ -89,32 +88,6 @@ export class JobService {
       stepsMap = stepsMap.set(stepId, step);
     });
     return stepsMap;
-  }
-
-  /**
-   * Creates and returns a new task map with a generated unique identifier and steps value.
-   *
-   * @param id the id of the new task.
-   * @param steps the steps of the new task.
-   */
-  createTask(
-    id: string | undefined,
-    steps: Map<string, Step>
-  ): Map<string, Task> | undefined {
-    if (JobService.isTaskEmpty(steps)) {
-      return undefined;
-    }
-    const taskId = id || this.dataStoreService.generateId();
-    return JobService.createTaskMap(taskId, new Task(taskId, steps));
-  }
-
-  /**
-   * Creates and returns a task map with a given id and task value.
-   */
-  private static createTaskMap(id: string, task: Task): Map<string, Task> {
-    let tasks = Map<string, Task>();
-    tasks = tasks.set(id, task);
-    return tasks;
   }
 
   /**

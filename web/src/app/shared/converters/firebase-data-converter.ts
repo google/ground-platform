@@ -17,7 +17,6 @@ import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
-import { Task } from '../models/task/task.model';
 import { Step, StepType } from '../models/task/step.model';
 import {
   MultipleChoice,
@@ -133,7 +132,6 @@ export class FirebaseDataConverter {
       data.index || -1,
       data.defaultStyle?.color || data.color,
       data.name,
-      Map<string, Task>(),
       this.toSteps(data),
       data.contributorsCanAdd || []
     );
