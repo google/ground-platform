@@ -25,6 +25,7 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { Job } from '../../shared/models/job.model';
+import { Map } from 'immutable';
 import { Task } from '../../shared/models/task/task.model';
 import { Subscription } from 'rxjs';
 import { StepType, Step } from '../../shared/models/task/step.model';
@@ -179,6 +180,7 @@ export class JobDialogComponent implements OnDestroy {
       // TODO: Make jobName Map
       this.jobName.trim(),
       tasks,
+      /* steps */ Map<string, Step>(),
       allowedLoiTypes
     );
     this.addOrUpdateJob(this.surveyId, job);
