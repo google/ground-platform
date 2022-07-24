@@ -138,10 +138,9 @@ export class JobDialogComponent implements OnDestroy {
       this.job?.contributorsCanAdd?.includes('points') || false;
     this.contributorsCanAddPolygons =
       this.job?.contributorsCanAdd?.includes('polygons') || false;
-    this.task = this.jobService.getTask(this.job);
-    if (this.task) {
+    if (this.job?.steps) {
       this.steps =
-        this.task?.steps.toList().sortBy(step => step.index) || List<Step>();
+        this.job.steps.toList().sortBy(step => step.index) || List<Step>();
     } else {
       this.addQuestion();
     }
