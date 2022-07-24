@@ -479,7 +479,7 @@ export class FirebaseDataConverter {
 
   private static toResult(
     task: Task,
-    stepID: string,
+    stepId: string,
     resultValue: number | string | List<string>
   ): Result {
     if (typeof resultValue === 'string') {
@@ -492,7 +492,7 @@ export class FirebaseDataConverter {
       return new Result(
         List(
           resultValue.map(optionId =>
-            task.getMultipleChoiceStepOption(stepID, optionId)
+            task.getMultipleChoiceStepOption(stepId, optionId)
           )
         )
       );
