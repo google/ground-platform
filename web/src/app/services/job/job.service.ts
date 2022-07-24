@@ -90,10 +90,6 @@ export class JobService {
     return stepsMap;
   }
 
-  private static getStepLabel(step: Step): string {
-    return step.label?.trim() || '';
-  }
-
   private async getJobCount(): Promise<number> {
     const survey = await this.surveyService
       .getActiveSurvey$()
