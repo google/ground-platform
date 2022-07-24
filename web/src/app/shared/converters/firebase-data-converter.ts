@@ -133,12 +133,8 @@ export class FirebaseDataConverter {
       data.index || -1,
       data.defaultStyle?.color || data.color,
       data.name,
-      Map<string, Task>(
-        keys(data.tasks).map((id: string) => [
-          id as string,
-          FirebaseDataConverter.toTask(id, data.tasks[id]),
-        ])
-      ),
+      Map<string, Task>(),
+      this.toSteps(data),
       data.contributorsCanAdd || []
     );
   }
@@ -156,20 +152,16 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Task instance.
+   * immutable Map of id to Step.
    *
-   * @param id the uuid of the task instance.
-   * @param data the source data in a dictionary keyed by string.
+   * @param data the source steps in a dictionary keyed by string.
    */
-  private static toTask(id: string, data: DocumentData): Task {
-    return new Task(
-      id,
-      Map<string, Step>(
-        keys(data.steps)
-          .map(id => FirebaseDataConverter.toStep(id, data.steps[id]))
-          .filter(step => step !== null)
-          .map(step => [step!.id, step!])
-      )
+  private static toSteps(data: DocumentData): Map<string, Step> {
+    return Map<string, Step>(
+      keys(data.steps)
+        .map(id => FirebaseDataConverter.toStep(id, data.steps[id]))
+        .filter(step => step !== null)
+        .map(step => [step!.id, step!])
     );
   }
 
