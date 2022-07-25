@@ -87,7 +87,7 @@ export class AuthService {
   }
 
   /**
-   * Checks if a user has manager or owner level permissions of the survey.
+   * Checks if a user has survey organizer or owner level permissions of the survey.
    */
   canManageSurvey(acl: AclEntry[]): boolean {
     const userEmail = this.currentUser?.email;
@@ -107,15 +107,15 @@ export class AuthService {
     return (
       this.isManager(userRole) ||
       (this.isContributor(userRole) &&
-        (job.contributorsCanAdd?.includes('points') ?? false))
+        (job.dataCollectorsCanAdd?.includes('points') ?? false))
     );
   }
 
   isManager(role: Role): boolean {
-    return [Role.OWNER, Role.MANAGER].includes(role);
+    return [Role.OWNER, Role.SURVEY_ORGANIZER].includes(role);
   }
 
   isContributor(role: Role): boolean {
-    return [Role.CONTRIBUTOR].includes(role);
+    return [Role.DATA_COLLECTOR].includes(role);
   }
 }

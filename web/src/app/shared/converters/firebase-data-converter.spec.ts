@@ -48,26 +48,26 @@ class MockFirebaseData {
     jobId: 'job001',
     taskId: 'task001',
     results: {
-      element001: 'text result',
-      element002: ['option001', 'option002'],
-      element003: 123,
-      element004: new firebase.firestore.Timestamp(1641533340, 0),
-      element005: new firebase.firestore.Timestamp(1641534444, 0),
+      step001: 'text result',
+      step002: ['option001', 'option002'],
+      step003: 123,
+      step004: new firebase.firestore.Timestamp(1641533340, 0),
+      step005: new firebase.firestore.Timestamp(1641534444, 0),
     },
   };
 }
 
 class MockModel {
-  static element001: Step = new Step(
-    'element001',
+  static step001: Step = new Step(
+    'step001',
     StepType.TEXT,
     'Text Field',
     /*required=*/ true,
     0
   );
 
-  static element002: Step = new Step(
-    'element002',
+  static step002: Step = new Step(
+    'step002',
     StepType.MULTIPLE_CHOICE,
     'Multiple Select',
     /*required=*/ true,
@@ -93,24 +93,24 @@ class MockModel {
     )
   );
 
-  static element003: Step = new Step(
-    'element003',
+  static step003: Step = new Step(
+    'step003',
     StepType.NUMBER,
     'How many sloths are there?',
     /*required=*/ true,
     2
   );
 
-  static element004: Step = new Step(
-    'element004',
+  static step004: Step = new Step(
+    'step004',
     StepType.DATE,
     'What is the current date?',
     /*required=*/ true,
     2
   );
 
-  static element005: Step = new Step(
-    'element005',
+  static step005: Step = new Step(
+    'step005',
     StepType.TIME,
     'What time is it?',
     /*required=*/ true,
@@ -120,11 +120,11 @@ class MockModel {
   static task001: Task = new Task(
     'task001',
     Map({
-      element001: MockModel.element001,
-      element002: MockModel.element002,
-      element003: MockModel.element003,
-      element004: MockModel.element004,
-      element005: MockModel.element005,
+      step001: MockModel.step001,
+      step002: MockModel.step002,
+      step003: MockModel.step003,
+      step004: MockModel.step004,
+      step005: MockModel.step005,
     })
   );
 }
