@@ -93,10 +93,10 @@ export class FirebaseDataConverter {
     switch (roleString) {
       case 'owner':
         return Role.OWNER;
-      case 'manager':
-        return Role.MANAGER;
-      case 'contributor':
-        return Role.CONTRIBUTOR;
+      case 'survey-organizer':
+        return Role.SURVEY_ORGANIZER;
+      case 'data-collector':
+        return Role.DATA_COLLECTOR;
       case 'viewer':
         return Role.VIEWER;
       default:
@@ -133,14 +133,14 @@ export class FirebaseDataConverter {
       data.defaultStyle?.color || data.color,
       data.name,
       this.toSteps(data),
-      data.contributorsCanAdd || []
+      data.dataCollectorsCanAdd || []
     );
   }
 
   static jobToJS(job: Job): {} {
-    const { name, steps, color, contributorsCanAdd, ...jobDoc } = job;
+    const { name, steps, color, dataCollectorsCanAdd, ...jobDoc } = job;
     return {
-      contributorsCanAdd,
+      dataCollectorsCanAdd,
       name,
       steps: steps?.map(step => this.stepToJS(step)),
       defaultStyle: { color },

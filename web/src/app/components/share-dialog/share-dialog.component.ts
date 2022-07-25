@@ -46,14 +46,14 @@ class AclEntry {
 export class ShareDialogComponent {
   /** Roles and labels for select drop-downs. */
   readonly ROLE_OPTIONS = [
-    { label: 'Contributor', value: Role.CONTRIBUTOR },
-    { label: 'Manager', value: Role.MANAGER },
+    { label: 'Data Collector', value: Role.DATA_COLLECTOR },
+    { label: 'Survey Organizer', value: Role.SURVEY_ORGANIZER },
     { label: 'Viewer', value: Role.VIEWER },
   ];
 
   addUserForm = new FormGroup({
     email: new FormControl('', [Validators.email, this.notInListValidator()]),
-    role: new FormControl(Role.CONTRIBUTOR),
+    role: new FormControl(Role.DATA_COLLECTOR),
   });
 
   roles = Role;
@@ -77,7 +77,7 @@ export class ShareDialogComponent {
     this.subscription.add(
       // Grab only the first value from getActiveSurvey$() so that
       // successive changes to the remote survey config don't overwrite the
-      // contents of the contributors list in the dialog.
+      // contents of the data collectors list in the dialog.
       this.surveyService
         .getActiveSurvey$()
         .pipe(take(1))
@@ -101,8 +101,8 @@ export class ShareDialogComponent {
     this.acl.push(new AclEntry(email, role));
     this.updateChangeState();
 
-    // Clear "Add contributor" field.
-    this.addUserForm.setValue({ email: '', role: Role.CONTRIBUTOR });
+    // Clear "Add data collector" field.
+    this.addUserForm.setValue({ email: '', role: Role.DATA_COLLECTOR });
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
@@ -111,10 +111,10 @@ export class ShareDialogComponent {
     }
     // value holds the selected Role enum value, or -1 if "Remove" was selected.
     if (event.value < 0) {
-      // Remove contributor.
+      // Remove data collector.
       this.acl.splice(index, 1);
     } else {
-      // Update contributor role.
+      // Update data collector role.
       this.acl[index] = new AclEntry(this.acl[index].email, event.value);
     }
     this.updateChangeState();

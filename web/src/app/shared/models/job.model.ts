@@ -24,7 +24,7 @@ export class Job {
     readonly color?: string,
     readonly name?: string,
     readonly steps?: Map<string, Step>,
-    readonly contributorsCanAdd?: string[]
+    readonly dataCollectorsCanAdd?: string[]
   ) {}
 
   withIndex(index: number): Job {

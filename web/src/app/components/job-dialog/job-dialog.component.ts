@@ -53,8 +53,8 @@ export class JobDialogComponent implements OnDestroy {
   defaultJobColor: string;
   @ViewChildren(TaskStepEditorComponent)
   taskStepEditors?: QueryList<TaskStepEditorComponent>;
-  contributorsCanAddPoints = true;
-  contributorsCanAddPolygons = true;
+  dataCollectorsCanAddPoints = true;
+  dataCollectorsCanAddPolygons = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -131,10 +131,10 @@ export class JobDialogComponent implements OnDestroy {
       this.addQuestion();
       return;
     }
-    this.contributorsCanAddPoints =
-      this.job?.contributorsCanAdd?.includes('points') || false;
-    this.contributorsCanAddPolygons =
-      this.job?.contributorsCanAdd?.includes('polygons') || false;
+    this.dataCollectorsCanAddPoints =
+      this.job?.dataCollectorsCanAdd?.includes('points') || false;
+    this.dataCollectorsCanAddPolygons =
+      this.job?.dataCollectorsCanAdd?.includes('polygons') || false;
     if (this.job?.steps) {
       this.steps =
         this.job.steps.toList().sortBy(step => step.index) || List<Step>();
@@ -161,10 +161,10 @@ export class JobDialogComponent implements OnDestroy {
     }
     const steps = this.jobService.convertStepsListToMap(this.steps);
     const allowedLoiTypes: string[] = [];
-    if (this.contributorsCanAddPoints) {
+    if (this.dataCollectorsCanAddPoints) {
       allowedLoiTypes.push('points');
     }
-    if (this.contributorsCanAddPolygons) {
+    if (this.dataCollectorsCanAddPolygons) {
       allowedLoiTypes.push('polygons');
     }
     const job = new Job(
