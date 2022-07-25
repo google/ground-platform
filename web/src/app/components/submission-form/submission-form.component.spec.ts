@@ -122,8 +122,7 @@ class MockModel {
   static submission001 = new Submission(
     'submission001',
     MockModel.loi001.id,
-    MockModel.loi001.jobId,
-    MockModel.form001,
+    MockModel.job001,
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
