@@ -1,4 +1,3 @@
-import { Job } from './../models/job.model';
 /**
  * Copyright 2020 Google LLC
  *
@@ -16,7 +15,8 @@ import { Job } from './../models/job.model';
  */
 import firebase from 'firebase/app';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { Map, List } from 'immutable';
+import { Job } from './../models/job.model';
+import { List, Map } from 'immutable';
 import { Option } from '../models/task/option.model';
 import { Step, StepType } from '../models/task/step.model';
 import {
@@ -116,7 +116,18 @@ class MockModel {
     2
   );
 
-  static job001: Job = new Job(/* id= */ 'job001', /* index= */ 0);
+  static job001: Job = new Job(
+    /* id= */ 'job001',
+    /* index= */ 0,
+    '#ffffff',
+    'Test job',
+    Map({
+      step001: MockModel.step001,
+      step002: MockModel.step002,
+      step003: MockModel.step003,
+      step004: MockModel.step004,
+    })
+  );
 }
 
 describe('FirebaseDataConverter', () => {

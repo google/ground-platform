@@ -420,6 +420,9 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   static toSubmission(job: Job, id: string, data: DocumentData): Submission {
+    if (job.steps === undefined) {
+      throw Error('Job must contain at least once step');
+    }
     if (data === undefined) {
       throw Error(`Submission ${id} does not have document data.`);
     }
