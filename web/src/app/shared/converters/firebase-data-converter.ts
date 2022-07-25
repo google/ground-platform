@@ -174,8 +174,8 @@ export class FirebaseDataConverter {
     return new Task(
       id,
       Map<string, Step>(
-        keys(data.elements)
-          .map(id => FirebaseDataConverter.toStep(id, data.elements[id]))
+        keys(data.steps)
+          .map(id => FirebaseDataConverter.toStep(id, data.steps[id]))
           .filter(step => step !== null)
           .map(step => [step!.id, step!])
       )
@@ -185,7 +185,7 @@ export class FirebaseDataConverter {
   private static taskToJS(task: Task): {} {
     const { steps, ...taskDoc } = task;
     return {
-      elements:
+      steps:
         steps?.reduce(
           (map, step: Step) => ({
             ...map,
@@ -444,8 +444,8 @@ export class FirebaseDataConverter {
    *   loiId: 'loi123'
    *   taskId: 'task001',
    *   results: {
-   *     'element001': 'Result text',  // For 'text_field  elements.
-   *     'element002': ['A', 'B'],       // For 'multiple_choice' elements.
+   *     'step001': 'Result text',    // For 'text_field' steps.
+   *     'step002': ['A', 'B'],       // For 'multiple_choice' steps.
    *      // ...
    *   }
    *   created: <AUDIT_INFO>,
