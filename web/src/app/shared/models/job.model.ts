@@ -25,7 +25,7 @@ export class Job {
     readonly color?: string,
     readonly name?: string,
     readonly tasks?: Map<string, Task>,
-    readonly contributorsCanAdd?: string[]
+    readonly dataCollectorsCanAdd?: string[]
   ) {}
 
   getTask(taskId: string): Task | undefined {
