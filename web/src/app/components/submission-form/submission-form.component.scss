@@ -20,17 +20,17 @@
 .submission {
   margin: 16px;
 }
-.submission .step-label {
+.submission .task-label {
   font-size: 12px;
   line-height: 16px;
   margin-bottom: 3px;
 }
-.submission .step-result {
+.submission .task-result {
   font-size: 14px;
   line-height: 20px;
   margin-bottom: 12px;
 }
-.step-result .mat-form-field {
+.task-result .mat-form-field {
   width: 100%;
 }
 /**
@@ -45,7 +45,7 @@
 .mat-form-field-wrapper {
   margin-bottom: -1.34em;
 }
-/* The spacing between a step label and its options should be larger */
+/* The spacing between a task label and its options should be larger */
 .mat-label {
   margin-bottom: 1em;
 }

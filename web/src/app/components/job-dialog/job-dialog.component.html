@@ -62,19 +62,19 @@
   </div>
   <div cdkDropList (cdkDropListDropped)="drop($event)">
     <div
-      *ngFor="let step of steps; let i = index; trackBy: trackByFn"
+      *ngFor="let task of tasks; let i = index; trackBy: trackByFn"
       fxLayout
       cdkDrag
     >
       <ground-task-editor
-        [label]="step.label"
-        [required]="step.required"
-        [stepType]="step.type"
-        [cardinality]="step.multipleChoice?.cardinality"
-        [multipleChoice]="step.multipleChoice"
-        [stepCount]="steps?.size"
-        (update)="onStepUpdate($event, i)"
-        (delete)="onStepDelete(i)"
+        [label]="task.label"
+        [required]="task.required"
+        [taskType]="task.type"
+        [cardinality]="task.multipleChoice?.cardinality"
+        [multipleChoice]="task.multipleChoice"
+        [taskCount]="tasks?.size"
+        (update)="onTaskUpdate($event, i)"
+        (delete)="onTaskDelete(i)"
         fxFlex="2 1 auto"
       >
       </ground-task-editor>

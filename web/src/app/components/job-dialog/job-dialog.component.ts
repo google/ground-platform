@@ -26,7 +26,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { Job } from '../../shared/models/job.model';
 import { Subscription } from 'rxjs';
-import { StepType, Step } from '../../shared/models/task/step.model';
+import { TaskType, Task } from '../../shared/models/task/task.model';
 import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -47,8 +47,8 @@ export class JobDialogComponent implements OnDestroy {
   jobName!: string;
   surveyId?: string;
   subscription: Subscription = new Subscription();
-  stepTypes = StepType;
-  steps: List<Step>;
+  taskTypes = TaskType;
+  tasks: List<Task>;
   color!: string;
   defaultJobColor: string;
   @ViewChildren(TaskEditorComponent)
@@ -72,7 +72,7 @@ export class JobDialogComponent implements OnDestroy {
     this.defaultJobColor = '#ff9131';
     // Disable closing on clicks outside of dialog.
     dialogRef.disableClose = true;
-    this.steps = List<Step>();
+    this.tasks = List<Task>();
     this.init(data.surveyId, data.createJob, data.job);
     this.dialogRef.keydownEvents().subscribe(event => {
       if (event.key === 'Escape') {
@@ -82,28 +82,28 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   addQuestion() {
-    const newStep = this.jobService.createStep(
-      StepType.TEXT,
+    const newTask = this.jobService.createTask(
+      TaskType.TEXT,
       /* label= */
       '',
       /* required= */
       false,
       /* index= */
-      this.steps.size
+      this.tasks.size
     );
-    this.steps = this.steps.push(newStep);
+    this.tasks = this.tasks.push(newTask);
     this.markTasksTouched();
     this.focusNewQuestion();
   }
 
   /**
-   * Delete the step of a given index.
+   * Delete the task of a given index.
    *
-   * @param index - The index of the step
+   * @param index - The index of the task
    * @returns void
    *
    */
-  onStepDelete(index: number) {
+  onTaskDelete(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
@@ -113,7 +113,7 @@ export class JobDialogComponent implements OnDestroy {
       .afterClosed()
       .subscribe(dialogResult => {
         if (dialogResult) {
-          this.steps = this.steps.splice(index, 1);
+          this.tasks = this.tasks.splice(index, 1);
         }
       });
   }
@@ -135,9 +135,9 @@ export class JobDialogComponent implements OnDestroy {
       this.job?.dataCollectorsCanAdd?.includes('points') || false;
     this.dataCollectorsCanAddPolygons =
       this.job?.dataCollectorsCanAdd?.includes('polygons') || false;
-    if (this.job?.steps) {
-      this.steps =
-        this.job.steps.toList().sortBy(step => step.index) || List<Step>();
+    if (this.job?.tasks) {
+      this.tasks =
+        this.job.tasks.toList().sortBy(task => task.index) || List<Task>();
     } else {
       this.addQuestion();
     }
@@ -155,11 +155,11 @@ export class JobDialogComponent implements OnDestroy {
     this.markTasksTouched();
 
     for (const editor of this.taskEditors) {
-      if (editor.taskGroup.invalid || !this.isStepOptionsValid(editor)) {
+      if (editor.taskGroup.invalid || !this.isTaskOptionsValid(editor)) {
         return;
       }
     }
-    const steps = this.jobService.convertStepsListToMap(this.steps);
+    const tasks = this.jobService.convertTasksListToMap(this.tasks);
     const allowedLoiTypes: string[] = [];
     if (this.dataCollectorsCanAddPoints) {
       allowedLoiTypes.push('points');
@@ -173,13 +173,13 @@ export class JobDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make jobName Map
       this.jobName.trim(),
-      steps,
+      tasks,
       allowedLoiTypes
     );
     this.addOrUpdateJob(this.surveyId, job);
   }
 
-  private isStepOptionsValid(taskEditor: TaskEditorComponent): boolean {
+  private isTaskOptionsValid(taskEditor: TaskEditorComponent): boolean {
     if (!taskEditor.optionEditors) {
       return true;
     }
@@ -226,24 +226,24 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   /**
-   * Updates the step at given index from event emitted from task-editor
+   * Updates the task at given index from event emitted from task-editor
    *
-   * @param index - The index of the step
-   * @param event - updated step emitted from task-editor
+   * @param index - The index of the task
+   * @param event - updated task emitted from task-editor
    * @returns void
    *
    */
-  onStepUpdate(event: Step, index: number) {
-    const stepId = this.steps.get(index)?.id;
-    const step = new Step(
-      stepId || '',
+  onTaskUpdate(event: Task, index: number) {
+    const taskId = this.tasks.get(index)?.id;
+    const task = new Task(
+      taskId || '',
       event.type,
       event.label,
       event.required,
       index,
       event.multipleChoice
     );
-    this.steps = this.steps.set(index, step);
+    this.tasks = this.tasks.set(index, task);
   }
 
   trackByFn(index: number) {
@@ -251,12 +251,12 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    const stepAtPrevIndex = this.steps.get(event.previousIndex);
-    if (!stepAtPrevIndex) {
+    const taskAtPrevIndex = this.tasks.get(event.previousIndex);
+    if (!taskAtPrevIndex) {
       return;
     }
-    this.steps = this.steps.delete(event.previousIndex);
-    this.steps = this.steps.insert(event.currentIndex, stepAtPrevIndex);
+    this.tasks = this.tasks.delete(event.previousIndex);
+    this.tasks = this.tasks.insert(event.currentIndex, taskAtPrevIndex);
   }
 
   ngOnDestroy() {
@@ -288,7 +288,7 @@ export class JobDialogComponent implements OnDestroy {
     }
   }
 
-  private isStepOptionsDirty(taskEditor: TaskEditorComponent): boolean {
+  private isTaskOptionsDirty(taskEditor: TaskEditorComponent): boolean {
     if (!taskEditor.optionEditors) {
       return true;
     }
@@ -305,7 +305,7 @@ export class JobDialogComponent implements OnDestroy {
       return false;
     }
     for (const editor of this.taskEditors) {
-      if (editor.taskGroup.dirty || !this.isStepOptionsDirty(editor)) {
+      if (editor.taskGroup.dirty || !this.isTaskOptionsDirty(editor)) {
         return true;
       }
     }

@@ -61,29 +61,29 @@ limitations under the License.
         </mat-menu>
       </mat-card-header>
       <mat-card-content>
-        <div *ngFor="let step of getSteps(submission)">
-          <label class="step-label">{{ step.label }}</label>
+        <div *ngFor="let task of getTasks(submission)">
+          <label class="task-label">{{ task.label }}</label>
           <div
-            class="step-result"
-            *ngIf="step.type == stepTypes.TEXT || step.type == stepTypes.NUMBER"
+            class="task-result"
+            *ngIf="task.type == taskTypes.TEXT || task.type == taskTypes.NUMBER"
           >
-            {{ submission.results?.get(step.id)?.value }}
+            {{ submission.results?.get(task.id)?.value }}
           </div>
           <div
-            class="step-result"
-            *ngIf="step.type == stepTypes.MULTIPLE_CHOICE"
+            class="task-result"
+            *ngIf="task.type == taskTypes.MULTIPLE_CHOICE"
           >
             <span
               class="option-label"
-              *ngFor="let option of submission.results?.get(step.id)?.value"
+              *ngFor="let option of submission.results?.get(task.id)?.value"
             >
               {{ option.label }}
             </span>
           </div>
-          <div class="step-result" *ngIf="step.type == stepTypes.PHOTO">
+          <div class="task-result" *ngIf="task.type == taskTypes.PHOTO">
             <img
-              (click)="openUrlInNewTab(photoUrls.get(step.id))"
-              src="{{ photoUrls.get(step.id) }}"
+              (click)="openUrlInNewTab(photoUrls.get(task.id))"
+              src="{{ photoUrls.get(task.id) }}"
               width="100%"
             />
           </div>

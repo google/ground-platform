@@ -33,7 +33,7 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../../shared/models/task/multiple-choice.model';
-import { StepType, Step } from '../../shared/models/task/step.model';
+import { TaskType, Task } from '../../shared/models/task/task.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
@@ -55,17 +55,17 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { By } from '@angular/platform-browser';
 
 class MockModel {
-  static step001: Step = new Step(
-    'step001',
-    StepType.TEXT,
+  static task001: Task = new Task(
+    'task001',
+    TaskType.TEXT,
     'Text Field',
     /*required=*/ true,
     0
   );
 
-  static step002: Step = new Step(
-    'step002',
-    StepType.TEXT,
+  static task002: Task = new Task(
+    'task002',
+    TaskType.TEXT,
     'Text Field',
     /*required=*/ false,
     0
@@ -75,9 +75,9 @@ class MockModel {
 
   static option002 = new Option('option002', 'code002', 'option 2', 2);
 
-  static step003: Step = new Step(
-    'step003',
-    StepType.MULTIPLE_CHOICE,
+  static task003: Task = new Task(
+    'task003',
+    TaskType.MULTIPLE_CHOICE,
     'Multiple Select',
     /*required=*/ true,
     0,
@@ -93,9 +93,9 @@ class MockModel {
     'red',
     'name',
     Map({
-      step001: MockModel.step001,
-      step002: MockModel.step002,
-      step003: MockModel.step003,
+      task001: MockModel.task001,
+      task002: MockModel.task002,
+      task003: MockModel.task003,
     })
   );
 
@@ -126,8 +126,8 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
-      step001: new Result('result'),
-      step003: new Result(List([MockModel.option001])),
+      task001: new Result('result'),
+      task003: new Result(List([MockModel.option001])),
     })
   );
 }
@@ -210,20 +210,20 @@ describe('SubmissionFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should create text steps with right "required" option', () => {
+  it('should create text tasks with right "required" option', () => {
     for (const el of fixture.debugElement.queryAll(
-      By.css('.step-result div mat-form-field input')
+      By.css('.task-result div mat-form-field input')
     )) {
-      if (!component.submissionSteps) {
+      if (!component.submissionTasks) {
         break;
       }
-      const indexEl = component.submissionSteps.findIndex(
-        step => step.id === el.nativeElement.id
+      const indexEl = component.submissionTasks.findIndex(
+        task => task.id === el.nativeElement.id
       );
 
       expect(indexEl).toBeGreaterThanOrEqual(0);
 
-      const want = component.submissionSteps.get(indexEl)?.required;
+      const want = component.submissionTasks.get(indexEl)?.required;
 
       const got = el.nativeElement.required as boolean | undefined;
 
@@ -231,20 +231,20 @@ describe('SubmissionFormComponent', () => {
     }
   });
 
-  it('should create radio button steps with right "asterix" class', () => {
+  it('should create radio button tasks with right "asterix" class', () => {
     for (const el of fixture.debugElement.queryAll(
-      By.css('.step-result .multiple-choice-step mat-label')
+      By.css('.task-result .multiple-choice-task mat-label')
     )) {
-      if (!component.submissionSteps) {
+      if (!component.submissionTasks) {
         break;
       }
-      const indexEl = component.submissionSteps.findIndex(
-        step => step.id === el.nativeElement.id
+      const indexEl = component.submissionTasks.findIndex(
+        task => task.id === el.nativeElement.id
       );
 
       expect(indexEl).toBeGreaterThanOrEqual(0);
 
-      const want = component.submissionSteps.get(indexEl)?.required;
+      const want = component.submissionTasks.get(indexEl)?.required;
 
       const got = el.classes['asterix--after'] as boolean | undefined;
 

@@ -17,7 +17,7 @@ import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
-import { Step, StepType } from '../models/task/step.model';
+import { Task, TaskType } from '../models/task/task.model';
 import {
   MultipleChoice,
   Cardinality,
@@ -37,19 +37,19 @@ import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
 
-const STEP_TYPE_ENUMS_BY_STRING = Map([
-  [StepType.TEXT, 'text_field'],
-  [StepType.MULTIPLE_CHOICE, 'multiple_choice'],
-  [StepType.PHOTO, 'photo'],
-  [StepType.NUMBER, 'number'],
-  [StepType.DATE, 'date'],
-  [StepType.TIME, 'time'],
+const TASK_TYPE_ENUMS_BY_STRING = Map([
+  [TaskType.TEXT, 'text_field'],
+  [TaskType.MULTIPLE_CHOICE, 'multiple_choice'],
+  [TaskType.PHOTO, 'photo'],
+  [TaskType.NUMBER, 'number'],
+  [TaskType.DATE, 'date'],
+  [TaskType.TIME, 'time'],
 ]);
 
-const STEP_TYPE_STRINGS_BY_ENUM = Map(
+const TASK_TYPE_STRINGS_BY_ENUM = Map(
   Array.from(
-    STEP_TYPE_ENUMS_BY_STRING.toArray(),
-    el => el.reverse() as [string, StepType]
+    TASK_TYPE_ENUMS_BY_STRING.toArray(),
+    el => el.reverse() as [string, TaskType]
   )
 );
 
@@ -132,17 +132,17 @@ export class FirebaseDataConverter {
       data.index || -1,
       data.defaultStyle?.color || data.color,
       data.name,
-      this.toSteps(data),
+      this.toTasks(data),
       data.dataCollectorsCanAdd || []
     );
   }
 
   static jobToJS(job: Job): {} {
-    const { name, steps, color, dataCollectorsCanAdd, ...jobDoc } = job;
+    const { name, tasks, color, dataCollectorsCanAdd, ...jobDoc } = job;
     return {
       dataCollectorsCanAdd,
       name,
-      steps: steps?.map(step => this.stepToJS(step)),
+      tasks: tasks?.map(task => this.taskToJS(task)),
       defaultStyle: { color },
       ...jobDoc,
     };
@@ -150,16 +150,16 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Map of id to Step.
+   * immutable Map of id to Task.
    *
-   * @param data the source steps in a dictionary keyed by string.
+   * @param data the source tasks in a dictionary keyed by string.
    */
-  private static toSteps(data: DocumentData): Map<string, Step> {
-    return Map<string, Step>(
-      keys(data.steps)
-        .map(id => FirebaseDataConverter.toStep(id, data.steps[id]))
-        .filter(step => step !== null)
-        .map(step => [step!.id, step!])
+  private static toTasks(data: DocumentData): Map<string, Task> {
+    return Map<string, Task>(
+      keys(data.tasks)
+        .map(id => FirebaseDataConverter.toTask(id, data.tasks[id]))
+        .filter(task => task !== null)
+        .map(task => [task!.id, task!])
     );
   }
 
@@ -191,7 +191,7 @@ export class FirebaseDataConverter {
   }
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Step instance.
+   * immutable Task instance.
    *
    * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
@@ -221,11 +221,11 @@ export class FirebaseDataConverter {
    *   }
    * </code></pre>
    */
-  private static toStep(id: string, data: DocumentData): Step | null {
+  private static toTask(id: string, data: DocumentData): Task | null {
     try {
-      return new Step(
+      return new Task(
         id,
-        FirebaseDataConverter.stringToStepType(data.type),
+        FirebaseDataConverter.stringToTaskType(data.type),
         data.label,
         data.required,
         // Fall back to constant so old dev databases do not break.
@@ -246,17 +246,17 @@ export class FirebaseDataConverter {
     }
   }
 
-  private static stepToJS(step: Step): {} {
-    const { type, label, multipleChoice, ...stepDoc } = step;
+  private static taskToJS(task: Task): {} {
+    const { type, label, multipleChoice, ...taskDoc } = task;
     if (multipleChoice === undefined) {
       return {
-        type: FirebaseDataConverter.stepTypeToString(type),
+        type: FirebaseDataConverter.taskTypeToString(type),
         label,
-        ...stepDoc,
+        ...taskDoc,
       };
     } else {
       return {
-        type: FirebaseDataConverter.stepTypeToString(type),
+        type: FirebaseDataConverter.taskTypeToString(type),
         label,
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
@@ -270,7 +270,7 @@ export class FirebaseDataConverter {
             }),
             {}
           ) || {},
-        ...stepDoc,
+        ...taskDoc,
       };
     }
   }
@@ -297,25 +297,25 @@ export class FirebaseDataConverter {
     }
   }
 
-  private static stringToStepType(stepType: string): StepType {
-    const type = STEP_TYPE_STRINGS_BY_ENUM.get(stepType);
+  private static stringToTaskType(taskType: string): TaskType {
+    const type = TASK_TYPE_STRINGS_BY_ENUM.get(taskType);
     if (!type) {
-      throw new Error(`Ignoring unsupported step of type: ${stepType}`);
+      throw new Error(`Ignoring unsupported task of type: ${taskType}`);
     }
     return type;
   }
 
-  private static stepTypeToString(stepType: StepType): string {
-    const str = STEP_TYPE_ENUMS_BY_STRING.get(stepType);
+  private static taskTypeToString(taskType: TaskType): string {
+    const str = TASK_TYPE_ENUMS_BY_STRING.get(taskType);
     if (!str) {
-      throw Error(`Unsupported step type ${stepType}`);
+      throw Error(`Unsupported task type ${taskType}`);
     }
     return str;
   }
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Step instance.
+   * immutable Task instance.
    *
    * @param id the uuid of the survey instance.
    * @param data the source data in a dictionary keyed by string.
@@ -410,8 +410,8 @@ export class FirebaseDataConverter {
    *   loiId: 'loi123'
    *   taskId: 'task001',
    *   results: {
-   *     'step001': 'Result text',    // For 'text_field' steps.
-   *     'step002': ['A', 'B'],       // For 'multiple_choice' steps.
+   *     'task001': 'Result text',    // For 'text_field' tasks.
+   *     'task002': ['A', 'B'],       // For 'multiple_choice' tasks.
    *      // ...
    *   }
    *   created: <AUDIT_INFO>,
@@ -420,8 +420,8 @@ export class FirebaseDataConverter {
    * </code></pre>
    */
   static toSubmission(job: Job, id: string, data: DocumentData): Submission {
-    if (job.steps === undefined) {
-      throw Error('Job must contain at least once step');
+    if (job.tasks === undefined) {
+      throw Error('Job must contain at least once task');
     }
     if (data === undefined) {
       throw Error(`Submission ${id} does not have document data.`);
@@ -433,11 +433,11 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
       Map<string, Result>(
-        keys(data.results).map((stepId: string) => [
-          stepId as string,
+        keys(data.results).map((taskId: string) => [
+          taskId as string,
           FirebaseDataConverter.toResult(
-            job.steps!.get(stepId)!,
-            data.results[stepId]
+            job.tasks!.get(taskId)!,
+            data.results[taskId]
           ),
         ])
       )
@@ -471,16 +471,16 @@ export class FirebaseDataConverter {
 
   private static resultsToJS(results: Map<string, Result>): {} {
     return results.entrySeq().reduce(
-      (obj: {}, [stepId, result]) => ({
+      (obj: {}, [taskId, result]) => ({
         ...obj,
-        [stepId]: FirebaseDataConverter.resultToJS(result),
+        [taskId]: FirebaseDataConverter.resultToJS(result),
       }),
       {}
     );
   }
 
   private static toResult(
-    step: Step,
+    task: Task,
     resultValue: number | string | List<string>
   ): Result {
     if (typeof resultValue === 'string') {
@@ -492,7 +492,7 @@ export class FirebaseDataConverter {
     if (resultValue instanceof Array) {
       return new Result(
         List(
-          resultValue.map(optionId => step.getMultipleChoiceOption(optionId))
+          resultValue.map(optionId => task.getMultipleChoiceOption(optionId))
         )
       );
     }
