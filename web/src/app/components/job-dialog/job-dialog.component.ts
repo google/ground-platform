@@ -31,7 +31,7 @@ import { List } from 'immutable';
 import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { JobService } from '../../services/job/job.service';
-import { TaskStepEditorComponent } from '../task-step-editor/task-step-editor.component';
+import { TaskEditorComponent } from '../task-editor/task-editor.component';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 // To make ESLint happy:
@@ -51,8 +51,8 @@ export class JobDialogComponent implements OnDestroy {
   steps: List<Step>;
   color!: string;
   defaultJobColor: string;
-  @ViewChildren(TaskStepEditorComponent)
-  taskStepEditors?: QueryList<TaskStepEditorComponent>;
+  @ViewChildren(TaskEditorComponent)
+  taskEditors?: QueryList<TaskEditorComponent>;
   dataCollectorsCanAddPoints = true;
   dataCollectorsCanAddPolygons = true;
 
@@ -92,7 +92,7 @@ export class JobDialogComponent implements OnDestroy {
       this.steps.size
     );
     this.steps = this.steps.push(newStep);
-    this.markTaskStepsTouched();
+    this.markTasksTouched();
     this.focusNewQuestion();
   }
 
@@ -148,13 +148,13 @@ export class JobDialogComponent implements OnDestroy {
       throw Error('Survey not yet loaded');
     }
 
-    if (!this.taskStepEditors) {
+    if (!this.taskEditors) {
       return;
     }
 
-    this.markTaskStepsTouched();
+    this.markTasksTouched();
 
-    for (const editor of this.taskStepEditors) {
+    for (const editor of this.taskEditors) {
       if (editor.taskGroup.invalid || !this.isStepOptionsValid(editor)) {
         return;
       }
@@ -179,11 +179,11 @@ export class JobDialogComponent implements OnDestroy {
     this.addOrUpdateJob(this.surveyId, job);
   }
 
-  private isStepOptionsValid(taskStepEditor: TaskStepEditorComponent): boolean {
-    if (!taskStepEditor.optionEditors) {
+  private isStepOptionsValid(taskEditor: TaskEditorComponent): boolean {
+    if (!taskEditor.optionEditors) {
       return true;
     }
-    for (const editor of taskStepEditor.optionEditors) {
+    for (const editor of taskEditor.optionEditors) {
       if (editor.optionGroup.invalid) {
         return false;
       }
@@ -226,10 +226,10 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   /**
-   * Updates the step at given index from event emitted from task-step-editor
+   * Updates the step at given index from event emitted from task-editor
    *
    * @param index - The index of the step
-   * @param event - updated step emitted from task-step-editor
+   * @param event - updated step emitted from task-editor
    * @returns void
    *
    */
@@ -267,32 +267,32 @@ export class JobDialogComponent implements OnDestroy {
     this.color = event.color;
   }
 
-  private markTaskStepsTouched(): void {
-    this.taskStepEditors?.forEach(editor => {
+  private markTasksTouched(): void {
+    this.taskEditors?.forEach(editor => {
       this.markOptionsTouched(editor);
       editor.labelControl.markAsTouched();
     });
   }
 
-  private markOptionsTouched(editor: TaskStepEditorComponent): void {
+  private markOptionsTouched(editor: TaskEditorComponent): void {
     editor.optionEditors?.forEach(editor => {
       editor.optionGroup.markAllAsTouched();
     });
   }
 
   private focusNewQuestion(): void {
-    if (this.taskStepEditors?.length) {
+    if (this.taskEditors?.length) {
       this.cdr.detectChanges();
-      const question = this.taskStepEditors.last;
+      const question = this.taskEditors.last;
       question?.questionInput?.nativeElement.focus();
     }
   }
 
-  private isStepOptionsDirty(taskStepEditor: TaskStepEditorComponent): boolean {
-    if (!taskStepEditor.optionEditors) {
+  private isStepOptionsDirty(taskEditor: TaskEditorComponent): boolean {
+    if (!taskEditor.optionEditors) {
       return true;
     }
-    for (const editor of taskStepEditor.optionEditors) {
+    for (const editor of taskEditor.optionEditors) {
       if (editor.optionGroup.dirty) {
         return false;
       }
@@ -301,10 +301,10 @@ export class JobDialogComponent implements OnDestroy {
   }
 
   private hasUnsavedChanges(): boolean {
-    if (!this.taskStepEditors) {
+    if (!this.taskEditors) {
       return false;
     }
-    for (const editor of this.taskStepEditors) {
+    for (const editor of this.taskEditors) {
       if (editor.taskGroup.dirty || !this.isStepOptionsDirty(editor)) {
         return true;
       }

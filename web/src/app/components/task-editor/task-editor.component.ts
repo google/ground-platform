@@ -59,11 +59,11 @@ export interface StepTypeSelectOption {
 }
 
 @Component({
-  selector: 'ground-task-step-editor',
-  templateUrl: './task-step-editor.component.html',
-  styleUrls: ['./task-step-editor.component.scss'],
+  selector: 'ground-task-editor',
+  templateUrl: './task-editor.component.html',
+  styleUrls: ['./task-editor.component.scss'],
 })
-export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
+export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
   @Input() stepType?: StepType;
