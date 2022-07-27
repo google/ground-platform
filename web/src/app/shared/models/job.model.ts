@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Task } from './task/task.model';
-
+import { Step } from './task/step.model';
 import { Map } from 'immutable';
 
 export class Job {
@@ -24,13 +23,9 @@ export class Job {
     readonly index: number,
     readonly color?: string,
     readonly name?: string,
-    readonly tasks?: Map<string, Task>,
-    readonly contributorsCanAdd?: string[]
+    readonly steps?: Map<string, Step>,
+    readonly dataCollectorsCanAdd?: string[]
   ) {}
-
-  getTask(taskId: string): Task | undefined {
-    return this.tasks?.get(taskId);
-  }
 
   withIndex(index: number): Job {
     return { ...this, index };

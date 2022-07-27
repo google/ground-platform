@@ -38,7 +38,12 @@ const SURVEYS_COLLECTION_NAME = 'surveys';
   providedIn: 'root',
 })
 export class DataStoreService {
-  private readonly VALID_ROLES = ['owner', 'contributor', 'manager', 'viewer'];
+  private readonly VALID_ROLES = [
+    'owner',
+    'data-collector',
+    'survey-organizer',
+    'viewer',
+  ];
   constructor(private db: AngularFirestore) {}
 
   /**
@@ -261,9 +266,7 @@ export class DataStoreService {
           List(
             array.map(obj => {
               return FirebaseDataConverter.toSubmission(
-                survey
-                  .getJob(loi.jobId)!
-                  .getTask((obj as DocumentData).taskId)!,
+                survey.getJob(loi.jobId)!,
                 obj.id,
                 obj
               );
@@ -286,9 +289,7 @@ export class DataStoreService {
       .pipe(
         map(doc => {
           return FirebaseDataConverter.toSubmission(
-            survey
-              .getJob(loi.jobId)!
-              .getTask((doc.data()! as DocumentData).taskId)!,
+            survey.getJob(loi.jobId)!,
             doc.id,
             doc.data()! as DocumentData
           );

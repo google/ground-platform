@@ -15,7 +15,7 @@
  */
 
 import { AuditInfo } from '../audit-info.model';
-import { Task } from '../task/task.model';
+import { Job } from './../job.model';
 import { Result } from './result.model';
 import { Map } from 'immutable';
 
@@ -23,8 +23,7 @@ export class Submission {
   constructor(
     readonly id: string,
     readonly loiId: string,
-    readonly jobId: string,
-    readonly task: Task | null,
+    readonly job: Job | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
     readonly results: Map<string, Result>
@@ -38,8 +37,7 @@ export class Submission {
     return new Submission(
       this.id,
       this.loiId,
-      this.jobId,
-      this.task,
+      this.job,
       this.created,
       lastModified,
       results
