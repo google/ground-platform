@@ -116,7 +116,7 @@ describe('SurveyListComponent', () => {
       of<Survey[]>([mockSurvey1, mockSurvey2])
     );
     surveyServiceSpy.getSurveyAcl.and.returnValue([
-      new AclEntry('test@gmail.com', Role.MANAGER),
+      new AclEntry('test@gmail.com', Role.SURVEY_ORGANIZER),
     ]);
     authServiceSpy.canManageSurvey.and.returnValue(true);
     fixture = TestBed.createComponent(SurveyListComponent);

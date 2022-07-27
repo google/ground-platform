@@ -1,4 +1,3 @@
-import { DataStoreService } from './../../services/data-store/data-store.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -16,7 +15,7 @@ import { DataStoreService } from './../../services/data-store/data-store.service
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import { DataStoreService } from './../../services/data-store/data-store.service';
 import { SubmissionFormComponent } from './submission-form.component';
 import {
   LocationOfInterest,
@@ -35,7 +34,6 @@ import {
   Cardinality,
 } from '../../shared/models/task/multiple-choice.model';
 import { StepType, Step } from '../../shared/models/task/step.model';
-import { Task } from '../../shared/models/task/task.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
@@ -57,16 +55,16 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { By } from '@angular/platform-browser';
 
 class MockModel {
-  static element001: Step = new Step(
-    'element001',
+  static step001: Step = new Step(
+    'step001',
     StepType.TEXT,
     'Text Field',
     /*required=*/ true,
     0
   );
 
-  static element002: Step = new Step(
-    'element002',
+  static step002: Step = new Step(
+    'step002',
     StepType.TEXT,
     'Text Field',
     /*required=*/ false,
@@ -77,8 +75,8 @@ class MockModel {
 
   static option002 = new Option('option002', 'code002', 'option 2', 2);
 
-  static element003: Step = new Step(
-    'element003',
+  static step003: Step = new Step(
+    'step003',
     StepType.MULTIPLE_CHOICE,
     'Multiple Select',
     /*required=*/ true,
@@ -89,21 +87,16 @@ class MockModel {
     )
   );
 
-  static form001: Task = new Task(
-    'form001',
-    Map({
-      element001: MockModel.element001,
-      element002: MockModel.element002,
-      element003: MockModel.element003,
-    })
-  );
-
   static job001 = new Job(
     'job001',
     1,
     'red',
     'name',
-    Map({ form001: MockModel.form001 })
+    Map({
+      step001: MockModel.step001,
+      step002: MockModel.step002,
+      step003: MockModel.step003,
+    })
   );
 
   static survey001 = new Survey(
@@ -129,13 +122,12 @@ class MockModel {
   static submission001 = new Submission(
     'submission001',
     MockModel.loi001.id,
-    MockModel.loi001.jobId,
-    MockModel.form001,
+    MockModel.job001,
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
-      element001: new Result('result'),
-      element003: new Result(List([MockModel.option001])),
+      step001: new Result('result'),
+      step003: new Result(List([MockModel.option001])),
     })
   );
 }

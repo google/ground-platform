@@ -20,7 +20,7 @@
  */
 export enum Role {
   OWNER,
-  MANAGER,
-  CONTRIBUTOR,
+  SURVEY_ORGANIZER,
+  DATA_COLLECTOR,
   VIEWER,
 }
