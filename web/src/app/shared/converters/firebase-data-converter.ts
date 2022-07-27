@@ -142,7 +142,7 @@ export class FirebaseDataConverter {
     return {
       dataCollectorsCanAdd,
       name,
-      steps: steps?.map(step => this.stepToJS(step)),
+      steps: steps?.map(step => this.stepToJS(step)).toJS(),
       defaultStyle: { color },
       ...jobDoc,
     };
