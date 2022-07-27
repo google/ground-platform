@@ -15,8 +15,8 @@
  */
 import firebase from 'firebase/app';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { Task } from '../models/task/task.model';
-import { Map, List } from 'immutable';
+import { Job } from './../models/job.model';
+import { List, Map } from 'immutable';
 import { Option } from '../models/task/option.model';
 import { Step, StepType } from '../models/task/step.model';
 import {
@@ -46,7 +46,6 @@ class MockFirebaseData {
     },
     loiId: 'loi001',
     jobId: 'job001',
-    taskId: 'task001',
     results: {
       step001: 'text result',
       step002: ['option001', 'option002'],
@@ -117,14 +116,16 @@ class MockModel {
     2
   );
 
-  static task001: Task = new Task(
-    'task001',
+  static job001: Job = new Job(
+    /* id= */ 'job001',
+    /* index= */ 0,
+    '#ffffff',
+    'Test job',
     Map({
       step001: MockModel.step001,
       step002: MockModel.step002,
       step003: MockModel.step003,
       step004: MockModel.step004,
-      step005: MockModel.step005,
     })
   );
 }
@@ -134,7 +135,7 @@ describe('FirebaseDataConverter', () => {
     expect(
       FirebaseDataConverter.submissionToJS(
         FirebaseDataConverter.toSubmission(
-          MockModel.task001,
+          MockModel.job001,
           'submission001',
           MockFirebaseData.submission001
         )

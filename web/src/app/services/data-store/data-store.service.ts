@@ -266,9 +266,7 @@ export class DataStoreService {
           List(
             array.map(obj => {
               return FirebaseDataConverter.toSubmission(
-                survey
-                  .getJob(loi.jobId)!
-                  .getTask((obj as DocumentData).taskId)!,
+                survey.getJob(loi.jobId)!,
                 obj.id,
                 obj
               );
@@ -291,9 +289,7 @@ export class DataStoreService {
       .pipe(
         map(doc => {
           return FirebaseDataConverter.toSubmission(
-            survey
-              .getJob(loi.jobId)!
-              .getTask((doc.data()! as DocumentData).taskId)!,
+            survey.getJob(loi.jobId)!,
             doc.id,
             doc.data()! as DocumentData
           );

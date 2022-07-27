@@ -1,4 +1,3 @@
-import { DataStoreService } from './../../services/data-store/data-store.service';
 /**
  * Copyright 2020 Google LLC
  *
@@ -16,7 +15,7 @@ import { DataStoreService } from './../../services/data-store/data-store.service
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import { DataStoreService } from './../../services/data-store/data-store.service';
 import { SubmissionFormComponent } from './submission-form.component';
 import {
   LocationOfInterest,
@@ -35,7 +34,6 @@ import {
   Cardinality,
 } from '../../shared/models/task/multiple-choice.model';
 import { StepType, Step } from '../../shared/models/task/step.model';
-import { Task } from '../../shared/models/task/task.model';
 import { AuditInfo } from '../../shared/models/audit-info.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SurveyService } from '../../services/survey/survey.service';
@@ -89,21 +87,16 @@ class MockModel {
     )
   );
 
-  static form001: Task = new Task(
-    'form001',
-    Map({
-      step001: MockModel.step001,
-      step002: MockModel.step002,
-      step003: MockModel.step003,
-    })
-  );
-
   static job001 = new Job(
     'job001',
     1,
     'red',
     'name',
-    Map({ form001: MockModel.form001 })
+    Map({
+      step001: MockModel.step001,
+      step002: MockModel.step002,
+      step003: MockModel.step003,
+    })
   );
 
   static survey001 = new Survey(
@@ -129,8 +122,7 @@ class MockModel {
   static submission001 = new Submission(
     'submission001',
     MockModel.loi001.id,
-    MockModel.loi001.jobId,
-    MockModel.form001,
+    MockModel.job001,
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({

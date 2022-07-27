@@ -17,7 +17,6 @@ import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
-import { Task } from '../models/task/task.model';
 import { Step, StepType } from '../models/task/step.model';
 import {
   MultipleChoice,
@@ -133,31 +132,17 @@ export class FirebaseDataConverter {
       data.index || -1,
       data.defaultStyle?.color || data.color,
       data.name,
-      Map<string, Task>(
-        keys(data.tasks).map((id: string) => [
-          id as string,
-          FirebaseDataConverter.toTask(id, data.tasks[id]),
-        ])
-      ),
+      this.toSteps(data),
       data.dataCollectorsCanAdd || []
     );
   }
 
   static jobToJS(job: Job): {} {
-    const { name, tasks, color, dataCollectorsCanAdd, ...jobDoc } = job;
+    const { name, steps, color, dataCollectorsCanAdd, ...jobDoc } = job;
     return {
       dataCollectorsCanAdd,
       name,
-      ...(tasks
-        ? {
-            tasks: tasks
-              ?.valueSeq()
-              .reduce(
-                (map, task) => ({ ...map, [task.id]: this.taskToJS(task) }),
-                {}
-              ),
-          }
-        : {}),
+      steps: steps?.map(step => this.stepToJS(step)),
       defaultStyle: { color },
       ...jobDoc,
     };
@@ -165,36 +150,17 @@ export class FirebaseDataConverter {
 
   /**
    * Converts the raw object representation deserialized from Firebase into an
-   * immutable Task instance.
+   * immutable Map of id to Step.
    *
-   * @param id the uuid of the task instance.
-   * @param data the source data in a dictionary keyed by string.
+   * @param data the source steps in a dictionary keyed by string.
    */
-  private static toTask(id: string, data: DocumentData): Task {
-    return new Task(
-      id,
-      Map<string, Step>(
-        keys(data.steps)
-          .map(id => FirebaseDataConverter.toStep(id, data.steps[id]))
-          .filter(step => step !== null)
-          .map(step => [step!.id, step!])
-      )
+  private static toSteps(data: DocumentData): Map<string, Step> {
+    return Map<string, Step>(
+      keys(data.steps)
+        .map(id => FirebaseDataConverter.toStep(id, data.steps[id]))
+        .filter(step => step !== null)
+        .map(step => [step!.id, step!])
     );
-  }
-
-  private static taskToJS(task: Task): {} {
-    const { steps, ...taskDoc } = task;
-    return {
-      steps:
-        steps?.reduce(
-          (map, step: Step) => ({
-            ...map,
-            [step.id]: this.stepToJS(step),
-          }),
-          {}
-        ) || {},
-      ...taskDoc,
-    };
   }
 
   public static loiToJS(loi: LocationOfInterest): {} {
@@ -453,21 +419,26 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toSubmission(task: Task, id: string, data: DocumentData): Submission {
+  static toSubmission(job: Job, id: string, data: DocumentData): Submission {
+    if (job.steps === undefined) {
+      throw Error('Job must contain at least once step');
+    }
     if (data === undefined) {
       throw Error(`Submission ${id} does not have document data.`);
     }
     return new Submission(
       id,
       data.loiId,
-      data.jobId,
-      task,
+      job,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
       Map<string, Result>(
         keys(data.results).map((stepId: string) => [
           stepId as string,
-          FirebaseDataConverter.toResult(task, stepId, data.results[stepId]),
+          FirebaseDataConverter.toResult(
+            job.steps!.get(stepId)!,
+            data.results[stepId]
+          ),
         ])
       )
     );
@@ -476,8 +447,7 @@ export class FirebaseDataConverter {
   static submissionToJS(submission: Submission): {} {
     return {
       loiId: submission.loiId,
-      jobId: submission.jobId,
-      taskId: submission.task?.id,
+      jobId: submission.job?.id,
       created: FirebaseDataConverter.auditInfoToJs(submission.created),
       lastModified: FirebaseDataConverter.auditInfoToJs(
         submission.lastModified
@@ -510,8 +480,7 @@ export class FirebaseDataConverter {
   }
 
   private static toResult(
-    task: Task,
-    stepID: string,
+    step: Step,
     resultValue: number | string | List<string>
   ): Result {
     if (typeof resultValue === 'string') {
@@ -523,9 +492,7 @@ export class FirebaseDataConverter {
     if (resultValue instanceof Array) {
       return new Result(
         List(
-          resultValue.map(optionId =>
-            task.getMultipleChoiceStepOption(stepID, optionId)
-          )
+          resultValue.map(optionId => step.getMultipleChoiceOption(optionId))
         )
       );
     }

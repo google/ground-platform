@@ -25,7 +25,6 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DialogService } from '../../services/dialog/dialog.service';
 import { Job } from '../../shared/models/job.model';
-import { Task } from '../../shared/models/task/task.model';
 import { Subscription } from 'rxjs';
 import { StepType, Step } from '../../shared/models/task/step.model';
 import { List } from 'immutable';
@@ -52,7 +51,6 @@ export class JobDialogComponent implements OnDestroy {
   steps: List<Step>;
   color!: string;
   defaultJobColor: string;
-  task?: Task;
   @ViewChildren(TaskStepEditorComponent)
   taskStepEditors?: QueryList<TaskStepEditorComponent>;
   dataCollectorsCanAddPoints = true;
@@ -137,10 +135,9 @@ export class JobDialogComponent implements OnDestroy {
       this.job?.dataCollectorsCanAdd?.includes('points') || false;
     this.dataCollectorsCanAddPolygons =
       this.job?.dataCollectorsCanAdd?.includes('polygons') || false;
-    this.task = this.jobService.getTask(this.job);
-    if (this.task) {
+    if (this.job?.steps) {
       this.steps =
-        this.task?.steps.toList().sortBy(step => step.index) || List<Step>();
+        this.job.steps.toList().sortBy(step => step.index) || List<Step>();
     } else {
       this.addQuestion();
     }
@@ -163,8 +160,6 @@ export class JobDialogComponent implements OnDestroy {
       }
     }
     const steps = this.jobService.convertStepsListToMap(this.steps);
-    const taskId = this.task?.id;
-    const tasks = this.jobService.createTask(taskId, steps);
     const allowedLoiTypes: string[] = [];
     if (this.dataCollectorsCanAddPoints) {
       allowedLoiTypes.push('points');
@@ -178,7 +173,7 @@ export class JobDialogComponent implements OnDestroy {
       this.color,
       // TODO: Make jobName Map
       this.jobName.trim(),
-      tasks,
+      steps,
       allowedLoiTypes
     );
     this.addOrUpdateJob(this.surveyId, job);
