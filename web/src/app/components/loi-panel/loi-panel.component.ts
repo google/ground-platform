@@ -113,7 +113,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   getSteps(submission: Submission): List<Step> {
-    return List(submission.task?.steps?.valueSeq() || []);
+    return List(submission.job?.steps?.valueSeq() || []);
   }
 
   onEditSubmissionClick(submission: Submission) {

@@ -50,16 +50,4 @@ describe('SubmissionService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
-
-  describe('createNewSubmission', () => {
-    it('fail if task missing', () => {
-      expect(() =>
-        service.createNewSubmission(
-          newUser(),
-          newSurvey({ jobs: { job001: newJob({ tasks: {} }) } }),
-          newPointOfInterest()
-        )
-      ).toThrow(new Error('No task in job job001'));
-    });
-  });
 });

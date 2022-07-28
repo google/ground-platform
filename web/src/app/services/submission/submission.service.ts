@@ -97,9 +97,9 @@ export class SubmissionService {
     if (!user) {
       throw Error('Login required to create new submission.');
     }
-    const task = survey.getJob(loi.jobId)!.tasks?.first(/*notSetValue=*/ null);
-    if (!task) {
-      throw Error(`No task in job ${loi.jobId}`);
+    const job = survey.getJob(loi.jobId);
+    if (!job) {
+      throw Error(`Missing job ${loi.jobId}`);
     }
     const newSubmissionId = this.dataStore.generateId();
     const auditInfo = new AuditInfo(
@@ -110,8 +110,7 @@ export class SubmissionService {
     return new Submission(
       newSubmissionId,
       loi.id,
-      loi.jobId,
-      task!,
+      job,
       auditInfo,
       auditInfo,
       Map<string, Result>([])
