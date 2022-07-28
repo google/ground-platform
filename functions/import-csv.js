@@ -34,14 +34,14 @@ async function importCsv(req, res) {
   }
   const busboy = new Busboy({ headers: req.headers });
 
-  // Dictionary used to accumulate task step values, keyed by step name.
+  // Dictionary used to accumulate form values, keyed by field name.
   const params = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
   let inserts = [];
 
-  // Handle non-file fields in the task. survey and job must appear
+  // Handle non-file fields in the form. Survey and job must appear
   // before the file for the file handler to work properly.
   busboy.on("field", (key, val) => {
     params[key] = val;
@@ -87,8 +87,8 @@ async function importCsv(req, res) {
 }
 
 /**
- * Transforms a dictionary of string in the task A->B[] into a dictionary of
- * strings in the task B->A. Values in B[] are assumed to appear at most once
+ * Transforms a dictionary of string in the form A->B[] into a dictionary of
+ * strings in the form B->A. Values in B[] are assumed to appear at most once
  * in the array values in the provided dictionary.
  */
 function invertAndFlatten(obj) {
