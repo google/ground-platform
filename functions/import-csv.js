@@ -101,8 +101,8 @@ function invertAndFlatten(obj) {
 }
 
 /**
- * Dictionary of lowercase aliases for recognized LOI attributes. Case
- * is ignored when mapping column aliases to LOI attributes.
+ * Dictionary of lowercase aliases for recognized LOI properties. Case
+ * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   id: ["id", "key"],
@@ -119,19 +119,19 @@ async function insertRow(surveyId, jobId, row) {
 }
 
 /**
- * Convert the provided row (key-value pairs) and jobId into a LocationOfInterest for
- * insertion into the data store.
+ * Convert the provided row (key-value pairs) and jobId into a
+ * LocationOfInterest for insertion into the data store.
  */
 function csvRowToLocationOfInterest(row, jobId) {
   let data = { jobId };
-  let attributes = {};
+  let properties = {};
   for (const columnName in row) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];
     if (loiKey) {
       data[loiKey] = value;
     } else {
-      attributes[columnName] = value;
+      properties[columnName] = value;
     }
   }
   let { lat, lng, ...loi } = data;
@@ -140,9 +140,12 @@ function csvRowToLocationOfInterest(row, jobId) {
   if (isNaN(lat) || isNaN(lng)) {
     return null;
   }
-  loi["location"] = new firestore.GeoPoint(lat, lng);
-  if (Object.keys(attributes).length > 0) {
-    loi["attributes"] = attributes;
+  loi["geometry"] = {
+    type: "Point",
+    coordinates: new firestore.GeoPoint(lat, lng),
+  };
+  if (Object.keys(properties).length > 0) {
+    loi["properties"] = properties;
   }
   return loi;
 }
