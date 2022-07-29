@@ -342,7 +342,6 @@ export class DataStoreService {
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ): Promise<string> {
     const surveyId = this.generateId();
-    await this.updateSurveyTitle(surveyId, title);
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
