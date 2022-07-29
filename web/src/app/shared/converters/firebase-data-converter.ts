@@ -109,7 +109,7 @@ export class FirebaseDataConverter {
     ownerEmail: string,
     title: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
-  ): {} {
+  ) {
     return {
       title,
       acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
