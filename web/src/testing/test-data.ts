@@ -18,7 +18,7 @@ import { PointOfInterest } from './../app/shared/models/loi.model';
 import { Survey } from '../app/shared/models/survey.model';
 import { Map } from 'immutable';
 import { Job } from './../app/shared/models/job.model';
-import { Step } from './../app/shared/models/task/step.model';
+import { Task } from './../app/shared/models/task/task.model';
 import { User } from './../app/shared/models/user.model';
 import firebase from 'firebase/app';
 import { Role } from './../app/shared/models/role.model';
@@ -55,10 +55,10 @@ export class TestData {
     index = 0,
     color = '#ffff00',
     name = 'job',
-    steps = {} as Record<string, Step>,
+    tasks = {} as Record<string, Task>,
     dataCollectorsCanAdd = [] as string[],
   }): Job {
-    return new Job(id, index, color, name, Map(steps), dataCollectorsCanAdd);
+    return new Job(id, index, color, name, Map(tasks), dataCollectorsCanAdd);
   }
 
   public static newPointOfInterest(): PointOfInterest {

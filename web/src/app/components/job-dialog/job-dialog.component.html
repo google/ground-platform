@@ -30,7 +30,10 @@
     <div fxLayout>
       <div fxLayout="column" fxLayoutGap="10px" fxFlex fxFlexAlign="center">
         <label>
-          <mat-checkbox [(ngModel)]="dataCollectorsCanAddPoints" color="primary">
+          <mat-checkbox
+            [(ngModel)]="dataCollectorsCanAddPoints"
+            color="primary"
+          >
             Data collectors may add points
           </mat-checkbox>
         </label>
@@ -39,7 +42,7 @@
             [(ngModel)]="dataCollectorsCanAddPolygons"
             color="primary"
           >
-          Data collectors may add polygons
+            Data collectors may add polygons
           </mat-checkbox>
         </label>
       </div>
@@ -59,22 +62,22 @@
   </div>
   <div cdkDropList (cdkDropListDropped)="drop($event)">
     <div
-      *ngFor="let step of steps; let i = index; trackBy: trackByFn"
+      *ngFor="let task of tasks; let i = index; trackBy: trackByFn"
       fxLayout
       cdkDrag
     >
-      <ground-task-step-editor
-        [label]="step.label"
-        [required]="step.required"
-        [stepType]="step.type"
-        [cardinality]="step.multipleChoice?.cardinality"
-        [multipleChoice]="step.multipleChoice"
-        [stepCount]="steps?.size"
-        (update)="onStepUpdate($event, i)"
-        (delete)="onStepDelete(i)"
+      <ground-task-editor
+        [label]="task.label"
+        [required]="task.required"
+        [taskType]="task.type"
+        [cardinality]="task.multipleChoice?.cardinality"
+        [multipleChoice]="task.multipleChoice"
+        [taskCount]="tasks?.size"
+        (update)="onTaskUpdate($event, i)"
+        (delete)="onTaskDelete(i)"
         fxFlex="2 1 auto"
       >
-      </ground-task-step-editor>
+      </ground-task-editor>
     </div>
   </div>
   <button mat-button class="add-question" type="button" (click)="addQuestion()">
