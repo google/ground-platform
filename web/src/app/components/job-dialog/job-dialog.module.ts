@@ -28,7 +28,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { TaskStepEditorModule } from '../task-step-editor/task-step-editor.module';
+import { TaskEditorModule } from '../task-editor/task-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
@@ -46,7 +46,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatInputModule,
     FlexLayoutModule,
     MatButtonModule,
-    TaskStepEditorModule,
+    TaskEditorModule,
     DragDropModule,
     MatIconModule,
     MatCheckboxModule,

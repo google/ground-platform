@@ -39,7 +39,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { DialogService } from '../../services/dialog/dialog.service';
-import { StepType } from '../../shared/models/task/step.model';
+import { TaskType } from '../../shared/models/task/task.model';
 import { Option } from '../../shared/models/task/option.model';
 import { List } from 'immutable';
 import {
@@ -51,29 +51,29 @@ import { JobService } from '../../services/job/job.service';
 import { Subscription } from 'rxjs';
 import { OptionEditorComponent } from '../option-editor/option-editor.component';
 
-export interface StepTypeSelectOption {
+export interface TaskTypeSelectOption {
   icon: string;
   label: string;
-  type: StepType;
+  type: TaskType;
   cardinality?: Cardinality;
 }
 
 @Component({
-  selector: 'ground-task-step-editor',
-  templateUrl: './task-step-editor.component.html',
-  styleUrls: ['./task-step-editor.component.scss'],
+  selector: 'ground-task-editor',
+  templateUrl: './task-editor.component.html',
+  styleUrls: ['./task-editor.component.scss'],
 })
-export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
+export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
-  @Input() stepType?: StepType;
+  @Input() taskType?: TaskType;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
-  @Input() stepCount?: Number;
+  @Input() taskCount?: Number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   taskOptions: MultipleChoice | undefined;
-  selectStepOptions: StepTypeSelectOption[];
+  selectTaskOptions: TaskTypeSelectOption[];
 
   /** When expanded, options and actions below the fold are visible to the user. */
   expanded: boolean;
@@ -111,50 +111,50 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
   ) {
     this.expanded = false;
     this.selected = false;
-    this.selectStepOptions = [
+    this.selectTaskOptions = [
       {
         icon: 'short_text',
         label: 'Text',
-        type: StepType.TEXT,
+        type: TaskType.TEXT,
       },
       {
         icon: 'radio_button_checked',
         label: 'Select One',
-        type: StepType.MULTIPLE_CHOICE,
+        type: TaskType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_ONE,
       },
       {
         icon: 'library_add_check',
         label: 'Select multiple',
-        type: StepType.MULTIPLE_CHOICE,
+        type: TaskType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_MULTIPLE,
       },
       {
         icon: 'photo',
         label: 'Photo',
-        type: StepType.PHOTO,
+        type: TaskType.PHOTO,
       },
       {
         icon: 'tag',
         label: 'Number',
-        type: StepType.NUMBER,
+        type: TaskType.NUMBER,
       },
       {
         icon: 'calendar_today',
         label: 'Date',
-        type: StepType.DATE,
+        type: TaskType.DATE,
       },
       {
         icon: 'access_time',
         label: 'Time',
-        type: StepType.TIME,
+        type: TaskType.TIME,
       },
     ];
     this.taskGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
-      // By default we set the select step to be of text type.
-      selectStepOption: this.selectStepOptions[StepType.TEXT],
+      // By default we set the select task to be of text type.
+      selectTaskOption: this.selectTaskOptions[TaskType.TEXT],
     });
   }
 
@@ -165,19 +165,19 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
   private isTaskEmpty(): boolean {
     return (
       this.label?.trim().length === 0 &&
-      this.stepCount === 1 &&
-      this.stepType === StepType.TEXT
+      this.taskCount === 1 &&
+      this.taskType === TaskType.TEXT
     );
   }
 
   ngOnInit(): void {
-    // As the task steps value change we are emitting the updated value to the job-dialog.
+    // As the task tasks value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
       this.taskGroup.valueChanges.subscribe(value => {
         this.update.emit({
           label: value.label,
           required: value.required,
-          type: value.selectStepOption.type,
+          type: value.selectTaskOption.type,
           multipleChoice: this.taskOptions,
         });
       })
@@ -185,7 +185,7 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /*
-   * This method is used to get the updated values of step from the job-dialog.
+   * This method is used to get the updated values of task from the job-dialog.
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.multipleChoice) {
@@ -194,45 +194,45 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.taskGroup.setValue({
       label: this.label,
       required: this.required,
-      selectStepOption: this.getSelectedStepTypeOption(),
+      selectTaskOption: this.getSelectedTaskTypeOption(),
     });
     this.markOptionEditorsTouched();
   }
 
-  getSelectedStepTypeOption(): StepTypeSelectOption {
-    const selectedOption = this.selectStepOptions.find(
+  getSelectedTaskTypeOption(): TaskTypeSelectOption {
+    const selectedOption = this.selectTaskOptions.find(
       option =>
-        option.type === this.stepType &&
-        (option.type !== StepType.MULTIPLE_CHOICE ||
+        option.type === this.taskType &&
+        (option.type !== TaskType.MULTIPLE_CHOICE ||
           option.cardinality === this.cardinality)
     );
     if (!selectedOption) {
-      throw new Error(`Unsupported step type${this.stepType}`);
+      throw new Error(`Unsupported task type${this.taskType}`);
     }
     return selectedOption;
   }
 
   /**
-   * Emits the delete step event to the job dialog component.
+   * Emits the delete task event to the job dialog component.
    *
    * @returns void
    */
-  onStepDelete(): void {
+  onTaskDelete(): void {
     this.delete.emit();
   }
 
-  getSelectStepType(): StepTypeSelectOption {
-    return this.taskGroup.get('selectStepOption')?.value;
+  getSelectTaskType(): TaskTypeSelectOption {
+    return this.taskGroup.get('selectTaskOption')?.value;
   }
 
   /**
    * Updates the type in the taskGroup on the select change event.
    *
-   * @param event: StepTypeSelectOption
+   * @param event: TaskTypeSelectOption
    * @returns void
    */
-  onStepTypeSelect(event: StepTypeSelectOption): void {
-    this.stepType = event.type;
+  onTaskTypeSelect(event: TaskTypeSelectOption): void {
+    this.taskType = event.type;
     this.cardinality = event.cardinality;
     if (this.cardinality && this.taskOptions?.options) {
       this.taskOptions = new MultipleChoice(
@@ -240,8 +240,8 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({ selectStepOption: event });
-    if (event.type === StepType.MULTIPLE_CHOICE) {
+    this.taskGroup.patchValue({ selectTaskOption: event });
+    if (event.type === TaskType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
       }
@@ -251,7 +251,7 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /*
-   * This is used to track input added or removed in case of step options.
+   * This is used to track input added or removed in case of task options.
    */
   trackByFn(index: number): number {
     return index;
@@ -260,7 +260,7 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Emits event with updated Options. Called when label or code gets updated.
    *
-   * @param event: label and code value of the option step.
+   * @param event: label and code value of the option task.
    * @param index: index of the option to be updated.
    * @returns void
    */
@@ -316,7 +316,7 @@ export class TaskStepEditorComponent implements OnInit, OnChanges, OnDestroy {
     this.update.emit({
       label: this.label,
       required: this.required,
-      type: this.stepType,
+      type: this.taskType,
       multipleChoice: this.taskOptions,
     });
   }

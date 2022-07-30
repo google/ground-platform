@@ -27,70 +27,70 @@
 <div *ngIf="submissionForm" class="submission">
   <h3>Add/edit submission</h3>
   <form [formGroup]="submissionForm" (ngSubmit)="onSave()" autocomplete="off">
-    <div *ngFor="let step of submissionSteps">
-      <div class="step-result">
-        <!-- Text step -->
-        <div *ngIf="step.type == stepTypes.TEXT">
+    <div *ngFor="let task of submissionTasks">
+      <div class="task-result">
+        <!-- Text task -->
+        <div *ngIf="task.type == taskTypes.TEXT">
           <mat-form-field appearance="fill">
-            <mat-label class="step-label" [attr.for]="step.id">
-              {{ step.label }}
+            <mat-label class="task-label" [attr.for]="task.id">
+              {{ task.label }}
             </mat-label>
             <input
               matInput
-              [formControlName]="step.id"
-              [id]="step.id"
-              [required]="step.required"
+              [formControlName]="task.id"
+              [id]="task.id"
+              [required]="task.required"
             />
           </mat-form-field>
         </div>
-        <div *ngIf="step.type == stepTypes.NUMBER">
+        <div *ngIf="task.type == taskTypes.NUMBER">
           <mat-form-field appearance="fill">
             <input
               type="number"
               matInput
-              [formControlName]="step.id"
-              [id]="step.id"
+              [formControlName]="task.id"
+              [id]="task.id"
             />
           </mat-form-field>
         </div>
 
-        <!-- Multiple choice step -->
+        <!-- Multiple choice task -->
         <div
-          *ngIf="step.type == stepTypes.MULTIPLE_CHOICE"
-          class="multiple-choice-step"
+          *ngIf="task.type == taskTypes.MULTIPLE_CHOICE"
+          class="multiple-choice-task"
         >
-          <!-- Radio button step -->
+          <!-- Radio button task -->
           <mat-label
-            [class.asterix--after]="step.required"
-            [attr.for]="step.id"
-            [id]="step.id"
+            [class.asterix--after]="task.required"
+            [attr.for]="task.id"
+            [id]="task.id"
           >
-            {{ step.label }}
+            {{ task.label }}
           </mat-label>
           <br />
           <mat-radio-group
-            [id]="step.id"
-            [formControlName]="step.id"
-            *ngIf="step.multipleChoice.cardinality == cardinality.SELECT_ONE"
-            [required]="step.required"
+            [id]="task.id"
+            [formControlName]="task.id"
+            *ngIf="task.multipleChoice.cardinality == cardinality.SELECT_ONE"
+            [required]="task.required"
           >
             <mat-radio-button
-              *ngFor="let option of step.multipleChoice.options; let i = index"
+              *ngFor="let option of task.multipleChoice.options; let i = index"
               [value]="option.id"
             >
               {{ option.label }}
             </mat-radio-button>
           </mat-radio-group>
 
-          <!-- Checkbox step -->
+          <!-- Checkbox task -->
           <div
             *ngIf="
-              step.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE
+              task.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE
             "
           >
             <mat-checkbox
               [formControlName]="option.id"
-              *ngFor="let option of step.multipleChoice.options"
+              *ngFor="let option of task.multipleChoice.options"
               [value]="option.id"
             >
               {{ option.label }}
