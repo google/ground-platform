@@ -36,11 +36,11 @@ import { Option } from './option.model';
  * }
  *
  * So to convert string to enum use:
- *  var value = StepType["TEXT"]
+ *  var value = TaskType["TEXT"]
  * Because then:
- *  value == StepType.TEXT
+ *  value == TaskType.TEXT
  */
-export enum StepType {
+export enum TaskType {
   TEXT = 1,
   MULTIPLE_CHOICE = 2,
   PHOTO = 3,
@@ -49,11 +49,11 @@ export enum StepType {
   TIME = 6,
 }
 
-// TODO: add a subclass of Step for each step type.
-export class Step {
+// TODO: add a subclass of Task for each task type.
+export class Task {
   constructor(
     readonly id: string,
-    readonly type: StepType,
+    readonly type: TaskType,
     readonly label: string,
     readonly required: boolean,
     readonly index: number,
@@ -61,21 +61,21 @@ export class Step {
   ) {}
 
   /**
-   * For MULTIPLE_CHOICE steps, returns the option with the specified id.
-   * Throws an Error if called for other step types.
+   * For MULTIPLE_CHOICE tasks, returns the option with the specified id.
+   * Throws an Error if called for other task types.
    */
   getMultipleChoiceOption(optionId: string): Option {
-    if (this.type !== StepType.MULTIPLE_CHOICE) {
+    if (this.type !== TaskType.MULTIPLE_CHOICE) {
       throw Error(
-        `Step ${this.id} of type ${StepType[this.type]} has no options.`
+        `Task ${this.id} of type ${TaskType[this.type]} has no options.`
       );
     }
     if (this.multipleChoice === undefined) {
-      throw Error(`Step ${this.id} does not have choices defined.`);
+      throw Error(`Task ${this.id} does not have choices defined.`);
     }
     const option = this.multipleChoice.options.find(o => o.id === optionId);
     if (!option) {
-      throw Error(`Option ${optionId} not found in step ${this.id}.`);
+      throw Error(`Option ${optionId} not found in task ${this.id}.`);
     }
     return option;
   }

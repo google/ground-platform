@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { TaskStepEditorComponent } from './task-step-editor.component';
+import { TaskEditorComponent } from './task-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { JobService } from './../../services/job/job.service';
@@ -30,13 +30,13 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('TaskFieldEditorComponent', () => {
-  let component: TaskStepEditorComponent;
-  let fixture: ComponentFixture<TaskStepEditorComponent>;
+  let component: TaskEditorComponent;
+  let fixture: ComponentFixture<TaskEditorComponent>;
 
   beforeEach(
     waitForAsync(() => {
       TestBed.configureTestingModule({
-        declarations: [TaskStepEditorComponent],
+        declarations: [TaskEditorComponent],
         imports: [
           FormsModule,
           ReactiveFormsModule,
@@ -59,7 +59,7 @@ describe('TaskFieldEditorComponent', () => {
   );
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TaskStepEditorComponent);
+    fixture = TestBed.createComponent(TaskEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

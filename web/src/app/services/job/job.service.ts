@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { DataStoreService } from '../data-store/data-store.service';
 import { Job } from '../../shared/models/job.model';
-import { Step, StepType } from '../../shared/models/task/step.model';
+import { Task, TaskType } from '../../shared/models/task/task.model';
 import { Option } from '../../shared/models/task/option.model';
 import { MultipleChoice } from '../../shared/models/task/multiple-choice.model';
 import { List, Map } from 'immutable';
@@ -42,17 +42,17 @@ export class JobService {
   }
 
   /**
-   * Creates and returns a new step with a generated unique identifier and a single English label.
+   * Creates and returns a new task with a generated unique identifier and a single English label.
    */
-  createStep(
-    type: StepType,
+  createTask(
+    type: TaskType,
     label: string,
     required: boolean,
     index: number,
     multipleChoice?: MultipleChoice
-  ): Step {
-    const stepId = this.dataStoreService.generateId();
-    return new Step(stepId, type, label, required, index, multipleChoice);
+  ): Task {
+    const taskId = this.dataStoreService.generateId();
+    return new Task(taskId, type, label, required, index, multipleChoice);
   }
 
   /**
@@ -76,18 +76,18 @@ export class JobService {
   }
 
   /**
-   * Converts list of steps to map.
+   * Converts list of tasks to map.
    */
-  convertStepsListToMap(steps: List<Step>): Map<string, Step> {
-    let stepsMap = Map<string, Step>();
-    steps.forEach((step: Step, index: number) => {
-      const jobFieldId = steps && steps.get(index)?.id;
-      const stepId = jobFieldId
+  convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
+    let tasksMap = Map<string, Task>();
+    tasks.forEach((task: Task, index: number) => {
+      const jobFieldId = tasks && tasks.get(index)?.id;
+      const taskId = jobFieldId
         ? jobFieldId
         : this.dataStoreService.generateId();
-      stepsMap = stepsMap.set(stepId, step);
+      tasksMap = tasksMap.set(taskId, task);
     });
-    return stepsMap;
+    return tasksMap;
   }
 
   private async getJobCount(): Promise<number> {

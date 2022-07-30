@@ -18,7 +18,7 @@ import { FirebaseDataConverter } from '../../shared/converters/firebase-data-con
 import { Job } from './../models/job.model';
 import { List, Map } from 'immutable';
 import { Option } from '../models/task/option.model';
-import { Step, StepType } from '../models/task/step.model';
+import { Task, TaskType } from '../models/task/task.model';
 import {
   MultipleChoice,
   Cardinality,
@@ -47,27 +47,27 @@ class MockFirebaseData {
     loiId: 'loi001',
     jobId: 'job001',
     results: {
-      step001: 'text result',
-      step002: ['option001', 'option002'],
-      step003: 123,
-      step004: new firebase.firestore.Timestamp(1641533340, 0),
-      step005: new firebase.firestore.Timestamp(1641534444, 0),
+      task001: 'text result',
+      task002: ['option001', 'option002'],
+      task003: 123,
+      task004: new firebase.firestore.Timestamp(1641533340, 0),
+      task005: new firebase.firestore.Timestamp(1641534444, 0),
     },
   };
 }
 
 class MockModel {
-  static step001: Step = new Step(
-    'step001',
-    StepType.TEXT,
+  static task001: Task = new Task(
+    'task001',
+    TaskType.TEXT,
     'Text Field',
     /*required=*/ true,
     0
   );
 
-  static step002: Step = new Step(
-    'step002',
-    StepType.MULTIPLE_CHOICE,
+  static task002: Task = new Task(
+    'task002',
+    TaskType.MULTIPLE_CHOICE,
     'Multiple Select',
     /*required=*/ true,
     1,
@@ -92,25 +92,25 @@ class MockModel {
     )
   );
 
-  static step003: Step = new Step(
-    'step003',
-    StepType.NUMBER,
+  static task003: Task = new Task(
+    'task003',
+    TaskType.NUMBER,
     'How many sloths are there?',
     /*required=*/ true,
     2
   );
 
-  static step004: Step = new Step(
-    'step004',
-    StepType.DATE,
+  static task004: Task = new Task(
+    'task004',
+    TaskType.DATE,
     'What is the current date?',
     /*required=*/ true,
     2
   );
 
-  static step005: Step = new Step(
-    'step005',
-    StepType.TIME,
+  static task005: Task = new Task(
+    'task005',
+    TaskType.TIME,
     'What time is it?',
     /*required=*/ true,
     2
@@ -122,10 +122,10 @@ class MockModel {
     '#ffffff',
     'Test job',
     Map({
-      step001: MockModel.step001,
-      step002: MockModel.step002,
-      step003: MockModel.step003,
-      step004: MockModel.step004,
+      task001: MockModel.task001,
+      task002: MockModel.task002,
+      task003: MockModel.task003,
+      task004: MockModel.task004,
     })
   );
 }
