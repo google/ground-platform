@@ -23,7 +23,7 @@ import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Job } from '../../shared/models/job.model';
-import { Step, StepType } from '../../shared/models/task/step.model';
+import { Task, TaskType } from '../../shared/models/task/task.model';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { DialogService } from '../../services/dialog/dialog.service';
@@ -38,7 +38,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   surveyId?: string;
   submissionId?: string;
   readonly submissions$: Observable<List<Submission>>;
-  readonly stepTypes = StepType;
+  readonly taskTypes = TaskType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
   job?: Job;
@@ -68,14 +68,14 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     this.photoUrls = new Map();
     this.submissions$.forEach(submissions => {
       submissions.forEach(submission => {
-        this.getSteps(submission).forEach(step => {
+        this.getTasks(submission).forEach(task => {
           if (
-            step.type === StepType.PHOTO &&
-            (submission.results?.get(step.id)?.value as string)
+            task.type === TaskType.PHOTO &&
+            (submission.results?.get(task.id)?.value as string)
           ) {
             this.fillPhotoURL(
-              step.id,
-              submission.results?.get(step.id)?.value as string
+              task.id,
+              submission.results?.get(task.id)?.value as string
             );
           }
         });
@@ -87,11 +87,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     window.open(url, '_blank');
   }
 
-  fillPhotoURL(stepId: string, storageFilePath: string) {
+  fillPhotoURL(taskId: string, storageFilePath: string) {
     this.dataStoreService
       .getImageDownloadURL(storageFilePath)
       .then(url => {
-        this.photoUrls.set(stepId, url);
+        this.photoUrls.set(taskId, url);
       })
       .catch(error => {
         console.log(error);
@@ -112,8 +112,8 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  getSteps(submission: Submission): List<Step> {
-    return List(submission.job?.steps?.valueSeq() || []);
+  getTasks(submission: Submission): List<Task> {
+    return List(submission.job?.tasks?.valueSeq() || []);
   }
 
   onEditSubmissionClick(submission: Submission) {

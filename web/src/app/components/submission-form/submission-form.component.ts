@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { StepType, Step } from '../../shared/models/task/step.model';
+import { TaskType, Task } from '../../shared/models/task/task.model';
 import { Cardinality } from '../../shared/models/task/multiple-choice.model';
 import { Option } from '../../shared/models/task/option.model';
 import { Submission } from '../../shared/models/submission/submission.model';
@@ -51,14 +51,14 @@ import { NavigationService } from '../../services/navigation/navigation.service'
   styleUrls: ['./submission-form.component.scss'],
 })
 export class SubmissionFormComponent {
-  readonly stepTypes = StepType;
+  readonly taskTypes = TaskType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
   readonly job$: Observable<Job>;
   surveyId?: string;
   submission?: Submission;
   submissionForm?: FormGroup;
-  submissionSteps?: List<Step>;
+  submissionTasks?: List<Task>;
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -136,8 +136,8 @@ export class SubmissionFormComponent {
     }
     if (submission instanceof Submission) {
       this.submission = submission;
-      this.submissionSteps = submission!
-        .job!.steps!.toOrderedMap()
+      this.submissionTasks = submission!
+        .job!.tasks!.toOrderedMap()
         .sortBy(entry => entry.index)
         .toList();
       this.initForm();
@@ -156,21 +156,21 @@ export class SubmissionFormComponent {
   }
 
   private convertSubmissionToFormGroup(submission: Submission): FormGroup {
-    const group: { [stepId: string]: FormControl } = {};
-    for (const [stepId, step] of submission.job!.steps!) {
-      const result = submission!.results?.get(stepId);
-      switch (step.type) {
-        case StepType.TEXT:
-          this.addControlsForTextStep(group, step, result);
+    const group: { [taskId: string]: FormControl } = {};
+    for (const [taskId, task] of submission.job!.tasks!) {
+      const result = submission!.results?.get(taskId);
+      switch (task.type) {
+        case TaskType.TEXT:
+          this.addControlsForTextTask(group, task, result);
           break;
-        case StepType.NUMBER:
-          this.addControlsForNumberStep(group, step, result);
+        case TaskType.NUMBER:
+          this.addControlsForNumberTask(group, task, result);
           break;
-        case StepType.MULTIPLE_CHOICE:
-          this.addControlsForMultipleChoiceStep(group, step, result);
+        case TaskType.MULTIPLE_CHOICE:
+          this.addControlsForMultipleChoiceTask(group, task, result);
           break;
         default:
-          console.debug(`Skipping unsupported step type: ${step.type}`);
+          console.debug(`Skipping unsupported task type: ${task.type}`);
       }
     }
     return this.formBuilder.group(group);
@@ -178,125 +178,125 @@ export class SubmissionFormComponent {
 
   private extractResults(): Map<string, Result> {
     return Map<string, Result>(
-      this.submissionSteps!.map(step => [
-        step.id,
-        this.extractResultForStep(step),
+      this.submissionTasks!.map(task => [
+        task.id,
+        this.extractResultForTask(task),
       ])
     );
   }
 
-  private extractResultForStep(step: Step) {
-    switch (step.type) {
-      case StepType.TEXT:
-        return this.extractResultForTextStep(step);
-      case StepType.NUMBER:
-        return this.extractResultForNumberStep(step);
-      case StepType.MULTIPLE_CHOICE:
-        return this.extractResultForMultipleChoiceStep(step);
+  private extractResultForTask(task: Task) {
+    switch (task.type) {
+      case TaskType.TEXT:
+        return this.extractResultForTextTask(task);
+      case TaskType.NUMBER:
+        return this.extractResultForNumberTask(task);
+      case TaskType.MULTIPLE_CHOICE:
+        return this.extractResultForMultipleChoiceTask(task);
       default:
         throw Error(
-          `Unimplemented Result extraction for Step with
-           Type:${step.type}`
+          `Unimplemented Result extraction for Task with
+           Type:${task.type}`
         );
     }
   }
 
-  private addControlsForTextStep(
-    group: { [stepId: string]: FormControl },
-    step: Step,
+  private addControlsForTextTask(
+    group: { [taskId: string]: FormControl },
+    task: Task,
     result?: Result
   ): void {
     const value = result?.value as string;
-    group[step.id] = step.required
+    group[task.id] = task.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
   }
 
-  private addControlsForNumberStep(
-    group: { [stepId: string]: FormControl },
-    step: Step,
+  private addControlsForNumberTask(
+    group: { [taskId: string]: FormControl },
+    task: Task,
     result?: Result
   ): void {
     const value = result?.value as number;
-    group[step.id] = step.required
+    group[task.id] = task.required
       ? new FormControl(value, Validators.required)
       : new FormControl(value);
   }
 
-  private extractResultForTextStep(step: Step): Result {
-    return new Result(this.submissionForm?.value[step.id]);
+  private extractResultForTextTask(task: Task): Result {
+    return new Result(this.submissionForm?.value[task.id]);
   }
 
-  private extractResultForNumberStep(step: Step): Result {
-    return new Result(this.submissionForm?.value[step.id]);
+  private extractResultForNumberTask(task: Task): Result {
+    return new Result(this.submissionForm?.value[task.id]);
   }
 
-  private addControlsForMultipleChoiceStep(
-    group: { [stepId: string]: FormControl },
-    step: Step,
+  private addControlsForMultipleChoiceTask(
+    group: { [taskId: string]: FormControl },
+    task: Task,
     result?: Result
   ): void {
-    switch (step.multipleChoice?.cardinality) {
+    switch (task.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        this.addControlsForSelectOneStep(group, step, result);
+        this.addControlsForSelectOneTask(group, task, result);
         return;
       case Cardinality.SELECT_MULTIPLE:
-        this.addControlsForSelectMultipleStep(group, step, result);
+        this.addControlsForSelectMultipleTask(group, task, result);
         return;
       default:
         throw Error(
-          `Unimplemented conversion to FormControl(s) for Step with
-           Cardinality:${step.multipleChoice?.cardinality}`
+          `Unimplemented conversion to FormControl(s) for Task with
+           Cardinality:${task.multipleChoice?.cardinality}`
         );
     }
   }
 
-  private extractResultForMultipleChoiceStep(step: Step): Result {
-    switch (step.multipleChoice?.cardinality) {
+  private extractResultForMultipleChoiceTask(task: Task): Result {
+    switch (task.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        return this.extractResultForSelectOneStep(step);
+        return this.extractResultForSelectOneTask(task);
       case Cardinality.SELECT_MULTIPLE:
-        return this.extractResultForSelectMultipleStep(step);
+        return this.extractResultForSelectMultipleTask(task);
       default:
         throw Error(
-          `Unimplemented Result extraction for Step with
-           Cardinality:${step.multipleChoice?.cardinality}`
+          `Unimplemented Result extraction for Task with
+           Cardinality:${task.multipleChoice?.cardinality}`
         );
     }
   }
 
-  private addControlsForSelectOneStep(
-    group: { [stepId: string]: FormControl },
-    step: Step,
+  private addControlsForSelectOneTask(
+    group: { [taskId: string]: FormControl },
+    task: Task,
     result?: Result
   ): void {
     const selectedOptionId = ((result?.value as List<Option>)?.first() as Option)
       ?.id;
-    group[step.id] = step.required
+    group[task.id] = task.required
       ? new FormControl(selectedOptionId, Validators.required)
       : new FormControl(selectedOptionId);
   }
 
-  private extractResultForSelectOneStep(step: Step): Result {
-    const selectedOption: Option = step.getMultipleChoiceOption(
-      this.submissionForm?.value[step.id]
+  private extractResultForSelectOneTask(task: Task): Result {
+    const selectedOption: Option = task.getMultipleChoiceOption(
+      this.submissionForm?.value[task.id]
     );
     return new Result(List([selectedOption]));
   }
 
-  private addControlsForSelectMultipleStep(
-    group: { [stepId: string]: FormControl },
-    step: Step,
+  private addControlsForSelectMultipleTask(
+    group: { [taskId: string]: FormControl },
+    task: Task,
     result?: Result
   ): void {
     const selectedOptions = result?.value as List<Option>;
-    for (const option of step.multipleChoice!.options) {
+    for (const option of task.multipleChoice!.options) {
       group[option.id] = new FormControl(selectedOptions?.contains(option));
     }
   }
 
-  private extractResultForSelectMultipleStep(step: Step): Result {
-    const selectedOptions: List<Option> = step.multipleChoice!.options!.filter(
+  private extractResultForSelectMultipleTask(task: Task): Result {
+    const selectedOptions: List<Option> = task.multipleChoice!.options!.filter(
       option => this.submissionForm?.value[option.id]
     );
     return new Result(selectedOptions);

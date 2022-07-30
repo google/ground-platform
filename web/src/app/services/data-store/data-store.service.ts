@@ -207,7 +207,7 @@ export class DataStoreService {
         ),
         // Cast to LocationOfInterest to remove undefined from type. Done as separate
         // map() operation since compiler doesn't recognize cast when defined in
-        // previous map() step.
+        // previous map() task.
         map(f => f as LocationOfInterest)
       );
   }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Step } from './task/step.model';
+import { Task } from './task/task.model';
 import { Map } from 'immutable';
 
 export class Job {
@@ -23,7 +23,7 @@ export class Job {
     readonly index: number,
     readonly color?: string,
     readonly name?: string,
-    readonly steps?: Map<string, Step>,
+    readonly tasks?: Map<string, Task>,
     readonly dataCollectorsCanAdd?: string[]
   ) {}
 
