@@ -46,7 +46,7 @@ describe('DrawingToolsComponent', () => {
   let mockDisabled$: BehaviorSubject<boolean>;
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
-  let mockObservationId$: BehaviorSubject<string | null>;
+  let mockSubmissionId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
@@ -97,12 +97,10 @@ describe('DrawingToolsComponent', () => {
 
       navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
         'NavigationService',
-        ['getObservationId$']
+        ['getSubmissionId$']
       );
-      mockObservationId$ = new BehaviorSubject<string | null>(null);
-      navigationServiceSpy.getObservationId$.and.returnValue(
-        mockObservationId$
-      );
+      mockSubmissionId$ = new BehaviorSubject<string | null>(null);
+      navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
       surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
         'getActiveSurvey$',
@@ -148,8 +146,8 @@ describe('DrawingToolsComponent', () => {
       expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('false');
     });
 
-    it('is disabled when an observation is selected', fakeAsync(() => {
-      mockObservationId$.next('oid1');
+    it('is disabled when an submission is selected', fakeAsync(() => {
+      mockSubmissionId$.next('oid1');
       tick();
       // wait for async pipe to reflect
       fixture.detectChanges();

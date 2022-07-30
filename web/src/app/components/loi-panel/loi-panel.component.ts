@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Observation } from './../../shared/models/observation/observation.model';
-import { ObservationService } from './../../services/observation/observation.service';
+import { Submission } from './../../shared/models/submission/submission.model';
+import { SubmissionService } from './../../services/submission/submission.service';
 import { LocationOfInterestService } from './../../services/loi/loi.service';
 import { switchMap } from 'rxjs/operators';
 import { SurveyService } from './../../services/survey/survey.service';
@@ -36,8 +36,8 @@ import { DialogService } from '../../services/dialog/dialog.service';
 })
 export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   surveyId?: string;
-  observationId?: string;
-  readonly observations$: Observable<List<Observation>>;
+  submissionId?: string;
+  readonly submissions$: Observable<List<Submission>>;
   readonly stepTypes = StepType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
@@ -47,20 +47,18 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     surveyService: SurveyService,
     loiService: LocationOfInterestService,
-    observationService: ObservationService,
+    submissionService: SubmissionService,
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
     private zone: NgZone
   ) {
-    this.observations$ = surveyService
+    this.submissions$ = surveyService
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
           loiService
             .getSelectedLocationOfInterest$()
-            .pipe(
-              switchMap(loi => observationService.observations$(survey, loi))
-            )
+            .pipe(switchMap(loi => submissionService.submissions$(survey, loi)))
         )
       );
     combineLatest([
@@ -68,16 +66,16 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
       loiService.getSelectedLocationOfInterest$(),
     ]).subscribe(([survey, loi]) => (this.job = survey.jobs.get(loi.jobId)));
     this.photoUrls = new Map();
-    this.observations$.forEach(observations => {
-      observations.forEach(observation => {
-        this.getSteps(observation).forEach(step => {
+    this.submissions$.forEach(submissions => {
+      submissions.forEach(submission => {
+        this.getSteps(submission).forEach(step => {
           if (
             step.type === StepType.PHOTO &&
-            (observation.responses?.get(step.id)?.value as string)
+            (submission.results?.get(step.id)?.value as string)
           ) {
             this.fillPhotoURL(
               step.id,
-              observation.responses?.get(step.id)?.value as string
+              submission.results?.get(step.id)?.value as string
             );
           }
         });
@@ -108,56 +106,56 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(
-      this.navigationService.getObservationId$().subscribe(id => {
-        this.observationId = id || undefined;
+      this.navigationService.getSubmissionId$().subscribe(id => {
+        this.submissionId = id || undefined;
       })
     );
   }
 
-  getSteps(observation: Observation): List<Step> {
-    return List(observation.task?.steps?.valueSeq() || []);
+  getSteps(submission: Submission): List<Step> {
+    return List(submission.job?.steps?.valueSeq() || []);
   }
 
-  onEditObservationClick(observation: Observation) {
-    this.navigationService.editObservation(
+  onEditSubmissionClick(submission: Submission) {
+    this.navigationService.editSubmission(
       this.navigationService.getLocationOfInterestId()!,
-      observation.id
+      submission.id
     );
   }
 
-  onAddObservationClick() {
-    this.navigationService.editObservation(
+  onAddSubmissionClick() {
+    this.navigationService.editSubmission(
       this.navigationService.getLocationOfInterestId()!,
-      NavigationService.OBSERVATION_ID_NEW
+      NavigationService.SUBMISSION_ID_NEW
     );
   }
 
-  onDeleteObservationClick(id: string) {
-    this.navigationService.editObservation(
+  onDeleteSubmissionClick(id: string) {
+    this.navigationService.editSubmission(
       this.navigationService.getLocationOfInterestId()!,
       id
     );
     this.dialogService
       .openConfirmationDialog(
         'Warning',
-        'Are you sure you wish to delete this observation? ' +
+        'Are you sure you wish to delete this submission? ' +
           'Any associated data will be lost. This cannot be undone.'
       )
       .afterClosed()
       .subscribe(async dialogResult => {
         if (dialogResult) {
-          await this.deleteObservation();
+          await this.deleteSubmission();
         }
       });
   }
 
-  async deleteObservation() {
-    if (!this.surveyId || !this.observationId) {
+  async deleteSubmission() {
+    if (!this.surveyId || !this.submissionId) {
       return;
     }
-    await this.dataStoreService.deleteObservation(
+    await this.dataStoreService.deleteSubmission(
       this.surveyId,
-      this.observationId
+      this.submissionId
     );
     this.onClose();
   }

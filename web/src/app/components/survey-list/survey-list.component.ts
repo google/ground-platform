@@ -25,7 +25,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { List } from 'immutable';
 
 @Component({
-  selector: 'app-survey-list',
+  selector: 'ground-survey-list',
   templateUrl: './survey-list.component.html',
   styleUrls: ['./survey-list.component.scss'],
 })

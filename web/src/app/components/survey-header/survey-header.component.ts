@@ -24,7 +24,7 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
 
 @Component({
-  selector: 'app-survey-header',
+  selector: 'ground-survey-header',
   templateUrl: './survey-header.component.html',
   styleUrls: ['./survey-header.component.scss'],
 })

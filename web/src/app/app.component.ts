@@ -24,7 +24,7 @@ import { Env } from '../environments/environment-enums';
  * in routing.module.ts.
  */
 @Component({
-  selector: 'app-root',
+  selector: 'ground-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.css'],
 })

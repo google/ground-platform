@@ -68,13 +68,13 @@
         cdkDrag
         fxLayout
       >
-        <app-option-editor
+        <ground-option-editor
           [label]="option.label"
           [code]="option.code"
           [index]="i"
           (update)="onOptionUpdate($event, i)"
           (delete)="onOptionDelete(i)"
-        ></app-option-editor>
+        ></ground-option-editor>
       </div>
       <button
         mat-button

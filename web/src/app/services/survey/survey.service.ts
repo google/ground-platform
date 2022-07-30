@@ -118,7 +118,7 @@ export class SurveyService {
   }
 
   /**
-   * Checks if a user has manager or owner level permissions of the survey.
+   * Checks if a user has survey organizer or owner level permissions of the survey.
    */
   canManageSurvey(): boolean {
     const user = this.authService.getCurrentUser();

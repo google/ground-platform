@@ -59,7 +59,7 @@ export interface StepTypeSelectOption {
 }
 
 @Component({
-  selector: 'app-task-step-editor',
+  selector: 'ground-task-step-editor',
   templateUrl: './task-step-editor.component.html',
   styleUrls: ['./task-step-editor.component.scss'],
 })

@@ -15,50 +15,46 @@
  */
 
 @import 'variables';
+@import '~firebaseui/dist/firebaseui.css';
 
-.submission.card {
+.submission {
   margin: 16px;
 }
 .submission .step-label {
   font-size: 12px;
   line-height: 16px;
-  color: mat-color($foreground, secondary-text);
   margin-bottom: 3px;
 }
 .submission .step-result {
   font-size: 14px;
   line-height: 20px;
-  color: mat-color($foreground, text);
   margin-bottom: 12px;
 }
-.option-label:not(:last-child):after {
-  content: ', ';
-  display: inline-block;
+.step-result .mat-form-field {
+  width: 100%;
 }
-
-.button-container {
-  padding: 0 16px;
+/**
+ * Make sure that inline items have proper spacing between them,
+ * e.g. on Submission Form page.
+ */
+.mat-radio-label-content,
+.mat-checkbox-label {
+  margin-right: 17px;
 }
-
-.add-submission-btn {
-  position: absolute;
-  bottom: 32px;
-  border-radius: 100px;
-  width: 193px;
-  height: 48px;
-  right: 53px;
-  z-index: 1000;
+/* The spacing below text box should be smaller. */
+.mat-form-field-wrapper {
+  margin-bottom: -1.34em;
 }
-
-.no-submission-text {
-  font-style: italic;
-  color: mat-color($foreground, secondary-text);
-  margin: 16px;
-  width: 267px;
-  bottom: 32px;
-  z-index: 1000;
+/* The spacing between a step label and its options should be larger */
+.mat-label {
+  margin-bottom: 1em;
 }
-
-.add-submission-icon {
-  padding: 10px;
+/* The spacing between radio buttons and checkboxes should be larger */
+.mat-radio-button,
+.mat-checkbox {
+  margin-right: 1em;
+}
+.asterix--after:after {
+  content: '*';
+  color: mat-color($warn);
 }

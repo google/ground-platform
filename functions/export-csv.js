@@ -69,34 +69,34 @@ async function exportCsv(req, res) {
   csvStream.pipe(res);
 
   const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
-  const observations = await db.fetchObservationsByJobId(survey.id, jobId);
+  const submissions = await db.fetchSubmissionsByJobId(survey.id, jobId);
 
-  // Index observations by LOI id in memory. This consumes more
-  // memory than iterating over and streaming both LOI and observation`
+  // Index submissions by LOI id in memory. This consumes more
+  // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const observationsByLocationOfInterest = {};
-  observations.forEach((observation) => {
-    const loiId = observation.get("loiId");
-    const arr = observationsByLocationOfInterest[loiId] || [];
-    arr.push(observation.data());
-    observationsByLocationOfInterest[loiId] = arr;
+  const submissionsByLocationOfInterest = {};
+  submissions.forEach((submission) => {
+    const loiId = submission.get("loiId");
+    const arr = submissionsByLocationOfInterest[loiId] || [];
+    arr.push(submission.data());
+    submissionsByLocationOfInterest[loiId] = arr;
   });
 
   lois.forEach((loi) => {
     const loiId = loi.id;
     const location = loi.get("location") || {};
-    const observations = observationsByLocationOfInterest[loiId] || [{}];
-    observations.forEach((observation) => {
+    const submissions = submissionsByLocationOfInterest[loiId] || [{}];
+    submissions.forEach((submission) => {
       const row = [];
       row.push(getId(loi));
       row.push(getLabel(loi));
       row.push(location["_latitude"] || "");
       row.push(location["_longitude"] || "");
       row.push(toWkt(loi.get("geoJson")) || "");
-      const responses = observation["responses"] || {};
+      const results = submission["results"] || {};
       elements
-        .map((element) => getValue(element, responses))
+        .map((element) => getValue(element, results))
         .forEach((value) => row.push(value));
       csvStream.write(row);
     });
@@ -144,20 +144,18 @@ function getLabel(loi) {
   );
 }
 /**
- * Returns the string representation of a specific task element response.
+ * Returns the string representation of a specific task element result.
  */
-function getValue(element, responses) {
-  const response = responses[element.id] || "";
+function getValue(element, results) {
+  const result = results[element.id] || "";
   if (
     element.type === "multiple_choice" &&
-    Array.isArray(response) &&
+    Array.isArray(result) &&
     element.options
   ) {
-    return response
-      .map((id) => getMultipleChoiceValues(id, element))
-      .join(", ");
+    return result.map((id) => getMultipleChoiceValues(id, element)).join(", ");
   } else {
-    return response;
+    return result;
   }
 }
 

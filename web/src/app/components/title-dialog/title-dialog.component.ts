@@ -21,7 +21,7 @@ import { SurveyService } from '../../services/survey/survey.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 
 @Component({
-  selector: 'app-title-dialog',
+  selector: 'ground-title-dialog',
   templateUrl: './title-dialog.component.html',
   styleUrls: ['./title-dialog.component.css'],
 })

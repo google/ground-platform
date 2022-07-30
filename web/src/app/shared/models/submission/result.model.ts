@@ -1,6 +1,5 @@
 /**
- * @license
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,14 +14,9 @@
  * limitations under the License.
  */
 
-import { browser, by, element } from 'protractor';
+import { List } from 'immutable';
+import { Option } from '../task/option.model';
 
-export class AppPage {
-  navigateTo() {
-    browser.get(browser.baseUrl);
-  }
-
-  getTitleText() {
-    return element(by.css('ground-root span')).getText() as Promise<string>;
-  }
+export class Result {
+  constructor(readonly value: number | string | List<Option> | Date) {}
 }
