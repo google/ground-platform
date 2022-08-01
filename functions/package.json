@@ -6,7 +6,8 @@
     "shell": "firebase experimental:functions:shell",
     "emulators": "firebase emulators:start --config ../firebase.local.json --project fake-project-id",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test": "mocha --reporter list"
   },
   "dependencies": {
     "@fast-csv/format": "^4.3.5",
@@ -25,5 +26,8 @@
   "engines": {
     "node": "12"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  }
 }
