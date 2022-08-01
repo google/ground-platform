@@ -63,7 +63,7 @@ async function importGeoJson(req, res) {
     });
 
     file
-      .pipe(JSONStream.parse(["lois", true]))
+      .pipe(JSONStream.parse(["features", true]))
       .on("data", async (geoJsonLoi) => {
         if (geoJsonType !== "FeatureCollection") {
           // TODO: report error to user
@@ -75,7 +75,7 @@ async function importGeoJson(req, res) {
           return;
         }
         try {
-          const loi = geoJsonToGroundLocationOfInterest(geoJsonLoi, jobId);
+          const loi = geoJsonToLoi(geoJsonLoi, jobId);
           if (loi) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
@@ -107,18 +107,15 @@ async function importGeoJson(req, res) {
 }
 
 /**
- * Convert the provided GeoJSON LocationOfInterest and jobId into a LocationOfInterest for
- * insertion into the Ground data store.
+ * Convert the provided GeoJSON LocationOfInterest and jobId into a
+ * LocationOfInterest for insertion into the data store.
  */
-function geoJsonToGroundLocationOfInterest(geoJsonLoi, jobId) {
-  // TODO: Migrate Android app to use geometry for points instead of 'location'.
+function geoJsonToLoi(geoJsonLoi, jobId) {
+  // TODO: Add created/modified metadata.
   return {
     jobId,
+    geometry: geoJsonLoi.geometry,
     properties: geoJsonLoi.properties,
-    // TODO: Remove once web app moves over to using 'geometry' field.
-    geoJson: JSON.stringify(geoJsonLoi),
-    // TODO: Convert to object (incl nested arrays) and store in 'geometry'.
-    // TODO: Add created/modified metadata.
   };
 }
 

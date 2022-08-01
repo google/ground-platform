@@ -17,6 +17,8 @@
 
 "use strict";
 
+const { firestore } = require("firebase-admin");
+
 class Datastore {
   constructor(db) {
     this.db_ = db;
@@ -83,13 +85,40 @@ class Datastore {
   }
 
   async insertLocationOfInterest(surveyId, loi) {
+    const loiDoc = {
+      ...loi,
+      geometry: Datastore.toFirestoreMap(loi.geometry),
+    };
     const docRef = await this.db_.collection("surveys").doc(surveyId);
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new Error(`/surveys/${surveyId} not found`);
     }
-    await docRef.collection("lois").add(loi);
+    await docRef.collection("lois").add(loiDoc);
   }
 }
+
+function toFirestoreValue(value) {
+  if (value === null) {
+    return null;
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 2 && value.every((x) => typeof x === "number")) {
+      return new firestore.GeoPoint(value[0], value[1]);
+    }
+    // Convert array to map.
+    return Object.fromEntries(value.map((x, i) => [i, toFirestoreValue(x)]));
+  }
+  return value;
+}
+
+Datastore.toFirestoreMap = function (geometry) {
+  return Object.fromEntries(
+    Object.entries(geometry).map(([key, value]) => [
+      key,
+      toFirestoreValue(value),
+    ])
+  );
+};
 
 module.exports = Datastore;
