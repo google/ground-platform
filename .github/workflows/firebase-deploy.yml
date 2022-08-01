@@ -35,19 +35,19 @@ jobs:
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
         env:
-          FILE_NAME: "src/environments/.firebase-config.ts"
+          FILE_NAME: "web/src/environments/.firebase-config.ts"
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Create google-maps-config.ts
         uses: "finnp/create-file-action@master"
         env:
-          FILE_NAME: "src/environments/.google-maps-config.ts"
+          FILE_NAME: "web/src/environments/.google-maps-config.ts"
           FILE_DATA: ${{ secrets.GOOGLE_MAPS_CONFIG }}
 
       - name: Create backend-config.json
         uses: "finnp/create-file-action@master"
         env:
-          FILE_NAME: "src/environments/.backend-config.json"
+          FILE_NAME: "web/src/environments/.backend-config.json"
           FILE_DATA: ${{ secrets.BACKEND_CONFIG }}
 
       - name: Build Angular App
