@@ -24,8 +24,6 @@ import { AuthService } from './../../services/auth/auth.service';
 import { Subject } from 'rxjs';
 import { User } from '../../shared/models/user.model';
 
-const { newUser, newSurvey, newJob, newPointOfInterest } = TestData;
-
 describe('SubmissionService', () => {
   const user$ = new Subject<User | null>();
   let service: SubmissionService;
