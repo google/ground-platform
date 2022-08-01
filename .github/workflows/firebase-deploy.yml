@@ -33,22 +33,22 @@ jobs:
         run: npm install -g @angular/cli > /dev/null
 
       - name: Create firebase-config.ts
-        run: touch src/environments/.firebase-config.ts && echo $FIREBASE_CONFIG > src/environments/.firebase-config.ts
-        shell: bash
+        uses: "finnp/create-file-action@master"
         env:
-          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+          FILE_NAME: "src/environments/.firebase-config.ts"
+          FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Create google-maps-config.ts
-        run: touch src/environments/.google-maps-config.ts && echo $GOOGLE_MAPS_CONFIG > src/environments/.google-maps-config.ts
-        shell: bash
+        uses: "finnp/create-file-action@master"
         env:
-          FIREBASE_CONFIG: ${{ secrets.GOOGLE_MAPS_CONFIG }}
+          FILE_NAME: "src/environments/.google-maps-config.ts"
+          FILE_DATA: ${{ secrets.GOOGLE_MAPS_CONFIG }}
 
-      - name: Create backend-config.ts
-        run: touch src/environments/.backend-config.ts && echo $BACKEND_CONFIG > src/environments/.backend-config.ts
-        shell: bash
+      - name: Create backend-config.json
+        uses: "finnp/create-file-action@master"
         env:
-          FIREBASE_CONFIG: ${{ secrets.BACKEND_CONFIG }}
+          FILE_NAME: "src/environments/.backend-config.json"
+          FILE_DATA: ${{ secrets.BACKEND_CONFIG }}
 
       - name: Build Angular App
         run: ./build.sh
