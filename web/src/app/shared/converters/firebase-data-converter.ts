@@ -141,7 +141,7 @@ export class FirebaseDataConverter {
     return {
       dataCollectorsCanAdd,
       name,
-      tasks: tasks?.map(task => this.taskToJS(task)),
+      tasks: tasks?.map(task => this.taskToJS(task)).toJS(),
       defaultStyle: { color },
       ...jobDoc,
     };
