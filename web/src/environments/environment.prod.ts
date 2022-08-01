@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
+import { googleMapsConfig } from './.google-maps-config';
+import { firebaseConfig } from './.firebase-config';
+import { offlineBaseMapSources } from './.backend-config.json';
 import { Env } from './environment-enums';
 
 export const environment = {
   production: true,
-  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-  firebase: {
-    apiKey: process.env.FIREBASE_CONFIG_API_KEY,
-    authDomain: process.env.FIREBASE_CONFIG_AUTH_DOMAIN,
-    databaseUrl: process.env.FIREBASE_CONFIG_DATABASE_URL,
-    projectId: process.env.FIREBASE_CONFIG_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_CONFIG_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_CONFIG_MESSAGING_SENDER_ID,
-    configAppId: process.env.FIREBASE_CONFIG_APP_ID,
-  },
-  cloudFunctionsUrl: process.env.CLOUD_FUNCTIONS_URL,
-  offlineBaseMapSources: [
-    {
-      url: process.env.OFFLINE_BASE_MAP_SOURCES_URL!,
-    },
-  ],
+  googleMapsApiKey: googleMapsConfig.apiKey,
+  firebase: firebaseConfig,
+  cloudFunctionsUrl: '',
+  offlineBaseMapSources,
   useEmulators: false,
   env: Env.Prod,
 };

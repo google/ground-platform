@@ -32,33 +32,21 @@ jobs:
       - name: Install Angular-CLI
         run: npm install -g @angular/cli > /dev/null
 
+      - name: Create firebase-config.ts
+        run: echo ${{ secrets.FIREBASE_CONFIG }} > src/environments/.firebase-config.ts
+
+      - name: Create google-maps-config.ts
+        run: echo ${{ secrets.GOOGLE_MAPS_CONFIG }} > src/environments/.google-maps-config.ts
+
+      - name: Create backend-config.json
+        run: echo ${{ secrets.BACKEND_CONFIG }} > src/environments/.backend-config.ts
+
       - name: Build Angular App
         run: ./build.sh
-        env:
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          FIREBASE_CONFIG_API_KEY: ${{ secrets.FIREBASE_CONFIG_API_KEY }}
-          FIREBASE_CONFIG_AUTH_DOMAIN: ${{ secrets.FIREBASE_CONFIG_AUTH_DOMAIN }}
-          FIREBASE_CONFIG_DATABASE_URL: ${{ secrets.FIREBASE_CONFIG_DATABASE_URL }}
-          FIREBASE_CONFIG_PROJECT_ID: ${{ secrets.FIREBASE_CONFIG_PROJECT_ID }}
-          FIREBASE_CONFIG_STORAGE_BUCKET: ${{ secrets.FIREBASE_CONFIG_STORAGE_BUCKET }}
-          FIREBASE_CONFIG_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_CONFIG_MESSAGING_SENDER_ID }}
-          FIREBASE_CONFIG_APP_ID: ${{ secrets.FIREBASE_CONFIG_APP_ID }}
-          CLOUD_FUNCTIONS_URL: ${{ secrets.CLOUD_FUNCTIONS_URL }}
-          OFFLINE_BASE_MAP_SOURCES_URL: ${{ secrets.OFFLINE_BASE_MAP_SOURCES_URL }}
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}"
           channelId: live
           projectId: gnd-dev
-        env:
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          FIREBASE_CONFIG_API_KEY: ${{ secrets.FIREBASE_CONFIG_API_KEY }}
-          FIREBASE_CONFIG_AUTH_DOMAIN: ${{ secrets.FIREBASE_CONFIG_AUTH_DOMAIN }}
-          FIREBASE_CONFIG_DATABASE_URL: ${{ secrets.FIREBASE_CONFIG_DATABASE_URL }}
-          FIREBASE_CONFIG_PROJECT_ID: ${{ secrets.FIREBASE_CONFIG_PROJECT_ID }}
-          FIREBASE_CONFIG_STORAGE_BUCKET: ${{ secrets.FIREBASE_CONFIG_STORAGE_BUCKET }}
-          FIREBASE_CONFIG_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_CONFIG_MESSAGING_SENDER_ID }}
-          FIREBASE_CONFIG_APP_ID: ${{ secrets.FIREBASE_CONFIG_APP_ID }}
-          CLOUD_FUNCTIONS_URL: ${{ secrets.CLOUD_FUNCTIONS_URL }}
-          OFFLINE_BASE_MAP_SOURCES_URL: ${{ secrets.OFFLINE_BASE_MAP_SOURCES_URL }}
