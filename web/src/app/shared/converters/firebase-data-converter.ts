@@ -111,8 +111,7 @@ export class FirebaseDataConverter {
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ): {} {
     return {
-      // TODO(i18n): Make title language dynamic.
-      title: { en: title },
+      title,
       acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
       ...(offlineBaseMapSources?.length ? { offlineBaseMapSources } : {}),
     };

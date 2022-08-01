@@ -100,7 +100,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({ title: { en: newTitle } }, { merge: true });
+      .set({ title: newTitle }, { merge: true });
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {

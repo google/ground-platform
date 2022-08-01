@@ -171,7 +171,6 @@ export class JobDialogComponent implements OnDestroy {
       this.job?.id || '',
       /* index */ this.job?.index || -1,
       this.color,
-      // TODO: Make jobName Map
       this.jobName.trim(),
       tasks,
       allowedLoiTypes
