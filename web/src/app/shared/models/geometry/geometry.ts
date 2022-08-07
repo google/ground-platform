@@ -23,6 +23,9 @@ export interface Geometry {
   geometryType: GeometryType;
 }
 
+/**
+ * An enum representing the type of the geometry instance.
+ */
 export enum GeometryType {
   POINT,
   LINE_STRING,
