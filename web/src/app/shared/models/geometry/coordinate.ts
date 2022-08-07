@@ -18,10 +18,7 @@
  * A lightweight class used to store coordinates on the 2-dimensional Cartesian
  * plane.
  *
- * It is distinct from Point, which is a subclass of Geometry. Unlike objects of
- * type Point (which contain additional information such as an envelope, a
- * precision model, and spatial reference system information), a Coordinate only
- * contains ordinate values and accessor methods.
+ * It is distinct from Point, which is a subclass of Geometry.
  *
  * Based on https://locationtech.github.io/jts/javadoc/org/locationtech/jts/geom/Coordinate.html
  */
