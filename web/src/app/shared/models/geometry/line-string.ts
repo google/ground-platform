@@ -22,8 +22,8 @@ import { Geometry, GeometryType } from './geometry';
  * or more vertices, along with all points along the linearly-interpolated
  * curves (line segments) between each pair of consecutive vertices. Consecutive
  * vertices may be equal. The line segments in the line may intersect each other
- *  (in other words, the linestring may "curl back" in itself and
- * self-intersect. Linestrings with exactly two identical points are invalid.
+ * (in other words, the linestring may "curl back" in itself and self-intersect.
+ * Linestrings with exactly two identical points are invalid.
  *
  * A linestring is assumed to have either 0 or 2 or more points.
  *
