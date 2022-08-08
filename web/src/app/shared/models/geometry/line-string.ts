@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { List } from 'immutable';
 import { Coordinate } from './coordinate';
 import { Geometry, GeometryType } from './geometry';
 
@@ -32,5 +33,5 @@ import { Geometry, GeometryType } from './geometry';
 export class LineString implements Geometry {
   geometryType = GeometryType.LINE_STRING;
 
-  constructor(readonly points: Coordinate[]) {}
+  constructor(readonly points: List<Coordinate>) {}
 }

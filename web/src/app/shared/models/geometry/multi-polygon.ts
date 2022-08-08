@@ -16,6 +16,7 @@
 
 import { Polygon } from './polygon';
 import { Geometry, GeometryType } from './geometry';
+import { List } from 'immutable';
 
 /**
  * Models a collection of Polygons.
@@ -29,5 +30,5 @@ import { Geometry, GeometryType } from './geometry';
 export class MultiPolygon implements Geometry {
   geometryType = GeometryType.MULTI_POLYGON;
 
-  constructor(readonly polygons: Polygon[]) {}
+  constructor(readonly polygons: List<Polygon>) {}
 }

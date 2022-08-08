@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { List } from 'immutable';
 import { Geometry, GeometryType } from './geometry';
 import { LinearRing } from './linear-ring';
 
@@ -31,5 +32,5 @@ import { LinearRing } from './linear-ring';
 export class Polygon implements Geometry {
   geometryType = GeometryType.POLYGON;
 
-  constructor(readonly shell: LinearRing, readonly holes: LinearRing[]) {}
+  constructor(readonly shell: LinearRing, readonly holes: List<LinearRing>) {}
 }
