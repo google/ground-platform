@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import { Coordinate } from './coordinate';
 import { GeometryType } from './geometry';
 import { LineString } from './line-string';
+import { List } from 'immutable';
 
 /**
  * Models an OGC SFS LinearRing. A LinearRing is a LineString which is both
@@ -30,4 +32,8 @@ import { LineString } from './line-string';
  */
 export class LinearRing extends LineString {
   geometryType = GeometryType.LINEAR_RING;
+
+  constructor(points: List<Coordinate>) {
+    super(points);
+  }
 }
