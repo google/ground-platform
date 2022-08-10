@@ -1,3 +1,4 @@
+import { MultiPolygon } from './../models/geometry/multi-polygon';
 /**
  * Copyright 2019 Google LLC
  *
@@ -13,8 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import firebase from 'firebase/app';
+import { Coordinate } from './../models/geometry/coordinate';
 import { DocumentData } from '@angular/fire/firestore';
+import { Geometry, GeometryType } from './../models/geometry/geometry';
+import { GenericLocationOfInterest } from './../models/loi.model';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
 import { Task, TaskType } from '../models/task/task.model';
@@ -36,6 +43,12 @@ import { Result } from '../../shared/models/submission/result.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
+import { Point } from '../models/geometry/point';
+import { indexedMapToList } from './indexed-map';
+import { Polygon } from '../models/geometry/polygon';
+import { LinearRing } from '../models/geometry/linear-ring';
+
+import GeoPoint = firebase.firestore.GeoPoint;
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -53,12 +66,71 @@ const TASK_TYPE_STRINGS_BY_ENUM = Map(
   )
 );
 
+const GEOJSON_GEOMETRY_TYPES = Map([
+  [GeometryType.POINT, 'Point'],
+  [GeometryType.POLYGON, 'Polygon'],
+  [GeometryType.MULTI_POLYGON, 'MultiPolygon'],
+]);
+
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
  * empty array.
  */
 function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
+}
+
+function toGeometry(geometry?: any): Geometry {
+  if (!geometry) {
+    throw new Error('Missing geometry');
+  }
+  switch (geometry.type) {
+    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT):
+      return toPoint(geometry.coordinates);
+    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON):
+      return toPolygon(geometry.coordinates);
+    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
+      return toMultiPolygon(geometry.coordinates);
+    default:
+      throw new Error(`Unsupported geometry type ${geometry.type}`);
+  }
+}
+
+function toPoint(coordinates?: any): Point {
+  return new Point(toCoordinate(coordinates));
+}
+
+function isGeoPointList(list: List<any>): boolean {
+  return (
+    list instanceof List &&
+    !list.isEmpty() &&
+    list.every(v => v instanceof GeoPoint)
+  );
+}
+
+function toPolygon(coordinatesMap?: any): Polygon {
+  const rings = indexedMapToList(coordinatesMap) as List<List<GeoPoint>>;
+  if (rings.isEmpty() || !rings.every(l => isGeoPointList(l))) {
+    throw new Error('Missing or invalid coordinates');
+  }
+  const shell = new LinearRing(rings.shift()!.map(c => toCoordinate(c)));
+  const holes = rings.map(h => new LinearRing(h.map(c => toCoordinate(c))));
+  return new Polygon(shell, holes);
+}
+
+function toMultiPolygon(coordinatesMap?: any): MultiPolygon {
+  const polygons = indexedMapToList(coordinatesMap);
+  if (polygons.isEmpty()) {
+    throw new Error('Empty multi-polygon in db ${coordinatesMap}');
+  }
+  return new MultiPolygon(polygons.map(p => toPolygon(p)));
+}
+
+function toCoordinate(coordinates?: any): Coordinate {
+  if (!(coordinates && coordinates instanceof GeoPoint)) {
+    throw new Error(`Expected GeoPoint, got ${coordinates}`);
+  }
+  return new Coordinate(coordinates.latitude, coordinates.longitude);
 }
 
 export class FirebaseDataConverter {
@@ -224,6 +296,8 @@ export class FirebaseDataConverter {
     try {
       return new Task(
         id,
+        // TODO: Move private static functions out to top-level of file so that
+        // they don't need to be qualified with full class name.
         FirebaseDataConverter.stringToTaskType(data.type),
         data.label,
         data.required,
@@ -359,43 +433,22 @@ export class FirebaseDataConverter {
       if (!data.jobId) {
         throw new Error('Missing job id');
       }
-      const loiProperties = Map<string, string | number>(
+      const properties = Map<string, string | number>(
         keys(data.properties).map((property: string) => [
           property,
           data.properties[property],
         ])
       );
-
-      if (this.isPointOfInterest(data)) {
-        return new PointOfInterest(
-          id,
-          data.jobId,
-          data.location,
-          loiProperties
-        );
-      }
-      if (this.isGeoJsonLocationOfInterest(data)) {
-        const geoJson = JSON.parse(data.geoJson);
-        return new GeoJsonLocationOfInterest(
-          id,
-          data.jobId,
-          geoJson,
-          loiProperties
-        );
-      }
-      if (this.isAreaOfInterest(data)) {
-        return new AreaOfInterest(
-          id,
-          data.jobId,
-          data.geometry.coordinates,
-          loiProperties
-        );
-      }
-      throw new Error('Missing location and geoJson');
+      const geometry = toGeometry(data.geometry);
+      return new GenericLocationOfInterest(
+        id,
+        data.jobId,
+        geometry,
+        properties
+      );
     } catch (err) {
-      console.error(`Invalid loi ${id}, ${err}`);
+      console.warn('Ignoring invalid LOI in remote data store', data, err);
     }
-    console.warn(`Invalid loi ${id} in remote data store ignored`);
     return;
   }
 
@@ -568,16 +621,5 @@ export class FirebaseDataConverter {
    */
   static toRoleId(role: Role): string {
     return Role[role].toLowerCase();
-  }
-
-  private static isPointOfInterest(data: DocumentData): boolean {
-    return data?.location?.latitude && data?.location?.longitude;
-  }
-
-  private static isGeoJsonLocationOfInterest(data: DocumentData): boolean {
-    return data?.geoJson;
-  }
-  private static isAreaOfInterest(data: DocumentData): boolean {
-    return data?.geometry;
   }
 }
