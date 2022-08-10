@@ -1,4 +1,3 @@
-import { MultiPolygon } from './../models/geometry/multi-polygon';
 /**
  * Copyright 2019 Google LLC
  *
@@ -47,6 +46,7 @@ import { Point } from '../models/geometry/point';
 import { indexedMapToList } from './indexed-map';
 import { Polygon } from '../models/geometry/polygon';
 import { LinearRing } from '../models/geometry/linear-ring';
+import { MultiPolygon } from './../models/geometry/multi-polygon';
 
 import GeoPoint = firebase.firestore.GeoPoint;
 
