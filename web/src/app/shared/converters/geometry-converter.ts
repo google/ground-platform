@@ -28,11 +28,29 @@ import { indexedMapToList } from './indexed-map';
 
 import GeoPoint = firebase.firestore.GeoPoint;
 
+/**
+ * Maps geometry type enum values to their GeoJson equivalent string
+ * representations used in the remote db.
+ */
 const GEOJSON_GEOMETRY_TYPES = Map([
   [GeometryType.POINT, 'Point'],
   [GeometryType.POLYGON, 'Polygon'],
   [GeometryType.MULTI_POLYGON, 'MultiPolygon'],
 ]);
+
+/**
+ * Converts remote db representation of a geometry to a geometry object using a
+ * modified GeoJSON representation:
+ *
+ * * The GeoJSON map hierarchy is converted to a Firestore nested map.
+ * * Since Firestore does not allow nested arrays, arrays are replaced with
+ *   nested maps, keyed by integer array index.
+ * * Coordinates (two-element double arrays) are represented as a Firestore
+ *   GeoPoint.
+ *
+ * Only `Point`, `Polygon`, and `MultiPolygon` are supported; behavior for other
+ * geometry types is undefined.
+ */
 
 export function toGeometry(geometry?: any): Geometry {
   if (!geometry) {
