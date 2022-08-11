@@ -8,6 +8,10 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "types": ["node"],
+    /*
+      Required to get jasmine type bindings to work in VSCode as per
+      https://github.com/microsoft/TypeScript/issues/11620 
+    */
     "typeRoots": [
       "../node_modules/@types"
     ]
