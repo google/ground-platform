@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import firebase from 'firebase/app';
-import { Coordinate } from './../models/geometry/coordinate';
 import { DocumentData } from '@angular/fire/firestore';
-import { Geometry, GeometryType } from './../models/geometry/geometry';
 import { GenericLocationOfInterest } from './../models/loi.model';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
@@ -42,13 +38,7 @@ import { Result } from '../../shared/models/submission/result.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
-import { Point } from '../models/geometry/point';
-import { indexedMapToList } from './indexed-map';
-import { Polygon } from '../models/geometry/polygon';
-import { LinearRing } from '../models/geometry/linear-ring';
-import { MultiPolygon } from './../models/geometry/multi-polygon';
-
-import GeoPoint = firebase.firestore.GeoPoint;
+import { toGeometry } from './geometry-converter';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -66,71 +56,12 @@ const TASK_TYPE_STRINGS_BY_ENUM = Map(
   )
 );
 
-const GEOJSON_GEOMETRY_TYPES = Map([
-  [GeometryType.POINT, 'Point'],
-  [GeometryType.POLYGON, 'Polygon'],
-  [GeometryType.MULTI_POLYGON, 'MultiPolygon'],
-]);
-
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
  * empty array.
  */
 function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
-}
-
-function toGeometry(geometry?: any): Geometry {
-  if (!geometry) {
-    throw new Error('Missing geometry');
-  }
-  switch (geometry.type) {
-    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT):
-      return toPoint(geometry.coordinates);
-    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON):
-      return toPolygon(geometry.coordinates);
-    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
-      return toMultiPolygon(geometry.coordinates);
-    default:
-      throw new Error(`Unsupported geometry type ${geometry.type}`);
-  }
-}
-
-function toPoint(coordinates?: any): Point {
-  return new Point(toCoordinate(coordinates));
-}
-
-function isGeoPointList(list: List<any>): boolean {
-  return (
-    list instanceof List &&
-    !list.isEmpty() &&
-    list.every(v => v instanceof GeoPoint)
-  );
-}
-
-function toPolygon(coordinatesMap?: any): Polygon {
-  const rings = indexedMapToList(coordinatesMap) as List<List<GeoPoint>>;
-  if (rings.isEmpty() || !rings.every(l => isGeoPointList(l))) {
-    throw new Error('Missing or invalid coordinates');
-  }
-  const shell = new LinearRing(rings.shift()!.map(c => toCoordinate(c)));
-  const holes = rings.map(h => new LinearRing(h.map(c => toCoordinate(c))));
-  return new Polygon(shell, holes);
-}
-
-function toMultiPolygon(coordinatesMap?: any): MultiPolygon {
-  const polygons = indexedMapToList(coordinatesMap);
-  if (polygons.isEmpty()) {
-    throw new Error('Empty multi-polygon in db ${coordinatesMap}');
-  }
-  return new MultiPolygon(polygons.map(p => toPolygon(p)));
-}
-
-function toCoordinate(coordinates?: any): Coordinate {
-  if (!(coordinates && coordinates instanceof GeoPoint)) {
-    throw new Error(`Expected GeoPoint, got ${coordinates}`);
-  }
-  return new Coordinate(coordinates.latitude, coordinates.longitude);
 }
 
 export class FirebaseDataConverter {
