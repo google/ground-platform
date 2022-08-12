@@ -24,9 +24,11 @@ import { Polygon } from '../models/geometry/polygon';
 import { Coordinate } from './../models/geometry/coordinate';
 import { Geometry, GeometryType } from './../models/geometry/geometry';
 import { MultiPolygon } from './../models/geometry/multi-polygon';
-import { indexedMapToList } from './indexed-map';
 
 import GeoPoint = firebase.firestore.GeoPoint;
+
+/** Pretty-print objects. */
+const stringify = (o: Object) => JSON.stringify(o);
 
 /**
  * Maps geometry type enum values to their GeoJson equivalent string
@@ -72,35 +74,83 @@ function toPoint(coordinates?: any): Point {
   return new Point(toCoordinate(coordinates));
 }
 
-function isGeoPointList(list: List<any>): boolean {
-  return (
-    list instanceof List &&
-    !list.isEmpty() &&
-    list.every(v => v instanceof GeoPoint)
-  );
-}
-
+/**
+ * Returns a polygon constructed from the db representation of polygon
+ * coordinates. The provided map must be an indexed map of rings (one shell and
+ * zero or more holes), each comprised of an indexed map of coordinates.
+ */
 function toPolygon(coordinatesMap?: any): Polygon {
-  const rings = indexedMapToList(coordinatesMap) as List<List<GeoPoint>>;
-  if (rings.isEmpty() || !rings.every(l => isGeoPointList(l))) {
-    throw new Error('Missing or invalid coordinates');
+  const rings: List<List<any>> = indexedMapToList(coordinatesMap).map(
+    indexedMapToList
+  );
+  if (rings.isEmpty()) {
+    throw new Error('Empty coordinates map');
   }
-  const shell = new LinearRing(rings.shift()!.map(c => toCoordinate(c)));
-  const holes = rings.map(h => new LinearRing(h.map(c => toCoordinate(c))));
+  // First ring is the polygon's outer shell.
+  const shell = toLinearRing(rings.first());
+  // Any remaining rings represent inner rings / holes.
+  const holes = rings.shift().map(h => toLinearRing(h));
   return new Polygon(shell, holes);
 }
 
+/**
+ * Returns a polygon constructed from the db representation of multi-polygon
+ * coordinates. The provided map must be an indexed map of polygons. See
+ * `toPolygon` for polygon representation.
+ */
 function toMultiPolygon(coordinatesMap?: any): MultiPolygon {
   const polygons = indexedMapToList(coordinatesMap);
   if (polygons.isEmpty()) {
-    throw new Error('Empty multi-polygon in db ${coordinatesMap}');
+    throw new Error(`Empty multi-polygon ${stringify(coordinatesMap)}`);
   }
-  return new MultiPolygon(polygons.map(p => toPolygon(p)));
+  return new MultiPolygon(polygons.map(toPolygon));
 }
 
 function toCoordinate(coordinates?: any): Coordinate {
   if (!(coordinates && coordinates instanceof GeoPoint)) {
-    throw new Error(`Expected GeoPoint, got ${coordinates}`);
+    throw new Error(`Expected GeoPoint, got ${stringify(coordinates)}`);
   }
   return new Coordinate(coordinates.latitude, coordinates.longitude);
+}
+
+function toLinearRing(coordinateList: List<any>): LinearRing {
+  return new LinearRing(coordinateList.map(toCoordinate));
+}
+
+/**
+ * Returns the list representation of a dictionary whose keys represent indices
+ * within the final list. This is done for the outer map only; it is not
+ * done recursively.
+ *
+ * For example, the following map representation:
+ * {0: {0: 'alpha', 1: 'beta'}, 1: {0: 'gamma', 1: 'delta'}}
+ *
+ * Would be converted the the following list:
+ * [{0: 'alpha', 1: 'beta'}, {0: 'gamma', 1: 'delta'}]
+ *
+ * `null`Null` values are not allowed.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function indexedMapToList(map?: any): List<any> {
+  if (
+    !map ||
+    typeof map !== 'object' ||
+    Object.values(map).some(v => v === null)
+  ) {
+    throw new Error(`Invalid indexed map ${stringify(map)}`);
+  }
+
+  // Convert keys to numbers and sort by index.
+  const entries = Object.entries(map)
+    .map(([key, val]) => [Number(key), val] as [number, unknown])
+    .sort((a, b) => a[0] - b[0]);
+
+  // Verify keys correspond 1:1 to array indices (i.e., 0 to array.length-1).
+  if (entries.map(e => e[0]).some((key, idx) => key !== idx)) {
+    throw new Error(`Non-sequential indices in ${stringify(entries)}`);
+  }
+
+  // Entries are already sorted by sequential indices, so we can now extract
+  // values as an array.
+  return List(entries.map(e => e[1]));
 }
