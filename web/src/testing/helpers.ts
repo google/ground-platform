@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import { Collection } from 'immutable';
+import { is, Collection } from 'immutable';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function immutableCollectionTester(a: any, b: any): boolean | undefined {
-  if (a instanceof Collection && b instanceof Collection) {
-    return (a as Collection<never, never>).equals(
-      b as Collection<never, never>
-    );
-  }
-  return;
+function deepEqualityTester(a: any, b: any): boolean | undefined {
+  return is(a, b);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +30,6 @@ function formatImmutableCollection(val: any): string | undefined {
 }
 
 beforeEach(() => {
-  jasmine.addCustomEqualityTester(immutableCollectionTester);
+  jasmine.addCustomEqualityTester(deepEqualityTester);
   jasmine.addCustomObjectFormatter(formatImmutableCollection);
 });
