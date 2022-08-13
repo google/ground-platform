@@ -128,7 +128,7 @@ function toLinearRing(coordinateList: List<any>): LinearRing {
  * Would be converted the the following list:
  * [{0: 'alpha', 1: 'beta'}, {0: 'gamma', 1: 'delta'}]
  *
- * `null`Null` values are not allowed.
+ * `null` values are not allowed.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function indexedMapToList(map?: any): List<any> {
