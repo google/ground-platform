@@ -87,40 +87,88 @@ function indexedGeoPointMap(path: Path): {} {
   return map;
 }
 
-describe('geometry-converter.ts', () => {
-  it('Convert map to Point', () =>
-    expect(
-      toGeometry({
-        type: 'Point',
-        coordinates: new GeoPoint(x, y),
-      })
-    ).toEqual(point(x, y)));
-
-  it('Convert map to Polygon', () =>
-    expect(
-      toGeometry({
-        type: 'Polygon',
-        coordinates: {
-          '0': indexedGeoPointMap(path1),
-          '1': indexedGeoPointMap(path2),
+fdescribe('geometry-converter.ts', () => {
+  describe('toGeometry', () => {
+    // Valid / passing test cases.
+    [
+      {
+        expectation: 'converts map to Point',
+        input: {
+          type: 'Point',
+          coordinates: new GeoPoint(x, y),
         },
-      })
-    ).toEqual(polygon(path1, path2)));
-
-  it('Convert map to MultiPolygon', () =>
-    expect(
-      toGeometry({
-        type: 'MultiPolygon',
-        coordinates: {
-          '0': {
+        expectedOutput: point(x, y),
+      },
+      {
+        expectation: 'converts map to Polygon',
+        input: {
+          type: 'Polygon',
+          coordinates: {
             '0': indexedGeoPointMap(path1),
             '1': indexedGeoPointMap(path2),
           },
-          '1': {
-            '0': indexedGeoPointMap(path3),
-            '1': indexedGeoPointMap(path4),
+        },
+        expectedOutput: polygon(path1, path2),
+      },
+      {
+        expectation: 'converts map to MultiPolygon',
+        input: {
+          type: 'MultiPolygon',
+          coordinates: {
+            '0': {
+              '0': indexedGeoPointMap(path1),
+              '1': indexedGeoPointMap(path2),
+            },
+            '1': {
+              '0': indexedGeoPointMap(path3),
+              '1': indexedGeoPointMap(path4),
+            },
           },
         },
-      })
-    ).toEqual(multiPolygon(polygon(path1, path2), polygon(path3, path4))));
+        expectedOutput: multiPolygon(
+          polygon(path1, path2),
+          polygon(path3, path4)
+        ),
+      },
+    ].forEach(({ expectation, input, expectedOutput }) =>
+      it(expectation, () => expect(toGeometry(input)).toEqual(expectedOutput))
+    );
+
+    // Failure states.
+    [
+      {
+        expectation: 'fails on null geometry',
+        input: null,
+      },
+      {
+        expectation: 'fails on unknown type',
+        input: {
+          type: 'Squircle',
+          coordinates: new GeoPoint(x, y),
+        },
+      },
+      {
+        expectation: 'fails on point with missing coordinates',
+        input: {
+          type: 'Point',
+        },
+      },
+      {
+        expectation: 'fails on point with null coordinates',
+        input: {
+          type: 'Point',
+          coordinates: null,
+        },
+      },
+      {
+        expectation: 'fails on point with wrong coordinates type',
+        input: {
+          type: 'Point',
+          coordinates: 'Kapow!',
+        },
+      },
+    ].forEach(({ expectation, input }) =>
+      it(expectation, () => expect(toGeometry(input)).toBeInstanceOf(Error))
+    );
+  });
 });
