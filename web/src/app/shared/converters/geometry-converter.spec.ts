@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../../testing/helpers';
 import firebase from 'firebase/app';
 import { List } from 'immutable';
 import { Coordinate } from '../models/geometry/coordinate';
