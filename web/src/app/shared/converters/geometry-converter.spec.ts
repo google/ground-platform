@@ -87,7 +87,7 @@ function indexedGeoPointMap(path: Path): {} {
   return map;
 }
 
-fdescribe('geometry-converter.ts', () => {
+describe('geometry-converter.ts', () => {
   describe('toGeometry', () => {
     // Valid / passing test cases.
     [
