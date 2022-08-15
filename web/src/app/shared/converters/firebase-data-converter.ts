@@ -39,6 +39,7 @@ import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
 import { toGeometry } from './geometry-converter';
+import { Geometry } from '../models/geometry/geometry';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -370,13 +371,18 @@ export class FirebaseDataConverter {
           data.properties[property],
         ])
       );
-      const geometry = toGeometry(data.geometry);
-      return new GenericLocationOfInterest(
-        id,
-        data.jobId,
-        geometry,
-        properties
-      );
+      const result = toGeometry(data.geometry);
+      if (result instanceof Error) {
+        // TODO: Return Error rather than rethrowing to force callers to handle.
+        throw result as Error;
+      } else {
+        return new GenericLocationOfInterest(
+          id,
+          data.jobId,
+          result as Geometry,
+          properties
+        );
+      }
     } catch (err) {
       console.warn('Ignoring invalid LOI in remote data store', data, err);
     }

@@ -54,19 +54,23 @@ const GEOJSON_GEOMETRY_TYPES = Map([
  * geometry types is undefined.
  */
 
-export function toGeometry(geometry?: any): Geometry {
+export function toGeometry(geometry?: any): Geometry | Error {
   if (!geometry) {
-    throw new Error('Missing geometry');
+    return new Error('Missing geometry');
   }
-  switch (geometry.type) {
-    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT):
-      return toPoint(geometry.coordinates);
-    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON):
-      return toPolygon(geometry.coordinates);
-    case GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
-      return toMultiPolygon(geometry.coordinates);
-    default:
-      throw new Error(`Unsupported geometry type ${geometry.type}`);
+  try {
+    switch (geometry.type) {
+      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT):
+        return toPoint(geometry.coordinates);
+      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON):
+        return toPolygon(geometry.coordinates);
+      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
+        return toMultiPolygon(geometry.coordinates);
+      default:
+        return Error(`Unsupported geometry type ${geometry.type}`);
+    }
+  } catch (e) {
+    return e instanceof Error ? e : new Error(JSON.stringify(e));
   }
 }
 
