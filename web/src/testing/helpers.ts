@@ -17,7 +17,7 @@
 import { is, isValueObject, Collection } from 'immutable';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function deepEqualityTester(a: any, b: any): boolean | undefined {
+export function deepEqualityTester(a: any, b: any): boolean | undefined {
   // `is()` doesn't do deep equals on arrays or dictionaries, so we let Jasmine
   // handle these instead. Jasmine will still pass indiviudal elements back to
   // this tester.
@@ -33,14 +33,9 @@ function deepEqualityTester(a: any, b: any): boolean | undefined {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatImmutableCollection(val: any): string | undefined {
+export function formatImmutableCollection(val: any): string | undefined {
   if (val instanceof Collection) {
     return JSON.stringify((val as Collection<never, never>).toJS());
   }
   return;
 }
-
-beforeEach(() => {
-  jasmine.addCustomEqualityTester(deepEqualityTester);
-  jasmine.addCustomObjectFormatter(formatImmutableCollection);
-});

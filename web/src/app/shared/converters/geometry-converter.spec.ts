@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import '../../../testing/helpers';
+import {
+  deepEqualityTester,
+  formatImmutableCollection,
+} from '../../../testing/helpers';
 import firebase from 'firebase/app';
 import { List } from 'immutable';
 import { Coordinate } from '../models/geometry/coordinate';
@@ -88,6 +91,11 @@ function indexedGeoPointMap(path: Path): {} {
 }
 
 describe('geometry-converter.ts', () => {
+  beforeEach(() => {
+    jasmine.addCustomEqualityTester(deepEqualityTester);
+    jasmine.addCustomObjectFormatter(formatImmutableCollection);
+  });
+  
   describe('toGeometry', () => {
     // Valid / passing test cases.
     [
