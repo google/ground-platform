@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-import { is, Collection } from 'immutable';
+import { is, isValueObject, Collection } from 'immutable';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function deepEqualityTester(a: any, b: any): boolean | undefined {
+  // `is()` doesn't do deep equals on arrays or dictionaries, so we let Jasmine
+  // handle these instead. Jasmine will still pass indiviudal elements back to
+  // this tester.
+  if (
+    Array.isArray(a) ||
+    Array.isArray(b) ||
+    !isValueObject(a) ||
+    !isValueObject(b)
+  ) {
+    return;
+  }
   return is(a, b);
 }
 
