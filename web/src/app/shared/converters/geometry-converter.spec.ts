@@ -95,7 +95,7 @@ describe('geometry-converter.ts', () => {
     jasmine.addCustomEqualityTester(deepEqualityTester);
     jasmine.addCustomObjectFormatter(formatImmutableCollection);
   });
-  
+
   describe('toGeometry', () => {
     // Valid / passing test cases.
     [
