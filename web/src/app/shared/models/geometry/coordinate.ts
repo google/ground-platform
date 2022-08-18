@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { hash } from 'immutable';
+
 /**
  * A lightweight class used to store coordinates on the 2-dimensional Cartesian
  * plane.
@@ -24,4 +26,12 @@
  */
 export class Coordinate {
   constructor(readonly x: number, readonly y: number) {}
+
+  equals(other: Coordinate): boolean {
+    return this.x === other.x && this.y === other.y;
+  }
+
+  hashCode(): number {
+    return hash(this);
+  }
 }

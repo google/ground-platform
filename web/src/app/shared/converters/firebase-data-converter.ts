@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
+import { GenericLocationOfInterest } from './../models/loi.model';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
 import { Task, TaskType } from '../models/task/task.model';
@@ -36,6 +38,8 @@ import { Result } from '../../shared/models/submission/result.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
+import { toGeometry } from './geometry-converter';
+import { Geometry } from '../models/geometry/geometry';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -224,6 +228,8 @@ export class FirebaseDataConverter {
     try {
       return new Task(
         id,
+        // TODO: Move private static functions out to top-level of file so that
+        // they don't need to be qualified with full class name.
         FirebaseDataConverter.stringToTaskType(data.type),
         data.label,
         data.required,
@@ -359,43 +365,27 @@ export class FirebaseDataConverter {
       if (!data.jobId) {
         throw new Error('Missing job id');
       }
-      const loiProperties = Map<string, string | number>(
+      const properties = Map<string, string | number>(
         keys(data.properties).map((property: string) => [
           property,
           data.properties[property],
         ])
       );
-
-      if (this.isPointOfInterest(data)) {
-        return new PointOfInterest(
+      const result = toGeometry(data.geometry);
+      if (result instanceof Error) {
+        // TODO: Return Error rather than rethrowing to force callers to handle.
+        throw result as Error;
+      } else {
+        return new GenericLocationOfInterest(
           id,
           data.jobId,
-          data.location,
-          loiProperties
+          result as Geometry,
+          properties
         );
       }
-      if (this.isGeoJsonLocationOfInterest(data)) {
-        const geoJson = JSON.parse(data.geoJson);
-        return new GeoJsonLocationOfInterest(
-          id,
-          data.jobId,
-          geoJson,
-          loiProperties
-        );
-      }
-      if (this.isAreaOfInterest(data)) {
-        return new AreaOfInterest(
-          id,
-          data.jobId,
-          data.geometry.coordinates,
-          loiProperties
-        );
-      }
-      throw new Error('Missing location and geoJson');
     } catch (err) {
-      console.error(`Invalid loi ${id}, ${err}`);
+      console.warn('Ignoring invalid LOI in remote data store', data, err);
     }
-    console.warn(`Invalid loi ${id} in remote data store ignored`);
     return;
   }
 
@@ -568,16 +558,5 @@ export class FirebaseDataConverter {
    */
   static toRoleId(role: Role): string {
     return Role[role].toLowerCase();
-  }
-
-  private static isPointOfInterest(data: DocumentData): boolean {
-    return data?.location?.latitude && data?.location?.longitude;
-  }
-
-  private static isGeoJsonLocationOfInterest(data: DocumentData): boolean {
-    return data?.geoJson;
-  }
-  private static isAreaOfInterest(data: DocumentData): boolean {
-    return data?.geometry;
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { List } from 'immutable';
+import { hash, is, List } from 'immutable';
 import { Geometry, GeometryType } from './geometry';
 import { LinearRing } from './linear-ring';
 
@@ -33,4 +33,12 @@ export class Polygon implements Geometry {
   geometryType = GeometryType.POLYGON;
 
   constructor(readonly shell: LinearRing, readonly holes: List<LinearRing>) {}
+
+  equals(other: Polygon): boolean {
+    return is(this.shell, other.shell) && is(this.holes, other.holes);
+  }
+
+  hashCode(): number {
+    return hash(this);
+  }
 }

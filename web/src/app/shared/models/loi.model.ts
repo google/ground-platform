@@ -16,13 +16,18 @@
 
 import firebase from 'firebase/app';
 import { Map } from 'immutable';
+import { Geometry } from './geometry/geometry';
 
 export interface LocationOfInterest {
   readonly id: string;
   readonly jobId: string;
+  // TODO: Make non-null once other subtypes are removed.
+  readonly geometry?: Geometry;
+  // TODO: Make non-null, init to empty by default.
   readonly properties?: Map<string, string | number>;
 }
 
+// TODO: Delete me in favor of single LOI type.
 export class PointOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
@@ -33,6 +38,7 @@ export class PointOfInterest implements LocationOfInterest {
   ) {}
 }
 
+// TODO: Delete me in favor of single LOI type.
 export class GeoJsonLocationOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
@@ -42,11 +48,22 @@ export class GeoJsonLocationOfInterest implements LocationOfInterest {
   ) {}
 }
 
+// TODO: Delete me in favor of single LOI type.
 export class AreaOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly jobId: string,
     readonly polygonVertices: firebase.firestore.GeoPoint[],
     readonly properties?: Map<string, string | number>
+  ) {}
+}
+
+// TODO: Merge into LocationOfInterest and make concrete.
+export class GenericLocationOfInterest implements LocationOfInterest {
+  constructor(
+    readonly id: string,
+    readonly jobId: string,
+    readonly geometry: Geometry,
+    readonly properties: Map<string, string | number>
   ) {}
 }

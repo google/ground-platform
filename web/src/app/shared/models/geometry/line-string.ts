@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { List } from 'immutable';
+import { hash, is, List } from 'immutable';
 import { Coordinate } from './coordinate';
 import { Geometry, GeometryType } from './geometry';
 
@@ -34,4 +34,12 @@ export class LineString implements Geometry {
   geometryType = GeometryType.LINE_STRING;
 
   constructor(readonly points: List<Coordinate>) {}
+
+  equals(other: LineString): boolean {
+    return is(this.points, other.points);
+  }
+
+  hashCode(): number {
+    return hash(this);
+  }
 }
