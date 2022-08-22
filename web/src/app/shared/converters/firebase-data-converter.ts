@@ -162,7 +162,7 @@ export class FirebaseDataConverter {
     );
   }
 
-  public static loiToJS(loi: LocationOfInterest): {} {
+  public static loiToJS(loi: LocationOfInterest): {} | Error {
     // TODO: Set audit info (created / last modified user and timestamp).
     if (loi instanceof PointOfInterest) {
       const { jobId, location } = loi;
@@ -183,7 +183,7 @@ export class FirebaseDataConverter {
         polygonVertices,
       };
     } else {
-      throw new Error(
+      return new Error(
         `Cannot convert unexpected loi class ${loi.constructor.name} to json.`
       );
     }
