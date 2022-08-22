@@ -16,7 +16,7 @@
 
 import { Polygon } from './polygon';
 import { Geometry, GeometryType } from './geometry';
-import { List } from 'immutable';
+import { hash, is, List } from 'immutable';
 
 /**
  * Models a collection of Polygons.
@@ -31,4 +31,12 @@ export class MultiPolygon implements Geometry {
   geometryType = GeometryType.MULTI_POLYGON;
 
   constructor(readonly polygons: List<Polygon>) {}
+
+  equals(other: MultiPolygon): boolean {
+    return is(this.polygons, other.polygons);
+  }
+
+  hashCode(): number {
+    return hash(this);
+  }
 }
