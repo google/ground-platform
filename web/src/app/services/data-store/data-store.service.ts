@@ -29,6 +29,7 @@ import { Submission } from '../../shared/models/submission/submission.model';
 import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 import 'firebase/storage';
+import { LoiDataConverter } from '../../shared/converters/loi-converter/loi-data-converter';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -44,7 +45,7 @@ export class DataStoreService {
     'survey-organizer',
     'viewer',
   ];
-  constructor(private db: AngularFirestore) {}
+  constructor(private db: AngularFirestore) { }
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -200,7 +201,7 @@ export class DataStoreService {
       .pipe(
         // Fail with error if LOI could not be loaded.
         map(doc =>
-          FirebaseDataConverter.toLocationOfInterest(
+          LoiDataConverter.toLocationOfInterest(
             doc.id,
             doc.data()! as DocumentData
           )
@@ -234,7 +235,7 @@ export class DataStoreService {
           List(
             array
               .map(obj =>
-                FirebaseDataConverter.toLocationOfInterest(obj.id, obj)
+                LoiDataConverter.toLocationOfInterest(obj.id, obj)
               )
               // Filter out LOIs that could not be loaded (i.e., undefined).
               .filter(f => !!f)

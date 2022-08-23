@@ -16,7 +16,6 @@
 
 import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
-import { GenericLocationOfInterest } from './../models/loi.model';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
 import { Task, TaskType } from '../models/task/task.model';
@@ -29,6 +28,7 @@ import {
   PointOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
+  GenericLocationOfInterest,
 } from '../models/loi.model';
 import { Submission } from '../models/submission/submission.model';
 import { Option } from '../models/task/option.model';
@@ -38,8 +38,8 @@ import { Result } from '../../shared/models/submission/result.model';
 import { Role } from '../models/role.model';
 import { User } from '../models/user.model';
 import { OfflineBaseMapSource } from '../models/offline-base-map-source';
-import { toGeometry } from './geometry-converter';
 import { Geometry } from '../models/geometry/geometry';
+import { toGeometry } from './geometry-converter';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -236,14 +236,14 @@ export class FirebaseDataConverter {
         // Fall back to constant so old dev databases do not break.
         data.index || -1,
         data.options &&
-          new MultipleChoice(
-            FirebaseDataConverter.stringToCardinality(data.cardinality),
-            List(
-              keys(data.options).map((id: string) =>
-                FirebaseDataConverter.toOption(id, data.options[id])
-              )
+        new MultipleChoice(
+          FirebaseDataConverter.stringToCardinality(data.cardinality),
+          List(
+            keys(data.options).map((id: string) =>
+              FirebaseDataConverter.toOption(id, data.options[id])
             )
           )
+        )
       );
     } catch (e) {
       console.error(e);
@@ -348,45 +348,6 @@ export class FirebaseDataConverter {
       label,
       ...optionDoc,
     };
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable LocationOfInterest instance.
-   *
-   * @param id the uuid of the survey instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  static toLocationOfInterest(
-    id: string,
-    data: DocumentData
-  ): LocationOfInterest | undefined {
-    try {
-      if (!data.jobId) {
-        throw new Error('Missing job id');
-      }
-      const properties = Map<string, string | number>(
-        keys(data.properties).map((property: string) => [
-          property,
-          data.properties[property],
-        ])
-      );
-      const result = toGeometry(data.geometry);
-      if (result instanceof Error) {
-        // TODO: Return Error rather than rethrowing to force callers to handle.
-        throw result as Error;
-      } else {
-        return new GenericLocationOfInterest(
-          id,
-          data.jobId,
-          result as Geometry,
-          properties
-        );
-      }
-    } catch (err) {
-      console.warn('Ignoring invalid LOI in remote data store', data, err);
-    }
-    return;
   }
 
   /**
