@@ -9,5 +9,5 @@
     "resolveJsonModule": true,
     "types": ["node", "jasmine"]
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "src/app/shared/converters/loi-converter"]
 }
