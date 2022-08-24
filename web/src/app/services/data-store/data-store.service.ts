@@ -45,7 +45,7 @@ export class DataStoreService {
     'survey-organizer',
     'viewer',
   ];
-  constructor(private db: AngularFirestore) { }
+  constructor(private db: AngularFirestore) {}
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
