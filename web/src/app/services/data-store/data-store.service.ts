@@ -45,7 +45,7 @@ export class DataStoreService {
     'survey-organizer',
     'viewer',
   ];
-  constructor(private db: AngularFirestore) { }
+  constructor(private db: AngularFirestore) {}
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -206,11 +206,11 @@ export class DataStoreService {
             doc.data()! as DocumentData
           );
           if (loi instanceof Error) {
-            throw loi
+            throw loi;
           }
 
-          return loi
-        }),
+          return loi;
+        })
       );
   }
 
@@ -238,10 +238,10 @@ export class DataStoreService {
               .map(obj => {
                 const loi = LoiDataConverter.toLocationOfInterest(obj.id, obj);
                 if (loi instanceof Error) {
-                  throw loi
+                  throw loi;
                 }
 
-                return loi
+                return loi;
               })
               // Filter out LOIs that could not be loaded (i.e., undefined).
               .filter(f => !!f)
