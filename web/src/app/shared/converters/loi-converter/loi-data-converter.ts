@@ -15,55 +15,88 @@
  */
 import { DocumentData } from '@angular/fire/firestore';
 import {
-    LocationOfInterest,
-    GenericLocationOfInterest,
+  LocationOfInterest,
+  PointOfInterest,
+  GeoJsonLocationOfInterest,
+  AreaOfInterest,
+  GenericLocationOfInterest,
 } from '../../models/loi.model';
 import { Map } from 'immutable';
 import { Geometry } from '../../models/geometry/geometry';
 import { toGeometry } from './../geometry-converter';
+
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
  * empty array.
  */
 function keys(dict?: {}): string[] {
-    return Object.keys(dict || {});
+  return Object.keys(dict || {});
 }
 
 export class LoiDataConverter {
-    /**
- * Converts the raw object representation deserialized from Firebase into an
- * immutable LocationOfInterest instance.
- *
- * @param id the uuid of the survey instance.
- * @param data the source data in a dictionary keyed by string.
- */
-    static toLocationOfInterest(
-        id: string,
-        data: DocumentData
-    ): LocationOfInterest | Error {
-        try {
-            if (!data.jobId) {
-               throw new Error('missing job id');
-            }
-            const properties = Map<string, string | number>(
-                keys(data.properties).map((property: string) => [
-                    property,
-                    data.properties[property],
-                ])
-            );
-            const result = toGeometry(data.geometry);
-            if (result instanceof Error) {
-                throw result
-            }
+  /**
+   * Converts the raw object representation deserialized from Firebase into an
+   * immutable LocationOfInterest instance.
+   *
+   * @param id the uuid of the survey instance.
+   * @param data the source data in a dictionary keyed by string.
+   */
+  static toLocationOfInterest(
+    id: string,
+    data: DocumentData
+  ): LocationOfInterest | Error {
+    try {
+      if (!data.jobId) {
+        throw new Error('missing job id');
+      }
+      const properties = Map<string, string | number>(
+        keys(data.properties).map((property: string) => [
+          property,
+          data.properties[property],
+        ])
+      );
+      const result = toGeometry(data.geometry);
+      if (result instanceof Error) {
+        throw result;
+      }
 
-            return new GenericLocationOfInterest(
-                id,
-                data.jobId,
-                result as Geometry,
-                properties
-            );
-        } catch (err) {
-            return new Error(`invalid LOI in remote data store; data: ${data}, error message: ${err}`);
-        }
+      return new GenericLocationOfInterest(
+        id,
+        data.jobId,
+        result as Geometry,
+        properties
+      );
+    } catch (err) {
+      return new Error(
+        `invalid LOI in remote data store; data: ${data}, error message: ${err}`
+      );
     }
+  }
+
+  public static loiToJS(loi: LocationOfInterest): {} | Error {
+    // TODO: Set audit info (created / last modified user and timestamp).
+    if (loi instanceof PointOfInterest) {
+      const { jobId, location } = loi;
+      return {
+        jobId,
+        location,
+      };
+    } else if (loi instanceof GeoJsonLocationOfInterest) {
+      const { jobId, geoJson } = loi;
+      return {
+        jobId,
+        geoJson,
+      };
+    } else if (loi instanceof AreaOfInterest) {
+      const { jobId, polygonVertices } = loi;
+      return {
+        jobId,
+        polygonVertices,
+      };
+    } else {
+      return new Error(
+        `Cannot convert unexpected loi class ${loi.constructor.name} to json.`
+      );
+    }
+  }
 }
