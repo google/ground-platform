@@ -45,7 +45,7 @@ export class DataStoreService {
     'survey-organizer',
     'viewer',
   ];
-  constructor(private db: AngularFirestore) {}
+  constructor(private db: AngularFirestore) { }
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -328,12 +328,17 @@ export class DataStoreService {
     surveyId: string,
     loi: LocationOfInterest
   ): Promise<void> {
+    const loiJs = LoiDataConverter.loiToJS(loi);
+    if (loiJs instanceof Error) {
+      throw loiJs;
+    }
+
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .collection('lois')
       .doc(loi.id)
-      .set(LoiDataConverter.loiToJS(loi));
+      .set(loiJs);
   }
 
   /**
