@@ -45,7 +45,7 @@ export class DataStoreService {
     'survey-organizer',
     'viewer',
   ];
-  constructor(private db: AngularFirestore) {}
+  constructor(private db: AngularFirestore) { }
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -200,16 +200,17 @@ export class DataStoreService {
       .get()
       .pipe(
         // Fail with error if LOI could not be loaded.
-        map(doc =>
-          LoiDataConverter.toLocationOfInterest(
+        map(doc => {
+          const loi = LoiDataConverter.toLocationOfInterest(
             doc.id,
             doc.data()! as DocumentData
-          )
-        ),
-        // Cast to LocationOfInterest to remove undefined from type. Done as separate
-        // map() operation since compiler doesn't recognize cast when defined in
-        // previous map() task.
-        map(f => f as LocationOfInterest)
+          );
+          if (loi instanceof Error) {
+            throw loi
+          }
+
+          return loi
+        }),
       );
   }
 
@@ -234,11 +235,16 @@ export class DataStoreService {
         map(array =>
           List(
             array
-              .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+              .map(obj => {
+                const loi = LoiDataConverter.toLocationOfInterest(obj.id, obj);
+                if (loi instanceof Error) {
+                  throw loi
+                }
+
+                return loi
+              })
               // Filter out LOIs that could not be loaded (i.e., undefined).
               .filter(f => !!f)
-              // Cast items in List to LocationOfInterest to remove undefined from type.
-              .map(f => f as LocationOfInterest)
           )
         )
       );
