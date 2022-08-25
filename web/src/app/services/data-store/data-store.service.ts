@@ -29,6 +29,7 @@ import { Submission } from '../../shared/models/submission/submission.model';
 import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
 import 'firebase/storage';
+import { LoiDataConverter } from '../../shared/converters/loi-converter/loi-data-converter';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -199,16 +200,17 @@ export class DataStoreService {
       .get()
       .pipe(
         // Fail with error if LOI could not be loaded.
-        map(doc =>
-          FirebaseDataConverter.toLocationOfInterest(
+        map(doc => {
+          const loi = LoiDataConverter.toLocationOfInterest(
             doc.id,
             doc.data()! as DocumentData
-          )
-        ),
-        // Cast to LocationOfInterest to remove undefined from type. Done as separate
-        // map() operation since compiler doesn't recognize cast when defined in
-        // previous map() task.
-        map(f => f as LocationOfInterest)
+          );
+          if (loi instanceof Error) {
+            throw loi;
+          }
+
+          return loi;
+        })
       );
   }
 
@@ -233,13 +235,16 @@ export class DataStoreService {
         map(array =>
           List(
             array
-              .map(obj =>
-                FirebaseDataConverter.toLocationOfInterest(obj.id, obj)
-              )
+              .map(obj => {
+                const loi = LoiDataConverter.toLocationOfInterest(obj.id, obj);
+                if (loi instanceof Error) {
+                  throw loi;
+                }
+
+                return loi;
+              })
               // Filter out LOIs that could not be loaded (i.e., undefined).
               .filter(f => !!f)
-              // Cast items in List to LocationOfInterest to remove undefined from type.
-              .map(f => f as LocationOfInterest)
           )
         )
       );
@@ -323,12 +328,17 @@ export class DataStoreService {
     surveyId: string,
     loi: LocationOfInterest
   ): Promise<void> {
+    const loiJs = LoiDataConverter.loiToJS(loi);
+    if (loiJs instanceof Error) {
+      throw loiJs;
+    }
+
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .collection('lois')
       .doc(loi.id)
-      .set(FirebaseDataConverter.loiToJS(loi));
+      .set(loiJs);
   }
 
   /**
