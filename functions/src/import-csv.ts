@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2020 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,32 @@
  * limitations under the License.
  */
 
-"use strict";
-
-const HttpStatus = require("http-status-codes");
-const { firestore } = require("firebase-admin");
-const csvParser = require("csv-parser");
-const Busboy = require("busboy");
-const { db } = require("./common/context");
+import { firestore } from "firebase-admin";
+import * as functions from "firebase-functions";
+import * as HttpStatus from "http-status-codes";
+import * as csvParser from "csv-parser";
+import * as Busboy from "busboy";
+import { db } from "./common/context";
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'survey' id and 'job' id to the database.
  */
-async function importCsv(req, res) {
+export async function importCsvHandler(req: functions.Request, res: functions.Response<any>) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== "POST") {
-    return res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
+    // don't have to return response ???
+    res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
+    return;
   }
-  const busboy = new Busboy({ headers: req.headers });
+  const busboy = Busboy({ headers: req.headers });
 
   // Dictionary used to accumulate form values, keyed by field name.
-  const params = {};
+  const params: { [name: string]: string } = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
-  let inserts = [];
+  let inserts: any[] = [];
 
   // Handle non-file fields in the form. Survey and job must appear
   // before the file for the file handler to work properly.
@@ -48,10 +49,12 @@ async function importCsv(req, res) {
   });
 
   // This code will process each file uploaded.
-  busboy.on("file", (key, file, _) => {
+  busboy.on("file", (_key, file, _) => {
     const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
-      return res.status(HttpStatus.BAD_REQUEST).end();
+      // don't have to return response ???
+      res.status(HttpStatus.BAD_REQUEST).end();
+      return;
     }
     console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
@@ -61,10 +64,10 @@ async function importCsv(req, res) {
     file.pipe(csvParser()).on("data", async (row) => {
       try {
         inserts.push(insertRow(surveyId, jobId, row));
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        res.unpipe(busboy);
-        await res
+        req.unpipe(busboy);
+        res
           .status(HttpStatus.BAD_REQUEST)
           .end(JSON.stringify({ error: err.message }));
       }
@@ -76,14 +79,16 @@ async function importCsv(req, res) {
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`Inserted ${count} rows`);
-    await res.status(HttpStatus.OK).end(JSON.stringify({ count }));
+    res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
   busboy.on("error", (err) => {
-    console.err("Busboy error", err);
-    next(err);
+    console.error("Busboy error", err);
+    // TODO bring next function back ????
+    // next(err);
   });
-  busboy.end(req.rawBody);
+  // rawBody ???
+  busboy.end(req.body);
 }
 
 /**
@@ -91,9 +96,9 @@ async function importCsv(req, res) {
  * strings in the form B->A. Values in B[] are assumed to appear at most once
  * in the array values in the provided dictionary.
  */
-function invertAndFlatten(obj) {
+function invertAndFlatten(obj: any) {
   return Object.keys(obj)
-    .flatMap((k) => obj[k].map((v) => ({ k, v })))
+    .flatMap((k) => obj[k].map((v: any) => ({ k, v })))
     .reduce((o, { v, k }) => {
       o[v] = k;
       return o;
@@ -111,7 +116,7 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   lng: ["lng", "lon", "long", "lng", "x"],
 });
 
-async function insertRow(surveyId, jobId, row) {
+async function insertRow(surveyId: string, jobId: string, row: any) {
   const loi = csvRowToLocationOfInterest(row, jobId);
   if (loi) {
     await db.insertLocationOfInterest(surveyId, loi);
@@ -122,9 +127,9 @@ async function insertRow(surveyId, jobId, row) {
  * Convert the provided row (key-value pairs) and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function csvRowToLocationOfInterest(row, jobId) {
-  let data = { jobId };
-  let properties = {};
+function csvRowToLocationOfInterest(row: any, jobId: string) {
+  let data: any = { jobId };
+  let properties: { [name: string]: any } = {};
   for (const columnName in row) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];
@@ -149,5 +154,3 @@ function csvRowToLocationOfInterest(row, jobId) {
   }
   return loi;
 }
-
-module.exports = importCsv;

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-const {db} = require('./common/context');
+import * as functions from "firebase-functions";
+import { db } from './common/context';
 
 /**
  * Called when a new user logs in for the first time.
  */
-module.exports = user => db.mergeUserProfile(user);
+export function handleCreateUser(user: functions.auth.UserRecord) { db.mergeUserProfile(user); }

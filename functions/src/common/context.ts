@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2019 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 
-"use strict";
-
-const admin = require("firebase-admin");
-const functions = require("firebase-functions");
-const Datastore = require("./datastore");
+import * as admin from "firebase-admin";
+import * as functions from "firebase-functions";
+import { Datastore } from "./datastore";
 
 // functions.config().firebase is auto-populated with configuration needed to
 // initialize the firebase-admin SDK when deploying via Firebase CLI.
 admin.initializeApp(functions.config().firebase);
 
-const db = new Datastore(admin.firestore());
-
-module.exports = { db };
+export const db = new Datastore(admin.firestore());
