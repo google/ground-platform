@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: deploy-to-firebase-hosting-on-merge
+name: deploy-to-firebase-on-merge
 on:
   push:
     branches:
@@ -59,3 +59,9 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}"
           channelId: live
           projectId: gnd-dev
+      
+      - name: Deploy to Firebase Functions
+        uses: chrissank/deploy-firebase-functions@1.0.0
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          TARGET: default
