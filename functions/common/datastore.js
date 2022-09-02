@@ -104,7 +104,9 @@ function toFirestoreValue(value) {
   }
   if (Array.isArray(value)) {
     if (value.length === 2 && value.every((x) => typeof x === "number")) {
-      return new firestore.GeoPoint(value[0], value[1]);
+      // Note: GeoJSON coordinates are in lng-lat order. We reverse that order for GeoPoint, which uses
+      // lat-lng order.
+      return new firestore.GeoPoint(value[1], value[0]);
     }
     // Convert array to map.
     return Object.fromEntries(value.map((x, i) => [i, toFirestoreValue(x)]));
