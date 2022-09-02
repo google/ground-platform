@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import { db } from "./common/context";
 export async function importCsvHandler(req: functions.Request, res: functions.Response<any>) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== "POST") {
-    // don't have to return response ???
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
   }
@@ -52,7 +51,6 @@ export async function importCsvHandler(req: functions.Request, res: functions.Re
   busboy.on("file", (_key, file, _) => {
     const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
-      // don't have to return response ???
       res.status(HttpStatus.BAD_REQUEST).end();
       return;
     }
@@ -82,13 +80,11 @@ export async function importCsvHandler(req: functions.Request, res: functions.Re
     res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
-  busboy.on("error", (err) => {
+  busboy.on("error", (err: any) => {
     console.error("Busboy error", err);
-    // TODO bring next function back ????
-    // next(err);
+    req.unpipe(busboy);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
-  // rawBody ???
-  busboy.end(req.body);
 }
 
 /**

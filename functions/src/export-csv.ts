@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import * as functions from "firebase-functions";
 import * as csv from "@fast-csv/format";
 import { geojsonToWKT } from "@terraformer/wkt"
 import { db } from "./common/context";
+import * as HttpStatus from "http-status-codes";
 
 // TODO: Refactor into meaningful pieces.
 export async function exportCsvHandler(req: functions.Request, res: functions.Response<any>) {
@@ -26,7 +27,7 @@ export async function exportCsvHandler(req: functions.Request, res: functions.Re
   const jobId = req.query.job as string;
   const survey = await db.fetchSurvey(surveyId);
   if (!survey.exists) {
-    res.status(404).send("Survey not found");
+    res.status(HttpStatus.NOT_FOUND).send("Survey not found");
     return;
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);

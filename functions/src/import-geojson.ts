@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Google LLC
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import * as JSONStream from "jsonstream";
  */
 export async function importGeoJsonHandler(req: functions.Request, res: functions.Response<any>) {
   if (req.method !== "POST") {
-    // don't have to return response ???
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
   }
@@ -51,7 +50,6 @@ export async function importGeoJsonHandler(req: functions.Request, res: function
   busboy.on("file", (_field, file, _filename) => {
     const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
-      // don't have to return response ???
       res
         .status(HttpStatus.BAD_REQUEST)
         .end(JSON.stringify({ error: "Invalid request" }));
@@ -71,7 +69,6 @@ export async function importGeoJsonHandler(req: functions.Request, res: function
         if (geoJsonType !== "FeatureCollection") {
           // TODO: report error to user
           console.debug(`Invalid ${geoJsonType}`);
-          // don't have to return response ???
           res.status(HttpStatus.BAD_REQUEST).end();
           return;
         }
@@ -103,13 +100,11 @@ export async function importGeoJsonHandler(req: functions.Request, res: function
     res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
-  busboy.on("error", (err) => {
+  busboy.on("error", (err: any) => {
     console.error("Busboy error", err);
-    // TODO bring next function back ???
-    // next(err);
+    req.unpipe(busboy);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
-  // rawBody ???
-  busboy.end(req.body);
 }
 
 /**
