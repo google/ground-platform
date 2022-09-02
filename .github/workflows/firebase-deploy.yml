@@ -60,8 +60,7 @@ jobs:
           channelId: live
           projectId: gnd-dev
       
-      - name: Deploy to Firebase Functions
-        uses: chrissank/deploy-firebase-functions@1.0.0
+      - name: Deploy to Firebase
+        uses: BIGG-Kaymo/deploy-firebase-functions@v1.0.1
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          TARGET: default
