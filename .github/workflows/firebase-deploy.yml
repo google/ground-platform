@@ -59,8 +59,10 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}"
           channelId: live
           projectId: gnd-dev
-      
-      - name: Deploy to Firebase
-        uses: BIGG-Kaymo/deploy-firebase-functions@v1.0.1
+
+      - name:  Deploy to Firebase functions
+        uses: w9jds/firebase-action@master
+        with:
+            args: deploy --only functions
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+            FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
