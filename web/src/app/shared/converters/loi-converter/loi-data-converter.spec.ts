@@ -148,12 +148,12 @@ describe('loiToJS', () => {
     want: {};
   }[] = [
     {
-      expectation: 'converts PointOfInterest',
-      loi: new PointOfInterest(
+      expectation: 'converts GenericLocationOfInterest with Point geometry',
+      loi: new GenericLocationOfInterest(
         'id0',
         'jobId0',
-        geoPoint,
-        Map<string, string | number>()
+        point,
+        Map(),
       ),
       want: {
         jobId: 'jobId0',
@@ -218,7 +218,7 @@ describe('loiToJS_Error', () => {
       `got unexpected error in geometry conversion ${geoPointWithError}`
     );
   }
-  const geoPoint = (geoPointWithError as unknown) as Geometry;
+  const geoPoint = (geoPointWithError as unknown) as GeoPoint;
 
   const testData: {
     expectation: string;
@@ -226,8 +226,8 @@ describe('loiToJS_Error', () => {
     wantErrorMessage: string;
   }[] = [
     {
-      expectation: 'Cannot convert generic LOI',
-      loi: new GenericLocationOfInterest(
+      expectation: 'Cannot convert PointOfInterest',
+      loi: new PointOfInterest(
         'id0',
         'jobId0',
         geoPoint,

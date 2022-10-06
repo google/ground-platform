@@ -30,9 +30,9 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { Survey } from '../../shared/models/survey.model';
 import {
   LocationOfInterest,
-  PointOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
+  GenericLocationOfInterest,
 } from '../../shared/models/loi.model';
 import { Map, List } from 'immutable';
 import { Job } from '../../shared/models/job.model';
@@ -43,6 +43,8 @@ import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
+import {Point} from '../../shared/models/geometry/point';
+import {Coordinate} from '../../shared/models/geometry/coordinate';
 
 describe('MapComponent', () => {
   let component: MapComponent;
@@ -90,26 +92,14 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map()
   );
-  const poi1 = new PointOfInterest(
-    poiId1,
-    jobId1,
-    new firebase.firestore.GeoPoint(1.23, 4.56)
-  );
-  const poi2 = new PointOfInterest(
-    poiId2,
-    jobId2,
-    new firebase.firestore.GeoPoint(12.3, 45.6)
-  );
-  const poi3 = new PointOfInterest(
-    poiId3,
-    jobId2,
-    new firebase.firestore.GeoPoint(78.9, 78.9)
-  );
-  const poi4 = new PointOfInterest(
-    poiId4,
-    jobId2,
-    new firebase.firestore.GeoPoint(45, 45)
-  );
+  const poi1 = new GenericLocationOfInterest(poiId1,
+    jobId1, new Point(new Coordinate(1.23, 4.56)), Map());
+  const poi2 = new GenericLocationOfInterest(poiId2,
+    jobId2, new Point(new Coordinate(12.3, 45.6)), Map());
+  const poi3 = new GenericLocationOfInterest(poiId3,
+    jobId2, new Point(new Coordinate(78.9, 78.9)), Map());
+  const poi4 = new GenericLocationOfInterest(poiId4,
+    jobId2, new Point(new Coordinate(45, 45)), Map());
   const geoJson1 = {
     type: 'FeatureCollection',
     features: [
@@ -451,11 +441,8 @@ describe('MapComponent', () => {
 
     assertMarkerLatLng(marker, new google.maps.LatLng(2.23, 5.56));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
-      new PointOfInterest(
-        poi1.id,
-        poi1.jobId,
-        new firebase.firestore.GeoPoint(2.23, 5.56)
-      )
+      new GenericLocationOfInterest(poi1.id,
+        poi1.jobId, new Point(new Coordinate(2.23, 5.56)), Map())
     );
   }));
 

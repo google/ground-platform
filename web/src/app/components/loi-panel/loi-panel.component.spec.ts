@@ -22,8 +22,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import {
+  GenericLocationOfInterest,
   LocationOfInterest,
-  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { Job } from '../../shared/models/job.model';
 import { Submission } from '../../shared/models/submission/submission.model';
@@ -34,6 +34,8 @@ import { SubmissionService } from '../../services/submission/submission.service'
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import {Point} from '../../shared/models/geometry/point';
+import {Coordinate} from '../../shared/models/geometry/coordinate';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -51,11 +53,8 @@ const mockSurvey = new Survey(
   /* acl= */ Map()
 );
 
-const mockLocationOfInterest = new PointOfInterest(
-  'loi001',
-  'job001',
-  new firebase.firestore.GeoPoint(0.0, 0.0)
-);
+const mockLocationOfInterest = new GenericLocationOfInterest('loi001',
+  'job001', new Point(new Coordinate(0.0, 0.0)), Map());
 
 const mockSubmissions = List<Submission>([]);
 

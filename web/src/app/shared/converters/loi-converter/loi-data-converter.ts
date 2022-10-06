@@ -16,7 +16,6 @@
 import { DocumentData } from '@angular/fire/firestore';
 import {
   LocationOfInterest,
-  PointOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
@@ -24,6 +23,7 @@ import {
 import { Map } from 'immutable';
 import { Geometry } from '../../models/geometry/geometry';
 import { toGeometry } from './../geometry-converter';
+import {Point} from '../../models/geometry/point';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -75,11 +75,11 @@ export class LoiDataConverter {
 
   public static loiToJS(loi: LocationOfInterest): {} | Error {
     // TODO: Set audit info (created / last modified user and timestamp).
-    if (loi instanceof PointOfInterest) {
-      const { jobId, location } = loi;
+    if (loi.geometry instanceof Point) {
+      const { jobId, geometry } = loi;
       return {
         jobId,
-        location,
+        location: geometry
       };
     } else if (loi instanceof GeoJsonLocationOfInterest) {
       const { jobId, geoJson } = loi;
