@@ -23,7 +23,7 @@ import {
 import { Map } from 'immutable';
 import { Geometry } from '../../models/geometry/geometry';
 import { toGeometry } from './../geometry-converter';
-import {Point} from '../../models/geometry/point';
+import { Point } from '../../models/geometry/point';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -79,7 +79,7 @@ export class LoiDataConverter {
       const { jobId, geometry } = loi;
       return {
         jobId,
-        location: geometry
+        location: geometry,
       };
     } else if (loi instanceof GeoJsonLocationOfInterest) {
       const { jobId, geoJson } = loi;

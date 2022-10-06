@@ -149,12 +149,7 @@ describe('loiToJS', () => {
   }[] = [
     {
       expectation: 'converts GenericLocationOfInterest with Point geometry',
-      loi: new GenericLocationOfInterest(
-        'id0',
-        'jobId0',
-        point,
-        Map(),
-      ),
+      loi: new GenericLocationOfInterest('id0', 'jobId0', point, Map()),
       want: {
         jobId: 'jobId0',
         location: point,

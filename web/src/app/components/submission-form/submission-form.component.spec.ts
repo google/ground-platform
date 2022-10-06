@@ -53,8 +53,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { By } from '@angular/platform-browser';
-import {Point} from '../../shared/models/geometry/point';
-import {Coordinate} from '../../shared/models/geometry/coordinate';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 class MockModel {
   static task001: Task = new Task(
@@ -113,7 +113,7 @@ class MockModel {
     'loi001',
     MockModel.job001.id,
     new Point(new Coordinate(0.0, 0.0)),
-    Map(),
+    Map()
   );
 
   static user001 = {

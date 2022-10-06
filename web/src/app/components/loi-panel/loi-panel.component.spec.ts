@@ -34,8 +34,8 @@ import { SubmissionService } from '../../services/submission/submission.service'
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import {Point} from '../../shared/models/geometry/point';
-import {Coordinate} from '../../shared/models/geometry/coordinate';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -53,8 +53,12 @@ const mockSurvey = new Survey(
   /* acl= */ Map()
 );
 
-const mockLocationOfInterest = new GenericLocationOfInterest('loi001',
-  'job001', new Point(new Coordinate(0.0, 0.0)), Map());
+const mockLocationOfInterest = new GenericLocationOfInterest(
+  'loi001',
+  'job001',
+  new Point(new Coordinate(0.0, 0.0)),
+  Map()
+);
 
 const mockSubmissions = List<Submission>([]);
 

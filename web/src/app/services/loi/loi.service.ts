@@ -26,8 +26,8 @@ import {
 } from '../../shared/models/loi.model';
 import { List, Map as ImmutableMap } from 'immutable';
 import firebase from 'firebase/app';
-import {Point} from '../../shared/models/geometry/point';
-import {Coordinate} from '../../shared/models/geometry/coordinate';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 @Injectable({
   providedIn: 'root',
@@ -111,7 +111,7 @@ export class LocationOfInterestService {
       this.dataStore.generateId(),
       jobId,
       new Point(new Coordinate(lat, lng)),
-      ImmutableMap(),
+      ImmutableMap()
     );
     await this.dataStore.updateLocationOfInterest(
       survey.id,

@@ -23,7 +23,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { Survey } from '../../shared/models/survey.model';
-import {Point} from '../../shared/models/geometry/point';
+import { Point } from '../../shared/models/geometry/point';
 import {
   LocationOfInterest,
   GeoJsonLocationOfInterest,
@@ -47,7 +47,7 @@ import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
 } from '../select-loi-dialog/select-loi-dialog.component';
-import {Coordinate} from '../../shared/models/geometry/coordinate';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 // To make ESLint happy:
 /*global google*/
@@ -246,8 +246,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const jobName = survey.jobs.get(loi.jobId)?.name;
 
       if (loi.geometry instanceof Point) {
-        const {id, jobId, geometry} = loi;
-        this.addPointOfInterest({id, jobId, color, geometry});
+        const { id, jobId, geometry } = loi;
+        this.addPointOfInterest({ id, jobId, color, geometry });
       }
       if (loi instanceof GeoJsonLocationOfInterest) {
         this.addGeoJsonLocationOfInterest(color, jobName, loi);
@@ -258,10 +258,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private addPointOfInterest({id, jobId, geometry, color}:
-    {id: string, jobId: string, geometry: Point, color: string | undefined}) {
-
-    const {x: latitude, y: longitude} = geometry.coord;
+  private addPointOfInterest({
+    id,
+    jobId,
+    geometry,
+    color,
+  }: {
+    id: string;
+    jobId: string;
+    geometry: Point;
+    color: string | undefined;
+  }) {
+    const { x: latitude, y: longitude } = geometry.coord;
     const icon = {
       url: getPinImageSource(color),
       scaledSize: {
@@ -311,15 +319,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
   }
 
-  private onMarkerDragEnd(event: google.maps.MouseEvent, id: string, jobId: string) {
+  private onMarkerDragEnd(
+    event: google.maps.MouseEvent,
+    id: string,
+    jobId: string
+  ) {
     this.newLatLng = new google.maps.LatLng(
       event.latLng.lat(),
       event.latLng.lng()
     );
 
-    this.newLocationOfInterestToReposition = new GenericLocationOfInterest(id,
-      jobId, new Point(new Coordinate(event.latLng.lat(), event.latLng.lng())),
-      ImmutableMap<string, string|number>());
+    this.newLocationOfInterestToReposition = new GenericLocationOfInterest(
+      id,
+      jobId,
+      new Point(new Coordinate(event.latLng.lat(), event.latLng.lng())),
+      ImmutableMap<string, string | number>()
+    );
   }
 
   private panAndZoom(position: google.maps.LatLng | null | undefined) {

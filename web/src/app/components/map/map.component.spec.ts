@@ -43,8 +43,8 @@ import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
-import {Point} from '../../shared/models/geometry/point';
-import {Coordinate} from '../../shared/models/geometry/coordinate';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 describe('MapComponent', () => {
   let component: MapComponent;
@@ -92,14 +92,30 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map()
   );
-  const poi1 = new GenericLocationOfInterest(poiId1,
-    jobId1, new Point(new Coordinate(1.23, 4.56)), Map());
-  const poi2 = new GenericLocationOfInterest(poiId2,
-    jobId2, new Point(new Coordinate(12.3, 45.6)), Map());
-  const poi3 = new GenericLocationOfInterest(poiId3,
-    jobId2, new Point(new Coordinate(78.9, 78.9)), Map());
-  const poi4 = new GenericLocationOfInterest(poiId4,
-    jobId2, new Point(new Coordinate(45, 45)), Map());
+  const poi1 = new GenericLocationOfInterest(
+    poiId1,
+    jobId1,
+    new Point(new Coordinate(1.23, 4.56)),
+    Map()
+  );
+  const poi2 = new GenericLocationOfInterest(
+    poiId2,
+    jobId2,
+    new Point(new Coordinate(12.3, 45.6)),
+    Map()
+  );
+  const poi3 = new GenericLocationOfInterest(
+    poiId3,
+    jobId2,
+    new Point(new Coordinate(78.9, 78.9)),
+    Map()
+  );
+  const poi4 = new GenericLocationOfInterest(
+    poiId4,
+    jobId2,
+    new Point(new Coordinate(45, 45)),
+    Map()
+  );
   const geoJson1 = {
     type: 'FeatureCollection',
     features: [
@@ -441,8 +457,12 @@ describe('MapComponent', () => {
 
     assertMarkerLatLng(marker, new google.maps.LatLng(2.23, 5.56));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
-      new GenericLocationOfInterest(poi1.id,
-        poi1.jobId, new Point(new Coordinate(2.23, 5.56)), Map())
+      new GenericLocationOfInterest(
+        poi1.id,
+        poi1.jobId,
+        new Point(new Coordinate(2.23, 5.56)),
+        Map()
+      )
     );
   }));
 
