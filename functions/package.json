@@ -25,7 +25,7 @@
     "requests": "^0.3.0"
   },
   "engines": {
-    "node": "12"
+    "node": "16"
   },
   "private": true,
   "devDependencies": {
