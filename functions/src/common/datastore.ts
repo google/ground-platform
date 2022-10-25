@@ -36,9 +36,11 @@ export class Datastore {
       .set({ uid, email, displayName, photoURL }, { merge: true });
   }
 
-  async fetch_(docRef: firestore.DocumentReference): Promise<firestore.DocumentData | null | undefined> {
+  async fetch_(
+    docRef: firestore.DocumentReference
+  ): Promise<firestore.DocumentData | null | undefined> {
     const doc = await docRef.get();
-    return (doc.exists ? doc.data() : null);
+    return doc.exists ? doc.data() : null;
   }
 
   fetchDoc_(path: string) {
@@ -107,7 +109,7 @@ export class Datastore {
         Datastore.toFirestoreValue(value),
       ])
     );
-  };
+  }
 
   static toFirestoreValue(value: any): any {
     if (value === null) {
@@ -120,7 +122,9 @@ export class Datastore {
         return new firestore.GeoPoint(value[1], value[0]);
       }
       // Convert array to map.
-      return Object.fromEntries(value.map((x, i) => [i, Datastore.toFirestoreValue(x)]));
+      return Object.fromEntries(
+        value.map((x, i) => [i, Datastore.toFirestoreValue(x)])
+      );
     }
     return value;
   }
