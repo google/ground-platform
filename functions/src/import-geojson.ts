@@ -19,13 +19,16 @@ import * as functions from "firebase-functions";
 import * as HttpStatus from "http-status-codes";
 import { db } from "./common/context";
 import * as Busboy from "busboy";
-import * as JSONStream from "jsonstream";
+import * as JSONStream from "jsonstream-ts";
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-export async function importGeoJsonHandler(req: functions.Request, res: functions.Response<any>) {
+export async function importGeoJsonHandler(
+  req: functions.Request,
+  res: functions.Response<any>
+) {
   if (req.method !== "POST") {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
@@ -59,12 +62,12 @@ export async function importGeoJsonHandler(req: functions.Request, res: function
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
     let geoJsonType: any = null;
-    file.pipe(JSONStream.parse("type")).on("data", (data: any) => {
+    file.pipe(JSONStream.parse("type", undefined)).on("data", (data: any) => {
       geoJsonType = data;
     });
 
     file
-      .pipe(JSONStream.parse(["features", true]))
+      .pipe(JSONStream.parse(["features", true], undefined))
       .on("data", (geoJsonLoi: any) => {
         if (geoJsonType !== "FeatureCollection") {
           // TODO: report error to user
