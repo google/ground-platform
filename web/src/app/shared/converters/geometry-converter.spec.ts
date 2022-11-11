@@ -28,7 +28,7 @@ import { Point } from './../models/geometry/point';
 import { toGeometry } from './geometry-converter';
 
 import GeoPoint = firebase.firestore.GeoPoint;
-import {GeometryType} from '../models/geometry/geometry';
+import { GeometryType } from '../models/geometry/geometry';
 
 type Path = Array<[number, number]>;
 
