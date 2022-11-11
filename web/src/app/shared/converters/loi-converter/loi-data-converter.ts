@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import {
   LocationOfInterest,
@@ -24,6 +25,8 @@ import { Map } from 'immutable';
 import { Geometry } from '../../models/geometry/geometry';
 import { toGeometry } from './../geometry-converter';
 import { Point } from '../../models/geometry/point';
+
+import GeoPoint = firebase.firestore.GeoPoint;
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -79,7 +82,10 @@ export class LoiDataConverter {
       const { jobId, geometry } = loi;
       return {
         jobId,
-        location: geometry,
+        geometry: {
+          coordinates: new GeoPoint(geometry.coord.x, geometry.coord.y),
+          type: geometry.geometryType,
+        },
       };
     } else if (loi instanceof GeoJsonLocationOfInterest) {
       const { jobId, geoJson } = loi;

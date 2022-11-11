@@ -31,16 +31,6 @@ import GeoPoint = firebase.firestore.GeoPoint;
 const stringify = (o: Object) => JSON.stringify(o);
 
 /**
- * Maps geometry type enum values to their GeoJson equivalent string
- * representations used in the remote db.
- */
-const GEOJSON_GEOMETRY_TYPES = Map([
-  [GeometryType.POINT, 'Point'],
-  [GeometryType.POLYGON, 'Polygon'],
-  [GeometryType.MULTI_POLYGON, 'MultiPolygon'],
-]);
-
-/**
  * Converts remote db representation of a geometry to a geometry object using a
  * modified GeoJSON representation:
  *
@@ -60,11 +50,11 @@ export function toGeometry(geometry?: any): Geometry | Error {
   }
   try {
     switch (geometry.type) {
-      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT):
+      case GeometryType.POINT:
         return toPoint(geometry.coordinates);
-      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON):
+      case GeometryType.POLYGON:
         return toPolygon(geometry.coordinates);
-      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
+      case GeometryType.MULTI_POLYGON:
         return toMultiPolygon(geometry.coordinates);
       default:
         return Error(`Unsupported geometry type ${geometry.type}`);

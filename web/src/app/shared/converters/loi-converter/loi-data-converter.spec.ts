@@ -26,13 +26,13 @@ import { toGeometry } from '../geometry-converter';
 import { LoiDataConverter } from './loi-data-converter';
 import GeoPoint = firebase.firestore.GeoPoint;
 import { Map } from 'immutable';
-import { Geometry } from '../../models/geometry/geometry';
+import { Geometry, GeometryType } from '../../models/geometry/geometry';
 import { Point } from '../../models/geometry/point';
 
 const x = -42.121;
 const y = 28.482;
 const geoPointData = {
-  type: 'Point',
+  type: GeometryType.POINT,
   coordinates: new GeoPoint(x, y),
 };
 
@@ -152,7 +152,10 @@ describe('loiToJS', () => {
       loi: new GenericLocationOfInterest('id0', 'jobId0', point, Map()),
       want: {
         jobId: 'jobId0',
-        location: point,
+        geometry: {
+          coordinates: new GeoPoint(point.coord.x, point.coord.y),
+          type: GeometryType.POINT,
+        },
       },
     },
     {
