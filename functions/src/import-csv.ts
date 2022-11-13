@@ -26,7 +26,10 @@ import { db } from "./common/context";
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'survey' id and 'job' id to the database.
  */
-export async function importCsvHandler(req: functions.Request, res: functions.Response<any>) {
+export async function importCsvHandler(
+  req: functions.https.Request,
+  res: functions.Response<any>
+) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== "POST") {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
@@ -85,6 +88,10 @@ export async function importCsvHandler(req: functions.Request, res: functions.Re
     req.unpipe(busboy);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
+
+  // Use this for Cloud Functions rather than `req.pipe(busboy)`:
+  // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
+  busboy.end(req.rawBody);
 }
 
 /**
