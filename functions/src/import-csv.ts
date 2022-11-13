@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import { firestore } from "firebase-admin";
 import * as functions from "firebase-functions";
 import * as HttpStatus from "http-status-codes";
 import * as csvParser from "csv-parser";
 import * as Busboy from "busboy";
 import { db } from "./common/context";
+import { GeoPoint } from "firebase-admin/firestore";
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -150,7 +150,7 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
   }
   loi["geometry"] = {
     type: "Point",
-    coordinates: new firestore.GeoPoint(lat, lng),
+    coordinates: new GeoPoint(lat, lng),
   };
   if (Object.keys(properties).length > 0) {
     loi["properties"] = properties;
