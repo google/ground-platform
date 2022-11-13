@@ -17,6 +17,7 @@
 
 import * as functions from "firebase-functions";
 import { firestore } from "firebase-admin";
+import { GeoPoint } from "firebase-admin/firestore";
 
 export class Datastore {
   private db_: firestore.Firestore;
@@ -119,7 +120,7 @@ export class Datastore {
       if (value.length === 2 && value.every((x) => typeof x === "number")) {
         // Note: GeoJSON coordinates are in lng-lat order. We reverse that order for GeoPoint, which uses
         // lat-lng order.
-        return new firestore.GeoPoint(value[1], value[0]);
+        return new GeoPoint(value[1] as number, value[0] as number);
       }
       // Convert array to map.
       return Object.fromEntries(
