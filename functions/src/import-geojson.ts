@@ -26,7 +26,7 @@ import * as JSONStream from "jsonstream-ts";
  * and required 'survey' id and 'job' id to the database.
  */
 export async function importGeoJsonHandler(
-  req: functions.Request,
+  req: functions.https.Request,
   res: functions.Response<any>
 ) {
   if (req.method !== "POST") {
@@ -108,6 +108,10 @@ export async function importGeoJsonHandler(
     req.unpipe(busboy);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
+
+  // Use this for Cloud Functions rather than `req.pipe(busboy)`:
+  // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
+  busboy.end(req.rawBody);
 }
 
 /**
