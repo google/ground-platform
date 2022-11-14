@@ -27,9 +27,9 @@ export interface Geometry {
  * An enum representing the type of the geometry instance.
  */
 export enum GeometryType {
-  POINT = 'POINT',
-  LINE_STRING = 'LINE_STRING',
-  LINEAR_RING = 'LINEAR_RING',
-  POLYGON = 'POLYGON',
-  MULTI_POLYGON = 'MULTI_POLYGON',
+  POINT = 'Point',
+  LINE_STRING = 'LineString',
+  LINEAR_RING = 'LinearRing',
+  POLYGON = 'Polygon',
+  MULTI_POLYGON = 'MultiPolygon',
 }
