@@ -23,11 +23,12 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { Survey } from '../../shared/models/survey.model';
+import { Point } from '../../shared/models/geometry/point';
 import {
   LocationOfInterest,
-  PointOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
+  GenericLocationOfInterest,
 } from '../../shared/models/loi.model';
 import {
   DrawingToolsService,
@@ -36,7 +37,7 @@ import {
 import { SurveyService } from '../../services/survey/survey.service';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
-import { List } from 'immutable';
+import { List, Map as ImmutableMap } from 'immutable';
 import { getPinImageSource } from './ground-pin';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
@@ -46,6 +47,7 @@ import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
 } from '../select-loi-dialog/select-loi-dialog.component';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 // To make ESLint happy:
 /*global google*/
@@ -91,7 +93,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
   showRepositionConfirmDialog = false;
-  newLocationOfInterestToReposition?: PointOfInterest;
+  newLocationOfInterestToReposition?: GenericLocationOfInterest;
   oldLatLng?: google.maps.LatLng;
   newLatLng?: google.maps.LatLng;
   markerToReposition?: google.maps.Marker;
@@ -242,8 +244,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
       const color = survey.jobs.get(loi.jobId)?.color;
       const jobName = survey.jobs.get(loi.jobId)?.name;
-      if (loi instanceof PointOfInterest) {
-        this.addPointOfInterest(color, loi);
+
+      if (loi.geometry instanceof Point) {
+        const { id, jobId, geometry } = loi;
+        this.addPointOfInterest({ id, jobId, color, geometry });
       }
       if (loi instanceof GeoJsonLocationOfInterest) {
         this.addGeoJsonLocationOfInterest(color, jobName, loi);
@@ -254,7 +258,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private addPointOfInterest(color: string | undefined, loi: PointOfInterest) {
+  private addPointOfInterest({
+    id,
+    jobId,
+    geometry,
+    color,
+  }: {
+    id: string;
+    jobId: string;
+    geometry: Point;
+    color: string | undefined;
+  }) {
+    const { x: latitude, y: longitude } = geometry.coord;
     const icon = {
       url: getPinImageSource(color),
       scaledSize: {
@@ -264,23 +279,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     } as google.maps.Icon;
     const options: google.maps.MarkerOptions = {
       map: this.map.googleMap,
-      position: new google.maps.LatLng(
-        loi.location.latitude,
-        loi.location.longitude
-      ),
+      position: new google.maps.LatLng(latitude, longitude),
       icon,
       draggable: false,
-      title: loi.id,
+      title: id,
     };
     const marker = new google.maps.Marker(options);
-    marker.addListener('click', () => this.onMarkerClick(loi.id));
+    marker.addListener('click', () => this.onMarkerClick(id));
     marker.addListener('dragstart', (event: google.maps.MouseEvent) =>
       this.onMarkerDragStart(event, marker)
     );
     marker.addListener('dragend', (event: google.maps.MouseEvent) =>
-      this.onMarkerDragEnd(event, loi)
+      this.onMarkerDragEnd(event, id, jobId)
     );
-    this.markers.set(loi.id, marker);
+    this.markers.set(id, marker);
   }
 
   private onMarkerClick(loiId: string) {
@@ -307,15 +319,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
   }
 
-  private onMarkerDragEnd(event: google.maps.MouseEvent, loi: PointOfInterest) {
+  private onMarkerDragEnd(
+    event: google.maps.MouseEvent,
+    id: string,
+    jobId: string
+  ) {
     this.newLatLng = new google.maps.LatLng(
       event.latLng.lat(),
       event.latLng.lng()
     );
-    this.newLocationOfInterestToReposition = new PointOfInterest(
-      loi.id,
-      loi.jobId,
-      new firebase.firestore.GeoPoint(event.latLng.lat(), event.latLng.lng())
+
+    this.newLocationOfInterestToReposition = new GenericLocationOfInterest(
+      id,
+      jobId,
+      new Point(new Coordinate(event.latLng.lat(), event.latLng.lng())),
+      ImmutableMap<string, string | number>()
     );
   }
 

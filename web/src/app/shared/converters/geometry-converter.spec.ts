@@ -28,6 +28,7 @@ import { Point } from './../models/geometry/point';
 import { toGeometry } from './geometry-converter';
 
 import GeoPoint = firebase.firestore.GeoPoint;
+import { GeometryType } from '../models/geometry/geometry';
 
 type Path = Array<[number, number]>;
 
@@ -102,7 +103,7 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'converts map to Point',
         input: {
-          type: 'Point',
+          type: GeometryType.POINT,
           coordinates: new GeoPoint(x, y),
         },
         expectedOutput: point(x, y),
@@ -110,7 +111,7 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'converts map to Polygon',
         input: {
-          type: 'Polygon',
+          type: GeometryType.POLYGON,
           coordinates: {
             '0': indexedGeoPointMap(path1),
             '1': indexedGeoPointMap(path2),
@@ -121,7 +122,7 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'converts map to MultiPolygon',
         input: {
-          type: 'MultiPolygon',
+          type: GeometryType.MULTI_POLYGON,
           coordinates: {
             '0': {
               '0': indexedGeoPointMap(path1),
@@ -158,20 +159,20 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'fails on point with missing coordinates',
         input: {
-          type: 'Point',
+          type: GeometryType.POINT,
         },
       },
       {
         expectation: 'fails on point with null coordinates',
         input: {
-          type: 'Point',
+          type: GeometryType.POINT,
           coordinates: null,
         },
       },
       {
         expectation: 'fails on point with wrong coordinates type',
         input: {
-          type: 'Point',
+          type: GeometryType.POINT,
           coordinates: 'Kapow!',
         },
       },

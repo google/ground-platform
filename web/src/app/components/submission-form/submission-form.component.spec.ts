@@ -18,8 +18,8 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { SubmissionFormComponent } from './submission-form.component';
 import {
+  GenericLocationOfInterest,
   LocationOfInterest,
-  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { NEVER, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
@@ -53,6 +53,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { By } from '@angular/platform-browser';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 class MockModel {
   static task001: Task = new Task(
@@ -107,10 +109,11 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static loi001 = new PointOfInterest(
+  static loi001 = new GenericLocationOfInterest(
     'loi001',
     MockModel.job001.id,
-    new firebase.firestore.GeoPoint(0.0, 0.0)
+    new Point(new Coordinate(0.0, 0.0)),
+    Map()
   );
 
   static user001 = {

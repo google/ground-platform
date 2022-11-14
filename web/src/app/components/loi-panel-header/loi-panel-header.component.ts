@@ -29,12 +29,10 @@ import { DialogService } from '../../services/dialog/dialog.service';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
-import {
-  GeoJsonLocationOfInterest,
-  PointOfInterest,
-} from '../../shared/models/loi.model';
+import { GeoJsonLocationOfInterest } from '../../shared/models/loi.model';
 import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { Map } from 'immutable';
+import { Point } from '../../shared/models/geometry/point';
 @Component({
   selector: 'ground-loi-panel-header',
   templateUrl: './loi-panel-header.component.html',
@@ -66,7 +64,7 @@ export class LocationOfInterestPanelHeaderComponent
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
         if (loi instanceof GeoJsonLocationOfInterest) {
           this.loiTypeValue = LocationOfInterestType.Polygon;
-        } else if (loi instanceof PointOfInterest) {
+        } else if (loi.geometry instanceof Point) {
           this.loiTypeValue = LocationOfInterestType.Point;
         }
         this.loiProperties = loi.properties;

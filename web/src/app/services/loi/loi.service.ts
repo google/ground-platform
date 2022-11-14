@@ -21,11 +21,13 @@ import { Survey } from './../../shared/models/survey.model';
 import { SurveyService } from './../survey/survey.service';
 import { Injectable } from '@angular/core';
 import {
+  GenericLocationOfInterest,
   LocationOfInterest,
-  PointOfInterest,
 } from '../../shared/models/loi.model';
-import { List } from 'immutable';
+import { List, Map as ImmutableMap } from 'immutable';
 import firebase from 'firebase/app';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 @Injectable({
   providedIn: 'root',
@@ -105,10 +107,11 @@ export class LocationOfInterestService {
     if (!(survey.jobs || new Map()).get(jobId)) {
       return null;
     }
-    const newLocationOfInterest = new PointOfInterest(
+    const newLocationOfInterest = new GenericLocationOfInterest(
       this.dataStore.generateId(),
       jobId,
-      new firebase.firestore.GeoPoint(lat, lng)
+      new Point(new Coordinate(lat, lng)),
+      ImmutableMap()
     );
     await this.dataStore.updateLocationOfInterest(
       survey.id,
