@@ -15,30 +15,33 @@
  * limitations under the License.
  */
 
-"use strict";
-
-const HttpStatus = require("http-status-codes");
-const { db } = require("./common/context");
-const Busboy = require("busboy");
-const JSONStream = require("JSONStream");
+import * as functions from "firebase-functions";
+import * as HttpStatus from "http-status-codes";
+import { db } from "./common/context";
+import * as Busboy from "busboy";
+import * as JSONStream from "jsonstream-ts";
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-async function importGeoJson(req, res) {
+export async function importGeoJsonHandler(
+  req: functions.https.Request,
+  res: functions.Response<any>
+) {
   if (req.method !== "POST") {
-    return res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
+    res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
+    return;
   }
 
-  const busboy = new Busboy({ headers: req.headers });
+  const busboy = Busboy({ headers: req.headers });
 
   // Dictionary used to accumulate task step values, keyed by step name.
-  const params = {};
+  const params: { [name: string]: string } = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
-  let inserts = [];
+  let inserts: any[] = [];
 
   // Handle non-file fields in the task. survey and job must appear
   // before the file for the file handler to work properly.
@@ -50,25 +53,27 @@ async function importGeoJson(req, res) {
   busboy.on("file", (_field, file, _filename) => {
     const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
-      return res
+      res
         .status(HttpStatus.BAD_REQUEST)
         .end(JSON.stringify({ error: "Invalid request" }));
+      return;
     }
     console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
-    let geoJsonType = null;
-    file.pipe(JSONStream.parse("type")).on("data", (data) => {
+    let geoJsonType: any = null;
+    file.pipe(JSONStream.parse("type", undefined)).on("data", (data: any) => {
       geoJsonType = data;
     });
 
     file
-      .pipe(JSONStream.parse(["features", true]))
-      .on("data", async (geoJsonLoi) => {
+      .pipe(JSONStream.parse(["features", true], undefined))
+      .on("data", (geoJsonLoi: any) => {
         if (geoJsonType !== "FeatureCollection") {
           // TODO: report error to user
           console.debug(`Invalid ${geoJsonType}`);
-          return res.status(HttpStatus.BAD_REQUEST).end();
+          res.status(HttpStatus.BAD_REQUEST).end();
+          return;
         }
         if (geoJsonLoi.type != "Feature") {
           console.debug(`Skipping loi with type ${geoJsonLoi.type}`);
@@ -81,10 +86,10 @@ async function importGeoJson(req, res) {
           }
         } catch (err) {
           console.error(err);
-          res.unpipe(busboy);
-          await res
+          req.unpipe(busboy);
+          res
             .status(HttpStatus.BAD_REQUEST)
-            .end(JSON.stringify({ error: err.message }));
+            .end(JSON.stringify({ error: (err as Error).message }));
           // TODO(#525): Abort stream on error. How?
         }
       });
@@ -95,14 +100,17 @@ async function importGeoJson(req, res) {
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`${count} lois imported`);
-    await res.status(HttpStatus.OK).end(JSON.stringify({ count }));
+    res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
-  busboy.on("error", (err) => {
-    console.err("Busboy error", err);
-    next(err);
+  busboy.on("error", (err: any) => {
+    console.error("Busboy error", err);
+    req.unpipe(busboy);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
 
+  // Use this for Cloud Functions rather than `req.pipe(busboy)`:
+  // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
   busboy.end(req.rawBody);
 }
 
@@ -110,7 +118,7 @@ async function importGeoJson(req, res) {
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function geoJsonToLoi(geoJsonLoi, jobId) {
+function geoJsonToLoi(geoJsonLoi: any, jobId: string) {
   // TODO: Add created/modified metadata.
   return {
     jobId,
@@ -118,5 +126,3 @@ function geoJsonToLoi(geoJsonLoi, jobId) {
     properties: geoJsonLoi.properties,
   };
 }
-
-module.exports = importGeoJson;

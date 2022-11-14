@@ -1,33 +1,48 @@
 {
   "name": "functions",
+  "main": "lib/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {
+    "lint": "eslint --ext .js,.ts",
     "serve": "firebase serve --only functions",
     "shell": "firebase experimental:functions:shell",
     "emulators": "firebase emulators:start --config ../firebase.local.json --project fake-project-id",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "mocha --reporter list"
+    "test": "mocha --reporter list",
+    "build": "npm run lint && tsc"
   },
   "dependencies": {
-    "@fast-csv/format": "^4.3.5",
-    "JSONStream": "^1.3.5",
-    "busboy": "^0.3.1",
-    "cors": "^2.8.5",
-    "csv-parser": "^2.3.3",
-    "firebase-admin": "^9.8.0",
-    "firebase-functions": "^3.14.0",
-    "google-auth-library": "^6.1.3",
-    "googleapis": "^64.0.0",
-    "http-status-codes": "^1.4.0",
-    "requests": "^0.3.0",
-    "wkt": "^0.1.1"
+    "@fast-csv/format": "4.3.5",
+    "@terraformer/wkt": "2.1.2",
+    "@types/busboy": "1.5.0",
+    "@types/cors": "2.8.12",
+    "@types/jsonstream": "0.8.30",
+    "@types/node": "18.7.13",
+    "@types/terraformer__wkt": "2.0.0",
+    "busboy": "1.6.0",
+    "cors": "2.8.5",
+    "csv-parser": "2.3.3",
+    "firebase-admin": "11.0.1",
+    "firebase-functions": "4.0.1",
+    "google-auth-library": "6.1.3",
+    "googleapis": "64.0.0",
+    "http-status-codes": "1.4.0",
+    "jsonstream-ts": "1.3.6",
+    "requests": "0.3.0"
   },
   "engines": {
-    "node": "12"
+    "node": "16"
   },
   "private": true,
   "devDependencies": {
-    "mocha": "^10.0.0"
+    "@angular/cli": "14.2.5",
+    "@typescript-eslint/eslint-plugin": "5.39.0",
+    "@typescript-eslint/parser": "5.39.0",
+    "eslint": "8.26.0",
+    "firebase-tools": "11.16.0",
+    "mocha": "10.0.0",
+    "typescript": "4.8.4",
+    "wkt": "0.1.1"
   }
 }

@@ -15,27 +15,28 @@
  * limitations under the License.
  */
 
-"use strict";
-
-const csv = require("@fast-csv/format");
-const { db } = require("./common/context");
-const wkt = require("wkt");
+import * as functions from "firebase-functions";
+import * as csv from "@fast-csv/format";
+import { geojsonToWKT } from "@terraformer/wkt"
+import { db } from "./common/context";
+import * as HttpStatus from "http-status-codes";
 
 // TODO: Refactor into meaningful pieces.
-async function exportCsv(req, res) {
-  const { survey: surveyId, job: jobId } = req.query;
+export async function exportCsvHandler(req: functions.Request, res: functions.Response<any>) {
+  const surveyId = req.query.survey as string;
+  const jobId = req.query.job as string;
   const survey = await db.fetchSurvey(surveyId);
   if (!survey.exists) {
-    res.status(404).send("Survey not found");
+    res.status(HttpStatus.NOT_FOUND).send("Survey not found");
     return;
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
   const jobs = survey.get("jobs") || {};
   const job = jobs[jobId] || {};
-  const jobName = job.name && job.name["en"];
+  const jobName = job.name && job.name["en"] as string;
   const tasks = job["tasks"] || {};
-  const task = Object.values(tasks)[0] || {};
+  const task = Object.values(tasks)[0] as any || {};
   const elementMap = task["elements"] || {};
   const elements = Object.keys(elementMap)
     .map((elementId) => ({ id: elementId, ...elementMap[elementId] }))
@@ -75,10 +76,10 @@ async function exportCsv(req, res) {
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest = {};
+  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
   submissions.forEach((submission) => {
-    const loiId = submission.get("loiId");
-    const arr = submissionsByLocationOfInterest[loiId] || [];
+    const loiId = submission.get("loiId") as string;
+    const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
     arr.push(submission.data());
     submissionsByLocationOfInterest[loiId] = arr;
   });
@@ -104,13 +105,13 @@ async function exportCsv(req, res) {
   csvStream.end();
 }
 
-function toWkt(geoJsonString) {
+function toWkt(geoJsonString: string) {
   const geoJsonObject = parseGeoJson(geoJsonString);
   const geometry = getGeometry(geoJsonObject);
-  return geometry ? wkt.stringify(geometry) : "";
+  return geometry ? geojsonToWKT(geometry) : "";
 }
 
-function parseGeoJson(jsonString) {
+function parseGeoJson(jsonString: string) {
   try {
     // Note: Returns null when jsonString is null.
     return JSON.parse(jsonString);
@@ -119,14 +120,14 @@ function parseGeoJson(jsonString) {
   }
 }
 
-function getGeometry(geoJsonObject) {
+function getGeometry(geoJsonObject: any) {
   if (!geoJsonObject || typeof geoJsonObject !== "object") {
     return null;
   }
   return geoJsonObject.geometry;
 }
 
-function getId(loi) {
+function getId(loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>) {
   const properties = loi.get("properties") || {};
   return (
     loi.get("id") ||
@@ -137,7 +138,7 @@ function getId(loi) {
   );
 }
 
-function getLabel(loi) {
+function getLabel(loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>) {
   const properties = loi.get("properties") || {};
   return (
     properties["caption"] || properties["label"] || properties["title"] || ""
@@ -146,7 +147,7 @@ function getLabel(loi) {
 /**
  * Returns the string representation of a specific task element result.
  */
-function getValue(element, results) {
+function getValue(element: any, results: any) {
   const result = results[element.id] || "";
   if (
     element.type === "multiple_choice" &&
@@ -163,7 +164,7 @@ function getValue(element, results) {
  * Returns the code associated with a specified multiple choice option, or if
  * the code is not defined, returns the label in English.
  */
-function getMultipleChoiceValues(id, element) {
+function getMultipleChoiceValues(id: any, element: any) {
   const options = element.options || {};
   const option = options[id] || {};
   const label = option.label || {};
@@ -174,10 +175,9 @@ function getMultipleChoiceValues(id, element) {
 /**
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
-function getFileName(jobName) {
+function getFileName(jobName: string) {
   jobName = jobName || "ground-export";
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
   return `${fileBase}.csv`;
 }
 
-module.exports = exportCsv;

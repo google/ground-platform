@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-"use strict";
+import * as functions from "firebase-functions";
+import { firestore } from "firebase-admin";
+import { GeoPoint } from "firebase-admin/firestore";
 
-const { firestore } = require("firebase-admin");
+export class Datastore {
+  private db_: firestore.Firestore;
 
-class Datastore {
-  constructor(db) {
+  constructor(db: firestore.Firestore) {
     this.db_ = db;
   }
 
@@ -28,99 +30,103 @@ class Datastore {
    * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
-  mergeUserProfile({ uid, email, displayName, photoURL }) {
+  mergeUserProfile(user: functions.auth.UserRecord) {
+    const { uid, email, displayName, photoURL } = user;
     return this.db_
       .doc(`users/${uid}`)
       .set({ uid, email, displayName, photoURL }, { merge: true });
   }
 
-  fetch_(docRef) {
-    return docRef.get().then((doc) => (doc.exists ? doc.data() : null));
+  async fetch_(
+    docRef: firestore.DocumentReference
+  ): Promise<firestore.DocumentData | null | undefined> {
+    const doc = await docRef.get();
+    return doc.exists ? doc.data() : null;
   }
 
-  fetchDoc_(path) {
+  fetchDoc_(path: string) {
     return this.fetch_(this.db_.doc(path));
   }
 
-  fetchCollection_(path) {
+  fetchCollection_(path: string) {
     return this.db_.collection(path).get();
   }
 
-  fetchSurvey(surveyId) {
+  fetchSurvey(surveyId: string) {
     return this.db_.doc(`surveys/${surveyId}`).get();
   }
 
-  fetchRecord(surveyId, loiId, recordId) {
+  fetchRecord(surveyId: string, loiId: string, recordId: string) {
     return this.fetchDoc_(
       `surveys/${surveyId}/lois/${loiId}/records/${recordId}`
     );
   }
 
-  fetchSubmissionsByJobId(surveyId, jobId) {
+  fetchSubmissionsByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(`surveys/${surveyId}/submissions`)
       .where("jobId", "==", jobId)
       .get();
   }
 
-  fetchLocationOfInterest(surveyId, loiId) {
+  fetchLocationOfInterest(surveyId: string, loiId: string) {
     return this.fetchDoc_(`surveys/${surveyId}/lois/${loiId}`);
   }
 
-  fetchLocationsOfInterestByJobId(surveyId, jobId) {
+  fetchLocationsOfInterestByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(`surveys/${surveyId}/lois`)
       .where("jobId", "==", jobId)
       .get();
   }
 
-  fetchTask(surveyId, loiTypeId, taskId) {
+  fetchTask(surveyId: string, loiTypeId: string, taskId: string) {
     return this.fetchDoc_(
       `surveys/${surveyId}/loiTypes/${loiTypeId}/tasks/${taskId}`
     );
   }
 
-  fetchSheetsConfig(surveyId) {
+  fetchSheetsConfig(surveyId: string) {
     return this.fetchDoc_(`surveys/${surveyId}/sheets/config`);
   }
 
-  async insertLocationOfInterest(surveyId, loi) {
+  async insertLocationOfInterest(surveyId: string, loi: any) {
     const loiDoc = {
       ...loi,
       geometry: Datastore.toFirestoreMap(loi.geometry),
     };
-    const docRef = await this.db_.collection("surveys").doc(surveyId);
+    const docRef = this.db_.collection("surveys").doc(surveyId);
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new Error(`/surveys/${surveyId} not found`);
     }
     await docRef.collection("lois").add(loiDoc);
   }
-}
 
-function toFirestoreValue(value) {
-  if (value === null) {
-    return null;
+  static toFirestoreMap(geometry: any) {
+    return Object.fromEntries(
+      Object.entries(geometry).map(([key, value]) => [
+        key,
+        Datastore.toFirestoreValue(value),
+      ])
+    );
   }
-  if (Array.isArray(value)) {
-    if (value.length === 2 && value.every((x) => typeof x === "number")) {
-      // Note: GeoJSON coordinates are in lng-lat order. We reverse that order for GeoPoint, which uses
-      // lat-lng order.
-      return new firestore.GeoPoint(value[1], value[0]);
+
+  static toFirestoreValue(value: any): any {
+    if (value === null) {
+      return null;
     }
-    // Convert array to map.
-    return Object.fromEntries(value.map((x, i) => [i, toFirestoreValue(x)]));
+    if (Array.isArray(value)) {
+      if (value.length === 2 && value.every((x) => typeof x === "number")) {
+        // Note: GeoJSON coordinates are in lng-lat order. We reverse that order for GeoPoint, which uses
+        // lat-lng order.
+        return new GeoPoint(value[1] as number, value[0] as number);
+      }
+      // Convert array to map.
+      return Object.fromEntries(
+        value.map((x, i) => [i, Datastore.toFirestoreValue(x)])
+      );
+    }
+    return value;
   }
-  return value;
 }
-
-Datastore.toFirestoreMap = function (geometry) {
-  return Object.fromEntries(
-    Object.entries(geometry).map(([key, value]) => [
-      key,
-      toFirestoreValue(value),
-    ])
-  );
-};
-
-module.exports = Datastore;
