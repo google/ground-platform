@@ -25,7 +25,7 @@ This repo contains all Ground cloud-based / hosted components:
 | [docs/](docs/)           | _Public documentation_, including Ground homepage                                                             |
 | [firestore/](firestore/) | _Firestore config_ defining Firebase rules and other database settings                                        |
 | [functions/](functions/) | _Firebase Cloud Functions_, used to sync with Google Sheets and import/export data to/from other data sources |
-| [web/](web/)       | _Ground web console_ used to set up and manage surveys, and to view, edit, and analyze collected data online |
+| [web/](web/)             | _Ground web console_ used to set up and manage surveys, and to view, edit, and analyze collected data online  |
 
 Follow the instructions provided in the README of each subdirectory to set up the proper
 development environment for each component.
@@ -49,7 +49,7 @@ information, including details on the required Contributor License Agreement
 Once you have nvm installed, install Node.js with:
 
 ```
-$ nvm install 14 && nvm use 14
+$ nvm install 16 && nvm use 16
 ```
 
 Then install the Angular CLI using npm using:
