@@ -504,7 +504,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     const candidatePolygons: google.maps.Polygon[] = [];
     for (const polygon of this.polygons.values()) {
-      if (google.maps.geometry.poly.containsLocation(event.latLng, polygon)) {
+      if (google.maps.geometry.poly.containsLocation(event.latLng!, polygon)) {
         candidatePolygons.push(polygon);
       }
     }
