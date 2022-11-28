@@ -18,7 +18,6 @@ import {
   deepEqualityTester,
   formatImmutableCollection,
 } from '../../../testing/helpers';
-import firebase from 'firebase/app';
 import { List } from 'immutable';
 import { Coordinate } from '../models/geometry/coordinate';
 import { MultiPolygon } from '../models/geometry/multi-polygon';
@@ -26,8 +25,7 @@ import { Polygon } from '../models/geometry/polygon';
 import { LinearRing } from './../models/geometry/linear-ring';
 import { Point } from './../models/geometry/point';
 import { toGeometry } from './geometry-converter';
-
-import GeoPoint = firebase.firestore.GeoPoint;
+import { GeoPoint } from 'firebase/firestore';
 import { GeometryType } from '../models/geometry/geometry';
 
 type Path = Array<[number, number]>;

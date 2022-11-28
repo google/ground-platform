@@ -16,7 +16,7 @@
 
 import firebase from 'firebase/app';
 import { Injectable } from '@angular/core';
-import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
+import { AngularFirestore, DocumentData, FieldPath, FieldValue } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { Observable } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
@@ -72,7 +72,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(
-          new firebase.firestore.FieldPath('acl', userEmail),
+          new FieldPath('acl', userEmail),
           'in',
           this.VALID_ROLES
         )
@@ -120,7 +120,7 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}`]: firebase.firestore.FieldValue.delete(),
+        [`jobs.${jobId}`]: FieldValue.delete(),
       });
   }
 
@@ -321,7 +321,7 @@ export class DataStoreService {
   }
 
   getServerTimestamp() {
-    return firebase.firestore.FieldValue.serverTimestamp();
+    return FieldValue.serverTimestamp();
   }
 
   updateLocationOfInterest(

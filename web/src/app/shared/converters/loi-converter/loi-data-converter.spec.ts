@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import { DocumentData } from '@angular/fire/firestore';
-import firebase from 'firebase';
 import {
   AreaOfInterest,
   GenericLocationOfInterest,
@@ -24,8 +23,8 @@ import {
 } from '../../models/loi.model';
 import { toGeometry } from '../geometry-converter';
 import { LoiDataConverter } from './loi-data-converter';
-import GeoPoint = firebase.firestore.GeoPoint;
 import { Map } from 'immutable';
+import { GeoPoint } from 'firebase/firestore';
 import { Geometry, GeometryType } from '../../models/geometry/geometry';
 import { Point } from '../../models/geometry/point';
 
