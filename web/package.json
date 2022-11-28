@@ -43,7 +43,7 @@
     "ngx-autosize-input": "^14",
     "ngx-color": "^5.1.4",
     "rxjs": "^7.5.7",
-    "tslib": "^1.14.1",
+    "tslib": "^2.4.1",
     "zone.js": "^0.12.0"
   },
   "devDependencies": {
