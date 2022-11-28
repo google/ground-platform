@@ -19,6 +19,7 @@ on:
       - master
 jobs:
   build_and_deploy:
+    if: github.repository_owner == 'google'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
