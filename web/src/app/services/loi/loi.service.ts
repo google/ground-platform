@@ -16,7 +16,7 @@
 
 import { DataStoreService } from './../data-store/data-store.service';
 import { switchMap } from 'rxjs/operators';
-import { firstValueFrom, Observable, ReplaySubject } from 'rxjs';
+import { firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
 import { Survey } from './../../shared/models/survey.model';
 import { SurveyService } from './../survey/survey.service';
 import { Injectable } from '@angular/core';
@@ -44,7 +44,7 @@ export class LocationOfInterestService {
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          survey.isUnsavedNew() ? List() : dataStore.lois$(survey)
+          survey.isUnsavedNew() ? of(List<LocationOfInterest>()) : dataStore.lois$(survey)
         )
       );
 
