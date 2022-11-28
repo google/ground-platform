@@ -19,7 +19,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { DocumentData, FieldPath, FieldValue } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
@@ -29,8 +29,8 @@ import { List, Map } from 'immutable';
 import { Submission } from '../../shared/models/submission/submission.model';
 import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
-import 'firebase/storage';
 import { LoiDataConverter } from '../../shared/converters/loi-converter/loi-data-converter';
+import { deleteField, serverTimestamp } from 'firebase/firestore';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -121,7 +121,7 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}`]: FieldValue.delete(),
+        [`jobs.${jobId}`]: deleteField(),
       });
   }
 
@@ -130,7 +130,7 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where('jobId', '==', jobId)
     );
-    const querySnapshot = await submissions.get().toPromise();
+    const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -142,7 +142,7 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where('loiId', '==', loiId)
     );
-    const querySnapshot = await submissions.get().toPromise();
+    const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -154,8 +154,8 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref => ref.where('jobId', '==', jobId)
     );
-    const querySnapshot = await loisInJob.get().toPromise();
-    return await Promise.all( .docs.map(doc => doc.ref.delete()));
+    const querySnapshot = await firstValueFrom(loisInJob.get());
+    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
   async deleteLocationOfInterest(surveyId: string, loiId: string) {
@@ -322,7 +322,7 @@ export class DataStoreService {
   }
 
   getServerTimestamp() {
-    return FieldValue.serverTimestamp();
+    return serverTimestamp();
   }
 
   updateLocationOfInterest(
