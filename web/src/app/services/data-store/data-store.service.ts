@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
+import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import { Injectable } from '@angular/core';
-import { AngularFirestore, DocumentData, FieldPath, FieldValue } from '@angular/fire/firestore';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { DocumentData, FieldPath, FieldValue } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { Observable } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
@@ -154,7 +155,7 @@ export class DataStoreService {
       ref => ref.where('jobId', '==', jobId)
     );
     const querySnapshot = await loisInJob.get().toPromise();
-    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+    return await Promise.all( .docs.map(doc => doc.ref.delete()));
   }
 
   async deleteLocationOfInterest(surveyId: string, loiId: string) {
@@ -366,6 +367,6 @@ export class DataStoreService {
   }
 
   getImageDownloadURL(path: string) {
-    return firebase.storage().ref().child(path).getDownloadURL();
+    return getDownloadURL(ref(getStorage(), path));
   }
 }

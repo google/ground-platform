@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { JobListItemComponent } from './job-list-item.component';
