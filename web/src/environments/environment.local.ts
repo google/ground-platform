@@ -20,7 +20,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 import { Env } from './environment-enums';
-import { googleMapsConfig } from '../.google-maps-config';
+import { googleMapsConfig } from './.google-maps-config';
 
 export const environment = {
   production: false,
