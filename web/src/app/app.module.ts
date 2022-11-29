@@ -31,6 +31,8 @@ import { GoogleAuthProvider } from 'firebase/auth';
 import { HttpClientModule } from '@angular/common/http';
 import { firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -55,8 +57,11 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     },
   ],
   imports: [
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideFirestore(() => getFirestore()),
+    // TODO(#967): Replace compat libs with new AngularFire APIs:
+    //   provideFirebaseApp(() => initializeApp(environment.firebase)),
+    //   provideFirestore(() => getFirestore()),
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireAuthModule,    
     AngularFirestoreModule,
     BrowserAnimationsModule,
     BrowserModule,
