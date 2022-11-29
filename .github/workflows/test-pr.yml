@@ -37,13 +37,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
 
       - name: Install dependencies
-        run: npm i
-
-      - name: Install Angular-CLI
-        run: npm install -g @angular/cli > /dev/null
+        run: npm install
 
       - name: Run Jasmine tests
         run: npm run test-with-coverage
