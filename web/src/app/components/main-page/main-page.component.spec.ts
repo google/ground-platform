@@ -25,8 +25,8 @@ import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SubmissionService } from '../../services/submission/submission.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Component({ selector: 'ground-map', template: '' })

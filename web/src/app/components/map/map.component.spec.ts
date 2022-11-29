@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
-import {
+ import {
   ComponentFixture,
   TestBed,
   waitForAsync,
@@ -37,6 +36,7 @@ import {
 import { Map, List } from 'immutable';
 import { Job } from '../../shared/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
+import { GeoPoint } from 'firebase/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { urlPrefix } from './ground-pin';
 import {
@@ -142,11 +142,11 @@ describe('MapComponent', () => {
     geoJson1
   );
   const aoi1 = new AreaOfInterest(aoiId1, jobId2, [
-    new firebase.firestore.GeoPoint(-10, -10),
-    new firebase.firestore.GeoPoint(20, -10),
-    new firebase.firestore.GeoPoint(20, 20),
-    new firebase.firestore.GeoPoint(-10, 20),
-    new firebase.firestore.GeoPoint(-10, -10),
+    new GeoPoint(-10, -10),
+    new GeoPoint(20, -10),
+    new GeoPoint(20, 20),
+    new GeoPoint(-10, 20),
+    new GeoPoint(-10, -10),
   ]);
 
   beforeEach(

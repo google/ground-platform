@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import firebase from 'firebase/app';
 import { DocumentData } from '@angular/fire/firestore';
 import {
   LocationOfInterest,
@@ -22,11 +21,10 @@ import {
   GenericLocationOfInterest,
 } from '../../models/loi.model';
 import { Map } from 'immutable';
+import { GeoPoint } from 'firebase/firestore';
 import { Geometry } from '../../models/geometry/geometry';
 import { toGeometry } from './../geometry-converter';
 import { Point } from '../../models/geometry/point';
-
-import GeoPoint = firebase.firestore.GeoPoint;
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an

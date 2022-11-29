@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
+import { firstValueFrom, Observable, ReplaySubject } from 'rxjs';
 import { switchMap, shareReplay } from 'rxjs/operators';
 import { Survey } from '../../shared/models/survey.model';
 import { DataStoreService } from '../data-store/data-store.service';
@@ -95,7 +95,7 @@ export class SurveyService {
 
   async createSurvey(title: string): Promise<string> {
     const offlineBaseMapSources = environment.offlineBaseMapSources;
-    const user = await this.authService.getUser$().pipe(take(1)).toPromise();
+    const user = await firstValueFrom(this.authService.getUser$());
     const email = user?.email || 'Unknown email';
     const surveyId = await this.dataStore.createSurvey(
       email,

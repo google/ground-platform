@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import { GeoPoint } from 'firebase/firestore';
 import { PointOfInterest } from './../app/shared/models/loi.model';
 import { Survey } from '../app/shared/models/survey.model';
 import { Map } from 'immutable';
 import { Job } from './../app/shared/models/job.model';
 import { Task } from './../app/shared/models/task/task.model';
 import { User } from './../app/shared/models/user.model';
-import firebase from 'firebase/app';
 import { Role } from './../app/shared/models/role.model';
 
 /**
@@ -65,7 +65,7 @@ export class TestData {
     return new PointOfInterest(
       'loi001',
       'job001',
-      new firebase.firestore.GeoPoint(0, 0),
+      new GeoPoint(0, 0),
       Map()
     );
   }

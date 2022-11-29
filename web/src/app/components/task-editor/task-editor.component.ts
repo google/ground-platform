@@ -48,7 +48,7 @@ import {
 } from '../../shared/models/task/multiple-choice.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { JobService } from '../../services/job/job.service';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { OptionEditorComponent } from '../option-editor/option-editor.component';
 
 export interface TaskTypeSelectOption {
@@ -271,15 +271,15 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onOptionDelete(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to delete this option? ' +
+    firstValueFrom(
+      this.dialogService
+        .openConfirmationDialog(
+          'Warning',
+          'Are you sure you wish to delete this option? ' +
           'Any associated data will be lost. This cannot be undone.'
-      )
-      .afterClosed()
-      .toPromise()
-      .then(dialogResult => {
+        )
+        .afterClosed()
+    ).then(dialogResult => {
         if (dialogResult) {
           let options = this.taskOptions?.options;
           if (!options) return;
