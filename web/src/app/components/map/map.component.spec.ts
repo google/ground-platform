@@ -227,11 +227,11 @@ describe('MapComponent', () => {
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, jobColor1, 30);
-    expect(marker1.getMap()).toEqual(component.map.googleMap);
+    expect(marker1.getMap()).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
     assertMarkerIcon(marker2, jobColor2, 30);
-    expect(marker2.getMap()).toEqual(component.map.googleMap);
+    expect(marker2.getMap()).toEqual(component.map.googleMap!);
   });
 
   it('should render polygons on map - geojson loi', () => {
@@ -273,11 +273,11 @@ describe('MapComponent', () => {
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, jobColor1, 30);
-    expect(marker1.getMap()).toEqual(component.map.googleMap);
+    expect(marker1.getMap()).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId3)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
     assertMarkerIcon(marker2, jobColor2, 30);
-    expect(marker2.getMap()).toEqual(component.map.googleMap);
+    expect(marker2.getMap()).toEqual(component.map.googleMap!);
     expect(component.polygons.size).toEqual(1);
     const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonPaths(polygon, [
@@ -573,7 +573,7 @@ describe('MapComponent', () => {
     iconColor: string,
     iconSize: number
   ): void {
-    const icon = marker.getIcon() as google.maps.ReadonlyIcon;
+    const icon = marker.getIcon() as google.maps.Icon;
     expect(atob(icon.url.slice(urlPrefix.length))).toContain(iconColor);
     expect(icon.scaledSize?.height).toEqual(iconSize);
     expect(icon.scaledSize?.width).toEqual(iconSize);
