@@ -104,7 +104,7 @@ export class DataStoreService {
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
+      .doc(surveyId)  
       .update({
         [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
       });
