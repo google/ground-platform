@@ -44,7 +44,9 @@ export class LocationOfInterestService {
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          survey.isUnsavedNew() ? of(List<LocationOfInterest>()) : dataStore.lois$(survey)
+          survey.isUnsavedNew()
+            ? of(List<LocationOfInterest>())
+            : dataStore.lois$(survey)
         )
       );
 

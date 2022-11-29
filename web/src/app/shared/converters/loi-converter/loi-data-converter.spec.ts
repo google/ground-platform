@@ -138,8 +138,8 @@ describe('loiToJS', () => {
       `got unexpected error in geometry conversion ${geoPointWithError}`
     );
   }
-  const geoPoint = (geoPointWithError as unknown) as GeoPoint;
-  const point = (geoPointWithError as unknown) as Point;
+  const geoPoint = geoPointWithError as unknown as GeoPoint;
+  const point = geoPointWithError as unknown as Point;
 
   const testData: {
     expectation: string;
@@ -215,7 +215,7 @@ describe('loiToJS_Error', () => {
       `got unexpected error in geometry conversion ${geoPointWithError}`
     );
   }
-  const geoPoint = (geoPointWithError as unknown) as GeoPoint;
+  const geoPoint = geoPointWithError as unknown as GeoPoint;
 
   const testData: {
     expectation: string;

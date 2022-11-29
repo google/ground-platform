@@ -33,27 +33,25 @@ describe('SurveyHeaderComponent', () => {
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
   const user$ = new Subject<User | null>();
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [InlineEditorModule, MatIconModule, MatDialogModule],
-        declarations: [SurveyHeaderComponent],
-        providers: [
-          { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
-          { provide: MAT_DIALOG_DATA, useValue: {} },
-          { provide: MatDialogRef, useValue: dialogRef },
-          {
-            provide: SurveyService,
-            useValue: {
-              getActiveSurvey$: () => NEVER,
-              getCurrentSurvey: () => {},
-            },
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [InlineEditorModule, MatIconModule, MatDialogModule],
+      declarations: [SurveyHeaderComponent],
+      providers: [
+        { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MatDialogRef, useValue: dialogRef },
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => NEVER,
+            getCurrentSurvey: () => {},
           },
-          { provide: Router, useValue: {} },
-        ],
-      }).compileComponents();
-    })
-  );
+        },
+        { provide: Router, useValue: {} },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyHeaderComponent);

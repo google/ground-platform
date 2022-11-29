@@ -62,11 +62,6 @@ export class TestData {
   }
 
   public static newPointOfInterest(): PointOfInterest {
-    return new PointOfInterest(
-      'loi001',
-      'job001',
-      new GeoPoint(0, 0),
-      Map()
-    );
+    return new PointOfInterest('loi001', 'job001', new GeoPoint(0, 0), Map());
   }
 }

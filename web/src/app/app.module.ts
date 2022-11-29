@@ -16,7 +16,11 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR, SETTINGS as FIRESTORE_SETTINGS } from '@angular/fire/compat/firestore';
+import {
+  AngularFirestoreModule,
+  USE_EMULATOR as USE_FIRESTORE_EMULATOR,
+  SETTINGS as FIRESTORE_SETTINGS,
+} from '@angular/fire/compat/firestore';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -59,7 +63,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     //   provideFirebaseApp(() => initializeApp(environment.firebase)),
     //   provideFirestore(() => getFirestore()),
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFireAuthModule,    
+    AngularFireAuthModule,
     AngularFirestoreModule,
     BrowserAnimationsModule,
     BrowserModule,

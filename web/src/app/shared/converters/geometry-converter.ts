@@ -72,9 +72,8 @@ function toPoint(coordinates?: any): Point {
  * zero or more holes), each comprised of an indexed map of coordinates.
  */
 function toPolygon(coordinatesMap?: any): Polygon {
-  const rings: List<List<any>> = indexedMapToList(coordinatesMap).map(
-    indexedMapToList
-  );
+  const rings: List<List<any>> =
+    indexedMapToList(coordinatesMap).map(indexedMapToList);
   if (rings.isEmpty()) {
     throw new Error('Empty coordinates map');
   }

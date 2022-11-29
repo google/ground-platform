@@ -276,17 +276,17 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
         .openConfirmationDialog(
           'Warning',
           'Are you sure you wish to delete this option? ' +
-          'Any associated data will be lost. This cannot be undone.'
+            'Any associated data will be lost. This cannot be undone.'
         )
         .afterClosed()
     ).then(dialogResult => {
-        if (dialogResult) {
-          let options = this.taskOptions?.options;
-          if (!options) return;
-          options = options.delete(index);
-          this.emitTaskOptions(options);
-        }
-      });
+      if (dialogResult) {
+        let options = this.taskOptions?.options;
+        if (!options) return;
+        options = options.delete(index);
+        this.emitTaskOptions(options);
+      }
+    });
   }
 
   onAddOption(): void {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
@@ -92,27 +91,25 @@ describe('LocationOfInterestPanelComponent', () => {
   let component: LocationOfInterestPanelComponent;
   let fixture: ComponentFixture<LocationOfInterestPanelComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const routerSpy = createRouterSpy();
-      TestBed.configureTestingModule({
-        declarations: [LocationOfInterestPanelComponent],
-        imports: [MatDialogModule],
-        providers: [
-          { provide: DataStoreService, useValue: {} },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiService,
-          },
-          { provide: SurveyService, useValue: surveyService },
-          { provide: SubmissionService, useValue: submissionService },
-          { provide: Router, useValue: routerSpy },
-          { provide: NavigationService, useValue: navigationService },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    const routerSpy = createRouterSpy();
+    TestBed.configureTestingModule({
+      declarations: [LocationOfInterestPanelComponent],
+      imports: [MatDialogModule],
+      providers: [
+        { provide: DataStoreService, useValue: {} },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiService,
+        },
+        { provide: SurveyService, useValue: surveyService },
+        { provide: SubmissionService, useValue: submissionService },
+        { provide: Router, useValue: routerSpy },
+        { provide: NavigationService, useValue: navigationService },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LocationOfInterestPanelComponent);

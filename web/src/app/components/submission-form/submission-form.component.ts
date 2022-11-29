@@ -270,8 +270,9 @@ export class SubmissionFormComponent {
     task: Task,
     result?: Result
   ): void {
-    const selectedOptionId = ((result?.value as List<Option>)?.first() as Option)
-      ?.id;
+    const selectedOptionId = (
+      (result?.value as List<Option>)?.first() as Option
+    )?.id;
     group[task.id] = task.required
       ? new FormControl(selectedOptionId, Validators.required)
       : new FormControl(selectedOptionId);

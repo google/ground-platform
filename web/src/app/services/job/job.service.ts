@@ -22,7 +22,6 @@ import { Option } from '../../shared/models/task/option.model';
 import { MultipleChoice } from '../../shared/models/task/multiple-choice.model';
 import { List, Map } from 'immutable';
 import { SurveyService } from '../survey/survey.service';
-import { take } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({

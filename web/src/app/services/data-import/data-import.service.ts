@@ -51,6 +51,8 @@ export class DataImportService {
     } else {
       throw new Error('Invalid file format');
     }
-    return firstValueFrom(this.httpClient.post<ImportResult>(importUrl, formData));
+    return firstValueFrom(
+      this.httpClient.post<ImportResult>(importUrl, formData)
+    );
   }
 }

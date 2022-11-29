@@ -30,20 +30,18 @@ describe('TitleDialogComponent', () => {
     'selectSurvey',
   ]);
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [TitleDialogComponent],
-        imports: [MatDialogModule],
-        providers: [
-          { provide: MatDialogRef, useValue: dialogRef },
-          { provide: SurveyService, useValue: surveyService },
-          { provide: NavigationService, useValue: navigationService },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [TitleDialogComponent],
+      imports: [MatDialogModule],
+      providers: [
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: SurveyService, useValue: surveyService },
+        { provide: NavigationService, useValue: navigationService },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TitleDialogComponent);

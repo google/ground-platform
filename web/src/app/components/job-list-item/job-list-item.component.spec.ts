@@ -41,29 +41,27 @@ describe('JobListItemComponent', () => {
   let component: JobListItemComponent;
   let fixture: ComponentFixture<JobListItemComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const navigationService = {
-        getSurveyId$: () => of(''),
-        getLocationOfInterestId$: () => of(''),
-      };
+  beforeEach(waitForAsync(() => {
+    const navigationService = {
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
+    };
 
-      TestBed.configureTestingModule({
-        declarations: [JobListItemComponent],
-        imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
-        providers: [
-          { provide: DataStoreService, useValue: { user$: () => of() } },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: Router, useValue: {} },
-          { provide: AngularFirestore, useValue: {} },
-          {
-            provide: AngularFireAuth,
-            useValue: mockAngularFireAuth,
-          },
-        ],
-      }).compileComponents();
-    })
-  );
+    TestBed.configureTestingModule({
+      declarations: [JobListItemComponent],
+      imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
+      providers: [
+        { provide: DataStoreService, useValue: { user$: () => of() } },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: Router, useValue: {} },
+        { provide: AngularFirestore, useValue: {} },
+        {
+          provide: AngularFireAuth,
+          useValue: mockAngularFireAuth,
+        },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListItemComponent);

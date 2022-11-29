@@ -17,7 +17,7 @@
 import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { DocumentData, FieldPath, FieldValue } from '@angular/fire/firestore';
+import { DocumentData, FieldPath } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
@@ -72,11 +72,7 @@ export class DataStoreService {
   loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(
-          new FieldPath('acl', userEmail),
-          'in',
-          this.VALID_ROLES
-        )
+        ref.where(new FieldPath('acl', userEmail), 'in', this.VALID_ROLES)
       )
       .snapshotChanges()
       .pipe(

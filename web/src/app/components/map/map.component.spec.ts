@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- import {
+import {
   ComponentFixture,
   TestBed,
   waitForAsync,
@@ -149,72 +149,70 @@ describe('MapComponent', () => {
     new GeoPoint(-10, -10),
   ]);
 
-  beforeEach(
-    waitForAsync(() => {
-      surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-        'getActiveSurvey$',
-      ]);
-      surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
+  beforeEach(waitForAsync(() => {
+    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+      'getActiveSurvey$',
+    ]);
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
 
-      loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
-        'LocationOfInterestService',
-        ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
-      );
-      mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
-        List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
-      );
-      loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
+    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+      'LocationOfInterestService',
+      ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
+    );
+    mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
+      List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
+    );
+    loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
-      navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
-        'NavigationService',
-        [
-          'getLocationOfInterestId$',
-          'getSubmissionId$',
-          'selectLocationOfInterest',
-          'clearLocationOfInterestId',
-        ]
-      );
-      mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
-      navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
-        mockLocationOfInterestId$
-      );
-      navigationServiceSpy.getSubmissionId$.and.returnValue(
-        of<string | null>(null)
-      );
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      [
+        'getLocationOfInterestId$',
+        'getSubmissionId$',
+        'selectLocationOfInterest',
+        'clearLocationOfInterestId',
+      ]
+    );
+    mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
+      mockLocationOfInterestId$
+    );
+    navigationServiceSpy.getSubmissionId$.and.returnValue(
+      of<string | null>(null)
+    );
 
-      mockDialogAfterClosed$ = new BehaviorSubject<string>('');
-      dialogRefSpy = jasmine.createSpyObj<MatDialogRef<unknown, unknown>>(
-        'MatDialogRef',
-        ['afterClosed']
-      );
-      dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
-      dialogSpy.open.and.returnValue(dialogRefSpy);
-      dialogRefSpy.afterClosed.and.returnValue(mockDialogAfterClosed$);
+    mockDialogAfterClosed$ = new BehaviorSubject<string>('');
+    dialogRefSpy = jasmine.createSpyObj<MatDialogRef<unknown, unknown>>(
+      'MatDialogRef',
+      ['afterClosed']
+    );
+    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+    dialogRefSpy.afterClosed.and.returnValue(mockDialogAfterClosed$);
 
-      mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
-      drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
-        'DrawingToolsService',
-        ['getEditMode$', 'setEditMode', 'getSelectedJobId', 'setDisabled']
-      );
-      drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
-      drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId1);
+    mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
+    drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
+      'DrawingToolsService',
+      ['getEditMode$', 'setEditMode', 'getSelectedJobId', 'setDisabled']
+    );
+    drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId1);
 
-      TestBed.configureTestingModule({
-        imports: [GoogleMapsModule],
-        declarations: [MapComponent],
-        providers: [
-          { provide: MatDialog, useValue: dialogSpy },
-          { provide: SurveyService, useValue: surveyServiceSpy },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiServiceSpy,
-          },
-          { provide: NavigationService, useValue: navigationServiceSpy },
-          { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
-        ],
-      }).compileComponents();
-    })
-  );
+    TestBed.configureTestingModule({
+      imports: [GoogleMapsModule],
+      declarations: [MapComponent],
+      providers: [
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiServiceSpy,
+        },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MapComponent);
@@ -264,9 +262,7 @@ describe('MapComponent', () => {
   });
 
   it('should update lois when backend lois update', fakeAsync(() => {
-    mockLois$.next(
-      List<LocationOfInterest>([poi1, poi3, geoJsonLoi1])
-    );
+    mockLois$.next(List<LocationOfInterest>([poi1, poi3, geoJsonLoi1]));
     tick();
 
     expect(component.markers.size).toEqual(2);

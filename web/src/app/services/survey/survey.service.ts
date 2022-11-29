@@ -23,7 +23,6 @@ import { AuthService } from '../auth/auth.service';
 import { Role } from '../../shared/models/role.model';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { NavigationService } from '../navigation/navigation.service';
 import { AclEntry } from '../../shared/models/acl-entry.model';

@@ -70,34 +70,32 @@ describe('JobListComponent', () => {
   let component: JobListComponent;
   let fixture: ComponentFixture<JobListComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const navigationService = {
-        getSurveyId$: () => of(''),
-        getLocationOfInterestId$: () => of(''),
-      };
-      const routerSpy = createRouterSpy();
-      TestBed.configureTestingModule({
-        declarations: [JobListComponent],
-        imports: [MatListModule],
-        providers: [
-          { provide: SurveyService, useValue: surveyService },
-          {
-            provide: Router,
-            useValue: routerSpy,
-          },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: AngularFirestore, useValue: {} },
-          {
-            provide: AngularFireAuth,
-            useValue: mockAngularFireAuth,
-          },
-          { provide: DataStoreService, useValue: { user$: () => of() } },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    const navigationService = {
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
+    };
+    const routerSpy = createRouterSpy();
+    TestBed.configureTestingModule({
+      declarations: [JobListComponent],
+      imports: [MatListModule],
+      providers: [
+        { provide: SurveyService, useValue: surveyService },
+        {
+          provide: Router,
+          useValue: routerSpy,
+        },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AngularFirestore, useValue: {} },
+        {
+          provide: AngularFireAuth,
+          useValue: mockAngularFireAuth,
+        },
+        { provide: DataStoreService, useValue: { user$: () => of() } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListComponent);
