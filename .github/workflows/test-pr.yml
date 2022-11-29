@@ -39,6 +39,11 @@ jobs:
         with:
           node-version: "16"
 
+      - name: Create empty key files
+        run: echo 'export const googleMapsConfig = {};' > environments/.google-maps-config.ts
+        run: echo 'export const firebaseConfig = {};' > environments/.firebase-config.ts
+        run: echo '{"offlineBaseMapSources": {}}' > environments/.backend-config.json
+
       - name: Install dependencies
         run: npm install
 
