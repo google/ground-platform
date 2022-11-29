@@ -43,11 +43,11 @@
     "ngx-autosize-input": "^14",
     "ngx-color": "^5.1.4",
     "rxjs": "^7.5.7",
-    "tslib": "^1.14.1",
+    "tslib": "^2.4.1",
     "zone.js": "^0.12.0"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "0.1402.10",
+    "@angular-devkit/architect": "0.1500.1",
     "@angular-devkit/build-angular": "^14",
     "@angular/cli": "^14",
     "@angular/compiler-cli": "^14",
