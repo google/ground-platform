@@ -13,12 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-echo .
-ls
-echo web
-ls web
-echo environments
-ls environments
-echo 'export const googleMapsConfig = {};' > environments/.google-maps-config.ts
-echo 'export const firebaseConfig = {};' > environments/.firebase-config.ts
-echo '{"offlineBaseMapSources": {}}' > environments/.backend-config.json
+echo 'export const googleMapsConfig = {};' > src/environments/.google-maps-config.ts
+echo 'export const firebaseConfig = {};' > src/environments/.firebase-config.ts
+echo '{"offlineBaseMapSources": {}}' > src/environments/.backend-config.json
