@@ -1,21 +1,21 @@
 {
   "name": "ground",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
+    "clean": "rm -rf node_modules dist coverage *.log",
     "ng": "ng",
-    "start": "ng serve",
-    "start:local": "ng serve --configuration=local",
+    "start:dev": "ng serve",
     "build": "ng build",
+    "build:watch": "ng build --watch",
     "pretest": "./pretest.sh",
     "test": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "test-with-coverage": "npm run pretest && ng test --browsers ChromeHeadlessNoSandbox --watch=false --code-coverage && npm run posttest",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "compile": "tsc -p .",
     "fix": "ng lint --fix",
-    "postinstall": "ngcc",
     "posttest": "./posttest.sh && npm run lint",
-    "prepare": "npm run compile"
+    "login": "firebase login",
+    "deploy": "firebase deploy --only hosting"
   },
   "private": true,
   "dependencies": {
@@ -37,6 +37,7 @@
     "firebase": "^9.8.3",
     "firebaseui": "^6.0.1",
     "firebaseui-angular": "^6.1.2",
+    "functions": "^1.0.9",
     "hammerjs": "^2.0.8",
     "immutable": "^4.0.0-rc.12",
     "ngx-autosize-input": "^14",
