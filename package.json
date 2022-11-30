@@ -1,0 +1,24 @@
+{
+  "name": "ground-platform",
+  "version": "1.0.1",
+  "description": "Ground hosted components",
+  "scripts": {
+    "postinstall": "(cd web && npm i); (cd functions && npm i)",
+    "build": "(cd web && npm run build); (cd functions && npm run build)",
+    "start": "firebase emulators:exec 'cd web && npm run build-watch'",
+    "login": "firebase login",
+    "deploy": "firebase deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gino-m/ground-platform.git"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/gino-m/ground-platform/issues"
+  },
+  "homepage": "https://groundplatform.org",
+  "devDependencies": {
+    "firebase-tools": "^9.23.3"
+  }
+}

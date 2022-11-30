@@ -4,13 +4,13 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "lint": "eslint --ext .js,.ts",
-    "serve": "firebase serve --only functions",
-    "shell": "firebase experimental:functions:shell",
-    "emulators": "firebase emulators:start --config ../firebase.local.json --project fake-project-id",
+    "shell": "firebase functions:shell",
+    "emulators": "firebase emulators:start --only functions",
+    "login": "firebase login",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "mocha --reporter list",
-    "build": "npm run lint && tsc"
+    "test": "npm run lint && mocha --reporter list",
+    "build": "tsc"
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
@@ -36,7 +36,6 @@
   },
   "private": true,
   "devDependencies": {
-    "@angular/cli": "14.2.5",
     "@typescript-eslint/eslint-plugin": "5.39.0",
     "@typescript-eslint/parser": "5.39.0",
     "eslint": "8.26.0",
