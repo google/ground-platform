@@ -77,6 +77,7 @@ export class LoiDataConverter {
   public static loiToJS(loi: LocationOfInterest): {} | Error {
     // TODO: Set audit info (created / last modified user and timestamp).
     if (loi.geometry instanceof Point) {
+      // TODO: Add geometryToJS converters in geometry-converter.ts call it from here. Then GEOJSON_GEOMETRY_TYPES can be local.
       const { jobId, geometry } = loi;
       return {
         jobId,
