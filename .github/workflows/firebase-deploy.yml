@@ -48,8 +48,8 @@ jobs:
           FILE_NAME: "web/src/environments/.backend-config.json"
           FILE_DATA: ${{ secrets.BACKEND_CONFIG }}
 
-      - name: Build Angular App
-        run: ./build.sh
+      - name: Build using development configuration
+        run: npm install && npm run build:dev
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
