@@ -21,7 +21,6 @@ import {
   USE_EMULATOR as USE_FIRESTORE_EMULATOR,
   SETTINGS as FIRESTORE_SETTINGS,
 } from '@angular/fire/compat/firestore';
-import { USE_EMULATOR as USE_AUTH_EMULATOR } from '@angular/fire/compat/auth';
 import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR } from '@angular/fire/compat/functions';
 import { AppRoutingModule } from './routing.module';
@@ -60,21 +59,15 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     // TODO(#979): Set up auth emulator and enable rules.
     {
       provide: USE_DATABASE_EMULATOR,
-      useValue: environment.useEmulators
-        ? ['localhost', 9000]
-        : undefined,
+      useValue: environment.useEmulators ? ['localhost', 9000] : undefined,
     },
     {
       provide: USE_FIRESTORE_EMULATOR,
-      useValue: environment.useEmulators
-        ? ['localhost', 8080]
-        : undefined,
+      useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
     },
     {
       provide: USE_FUNCTIONS_EMULATOR,
-      useValue: environment.useEmulators
-        ? ['localhost', 5001]
-        : undefined,
+      useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
     },
   ],
   imports: [

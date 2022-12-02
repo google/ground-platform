@@ -26,7 +26,7 @@ export const environment = {
   googleMapsApiKey: '',
   firebase: {
     projectId: 'demo-project',
-    apiKey: 'fake-api-key'
+    apiKey: 'fake-api-key',
   },
   cloudFunctionsUrl: '',
   offlineBaseMapSources: [{ url: '' }],
