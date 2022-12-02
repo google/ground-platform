@@ -8,7 +8,7 @@
     "shell": "firebase functions:shell",
     "emulators": "firebase emulators:start --only functions",
     "login": "firebase login",
-    "deploy": "firebase deploy --only functions",
+    "deploy": "firebase deploy --only functions --project",
     "logs": "firebase functions:log",
     "test": "npm run lint && mocha --reporter list",
     "build": "tsc",
