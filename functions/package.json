@@ -12,7 +12,7 @@
     "logs": "firebase functions:log",
     "test": "npm run lint && mocha --reporter list",
     "build": "tsc",
-    "build:watch": "tsc --watch"
+    "watch": "tsc --watch"
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",

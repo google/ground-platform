@@ -5,13 +5,13 @@
   "scripts": {
     "clean": "npm run clean --prefix functions && npm run clean --prefix web",
     "postinstall": "npm install --prefix functions && npm install --prefix web",
-    "build": "npm run build --prefix functions && npm run build --prefix web",
-    "build:local": "npm run build -- -c local",
-    "build:dev": "npm run build -- -c dev",
-    "build:watch:local": "npm run build:watch --prefix functions & npm run build:watch --prefix web -- -c local",
-    "start:local": "firebase emulators:exec 'npm run build:watch:local' --project demo-project --ui --config firebase.local.json",
+    "build:local": "npm run build --prefix functions && npm run build:local --prefix web",
+    "build:dev": "npm run build --prefix functions && npm run build:dev --prefix web",
+    "build:prod": "npm run build --prefix functions && npm run build:prod --prefix web",
+    "watch:local": "npm run watch --prefix functions & npm run watch:local --prefix web",
+    "start:local": "firebase emulators:exec 'npm run watch:local' --project demo-project --ui --config firebase.local.json",
     "login": "firebase login",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy --project"
   },
   "repository": {
     "type": "git",
