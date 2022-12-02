@@ -3,6 +3,7 @@
   "main": "lib/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {
+    "clean": "rm -rf node_modules lib *.log",
     "lint": "eslint --ext .js,.ts",
     "shell": "firebase functions:shell",
     "emulators": "firebase emulators:start --only functions",

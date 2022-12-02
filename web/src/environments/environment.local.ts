@@ -20,13 +20,19 @@
 // The list of file replacements can be found in `angular.json`.
 
 import { Env } from './environment-enums';
-import { googleMapsConfig } from './.google-maps-config';
+// import { googleMapsConfig } from './.google-maps-config';
+import { firebaseConfig } from './.firebase-config';
 
 export const environment = {
   production: false,
-  googleMapsApiKey: googleMapsConfig.apiKey,
-  firebase: { projectId: 'fake-project-id', apiKey: 'fake-api-key' },
-  cloudFunctionsUrl: 'http://localhost:5001/fake-project-id/us-central1',
+  googleMapsApiKey: '',
+  firebase: firebaseConfig,
+  // firebase: {
+  //   projectId: 'demo-project',
+  //   apiKey: 'fake-api-key',
+  //   authDomain: 'localhost:9099',
+  // },
+  cloudFunctionsUrl: '',
   offlineBaseMapSources: [{ url: '' }],
   useEmulators: true,
   env: Env.Local,
