@@ -30,9 +30,6 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Install Angular-CLI
-        run: npm install -g @angular/cli > /dev/null
-
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
         env:
