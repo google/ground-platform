@@ -16,16 +16,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import firebase from 'firebase/app';
-import { List, Map } from 'immutable';
+import { List } from 'immutable';
 import { LinearRing } from '../models/geometry/linear-ring';
 import { Point } from '../models/geometry/point';
 import { Polygon } from '../models/geometry/polygon';
 import { Coordinate } from './../models/geometry/coordinate';
+import { GeoPoint } from 'firebase/firestore';
 import { Geometry, GeometryType } from './../models/geometry/geometry';
 import { MultiPolygon } from './../models/geometry/multi-polygon';
-
-import GeoPoint = firebase.firestore.GeoPoint;
 
 /** Pretty-print objects. */
 const stringify = (o: Object) => JSON.stringify(o);
@@ -74,9 +72,8 @@ function toPoint(coordinates?: any): Point {
  * zero or more holes), each comprised of an indexed map of coordinates.
  */
 function toPolygon(coordinatesMap?: any): Polygon {
-  const rings: List<List<any>> = indexedMapToList(coordinatesMap).map(
-    indexedMapToList
-  );
+  const rings: List<List<any>> =
+    indexedMapToList(coordinatesMap).map(indexedMapToList);
   if (rings.isEmpty()) {
     throw new Error('Empty coordinates map');
   }

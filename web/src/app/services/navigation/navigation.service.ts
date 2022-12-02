@@ -188,9 +188,8 @@ export class NavigationService {
 
   clearSubmissionId() {
     const newParam: { [key: string]: string } = {};
-    newParam[
-      NavigationService.LOI_ID_FRAGMENT_PARAM
-    ] = this.getLocationOfInterestId()!;
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] =
+      this.getLocationOfInterestId()!;
     this.setFragmentParams(new HttpParams({ fromObject: newParam }));
   }
 

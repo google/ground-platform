@@ -26,7 +26,6 @@ import { Survey } from '../../shared/models/survey.model';
 import { List, Map } from 'immutable';
 import { Submission } from '../../shared/models/submission/submission.model';
 import { Result } from '../../shared/models/submission/result.model';
-import firebase from 'firebase/app';
 import { Job } from '../../shared/models/job.model';
 import { Option } from '../../shared/models/task/option.model';
 import {
@@ -163,45 +162,43 @@ describe('SubmissionFormComponent', () => {
   let component: SubmissionFormComponent;
   let fixture: ComponentFixture<SubmissionFormComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const navigationService = {
-        getSurveyId$: () => of(''),
-        getLocationOfInterestId$: () => NEVER,
-      };
-      const routerSpy = createRouterSpy();
-      TestBed.configureTestingModule({
-        declarations: [SubmissionFormComponent],
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          ReactiveFormsModule,
-          MatFormFieldModule,
-          MatButtonModule,
-          MatFormFieldModule,
-          MatInputModule,
-          MatRadioModule,
-          MatCheckboxModule,
-          MatIconModule,
-          MatListModule,
-          JobListItemModule,
-        ],
-        providers: [
-          { provide: DataStoreService, useValue: {} },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiService,
-          },
-          { provide: SurveyService, useValue: surveyService },
-          { provide: SubmissionService, useValue: submissionService },
-          { provide: Router, useValue: routerSpy },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: AuthService, useValue: { getUser$: () => NEVER } },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    const navigationService = {
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => NEVER,
+    };
+    const routerSpy = createRouterSpy();
+    TestBed.configureTestingModule({
+      declarations: [SubmissionFormComponent],
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatRadioModule,
+        MatCheckboxModule,
+        MatIconModule,
+        MatListModule,
+        JobListItemModule,
+      ],
+      providers: [
+        { provide: DataStoreService, useValue: {} },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiService,
+        },
+        { provide: SurveyService, useValue: surveyService },
+        { provide: SubmissionService, useValue: submissionService },
+        { provide: Router, useValue: routerSpy },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AuthService, useValue: { getUser$: () => NEVER } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SubmissionFormComponent);

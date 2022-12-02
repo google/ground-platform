@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import firebase from 'firebase/app';
+
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
 import { Job } from './../models/job.model';
 import { List, Map } from 'immutable';
@@ -23,6 +23,7 @@ import {
   MultipleChoice,
   Cardinality,
 } from '../models/task/multiple-choice.model';
+import { Timestamp } from 'firebase/firestore';
 
 class MockFirebaseData {
   static submission001 = {
@@ -50,8 +51,8 @@ class MockFirebaseData {
       task001: 'text result',
       task002: ['option001', 'option002'],
       task003: 123,
-      task004: new firebase.firestore.Timestamp(1641533340, 0),
-      task005: new firebase.firestore.Timestamp(1641534444, 0),
+      task004: new Timestamp(1641533340, 0),
+      task005: new Timestamp(1641534444, 0),
     },
   };
 }

@@ -15,7 +15,6 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { TestData } from '../../../testing/test-data';
 import { SubmissionService } from './submission.service';
 import { DataStoreService } from '../data-store/data-store.service';
 import { SurveyService } from '../survey/survey.service';

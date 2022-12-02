@@ -19,8 +19,8 @@ import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
 import { Injectable } from '@angular/core';
-import firebase from 'firebase/app';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { GoogleAuthProvider } from 'firebase/auth';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
 import { NavigationService } from '../navigation/navigation.service';
@@ -77,7 +77,7 @@ export class AuthService {
   }
 
   async signIn() {
-    const provider = new firebase.auth.GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
     await this.afAuth.signInWithPopup(provider);
   }
 

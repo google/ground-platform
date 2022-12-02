@@ -79,46 +79,44 @@ describe('DrawingToolsComponent', () => {
     /* acl= */ Map()
   );
 
-  beforeEach(
-    waitForAsync(() => {
-      authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
-        'canUserAddPointsToJob',
-      ]);
-      authServiceSpy.canUserAddPointsToJob.and.returnValue(true);
+  beforeEach(waitForAsync(() => {
+    authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
+      'canUserAddPointsToJob',
+    ]);
+    authServiceSpy.canUserAddPointsToJob.and.returnValue(true);
 
-      mockDisabled$ = new BehaviorSubject<boolean>(false);
-      mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
-      drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
-        'DrawingToolsService',
-        ['getDisabled$', 'getEditMode$', 'setSelectedJobId', 'setEditMode']
-      );
-      drawingToolsServiceSpy.getDisabled$.and.returnValue(mockDisabled$);
-      drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
+    mockDisabled$ = new BehaviorSubject<boolean>(false);
+    mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
+    drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
+      'DrawingToolsService',
+      ['getDisabled$', 'getEditMode$', 'setSelectedJobId', 'setEditMode']
+    );
+    drawingToolsServiceSpy.getDisabled$.and.returnValue(mockDisabled$);
+    drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
 
-      navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
-        'NavigationService',
-        ['getSubmissionId$']
-      );
-      mockSubmissionId$ = new BehaviorSubject<string | null>(null);
-      navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      ['getSubmissionId$']
+    );
+    mockSubmissionId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
-      surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-        'getActiveSurvey$',
-      ]);
-      surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
+    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+      'getActiveSurvey$',
+    ]);
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
 
-      TestBed.configureTestingModule({
-        imports: [DrawingToolsModule, BrowserAnimationsModule],
-        declarations: [DrawingToolsComponent],
-        providers: [
-          { provide: AuthService, useValue: authServiceSpy },
-          { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
-          { provide: NavigationService, useValue: navigationServiceSpy },
-          { provide: SurveyService, useValue: surveyServiceSpy },
-        ],
-      }).compileComponents();
-    })
-  );
+    TestBed.configureTestingModule({
+      imports: [DrawingToolsModule, BrowserAnimationsModule],
+      declarations: [DrawingToolsComponent],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+      ],
+    }).compileComponents();
+  }));
 
   function resetFixture() {
     fixture = TestBed.createComponent(DrawingToolsComponent);
@@ -141,8 +139,9 @@ describe('DrawingToolsComponent', () => {
 
   describe('button group', () => {
     it('is enabled by default', () => {
-      const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
-        .nativeElement;
+      const buttonGroup = fixture.debugElement.query(
+        By.css('#button-group')
+      ).nativeElement;
       expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('false');
     });
 
@@ -152,8 +151,9 @@ describe('DrawingToolsComponent', () => {
       // wait for async pipe to reflect
       fixture.detectChanges();
 
-      const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
-        .nativeElement;
+      const buttonGroup = fixture.debugElement.query(
+        By.css('#button-group')
+      ).nativeElement;
       expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
     }));
 
@@ -163,8 +163,9 @@ describe('DrawingToolsComponent', () => {
       // wait for async pipe to reflect
       fixture.detectChanges();
 
-      const buttonGroup = fixture.debugElement.query(By.css('#button-group'))
-        .nativeElement;
+      const buttonGroup = fixture.debugElement.query(
+        By.css('#button-group')
+      ).nativeElement;
       expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
     }));
   });
@@ -263,8 +264,9 @@ describe('DrawingToolsComponent', () => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const jobSelector = fixture.debugElement.query(By.css('#job-selector'))
-        .nativeElement;
+      const jobSelector = fixture.debugElement.query(
+        By.css('#job-selector')
+      ).nativeElement;
       jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();
@@ -283,8 +285,9 @@ describe('DrawingToolsComponent', () => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const cancelButton = fixture.debugElement.query(By.css('#cancel-button'))
-        .nativeElement;
+      const cancelButton = fixture.debugElement.query(
+        By.css('#cancel-button')
+      ).nativeElement;
       cancelButton.click();
 
       expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
@@ -296,8 +299,9 @@ describe('DrawingToolsComponent', () => {
       mockEditMode$.next(EditMode.AddPoint);
       tick();
 
-      const jobSelector = fixture.debugElement.query(By.css('#job-selector'))
-        .nativeElement;
+      const jobSelector = fixture.debugElement.query(
+        By.css('#job-selector')
+      ).nativeElement;
       jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();

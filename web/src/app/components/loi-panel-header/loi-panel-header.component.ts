@@ -39,7 +39,8 @@ import { Point } from '../../shared/models/geometry/point';
   styleUrls: ['./loi-panel-header.component.scss'],
 })
 export class LocationOfInterestPanelHeaderComponent
-  implements OnInit, OnDestroy, OnChanges {
+  implements OnInit, OnDestroy, OnChanges
+{
   @Input() job?: Job;
   surveyId?: string | null;
   loiId?: string | null;
