@@ -7,7 +7,7 @@
     "clean": "cmd='run clean' npm run onsubpkgs",
     "postinstall": "cmd='install' npm run onsubpkgs",
     "build": "cmd='run build' npm run onsubpkgs",
-    "start:local": "firebase emulators:exec 'npm run build:watch --prefix web' --ui",
+    "start:local": "firebase emulators:exec 'npm run build:local:watch --prefix web' --ui",
     "login": "firebase login",
     "deploy": "firebase deploy"
   },
