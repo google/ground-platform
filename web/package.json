@@ -6,7 +6,7 @@
     "ng": "ng",
     "start:dev": "ng serve",
     "build": "ng build",
-    "build:local:watch": "ng build --watch -c local",
+    "build:watch": "ng build --watch",
     "pretest": "./pretest.sh",
     "test": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "test-with-coverage": "npm run pretest && ng test --browsers ChromeHeadlessNoSandbox --watch=false --code-coverage && npm run posttest",
