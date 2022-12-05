@@ -32,7 +32,7 @@ const stringify = (o: Object) => JSON.stringify(o);
  * Maps geometry type enum values to their GeoJson equivalent string
  * representations used in the remote db.
  */
-export const GEOJSON_GEOMETRY_TYPES = Map([
+export const GEOMETRY_TYPES = Map([
   [GeometryType.POINT, 'Point'],
   [GeometryType.POLYGON, 'Polygon'],
   [GeometryType.MULTI_POLYGON, 'MultiPolygon'],
@@ -60,11 +60,11 @@ export function toGeometry(geometry?: any): Geometry | Error {
   }
   try {
     switch (geometry.type) {
-      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT):
+      case GEOMETRY_TYPES.get(GeometryType.POINT):
         return toPoint(geometry.coordinates);
-      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON):
+      case GEOMETRY_TYPES.get(GeometryType.POLYGON):
         return toPolygon(geometry.coordinates);
-      case GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
+      case GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
         return toMultiPolygon(geometry.coordinates);
       default:
         return Error(`Unsupported geometry type ${geometry.type}`);

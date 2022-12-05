@@ -24,7 +24,7 @@ import { MultiPolygon } from '../models/geometry/multi-polygon';
 import { Polygon } from '../models/geometry/polygon';
 import { LinearRing } from './../models/geometry/linear-ring';
 import { Point } from './../models/geometry/point';
-import { toGeometry, GEOJSON_GEOMETRY_TYPES } from './geometry-converter';
+import { toGeometry, GEOMETRY_TYPES } from './geometry-converter';
 import { GeoPoint } from 'firebase/firestore';
 import { GeometryType } from '../models/geometry/geometry';
 
@@ -101,7 +101,7 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'converts map to Point',
         input: {
-          type: GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT),
+          type: GEOMETRY_TYPES.get(GeometryType.POINT),
           coordinates: new GeoPoint(x, y),
         },
         expectedOutput: point(x, y),
@@ -109,7 +109,7 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'converts map to Polygon',
         input: {
-          type: GEOJSON_GEOMETRY_TYPES.get(GeometryType.POLYGON),
+          type: GEOMETRY_TYPES.get(GeometryType.POLYGON),
           coordinates: {
             '0': indexedGeoPointMap(path1),
             '1': indexedGeoPointMap(path2),
@@ -120,7 +120,7 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'converts map to MultiPolygon',
         input: {
-          type: GEOJSON_GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON),
+          type: GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON),
           coordinates: {
             '0': {
               '0': indexedGeoPointMap(path1),
@@ -157,20 +157,20 @@ describe('geometry-converter.ts', () => {
       {
         expectation: 'fails on point with missing coordinates',
         input: {
-          type: GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT),
+          type: GEOMETRY_TYPES.get(GeometryType.POINT),
         },
       },
       {
         expectation: 'fails on point with null coordinates',
         input: {
-          type: GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT),
+          type: GEOMETRY_TYPES.get(GeometryType.POINT),
           coordinates: null,
         },
       },
       {
         expectation: 'fails on point with wrong coordinates type',
         input: {
-          type: GEOJSON_GEOMETRY_TYPES.get(GeometryType.POINT),
+          type: GEOMETRY_TYPES.get(GeometryType.POINT),
           coordinates: 'Kapow!',
         },
       },
