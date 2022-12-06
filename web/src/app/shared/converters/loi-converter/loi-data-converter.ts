@@ -23,7 +23,7 @@ import {
 import { Map } from 'immutable';
 import { GeoPoint } from 'firebase/firestore';
 import { Geometry } from '../../models/geometry/geometry';
-import { toGeometry } from './../geometry-converter';
+import { toGeometry, GEOMETRY_TYPES } from './../geometry-converter';
 import { Point } from '../../models/geometry/point';
 
 /**
@@ -77,12 +77,13 @@ export class LoiDataConverter {
   public static loiToJS(loi: LocationOfInterest): {} | Error {
     // TODO: Set audit info (created / last modified user and timestamp).
     if (loi.geometry instanceof Point) {
+      // TODO: Add geometryToJS converters in geometry-converter.ts call it from here. Then GEOMETRY_TYPES can be local.
       const { jobId, geometry } = loi;
       return {
         jobId,
         geometry: {
           coordinates: new GeoPoint(geometry.coord.x, geometry.coord.y),
-          type: geometry.geometryType,
+          type: GEOMETRY_TYPES.get(geometry.geometryType),
         },
       };
     } else if (loi instanceof GeoJsonLocationOfInterest) {

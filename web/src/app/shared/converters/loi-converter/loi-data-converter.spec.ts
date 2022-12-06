@@ -21,7 +21,7 @@ import {
   LocationOfInterest,
   PointOfInterest,
 } from '../../models/loi.model';
-import { toGeometry } from '../geometry-converter';
+import { toGeometry, GEOMETRY_TYPES } from '../geometry-converter';
 import { LoiDataConverter } from './loi-data-converter';
 import { Map } from 'immutable';
 import { GeoPoint } from 'firebase/firestore';
@@ -31,7 +31,7 @@ import { Point } from '../../models/geometry/point';
 const x = -42.121;
 const y = 28.482;
 const geoPointData = {
-  type: GeometryType.POINT,
+  type: GEOMETRY_TYPES.get(GeometryType.POINT),
   coordinates: new GeoPoint(x, y),
 };
 
@@ -153,7 +153,7 @@ describe('loiToJS', () => {
         jobId: 'jobId0',
         geometry: {
           coordinates: new GeoPoint(point.coord.x, point.coord.y),
-          type: GeometryType.POINT,
+          type: GEOMETRY_TYPES.get(GeometryType.POINT),
         },
       },
     },
