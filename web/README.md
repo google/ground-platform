@@ -92,6 +92,7 @@ Run `npm run build:dev` to build the project. The build artifacts will be stored
 ## Running unit tests
 
 Run `npm run test` to execute run tests locally in Chrome using
+
 [Karma](https://karma-runner.github.io) test runner.
 
 ## Running end-to-end tests

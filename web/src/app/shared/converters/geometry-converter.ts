@@ -16,7 +16,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { List } from 'immutable';
+import { List, Map } from 'immutable';
 import { LinearRing } from '../models/geometry/linear-ring';
 import { Point } from '../models/geometry/point';
 import { Polygon } from '../models/geometry/polygon';
@@ -27,6 +27,18 @@ import { MultiPolygon } from './../models/geometry/multi-polygon';
 
 /** Pretty-print objects. */
 const stringify = (o: Object) => JSON.stringify(o);
+
+/**
+ * Maps geometry type enum values to their GeoJson equivalent string
+ * representations used in the remote db.
+ */
+export const GEOMETRY_TYPES = Map([
+  [GeometryType.POINT, 'Point'],
+  [GeometryType.POLYGON, 'Polygon'],
+  [GeometryType.MULTI_POLYGON, 'MultiPolygon'],
+  [GeometryType.LINE_STRING, 'LineString'],
+  [GeometryType.LINEAR_RING, 'LinearRing'],
+]);
 
 /**
  * Converts remote db representation of a geometry to a geometry object using a
@@ -48,11 +60,11 @@ export function toGeometry(geometry?: any): Geometry | Error {
   }
   try {
     switch (geometry.type) {
-      case GeometryType.POINT:
+      case GEOMETRY_TYPES.get(GeometryType.POINT):
         return toPoint(geometry.coordinates);
-      case GeometryType.POLYGON:
+      case GEOMETRY_TYPES.get(GeometryType.POLYGON):
         return toPolygon(geometry.coordinates);
-      case GeometryType.MULTI_POLYGON:
+      case GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
         return toMultiPolygon(geometry.coordinates);
       default:
         return Error(`Unsupported geometry type ${geometry.type}`);
