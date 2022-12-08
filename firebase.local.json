@@ -1,18 +1,49 @@
 {
-  "functions": {
-    "source": "functions",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log"
+  "firestore": {
+    "indexes": "firestore/firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "web/dist/web",
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/signin",
+        "type": 301
+      },
+      {
+        "source": "/s/[:]new",
+        "destination": "/survey/new",
+        "type": 301
+      },
+      {
+        "source": "/s/:id",
+        "destination": "/survey/:id",
+        "type": 301
+      }
     ],
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint",
-      "npm --prefix \"$RESOURCE_DIR\" run build"
+    "rewrites": [
+      {
+        "source": "/importCsv",
+        "function": "importCsv"
+      },
+      {
+        "source": "/importGeoJson",
+        "function": "importGeoJson"
+      },
+      {
+        "source": "/exportCsv",
+        "function": "exportCsv"
+      },
+      {
+        "source": "**/!(*.*)",
+        "destination": "/index.html"
+      }
     ]
   },
   "emulators": {
+    "auth": {
+      "port": 9099
+    },
     "functions": {
       "port": 5001
     },
@@ -23,7 +54,12 @@
       "port": 5000
     },
     "ui": {
-      "enabled": true
+      "enabled": true,
+      "port": 4000
     }
+  },
+  "functions": {
+    "source": "functions",
+    "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"]
   }
 }

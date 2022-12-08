@@ -21,6 +21,8 @@ import {
   USE_EMULATOR as USE_FIRESTORE_EMULATOR,
   SETTINGS as FIRESTORE_SETTINGS,
 } from '@angular/fire/compat/firestore';
+import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
+import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR } from '@angular/fire/compat/functions';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -53,9 +55,19 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
       provide: FIRESTORE_SETTINGS,
       useValue: { ignoreUndefinedProperties: true },
     },
+    // Emulator ports defined in ../firebase.local.json
+    // TODO(#979): Set up auth emulator and enable rules.
+    {
+      provide: USE_DATABASE_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 9000] : undefined,
+    },
     {
       provide: USE_FIRESTORE_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
+    },
+    {
+      provide: USE_FUNCTIONS_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
     },
   ],
   imports: [
@@ -63,6 +75,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     //   provideFirebaseApp(() => initializeApp(environment.firebase)),
     //   provideFirestore(() => getFirestore()),
     AngularFireModule.initializeApp(environment.firebase),
+    AngularFireModule,
     AngularFireAuthModule,
     AngularFirestoreModule,
     BrowserAnimationsModule,

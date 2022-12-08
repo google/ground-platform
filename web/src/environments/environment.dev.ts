@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --configuration=test ` replaces `environment.ts` with
-// `environment.test.ts`.
-// The list of file replacements can be found in `angular.json`.
-
+import { googleMapsConfig } from './.google-maps-config';
+import { firebaseConfig } from './.firebase-config';
+import { offlineBaseMapSources } from './.backend-config.json';
 import { Env } from './environment-enums';
 
 export const environment = {
   production: false,
-  googleMapsApiKey: '',
-  firebase: {
-    projectId: 'demo-project',
-    apiKey: 'fake-api-key',
-  },
+  googleMapsApiKey: googleMapsConfig.apiKey,
+  firebase: firebaseConfig,
   cloudFunctionsUrl: '',
-  offlineBaseMapSources: [{ url: '' }],
-  useEmulators: true,
-  env: Env.Local,
+  offlineBaseMapSources,
+  useEmulators: false,
+  env: Env.Dev,
 };
