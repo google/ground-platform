@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
@@ -22,8 +21,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import {
+  GenericLocationOfInterest,
   LocationOfInterest,
-  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { Job } from '../../shared/models/job.model';
 import { Submission } from '../../shared/models/submission/submission.model';
@@ -34,6 +33,8 @@ import { SubmissionService } from '../../services/submission/submission.service'
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigationService } from '../../services/navigation/navigation.service';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -51,10 +52,11 @@ const mockSurvey = new Survey(
   /* acl= */ Map()
 );
 
-const mockLocationOfInterest = new PointOfInterest(
+const mockLocationOfInterest = new GenericLocationOfInterest(
   'loi001',
   'job001',
-  new firebase.firestore.GeoPoint(0.0, 0.0)
+  new Point(new Coordinate(0.0, 0.0)),
+  Map()
 );
 
 const mockSubmissions = List<Submission>([]);
@@ -89,27 +91,25 @@ describe('LocationOfInterestPanelComponent', () => {
   let component: LocationOfInterestPanelComponent;
   let fixture: ComponentFixture<LocationOfInterestPanelComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const routerSpy = createRouterSpy();
-      TestBed.configureTestingModule({
-        declarations: [LocationOfInterestPanelComponent],
-        imports: [MatDialogModule],
-        providers: [
-          { provide: DataStoreService, useValue: {} },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiService,
-          },
-          { provide: SurveyService, useValue: surveyService },
-          { provide: SubmissionService, useValue: submissionService },
-          { provide: Router, useValue: routerSpy },
-          { provide: NavigationService, useValue: navigationService },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    const routerSpy = createRouterSpy();
+    TestBed.configureTestingModule({
+      declarations: [LocationOfInterestPanelComponent],
+      imports: [MatDialogModule],
+      providers: [
+        { provide: DataStoreService, useValue: {} },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiService,
+        },
+        { provide: SurveyService, useValue: surveyService },
+        { provide: SubmissionService, useValue: submissionService },
+        { provide: Router, useValue: routerSpy },
+        { provide: NavigationService, useValue: navigationService },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LocationOfInterestPanelComponent);

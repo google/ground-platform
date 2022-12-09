@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
 import {
   ComponentFixture,
   TestBed,
@@ -30,19 +29,22 @@ import { NavigationService } from '../../services/navigation/navigation.service'
 import { Survey } from '../../shared/models/survey.model';
 import {
   LocationOfInterest,
-  PointOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
+  GenericLocationOfInterest,
 } from '../../shared/models/loi.model';
 import { Map, List } from 'immutable';
 import { Job } from '../../shared/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
+import { GeoPoint } from 'firebase/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { urlPrefix } from './ground-pin';
 import {
   DrawingToolsService,
   EditMode,
 } from '../../services/drawing-tools/drawing-tools.service';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 describe('MapComponent', () => {
   let component: MapComponent;
@@ -90,25 +92,29 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map()
   );
-  const poi1 = new PointOfInterest(
+  const poi1 = new GenericLocationOfInterest(
     poiId1,
     jobId1,
-    new firebase.firestore.GeoPoint(1.23, 4.56)
+    new Point(new Coordinate(1.23, 4.56)),
+    Map()
   );
-  const poi2 = new PointOfInterest(
+  const poi2 = new GenericLocationOfInterest(
     poiId2,
     jobId2,
-    new firebase.firestore.GeoPoint(12.3, 45.6)
+    new Point(new Coordinate(12.3, 45.6)),
+    Map()
   );
-  const poi3 = new PointOfInterest(
+  const poi3 = new GenericLocationOfInterest(
     poiId3,
     jobId2,
-    new firebase.firestore.GeoPoint(78.9, 78.9)
+    new Point(new Coordinate(78.9, 78.9)),
+    Map()
   );
-  const poi4 = new PointOfInterest(
+  const poi4 = new GenericLocationOfInterest(
     poiId4,
     jobId2,
-    new firebase.firestore.GeoPoint(45, 45)
+    new Point(new Coordinate(45, 45)),
+    Map()
   );
   const geoJson1 = {
     type: 'FeatureCollection',
@@ -136,79 +142,77 @@ describe('MapComponent', () => {
     geoJson1
   );
   const aoi1 = new AreaOfInterest(aoiId1, jobId2, [
-    new firebase.firestore.GeoPoint(-10, -10),
-    new firebase.firestore.GeoPoint(20, -10),
-    new firebase.firestore.GeoPoint(20, 20),
-    new firebase.firestore.GeoPoint(-10, 20),
-    new firebase.firestore.GeoPoint(-10, -10),
+    new GeoPoint(-10, -10),
+    new GeoPoint(20, -10),
+    new GeoPoint(20, 20),
+    new GeoPoint(-10, 20),
+    new GeoPoint(-10, -10),
   ]);
 
-  beforeEach(
-    waitForAsync(() => {
-      surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-        'getActiveSurvey$',
-      ]);
-      surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
+  beforeEach(waitForAsync(() => {
+    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+      'getActiveSurvey$',
+    ]);
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
 
-      loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
-        'LocationOfInterestService',
-        ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
-      );
-      mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
-        List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
-      );
-      loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
+    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+      'LocationOfInterestService',
+      ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
+    );
+    mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
+      List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
+    );
+    loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
-      navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
-        'NavigationService',
-        [
-          'getLocationOfInterestId$',
-          'getSubmissionId$',
-          'selectLocationOfInterest',
-          'clearLocationOfInterestId',
-        ]
-      );
-      mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
-      navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
-        mockLocationOfInterestId$
-      );
-      navigationServiceSpy.getSubmissionId$.and.returnValue(
-        of<string | null>(null)
-      );
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      [
+        'getLocationOfInterestId$',
+        'getSubmissionId$',
+        'selectLocationOfInterest',
+        'clearLocationOfInterestId',
+      ]
+    );
+    mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
+      mockLocationOfInterestId$
+    );
+    navigationServiceSpy.getSubmissionId$.and.returnValue(
+      of<string | null>(null)
+    );
 
-      mockDialogAfterClosed$ = new BehaviorSubject<string>('');
-      dialogRefSpy = jasmine.createSpyObj<MatDialogRef<unknown, unknown>>(
-        'MatDialogRef',
-        ['afterClosed']
-      );
-      dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
-      dialogSpy.open.and.returnValue(dialogRefSpy);
-      dialogRefSpy.afterClosed.and.returnValue(mockDialogAfterClosed$);
+    mockDialogAfterClosed$ = new BehaviorSubject<string>('');
+    dialogRefSpy = jasmine.createSpyObj<MatDialogRef<unknown, unknown>>(
+      'MatDialogRef',
+      ['afterClosed']
+    );
+    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+    dialogRefSpy.afterClosed.and.returnValue(mockDialogAfterClosed$);
 
-      mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
-      drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
-        'DrawingToolsService',
-        ['getEditMode$', 'setEditMode', 'getSelectedJobId', 'setDisabled']
-      );
-      drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
-      drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId1);
+    mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
+    drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
+      'DrawingToolsService',
+      ['getEditMode$', 'setEditMode', 'getSelectedJobId', 'setDisabled']
+    );
+    drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
+    drawingToolsServiceSpy.getSelectedJobId.and.returnValue(jobId1);
 
-      TestBed.configureTestingModule({
-        imports: [GoogleMapsModule],
-        declarations: [MapComponent],
-        providers: [
-          { provide: MatDialog, useValue: dialogSpy },
-          { provide: SurveyService, useValue: surveyServiceSpy },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiServiceSpy,
-          },
-          { provide: NavigationService, useValue: navigationServiceSpy },
-          { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
-        ],
-      }).compileComponents();
-    })
-  );
+    TestBed.configureTestingModule({
+      imports: [GoogleMapsModule],
+      declarations: [MapComponent],
+      providers: [
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiServiceSpy,
+        },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MapComponent);
@@ -221,11 +225,11 @@ describe('MapComponent', () => {
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, jobColor1, 30);
-    expect(marker1.getMap()).toEqual(component.map.googleMap);
+    expect(marker1.getMap()).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
     assertMarkerIcon(marker2, jobColor2, 30);
-    expect(marker2.getMap()).toEqual(component.map.googleMap);
+    expect(marker2.getMap()).toEqual(component.map.googleMap!);
   });
 
   it('should render polygons on map - geojson loi', () => {
@@ -258,20 +262,18 @@ describe('MapComponent', () => {
   });
 
   it('should update lois when backend lois update', fakeAsync(() => {
-    mockLois$.next(
-      List<LocationOfInterest>([poi1, poi3, geoJsonLoi1])
-    );
+    mockLois$.next(List<LocationOfInterest>([poi1, poi3, geoJsonLoi1]));
     tick();
 
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
     assertMarkerIcon(marker1, jobColor1, 30);
-    expect(marker1.getMap()).toEqual(component.map.googleMap);
+    expect(marker1.getMap()).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId3)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
     assertMarkerIcon(marker2, jobColor2, 30);
-    expect(marker2.getMap()).toEqual(component.map.googleMap);
+    expect(marker2.getMap()).toEqual(component.map.googleMap!);
     expect(component.polygons.size).toEqual(1);
     const polygon = component.polygons.get(geoJsonLoiId1)!;
     assertPolygonPaths(polygon, [
@@ -451,10 +453,11 @@ describe('MapComponent', () => {
 
     assertMarkerLatLng(marker, new google.maps.LatLng(2.23, 5.56));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
-      new PointOfInterest(
+      new GenericLocationOfInterest(
         poi1.id,
         poi1.jobId,
-        new firebase.firestore.GeoPoint(2.23, 5.56)
+        new Point(new Coordinate(2.23, 5.56)),
+        Map()
       )
     );
   }));
@@ -566,7 +569,7 @@ describe('MapComponent', () => {
     iconColor: string,
     iconSize: number
   ): void {
-    const icon = marker.getIcon() as google.maps.ReadonlyIcon;
+    const icon = marker.getIcon() as google.maps.Icon;
     expect(atob(icon.url.slice(urlPrefix.length))).toContain(iconColor);
     expect(icon.scaledSize?.height).toEqual(iconSize);
     expect(icon.scaledSize?.width).toEqual(iconSize);

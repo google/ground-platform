@@ -50,38 +50,36 @@ describe('JobDialogComponent', () => {
     keydownEvents: () => NEVER,
   };
 
-  beforeEach(
-    waitForAsync(() => {
-      const routerSpy = createRouterSpy();
-      TestBed.configureTestingModule({
-        declarations: [JobDialogComponent, MatDialogContent, MatDialogActions],
-        imports: [
-          EditStyleButtonModule,
-          FormsModule,
-          TaskEditorModule,
-          InlineEditorModule,
-          ReactiveFormsModule,
-          BrowserAnimationsModule,
-          FlexLayoutModule,
-          MatFormFieldModule,
-          MatInputModule,
-          MatDialogModule,
-          MatIconModule,
-          MatCheckboxModule,
-        ],
-        providers: [
-          { provide: DataStoreService, useValue: { generateId: () => '123' } },
-          { provide: MAT_DIALOG_DATA, useValue: { createJob: true } },
-          { provide: MatDialogRef, useValue: dialogRef },
-          { provide: Router, useValue: routerSpy },
-          {
-            provide: AuthService,
-            useValue: { getUser$: () => NEVER },
-          },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    const routerSpy = createRouterSpy();
+    TestBed.configureTestingModule({
+      declarations: [JobDialogComponent, MatDialogContent, MatDialogActions],
+      imports: [
+        EditStyleButtonModule,
+        FormsModule,
+        TaskEditorModule,
+        InlineEditorModule,
+        ReactiveFormsModule,
+        BrowserAnimationsModule,
+        FlexLayoutModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDialogModule,
+        MatIconModule,
+        MatCheckboxModule,
+      ],
+      providers: [
+        { provide: DataStoreService, useValue: { generateId: () => '123' } },
+        { provide: MAT_DIALOG_DATA, useValue: { createJob: true } },
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: routerSpy },
+        {
+          provide: AuthService,
+          useValue: { getUser$: () => NEVER },
+        },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobDialogComponent);

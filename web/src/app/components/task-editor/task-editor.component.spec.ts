@@ -33,30 +33,28 @@ describe('TaskFieldEditorComponent', () => {
   let component: TaskEditorComponent;
   let fixture: ComponentFixture<TaskEditorComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [TaskEditorComponent],
-        imports: [
-          FormsModule,
-          ReactiveFormsModule,
-          BrowserModule,
-          MatDialogModule,
-          MatIconModule,
-          MatSelectModule,
-          MatSlideToggleModule,
-          MatFormFieldModule,
-          MatInputModule,
-          NoopAnimationsModule,
-        ],
-        providers: [
-          { provide: Router, useValue: {} },
-          { provide: JobService, useValue: {} },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [TaskEditorComponent],
+      imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        BrowserModule,
+        MatDialogModule,
+        MatIconModule,
+        MatSelectModule,
+        MatSlideToggleModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NoopAnimationsModule,
+      ],
+      providers: [
+        { provide: Router, useValue: {} },
+        { provide: JobService, useValue: {} },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskEditorComponent);

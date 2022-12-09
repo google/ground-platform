@@ -15,8 +15,8 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component } from '@angular/core';
 import { NEVER, of } from 'rxjs';
@@ -84,32 +84,30 @@ describe('SurveyListComponent', () => {
     'canManageSurvey',
   ]);
 
-  beforeEach(
-    waitForAsync(() => {
-      const navigationService = {
-        newSurvey: () => NEVER,
-      };
+  beforeEach(waitForAsync(() => {
+    const navigationService = {
+      newSurvey: () => NEVER,
+    };
 
-      TestBed.configureTestingModule({
-        imports: [
-          MatCardModule,
-          MatGridListModule,
-          MatButtonModule,
-          MatIconModule,
-        ],
-        declarations: [SurveyListComponent, HeaderLayoutComponent],
-        providers: [
-          { provide: MatDialog, useValue: dialog },
-          { provide: MatDialogRef, useValue: dialogRef },
-          { provide: SurveyService, useValue: surveyServiceSpy },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: AngularFirestore, useValue: {} },
-          { provide: AngularFireAuth, useValue: {} },
-          { provide: AuthService, useValue: authServiceSpy },
-        ],
-      }).compileComponents();
-    })
-  );
+    TestBed.configureTestingModule({
+      imports: [
+        MatCardModule,
+        MatGridListModule,
+        MatButtonModule,
+        MatIconModule,
+      ],
+      declarations: [SurveyListComponent, HeaderLayoutComponent],
+      providers: [
+        { provide: MatDialog, useValue: dialog },
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AngularFirestore, useValue: {} },
+        { provide: AngularFireAuth, useValue: {} },
+        { provide: AuthService, useValue: authServiceSpy },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     surveyServiceSpy.getAccessibleSurveys$.and.returnValue(

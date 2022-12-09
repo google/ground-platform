@@ -18,15 +18,14 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from './../../services/data-store/data-store.service';
 import { SubmissionFormComponent } from './submission-form.component';
 import {
+  GenericLocationOfInterest,
   LocationOfInterest,
-  PointOfInterest,
 } from '../../shared/models/loi.model';
 import { NEVER, of } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { List, Map } from 'immutable';
 import { Submission } from '../../shared/models/submission/submission.model';
 import { Result } from '../../shared/models/submission/result.model';
-import firebase from 'firebase/app';
 import { Job } from '../../shared/models/job.model';
 import { Option } from '../../shared/models/task/option.model';
 import {
@@ -53,6 +52,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { By } from '@angular/platform-browser';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 class MockModel {
   static task001: Task = new Task(
@@ -107,10 +108,11 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static loi001 = new PointOfInterest(
+  static loi001 = new GenericLocationOfInterest(
     'loi001',
     MockModel.job001.id,
-    new firebase.firestore.GeoPoint(0.0, 0.0)
+    new Point(new Coordinate(0.0, 0.0)),
+    Map()
   );
 
   static user001 = {
@@ -160,45 +162,43 @@ describe('SubmissionFormComponent', () => {
   let component: SubmissionFormComponent;
   let fixture: ComponentFixture<SubmissionFormComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const navigationService = {
-        getSurveyId$: () => of(''),
-        getLocationOfInterestId$: () => NEVER,
-      };
-      const routerSpy = createRouterSpy();
-      TestBed.configureTestingModule({
-        declarations: [SubmissionFormComponent],
-        imports: [
-          BrowserAnimationsModule,
-          FormsModule,
-          ReactiveFormsModule,
-          MatFormFieldModule,
-          MatButtonModule,
-          MatFormFieldModule,
-          MatInputModule,
-          MatRadioModule,
-          MatCheckboxModule,
-          MatIconModule,
-          MatListModule,
-          JobListItemModule,
-        ],
-        providers: [
-          { provide: DataStoreService, useValue: {} },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiService,
-          },
-          { provide: SurveyService, useValue: surveyService },
-          { provide: SubmissionService, useValue: submissionService },
-          { provide: Router, useValue: routerSpy },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: AuthService, useValue: { getUser$: () => NEVER } },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    const navigationService = {
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => NEVER,
+    };
+    const routerSpy = createRouterSpy();
+    TestBed.configureTestingModule({
+      declarations: [SubmissionFormComponent],
+      imports: [
+        BrowserAnimationsModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatRadioModule,
+        MatCheckboxModule,
+        MatIconModule,
+        MatListModule,
+        JobListItemModule,
+      ],
+      providers: [
+        { provide: DataStoreService, useValue: {} },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiService,
+        },
+        { provide: SurveyService, useValue: surveyService },
+        { provide: SubmissionService, useValue: submissionService },
+        { provide: Router, useValue: routerSpy },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AuthService, useValue: { getUser$: () => NEVER } },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SubmissionFormComponent);

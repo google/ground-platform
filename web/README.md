@@ -81,29 +81,30 @@ automatically rebuild and reload if you change any of the source files.
 
 ## Code scaffolding
 
-Run `ng generate component component-name` to generate a new component. You can
+Run `npm run ng generate component component-name` to generate a new component. You can
 also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the
-`dist/` directory. Use the `--prod` flag for a production build.
+Run `npm run build:dev` to build the project. The build artifacts will be stored in the
+`dist/` directory. Use the `npm run build:prod` flag for a production build.
 
 ## Running unit tests
 
-Run `ng test` to execute run tests locally in Chrome using
+Run `npm run test` to execute run tests locally in Chrome using
+
 [Karma](https://karma-runner.github.io) test runner.
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via
+Run `npm run e2e` to execute the end-to-end tests via
 [Protractor](http://www.protractortest.org/).
 
 ## Deploying web app to development Firebase instance
 
-Run `ng deploy`.
+Run `npm run deploy <project-id>`.
 
 ## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular
+To get more help on the Angular CLI use `npm run ng help` or go check out the [Angular
 CLI README](https://github.com/angular/angular-cli/blob/master/README.md).

@@ -33,35 +33,33 @@ describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
   let fixture: ComponentFixture<ShareDialogComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [ShareDialogComponent],
-        imports: [
-          NoopAnimationsModule,
-          FlexLayoutModule,
-          MatButtonModule,
-          MatDialogModule,
-          MatFormFieldModule,
-          MatInputModule,
-          MatListModule,
-          MatSelectModule,
-          FormsModule,
-          ReactiveFormsModule,
-        ],
-        providers: [
-          { provide: MatDialogRef, useValue: {} },
-          {
-            provide: SurveyService,
-            useValue: {
-              getActiveSurvey$: () => of({ acl: Map() }),
-              getCurrentSurveyAcl: () => {},
-            },
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [ShareDialogComponent],
+      imports: [
+        NoopAnimationsModule,
+        FlexLayoutModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatListModule,
+        MatSelectModule,
+        FormsModule,
+        ReactiveFormsModule,
+      ],
+      providers: [
+        { provide: MatDialogRef, useValue: {} },
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => of({ acl: Map() }),
+            getCurrentSurveyAcl: () => {},
           },
-        ],
-      }).compileComponents();
-    })
-  );
+        },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareDialogComponent);

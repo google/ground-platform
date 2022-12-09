@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
 import { Map } from 'immutable';
+import { GeoPoint } from 'firebase/firestore';
 import { Geometry } from './geometry/geometry';
 
 export interface LocationOfInterest {
@@ -33,7 +33,7 @@ export class PointOfInterest implements LocationOfInterest {
     readonly id: string,
     readonly jobId: string,
     // TODO: User custom type instead of exposing types from data job.
-    readonly location: firebase.firestore.GeoPoint,
+    readonly location: GeoPoint,
     readonly properties?: Map<string, string | number>
   ) {}
 }
@@ -53,7 +53,7 @@ export class AreaOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly jobId: string,
-    readonly polygonVertices: firebase.firestore.GeoPoint[],
+    readonly polygonVertices: GeoPoint[],
     readonly properties?: Map<string, string | number>
   ) {}
 }
