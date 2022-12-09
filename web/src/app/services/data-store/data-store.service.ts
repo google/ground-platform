@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
+import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import { Injectable } from '@angular/core';
-import { AngularFirestore, DocumentData } from '@angular/fire/firestore';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { DocumentData, FieldPath } from '@angular/fire/firestore';
 import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Survey } from '../../shared/models/survey.model';
 import { map } from 'rxjs/operators';
 import { User } from './../../shared/models/user.model';
@@ -28,8 +29,8 @@ import { List, Map } from 'immutable';
 import { Submission } from '../../shared/models/submission/submission.model';
 import { Role } from '../../shared/models/role.model';
 import { OfflineBaseMapSource } from '../../shared/models/offline-base-map-source';
-import 'firebase/storage';
 import { LoiDataConverter } from '../../shared/converters/loi-converter/loi-data-converter';
+import { deleteField, serverTimestamp } from 'firebase/firestore';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -71,11 +72,7 @@ export class DataStoreService {
   loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(
-          new firebase.firestore.FieldPath('acl', userEmail),
-          'in',
-          this.VALID_ROLES
-        )
+        ref.where(new FieldPath('acl', userEmail), 'in', this.VALID_ROLES)
       )
       .snapshotChanges()
       .pipe(
@@ -120,7 +117,7 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}`]: firebase.firestore.FieldValue.delete(),
+        [`jobs.${jobId}`]: deleteField(),
       });
   }
 
@@ -129,7 +126,7 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where('jobId', '==', jobId)
     );
-    const querySnapshot = await submissions.get().toPromise();
+    const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -141,7 +138,7 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where('loiId', '==', loiId)
     );
-    const querySnapshot = await submissions.get().toPromise();
+    const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -153,7 +150,7 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref => ref.where('jobId', '==', jobId)
     );
-    const querySnapshot = await loisInJob.get().toPromise();
+    const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
@@ -321,7 +318,7 @@ export class DataStoreService {
   }
 
   getServerTimestamp() {
-    return firebase.firestore.FieldValue.serverTimestamp();
+    return serverTimestamp();
   }
 
   updateLocationOfInterest(
@@ -366,6 +363,6 @@ export class DataStoreService {
   }
 
   getImageDownloadURL(path: string) {
-    return firebase.storage().ref().child(path).getDownloadURL();
+    return getDownloadURL(ref(getStorage(), path));
   }
 }

@@ -40,8 +40,9 @@
         "destination": "/index.html"
       }
     ]
-  },
+  }, 
   "functions": {
-    "source": "functions"
+    "source": "functions",
+    "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"]
   }
 }

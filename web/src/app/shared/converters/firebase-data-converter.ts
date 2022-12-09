@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import firebase from 'firebase/app';
-import { DocumentData } from '@angular/fire/firestore';
+import { DocumentData, Timestamp } from '@angular/fire/firestore';
 import { Survey } from '../models/survey.model';
 import { Job } from '../models/job.model';
 import { Task, TaskType } from '../models/task/task.model';
@@ -411,7 +410,7 @@ export class FirebaseDataConverter {
         )
       );
     }
-    if (resultValue instanceof firebase.firestore.Timestamp) {
+    if (resultValue instanceof Timestamp) {
       return new Result(resultValue.toDate());
     }
     throw Error(`Unknown value type ${typeof resultValue}`);
@@ -428,7 +427,7 @@ export class FirebaseDataConverter {
       return (result.value as List<Option>).map(option => option.id).toArray();
     }
     if (result.value instanceof Date) {
-      return firebase.firestore.Timestamp.fromDate(result.value);
+      return Timestamp.fromDate(result.value);
     }
     throw Error(`Unknown value type of ${result.value}`);
   }

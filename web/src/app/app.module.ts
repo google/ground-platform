@@ -16,13 +16,13 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFireModule } from '@angular/fire';
 import {
   AngularFirestoreModule,
-  SETTINGS as FIRESTORE_SETTINGS,
   USE_EMULATOR as USE_FIRESTORE_EMULATOR,
-} from '@angular/fire/firestore';
+  SETTINGS as FIRESTORE_SETTINGS,
+} from '@angular/fire/compat/firestore';
+import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
+import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR } from '@angular/fire/compat/functions';
 import { AppRoutingModule } from './routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -31,16 +31,19 @@ import { environment } from '../environments/environment';
 import { SurveyHeaderModule } from './components/survey-header/survey-header.module';
 import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
 import { JobDialogModule } from './components/job-dialog/job-dialog.module';
+import { GoogleAuthProvider } from 'firebase/auth';
 import { HttpClientModule } from '@angular/common/http';
-import { firebase, firebaseui, FirebaseUIModule } from 'firebaseui-angular';
+import { firebaseui, FirebaseUIModule } from 'firebaseui-angular';
 import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
   // blocked due to unsupported 3rd party cookies.
   signInFlow: 'popup',
   // For now we only use Google for auth.
-  signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+  signInOptions: [GoogleAuthProvider.PROVIDER_ID],
   // Required to enable one-tap sign-up credential helper.
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
 };
@@ -52,13 +55,27 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
       provide: FIRESTORE_SETTINGS,
       useValue: { ignoreUndefinedProperties: true },
     },
+    // Emulator ports defined in ../firebase.local.json
+    // TODO(#979): Set up auth emulator and enable rules.
+    {
+      provide: USE_DATABASE_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 9000] : undefined,
+    },
     {
       provide: USE_FIRESTORE_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
     },
+    {
+      provide: USE_FUNCTIONS_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
+    },
   ],
   imports: [
+    // TODO(#967): Replace compat libs with new AngularFire APIs:
+    //   provideFirebaseApp(() => initializeApp(environment.firebase)),
+    //   provideFirestore(() => getFirestore()),
     AngularFireModule.initializeApp(environment.firebase),
+    AngularFireModule,
     AngularFireAuthModule,
     AngularFirestoreModule,
     BrowserAnimationsModule,

@@ -15,12 +15,12 @@
  */
 
 import { User } from './user.model';
-import firebase from 'firebase/app';
+import { FieldValue } from 'firebase/firestore';
 
 export class AuditInfo {
   constructor(
     readonly user: User,
     readonly clientTime: Date,
-    readonly serverTime: Date | firebase.firestore.FieldValue
+    readonly serverTime: Date | FieldValue
   ) {}
 }

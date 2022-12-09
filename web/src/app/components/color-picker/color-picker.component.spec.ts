@@ -25,19 +25,17 @@ describe('ColorPickerComponent', () => {
   let fixture: ComponentFixture<ColorPickerComponent>;
   const dialogRef: Partial<MatDialogRef<ColorPickerComponent>> = {};
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [ColorPickerComponent],
-        imports: [MatDialogModule],
-        providers: [
-          { provide: MAT_DIALOG_DATA, useValue: {} },
-          { provide: MatDialogRef, useValue: dialogRef },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [ColorPickerComponent],
+      imports: [MatDialogModule],
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: MatDialogRef, useValue: dialogRef },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ColorPickerComponent);

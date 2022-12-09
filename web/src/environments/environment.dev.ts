@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-/**
- * Minimal representation of a planar, linear vector geometry.
- *
- * Based on https://locationtech.github.io/jts/javadoc/org/locationtech/jts/geom/Geometry.html
- */
-export interface Geometry {
-  geometryType: GeometryType;
-}
+import { googleMapsConfig } from './.google-maps-config';
+import { firebaseConfig } from './.firebase-config';
+import { offlineBaseMapSources } from './.backend-config.json';
+import { Env } from './environment-enums';
 
-/**
- * An enum representing the type of the geometry instance.
- */
-export enum GeometryType {
-  POINT = 'POINT',
-  LINE_STRING = 'LINE_STRING',
-  LINEAR_RING = 'LINEAR_RING',
-  POLYGON = 'POLYGON',
-  MULTI_POLYGON = 'MULTI_POLYGON',
-}
+export const environment = {
+  production: false,
+  googleMapsApiKey: googleMapsConfig.apiKey,
+  firebase: firebaseConfig,
+  cloudFunctionsUrl: '',
+  offlineBaseMapSources,
+  useEmulators: false,
+  env: Env.Dev,
+};

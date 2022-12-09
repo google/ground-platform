@@ -24,8 +24,11 @@ import { Env } from './environment-enums';
 export const environment = {
   production: false,
   googleMapsApiKey: '',
-  firebase: { projectId: 'fake-project-id', apiKey: 'fake-api-key' },
-  cloudFunctionsUrl: 'http://localhost:5001/fake-project-id/us-central1',
+  firebase: {
+    projectId: 'demo-project',
+    apiKey: 'fake-api-key',
+  },
+  cloudFunctionsUrl: '',
   offlineBaseMapSources: [{ url: '' }],
   useEmulators: true,
   env: Env.Local,

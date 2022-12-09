@@ -25,8 +25,8 @@ import { LocationOfInterestService } from '../../services/loi/loi.service';
 import { SubmissionService } from '../../services/submission/submission.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AuthService } from '../../services/auth/auth.service';
 
 @Component({ selector: 'ground-map', template: '' })
@@ -43,58 +43,56 @@ describe('MainPageComponent', () => {
   let route: ActivatedRouteStub;
   const dialog: Partial<MatDialog> = {};
 
-  beforeEach(
-    waitForAsync(() => {
-      route = new ActivatedRouteStub();
+  beforeEach(waitForAsync(() => {
+    route = new ActivatedRouteStub();
 
-      const surveyService = jasmine.createSpyObj('SurveyService', [
-        'getActiveSurvey$',
-        'activateSurvey',
-      ]);
+    const surveyService = jasmine.createSpyObj('SurveyService', [
+      'getActiveSurvey$',
+      'activateSurvey',
+    ]);
 
-      const loiService = jasmine.createSpyObj('LocationOfInterestService', [
-        'selectLocationOfInterest$',
-      ]);
+    const loiService = jasmine.createSpyObj('LocationOfInterestService', [
+      'selectLocationOfInterest$',
+    ]);
 
-      const submissionService = jasmine.createSpyObj('SubmissionService', [
-        'selectSubmission$',
-      ]);
+    const submissionService = jasmine.createSpyObj('SubmissionService', [
+      'selectSubmission$',
+    ]);
 
-      const navigationService = {
-        getSurveyId$: () => NEVER,
-        getJobId$: () => NEVER,
-        getLocationOfInterestId$: () => NEVER,
-        getSubmissionId$: () => NEVER,
-      };
+    const navigationService = {
+      getSurveyId$: () => NEVER,
+      getJobId$: () => NEVER,
+      getLocationOfInterestId$: () => NEVER,
+      getSubmissionId$: () => NEVER,
+    };
 
-      TestBed.configureTestingModule({
-        declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
-        providers: [
-          { provide: ActivatedRoute, useValue: route },
-          { provide: MatDialog, useValue: dialog },
-          {
-            provide: LocationOfInterestService,
-            useValue: loiService,
-          },
-          { provide: SubmissionService, useValue: submissionService },
-          { provide: SurveyService, useValue: surveyService },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: AngularFirestore, useValue: {} },
-          { provide: AngularFireAuth, useValue: {} },
-          { provide: Router, useValue: {} },
-          {
-            provide: AuthService,
-            useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
-          },
-        ],
-        schemas: [NO_ERRORS_SCHEMA],
-      }).compileComponents();
+    TestBed.configureTestingModule({
+      declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
+      providers: [
+        { provide: ActivatedRoute, useValue: route },
+        { provide: MatDialog, useValue: dialog },
+        {
+          provide: LocationOfInterestService,
+          useValue: loiService,
+        },
+        { provide: SubmissionService, useValue: submissionService },
+        { provide: SurveyService, useValue: surveyService },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AngularFirestore, useValue: {} },
+        { provide: AngularFireAuth, useValue: {} },
+        { provide: Router, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
 
-      fixture = TestBed.createComponent(MainPageComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    })
-  );
+    fixture = TestBed.createComponent(MainPageComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }));
 
   it('should create', () => {
     expect(component).toBeTruthy();

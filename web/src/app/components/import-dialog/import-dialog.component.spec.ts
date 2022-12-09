@@ -33,25 +33,23 @@ describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;
   let fixture: ComponentFixture<ImportDialogComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      TestBed.configureTestingModule({
-        declarations: [ImportDialogComponent],
-        imports: [
-          FileUploadModule,
-          ReactiveFormsModule,
-          MatDialogModule,
-          NoopAnimationsModule,
-          MatSnackBarModule,
-        ],
-        providers: [
-          { provide: DataImportService, useValue: {} },
-          { provide: MatDialogRef, useValue: { afterClosed: () => NEVER } },
-          { provide: MAT_DIALOG_DATA, useValue: {} },
-        ],
-      }).compileComponents();
-    })
-  );
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      declarations: [ImportDialogComponent],
+      imports: [
+        FileUploadModule,
+        ReactiveFormsModule,
+        MatDialogModule,
+        NoopAnimationsModule,
+        MatSnackBarModule,
+      ],
+      providers: [
+        { provide: DataImportService, useValue: {} },
+        { provide: MatDialogRef, useValue: { afterClosed: () => NEVER } },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ImportDialogComponent);

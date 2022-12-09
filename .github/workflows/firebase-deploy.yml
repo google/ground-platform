@@ -19,6 +19,7 @@ on:
       - master
 jobs:
   build_and_deploy:
+    if: github.repository_owner == 'google'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -27,31 +28,28 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "14"
+          node-version: "16"
 
-      - name: Install Angular-CLI
-        run: npm install -g @angular/cli > /dev/null
-
-      - name: Create firebase-config.ts
+      - name: Create .firebase-config.ts
         uses: "finnp/create-file-action@master"
         env:
           FILE_NAME: "web/src/environments/.firebase-config.ts"
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
-      - name: Create google-maps-config.ts
+      - name: Create .google-maps-config.ts
         uses: "finnp/create-file-action@master"
         env:
           FILE_NAME: "web/src/environments/.google-maps-config.ts"
           FILE_DATA: ${{ secrets.GOOGLE_MAPS_CONFIG }}
 
-      - name: Create backend-config.json
+      - name: Create .backend-config.json
         uses: "finnp/create-file-action@master"
         env:
           FILE_NAME: "web/src/environments/.backend-config.json"
           FILE_DATA: ${{ secrets.BACKEND_CONFIG }}
 
-      - name: Build Angular App
-        run: ./build.sh
+      - name: Build using development configuration
+        run: npm install && npm run build:dev
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -59,8 +57,10 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}"
           channelId: live
           projectId: gnd-dev
-      
-      - name: Deploy to Firebase
-        uses: BIGG-Kaymo/deploy-firebase-functions@v1.0.1
+
+      - name:  Deploy to Firebase functions
+        uses: w9jds/firebase-action@master
+        with:
+            args: deploy --only functions --project gnd-dev
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+            FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { DataStoreService } from '../../services/data-store/data-store.service';
 import { JobListItemComponent } from './job-list-item.component';
@@ -41,29 +41,27 @@ describe('JobListItemComponent', () => {
   let component: JobListItemComponent;
   let fixture: ComponentFixture<JobListItemComponent>;
 
-  beforeEach(
-    waitForAsync(() => {
-      const navigationService = {
-        getSurveyId$: () => of(''),
-        getLocationOfInterestId$: () => of(''),
-      };
+  beforeEach(waitForAsync(() => {
+    const navigationService = {
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
+    };
 
-      TestBed.configureTestingModule({
-        declarations: [JobListItemComponent],
-        imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
-        providers: [
-          { provide: DataStoreService, useValue: { user$: () => of() } },
-          { provide: NavigationService, useValue: navigationService },
-          { provide: Router, useValue: {} },
-          { provide: AngularFirestore, useValue: {} },
-          {
-            provide: AngularFireAuth,
-            useValue: mockAngularFireAuth,
-          },
-        ],
-      }).compileComponents();
-    })
-  );
+    TestBed.configureTestingModule({
+      declarations: [JobListItemComponent],
+      imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
+      providers: [
+        { provide: DataStoreService, useValue: { user$: () => of() } },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: Router, useValue: {} },
+        { provide: AngularFirestore, useValue: {} },
+        {
+          provide: AngularFireAuth,
+          useValue: mockAngularFireAuth,
+        },
+      ],
+    }).compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListItemComponent);

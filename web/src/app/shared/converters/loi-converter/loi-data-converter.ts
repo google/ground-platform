@@ -16,14 +16,15 @@
 import { DocumentData } from '@angular/fire/firestore';
 import {
   LocationOfInterest,
-  PointOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
 } from '../../models/loi.model';
 import { Map } from 'immutable';
+import { GeoPoint } from 'firebase/firestore';
 import { Geometry } from '../../models/geometry/geometry';
-import { toGeometry } from './../geometry-converter';
+import { toGeometry, GEOMETRY_TYPES } from './../geometry-converter';
+import { Point } from '../../models/geometry/point';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -75,11 +76,15 @@ export class LoiDataConverter {
 
   public static loiToJS(loi: LocationOfInterest): {} | Error {
     // TODO: Set audit info (created / last modified user and timestamp).
-    if (loi instanceof PointOfInterest) {
-      const { jobId, location } = loi;
+    if (loi.geometry instanceof Point) {
+      // TODO: Add geometryToJS converters in geometry-converter.ts call it from here. Then GEOMETRY_TYPES can be local.
+      const { jobId, geometry } = loi;
       return {
         jobId,
-        location,
+        geometry: {
+          coordinates: new GeoPoint(geometry.coord.x, geometry.coord.y),
+          type: GEOMETRY_TYPES.get(geometry.geometryType),
+        },
       };
     } else if (loi instanceof GeoJsonLocationOfInterest) {
       const { jobId, geoJson } = loi;

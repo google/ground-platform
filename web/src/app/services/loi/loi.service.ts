@@ -15,17 +15,18 @@
  */
 
 import { DataStoreService } from './../data-store/data-store.service';
-import { switchMap, take } from 'rxjs/operators';
-import { Observable, ReplaySubject } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
 import { Survey } from './../../shared/models/survey.model';
 import { SurveyService } from './../survey/survey.service';
 import { Injectable } from '@angular/core';
 import {
+  GenericLocationOfInterest,
   LocationOfInterest,
-  PointOfInterest,
 } from '../../shared/models/loi.model';
-import { List } from 'immutable';
-import firebase from 'firebase/app';
+import { List, Map as ImmutableMap } from 'immutable';
+import { Point } from '../../shared/models/geometry/point';
+import { Coordinate } from '../../shared/models/geometry/coordinate';
 
 @Injectable({
   providedIn: 'root',
@@ -43,7 +44,9 @@ export class LocationOfInterestService {
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          survey.isUnsavedNew() ? List() : dataStore.lois$(survey)
+          survey.isUnsavedNew()
+            ? of(List<LocationOfInterest>())
+            : dataStore.lois$(survey)
         )
       );
 
@@ -79,20 +82,14 @@ export class LocationOfInterestService {
   ): Promise<LocationOfInterest | null> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const survey = await this.surveyService
-      .getActiveSurvey$()
-      .pipe(take(1))
-      .toPromise();
+    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
     return await this.addPointInternal(survey, lat, lng, jobId);
   }
 
   async updatePoint(loi: LocationOfInterest): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const survey = await this.surveyService
-      .getActiveSurvey$()
-      .pipe(take(1))
-      .toPromise();
+    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
     return await this.updatePointInternal(survey, loi);
   }
 
@@ -105,10 +102,11 @@ export class LocationOfInterestService {
     if (!(survey.jobs || new Map()).get(jobId)) {
       return null;
     }
-    const newLocationOfInterest = new PointOfInterest(
+    const newLocationOfInterest = new GenericLocationOfInterest(
       this.dataStore.generateId(),
       jobId,
-      new firebase.firestore.GeoPoint(lat, lng)
+      new Point(new Coordinate(lat, lng)),
+      ImmutableMap()
     );
     await this.dataStore.updateLocationOfInterest(
       survey.id,

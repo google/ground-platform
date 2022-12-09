@@ -98,7 +98,7 @@ export class ShareDialogComponent {
 
     // Add new email/role and update change state. Validation rules prevent
     // the same email from being added twice.
-    this.acl.push(new AclEntry(email, role));
+    this.acl.push(new AclEntry(email!, role!));
     this.updateChangeState();
 
     // Clear "Add data collector" field.
