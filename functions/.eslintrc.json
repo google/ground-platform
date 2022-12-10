@@ -1,0 +1,11 @@
+{
+  "extends": "./node_modules/gts",
+  "env": {
+    "jasmine": true
+  },
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "eslint-plugin-absolute-imports"
+  ]
+}
