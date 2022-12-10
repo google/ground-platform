@@ -41,7 +41,7 @@ export async function importGeoJsonHandler(
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
-  let inserts: any[] = [];
+  const inserts: any[] = [];
 
   // Handle non-file fields in the task. survey and job must appear
   // before the file for the file handler to work properly.

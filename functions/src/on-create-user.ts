@@ -15,9 +15,11 @@
  */
 
 import * as functions from "firebase-functions";
-import { db } from './common/context';
+import { db } from "./common/context";
 
 /**
  * Called when a new user logs in for the first time.
  */
-export function handleCreateUser(user: functions.auth.UserRecord) { db.mergeUserProfile(user); }
+export function handleCreateUser(user: functions.auth.UserRecord) {
+  db.mergeUserProfile(user);
+}
