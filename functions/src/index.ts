@@ -17,10 +17,10 @@
 
 import * as functions from "firebase-functions";
 import * as cors from "cors";
-import { handleCreateUser } from "./on-create-user";
-import { importCsvHandler } from "./import-csv";
-import { importGeoJsonHandler } from "./import-geojson";
-import { exportCsvHandler } from "./export-csv";
+import { handleCreateUser } from "src/on-create-user";
+import { importCsvHandler } from "src/import-csv";
+import { importGeoJsonHandler } from "src/import-geojson";
+import { exportCsvHandler } from "src/export-csv";
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);

@@ -18,7 +18,7 @@
 import * as functions from "firebase-functions";
 import * as csv from "@fast-csv/format";
 import { geojsonToWKT } from "@terraformer/wkt";
-import { db } from "./common/context";
+import { db } from "src/common/context";
 import * as HttpStatus from "http-status-codes";
 
 // TODO: Refactor into meaningful pieces.

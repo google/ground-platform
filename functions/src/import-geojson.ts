@@ -17,7 +17,7 @@
 
 import * as functions from "firebase-functions";
 import * as HttpStatus from "http-status-codes";
-import { db } from "./common/context";
+import { db } from "src/common/context";
 import * as Busboy from "busboy";
 import * as JSONStream from "jsonstream-ts";
 
