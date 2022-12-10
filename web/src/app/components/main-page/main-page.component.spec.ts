@@ -16,18 +16,18 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
-import { MainPageComponent } from './main-page.component';
+import { MainPageComponent } from 'app/components/main-page/main-page.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActivatedRouteStub } from '../../../testing/activated-route-stub';
-import { SurveyService } from '../../services/survey/survey.service';
+import { ActivatedRouteStub } from 'testing/activated-route-stub';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { MatDialog } from '@angular/material/dialog';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { SubmissionService } from '../../services/submission/submission.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from 'app/services/auth/auth.service';
 
 @Component({ selector: 'ground-map', template: '' })
 class MapComponent {}

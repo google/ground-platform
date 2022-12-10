@@ -15,10 +15,10 @@
  */
 
 import { ActivatedRoute } from '@angular/router';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { Observable, Subscription } from 'rxjs';
-import { Survey } from '../../shared/models/survey.model';
-import { SurveyService } from './../../services/survey/survey.service';
+import { Survey } from 'app/shared/models/survey.model';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component({

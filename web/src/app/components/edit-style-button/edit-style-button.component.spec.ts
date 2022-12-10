@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { EditStyleButtonComponent } from './edit-style-button.component';
+import { EditStyleButtonComponent } from 'app/components/edit-style-button/edit-style-button.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 

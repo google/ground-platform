@@ -15,7 +15,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { DataStoreService } from './data-store.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 describe('DataStoreService', () => {

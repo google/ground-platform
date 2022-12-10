@@ -16,19 +16,19 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { JobDialogComponent } from './job-dialog.component';
+import { JobDialogComponent } from 'app/components/job-dialog/job-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { InlineEditorModule } from '../inline-editor/inline-editor.module';
-import { ColorPickerModule } from '../color-picker/color-picker.module';
-import { EditStyleButtonModule } from '../edit-style-button/edit-style-button.module';
+import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
+import { ColorPickerModule } from 'app/components/color-picker/color-picker.module';
+import { EditStyleButtonModule } from 'app/components/edit-style-button/edit-style-button.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { TaskEditorModule } from '../task-editor/task-editor.module';
+import { ConfirmationDialogComponent } from 'app/components/confirmation-dialog/confirmation-dialog.component';
+import { TaskEditorModule } from 'app/components/task-editor/task-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 

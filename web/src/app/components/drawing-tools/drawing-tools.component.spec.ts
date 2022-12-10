@@ -26,17 +26,17 @@ import { BehaviorSubject, of } from 'rxjs';
 import {
   DrawingToolsService,
   EditMode,
-} from '../../services/drawing-tools/drawing-tools.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { SurveyService } from '../../services/survey/survey.service';
-import { Job } from '../../shared/models/job.model';
-import { Survey } from '../../shared/models/survey.model';
-import { DrawingToolsComponent } from './drawing-tools.component';
-import { DrawingToolsModule } from './drawing-tools.module';
+} from 'app/services/drawing-tools/drawing-tools.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { Job } from 'app/shared/models/job.model';
+import { Survey } from 'app/shared/models/survey.model';
+import { DrawingToolsComponent } from 'app/components/drawing-tools/drawing-tools.component';
+import { DrawingToolsModule } from 'app/components/drawing-tools/drawing-tools.module';
 import { Map } from 'immutable';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from 'app/services/auth/auth.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { urlPrefix } from '../map/ground-pin';
+import { urlPrefix } from 'app/components/map/ground-pin';
 import { By } from '@angular/platform-browser';
 
 describe('DrawingToolsComponent', () => {

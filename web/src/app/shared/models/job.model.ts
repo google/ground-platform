@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Task } from './task/task.model';
+import { Task } from 'app/shared/models/task/task.model';
 import { Map } from 'immutable';
 
 export class Job {

@@ -22,17 +22,17 @@ import {
   NgZone,
   OnChanges,
 } from '@angular/core';
-import { Job } from '../../shared/models/job.model';
-import { getPinImageSource } from '../map/ground-pin';
+import { Job } from 'app/shared/models/job.model';
+import { getPinImageSource } from 'app/components/map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { DialogService } from '../../services/dialog/dialog.service';
-import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
-import { GeoJsonLocationOfInterest } from '../../shared/models/loi.model';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
+import { GeoJsonLocationOfInterest } from 'app/shared/models/loi.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { Map } from 'immutable';
-import { Point } from '../../shared/models/geometry/point';
+import { Point } from 'app/shared/models/geometry/point';
 @Component({
   selector: 'ground-loi-panel-header',
   templateUrl: './loi-panel-header.component.html',

@@ -17,12 +17,12 @@
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from '../../services/data-store/data-store.service';
-import { JobListItemComponent } from './job-list-item.component';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { JobListItemComponent } from 'app/components/job-list-item/job-list-item.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatListModule } from '@angular/material/list';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { of } from 'rxjs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';

@@ -17,17 +17,17 @@
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { JobListComponent } from './job-list.component';
-import { SurveyService } from '../../services/survey/survey.service';
+import { JobListComponent } from 'app/components/job-list/job-list.component';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Survey } from '../../shared/models/survey.model';
+import { Survey } from 'app/shared/models/survey.model';
 import { of } from 'rxjs';
 import { Map } from 'immutable';
-import { Job } from '../../shared/models/job.model';
+import { Job } from 'app/shared/models/job.model';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { DataStoreService } from '../../services/data-store/data-store.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 const mockSurvey = new Survey(
   'survey001',
