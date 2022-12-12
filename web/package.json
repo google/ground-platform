@@ -5,7 +5,6 @@
     "clean": "rm -rf node_modules dist coverage *.log",
     "ng": "ng",
     "start:dev": "ng serve",
-    "build": "ng build",
     "build:dev": "ng build -c dev",
     "build:prod": "ng build -c production",
     "build:local": "ng build -c local",
