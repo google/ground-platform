@@ -24,6 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserAvatarModule } from '../user-avatar/user-avatar.module';
 import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { ShareDialogModule } from './../share-dialog/share-dialog.module';
 
 @NgModule({
   declarations: [SurveyHeaderComponent],
@@ -36,6 +37,7 @@ import { InlineEditorModule } from '../inline-editor/inline-editor.module';
     MatDialogModule,
     UserAvatarModule,
     InlineEditorModule,
+    ShareDialogModule,
   ],
   exports: [SurveyHeaderComponent],
 })
