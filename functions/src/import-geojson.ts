@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import * as HttpStatus from "http-status-codes";
-import { db } from "src/common/context";
-import * as Busboy from "busboy";
-import * as JSONStream from "jsonstream-ts";
+import functions from "firebase-functions";
+import HttpStatus from "http-status-codes";
+import { db } from "common/context";
+import Busboy from "busboy";
+import JSONStream from "jsonstream-ts";
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'

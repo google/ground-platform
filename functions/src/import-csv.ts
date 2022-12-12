@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import * as HttpStatus from "http-status-codes";
-import * as csvParser from "csv-parser";
-import * as Busboy from "busboy";
-import { db } from "src/common/context";
+import functions from "firebase-functions";
+import HttpStatus from "http-status-codes";
+import csvParser from "csv-parser";
+import Busboy from "busboy";
+import { db } from "common/context";
 import { GeoPoint } from "firebase-admin/firestore";
 
 /**

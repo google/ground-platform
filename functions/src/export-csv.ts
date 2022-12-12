@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import * as csv from "@fast-csv/format";
+import functions from "firebase-functions";
+import csv from "@fast-csv/format";
 import { geojsonToWKT } from "@terraformer/wkt";
-import { db } from "src/common/context";
+import { db } from "common/context";
 import * as HttpStatus from "http-status-codes";
 
 // TODO: Refactor into meaningful pieces.
@@ -37,7 +37,7 @@ export async function exportCsvHandler(
 
   const jobs = survey.get("jobs") || {};
   const job = jobs[jobId] || {};
-  const jobName = job.name && (job.name['en'] as string);
+  const jobName = job.name && (job.name["en"] as string);
   const tasks = job["tasks"] || {};
   const task = (Object.values(tasks)[0] as any) || {};
   const elementMap = task["elements"] || {};
