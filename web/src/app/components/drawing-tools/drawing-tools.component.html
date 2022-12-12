@@ -21,7 +21,7 @@
   [(value)]="selectedValue"
 >
   <mat-button-toggle
-    *ngIf="!(jobs$ | async).isEmpty()"
+    *ngIf="!(jobs$ | async)?.isEmpty()"
     id="add-point-button"
     class="add-point-button"
     value="{{ pointValue }}"

@@ -36,8 +36,8 @@ export class SurveyHeaderComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     public navigationService: NavigationService,
-    private dialog: MatDialog,
-    private surveyService: SurveyService
+    public surveyService: SurveyService,
+    private dialog: MatDialog
   ) {
     this.title = '';
     const activeSurvey$ = this.surveyService.getActiveSurvey$();
@@ -72,7 +72,7 @@ export class SurveyHeaderComponent implements OnInit, OnDestroy {
     this.navigationService.navigateToSurveyList();
   }
 
-  private openShareDialog(): void {
+  openShareDialog(): void {
     this.dialog.open(ShareDialogComponent, {
       width: '580px',
       autoFocus: false,

@@ -23,7 +23,7 @@
     <ng-template #defaultPhoto>
       <user-avatar
         class="user-avatar"
-        [displayText]="user.displayName.charAt(0)"
+        [displayText]="user.displayName?.charAt(0)"
       ></user-avatar>
     </ng-template>
     <div class="user-description">
@@ -33,7 +33,7 @@
         class="btn-signout"
         mat-flat-button
         color="primary"
-        (click)="onSignOut($event)"
+        (click)="onSignOut()"
       >
         Sign out
       </button>

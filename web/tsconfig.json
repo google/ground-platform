@@ -10,5 +10,8 @@
     "skipLibCheck": true,
     "types": ["node", "jasmine"]
   },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+  },  
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }

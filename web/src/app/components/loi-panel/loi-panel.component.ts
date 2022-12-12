@@ -1,3 +1,4 @@
+import { Option } from './../../shared/models/task/option.model';
 /**
  * Copyright 2020 Google LLC
  *
@@ -114,6 +115,15 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
 
   getTasks(submission: Submission): List<Task> {
     return List(submission.job?.tasks?.valueSeq() || []);
+  }
+
+  getOptions(task: Task, submission: Submission): List<Option> {
+    const result = submission.results?.get(task.id);
+    if (result && result instanceof List<Option>) {
+      return result.value as List<Option>;
+    } else {
+      return List.of();
+    }
   }
 
   onEditSubmissionClick(submission: Submission) {
