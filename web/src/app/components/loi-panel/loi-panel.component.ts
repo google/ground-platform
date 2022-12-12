@@ -1,4 +1,3 @@
-import { Option } from './../../shared/models/task/option.model';
 /**
  * Copyright 2020 Google LLC
  *
@@ -15,6 +14,7 @@ import { Option } from './../../shared/models/task/option.model';
  * limitations under the License.
  */
 
+import { Option } from './../../shared/models/task/option.model';
 import { Submission } from './../../shared/models/submission/submission.model';
 import { SubmissionService } from './../../services/submission/submission.service';
 import { LocationOfInterestService } from './../../services/loi/loi.service';
