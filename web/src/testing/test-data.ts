@@ -15,13 +15,13 @@
  */
 
 import { GeoPoint } from 'firebase/firestore';
-import { PointOfInterest } from './../app/shared/models/loi.model';
-import { Survey } from '../app/shared/models/survey.model';
+import { PointOfInterest } from 'app/shared/models/loi.model';
+import { Survey } from 'app/shared/models/survey.model';
 import { Map } from 'immutable';
-import { Job } from './../app/shared/models/job.model';
-import { Task } from './../app/shared/models/task/task.model';
-import { User } from './../app/shared/models/user.model';
-import { Role } from './../app/shared/models/role.model';
+import { Job } from 'app/shared/models/job.model';
+import { Task } from 'app/shared/models/task/task.model';
+import { User } from 'app/shared/models/user.model';
+import { Role } from 'app/shared/models/role.model';
 
 /**
  * Shorthand builders with reasonable defaults for use by tests. Tests should

@@ -17,12 +17,15 @@
 
 import * as functions from "firebase-functions";
 import * as csv from "@fast-csv/format";
-import { geojsonToWKT } from "@terraformer/wkt"
-import { db } from "./common/context";
+import { geojsonToWKT } from "@terraformer/wkt";
+import { db } from "src/common/context";
 import * as HttpStatus from "http-status-codes";
 
 // TODO: Refactor into meaningful pieces.
-export async function exportCsvHandler(req: functions.Request, res: functions.Response<any>) {
+export async function exportCsvHandler(
+  req: functions.Request,
+  res: functions.Response<any>
+) {
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
   const survey = await db.fetchSurvey(surveyId);
@@ -34,9 +37,9 @@ export async function exportCsvHandler(req: functions.Request, res: functions.Re
 
   const jobs = survey.get("jobs") || {};
   const job = jobs[jobId] || {};
-  const jobName = job.name && job.name["en"] as string;
+  const jobName = job.name && (job.name['en'] as string);
   const tasks = job["tasks"] || {};
-  const task = Object.values(tasks)[0] as any || {};
+  const task = (Object.values(tasks)[0] as any) || {};
   const elementMap = task["elements"] || {};
   const elements = Object.keys(elementMap)
     .map((elementId) => ({ id: elementId, ...elementMap[elementId] }))
@@ -127,7 +130,9 @@ function getGeometry(geoJsonObject: any) {
   return geoJsonObject.geometry;
 }
 
-function getId(loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>) {
+function getId(
+  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
+) {
   const properties = loi.get("properties") || {};
   return (
     loi.get("id") ||
@@ -138,7 +143,9 @@ function getId(loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.Do
   );
 }
 
-function getLabel(loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>) {
+function getLabel(
+  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
+) {
   const properties = loi.get("properties") || {};
   return (
     properties["caption"] || properties["label"] || properties["title"] || ""
@@ -180,4 +187,3 @@ function getFileName(jobName: string) {
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
   return `${fileBase}.csv`;
 }
-

@@ -23,16 +23,16 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { DialogService } from '../../services/dialog/dialog.service';
-import { Job } from '../../shared/models/job.model';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { Job } from 'app/shared/models/job.model';
 import { Subscription } from 'rxjs';
-import { TaskType, Task } from '../../shared/models/task/task.model';
+import { TaskType, Task } from 'app/shared/models/task/task.model';
 import { List } from 'immutable';
-import { MarkerColorEvent } from '../edit-style-button/edit-style-button.component';
+import { MarkerColorEvent } from 'app/components/edit-style-button/edit-style-button.component';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { JobService } from '../../services/job/job.service';
-import { TaskEditorComponent } from '../task-editor/task-editor.component';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { JobService } from 'app/services/job/job.service';
+import { TaskEditorComponent } from 'app/components/task-editor/task-editor.component';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 // To make ESLint happy:
 /*global alert*/

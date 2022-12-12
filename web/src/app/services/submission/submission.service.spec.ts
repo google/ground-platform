@@ -15,13 +15,13 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { SubmissionService } from './submission.service';
-import { DataStoreService } from '../data-store/data-store.service';
-import { SurveyService } from '../survey/survey.service';
-import { LocationOfInterestService } from '../loi/loi.service';
-import { AuthService } from './../../services/auth/auth.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { AuthService } from 'app/services/auth/auth.service';
 import { Subject } from 'rxjs';
-import { User } from '../../shared/models/user.model';
+import { User } from 'app/shared/models/user.model';
 
 describe('SubmissionService', () => {
   const user$ = new Subject<User | null>();

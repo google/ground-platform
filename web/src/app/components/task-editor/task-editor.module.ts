@@ -24,8 +24,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { TaskEditorComponent } from './task-editor.component';
-import { OptionEditorModule } from '../option-editor/option-editor.module';
+import { TaskEditorComponent } from 'app/components/task-editor/task-editor.component';
+import { OptionEditorModule } from 'app/components/option-editor/option-editor.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({

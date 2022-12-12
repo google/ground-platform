@@ -16,10 +16,10 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { DataStoreService } from '../../services/data-store/data-store.service';
-import { EditStyleButtonModule } from '../edit-style-button/edit-style-button.module';
-import { TaskEditorModule } from '../task-editor/task-editor.module';
-import { JobDialogComponent } from './job-dialog.component';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { EditStyleButtonModule } from 'app/components/edit-style-button/edit-style-button.module';
+import { TaskEditorModule } from 'app/components/task-editor/task-editor.module';
+import { JobDialogComponent } from 'app/components/job-dialog/job-dialog.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
@@ -31,10 +31,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from 'app/services/auth/auth.service';
 import { NEVER } from 'rxjs';
 
 @Component({ selector: 'mat-dialog-content', template: '' })

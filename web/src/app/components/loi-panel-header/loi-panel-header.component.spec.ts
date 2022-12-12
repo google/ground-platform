@@ -23,8 +23,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { LocationOfInterestPanelHeaderComponent } from './loi-panel-header.component';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { LocationOfInterestPanelHeaderComponent } from 'app/components/loi-panel-header/loi-panel-header.component';
 
 describe('LocationOfInterestPanelHeaderComponent', () => {
   let component: LocationOfInterestPanelHeaderComponent;

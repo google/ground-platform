@@ -15,21 +15,21 @@
  */
 
 import { DocumentData, Timestamp } from '@angular/fire/firestore';
-import { Survey } from '../models/survey.model';
-import { Job } from '../models/job.model';
-import { Task, TaskType } from '../models/task/task.model';
+import { Survey } from 'app/shared/models/survey.model';
+import { Job } from 'app/shared/models/job.model';
+import { Task, TaskType } from 'app/shared/models/task/task.model';
 import {
   MultipleChoice,
   Cardinality,
-} from '../models/task/multiple-choice.model';
-import { Submission } from '../models/submission/submission.model';
-import { Option } from '../models/task/option.model';
+} from 'app/shared/models/task/multiple-choice.model';
+import { Submission } from 'app/shared/models/submission/submission.model';
+import { Option } from 'app/shared/models/task/option.model';
 import { List, Map } from 'immutable';
-import { AuditInfo } from '../models/audit-info.model';
-import { Result } from '../../shared/models/submission/result.model';
-import { Role } from '../models/role.model';
-import { User } from '../models/user.model';
-import { OfflineBaseMapSource } from '../models/offline-base-map-source';
+import { AuditInfo } from 'app/shared/models/audit-info.model';
+import { Result } from 'app/shared/models/submission/result.model';
+import { Role } from 'app/shared/models/role.model';
+import { User } from 'app/shared/models/user.model';
+import { OfflineBaseMapSource } from 'app/shared/models/offline-base-map-source';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],

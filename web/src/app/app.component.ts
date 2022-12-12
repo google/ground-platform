@@ -16,8 +16,8 @@
 
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject } from '@angular/core';
-import { environment } from '../environments/environment';
-import { Env } from '../environments/environment-enums';
+import { environment } from 'environments/environment';
+import { Env } from 'environments/environment-enums';
 
 /**
  * Top-level component. Delegates routing of sub-components to paths defined

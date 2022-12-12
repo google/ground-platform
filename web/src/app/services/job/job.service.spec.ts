@@ -15,9 +15,9 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { DataStoreService } from '../data-store/data-store.service';
-import { JobService } from './job.service';
-import { SurveyService } from '../survey/survey.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { JobService } from 'app/services/job/job.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NEVER } from 'rxjs';
 

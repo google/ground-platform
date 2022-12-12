@@ -20,20 +20,20 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Component } from '@angular/core';
 import { NEVER, of } from 'rxjs';
-import { AuthService } from '../../services/auth/auth.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { SurveyService } from '../../services/survey/survey.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { Map } from 'immutable';
-import { SurveyListComponent } from './survey-list.component';
-import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
+import { SurveyListComponent } from 'app/components/survey-list/survey-list.component';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Survey } from '../../shared/models/survey.model';
-import { Job } from '../../shared/models/job.model';
-import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Role } from '../../shared/models/role.model';
+import { Survey } from 'app/shared/models/survey.model';
+import { Job } from 'app/shared/models/job.model';
+import { AclEntry } from 'app/shared/models/acl-entry.model';
+import { Role } from 'app/shared/models/role.model';
 
 @Component({ selector: 'ground-header-layout', template: '' })
 class HeaderLayoutComponent {}

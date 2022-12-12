@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { AuthService } from './../../services/auth/auth.service';
+import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { UserProfilePopupComponent } from './user-profile-popup.component';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';

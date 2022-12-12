@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { InlineEditorComponent } from './inline-editor.component';
+import { InlineEditorComponent } from 'app/components/inline-editor/inline-editor.component';
 import { AutoSizeInputModule } from 'ngx-autosize-input';
 
 @NgModule({

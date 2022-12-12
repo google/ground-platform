@@ -18,7 +18,7 @@ import { Component } from '@angular/core';
 import {
   NavigationService,
   SideNavMode,
-} from '../../services/navigation/navigation.service';
+} from 'app/services/navigation/navigation.service';
 import { Observable } from 'rxjs';
 
 @Component({

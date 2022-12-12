@@ -21,30 +21,30 @@ import {
   tick,
   fakeAsync,
 } from '@angular/core/testing';
-import { MapComponent } from './map.component';
+import { MapComponent } from 'app/components/map/map.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { SurveyService } from '../../services/survey/survey.service';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { Survey } from '../../shared/models/survey.model';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { Survey } from 'app/shared/models/survey.model';
 import {
   LocationOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
-} from '../../shared/models/loi.model';
+} from 'app/shared/models/loi.model';
 import { Map, List } from 'immutable';
-import { Job } from '../../shared/models/job.model';
+import { Job } from 'app/shared/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
 import { GeoPoint } from 'firebase/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
-import { urlPrefix } from './ground-pin';
+import { urlPrefix } from 'app/components/map/ground-pin';
 import {
   DrawingToolsService,
   EditMode,
-} from '../../services/drawing-tools/drawing-tools.service';
-import { Point } from '../../shared/models/geometry/point';
-import { Coordinate } from '../../shared/models/geometry/coordinate';
+} from 'app/services/drawing-tools/drawing-tools.service';
+import { Point } from 'app/shared/models/geometry/point';
+import { Coordinate } from 'app/shared/models/geometry/coordinate';
 
 describe('MapComponent', () => {
   let component: MapComponent;

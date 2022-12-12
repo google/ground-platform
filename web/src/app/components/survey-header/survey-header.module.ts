@@ -17,13 +17,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutModule } from './../header-layout/header-layout.module';
-import { SurveyHeaderComponent } from './survey-header.component';
+import { HeaderLayoutModule } from 'app/components/header-layout/header-layout.module';
+import { SurveyHeaderComponent } from 'app/components/survey-header/survey-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserAvatarModule } from '../user-avatar/user-avatar.module';
-import { InlineEditorModule } from '../inline-editor/inline-editor.module';
+import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
+import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
 
 @NgModule({
   declarations: [SurveyHeaderComponent],
