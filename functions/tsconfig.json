@@ -2,9 +2,7 @@
   "compilerOptions": {
     "baseUrl": "src",
     "esModuleInterop": true,
-    "rootDir": "src",
     "module": "CommonJS",
-    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
@@ -15,6 +13,6 @@
   },
   "compileOnSave": true,
   "include": [
-    "src/**/*.ts"
+    "src"
   ]
 }
