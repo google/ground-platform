@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import functions from "firebase-functions";
-import cors from "cors";
-import { handleCreateUser } from "on-create-user";
-import { importCsvHandler } from "import-csv";
-import { importGeoJsonHandler } from "import-geojson";
-import { exportCsvHandler } from "export-csv";
+import "module-alias/register";
+import * as functions from "firebase-functions";
+import * as cors from "cors";
+import { handleCreateUser } from "@/on-create-user";
+import { importCsvHandler } from "@/import-csv";
+import { importGeoJsonHandler } from "@/import-geojson";
+import { exportCsvHandler } from "@/export-csv";
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
