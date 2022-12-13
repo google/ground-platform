@@ -15,18 +15,18 @@
  */
 
 import { Component, OnInit } from '@angular/core';
-import { JobDialogComponent } from '../job-dialog/job-dialog.component';
+import { JobDialogComponent } from 'app/components/job-dialog/job-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
-import { Survey } from '../../shared/models/survey.model';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { SurveyService } from '../../services/survey/survey.service';
-import { SubmissionService } from '../../services/submission/submission.service';
+import { Survey } from 'app/shared/models/survey.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 import { take } from 'rxjs/operators';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { AuthService } from '../../services/auth/auth.service';
-import { environment } from '../../../environments/environment';
-import { TitleDialogComponent } from '../title-dialog/title-dialog.component';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { environment } from 'environments/environment';
+import { TitleDialogComponent } from 'app/components/title-dialog/title-dialog.component';
 
 /**
  * Root component for main application page showing map, jobs list, and

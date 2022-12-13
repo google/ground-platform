@@ -15,8 +15,8 @@
  */
 
 import { hash, is } from 'immutable';
-import { Coordinate } from './coordinate';
-import { Geometry, GeometryType } from './geometry';
+import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { Geometry, GeometryType } from 'app/shared/models/geometry/geometry';
 
 /**
  * Represents a single point.

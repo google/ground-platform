@@ -18,8 +18,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from './user-profile-popup.component';
-import { UserAvatarModule } from '../user-avatar/user-avatar.module';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
+import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 
 @NgModule({
   declarations: [UserProfilePopupComponent],

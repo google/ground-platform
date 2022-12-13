@@ -15,12 +15,12 @@
  */
 
 import { Component } from '@angular/core';
-import { SurveyService } from '../../services/survey/survey.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
-import { Job } from '../../shared/models/job.model';
+import { Job } from 'app/shared/models/job.model';
 import { List } from 'immutable';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-job-list',

@@ -16,9 +16,9 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { DialogService } from './dialog.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from '../../components/confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogComponent } from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('DialogService', () => {

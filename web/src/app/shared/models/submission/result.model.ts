@@ -15,7 +15,7 @@
  */
 
 import { List } from 'immutable';
-import { Option } from '../task/option.model';
+import { Option } from 'app/shared/models/task/option.model';
 
 export class Result {
   constructor(readonly value: number | string | List<Option> | Date) {}

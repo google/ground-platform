@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { AuditInfo } from '../audit-info.model';
-import { Job } from './../job.model';
-import { Result } from './result.model';
+import { AuditInfo } from 'app/shared/models/audit-info.model';
+import { Job } from 'app/shared/models/job.model';
+import { Result } from 'app/shared/models/submission/result.model';
 import { Map } from 'immutable';
 
 export class Submission {
