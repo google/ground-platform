@@ -16,7 +16,7 @@
 
 import { Map } from 'immutable';
 import { GeoPoint } from 'firebase/firestore';
-import { Geometry } from './geometry/geometry';
+import { Geometry } from 'app/shared/models/geometry/geometry';
 
 export interface LocationOfInterest {
   readonly id: string;

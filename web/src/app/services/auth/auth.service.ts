@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { DataStoreService } from '../data-store/data-store.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { User } from './../../shared/models/user.model';
+import { User } from 'app/shared/models/user.model';
 import { Injectable } from '@angular/core';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { map } from 'rxjs/operators';
 import { shareReplay } from 'rxjs/operators';
-import { NavigationService } from '../navigation/navigation.service';
-import { AclEntry } from '../../shared/models/acl-entry.model';
-import { Job } from '../../shared/models/job.model';
-import { Survey } from '../../shared/models/survey.model';
-import { Role } from '../../shared/models/role.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { AclEntry } from 'app/shared/models/acl-entry.model';
+import { Job } from 'app/shared/models/job.model';
+import { Survey } from 'app/shared/models/survey.model';
+import { Role } from 'app/shared/models/role.model';
 
 const ANONYMOUS_USER: User = {
   id: '',

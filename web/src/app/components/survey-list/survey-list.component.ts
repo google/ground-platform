@@ -16,12 +16,12 @@
 
 import { Component, OnDestroy, ElementRef, OnInit } from '@angular/core';
 
-import { SurveyService } from '../../services/survey/survey.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
-import { Survey } from '../../shared/models/survey.model';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
+import { Survey } from 'app/shared/models/survey.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { List } from 'immutable';
 
 @Component({

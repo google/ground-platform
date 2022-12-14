@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataStoreService } from './../data-store/data-store.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 import {
   of,
   Observable,
@@ -22,20 +22,20 @@ import {
   Subscription,
   BehaviorSubject,
 } from 'rxjs';
-import { LocationOfInterest } from './../../shared/models/loi.model';
-import { Survey } from './../../shared/models/survey.model';
+import { LocationOfInterest } from 'app/shared/models/loi.model';
+import { Survey } from 'app/shared/models/survey.model';
 import { Injectable } from '@angular/core';
-import { Submission } from '../../shared/models/submission/submission.model';
+import { Submission } from 'app/shared/models/submission/submission.model';
 import { List, Map } from 'immutable';
 import { switchMap } from 'rxjs/operators';
-import { SurveyService } from '../survey/survey.service';
-import { LocationOfInterestService } from '../loi/loi.service';
-import { LoadingState } from '../loading-state.model';
-import { AuditInfo } from '../../shared/models/audit-info.model';
-import { AuthService } from './../../services/auth/auth.service';
-import { User } from '../../shared/models/user.model';
-import { Result } from '../../shared/models/submission/result.model';
-import { NavigationService } from '../navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { LoadingState } from 'app/services/loading-state.model';
+import { AuditInfo } from 'app/shared/models/audit-info.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { User } from 'app/shared/models/user.model';
+import { Result } from 'app/shared/models/submission/result.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',

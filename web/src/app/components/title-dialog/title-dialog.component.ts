@@ -17,8 +17,8 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { SurveyService } from '../../services/survey/survey.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-title-dialog',

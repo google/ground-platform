@@ -15,12 +15,12 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { LocationOfInterestService } from './loi.service';
-import { DataStoreService } from '../data-store/data-store.service';
-import { SurveyService } from '../survey/survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { Subject, of } from 'rxjs';
-import { Survey } from '../../shared/models/survey.model';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { Survey } from 'app/shared/models/survey.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();

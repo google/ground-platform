@@ -18,10 +18,10 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { googleMapsConfig } from './.google-maps-config';
-import { firebaseConfig } from './.firebase-config';
-import { offlineBaseMapSources } from './.backend-config.json';
-import { Env } from './environment-enums';
+import { googleMapsConfig } from 'environments/.google-maps-config';
+import { firebaseConfig } from 'environments/.firebase-config';
+import { offlineBaseMapSources } from 'environments/.backend-config.json';
+import { Env } from 'environments/environment-enums';
 
 const { projectId } = firebaseConfig;
 

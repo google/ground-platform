@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {
-  deepEqualityTester,
-  formatImmutableCollection,
-} from '../../../testing/helpers';
+import { deepEqualityTester, formatImmutableCollection } from 'testing/helpers';
 import { List } from 'immutable';
-import { Coordinate } from '../models/geometry/coordinate';
-import { MultiPolygon } from '../models/geometry/multi-polygon';
-import { Polygon } from '../models/geometry/polygon';
-import { LinearRing } from './../models/geometry/linear-ring';
-import { Point } from './../models/geometry/point';
-import { toGeometry, GEOMETRY_TYPES } from './geometry-converter';
+import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { MultiPolygon } from 'app/shared/models/geometry/multi-polygon';
+import { Polygon } from 'app/shared/models/geometry/polygon';
+import { LinearRing } from 'app/shared/models/geometry/linear-ring';
+import { Point } from 'app/shared/models/geometry/point';
+import {
+  toGeometry,
+  GEOMETRY_TYPES,
+} from 'app/shared/converters/geometry-converter';
 import { GeoPoint } from 'firebase/firestore';
-import { GeometryType } from '../models/geometry/geometry';
+import { GeometryType } from 'app/shared/models/geometry/geometry';
 
 type Path = Array<[number, number]>;
 
