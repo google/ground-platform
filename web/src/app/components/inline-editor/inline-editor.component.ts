@@ -38,18 +38,22 @@ export class InlineEditorComponent {
 
   constructor() {}
 
-  onFocusOut(event: { target: HTMLInputElement }) {
-    this.focusOut.emit(event.target.value);
+  onFocusOut(event: FocusEvent) {
+    const { target } = event;
+    if (!target || !(target instanceof HTMLInputElement)) return;
+    this.focusOut.emit(target.value);
   }
 
-  handleKeyPress(event: { key: string; target: HTMLInputElement }) {
-    switch (event.key) {
+  handleKeyPress(event: KeyboardEvent) {
+    const { key, target } = event;
+    if (!target || !(target instanceof HTMLInputElement)) return;
+    switch (key) {
       case 'Enter':
-        event.target.blur();
+        target.blur();
         break;
       case 'Escape':
-        event.target.value = this.data;
-        event.target.blur();
+        target.value = this.data;
+        target.blur();
         break;
       default:
       // n/a.

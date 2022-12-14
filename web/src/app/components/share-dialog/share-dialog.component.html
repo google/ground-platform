@@ -48,7 +48,7 @@
     <div class="list-heading">Collaborators</div>
   </div>
 </div>
-<div mat-dialog-content *ngIf="acl?.length > 0">
+<div mat-dialog-content *ngIf="acl && acl.length > 0">
   <table mat-table role="list" fxFill>
     <!-- TODO: Format list, role names, allow edit role, delete. -->
     <tr

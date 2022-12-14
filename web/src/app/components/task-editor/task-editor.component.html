@@ -61,7 +61,7 @@
     >
       <div
         *ngFor="
-          let option of taskOptions.options;
+          let option of taskOptions?.options;
           let i = index;
           trackBy: trackByFn
         "

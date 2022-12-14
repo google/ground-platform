@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Option } from 'app/shared/models/task/option.model';
 import { Submission } from 'app/shared/models/submission/submission.model';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
@@ -114,6 +115,15 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
 
   getTasks(submission: Submission): List<Task> {
     return List(submission.job?.tasks?.valueSeq() || []);
+  }
+
+  getOptions(task: Task, submission: Submission): List<Option> {
+    const result = submission.results?.get(task.id);
+    if (result && result instanceof List<Option>) {
+      return result.value as List<Option>;
+    } else {
+      return List.of();
+    }
   }
 
   onEditSubmissionClick(submission: Submission) {
