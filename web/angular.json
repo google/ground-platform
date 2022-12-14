@@ -42,7 +42,7 @@
                   "with": "src/environments/environment.dev.ts"
                 }
               ]
-            },            
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -81,6 +81,9 @@
           "configurations": {
             "local": {
               "browserTarget": "web:build:local"
+            },
+            "dev": {
+              "browserTarget": "web:build:dev"
             },
             "production": {
               "browserTarget": "web:build:production"
