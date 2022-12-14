@@ -32,7 +32,7 @@
         [disabled]="!surveyService.canManageSurvey()"
         mat-flat-button
         color="primary"
-        (click)="openShareDialog($event)"
+        (click)="openShareDialog()"
       >
         <mat-icon>people_alt</mat-icon>
         <label>Share</label>
@@ -51,7 +51,7 @@
       <ng-template #defaultPhoto>
         <user-avatar
           (click)="openProfileDialog($event)"
-          [displayText]="user.displayName.charAt(0)"
+          [displayText]="user.displayName?.charAt(0)"
         ></user-avatar>
       </ng-template>
     </div>

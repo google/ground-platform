@@ -71,11 +71,11 @@
           <mat-radio-group
             [id]="task.id"
             [formControlName]="task.id"
-            *ngIf="task.multipleChoice.cardinality == cardinality.SELECT_ONE"
+            *ngIf="task.multipleChoice?.cardinality == cardinality.SELECT_ONE"
             [required]="task.required"
           >
             <mat-radio-button
-              *ngFor="let option of task.multipleChoice.options; let i = index"
+              *ngFor="let option of task.multipleChoice?.options; let i = index"
               [value]="option.id"
             >
               {{ option.label }}
@@ -85,12 +85,12 @@
           <!-- Checkbox task -->
           <div
             *ngIf="
-              task.multipleChoice.cardinality == cardinality.SELECT_MULTIPLE
+              task.multipleChoice?.cardinality == cardinality.SELECT_MULTIPLE
             "
           >
             <mat-checkbox
               [formControlName]="option.id"
-              *ngFor="let option of task.multipleChoice.options"
+              *ngFor="let option of task.multipleChoice?.options"
               [value]="option.id"
             >
               {{ option.label }}
