@@ -16,14 +16,14 @@
 
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DataImportService } from './../../services/data-import/data-import.service';
+import { DataImportService } from 'app/services/data-import/data-import.service';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { ImportDialogComponent } from './import-dialog.component';
+import { ImportDialogComponent } from 'app/components/import-dialog/import-dialog.component';
 import { NEVER } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';

@@ -24,8 +24,8 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { ColorPickerComponent } from '../color-picker/color-picker.component';
-import { getPinImageSource } from '../map/ground-pin';
+import { ColorPickerComponent } from 'app/components/color-picker/color-picker.component';
+import { getPinImageSource } from 'app/components/map/ground-pin';
 
 @Component({
   selector: 'ground-edit-style-button',

@@ -23,18 +23,18 @@ import {
 } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR } from '@angular/fire/compat/functions';
-import { AppRoutingModule } from './routing.module';
-import { AppComponent } from './app.component';
+import { AppRoutingModule } from 'app/routing.module';
+import { AppComponent } from 'app/app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MainPageContainerModule } from './components/main-page-container/main-page-container.module';
-import { environment } from '../environments/environment';
-import { SurveyHeaderModule } from './components/survey-header/survey-header.module';
-import { UserProfilePopupModule } from './components/user-profile-popup/user-profile-popup.module';
-import { JobDialogModule } from './components/job-dialog/job-dialog.module';
+import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { environment } from 'environments/environment';
+import { SurveyHeaderModule } from 'app/components/survey-header/survey-header.module';
+import { UserProfilePopupModule } from 'app/components/user-profile-popup/user-profile-popup.module';
+import { JobDialogModule } from 'app/components/job-dialog/job-dialog.module';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { HttpClientModule } from '@angular/common/http';
 import { firebaseui, FirebaseUIModule } from 'firebaseui-angular';
-import { TitleDialogModule } from './components/title-dialog/title-dialog.module';
+import { TitleDialogModule } from 'app/components/title-dialog/title-dialog.module';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 

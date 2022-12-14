@@ -72,7 +72,7 @@
         [taskType]="task.type"
         [cardinality]="task.multipleChoice?.cardinality"
         [multipleChoice]="task.multipleChoice"
-        [taskCount]="tasks?.size"
+        [taskCount]="tasks.size"
         (update)="onTaskUpdate($event, i)"
         (delete)="onTaskDelete(i)"
         fxFlex="2 1 auto"

@@ -38,18 +38,18 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { DialogService } from '../../services/dialog/dialog.service';
-import { TaskType } from '../../shared/models/task/task.model';
-import { Option } from '../../shared/models/task/option.model';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { TaskType } from 'app/shared/models/task/task.model';
+import { Option } from 'app/shared/models/task/option.model';
 import { List } from 'immutable';
 import {
   MultipleChoice,
   Cardinality,
-} from '../../shared/models/task/multiple-choice.model';
+} from 'app/shared/models/task/multiple-choice.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { JobService } from '../../services/job/job.service';
+import { JobService } from 'app/services/job/job.service';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { OptionEditorComponent } from '../option-editor/option-editor.component';
+import { OptionEditorComponent } from 'app/components/option-editor/option-editor.component';
 
 export interface TaskTypeSelectOption {
   icon: string;

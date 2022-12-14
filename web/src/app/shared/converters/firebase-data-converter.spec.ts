@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { FirebaseDataConverter } from '../../shared/converters/firebase-data-converter';
-import { Job } from './../models/job.model';
+import { FirebaseDataConverter } from 'app/shared/converters/firebase-data-converter';
+import { Job } from 'app/shared/models/job.model';
 import { List, Map } from 'immutable';
-import { Option } from '../models/task/option.model';
-import { Task, TaskType } from '../models/task/task.model';
+import { Option } from 'app/shared/models/task/option.model';
+import { Task, TaskType } from 'app/shared/models/task/task.model';
 import {
   MultipleChoice,
   Cardinality,
-} from '../models/task/multiple-choice.model';
+} from 'app/shared/models/task/multiple-choice.model';
 import { Timestamp } from 'firebase/firestore';
 
 class MockFirebaseData {

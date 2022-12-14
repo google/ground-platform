@@ -17,7 +17,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutComponent } from './header-layout.component';
+import { HeaderLayoutComponent } from 'app/components/header-layout/header-layout.component';
 
 @NgModule({
   declarations: [HeaderLayoutComponent],

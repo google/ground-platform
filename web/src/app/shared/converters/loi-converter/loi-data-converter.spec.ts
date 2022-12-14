@@ -20,13 +20,16 @@ import {
   GeoJsonLocationOfInterest,
   LocationOfInterest,
   PointOfInterest,
-} from '../../models/loi.model';
-import { toGeometry, GEOMETRY_TYPES } from '../geometry-converter';
-import { LoiDataConverter } from './loi-data-converter';
+} from 'app/shared/models/loi.model';
+import {
+  toGeometry,
+  GEOMETRY_TYPES,
+} from 'app/shared/converters/geometry-converter';
+import { LoiDataConverter } from 'app/shared/converters/loi-converter/loi-data-converter';
 import { Map } from 'immutable';
 import { GeoPoint } from 'firebase/firestore';
-import { Geometry, GeometryType } from '../../models/geometry/geometry';
-import { Point } from '../../models/geometry/point';
+import { Geometry, GeometryType } from 'app/shared/models/geometry/geometry';
+import { Point } from 'app/shared/models/geometry/point';
 
 const x = -42.121;
 const y = 28.482;

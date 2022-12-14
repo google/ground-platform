@@ -19,7 +19,7 @@ import * as functions from "firebase-functions";
 import * as HttpStatus from "http-status-codes";
 import * as csvParser from "csv-parser";
 import * as Busboy from "busboy";
-import { db } from "./common/context";
+import { db } from "src/common/context";
 import { GeoPoint } from "firebase-admin/firestore";
 
 /**
@@ -42,7 +42,7 @@ export async function importCsvHandler(
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
-  let inserts: any[] = [];
+  const inserts: any[] = [];
 
   // Handle non-file fields in the form. Survey and job must appear
   // before the file for the file handler to work properly.
@@ -131,8 +131,8 @@ async function insertRow(surveyId: string, jobId: string, row: any) {
  * LocationOfInterest for insertion into the data store.
  */
 function csvRowToLocationOfInterest(row: any, jobId: string) {
-  let data: any = { jobId };
-  let properties: { [name: string]: any } = {};
+  const data: any = { jobId };
+  const properties: { [name: string]: any } = {};
   for (const columnName in row) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];

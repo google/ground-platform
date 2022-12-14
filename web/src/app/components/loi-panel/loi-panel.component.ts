@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import { Submission } from './../../shared/models/submission/submission.model';
-import { SubmissionService } from './../../services/submission/submission.service';
-import { LocationOfInterestService } from './../../services/loi/loi.service';
+import { Option } from 'app/shared/models/task/option.model';
+import { Submission } from 'app/shared/models/submission/submission.model';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { switchMap } from 'rxjs/operators';
-import { SurveyService } from './../../services/survey/survey.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { List } from 'immutable';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Job } from '../../shared/models/job.model';
-import { Task, TaskType } from '../../shared/models/task/task.model';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { DataStoreService } from '../../services/data-store/data-store.service';
-import { DialogService } from '../../services/dialog/dialog.service';
+import { Job } from 'app/shared/models/job.model';
+import { Task, TaskType } from 'app/shared/models/task/task.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
 
 // TODO: Rename "LocationOfInterestDetailsComponent".
 @Component({
@@ -114,6 +115,15 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
 
   getTasks(submission: Submission): List<Task> {
     return List(submission.job?.tasks?.valueSeq() || []);
+  }
+
+  getOptions(task: Task, submission: Submission): List<Option> {
+    const result = submission.results?.get(task.id);
+    if (result && result instanceof List<Option>) {
+      return result.value as List<Option>;
+    } else {
+      return List.of();
+    }
   }
 
   onEditSubmissionClick(submission: Submission) {

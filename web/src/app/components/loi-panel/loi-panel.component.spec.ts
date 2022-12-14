@@ -15,26 +15,26 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from './../../services/data-store/data-store.service';
-import { LocationOfInterestPanelComponent } from './loi-panel.component';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LocationOfInterestPanelComponent } from 'app/components/loi-panel/loi-panel.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { of } from 'rxjs';
 import { Map, List } from 'immutable';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
-} from '../../shared/models/loi.model';
-import { Job } from '../../shared/models/job.model';
-import { Submission } from '../../shared/models/submission/submission.model';
-import { Survey } from '../../shared/models/survey.model';
-import { SurveyService } from '../../services/survey/survey.service';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { SubmissionService } from '../../services/submission/submission.service';
+} from 'app/shared/models/loi.model';
+import { Job } from 'app/shared/models/job.model';
+import { Submission } from 'app/shared/models/submission/submission.model';
+import { Survey } from 'app/shared/models/survey.model';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { Point } from '../../shared/models/geometry/point';
-import { Coordinate } from '../../shared/models/geometry/coordinate';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { Point } from 'app/shared/models/geometry/point';
+import { Coordinate } from 'app/shared/models/geometry/coordinate';
 
 const mockSurvey = new Survey(
   'survey001',

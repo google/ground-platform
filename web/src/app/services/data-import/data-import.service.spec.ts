@@ -16,7 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { DataImportService } from './data-import.service';
+import { DataImportService } from 'app/services/data-import/data-import.service';
 import { HttpClient } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 

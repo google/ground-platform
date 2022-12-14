@@ -15,28 +15,28 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from './../../services/data-store/data-store.service';
-import { SubmissionFormComponent } from './submission-form.component';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SubmissionFormComponent } from 'app/components/submission-form/submission-form.component';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
-} from '../../shared/models/loi.model';
+} from 'app/shared/models/loi.model';
 import { NEVER, of } from 'rxjs';
-import { Survey } from '../../shared/models/survey.model';
+import { Survey } from 'app/shared/models/survey.model';
 import { List, Map } from 'immutable';
-import { Submission } from '../../shared/models/submission/submission.model';
-import { Result } from '../../shared/models/submission/result.model';
-import { Job } from '../../shared/models/job.model';
-import { Option } from '../../shared/models/task/option.model';
+import { Submission } from 'app/shared/models/submission/submission.model';
+import { Result } from 'app/shared/models/submission/result.model';
+import { Job } from 'app/shared/models/job.model';
+import { Option } from 'app/shared/models/task/option.model';
 import {
   MultipleChoice,
   Cardinality,
-} from '../../shared/models/task/multiple-choice.model';
-import { TaskType, Task } from '../../shared/models/task/task.model';
-import { AuditInfo } from '../../shared/models/audit-info.model';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
-import { SurveyService } from '../../services/survey/survey.service';
-import { SubmissionService } from '../../services/submission/submission.service';
+} from 'app/shared/models/task/multiple-choice.model';
+import { TaskType, Task } from 'app/shared/models/task/task.model';
+import { AuditInfo } from 'app/shared/models/audit-info.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 import { Router } from '@angular/router';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -47,13 +47,13 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { JobListItemModule } from '../job-list-item/job-list-item.module';
+import { JobListItemModule } from 'app/components/job-list-item/job-list-item.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AuthService } from '../../services/auth/auth.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { By } from '@angular/platform-browser';
-import { Point } from '../../shared/models/geometry/point';
-import { Coordinate } from '../../shared/models/geometry/coordinate';
+import { Point } from 'app/shared/models/geometry/point';
+import { Coordinate } from 'app/shared/models/geometry/coordinate';
 
 class MockModel {
   static task001: Task = new Task(

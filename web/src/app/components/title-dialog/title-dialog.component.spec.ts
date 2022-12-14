@@ -16,10 +16,10 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { TitleDialogComponent } from './title-dialog.component';
+import { TitleDialogComponent } from 'app/components/title-dialog/title-dialog.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { SurveyService } from '../../services/survey/survey.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
