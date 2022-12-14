@@ -12,7 +12,7 @@
     "types": ["node", "jasmine"]
   },
   "angularCompilerOptions": {
-    "strictTemplates": true,
+    "strictTemplates": true
   },  
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
