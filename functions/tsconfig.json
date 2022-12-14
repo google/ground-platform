@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "module": "commonjs",
+    "module": "CommonJS",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
-    "allowJs": true
+    "allowJs": true,
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }    
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src/**/*"
   ]
 }
