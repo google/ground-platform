@@ -16,11 +16,11 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { SurveyService } from './survey.service';
-import { DataStoreService } from '../data-store/data-store.service';
-import { AuthService } from '../auth/auth.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { AuthService } from 'app/services/auth/auth.service';
 import { Subject } from 'rxjs';
-import { User } from '../../shared/models/user.model';
+import { User } from 'app/shared/models/user.model';
 
 describe('SurveyService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};

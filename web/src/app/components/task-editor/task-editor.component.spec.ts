@@ -15,10 +15,10 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { TaskEditorComponent } from './task-editor.component';
+import { TaskEditorComponent } from 'app/components/task-editor/task-editor.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { JobService } from './../../services/job/job.service';
+import { JobService } from 'app/services/job/job.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';

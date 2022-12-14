@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { AuthService } from './../../services/auth/auth.service';
+import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { InlineEditorModule } from './../inline-editor/inline-editor.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { SurveyService } from './../../services/survey/survey.service';
+import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
+import { SurveyHeaderComponent } from 'app/components/survey-header/survey-header.component';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from '../user-profile-popup/user-profile-popup.component';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { NEVER, Subject } from 'rxjs';
-import { User } from '../../shared/models/user.model';
+import { User } from 'app/shared/models/user.model';
 import { Router } from '@angular/router';
 
 describe('SurveyHeaderComponent', () => {

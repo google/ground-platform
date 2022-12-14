@@ -15,13 +15,13 @@
  */
 
 import { Component, OnInit, ElementRef, OnDestroy } from '@angular/core';
-import { AuthService } from './../../services/auth/auth.service';
-import { UserProfilePopupComponent } from '../../components/user-profile-popup/user-profile-popup.component';
+import { AuthService } from 'app/services/auth/auth.service';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { MatDialog } from '@angular/material/dialog';
-import { SurveyService } from '../../services/survey/survey.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 import { Subscription } from 'rxjs';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { ShareDialogComponent } from '../share-dialog/share-dialog.component';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { ShareDialogComponent } from 'app/components/share-dialog/share-dialog.component';
 
 @Component({
   selector: 'ground-survey-header',

@@ -15,7 +15,7 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LocationOfInterestListComponent } from './loi-list.component';
+import { LocationOfInterestListComponent } from 'app/components/loi-list/loi-list.component';
 
 describe('LocationOfInterestListComponent', () => {
   let component: LocationOfInterestListComponent;

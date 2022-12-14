@@ -22,31 +22,31 @@ import {
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Survey } from '../../shared/models/survey.model';
-import { Point } from '../../shared/models/geometry/point';
+import { Survey } from 'app/shared/models/survey.model';
+import { Point } from 'app/shared/models/geometry/point';
 import {
   LocationOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
-} from '../../shared/models/loi.model';
+} from 'app/shared/models/loi.model';
 import {
   DrawingToolsService,
   EditMode,
-} from '../../services/drawing-tools/drawing-tools.service';
-import { SurveyService } from '../../services/survey/survey.service';
-import { LocationOfInterestService } from '../../services/loi/loi.service';
+} from 'app/services/drawing-tools/drawing-tools.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { List, Map as ImmutableMap } from 'immutable';
-import { getPinImageSource } from './ground-pin';
-import { NavigationService } from '../../services/navigation/navigation.service';
+import { getPinImageSource } from 'app/components/map/ground-pin';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 import { GoogleMap } from '@angular/google-maps';
 import { MatDialog } from '@angular/material/dialog';
 import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
-} from '../select-loi-dialog/select-loi-dialog.component';
-import { Coordinate } from '../../shared/models/geometry/coordinate';
+} from 'app/components/select-loi-dialog/select-loi-dialog.component';
+import { Coordinate } from 'app/shared/models/geometry/coordinate';
 
 // To make ESLint happy:
 /*global google*/

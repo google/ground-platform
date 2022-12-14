@@ -15,17 +15,17 @@
  */
 
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { DialogService } from '../../services/dialog/dialog.service';
-import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
-import { Job } from '../../shared/models/job.model';
-import { getPinImageSource } from '../map/ground-pin';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { ImportDialogComponent } from 'app/components/import-dialog/import-dialog.component';
+import { Job } from 'app/shared/models/job.model';
+import { getPinImageSource } from 'app/components/map/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
-import { DataStoreService } from '../../services/data-store/data-store.service';
-import { NavigationService } from '../../services/navigation/navigation.service';
-import { environment } from '../../../environments/environment';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { environment } from 'environments/environment';
 import { Subscription } from 'rxjs';
-import { SurveyService } from '../../services/survey/survey.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'ground-job-list-item',

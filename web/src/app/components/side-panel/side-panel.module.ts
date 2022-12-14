@@ -16,11 +16,11 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { LocationOfInterestPanelModule } from '../loi-panel/loi-panel.module';
-import { JobListModule } from '../job-list/job-list.module';
-import { SubmissionFormModule } from '../submission-form/submission-form.module';
-import { LocationOfInterestListModule } from '../loi-list/loi-list.module';
+import { SidePanelComponent } from 'app/components/side-panel/side-panel.component';
+import { LocationOfInterestPanelModule } from 'app/components/loi-panel/loi-panel.module';
+import { JobListModule } from 'app/components/job-list/job-list.module';
+import { SubmissionFormModule } from 'app/components/submission-form/submission-form.module';
+import { LocationOfInterestListModule } from 'app/components/loi-list/loi-list.module';
 
 @NgModule({
   imports: [

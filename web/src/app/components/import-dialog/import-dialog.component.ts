@@ -15,10 +15,10 @@
  */
 
 import { Component, Inject, NgZone } from '@angular/core';
-import { DataImportService } from './../../services/data-import/data-import.service';
+import { DataImportService } from 'app/services/data-import/data-import.service';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { NotificationService } from '../../services/notification/notification.service';
+import { NotificationService } from 'app/services/notification/notification.service';
 
 @Component({
   selector: 'ground-import-dialog',

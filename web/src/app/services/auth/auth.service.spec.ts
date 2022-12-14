@@ -19,8 +19,8 @@ import { NEVER, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { DataStoreService } from '../data-store/data-store.service';
-import { AuthService } from './auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { AuthService } from 'app/services/auth/auth.service';
 
 describe('AuthService', () => {
   beforeEach(() => {
