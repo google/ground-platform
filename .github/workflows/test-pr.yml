@@ -17,14 +17,14 @@
 # The first time the Docker image is created, the total build time can exceed
 # the 10 min default. Increase the max. build time to 20 min to prevent
 # timeouts.
-name: Pull request checks
+name: Run tests
 on:
   pull_request:
     paths:
       - "web/**"
 jobs:
   test-coverage:
-    name: Test web
+    name: web
     runs-on: ubuntu-latest
     defaults:
       run:
