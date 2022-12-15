@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ElementRef, OnDestroy } from '@angular/core';
-import { AuthService } from 'app/services/auth/auth.service';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
+import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { Subscription } from 'rxjs';
@@ -28,16 +26,16 @@ import { ShareDialogComponent } from 'app/components/share-dialog/share-dialog.c
   templateUrl: './survey-header.component.html',
   styleUrls: ['./survey-header.component.scss'],
 })
-export class SurveyHeaderComponent implements OnInit, OnDestroy {
+export class SurveyHeaderComponent implements OnDestroy {
   title: string;
   surveyId!: string;
 
   subscription: Subscription = new Subscription();
   constructor(
-    public auth: AuthService,
     public navigationService: NavigationService,
     public surveyService: SurveyService,
     private dialog: MatDialog
+
   ) {
     this.title = '';
     const activeSurvey$ = this.surveyService.getActiveSurvey$();
@@ -47,15 +45,6 @@ export class SurveyHeaderComponent implements OnInit, OnDestroy {
         this.surveyId = survey.id;
       })
     );
-  }
-
-  ngOnInit() {}
-
-  openProfileDialog(evt: MouseEvent): void {
-    const target = new ElementRef(evt.currentTarget);
-    this.dialog.open(UserProfilePopupComponent, {
-      data: { trigger: target },
-    });
   }
 
   /**

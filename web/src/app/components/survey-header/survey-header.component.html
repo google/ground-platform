@@ -16,44 +16,16 @@
 <ground-header-layout>
   <span left>
     <span class="header-divider"></span>
-    <inline-editor
-      [data]="title"
-      [placeholder]="'Untitled survey'"
-      (focusOut)="updateSurveyTitle($event)"
-      class="inline-editor"
-    ></inline-editor>
+    <inline-editor [data]="title" [placeholder]="'Untitled survey'" (focusOut)="updateSurveyTitle($event)"
+      class="inline-editor"></inline-editor>
   </span>
   <div right>
-    <div
-      *ngIf="auth.getUser$() | async as user"
-      class="rhs-widgets"
-    >
-      <button
-        [disabled]="!surveyService.canManageSurvey()"
-        mat-flat-button
-        color="primary"
-        (click)="openShareDialog()"
-      >
-        <mat-icon>people_alt</mat-icon>
-        <label>Share</label>
-      </button>
-      <button mat-icon-button aria-label="More survey settings">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-      <button mat-icon-button>
-        <img
-          *ngIf="user.photoURL; else defaultPhoto"
-          src="{{ user.photoURL }}=s64"
-          class="user-thumb"
-          (click)="openProfileDialog($event)"
-        />
-      </button>
-      <ng-template #defaultPhoto>
-        <user-avatar
-          (click)="openProfileDialog($event)"
-          [displayText]="user.displayName?.charAt(0)"
-        ></user-avatar>
-      </ng-template>
-    </div>
+    <button [disabled]="!surveyService.canManageSurvey()" mat-flat-button color="primary" (click)="openShareDialog()">
+      <mat-icon>people_alt</mat-icon>
+      <label>Share</label>
+    </button>
+    <button mat-icon-button aria-label="More survey settings">
+      <mat-icon>more_vert</mat-icon>
+    </button>
   </div>
 </ground-header-layout>

@@ -18,10 +18,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { HeaderLayoutComponent } from 'app/components/header-layout/header-layout.component';
+import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [HeaderLayoutComponent],
-  imports: [CommonModule, FlexLayoutModule],
+  imports: [CommonModule, FlexLayoutModule, MatButtonModule, UserAvatarModule],
   exports: [HeaderLayoutComponent],
 })
-export class HeaderLayoutModule {}
+export class HeaderLayoutModule { }

@@ -14,18 +14,30 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { AuthService } from 'app/services/auth/auth.service';
+import { Component, ElementRef } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { NavigationService } from 'app/services/navigation/navigation.service';
+import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 
 @Component({
   selector: 'ground-header-layout',
   templateUrl: './header-layout.component.html',
   styleUrls: ['./header-layout.component.scss'],
 })
-export class HeaderLayoutComponent implements OnInit {
-  constructor(public navigationService: NavigationService) {}
+export class HeaderLayoutComponent {
+  constructor(
+    public auth: AuthService,
+    public navigationService: NavigationService,
+    private dialog: MatDialog
+  ) { }
 
-  ngOnInit(): void {}
+  openProfileDialog(evt: MouseEvent): void {
+    const target = new ElementRef(evt.currentTarget);
+    this.dialog.open(UserProfilePopupComponent, {
+      data: { trigger: target },
+    });
+  }
 
   onSurveysButtonClick(): void {
     this.navigationService.navigateToSurveyList();

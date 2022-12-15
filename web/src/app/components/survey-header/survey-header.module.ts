@@ -22,7 +22,6 @@ import { SurveyHeaderComponent } from 'app/components/survey-header/survey-heade
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
 
 @NgModule({
@@ -34,9 +33,8 @@ import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.m
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    UserAvatarModule,
     InlineEditorModule,
   ],
   exports: [SurveyHeaderComponent],
 })
-export class SurveyHeaderModule {}
+export class SurveyHeaderModule { }
