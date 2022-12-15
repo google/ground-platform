@@ -146,7 +146,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  async onMapClick(event: google.maps.Data.MouseEvent) {
+  async onMapClick(
+    event: google.maps.MapMouseEvent | google.maps.IconMouseEvent
+  ) {
     if (this.disableMapClicks) {
       return;
     }
