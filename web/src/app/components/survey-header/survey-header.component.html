@@ -25,7 +25,7 @@
   </span>
   <div right>
     <div
-      *ngIf="auth.getUser$() | async as user; else login"
+      *ngIf="auth.getUser$() | async as user"
       class="rhs-widgets"
     >
       <button
@@ -55,11 +55,5 @@
         ></user-avatar>
       </ng-template>
     </div>
-    <ng-template #login>
-      <!-- TODO: Hide sign in button and show once page is initialized. -->
-      <button mat-flat-button color="primary" (click)="auth.signIn()">
-        Sign in
-      </button>
-    </ng-template>
   </div>
 </ground-header-layout>
