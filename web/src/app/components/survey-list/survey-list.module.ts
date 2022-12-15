@@ -24,7 +24,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { SurveyHeaderModule } from 'app/components/survey-header/survey-header.module';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 
@@ -37,7 +36,6 @@ import { MatCardModule } from '@angular/material/card';
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    SurveyHeaderModule,
     UserAvatarModule,
     MatCardModule,
     MatGridListModule,
