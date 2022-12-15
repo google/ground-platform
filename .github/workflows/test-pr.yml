@@ -17,23 +17,24 @@
 # The first time the Docker image is created, the total build time can exceed
 # the 10 min default. Increase the max. build time to 20 min to prevent
 # timeouts.
-name: karma-test-and-coverage-pr
+name: Pull request checks
 on:
   pull_request:
     paths:
       - "web/**"
 jobs:
   test-coverage:
+    name: Test web
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./web
 
     steps:
-      - name: Checkout Code
+      - name: Check out code
         uses: actions/checkout@v1
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: "16"
@@ -47,7 +48,7 @@ jobs:
       - name: Run Jasmine tests
         run: npm run test-with-coverage
 
-      - name: Upload coverage to Codecov
+      - name: Update test coverage analysis
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
