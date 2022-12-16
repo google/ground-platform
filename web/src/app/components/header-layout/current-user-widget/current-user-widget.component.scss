@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-@Component({
-  selector: 'ground-header-layout',
-  templateUrl: './header-layout.component.html',
-  styleUrls: ['./header-layout.component.scss'],
-})
-export class HeaderLayoutComponent {
-  constructor(public navigationService: NavigationService) {}
-
-  onSurveysButtonClick(): void {
-    this.navigationService.navigateToSurveyList();
-  }
-}
+ @import 'variables';
+ 
+ .user-thumb {
+   display: block;
+   border-radius: 50%;
+   margin-right: 8px;
+ }
+ 

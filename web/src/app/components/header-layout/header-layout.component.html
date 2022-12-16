@@ -22,15 +22,5 @@
   <div>
     <ng-content select="[right]"></ng-content>
   </div>
-  <ng-template *ngIf="auth.getUser$() | async as user">
-    <div *ngIf="user.isAuthenticated">
-      <button mat-icon-button>
-        <img *ngIf="user.photoURL; else showDefaultPhoto" referrerpolicy="no-referrer" src="{{ user.photoURL }}=s64"
-          class="user-thumb" (click)="openProfileDialog($event)" />
-      </button>
-      <ng-template #showDefaultPhoto>
-        <user-avatar (click)="openProfileDialog($event)" [displayText]="user.displayName?.charAt(0)"></user-avatar>
-      </ng-template>
-    </div>
-  </ng-template>
+  <ground-current-user-widget></ground-current-user-widget>
 </div>

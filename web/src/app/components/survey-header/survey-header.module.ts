@@ -37,4 +37,4 @@ import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.m
   ],
   exports: [SurveyHeaderComponent],
 })
-export class SurveyHeaderModule { }
+export class SurveyHeaderModule {}

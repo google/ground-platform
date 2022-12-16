@@ -20,10 +20,11 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { HeaderLayoutComponent } from 'app/components/header-layout/header-layout.component';
 import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 import { MatButtonModule } from '@angular/material/button';
+import { CurrentUserWidgetComponent } from 'app/components/header-layout/current-user-widget/current-user-widget.component';
 
 @NgModule({
-  declarations: [HeaderLayoutComponent],
+  declarations: [HeaderLayoutComponent, CurrentUserWidgetComponent],
   imports: [CommonModule, FlexLayoutModule, MatButtonModule, UserAvatarModule],
   exports: [HeaderLayoutComponent],
 })
-export class HeaderLayoutModule { }
+export class HeaderLayoutModule {}
