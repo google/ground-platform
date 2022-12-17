@@ -17,10 +17,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutComponent } from 'app/components/header-layout/header-layout.component';
+import { HeaderLayoutComponent } from 'app/shared/components/header-layout/header-layout.component';
 import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 import { MatButtonModule } from '@angular/material/button';
-import { CurrentUserWidgetComponent } from 'app/components/header-layout/current-user-widget/current-user-widget.component';
+import { CurrentUserWidgetComponent } from 'app/shared/components/header-layout/current-user-widget/current-user-widget.component';
 
 @NgModule({
   declarations: [HeaderLayoutComponent, CurrentUserWidgetComponent],
