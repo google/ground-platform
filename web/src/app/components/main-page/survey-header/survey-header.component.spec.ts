@@ -19,24 +19,19 @@ import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.m
 import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { NEVER } from 'rxjs';
 import { Router } from '@angular/router';
 
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
   let fixture: ComponentFixture<SurveyHeaderComponent>;
-  const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [InlineEditorModule, MatIconModule, MatDialogModule],
       declarations: [SurveyHeaderComponent],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
         {
           provide: SurveyService,
           useValue: {
