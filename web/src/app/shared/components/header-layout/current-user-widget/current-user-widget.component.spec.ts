@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
+import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CurrentUserWidgetComponent } from 'app/shared/components/header-layout/current-user-widget/current-user-widget.component';
+import { Subject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { User } from 'app/shared/models/user.model';
 
 describe('CurrentUserWidgetComponent', () => {
   let component: CurrentUserWidgetComponent;
   let fixture: ComponentFixture<CurrentUserWidgetComponent>;
+  const user$ = new Subject<User | null>();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CurrentUserWidgetComponent ]
-    })
-    .compileComponents();
+      providers: [
+        { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
+        { provide: MatDialog, useValue: {} },
+      ],
+      declarations: [CurrentUserWidgetComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CurrentUserWidgetComponent);
     component = fixture.componentInstance;

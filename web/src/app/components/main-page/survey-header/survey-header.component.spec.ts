@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
 import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
@@ -23,22 +22,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
-import { NEVER, Subject } from 'rxjs';
-import { User } from 'app/shared/models/user.model';
+import { NEVER } from 'rxjs';
 import { Router } from '@angular/router';
 
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
   let fixture: ComponentFixture<SurveyHeaderComponent>;
   const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
-  const user$ = new Subject<User | null>();
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [InlineEditorModule, MatIconModule, MatDialogModule],
       declarations: [SurveyHeaderComponent],
       providers: [
-        { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
         {
@@ -46,6 +42,7 @@ describe('SurveyHeaderComponent', () => {
           useValue: {
             getActiveSurvey$: () => NEVER,
             getCurrentSurvey: () => {},
+            canManageSurvey: () => {},
           },
         },
         { provide: Router, useValue: {} },
