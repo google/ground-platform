@@ -17,7 +17,7 @@
 import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { SurveyHeaderComponent } from 'app/components/survey-header/survey-header.component';
+import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
