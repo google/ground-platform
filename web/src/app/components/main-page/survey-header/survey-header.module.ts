@@ -18,7 +18,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { HeaderLayoutModule } from 'app/components/header-layout/header-layout.module';
-import { SurveyHeaderComponent } from 'app/components/survey-header/survey-header.component';
+import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';

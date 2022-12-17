@@ -28,7 +28,6 @@ import { AppComponent } from 'app/app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
 import { environment } from 'environments/environment';
-import { SurveyHeaderModule } from 'app/components/survey-header/survey-header.module';
 import { UserProfilePopupModule } from 'app/components/user-profile-popup/user-profile-popup.module';
 import { JobDialogModule } from 'app/components/job-dialog/job-dialog.module';
 import { GoogleAuthProvider } from 'firebase/auth';
@@ -84,7 +83,6 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     HttpClientModule,
     MainPageContainerModule,
-    SurveyHeaderModule,
     UserProfilePopupModule,
     JobDialogModule,
     TitleDialogModule,
