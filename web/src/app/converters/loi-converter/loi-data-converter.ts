@@ -23,10 +23,7 @@ import {
 import { Map } from 'immutable';
 import { GeoPoint } from 'firebase/firestore';
 import { Geometry } from 'app/models/geometry/geometry';
-import {
-  toGeometry,
-  GEOMETRY_TYPES,
-} from 'app/converters/geometry-converter';
+import { toGeometry, GEOMETRY_TYPES } from 'app/converters/geometry-converter';
 import { Point } from 'app/models/geometry/point';
 
 /**
