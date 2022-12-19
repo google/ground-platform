@@ -35,7 +35,6 @@ export class SurveyHeaderComponent implements OnDestroy {
     public navigationService: NavigationService,
     public surveyService: SurveyService,
     private dialog: MatDialog
-
   ) {
     this.title = '';
     const activeSurvey$ = this.surveyService.getActiveSurvey$();
