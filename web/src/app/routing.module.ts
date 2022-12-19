@@ -21,6 +21,9 @@ import { AuthGuard } from 'app/services/auth/auth.guard';
 import { SignInPageComponent } from 'app/components/sign-in-page/sign-in-page.component';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyListComponent } from 'app/components/survey-list/survey-list.component';
+import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { SignInPageModule } from 'app/components/sign-in-page/sign-in-page.module';
+import { SurveyListModule } from 'app/components/survey-list/survey-list.module';
 
 const routes: Routes = [
   {
@@ -45,6 +48,11 @@ const config = RouterModule.forRoot(routes, {
 
 @NgModule({
   imports: [config],
-  exports: [RouterModule],
+  exports: [
+    MainPageContainerModule,
+    RouterModule,
+    SignInPageModule,
+    SurveyListModule,
+  ],
 })
 export class AppRoutingModule {}
