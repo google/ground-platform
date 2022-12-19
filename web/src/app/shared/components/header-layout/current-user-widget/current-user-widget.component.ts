@@ -17,7 +17,7 @@
 import { AuthService } from 'app/services/auth/auth.service';
 import { Component, ElementRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
+import { UserProfilePopupComponent } from 'app/shared/components/header-layout/current-user-widget/user-profile-popup/user-profile-popup.component';
 
 @Component({
   selector: 'ground-current-user-widget',
