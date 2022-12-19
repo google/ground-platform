@@ -16,7 +16,7 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserAvatarComponent } from 'app/components/user-avatar/user-avatar.component';
+import { UserAvatarComponent } from 'app/shared/components/user-avatar/user-avatar.component';
 
 @NgModule({
   declarations: [UserAvatarComponent],
