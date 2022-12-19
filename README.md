@@ -1,4 +1,4 @@
-# Ground Platform
+# Ground
 
 [![Open Source Helpers](https://www.codetriage.com/google/ground-platform/badges/users.svg)](https://www.codetriage.com/google/ground-platform)
 
