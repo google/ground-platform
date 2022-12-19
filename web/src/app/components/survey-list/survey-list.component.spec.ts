@@ -17,7 +17,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Component } from '@angular/core';
 import { NEVER, of } from 'rxjs';
 import { AuthService } from 'app/services/auth/auth.service';
@@ -25,7 +25,6 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { Map } from 'immutable';
 import { SurveyListComponent } from 'app/components/survey-list/survey-list.component';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
@@ -42,7 +41,6 @@ describe('SurveyListComponent', () => {
   let component: SurveyListComponent;
   let fixture: ComponentFixture<SurveyListComponent>;
   const dialog: Partial<MatDialog> = {};
-  const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
 
   const mockSurvey1 = new Survey(
     'survey001',
@@ -99,7 +97,6 @@ describe('SurveyListComponent', () => {
       declarations: [SurveyListComponent, HeaderLayoutComponent],
       providers: [
         { provide: MatDialog, useValue: dialog },
-        { provide: MatDialogRef, useValue: dialogRef },
         { provide: SurveyService, useValue: surveyServiceSpy },
         { provide: NavigationService, useValue: navigationService },
         { provide: AngularFirestore, useValue: {} },
