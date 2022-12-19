@@ -17,7 +17,7 @@
 import { AuthService } from 'app/services/auth/auth.service';
 import { Component, ElementRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from 'app/components/header/current-user-widget/user-profile-popup/user-profile-popup.component';
+import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
 
 @Component({
   selector: 'ground-current-user-widget',
@@ -29,7 +29,7 @@ export class CurrentUserWidgetComponent {
 
   openProfileDialog(evt: MouseEvent): void {
     const target = new ElementRef(evt.currentTarget);
-    this.dialog.open(UserProfilePopupComponent, {
+    this.dialog.open(AccountPopupComponent, {
       data: { trigger: target },
     });
   }

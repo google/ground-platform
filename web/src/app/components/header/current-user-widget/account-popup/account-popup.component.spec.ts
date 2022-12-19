@@ -16,21 +16,21 @@
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { UserProfilePopupComponent } from 'app/components/header/current-user-widget/user-profile-popup/user-profile-popup.component';
+import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 
-describe('UserProfilePopupComponent', () => {
-  let component: UserProfilePopupComponent;
-  let fixture: ComponentFixture<UserProfilePopupComponent>;
-  const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
+describe('AccountPopupComponent', () => {
+  let component: AccountPopupComponent;
+  let fixture: ComponentFixture<AccountPopupComponent>;
+  const dialogRef: Partial<MatDialogRef<AccountPopupComponent>> = {};
 
   beforeEach(waitForAsync(() => {
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
-      declarations: [UserProfilePopupComponent],
+      declarations: [AccountPopupComponent],
       imports: [MatDialogModule],
       providers: [
         { provide: AuthService, useValue: { getUser$: () => of() } },
@@ -42,7 +42,7 @@ describe('UserProfilePopupComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(UserProfilePopupComponent);
+    fixture = TestBed.createComponent(AccountPopupComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -18,11 +18,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from 'app/components/header/current-user-widget/user-profile-popup/user-profile-popup.component';
+import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
 import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 
 @NgModule({
-  declarations: [UserProfilePopupComponent],
+  declarations: [AccountPopupComponent],
   imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
 })
-export class UserProfilePopupModule {}
+export class AccountPopupModule {}

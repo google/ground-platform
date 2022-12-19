@@ -20,16 +20,16 @@ import { MatDialogConfig } from '@angular/material/dialog';
 import { AuthService } from 'app/services/auth/auth.service';
 
 @Component({
-  selector: 'ground-user-profile-popup',
-  templateUrl: './user-profile-popup.component.html',
-  styleUrls: ['./user-profile-popup.component.scss'],
+  selector: 'ground-account-popup',
+  templateUrl: './account-popup.component.html',
+  styleUrls: ['./account-popup.component.scss'],
 })
-export class UserProfilePopupComponent implements OnInit {
-  private readonly matDialogRef: MatDialogRef<UserProfilePopupComponent>;
+export class AccountPopupComponent implements OnInit {
+  private readonly matDialogRef: MatDialogRef<AccountPopupComponent>;
   private readonly triggerElementRef: ElementRef;
 
   constructor(
-    matDialogRef: MatDialogRef<UserProfilePopupComponent>,
+    matDialogRef: MatDialogRef<AccountPopupComponent>,
     public auth: AuthService,
     @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }
   ) {
