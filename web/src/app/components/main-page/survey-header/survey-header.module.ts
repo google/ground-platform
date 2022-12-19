@@ -23,6 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
+import { ShareDialogModule } from 'app/components/share-dialog/share-dialog.module';
 
 @NgModule({
   declarations: [SurveyHeaderComponent],
@@ -34,6 +35,7 @@ import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.m
     MatIconModule,
     MatDialogModule,
     InlineEditorModule,
+    ShareDialogModule,
   ],
   exports: [SurveyHeaderComponent],
 })
