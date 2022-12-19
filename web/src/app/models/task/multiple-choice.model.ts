@@ -14,9 +14,34 @@
  * limitations under the License.
  */
 
+import { Option } from 'app/models/task/option.model';
 import { List } from 'immutable';
-import { Option } from 'app/shared/models/task/option.model';
 
-export class Result {
-  constructor(readonly value: number | string | List<Option> | Date) {}
+/**
+ *
+ * It converts in JavaScript to:
+ * {
+ *   1: "SELECT_ONE",
+ *   3: "SELECT_MULTIPLE",
+ *   SELECT_ONE: 1,
+ *   SELECT_MULTIPLE: 2,
+ * }
+ *
+ * So to convert string to enum use:
+ *  var value = Cardinality["SELECT_ONE"]
+ * Because then:
+ *  value == Cardinality.SELECT_ONE
+ */
+export enum Cardinality {
+  SELECT_ONE = 1,
+  SELECT_MULTIPLE = 2,
+}
+
+export class MultipleChoice {
+  constructor(
+    readonly cardinality: Cardinality,
+    readonly options: List<Option>
+  ) {
+    this.options = this.options.sortBy(option => option.index);
+  }
 }

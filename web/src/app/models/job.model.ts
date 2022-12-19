@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import { User } from 'app/shared/models/user.model';
-import { FieldValue } from 'firebase/firestore';
+import { Task } from 'app/models/task/task.model';
+import { Map } from 'immutable';
 
-export class AuditInfo {
+export class Job {
   constructor(
-    readonly user: User,
-    readonly clientTime: Date,
-    readonly serverTime: Date | FieldValue
+    readonly id: string,
+    readonly index: number,
+    readonly color?: string,
+    readonly name?: string,
+    readonly tasks?: Map<string, Task>,
+    readonly dataCollectorsCanAdd?: string[]
   ) {}
+
+  withIndex(index: number): Job {
+    return { ...this, index };
+  }
 }

@@ -16,17 +16,17 @@
 
 import { deepEqualityTester, formatImmutableCollection } from 'testing/helpers';
 import { List } from 'immutable';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
-import { MultiPolygon } from 'app/shared/models/geometry/multi-polygon';
-import { Polygon } from 'app/shared/models/geometry/polygon';
-import { LinearRing } from 'app/shared/models/geometry/linear-ring';
-import { Point } from 'app/shared/models/geometry/point';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import { Polygon } from 'app/models/geometry/polygon';
+import { LinearRing } from 'app/models/geometry/linear-ring';
+import { Point } from 'app/models/geometry/point';
 import {
   toGeometry,
   GEOMETRY_TYPES,
-} from 'app/shared/converters/geometry-converter';
+} from 'app/converters/geometry-converter';
 import { GeoPoint } from 'firebase/firestore';
-import { GeometryType } from 'app/shared/models/geometry/geometry';
+import { GeometryType } from 'app/models/geometry/geometry';
 
 type Path = Array<[number, number]>;
 

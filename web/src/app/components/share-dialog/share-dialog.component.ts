@@ -24,9 +24,9 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { Role } from 'app/shared/models/role.model';
+import { Role } from 'app/models/role.model';
 import { Subscription } from 'rxjs';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import { MatSelectChange } from '@angular/material/select';
 import { take } from 'rxjs/operators';
 import { Map } from 'immutable';

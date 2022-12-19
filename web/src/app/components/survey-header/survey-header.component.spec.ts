@@ -24,7 +24,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { NEVER, Subject } from 'rxjs';
-import { User } from 'app/shared/models/user.model';
+import { User } from 'app/models/user.model';
 import { Router } from '@angular/router';
 
 describe('SurveyHeaderComponent', () => {

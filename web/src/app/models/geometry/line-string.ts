@@ -15,8 +15,8 @@
  */
 
 import { hash, is, List } from 'immutable';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
-import { Geometry, GeometryType } from 'app/shared/models/geometry/geometry';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Geometry, GeometryType } from 'app/models/geometry/geometry';
 
 /**
  * Models an OGC-style LineString. A LineString consists of a sequence of two

@@ -21,7 +21,7 @@
             "aot": true,
             "assets": ["src/favicon.ico", "src/assets"],
             "stylePreprocessorOptions": {
-              "includePaths": ["src/app/shared/styles"]
+              "includePaths": ["src/app/styles"]
             },
             "styles": ["src/custom-theme.scss", "src/styles.scss"],
             "scripts": []
@@ -111,7 +111,7 @@
             "karmaConfig": "karma.conf.js",
             "assets": ["src/favicon.ico", "src/assets"],
             "stylePreprocessorOptions": {
-              "includePaths": ["src/app/shared/styles"]
+              "includePaths": ["src/app/styles"]
             },
             "styles": ["src/custom-theme.scss", "src/styles.scss"],
             "scripts": [],

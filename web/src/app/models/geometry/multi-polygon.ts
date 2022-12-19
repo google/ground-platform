@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Polygon } from 'app/shared/models/geometry/polygon';
-import { Geometry, GeometryType } from 'app/shared/models/geometry/geometry';
+import { Polygon } from 'app/models/geometry/polygon';
+import { Geometry, GeometryType } from 'app/models/geometry/geometry';
 import { hash, is, List } from 'immutable';
 
 /**

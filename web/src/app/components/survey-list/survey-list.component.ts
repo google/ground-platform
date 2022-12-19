@@ -20,7 +20,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { List } from 'immutable';
 

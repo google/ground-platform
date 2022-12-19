@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
-import { GeometryType } from 'app/shared/models/geometry/geometry';
-import { LineString } from 'app/shared/models/geometry/line-string';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { GeometryType } from 'app/models/geometry/geometry';
+import { LineString } from 'app/models/geometry/line-string';
 import { List } from 'immutable';
 
 /**

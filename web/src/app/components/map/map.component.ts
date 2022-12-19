@@ -22,14 +22,14 @@ import {
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Survey } from 'app/shared/models/survey.model';
-import { Point } from 'app/shared/models/geometry/point';
+import { Survey } from 'app/models/survey.model';
+import { Point } from 'app/models/geometry/point';
 import {
   LocationOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
-} from 'app/shared/models/loi.model';
+} from 'app/models/loi.model';
 import {
   DrawingToolsService,
   EditMode,
@@ -46,7 +46,7 @@ import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
 } from 'app/components/select-loi-dialog/select-loi-dialog.component';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { Coordinate } from 'app/models/geometry/coordinate';
 
 // To make ESLint happy:
 /*global google*/

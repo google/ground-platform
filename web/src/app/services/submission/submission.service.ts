@@ -22,19 +22,19 @@ import {
   Subscription,
   BehaviorSubject,
 } from 'rxjs';
-import { LocationOfInterest } from 'app/shared/models/loi.model';
-import { Survey } from 'app/shared/models/survey.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Survey } from 'app/models/survey.model';
 import { Injectable } from '@angular/core';
-import { Submission } from 'app/shared/models/submission/submission.model';
+import { Submission } from 'app/models/submission/submission.model';
 import { List, Map } from 'immutable';
 import { switchMap } from 'rxjs/operators';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { LoadingState } from 'app/services/loading-state.model';
-import { AuditInfo } from 'app/shared/models/audit-info.model';
+import { AuditInfo } from 'app/models/audit-info.model';
 import { AuthService } from 'app/services/auth/auth.service';
-import { User } from 'app/shared/models/user.model';
-import { Result } from 'app/shared/models/submission/result.model';
+import { User } from 'app/models/user.model';
+import { Result } from 'app/models/submission/result.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Injectable({

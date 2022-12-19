@@ -19,15 +19,15 @@ import {
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
-} from 'app/shared/models/loi.model';
+} from 'app/models/loi.model';
 import { Map } from 'immutable';
 import { GeoPoint } from 'firebase/firestore';
-import { Geometry } from 'app/shared/models/geometry/geometry';
+import { Geometry } from 'app/models/geometry/geometry';
 import {
   toGeometry,
   GEOMETRY_TYPES,
-} from 'app/shared/converters/geometry-converter';
-import { Point } from 'app/shared/models/geometry/point';
+} from 'app/converters/geometry-converter';
+import { Point } from 'app/models/geometry/point';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an

@@ -1,4 +1,4 @@
-import { Role } from 'app/shared/models/role.model';
+import { Role } from 'app/models/role.model';
 
 export class AclEntry {
   private static readonly MANAGER_ROLES = [Role.SURVEY_ORGANIZER, Role.OWNER];

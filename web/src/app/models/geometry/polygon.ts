@@ -15,8 +15,8 @@
  */
 
 import { hash, is, List } from 'immutable';
-import { Geometry, GeometryType } from 'app/shared/models/geometry/geometry';
-import { LinearRing } from 'app/shared/models/geometry/linear-ring';
+import { Geometry, GeometryType } from 'app/models/geometry/geometry';
+import { LinearRing } from 'app/models/geometry/linear-ring';
 
 /**
  * Represents a polygon with linear edges, which may include holes. The outer

@@ -39,13 +39,13 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { DialogService } from 'app/services/dialog/dialog.service';
-import { TaskType } from 'app/shared/models/task/task.model';
-import { Option } from 'app/shared/models/task/option.model';
+import { TaskType } from 'app/models/task/task.model';
+import { Option } from 'app/models/task/option.model';
 import { List } from 'immutable';
 import {
   MultipleChoice,
   Cardinality,
-} from 'app/shared/models/task/multiple-choice.model';
+} from 'app/models/task/multiple-choice.model';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { JobService } from 'app/services/job/job.service';
 import { firstValueFrom, Subscription } from 'rxjs';
