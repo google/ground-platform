@@ -17,7 +17,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutModule } from 'app/shared/components/header-layout/header-layout.module';
+import { HeaderModule } from 'app/shared/components/header/header.module';
 import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +29,7 @@ import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.m
   imports: [
     CommonModule,
     FlexLayoutModule,
-    HeaderLayoutModule,
+    HeaderModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,

@@ -16,7 +16,7 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { HeaderLayoutModule } from 'app/shared/components/header-layout/header-layout.module';
+import { HeaderModule } from 'app/shared/components/header/header.module';
 import { FirebaseUIModule } from 'firebaseui-angular';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,7 +31,7 @@ import { SignInPageComponent } from 'app/components/sign-in-page/sign-in-page.co
     BrowserModule,
     CommonModule,
     FirebaseUIModule,
-    HeaderLayoutModule,
+    HeaderModule,
     FlexLayoutModule,
     MatButtonModule,
     MatCardModule,

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CurrentUserWidgetModule } from 'app/shared/components/header-layout/current-user-widget/current-user-widget.module';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutComponent } from 'app/shared/components/header-layout/header-layout.component';
-
-@NgModule({
-  declarations: [HeaderLayoutComponent],
-  imports: [CommonModule, CurrentUserWidgetModule, FlexLayoutModule],
-  exports: [HeaderLayoutComponent],
+import { Component } from '@angular/core';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+@Component({
+  selector: 'ground-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss'],
 })
-export class HeaderLayoutModule {}
+export class HeaderComponent {
+  constructor(public navigationService: NavigationService) {}
+
+  onSurveysButtonClick(): void {
+    this.navigationService.navigateToSurveyList();
+  }
+}

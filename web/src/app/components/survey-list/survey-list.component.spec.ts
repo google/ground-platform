@@ -34,8 +34,8 @@ import { Job } from 'app/shared/models/job.model';
 import { AclEntry } from 'app/shared/models/acl-entry.model';
 import { Role } from 'app/shared/models/role.model';
 
-@Component({ selector: 'ground-header-layout', template: '' })
-class HeaderLayoutComponent {}
+@Component({ selector: 'ground-header', template: '' })
+class HeaderComponent {}
 
 describe('SurveyListComponent', () => {
   let component: SurveyListComponent;
@@ -94,7 +94,7 @@ describe('SurveyListComponent', () => {
         MatButtonModule,
         MatIconModule,
       ],
-      declarations: [SurveyListComponent, HeaderLayoutComponent],
+      declarations: [SurveyListComponent, HeaderComponent],
       providers: [
         { provide: MatDialog, useValue: dialog },
         { provide: SurveyService, useValue: surveyServiceSpy },

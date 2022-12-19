@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
+import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { HeaderLayoutComponent } from 'app/shared/components/header-layout/header-layout.component';
+import { CurrentUserWidgetComponent } from 'app/shared/components/header/current-user-widget/current-user-widget.component';
+import { Subject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { User } from 'app/shared/models/user.model';
 
-describe('HeaderLayoutComponent', () => {
-  let component: HeaderLayoutComponent;
-  let fixture: ComponentFixture<HeaderLayoutComponent>;
+describe('CurrentUserWidgetComponent', () => {
+  let component: CurrentUserWidgetComponent;
+  let fixture: ComponentFixture<CurrentUserWidgetComponent>;
+  const user$ = new Subject<User | null>();
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HeaderLayoutComponent],
-      providers: [{ provide: Router, useValue: {} }],
+      providers: [
+        { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
+        { provide: MatDialog, useValue: {} },
+      ],
+      declarations: [CurrentUserWidgetComponent],
     }).compileComponents();
-  });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(HeaderLayoutComponent);
+    fixture = TestBed.createComponent(CurrentUserWidgetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
