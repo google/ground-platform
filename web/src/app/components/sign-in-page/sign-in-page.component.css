@@ -46,6 +46,6 @@
   margin-top: 48px;
 }
 
-/deep/ .firebaseui-container {
+.firebaseui-container {
   max-width: 240px;
 }
