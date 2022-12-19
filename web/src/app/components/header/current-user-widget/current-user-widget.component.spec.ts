@@ -16,7 +16,7 @@
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CurrentUserWidgetComponent } from 'app/shared/components/header/current-user-widget/current-user-widget.component';
+import { CurrentUserWidgetComponent } from 'app/components/header/current-user-widget/current-user-widget.component';
 import { Subject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { User } from 'app/shared/models/user.model';

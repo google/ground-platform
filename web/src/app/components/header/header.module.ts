@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserAvatarModule } from 'app/shared/components/user-avatar/user-avatar.module';
-import { MatButtonModule } from '@angular/material/button';
-import { CurrentUserWidgetComponent } from 'app/shared/components/header/current-user-widget/current-user-widget.component';
+import { CurrentUserWidgetModule } from 'app/components/header/current-user-widget/current-user-widget.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { HeaderComponent } from 'app/components/header/header.component';
 
 @NgModule({
-  declarations: [CurrentUserWidgetComponent],
-  imports: [CommonModule, MatButtonModule, UserAvatarModule],
-  exports: [CurrentUserWidgetComponent],
+  declarations: [HeaderComponent],
+  imports: [CommonModule, CurrentUserWidgetModule, FlexLayoutModule],
+  exports: [HeaderComponent],
 })
-export class CurrentUserWidgetModule {}
+export class HeaderModule {}

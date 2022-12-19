@@ -16,7 +16,7 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
-import { HeaderModule } from 'app/shared/components/header/header.module';
+import { HeaderModule } from 'app/components/header/header.module';
 import { FirebaseUIModule } from 'firebaseui-angular';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
