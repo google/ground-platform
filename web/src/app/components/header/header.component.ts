@@ -14,38 +14,17 @@
  * limitations under the License.
  */
 
-.body-container {
-  background-image: url(/assets/img/happy-land.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  width: 100vw;
-}
+import { Component } from '@angular/core';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+@Component({
+  selector: 'ground-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss'],
+})
+export class HeaderComponent {
+  constructor(public navigationService: NavigationService) {}
 
-.logo {
-  width: 64px;
-  height: 64px;
-}
-
-.title {
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 1.8em;
-  font-weight: bold;
-}
-
-.card {
-  width: 420px;
-  height: 460px;
-}
-
-.content {
-  text-align: center;
-  padding: 40px;
-}
-
-.buttons {
-  margin-top: 48px;
-}
-
-.firebaseui-container {
-  max-width: 240px;
+  onSurveysButtonClick(): void {
+    this.navigationService.navigateToSurveyList();
+  }
 }

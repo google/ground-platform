@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutComponent } from 'app/components/header-layout/header-layout.component';
+@import 'variables';
 
-@NgModule({
-  declarations: [HeaderLayoutComponent],
-  imports: [CommonModule, FlexLayoutModule],
-  exports: [HeaderLayoutComponent],
-})
-export class HeaderLayoutModule {}
+.header-divider {
+  display: inline-block;
+  border-left: 1px solid mat-color($foreground, divider);
+  width: 1px;
+  height: 30px;
+  margin-left: 14px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+ground-inline-edit-title {
+  margin-top: 15px;
+}
+
+/* Relative top used to push title input field in line with flex row. */
+.inline-editor {
+  position: relative;
+  top: 2px;
+}

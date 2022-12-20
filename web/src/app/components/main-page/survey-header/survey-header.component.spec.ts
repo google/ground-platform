@@ -14,35 +14,39 @@
  * limitations under the License.
  */
 
-import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
+import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
+import { NEVER } from 'rxjs';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 
-describe('UserProfilePopupComponent', () => {
-  let component: UserProfilePopupComponent;
-  let fixture: ComponentFixture<UserProfilePopupComponent>;
-  const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
+describe('SurveyHeaderComponent', () => {
+  let component: SurveyHeaderComponent;
+  let fixture: ComponentFixture<SurveyHeaderComponent>;
 
   beforeEach(waitForAsync(() => {
-    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
-      declarations: [UserProfilePopupComponent],
-      imports: [MatDialogModule],
+      imports: [InlineEditorModule, MatIconModule, MatDialogModule],
+      declarations: [SurveyHeaderComponent],
       providers: [
-        { provide: AuthService, useValue: { getUser$: () => of() } },
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: routerSpy },
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => NEVER,
+            getCurrentSurvey: () => {},
+            canManageSurvey: () => {},
+          },
+        },
+        { provide: Router, useValue: {} },
       ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(UserProfilePopupComponent);
+    fixture = TestBed.createComponent(SurveyHeaderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -51,7 +55,3 @@ describe('UserProfilePopupComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-
-function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
-}

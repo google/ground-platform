@@ -14,31 +14,15 @@
  * limitations under the License.
  */
 
-@import 'variables';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
+import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 
-.header-divider {
-  display: inline-block;
-  border-left: 1px solid mat-color($foreground, divider);
-  width: 1px;
-  height: 30px;
-  margin-left: 14px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-ground-inline-edit-title {
-  margin-top: 15px;
-}
-
-.user-thumb {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-
-/* Relative top used to push title input field in line with flex row. */
-.inline-editor {
-  position: relative;
-  top: 2px;
-}
+@NgModule({
+  declarations: [AccountPopupComponent],
+  imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
+})
+export class AccountPopupModule {}

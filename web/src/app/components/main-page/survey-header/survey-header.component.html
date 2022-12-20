@@ -13,17 +13,19 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div fxLayout class="header" fxLayoutAlign="flex-self center">
-  <div fxFlex>
-    <img
-      class="logo"
-      src="/assets/img/logo.svg"
-      (click)="onSurveysButtonClick()"
-    />
-    <span class="ground-title">Ground</span>
-    <ng-content select="[left]"></ng-content>
+<ground-header>
+  <span left>
+    <span class="header-divider"></span>
+    <inline-editor [data]="title" [placeholder]="'Untitled survey'" (focusOut)="updateSurveyTitle($event)"
+      class="inline-editor"></inline-editor>
+  </span>
+  <div right>
+    <button [disabled]="!surveyService.canManageSurvey()" mat-flat-button color="primary" (click)="openShareDialog()">
+      <mat-icon>people_alt</mat-icon>
+      <label>Share</label>
+    </button>
+    <button mat-icon-button aria-label="More survey settings">
+      <mat-icon>more_vert</mat-icon>
+    </button>
   </div>
-  <div>
-    <ng-content select="[right]"></ng-content>
-  </div>
-</div>
+</ground-header>

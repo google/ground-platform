@@ -17,14 +17,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutModule } from 'app/components/header-layout/header-layout.module';
+import { HeaderModule } from 'app/components/header/header.module';
 import { SurveyListComponent } from 'app/components/survey-list/survey-list.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { SurveyHeaderModule } from 'app/components/survey-header/survey-header.module';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 
@@ -33,12 +31,10 @@ import { MatCardModule } from '@angular/material/card';
   imports: [
     CommonModule,
     FlexLayoutModule,
-    HeaderLayoutModule,
+    HeaderModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    SurveyHeaderModule,
-    UserAvatarModule,
     MatCardModule,
     MatGridListModule,
     InlineEditorModule,
