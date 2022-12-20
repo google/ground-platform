@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CurrentUserWidgetModule } from 'app/components/header/current-user-widget/current-user-widget.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { HeaderComponent } from 'app/components/header/header.component';
 
-@Component({
-  selector: 'ground-header-layout',
-  templateUrl: './header-layout.component.html',
-  styleUrls: ['./header-layout.component.scss'],
+@NgModule({
+  declarations: [HeaderComponent],
+  imports: [CommonModule, CurrentUserWidgetModule, FlexLayoutModule],
+  exports: [HeaderComponent],
 })
-export class HeaderLayoutComponent implements OnInit {
-  constructor(public navigationService: NavigationService) {}
-
-  ngOnInit(): void {}
-
-  onSurveysButtonClick(): void {
-    this.navigationService.navigateToSurveyList();
-  }
-}
+export class HeaderModule {}

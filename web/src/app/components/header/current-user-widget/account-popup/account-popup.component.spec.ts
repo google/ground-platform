@@ -16,45 +16,33 @@
 
 import { AuthService } from 'app/services/auth/auth.service';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { SurveyHeaderComponent } from 'app/components/survey-header/survey-header.component';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { MatIconModule } from '@angular/material/icon';
+import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
-import { NEVER, Subject } from 'rxjs';
-import { User } from 'app/shared/models/user.model';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
 
-describe('SurveyHeaderComponent', () => {
-  let component: SurveyHeaderComponent;
-  let fixture: ComponentFixture<SurveyHeaderComponent>;
-  const dialogRef: Partial<MatDialogRef<UserProfilePopupComponent>> = {};
-  const user$ = new Subject<User | null>();
+describe('AccountPopupComponent', () => {
+  let component: AccountPopupComponent;
+  let fixture: ComponentFixture<AccountPopupComponent>;
+  const dialogRef: Partial<MatDialogRef<AccountPopupComponent>> = {};
 
   beforeEach(waitForAsync(() => {
+    const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
-      imports: [InlineEditorModule, MatIconModule, MatDialogModule],
-      declarations: [SurveyHeaderComponent],
+      declarations: [AccountPopupComponent],
+      imports: [MatDialogModule],
       providers: [
-        { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
+        { provide: AuthService, useValue: { getUser$: () => of() } },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: MatDialogRef, useValue: dialogRef },
-        {
-          provide: SurveyService,
-          useValue: {
-            getActiveSurvey$: () => NEVER,
-            getCurrentSurvey: () => {},
-          },
-        },
-        { provide: Router, useValue: {} },
+        { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SurveyHeaderComponent);
+    fixture = TestBed.createComponent(AccountPopupComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -63,3 +51,7 @@ describe('SurveyHeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+function createRouterSpy() {
+  return jasmine.createSpyObj('Router', ['navigate']);
+}

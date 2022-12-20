@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2022 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { UserProfilePopupComponent } from 'app/components/user-profile-popup/user-profile-popup.component';
 import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
+import { MatButtonModule } from '@angular/material/button';
+import { CurrentUserWidgetComponent } from 'app/components/header/current-user-widget/current-user-widget.component';
 
 @NgModule({
-  declarations: [UserProfilePopupComponent],
-  imports: [CommonModule, MatButtonModule, MatDialogModule, UserAvatarModule],
+  declarations: [CurrentUserWidgetComponent],
+  imports: [CommonModule, MatButtonModule, UserAvatarModule],
+  exports: [CurrentUserWidgetComponent],
 })
-export class UserProfilePopupModule {}
+export class CurrentUserWidgetModule {}

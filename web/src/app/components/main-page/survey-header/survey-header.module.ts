@@ -17,12 +17,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderLayoutModule } from 'app/components/header-layout/header-layout.module';
-import { SurveyHeaderComponent } from 'app/components/survey-header/survey-header.component';
+import { HeaderModule } from 'app/components/header/header.module';
+import { SurveyHeaderComponent } from 'app/components/main-page/survey-header/survey-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
 import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
 import { ShareDialogModule } from 'app/components/share-dialog/share-dialog.module';
 
@@ -31,11 +30,10 @@ import { ShareDialogModule } from 'app/components/share-dialog/share-dialog.modu
   imports: [
     CommonModule,
     FlexLayoutModule,
-    HeaderLayoutModule,
+    HeaderModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
-    UserAvatarModule,
     InlineEditorModule,
     ShareDialogModule,
   ],
