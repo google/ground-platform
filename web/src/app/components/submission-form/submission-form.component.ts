@@ -194,10 +194,8 @@ export class SubmissionFormComponent {
       case TaskType.MULTIPLE_CHOICE:
         return this.extractResultForMultipleChoiceTask(task);
       default:
-        throw Error(
-          `Unimplemented Result extraction for Task with
-           Type:${task.type}`
-        );
+        console.warn(`Unsupported task type ${task.type}`);
+        return new Result('');
     }
   }
 
@@ -244,7 +242,7 @@ export class SubmissionFormComponent {
         this.addControlsForSelectMultipleTask(group, task, result);
         return;
       default:
-        throw Error(
+        console.warn(
           `Unimplemented conversion to FormControl(s) for Task with
            Cardinality:${task.multipleChoice?.cardinality}`
         );
@@ -298,7 +296,7 @@ export class SubmissionFormComponent {
 
   private extractResultForSelectMultipleTask(task: Task): Result {
     const selectedOptions: List<Option> = task.multipleChoice!.options!.filter(
-      option => this.submissionForm?.value[option.id]
+      (option: Option) => this.submissionForm?.value[option.id]
     );
     return new Result(selectedOptions);
   }
