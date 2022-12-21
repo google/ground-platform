@@ -18,7 +18,7 @@ import { Component, OnInit } from '@angular/core';
 import { JobDialogComponent } from 'app/components/job-dialog/job-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { SubmissionService } from 'app/services/submission/submission.service';

@@ -21,7 +21,7 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { AuthService } from 'app/services/auth/auth.service';
 import { Subject } from 'rxjs';
-import { User } from 'app/shared/models/user.model';
+import { User } from 'app/models/user.model';
 
 describe('SubmissionService', () => {
   const user$ = new Subject<User | null>();

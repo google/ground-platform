@@ -23,18 +23,18 @@ import { Map, List } from 'immutable';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
-} from 'app/shared/models/loi.model';
-import { Job } from 'app/shared/models/job.model';
-import { Submission } from 'app/shared/models/submission/submission.model';
-import { Survey } from 'app/shared/models/survey.model';
+} from 'app/models/loi.model';
+import { Job } from 'app/models/job.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Survey } from 'app/models/survey.model';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { Router } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { Point } from 'app/shared/models/geometry/point';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Coordinate } from 'app/models/geometry/coordinate';
 
 const mockSurvey = new Survey(
   'survey001',

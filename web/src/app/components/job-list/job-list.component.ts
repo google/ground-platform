@@ -18,7 +18,7 @@ import { Component } from '@angular/core';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators/map';
-import { Job } from 'app/shared/models/job.model';
+import { Job } from 'app/models/job.model';
 import { List } from 'immutable';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 

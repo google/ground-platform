@@ -20,20 +20,20 @@ import { SubmissionFormComponent } from 'app/components/submission-form/submissi
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
-} from 'app/shared/models/loi.model';
+} from 'app/models/loi.model';
 import { NEVER, of } from 'rxjs';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import { List, Map } from 'immutable';
-import { Submission } from 'app/shared/models/submission/submission.model';
-import { Result } from 'app/shared/models/submission/result.model';
-import { Job } from 'app/shared/models/job.model';
-import { Option } from 'app/shared/models/task/option.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Result } from 'app/models/submission/result.model';
+import { Job } from 'app/models/job.model';
+import { Option } from 'app/models/task/option.model';
 import {
   MultipleChoice,
   Cardinality,
-} from 'app/shared/models/task/multiple-choice.model';
-import { TaskType, Task } from 'app/shared/models/task/task.model';
-import { AuditInfo } from 'app/shared/models/audit-info.model';
+} from 'app/models/task/multiple-choice.model';
+import { TaskType, Task } from 'app/models/task/task.model';
+import { AuditInfo } from 'app/models/audit-info.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
@@ -52,8 +52,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthService } from 'app/services/auth/auth.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { By } from '@angular/platform-browser';
-import { Point } from 'app/shared/models/geometry/point';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Coordinate } from 'app/models/geometry/coordinate';
 
 class MockModel {
   static task001: Task = new Task(

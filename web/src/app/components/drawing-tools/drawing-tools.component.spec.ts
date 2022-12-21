@@ -29,8 +29,8 @@ import {
 } from 'app/services/drawing-tools/drawing-tools.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { Job } from 'app/shared/models/job.model';
-import { Survey } from 'app/shared/models/survey.model';
+import { Job } from 'app/models/job.model';
+import { Survey } from 'app/models/survey.model';
 import { DrawingToolsComponent } from 'app/components/drawing-tools/drawing-tools.component';
 import { DrawingToolsModule } from 'app/components/drawing-tools/drawing-tools.module';
 import { Map } from 'immutable';

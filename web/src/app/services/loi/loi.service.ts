@@ -17,16 +17,16 @@
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { switchMap } from 'rxjs/operators';
 import { firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { Injectable } from '@angular/core';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
-} from 'app/shared/models/loi.model';
+} from 'app/models/loi.model';
 import { List, Map as ImmutableMap } from 'immutable';
-import { Point } from 'app/shared/models/geometry/point';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Coordinate } from 'app/models/geometry/coordinate';
 
 @Injectable({
   providedIn: 'root',

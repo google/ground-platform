@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { MultipleChoice } from 'app/shared/models/task/multiple-choice.model';
-import { Option } from 'app/shared/models/task/option.model';
+import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
 
 /**
  *

@@ -17,13 +17,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { List, Map } from 'immutable';
-import { LinearRing } from 'app/shared/models/geometry/linear-ring';
-import { Point } from 'app/shared/models/geometry/point';
-import { Polygon } from 'app/shared/models/geometry/polygon';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { LinearRing } from 'app/models/geometry/linear-ring';
+import { Point } from 'app/models/geometry/point';
+import { Polygon } from 'app/models/geometry/polygon';
+import { Coordinate } from 'app/models/geometry/coordinate';
 import { GeoPoint } from 'firebase/firestore';
-import { Geometry, GeometryType } from 'app/shared/models/geometry/geometry';
-import { MultiPolygon } from 'app/shared/models/geometry/multi-polygon';
+import { Geometry, GeometryType } from 'app/models/geometry/geometry';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 
 /** Pretty-print objects. */
 const stringify = (o: Object) => JSON.stringify(o);

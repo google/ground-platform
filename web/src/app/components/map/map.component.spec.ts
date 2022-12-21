@@ -26,15 +26,15 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import {
   LocationOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
-} from 'app/shared/models/loi.model';
+} from 'app/models/loi.model';
 import { Map, List } from 'immutable';
-import { Job } from 'app/shared/models/job.model';
+import { Job } from 'app/models/job.model';
 import { BehaviorSubject, of } from 'rxjs';
 import { GeoPoint } from 'firebase/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
@@ -43,8 +43,8 @@ import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import { Point } from 'app/shared/models/geometry/point';
-import { Coordinate } from 'app/shared/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Coordinate } from 'app/models/geometry/coordinate';
 
 describe('MapComponent', () => {
   let component: MapComponent;

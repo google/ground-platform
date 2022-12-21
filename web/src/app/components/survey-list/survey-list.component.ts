@@ -18,7 +18,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { SurveyService } from 'app/services/survey/survey.service';
 import { Subscription } from 'rxjs';
-import { Survey } from 'app/shared/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { List } from 'immutable';
 

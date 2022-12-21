@@ -29,10 +29,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Survey } from 'app/shared/models/survey.model';
-import { Job } from 'app/shared/models/job.model';
-import { AclEntry } from 'app/shared/models/acl-entry.model';
-import { Role } from 'app/shared/models/role.model';
+import { Survey } from 'app/models/survey.model';
+import { Job } from 'app/models/job.model';
+import { AclEntry } from 'app/models/acl-entry.model';
+import { Role } from 'app/models/role.model';
 
 @Component({ selector: 'ground-header', template: '' })
 class HeaderComponent {}
