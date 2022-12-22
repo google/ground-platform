@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
-import { Datastore } from "@/common/datastore";
+import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+import { Datastore } from '@/common/datastore';
 
 // functions.config().firebase is auto-populated with configuration needed to
 // initialize the firebase-admin SDK when deploying via Firebase CLI.

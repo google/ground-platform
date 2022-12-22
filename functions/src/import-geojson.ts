@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import * as HttpStatus from "http-status-codes";
-import { db } from "@/common/context";
-import * as Busboy from "busboy";
-import * as JSONStream from "jsonstream-ts";
+import * as functions from 'firebase-functions';
+import * as HttpStatus from 'http-status-codes';
+import { db } from '@/common/context';
+import * as Busboy from 'busboy';
+import * as JSONStream from 'jsonstream-ts';
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
@@ -29,7 +29,7 @@ export async function importGeoJsonHandler(
   req: functions.https.Request,
   res: functions.Response<any>
 ) {
-  if (req.method !== "POST") {
+  if (req.method !== 'POST') {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
   }
@@ -45,37 +45,37 @@ export async function importGeoJsonHandler(
 
   // Handle non-file fields in the task. survey and job must appear
   // before the file for the file handler to work properly.
-  busboy.on("field", (key, val) => {
+  busboy.on('field', (key, val) => {
     params[key] = val;
   });
 
   // This code will process each file uploaded.
-  busboy.on("file", (_field, file, _filename) => {
+  busboy.on('file', (_field, file, _filename) => {
     const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
       res
         .status(HttpStatus.BAD_REQUEST)
-        .end(JSON.stringify({ error: "Invalid request" }));
+        .end(JSON.stringify({ error: 'Invalid request' }));
       return;
     }
     console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
     let geoJsonType: any = null;
-    file.pipe(JSONStream.parse("type", undefined)).on("data", (data: any) => {
+    file.pipe(JSONStream.parse('type', undefined)).on('data', (data: any) => {
       geoJsonType = data;
     });
 
     file
-      .pipe(JSONStream.parse(["features", true], undefined))
-      .on("data", (geoJsonLoi: any) => {
-        if (geoJsonType !== "FeatureCollection") {
+      .pipe(JSONStream.parse(['features', true], undefined))
+      .on('data', (geoJsonLoi: any) => {
+        if (geoJsonType !== 'FeatureCollection') {
           // TODO: report error to user
           console.debug(`Invalid ${geoJsonType}`);
           res.status(HttpStatus.BAD_REQUEST).end();
           return;
         }
-        if (geoJsonLoi.type != "Feature") {
+        if (geoJsonLoi.type !== 'Feature') {
           console.debug(`Skipping loi with type ${geoJsonLoi.type}`);
           return;
         }
@@ -96,15 +96,15 @@ export async function importGeoJsonHandler(
   });
 
   // Triggered once all uploaded files are processed by Busboy.
-  busboy.on("finish", async () => {
+  busboy.on('finish', async () => {
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`${count} lois imported`);
     res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
-  busboy.on("error", (err: any) => {
-    console.error("Busboy error", err);
+  busboy.on('error', (err: any) => {
+    console.error('Busboy error', err);
     req.unpipe(busboy);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
