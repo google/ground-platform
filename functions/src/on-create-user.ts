@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import { db } from "@/common/context";
+import * as functions from 'firebase-functions';
+import { db } from '@/common/context';
 
 /**
  * Called when a new user logs in for the first time.

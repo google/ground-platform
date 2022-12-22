@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import { firestore } from "firebase-admin";
-import { GeoPoint } from "firebase-admin/firestore";
+import * as functions from 'firebase-functions';
+import { firestore } from 'firebase-admin';
+import { GeoPoint } from 'firebase-admin/firestore';
 
 export class Datastore {
   private db_: firestore.Firestore;
@@ -65,7 +65,7 @@ export class Datastore {
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(`surveys/${surveyId}/submissions`)
-      .where("jobId", "==", jobId)
+      .where('jobId', '==', jobId)
       .get();
   }
 
@@ -76,7 +76,7 @@ export class Datastore {
   fetchLocationsOfInterestByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(`surveys/${surveyId}/lois`)
-      .where("jobId", "==", jobId)
+      .where('jobId', '==', jobId)
       .get();
   }
 
@@ -95,12 +95,12 @@ export class Datastore {
       ...loi,
       geometry: Datastore.toFirestoreMap(loi.geometry),
     };
-    const docRef = this.db_.collection("surveys").doc(surveyId);
+    const docRef = this.db_.collection('surveys').doc(surveyId);
     const doc = await docRef.get();
     if (!doc.exists) {
       throw new Error(`/surveys/${surveyId} not found`);
     }
-    await docRef.collection("lois").add(loiDoc);
+    await docRef.collection('lois').add(loiDoc);
   }
 
   static toFirestoreMap(geometry: any) {
@@ -117,7 +117,7 @@ export class Datastore {
       return null;
     }
     if (Array.isArray(value)) {
-      if (value.length === 2 && value.every((x) => typeof x === "number")) {
+      if (value.length === 2 && value.every(x => typeof x === 'number')) {
         // Note: GeoJSON coordinates are in lng-lat order. We reverse that order for GeoPoint, which uses
         // lat-lng order.
         return new GeoPoint(value[1] as number, value[0] as number);

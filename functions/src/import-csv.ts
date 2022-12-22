@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import * as HttpStatus from "http-status-codes";
-import * as csvParser from "csv-parser";
-import * as Busboy from "busboy";
-import { db } from "@/common/context";
-import { GeoPoint } from "firebase-admin/firestore";
+import * as functions from 'firebase-functions';
+import * as HttpStatus from 'http-status-codes';
+import * as csvParser from 'csv-parser';
+import * as Busboy from 'busboy';
+import { db } from '@/common/context';
+import { GeoPoint } from 'firebase-admin/firestore';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -31,7 +31,7 @@ export async function importCsvHandler(
   res: functions.Response<any>
 ) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
-  if (req.method !== "POST") {
+  if (req.method !== 'POST') {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
   }
@@ -46,12 +46,12 @@ export async function importCsvHandler(
 
   // Handle non-file fields in the form. Survey and job must appear
   // before the file for the file handler to work properly.
-  busboy.on("field", (key, val) => {
+  busboy.on('field', (key, val) => {
     params[key] = val;
   });
 
   // This code will process each file uploaded.
-  busboy.on("file", (_key, file, _) => {
+  busboy.on('file', (_key, file, _) => {
     const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
       res.status(HttpStatus.BAD_REQUEST).end();
@@ -62,7 +62,7 @@ export async function importCsvHandler(
     // Pipe file through CSV parser lib, inserting each row in the db as it is
     // received.
 
-    file.pipe(csvParser()).on("data", async (row) => {
+    file.pipe(csvParser()).on('data', async row => {
       try {
         inserts.push(insertRow(surveyId, jobId, row));
       } catch (err: any) {
@@ -76,15 +76,15 @@ export async function importCsvHandler(
   });
 
   // Triggered once all uploaded files are processed by Busboy.
-  busboy.on("finish", async () => {
+  busboy.on('finish', async () => {
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`Inserted ${count} rows`);
     res.status(HttpStatus.OK).end(JSON.stringify({ count }));
   });
 
-  busboy.on("error", (err: any) => {
-    console.error("Busboy error", err);
+  busboy.on('error', (err: any) => {
+    console.error('Busboy error', err);
     req.unpipe(busboy);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
   });
@@ -101,7 +101,7 @@ export async function importCsvHandler(
  */
 function invertAndFlatten(obj: any) {
   return Object.keys(obj)
-    .flatMap((k) => obj[k].map((v: any) => ({ k, v })))
+    .flatMap(k => obj[k].map((v: any) => ({ k, v })))
     .reduce((o, { v, k }) => {
       o[v] = k;
       return o;
@@ -113,10 +113,10 @@ function invertAndFlatten(obj: any) {
  * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
-  id: ["id", "key"],
-  caption: ["caption", "name", "label"],
-  lat: ["lat", "latitude", "y"],
-  lng: ["lng", "lon", "long", "lng", "x"],
+  id: ['id', 'key'],
+  caption: ['caption', 'name', 'label'],
+  lat: ['lat', 'latitude', 'y'],
+  lng: ['lng', 'lon', 'long', 'lng', 'x'],
 });
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
@@ -142,18 +142,18 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
       properties[columnName] = value;
     }
   }
-  let { lat, lng, ...loi } = data;
-  lat = Number.parseFloat(lat);
-  lng = Number.parseFloat(lng);
+  const { latStr, lngStr, ...loi } = data;
+  const lat = Number.parseFloat(latStr);
+  const lng = Number.parseFloat(lngStr);
   if (isNaN(lat) || isNaN(lng)) {
     return null;
   }
-  loi["geometry"] = {
-    type: "Point",
+  loi['geometry'] = {
+    type: 'Point',
     coordinates: new GeoPoint(lat, lng),
   };
   if (Object.keys(properties).length > 0) {
-    loi["properties"] = properties;
+    loi['properties'] = properties;
   }
   return loi;
 }

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import * as functions from "firebase-functions";
-import * as csv from "@fast-csv/format";
-import { geojsonToWKT } from "@terraformer/wkt";
-import { db } from "@/common/context";
-import * as HttpStatus from "http-status-codes";
+import * as functions from 'firebase-functions';
+import * as csv from '@fast-csv/format';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { db } from '@/common/context';
+import * as HttpStatus from 'http-status-codes';
 
 // TODO: Refactor into meaningful pieces.
 export async function exportCsvHandler(
@@ -30,43 +30,43 @@ export async function exportCsvHandler(
   const jobId = req.query.job as string;
   const survey = await db.fetchSurvey(surveyId);
   if (!survey.exists) {
-    res.status(HttpStatus.NOT_FOUND).send("Survey not found");
+    res.status(HttpStatus.NOT_FOUND).send('Survey not found');
     return;
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
-  const jobs = survey.get("jobs") || {};
+  const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
-  const jobName = job.name && (job.name["en"] as string);
-  const tasks = job["tasks"] || {};
+  const jobName = job.name && (job.name['en'] as string);
+  const tasks = job['tasks'] || {};
   const task = (Object.values(tasks)[0] as any) || {};
-  const elementMap = task["elements"] || {};
+  const elementMap = task['elements'] || {};
   const elements = Object.keys(elementMap)
-    .map((elementId) => ({ id: elementId, ...elementMap[elementId] }))
+    .map(elementId => ({ id: elementId, ...elementMap[elementId] }))
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push("loi_id");
-  headers.push("loi_name");
-  headers.push("latitude");
-  headers.push("longitude");
-  headers.push("geometry");
-  elements.forEach((element) => {
-    const labelMap = element["label"] || {};
-    const label = Object.values(labelMap)[0] || "Unnamed step";
+  headers.push('loi_id');
+  headers.push('loi_name');
+  headers.push('latitude');
+  headers.push('longitude');
+  headers.push('geometry');
+  elements.forEach(element => {
+    const labelMap = element['label'] || {};
+    const label = Object.values(labelMap)[0] || 'Unnamed step';
     headers.push(label);
   });
 
-  res.type("text/csv");
+  res.type('text/csv');
   res.setHeader(
-    "Content-Disposition",
-    "attachment; filename=" + getFileName(jobName)
+    'Content-Disposition',
+    'attachment; filename=' + getFileName(jobName)
   );
   const csvStream = csv.format({
-    delimiter: ",",
+    delimiter: ',',
     headers,
     includeEndRowDelimiter: true,
-    rowDelimiter: "\n",
+    rowDelimiter: '\n',
     quoteColumns: true,
     quote: '"',
   });
@@ -80,28 +80,28 @@ export async function exportCsvHandler(
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
   const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
-  submissions.forEach((submission) => {
-    const loiId = submission.get("loiId") as string;
+  submissions.forEach(submission => {
+    const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
     arr.push(submission.data());
     submissionsByLocationOfInterest[loiId] = arr;
   });
 
-  lois.forEach((loi) => {
+  lois.forEach(loi => {
     const loiId = loi.id;
-    const location = loi.get("location") || {};
+    const location = loi.get('location') || {};
     const submissions = submissionsByLocationOfInterest[loiId] || [{}];
-    submissions.forEach((submission) => {
+    submissions.forEach(submission => {
       const row = [];
       row.push(getId(loi));
       row.push(getLabel(loi));
-      row.push(location["_latitude"] || "");
-      row.push(location["_longitude"] || "");
-      row.push(toWkt(loi.get("geoJson")) || "");
-      const results = submission["results"] || {};
+      row.push(location['_latitude'] || '');
+      row.push(location['_longitude'] || '');
+      row.push(toWkt(loi.get('geoJson')) || '');
+      const results = submission['results'] || {};
       elements
-        .map((element) => getValue(element, results))
-        .forEach((value) => row.push(value));
+        .map(element => getValue(element, results))
+        .forEach(value => row.push(value));
       csvStream.write(row);
     });
   });
@@ -111,7 +111,7 @@ export async function exportCsvHandler(
 function toWkt(geoJsonString: string) {
   const geoJsonObject = parseGeoJson(geoJsonString);
   const geometry = getGeometry(geoJsonObject);
-  return geometry ? geojsonToWKT(geometry) : "";
+  return geometry ? geojsonToWKT(geometry) : '';
 }
 
 function parseGeoJson(jsonString: string) {
@@ -124,7 +124,7 @@ function parseGeoJson(jsonString: string) {
 }
 
 function getGeometry(geoJsonObject: any) {
-  if (!geoJsonObject || typeof geoJsonObject !== "object") {
+  if (!geoJsonObject || typeof geoJsonObject !== 'object') {
     return null;
   }
   return geoJsonObject.geometry;
@@ -133,35 +133,35 @@ function getGeometry(geoJsonObject: any) {
 function getId(
   loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
 ) {
-  const properties = loi.get("properties") || {};
+  const properties = loi.get('properties') || {};
   return (
-    loi.get("id") ||
-    properties["ID"] ||
-    properties["id"] ||
-    properties["id_prod"] ||
-    ""
+    loi.get('id') ||
+    properties['ID'] ||
+    properties['id'] ||
+    properties['id_prod'] ||
+    ''
   );
 }
 
 function getLabel(
   loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
 ) {
-  const properties = loi.get("properties") || {};
+  const properties = loi.get('properties') || {};
   return (
-    properties["caption"] || properties["label"] || properties["title"] || ""
+    properties['caption'] || properties['label'] || properties['title'] || ''
   );
 }
 /**
  * Returns the string representation of a specific task element result.
  */
 function getValue(element: any, results: any) {
-  const result = results[element.id] || "";
+  const result = results[element.id] || '';
   if (
-    element.type === "multiple_choice" &&
+    element.type === 'multiple_choice' &&
     Array.isArray(result) &&
     element.options
   ) {
-    return result.map((id) => getMultipleChoiceValues(id, element)).join(", ");
+    return result.map(id => getMultipleChoiceValues(id, element)).join(', ');
   } else {
     return result;
   }
@@ -176,14 +176,14 @@ function getMultipleChoiceValues(id: any, element: any) {
   const option = options[id] || {};
   const label = option.label || {};
   // TODO: i18n.
-  return option.code || label["en"] || "";
+  return option.code || label['en'] || '';
 }
 
 /**
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
 function getFileName(jobName: string) {
-  jobName = jobName || "ground-export";
-  const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, "-");
+  jobName = jobName || 'ground-export';
+  const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.csv`;
 }

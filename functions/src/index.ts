@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import "module-alias/register";
-import * as functions from "firebase-functions";
-import * as cors from "cors";
-import { handleCreateUser } from "@/on-create-user";
-import { importCsvHandler } from "@/import-csv";
-import { importGeoJsonHandler } from "@/import-geojson";
-import { exportCsvHandler } from "@/export-csv";
+import 'module-alias/register';
+import * as functions from 'firebase-functions';
+import * as cors from 'cors';
+import { handleCreateUser } from '@/on-create-user';
+import { importCsvHandler } from '@/import-csv';
+import { importGeoJsonHandler } from '@/import-geojson';
+import { exportCsvHandler } from '@/export-csv';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
@@ -36,7 +36,7 @@ function onHttpsRequest(handler: any) {
 
 function onError(res: any, err: any) {
   console.error(err);
-  res.status(500).send("Internal error");
+  res.status(500).send('Internal error');
 }
 
 // Create user profile in database when user first logs in.
