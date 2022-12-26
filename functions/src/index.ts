@@ -1,4 +1,3 @@
-import { Map } from 'immutable';
 /**
  * @license
  * Copyright 2018 Google LLC
@@ -23,9 +22,7 @@ import { handleCreateUser } from '@/on-create-user';
 import { importCsvHandler } from '@/import-csv';
 import { importGeoJsonHandler } from '@/import-geojson';
 import { exportCsvHandler } from '@/export-csv';
-import { sendUpdateMessage } from '@/common/messaging';
-import { Change, EventContext } from 'firebase-functions';
-import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
+import { onWriteSurveyHandler } from '@/on-write-survey';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
@@ -52,18 +49,10 @@ export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 
-async function onWriteHandler(
-  _: Change<DocumentSnapshot>,
-  context: EventContext
-) {
-  const { survey, ...otherIds } = context.params;
-  sendUpdateMessage(survey, context.timestamp, Map(otherIds));
-}
-
 export const onWriteSurvey = functions.firestore
-  .document('surveys/{survey}')
-  .onWrite(onWriteHandler);
+  .document('surveys/{surveyId}')
+  .onWrite(onWriteSurveyHandler);
 
 export const onWriteLoi = functions.firestore
-  .document('surveys/{survey}/lois/{loi}')
-  .onWrite(onWriteHandler);
+  .document('surveys/{surveyId}/lois/{loiId}')
+  .onWrite(onWriteSurveyHandler);
