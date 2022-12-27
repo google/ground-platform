@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { deepEqualityTester, formatImmutableCollection } from 'testing/helpers';
-import { List } from 'immutable';
-import { Coordinate } from 'app/models/geometry/coordinate';
-import { MultiPolygon } from 'app/models/geometry/multi-polygon';
-import { Polygon } from 'app/models/geometry/polygon';
-import { LinearRing } from 'app/models/geometry/linear-ring';
-import { Point } from 'app/models/geometry/point';
-import { toGeometry, GEOMETRY_TYPES } from 'app/converters/geometry-converter';
-import { GeoPoint } from 'firebase/firestore';
-import { GeometryType } from 'app/models/geometry/geometry';
+import {deepEqualityTester, formatImmutableCollection} from 'testing/helpers';
+import {List} from 'immutable';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+import {Polygon} from 'app/models/geometry/polygon';
+import {LinearRing} from 'app/models/geometry/linear-ring';
+import {Point} from 'app/models/geometry/point';
+import {toGeometry, GEOMETRY_TYPES} from 'app/converters/geometry-converter';
+import {GeoPoint} from 'firebase/firestore';
+import {GeometryType} from 'app/models/geometry/geometry';
 
 type Path = Array<[number, number]>;
 
@@ -81,7 +81,7 @@ function coordinateList(path: Path): List<Coordinate> {
 
 function indexedGeoPointMap(path: Path): {} {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const map: { [key: string]: any } = {};
+  const map: {[key: string]: any} = {};
   path.forEach((it, idx) => (map[String(idx)] = new GeoPoint(it[0], it[1])));
   return map;
 }
@@ -134,7 +134,7 @@ describe('geometry-converter.ts', () => {
           polygon(path3, path4)
         ),
       },
-    ].forEach(({ expectation, input, expectedOutput }) =>
+    ].forEach(({expectation, input, expectedOutput}) =>
       it(expectation, () => expect(toGeometry(input)).toEqual(expectedOutput))
     );
 
@@ -171,7 +171,7 @@ describe('geometry-converter.ts', () => {
           coordinates: 'Kapow!',
         },
       },
-    ].forEach(({ expectation, input }) =>
+    ].forEach(({expectation, input}) =>
       it(expectation, () => expect(toGeometry(input)).toBeInstanceOf(Error))
     );
   });

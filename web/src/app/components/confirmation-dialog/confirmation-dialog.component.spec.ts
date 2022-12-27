@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
-import { ConfirmationDialogComponent } from 'app/components/confirmation-dialog/confirmation-dialog.component';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 describe('ConfirmationDialogComponent', () => {
   let component: ConfirmationDialogComponent;
@@ -28,8 +28,8 @@ describe('ConfirmationDialogComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ConfirmationDialogComponent],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
+        {provide: MAT_DIALOG_DATA, useValue: {}},
+        {provide: MatDialogRef, useValue: dialogRef},
       ],
     }).compileComponents();
   }));

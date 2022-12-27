@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy } from '@angular/core';
-import { FirebaseUISignInFailure } from 'firebaseui-angular';
-import { OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { AuthService } from 'app/services/auth/auth.service';
-import { filter } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {Component, OnDestroy} from '@angular/core';
+import {FirebaseUISignInFailure} from 'firebaseui-angular';
+import {OnInit} from '@angular/core';
+import {Observable} from 'rxjs';
+import {AuthService} from 'app/services/auth/auth.service';
+import {filter} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   templateUrl: './sign-in-page.component.html',

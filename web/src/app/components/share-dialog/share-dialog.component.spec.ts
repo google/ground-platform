@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ShareDialogComponent } from 'app/components/share-dialog/share-dialog.component';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatListModule } from '@angular/material/list';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
-import { Map } from 'immutable';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
+import {MatDialogRef, MatDialogModule} from '@angular/material/dialog';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatListModule} from '@angular/material/list';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {of} from 'rxjs';
+import {Map} from 'immutable';
 
 describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;
@@ -49,11 +49,11 @@ describe('ShareDialogComponent', () => {
         ReactiveFormsModule,
       ],
       providers: [
-        { provide: MatDialogRef, useValue: {} },
+        {provide: MatDialogRef, useValue: {}},
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => of({ acl: Map() }),
+            getActiveSurvey$: () => of({acl: Map()}),
             getCurrentSurveyAcl: () => {},
           },
         },

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
-import { MatButtonModule } from '@angular/material/button';
-import { CurrentUserWidgetComponent } from 'app/components/header/current-user-widget/current-user-widget.component';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {UserAvatarModule} from 'app/components/user-avatar/user-avatar.module';
+import {MatButtonModule} from '@angular/material/button';
+import {CurrentUserWidgetComponent} from 'app/components/header/current-user-widget/current-user-widget.component';
 
 @NgModule({
   declarations: [CurrentUserWidgetComponent],

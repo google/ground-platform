@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { SurveyService } from 'app/services/survey/survey.service';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { AuthService } from 'app/services/auth/auth.service';
-import { Subject } from 'rxjs';
-import { User } from 'app/models/user.model';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {AuthService} from 'app/services/auth/auth.service';
+import {Subject} from 'rxjs';
+import {User} from 'app/models/user.model';
 
 describe('SurveyService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
@@ -28,7 +28,7 @@ describe('SurveyService', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
       providers: [
-        { provide: DataStoreService, useValue: dataStoreServiceStub },
+        {provide: DataStoreService, useValue: dataStoreServiceStub},
         {
           provide: AuthService,
           useValue: {

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable, ReplaySubject } from 'rxjs';
-import { switchMap, shareReplay } from 'rxjs/operators';
-import { Survey } from 'app/models/survey.model';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { AuthService } from 'app/services/auth/auth.service';
-import { Role } from 'app/models/role.model';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
-import { environment } from 'environments/environment';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { AclEntry } from 'app/models/acl-entry.model';
+import {Injectable} from '@angular/core';
+import {firstValueFrom, Observable, ReplaySubject} from 'rxjs';
+import {switchMap, shareReplay} from 'rxjs/operators';
+import {Survey} from 'app/models/survey.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {AuthService} from 'app/services/auth/auth.service';
+import {Role} from 'app/models/role.model';
+import {List, Map} from 'immutable';
+import {of} from 'rxjs';
+import {environment} from 'environments/environment';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {AclEntry} from 'app/models/acl-entry.model';
 
 @Injectable({
   providedIn: 'root',
