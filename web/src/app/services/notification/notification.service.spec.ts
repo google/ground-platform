@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { NotificationService } from 'app/services/notification/notification.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import {TestBed} from '@angular/core/testing';
+import {NotificationService} from 'app/services/notification/notification.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 describe('NotificationService', () => {
   let matSnackBar: jasmine.SpyObj<MatSnackBar>;
@@ -25,7 +25,7 @@ describe('NotificationService', () => {
   beforeEach(() => {
     matSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
     TestBed.configureTestingModule({
-      providers: [{ provide: MatSnackBar, useValue: matSnackBar }],
+      providers: [{provide: MatSnackBar, useValue: matSnackBar}],
     });
     service = TestBed.inject(NotificationService);
   });

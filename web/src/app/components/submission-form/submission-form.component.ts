@@ -14,33 +14,28 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { TaskType, Task } from 'app/models/task/task.model';
-import { Cardinality } from 'app/models/task/multiple-choice.model';
-import { Option } from 'app/models/task/option.model';
-import { Submission } from 'app/models/submission/submission.model';
-import { Result } from 'app/models/submission/result.model';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import {
-  FormGroup,
-  FormBuilder,
-  FormControl,
-  Validators,
-} from '@angular/forms';
-import { List, Map } from 'immutable';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { Survey } from 'app/models/survey.model';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { LoadingState } from 'app/services/loading-state.model';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { Job } from 'app/models/job.model';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { switchMap, map } from 'rxjs/operators';
-import { AuthService } from 'app/services/auth/auth.service';
-import { AuditInfo } from 'app/models/audit-info.model';
-import { JobListItemActionsType } from 'app/components/job-list-item/job-list-item.component';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {Component} from '@angular/core';
+import {TaskType, Task} from 'app/models/task/task.model';
+import {Cardinality} from 'app/models/task/multiple-choice.model';
+import {Option} from 'app/models/task/option.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Result} from 'app/models/submission/result.model';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {FormGroup, FormBuilder, FormControl, Validators} from '@angular/forms';
+import {List, Map} from 'immutable';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {Survey} from 'app/models/survey.model';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {LoadingState} from 'app/services/loading-state.model';
+import {Observable} from 'rxjs';
+import {first} from 'rxjs/operators';
+import {Job} from 'app/models/job.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {switchMap, map} from 'rxjs/operators';
+import {AuthService} from 'app/services/auth/auth.service';
+import {AuditInfo} from 'app/models/audit-info.model';
+import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 // To make ESLint happy:
 /*global alert*/
@@ -156,7 +151,7 @@ export class SubmissionFormComponent {
   }
 
   private convertSubmissionToFormGroup(submission: Submission): FormGroup {
-    const group: { [taskId: string]: FormControl } = {};
+    const group: {[taskId: string]: FormControl} = {};
     for (const [taskId, task] of submission.job!.tasks!) {
       const result = submission!.results?.get(taskId);
       switch (task.type) {
@@ -200,7 +195,7 @@ export class SubmissionFormComponent {
   }
 
   private addControlsForTextTask(
-    group: { [taskId: string]: FormControl },
+    group: {[taskId: string]: FormControl},
     task: Task,
     result?: Result
   ): void {
@@ -211,7 +206,7 @@ export class SubmissionFormComponent {
   }
 
   private addControlsForNumberTask(
-    group: { [taskId: string]: FormControl },
+    group: {[taskId: string]: FormControl},
     task: Task,
     result?: Result
   ): void {
@@ -230,7 +225,7 @@ export class SubmissionFormComponent {
   }
 
   private addControlsForMultipleChoiceTask(
-    group: { [taskId: string]: FormControl },
+    group: {[taskId: string]: FormControl},
     task: Task,
     result?: Result
   ): void {
@@ -264,7 +259,7 @@ export class SubmissionFormComponent {
   }
 
   private addControlsForSelectOneTask(
-    group: { [taskId: string]: FormControl },
+    group: {[taskId: string]: FormControl},
     task: Task,
     result?: Result
   ): void {
@@ -284,7 +279,7 @@ export class SubmissionFormComponent {
   }
 
   private addControlsForSelectMultipleTask(
-    group: { [taskId: string]: FormControl },
+    group: {[taskId: string]: FormControl},
     task: Task,
     result?: Result
   ): void {

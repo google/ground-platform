@@ -79,5 +79,5 @@ import 'zone.js/dist/zone'; // Included with Angular CLI.
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).process = {
-  env: { DEBUG: undefined },
+  env: {DEBUG: undefined},
 };

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { CommonModule } from '@angular/common';
-import { FileUploadModule } from '@iplab/ngx-file-upload';
-import { ImportDialogComponent } from 'app/components/import-dialog/import-dialog.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { ReactiveFormsModule } from '@angular/forms';
-import { NgModule } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {CommonModule} from '@angular/common';
+import {FileUploadModule} from '@iplab/ngx-file-upload';
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {ReactiveFormsModule} from '@angular/forms';
+import {NgModule} from '@angular/core';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [ImportDialogComponent],

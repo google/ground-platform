@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
-import { UserAvatarComponent } from 'app/components/user-avatar/user-avatar.component';
+import {UserAvatarComponent} from 'app/components/user-avatar/user-avatar.component';
 
 describe('UserAvatarComponent', () => {
   let component: UserAvatarComponent;

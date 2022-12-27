@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component } from '@angular/core';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { EditStyleButtonModule } from 'app/components/edit-style-button/edit-style-button.module';
-import { TaskEditorModule } from 'app/components/task-editor/task-editor.module';
-import { JobDialogComponent } from 'app/components/job-dialog/job-dialog.component';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {Component} from '@angular/core';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {EditStyleButtonModule} from 'app/components/edit-style-button/edit-style-button.module';
+import {TaskEditorModule} from 'app/components/task-editor/task-editor.module';
+import {JobDialogComponent} from 'app/components/job-dialog/job-dialog.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
   MatDialogModule,
 } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { AuthService } from 'app/services/auth/auth.service';
-import { NEVER } from 'rxjs';
+import {Router} from '@angular/router';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
+import {MatIconModule} from '@angular/material/icon';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {AuthService} from 'app/services/auth/auth.service';
+import {NEVER} from 'rxjs';
 
-@Component({ selector: 'mat-dialog-content', template: '' })
+@Component({selector: 'mat-dialog-content', template: ''})
 class MatDialogContent {}
 
-@Component({ selector: 'mat-dialog-actions', template: '' })
+@Component({selector: 'mat-dialog-actions', template: ''})
 class MatDialogActions {}
 
 describe('JobDialogComponent', () => {
@@ -69,13 +69,13 @@ describe('JobDialogComponent', () => {
         MatCheckboxModule,
       ],
       providers: [
-        { provide: DataStoreService, useValue: { generateId: () => '123' } },
-        { provide: MAT_DIALOG_DATA, useValue: { createJob: true } },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: routerSpy },
+        {provide: DataStoreService, useValue: {generateId: () => '123'}},
+        {provide: MAT_DIALOG_DATA, useValue: {createJob: true}},
+        {provide: MatDialogRef, useValue: dialogRef},
+        {provide: Router, useValue: routerSpy},
         {
           provide: AuthService,
-          useValue: { getUser$: () => NEVER },
+          useValue: {getUser$: () => NEVER},
         },
       ],
     }).compileComponents();

@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivate,
   RouterStateSnapshot,
 } from '@angular/router';
-import { AuthService } from 'app/services/auth/auth.service';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { environment } from 'environments/environment';
-import { User } from 'app/models/user.model';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {AuthService} from 'app/services/auth/auth.service';
+import {Observable, of} from 'rxjs';
+import {catchError, map} from 'rxjs/operators';
+import {environment} from 'environments/environment';
+import {User} from 'app/models/user.model';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { Option } from 'app/models/task/option.model';
-import { Submission } from 'app/models/submission/submission.model';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { switchMap } from 'rxjs/operators';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { List } from 'immutable';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { Job } from 'app/models/job.model';
-import { Task, TaskType } from 'app/models/task/task.model';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { DialogService } from 'app/services/dialog/dialog.service';
+import {Option} from 'app/models/task/option.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {switchMap} from 'rxjs/operators';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {List} from 'immutable';
+import {combineLatest, Observable, Subscription} from 'rxjs';
+import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import {Job} from 'app/models/job.model';
+import {Task, TaskType} from 'app/models/task/task.model';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {DialogService} from 'app/services/dialog/dialog.service';
 
 // TODO: Rename "LocationOfInterestDetailsComponent".
 @Component({

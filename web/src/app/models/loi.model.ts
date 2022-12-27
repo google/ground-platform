@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Map } from 'immutable';
-import { GeoPoint } from 'firebase/firestore';
-import { Geometry } from 'app/models/geometry/geometry';
+import {Map} from 'immutable';
+import {GeoPoint} from 'firebase/firestore';
+import {Geometry} from 'app/models/geometry/geometry';
 
 export interface LocationOfInterest {
   readonly id: string;

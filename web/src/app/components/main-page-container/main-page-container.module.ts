@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MainPageContainerComponent } from 'app/components/main-page-container/main-page-container.component';
-import { MainPageModule } from 'app/components/main-page/main-page.module';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {MainPageContainerComponent} from 'app/components/main-page-container/main-page-container.component';
+import {MainPageModule} from 'app/components/main-page/main-page.module';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
 @NgModule({
   entryComponents: [],

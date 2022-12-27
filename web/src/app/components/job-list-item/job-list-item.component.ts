@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { DialogService } from 'app/services/dialog/dialog.service';
-import { ImportDialogComponent } from 'app/components/import-dialog/import-dialog.component';
-import { Job } from 'app/models/job.model';
-import { getPinImageSource } from 'app/components/map/ground-pin';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { MatDialog } from '@angular/material/dialog';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { environment } from 'environments/environment';
-import { Subscription } from 'rxjs';
-import { SurveyService } from 'app/services/survey/survey.service';
+import {Component, Input, OnInit, OnDestroy} from '@angular/core';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {Job} from 'app/models/job.model';
+import {getPinImageSource} from 'app/components/map/ground-pin';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {MatDialog} from '@angular/material/dialog';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {environment} from 'environments/environment';
+import {Subscription} from 'rxjs';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'ground-job-list-item',
@@ -114,7 +114,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
-      data: { surveyId: this.surveyId, jobId: this.job?.id },
+      data: {surveyId: this.surveyId, jobId: this.job?.id},
       width: '350px',
       maxHeight: '800px',
     });

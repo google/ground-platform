@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import {waitForAsync, ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DataImportService } from 'app/services/data-import/data-import.service';
-import { FileUploadModule } from '@iplab/ngx-file-upload';
+import {DataImportService} from 'app/services/data-import/data-import.service';
+import {FileUploadModule} from '@iplab/ngx-file-upload';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { ImportDialogComponent } from 'app/components/import-dialog/import-dialog.component';
-import { NEVER } from 'rxjs';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {NEVER} from 'rxjs';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;
@@ -44,9 +44,9 @@ describe('ImportDialogComponent', () => {
         MatSnackBarModule,
       ],
       providers: [
-        { provide: DataImportService, useValue: {} },
-        { provide: MatDialogRef, useValue: { afterClosed: () => NEVER } },
-        { provide: MAT_DIALOG_DATA, useValue: {} },
+        {provide: DataImportService, useValue: {}},
+        {provide: MatDialogRef, useValue: {afterClosed: () => NEVER}},
+        {provide: MAT_DIALOG_DATA, useValue: {}},
       ],
     }).compileComponents();
   }));
