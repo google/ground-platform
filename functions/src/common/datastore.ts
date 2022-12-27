@@ -16,8 +16,8 @@
  */
 
 import * as functions from 'firebase-functions';
-import { firestore } from 'firebase-admin';
-import { GeoPoint } from 'firebase-admin/firestore';
+import {firestore} from 'firebase-admin';
+import {GeoPoint} from 'firebase-admin/firestore';
 
 export class Datastore {
   private db_: firestore.Firestore;
@@ -31,10 +31,10 @@ export class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   mergeUserProfile(user: functions.auth.UserRecord) {
-    const { uid, email, displayName, photoURL } = user;
+    const {uid, email, displayName, photoURL} = user;
     return this.db_
       .doc(`users/${uid}`)
-      .set({ uid, email, displayName, photoURL }, { merge: true });
+      .set({uid, email, displayName, photoURL}, {merge: true});
   }
 
   async fetch_(
