@@ -16,12 +16,12 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MainPageContainerComponent } from 'app/components/main-page-container/main-page-container.component';
+import { MainPageContainerComponent } from 'app/pages/main-page-container/main-page-container.component';
 import { AuthGuard } from 'app/services/auth/auth.guard';
 import { SignInPageComponent } from 'app/components/sign-in-page/sign-in-page.component';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyListComponent } from 'app/components/survey-list/survey-list.component';
-import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { MainPageContainerModule } from 'app/pages/main-page-container/main-page-container.module';
 import { SignInPageModule } from 'app/components/sign-in-page/sign-in-page.module';
 import { SurveyListModule } from 'app/components/survey-list/survey-list.module';
 
