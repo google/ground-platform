@@ -25,7 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgModule } from '@angular/core';
-import { SidePanelModule } from 'app/components/side-panel/side-panel.module';
+import { SidePanelModule } from 'app/pages/main-page-container/main-page/side-panel/side-panel.module';
 import { SurveyHeaderModule } from 'app/pages/main-page-container/main-page/survey-header/survey-header.module';
 import { MatIconModule } from '@angular/material/icon';
 
