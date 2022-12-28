@@ -16,22 +16,20 @@
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { LocationOfInterestPanelComponent } from 'app/components/loi-panel/loi-panel.component';
+import { LocationOfInterestPanelComponent } from './loi-panel.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 
-import { JobListItemModule } from 'app/components/job-list-item/job-list-item.module';
-import { LocationOfInterestPanelHeaderModule } from 'app/components/loi-panel-header/loi-panel-header.module';
+import { LocationOfInterestPanelHeaderModule } from './loi-panel-header/loi-panel-header.module';
 
 @NgModule({
   imports: [
     BrowserModule,
     MatCardModule,
     MatListModule,
-    JobListItemModule,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,

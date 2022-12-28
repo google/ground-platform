@@ -22,7 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatDialogModule } from '@angular/material/dialog';
-import { LocationOfInterestPanelHeaderComponent } from 'app/components/loi-panel-header/loi-panel-header.component';
+import { LocationOfInterestPanelHeaderComponent } from './loi-panel-header.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({

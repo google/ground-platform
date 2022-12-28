@@ -24,7 +24,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { LocationOfInterestPanelHeaderComponent } from 'app/components/loi-panel-header/loi-panel-header.component';
+import { LocationOfInterestPanelHeaderComponent } from 'app/pages/main-page-container/main-page/side-panel/loi-panel-header/loi-panel-header.component';
 
 describe('LocationOfInterestPanelHeaderComponent', () => {
   let component: LocationOfInterestPanelHeaderComponent;
