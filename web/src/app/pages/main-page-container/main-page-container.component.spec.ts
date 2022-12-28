@@ -17,8 +17,8 @@
 import { ActivatedRouteStub } from 'testing/activated-route-stub';
 import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MainPageContainerComponent } from 'app/pages/main-page-container/main-page-container.component';
-import { MainPageComponent } from 'app/pages/main-page-container/main-page/main-page.component';
+import { MainPageContainerComponent } from './main-page-container.component';
+import { MainPageComponent } from './main-page/main-page.component';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { NEVER } from 'rxjs';
 import { SurveyService } from 'app/services/survey/survey.service';
