@@ -17,7 +17,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule } from '@angular/material/dialog';
-import { SelectLocationOfInterestDialogComponent } from 'app/components/select-loi-dialog/select-loi-dialog.component';
+import { SelectLocationOfInterestDialogComponent } from './select-loi-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 

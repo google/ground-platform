@@ -20,7 +20,7 @@ import { MapComponent } from './map.component';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { SelectLocationOfInterestDialogModule } from 'app/components/select-loi-dialog/select-loi-dialog.module';
+import { SelectLocationOfInterestDialogModule } from './select-loi-dialog/select-loi-dialog.module';
 
 @NgModule({
   imports: [

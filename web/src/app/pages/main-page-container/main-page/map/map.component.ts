@@ -45,7 +45,7 @@ import { MatDialog } from '@angular/material/dialog';
 import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
-} from 'app/components/select-loi-dialog/select-loi-dialog.component';
+} from './select-loi-dialog/select-loi-dialog.component';
 import { Coordinate } from 'app/models/geometry/coordinate';
 
 // To make ESLint happy:
