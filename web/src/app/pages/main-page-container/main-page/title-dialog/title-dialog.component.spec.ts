@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { TitleDialogComponent } from 'app/components/title-dialog/title-dialog.component';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {TitleDialogComponent} from 'app/components/title-dialog/title-dialog.component';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;
@@ -35,9 +35,9 @@ describe('TitleDialogComponent', () => {
       declarations: [TitleDialogComponent],
       imports: [MatDialogModule],
       providers: [
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: SurveyService, useValue: surveyService },
-        { provide: NavigationService, useValue: navigationService },
+        {provide: MatDialogRef, useValue: dialogRef},
+        {provide: SurveyService, useValue: surveyService},
+        {provide: NavigationService, useValue: navigationService},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

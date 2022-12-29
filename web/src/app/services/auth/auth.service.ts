@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { User } from 'app/models/user.model';
-import { Injectable } from '@angular/core';
-import { GoogleAuthProvider } from 'firebase/auth';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { map } from 'rxjs/operators';
-import { shareReplay } from 'rxjs/operators';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { AclEntry } from 'app/models/acl-entry.model';
-import { Job } from 'app/models/job.model';
-import { Survey } from 'app/models/survey.model';
-import { Role } from 'app/models/role.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {Observable, of} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
+import {User} from 'app/models/user.model';
+import {Injectable} from '@angular/core';
+import {GoogleAuthProvider} from 'firebase/auth';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {map} from 'rxjs/operators';
+import {shareReplay} from 'rxjs/operators';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {AclEntry} from 'app/models/acl-entry.model';
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
+import {Role} from 'app/models/role.model';
 
 const ANONYMOUS_USER: User = {
   id: '',

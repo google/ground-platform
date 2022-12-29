@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { NEVER } from 'rxjs';
-import { Router } from '@angular/router';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
+import {SurveyHeaderComponent} from './survey-header.component';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {MatIconModule} from '@angular/material/icon';
+import {MatDialogModule} from '@angular/material/dialog';
+import {NEVER} from 'rxjs';
+import {Router} from '@angular/router';
 
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
@@ -40,7 +40,7 @@ describe('SurveyHeaderComponent', () => {
             canManageSurvey: () => {},
           },
         },
-        { provide: Router, useValue: {} },
+        {provide: Router, useValue: {}},
       ],
     }).compileComponents();
   }));

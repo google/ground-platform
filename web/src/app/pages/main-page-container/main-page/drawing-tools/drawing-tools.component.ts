@@ -25,17 +25,17 @@ import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { Observable, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { Job } from 'app/models/job.model';
-import { List } from 'immutable';
-import { map } from 'rxjs/internal/operators/map';
-import { getPinImageSource } from 'app/ground-pin';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { AuthService } from 'app/services/auth/auth.service';
-import { Survey } from 'app/models/survey.model';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Observable, Subscription} from 'rxjs';
+import {tap} from 'rxjs/operators';
+import {Job} from 'app/models/job.model';
+import {List} from 'immutable';
+import {map} from 'rxjs/internal/operators/map';
+import {getPinImageSource} from 'app/ground-pin';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {AuthService} from 'app/services/auth/auth.service';
+import {Survey} from 'app/models/survey.model';
 
 @Component({
   selector: 'ground-drawing-tools',

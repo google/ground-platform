@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { Router } from '@angular/router';
-import { NEVER, of } from 'rxjs';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { LocationOfInterestPanelHeaderComponent } from './loi-panel-header.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import {MatMenuModule} from '@angular/material/menu';
+import {Router} from '@angular/router';
+import {NEVER, of} from 'rxjs';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {LocationOfInterestPanelHeaderComponent} from './loi-panel-header.component';
 
 describe('LocationOfInterestPanelHeaderComponent', () => {
   let component: LocationOfInterestPanelHeaderComponent;
@@ -39,10 +39,10 @@ describe('LocationOfInterestPanelHeaderComponent', () => {
       declarations: [LocationOfInterestPanelHeaderComponent],
       imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
       providers: [
-        { provide: Router, useValue: {} },
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: { authState: NEVER } },
-        { provide: NavigationService, useValue: navigationService },
+        {provide: Router, useValue: {}},
+        {provide: AngularFirestore, useValue: {}},
+        {provide: AngularFireAuth, useValue: {authState: NEVER}},
+        {provide: NavigationService, useValue: navigationService},
       ],
     }).compileComponents();
   });

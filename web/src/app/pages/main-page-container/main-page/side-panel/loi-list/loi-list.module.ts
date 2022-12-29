@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { LocationOfInterestListComponent } from './loi-list.component';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {LocationOfInterestListComponent} from './loi-list.component';
 
 @NgModule({
   declarations: [LocationOfInterestListComponent],

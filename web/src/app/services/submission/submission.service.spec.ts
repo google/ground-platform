@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { AuthService } from 'app/services/auth/auth.service';
-import { Subject } from 'rxjs';
-import { User } from 'app/models/user.model';
+import {TestBed} from '@angular/core/testing';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {AuthService} from 'app/services/auth/auth.service';
+import {Subject} from 'rxjs';
+import {User} from 'app/models/user.model';
 
 describe('SubmissionService', () => {
   const user$ = new Subject<User | null>();
@@ -30,9 +30,9 @@ describe('SubmissionService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: DataStoreService, useValue: {} },
-        { provide: SurveyService, useValue: {} },
-        { provide: LocationOfInterestService, useValue: {} },
+        {provide: DataStoreService, useValue: {}},
+        {provide: SurveyService, useValue: {}},
+        {provide: LocationOfInterestService, useValue: {}},
         {
           provide: AuthService,
           useValue: {

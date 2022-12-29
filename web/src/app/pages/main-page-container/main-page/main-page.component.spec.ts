@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Component, NO_ERRORS_SCHEMA } from '@angular/core';
-import { MainPageComponent } from './main-page.component';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ActivatedRouteStub } from 'testing/activated-route-stub';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { MatDialog } from '@angular/material/dialog';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { NEVER } from 'rxjs';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AuthService } from 'app/services/auth/auth.service';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
+import {MainPageComponent} from './main-page.component';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {MatDialog} from '@angular/material/dialog';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {NEVER} from 'rxjs';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AuthService} from 'app/services/auth/auth.service';
 
-@Component({ selector: 'ground-map', template: '' })
+@Component({selector: 'ground-map', template: ''})
 class MapComponent {}
 
-@Component({ selector: 'mat-sidenav', template: '' })
+@Component({selector: 'mat-sidenav', template: ''})
 class MatSideNavComponent {
   opened = false;
 }
@@ -69,21 +69,21 @@ describe('MainPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: route },
-        { provide: MatDialog, useValue: dialog },
+        {provide: ActivatedRoute, useValue: route},
+        {provide: MatDialog, useValue: dialog},
         {
           provide: LocationOfInterestService,
           useValue: loiService,
         },
-        { provide: SubmissionService, useValue: submissionService },
-        { provide: SurveyService, useValue: surveyService },
-        { provide: NavigationService, useValue: navigationService },
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
-        { provide: Router, useValue: {} },
+        {provide: SubmissionService, useValue: submissionService},
+        {provide: SurveyService, useValue: surveyService},
+        {provide: NavigationService, useValue: navigationService},
+        {provide: AngularFirestore, useValue: {}},
+        {provide: AngularFireAuth, useValue: {}},
+        {provide: Router, useValue: {}},
         {
           provide: AuthService,
-          useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
+          useValue: {getUser$: () => NEVER, isAuthenticated$: () => NEVER},
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],

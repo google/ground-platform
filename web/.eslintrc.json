@@ -7,5 +7,25 @@
     "node/no-unpublished-import": "off",
     "node/no-unpublished-require": "off",
     "object-curly-spacing": ["error", "always"]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "extends": [
+        "plugin:prettier/recommended"
+      ]
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "rules": {}
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:prettier/recommended"],
+      "rules": {
+        "prettier/prettier": ["error", { "parser": "angular" }]
+      }
+    }
+  ]
 }

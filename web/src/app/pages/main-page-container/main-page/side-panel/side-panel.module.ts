@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { SidePanelComponent } from './side-panel.component';
-import { LocationOfInterestPanelModule } from './loi-panel/loi-panel.module';
-import { JobListModule } from './job-list/job-list.module';
-import { SubmissionFormModule } from './submission-form/submission-form.module';
-import { LocationOfInterestListModule } from './loi-list/loi-list.module';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {SidePanelComponent} from './side-panel.component';
+import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
+import {JobListModule} from './job-list/job-list.module';
+import {SubmissionFormModule} from './submission-form/submission-form.module';
+import {LocationOfInterestListModule} from './loi-list/loi-list.module';
 
 @NgModule({
   imports: [

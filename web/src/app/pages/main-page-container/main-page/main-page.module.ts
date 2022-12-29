@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { JobDialogModule } from './job-dialog/job-dialog.module';
-import { DrawingToolsModule } from './drawing-tools/drawing-tools.module';
-import { MainPageComponent } from './main-page.component';
-import { MapModule } from './map/map.module';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NgModule } from '@angular/core';
-import { SidePanelModule } from './side-panel/side-panel.module';
-import { SurveyHeaderModule } from './survey-header/survey-header.module';
-import { MatIconModule } from '@angular/material/icon';
+import {CommonModule} from '@angular/common';
+import {FlexLayoutModule} from '@angular/flex-layout';
+import {JobDialogModule} from './job-dialog/job-dialog.module';
+import {DrawingToolsModule} from './drawing-tools/drawing-tools.module';
+import {MainPageComponent} from './main-page.component';
+import {MapModule} from './map/map.module';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {NgModule} from '@angular/core';
+import {SidePanelModule} from './side-panel/side-panel.module';
+import {SurveyHeaderModule} from './survey-header/survey-header.module';
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
   declarations: [MainPageComponent],

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { DataImportService } from 'app/services/data-import/data-import.service';
-import { HttpClient } from '@angular/common/http';
-import { MatDialogModule } from '@angular/material/dialog';
+import {DataImportService} from 'app/services/data-import/data-import.service';
+import {HttpClient} from '@angular/common/http';
+import {MatDialogModule} from '@angular/material/dialog';
 
 describe('DataImportService', () => {
   let service: DataImportService;
@@ -26,7 +26,7 @@ describe('DataImportService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [MatDialogModule],
-      providers: [{ provide: HttpClient, useValue: {} }],
+      providers: [{provide: HttpClient, useValue: {}}],
     });
     service = TestBed.inject(DataImportService);
   });

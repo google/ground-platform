@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Option } from 'app/models/task/option.model';
-import { List } from 'immutable';
+import {Option} from 'app/models/task/option.model';
+import {List} from 'immutable';
 
 /**
  *

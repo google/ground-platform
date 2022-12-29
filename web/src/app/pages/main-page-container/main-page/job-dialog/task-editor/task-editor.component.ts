@@ -38,18 +38,18 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { DialogService } from 'app/services/dialog/dialog.service';
-import { TaskType } from 'app/models/task/task.model';
-import { Option } from 'app/models/task/option.model';
-import { List } from 'immutable';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {TaskType} from 'app/models/task/task.model';
+import {Option} from 'app/models/task/option.model';
+import {List} from 'immutable';
 import {
   MultipleChoice,
   Cardinality,
 } from 'app/models/task/multiple-choice.model';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { JobService } from 'app/services/job/job.service';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { OptionEditorComponent } from './option-editor/option-editor.component';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {JobService} from 'app/services/job/job.service';
+import {firstValueFrom, Subscription} from 'rxjs';
+import {OptionEditorComponent} from './option-editor/option-editor.component';
 
 export interface TaskTypeSelectOption {
   icon: string;
@@ -84,7 +84,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
   subscription: Subscription = new Subscription();
 
   taskGroup: FormGroup;
-  @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
+  @ViewChild('questionInput', {static: true}) questionInput?: ElementRef;
 
   @HostListener('click')
   onTaskFocus() {
@@ -240,7 +240,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({ selectTaskOption: event });
+    this.taskGroup.patchValue({selectTaskOption: event});
     if (event.type === TaskType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
@@ -264,7 +264,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: { label: string; code: string }, index: number): void {
+  onOptionUpdate(event: {label: string; code: string}, index: number): void {
     const option = this.jobService.createOption(event.code, event.label, index);
     const options = this.setTaskOptions(index, option);
     this.emitTaskOptions(options);

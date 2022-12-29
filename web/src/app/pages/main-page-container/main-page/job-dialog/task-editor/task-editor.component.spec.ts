@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { TaskEditorComponent } from 'app/components/task-editor/task-editor.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { JobService } from 'app/services/job/job.service';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatDialogModule } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {TaskEditorComponent} from 'app/components/task-editor/task-editor.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {BrowserModule} from '@angular/platform-browser';
+import {JobService} from 'app/services/job/job.service';
+import {MatIconModule} from '@angular/material/icon';
+import {MatSelectModule} from '@angular/material/select';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatDialogModule} from '@angular/material/dialog';
+import {Router} from '@angular/router';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 describe('TaskFieldEditorComponent', () => {
   let component: TaskEditorComponent;
@@ -49,8 +49,8 @@ describe('TaskFieldEditorComponent', () => {
         NoopAnimationsModule,
       ],
       providers: [
-        { provide: Router, useValue: {} },
-        { provide: JobService, useValue: {} },
+        {provide: Router, useValue: {}},
+        {provide: JobService, useValue: {}},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

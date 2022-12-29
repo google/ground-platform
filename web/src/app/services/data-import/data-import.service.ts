@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { environment } from 'environments/environment';
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import {environment} from 'environments/environment';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {firstValueFrom} from 'rxjs';
 
 const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;
 
