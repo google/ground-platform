@@ -15,7 +15,7 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
+import {ShareDialogComponent} from './share-dialog.component';
 import {MatDialogRef, MatDialogModule} from '@angular/material/dialog';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatListModule} from '@angular/material/list';
