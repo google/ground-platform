@@ -19,8 +19,8 @@ import * as functions from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
 import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
-import { db } from '@/common/context';
-import { GeoPoint } from 'firebase-admin/firestore';
+import {db} from '@/common/context';
+import {GeoPoint} from 'firebase-admin/firestore';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -35,10 +35,10 @@ export async function importCsvHandler(
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
   }
-  const busboy = Busboy({ headers: req.headers });
+  const busboy = Busboy({headers: req.headers});
 
   // Dictionary used to accumulate form values, keyed by field name.
-  const params: { [name: string]: string } = {};
+  const params: {[name: string]: string} = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
@@ -52,7 +52,7 @@ export async function importCsvHandler(
 
   // This code will process each file uploaded.
   busboy.on('file', (_key, file, _) => {
-    const { survey: surveyId, job: jobId } = params;
+    const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       res.status(HttpStatus.BAD_REQUEST).end();
       return;
@@ -70,7 +70,7 @@ export async function importCsvHandler(
         req.unpipe(busboy);
         res
           .status(HttpStatus.BAD_REQUEST)
-          .end(JSON.stringify({ error: err.message }));
+          .end(JSON.stringify({error: err.message}));
       }
     });
   });
@@ -80,7 +80,7 @@ export async function importCsvHandler(
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`Inserted ${count} rows`);
-    res.status(HttpStatus.OK).end(JSON.stringify({ count }));
+    res.status(HttpStatus.OK).end(JSON.stringify({count}));
   });
 
   busboy.on('error', (err: any) => {
@@ -101,8 +101,8 @@ export async function importCsvHandler(
  */
 function invertAndFlatten(obj: any) {
   return Object.keys(obj)
-    .flatMap(k => obj[k].map((v: any) => ({ k, v })))
-    .reduce((o, { v, k }) => {
+    .flatMap(k => obj[k].map((v: any) => ({k, v})))
+    .reduce((o, {v, k}) => {
       o[v] = k;
       return o;
     }, {});
@@ -131,8 +131,8 @@ async function insertRow(surveyId: string, jobId: string, row: any) {
  * LocationOfInterest for insertion into the data store.
  */
 function csvRowToLocationOfInterest(row: any, jobId: string) {
-  const data: any = { jobId };
-  const properties: { [name: string]: any } = {};
+  const data: any = {jobId};
+  const properties: {[name: string]: any} = {};
   for (const columnName in row) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];
@@ -142,7 +142,7 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
       properties[columnName] = value;
     }
   }
-  const { latStr, lngStr, ...loi } = data;
+  const {latStr, lngStr, ...loi} = data;
   const lat = Number.parseFloat(latStr);
   const lng = Number.parseFloat(lngStr);
   if (isNaN(lat) || isNaN(lng)) {
