@@ -16,27 +16,29 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { ShareDialogComponent } from './share-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatListModule } from '@angular/material/list';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
+  declarations: [ShareDialogComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
-    HeaderModule,
     MatButtonModule,
-    MatIconModule,
     MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatListModule,
+    MatSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
-  exports: [SurveyHeaderComponent],
 })
-export class SurveyHeaderModule {}
+export class ShareDialogModule {}

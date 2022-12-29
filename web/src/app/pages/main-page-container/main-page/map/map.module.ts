@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
+import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
+import { MapComponent } from './map.component';
+import { GoogleMapsModule } from '@angular/google-maps';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { SelectLocationOfInterestDialogModule } from 'app/components/select-loi-dialog/select-loi-dialog.module';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
   imports: [
-    CommonModule,
-    FlexLayoutModule,
-    HeaderModule,
+    BrowserModule,
+    GoogleMapsModule,
     MatButtonModule,
-    MatIconModule,
     MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    SelectLocationOfInterestDialogModule,
   ],
-  exports: [SurveyHeaderComponent],
+  exports: [MapComponent],
+  declarations: [MapComponent],
 })
-export class SurveyHeaderModule {}
+export class MapModule {}

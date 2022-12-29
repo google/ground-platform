@@ -18,7 +18,7 @@ import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { ImportDialogComponent } from 'app/components/import-dialog/import-dialog.component';
 import { Job } from 'app/models/job.model';
-import { getPinImageSource } from 'app/components/map/ground-pin';
+import { getPinImageSource } from 'app/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { DataStoreService } from 'app/services/data-store/data-store.service';

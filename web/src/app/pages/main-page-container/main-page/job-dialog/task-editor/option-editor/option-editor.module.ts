@@ -17,26 +17,27 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { OptionEditorComponent } from './option-editor.component';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
+  declarations: [OptionEditorComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
-    HeaderModule,
-    MatButtonModule,
+    MatFormFieldModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatInputModule,
     MatIconModule,
-    MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    MatButtonModule,
+    MatTooltipModule,
   ],
-  exports: [SurveyHeaderComponent],
+  exports: [OptionEditorComponent],
 })
-export class SurveyHeaderModule {}
+export class OptionEditorModule {}

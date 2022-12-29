@@ -17,26 +17,33 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { TaskEditorComponent } from './task-editor.component';
+import { OptionEditorModule } from './option-editor/option-editor.module';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
+  declarations: [TaskEditorComponent],
   imports: [
     CommonModule,
     FlexLayoutModule,
-    HeaderModule,
-    MatButtonModule,
+    MatFormFieldModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatSelectModule,
     MatIconModule,
-    MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    MatSlideToggleModule,
+    MatButtonModule,
+    OptionEditorModule,
+    DragDropModule,
   ],
-  exports: [SurveyHeaderComponent],
+  exports: [TaskEditorComponent],
 })
-export class SurveyHeaderModule {}
+export class TaskEditorModule {}

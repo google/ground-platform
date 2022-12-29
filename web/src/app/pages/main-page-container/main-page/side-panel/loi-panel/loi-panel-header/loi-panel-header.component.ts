@@ -23,7 +23,7 @@ import {
   OnChanges,
 } from '@angular/core';
 import { Job } from 'app/models/job.model';
-import { getPinImageSource } from 'app/components/map/ground-pin';
+import { getPinImageSource } from 'app/ground-pin';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';

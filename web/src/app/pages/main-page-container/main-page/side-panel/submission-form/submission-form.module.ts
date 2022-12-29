@@ -15,30 +15,32 @@
  */
 
 import { BrowserModule } from '@angular/platform-browser';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { ImportDialogModule } from 'app/components/import-dialog/import-dialog.module';
 import { NgModule } from '@angular/core';
-import { JobListItemComponent } from './job-list-item.component';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SubmissionFormComponent } from './submission-form.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { JobListItemModule } from 'app/components/job-list-item/job-list-item.module';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatListModule } from '@angular/material/list';
 
 @NgModule({
   imports: [
     BrowserModule,
-    FlexLayoutModule,
-    ImportDialogModule,
+    ReactiveFormsModule,
     MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatRadioModule,
+    MatCheckboxModule,
     MatIconModule,
     MatListModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatSnackBarModule,
+    JobListItemModule,
   ],
-  exports: [JobListItemComponent],
-  declarations: [JobListItemComponent],
+  exports: [SubmissionFormComponent],
+  declarations: [SubmissionFormComponent],
 })
-export class JobListItemModule {}
+export class SubmissionFormModule {}

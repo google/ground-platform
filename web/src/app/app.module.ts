@@ -28,11 +28,9 @@ import { AppComponent } from 'app/app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainPageContainerModule } from 'app/pages/main-page-container/main-page-container.module';
 import { environment } from 'environments/environment';
-import { JobDialogModule } from 'app/components/job-dialog/job-dialog.module';
 import { GoogleAuthProvider } from 'firebase/auth';
 import { HttpClientModule } from '@angular/common/http';
 import { firebaseui, FirebaseUIModule } from 'firebaseui-angular';
-import { TitleDialogModule } from 'app/components/title-dialog/title-dialog.module';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 
@@ -82,8 +80,6 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     HttpClientModule,
     MainPageContainerModule,
-    JobDialogModule,
-    TitleDialogModule,
   ],
   bootstrap: [AppComponent],
 })

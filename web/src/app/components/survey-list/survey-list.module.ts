@@ -22,7 +22,6 @@ import { SurveyListComponent } from 'app/components/survey-list/survey-list.comp
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 
@@ -37,7 +36,6 @@ import { MatCardModule } from '@angular/material/card';
     MatDialogModule,
     MatCardModule,
     MatGridListModule,
-    InlineEditorModule,
   ],
   exports: [SurveyListComponent],
 })

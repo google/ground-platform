@@ -14,29 +14,27 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { MatButtonModule } from '@angular/material/button';
+import { NgModule } from '@angular/core';
+import { DrawingToolsComponent } from './drawing-tools.component';
+import { MatButtonModule } from '@angular/material/button'; // ?
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
-    HeaderModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatIconModule,
-    MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
-  exports: [SurveyHeaderComponent],
+  exports: [DrawingToolsComponent],
+  declarations: [DrawingToolsComponent],
 })
-export class SurveyHeaderModule {}
+export class DrawingToolsModule {}

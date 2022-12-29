@@ -16,10 +16,10 @@
 
 import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { JobDialogModule } from 'app/components/job-dialog/job-dialog.module';
-import { DrawingToolsModule } from 'app/components/drawing-tools/drawing-tools.module';
+import { JobDialogModule } from './job-dialog/job-dialog.module';
+import { DrawingToolsModule } from './drawing-tools/drawing-tools.module';
 import { MainPageComponent } from './main-page.component';
-import { MapModule } from 'app/components/map/map.module';
+import { MapModule } from './map/map.module';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';

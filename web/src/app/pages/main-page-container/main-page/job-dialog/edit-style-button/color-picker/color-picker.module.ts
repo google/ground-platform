@@ -16,27 +16,28 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { ColorPickerComponent } from './color-picker.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { ColorCircleModule } from 'ngx-color/circle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
+  declarations: [ColorPickerComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
-    HeaderModule,
-    MatButtonModule,
-    MatIconModule,
     MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    MatFormFieldModule,
+    ColorCircleModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    MatButtonModule,
+    FlexLayoutModule,
+    FormsModule,
   ],
-  exports: [SurveyHeaderComponent],
+  exports: [ColorPickerComponent],
 })
-export class SurveyHeaderModule {}
+export class ColorPickerModule {}

@@ -15,28 +15,22 @@
  */
 
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { HeaderModule } from 'app/components/header/header.module';
-import { SurveyHeaderComponent } from './survey-header.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { InlineEditorModule } from 'app/components/inline-editor/inline-editor.module';
-import { ShareDialogModule } from './share-dialog/share-dialog.module';
+import { TitleDialogComponent } from './title-dialog.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @NgModule({
-  declarations: [SurveyHeaderComponent],
+  declarations: [TitleDialogComponent],
   imports: [
-    CommonModule,
-    FlexLayoutModule,
-    HeaderModule,
     MatButtonModule,
-    MatIconModule,
     MatDialogModule,
-    InlineEditorModule,
-    ShareDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
-  exports: [SurveyHeaderComponent],
 })
-export class SurveyHeaderModule {}
+export class TitleDialogModule {}
