@@ -26,8 +26,6 @@ import { Survey } from 'app/models/survey.model';
 import { Point } from 'app/models/geometry/point';
 import {
   LocationOfInterest,
-  GeoJsonLocationOfInterest,
-  AreaOfInterest,
   GenericLocationOfInterest,
 } from 'app/models/loi.model';
 import {
@@ -47,6 +45,8 @@ import {
   SelectLocationOfInterestDialogComponent,
 } from 'app/components/select-loi-dialog/select-loi-dialog.component';
 import { Coordinate } from 'app/models/geometry/coordinate';
+import { Polygon } from 'app/models/geometry/polygon';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 
 // To make ESLint happy:
 /*global google*/
@@ -250,11 +250,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         const { id, jobId, geometry } = loi;
         this.addPointOfInterest({ id, jobId, color, geometry });
       }
-      if (loi instanceof GeoJsonLocationOfInterest) {
-        this.addGeoJsonLocationOfInterest(color, jobName, loi);
+      if (loi.geometry instanceof Polygon) {
+        this.addPolygonToMap(loi.id, color, jobName, loi.geometry);
       }
-      if (loi instanceof AreaOfInterest) {
-        this.addAreaOfInterest(color, jobName, loi);
+      if (loi.geometry instanceof MultiPolygon) {
+        const geometry: MultiPolygon = loi.geometry;
+        for (const polygon of geometry.polygons) {
+          this.addPolygonToMap(loi.id, color, jobName, polygon);
+        }
       }
     });
   }
@@ -427,34 +430,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.panAndZoom(polygon?.getPaths().getAt(0).getAt(0));
   }
 
-  private addGeoJsonLocationOfInterest(
-    color: string | undefined,
-    jobName: string | undefined,
-    loi: GeoJsonLocationOfInterest
-  ) {
-    const paths: google.maps.LatLng[][] = [];
-    const job = new google.maps.Data();
-    job.addGeoJson(loi.geoJson);
-    job.forEach(f => {
-      if (f.getGeometry() instanceof google.maps.Data.Polygon) {
-        paths.push(
-          ...this.geoJsonPolygonToPaths(
-            f.getGeometry() as google.maps.Data.Polygon
-          )
-        );
-      }
-      if (f.getGeometry() instanceof google.maps.Data.MultiPolygon) {
-        (f.getGeometry() as google.maps.Data.MultiPolygon)
-          .getArray()
-          .forEach(polygon =>
-            paths.push(...this.geoJsonPolygonToPaths(polygon))
-          );
-      }
-    });
-
-    this.addPolygonToMap(loi.id, color, jobName, paths);
-  }
-
   private geoJsonPolygonToPaths(
     polygon: google.maps.Data.Polygon
   ): google.maps.LatLng[][] {
@@ -464,24 +439,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return paths;
   }
 
-  private addAreaOfInterest(
-    color: string | undefined,
-    jobName: string | undefined,
-    loi: AreaOfInterest
-  ) {
-    const vertices: google.maps.LatLng[] = loi.polygonVertices.map(
-      vertex => new google.maps.LatLng(vertex.latitude, vertex.longitude)
-    );
-
-    this.addPolygonToMap(loi.id, color, jobName, [vertices]);
-  }
-
   private addPolygonToMap(
     loiId: string,
     color: string | undefined,
     jobName: string | undefined,
-    paths: google.maps.LatLng[][]
+    polygonModel: Polygon
   ) {
+    const linearRings = [polygonModel.shell, ...polygonModel.holes];
+    const paths = linearRings.map(linearRing =>
+      linearRing.points
+        .map(
+          ({ x, y }: { x: number; y: number }) => new google.maps.LatLng(y, x)
+        )
+        .toJS()
+    );
     const polygon = new google.maps.Polygon({
       paths: paths,
       clickable: true,
