@@ -74,15 +74,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
-  private selectedMarker?: google.maps.Marker;
-  private selectedPolygon?: google.maps.Polygon;
+  private selectedLocationOfInterestId: string | null = null;
   markers: Map<string, google.maps.Marker> = new Map<
     string,
     google.maps.Marker
   >();
-  polygons: Map<string, google.maps.Polygon> = new Map<
+  polygons: Map<string, google.maps.Polygon[]> = new Map<
     string,
-    google.maps.Polygon
+    google.maps.Polygon[]
   >();
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
@@ -216,7 +215,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private removeDeletedPolygons(newLoiIds: List<string>) {
     for (const id of this.polygons.keys()) {
       if (!newLoiIds.contains(id)) {
-        this.polygons.get(id)!.setMap(null);
+        for (const polygon of this.polygons.get(id)!) {
+          polygon.setMap(null);
+        }
         this.polygons.delete(id);
       }
     }
@@ -248,21 +249,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       if (loi.geometry instanceof Point) {
         const { id, jobId, geometry } = loi;
-        this.addPointOfInterest({ id, jobId, color, geometry });
+        const marker = this.addPointOfInterestToMap({
+          id,
+          jobId,
+          color,
+          geometry,
+        });
+        this.markers.set(id, marker);
       }
       if (loi.geometry instanceof Polygon) {
-        this.addPolygonToMap(loi.id, color, jobName, loi.geometry);
+        const polygon = this.addPolygonToMap(
+          loi.id,
+          color,
+          jobName,
+          loi.geometry
+        );
+        this.polygons.set(loi.id, [polygon]);
       }
       if (loi.geometry instanceof MultiPolygon) {
         const geometry: MultiPolygon = loi.geometry;
+        const polygons: google.maps.Polygon[] = [];
         for (const polygon of geometry.polygons) {
-          this.addPolygonToMap(loi.id, color, jobName, polygon);
+          polygons.push(this.addPolygonToMap(loi.id, color, jobName, polygon));
         }
+        this.polygons.set(loi.id, polygons);
       }
     });
   }
 
-  private addPointOfInterest({
+  private addPointOfInterestToMap({
     id,
     jobId,
     geometry,
@@ -272,7 +287,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     jobId: string;
     geometry: Point;
     color: string | undefined;
-  }) {
+  }): google.maps.Marker {
     const { x: latitude, y: longitude } = geometry.coord;
     const icon = {
       url: getPinImageSource(color),
@@ -296,7 +311,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
       this.onMarkerDragEnd(event, id, jobId)
     );
-    this.markers.set(id, marker);
+    return marker;
   }
 
   private onMarkerClick(loiId: string) {
@@ -369,36 +384,36 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Selecting LOI enlarges the marker or border of the polygon,
-   * pans and zooms to the marker/polygon. Selecting null is considered
+   * Selecting LOI enlarges the marker or border of the polygon(s),
+   * pans and zooms to the marker/polygon(s). Selecting null is considered
    * as deselecting which will change the selected back to normal size.
    */
   private selectLocationOfInterest(
     selectedLocationOfInterestId: string | null
   ) {
-    const markerToSelect = this.markers.get(
-      selectedLocationOfInterestId as string
-    );
-    this.selectMarker(markerToSelect);
-    const polygonToSelect = this.polygons.get(
-      selectedLocationOfInterestId as string
-    );
-    this.selectPolygon(polygonToSelect);
-  }
-
-  private selectMarker(marker: google.maps.Marker | undefined) {
-    if (marker === this.selectedMarker) {
+    if (selectedLocationOfInterestId === this.selectedLocationOfInterestId) {
       return;
     }
+    this.selectMarker(selectedLocationOfInterestId);
+    this.selectPolygons(selectedLocationOfInterestId);
+    this.selectedLocationOfInterestId = selectedLocationOfInterestId;
+  }
+
+  private selectMarker(locationOfInterestId: string | null) {
+    const marker = locationOfInterestId
+      ? this.markers.get(locationOfInterestId)
+      : undefined;
     if (marker) {
       this.setIconSize(marker, enlargedIconScale);
       marker.setDraggable(true);
     }
-    if (this.selectedMarker) {
-      this.setIconSize(this.selectedMarker, normalIconScale);
-      this.selectedMarker.setDraggable(false);
+    const selectedMarker =
+      this.selectedLocationOfInterestId &&
+      this.markers.get(this.selectedLocationOfInterestId);
+    if (selectedMarker) {
+      this.setIconSize(selectedMarker, normalIconScale);
+      selectedMarker.setDraggable(false);
     }
-    this.selectedMarker = marker;
     this.panAndZoom(marker?.getPosition());
   }
 
@@ -414,29 +429,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.setIcon(newIcon);
   }
 
-  private selectPolygon(polygon: google.maps.Polygon | undefined) {
-    if (polygon === this.selectedPolygon) {
-      return;
+  private selectPolygons(locationOfInterestId: string | null) {
+    const polygons = locationOfInterestId
+      ? this.polygons.get(locationOfInterestId)
+      : undefined;
+    if (polygons) {
+      for (const polygon of polygons) {
+        polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
+      }
     }
-    if (polygon) {
-      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
+    const selectedPolygons = this.selectedLocationOfInterestId
+      ? this.polygons.get(this.selectedLocationOfInterestId)
+      : undefined;
+    if (selectedPolygons) {
+      for (const polygon of selectedPolygons)
+        polygon.setOptions({
+          strokeWeight: normalPolygonStrokeWeight,
+        });
     }
-    if (this.selectedPolygon) {
-      this.selectedPolygon.setOptions({
-        strokeWeight: normalPolygonStrokeWeight,
-      });
-    }
-    this.selectedPolygon = polygon;
-    this.panAndZoom(polygon?.getPaths().getAt(0).getAt(0));
-  }
-
-  private geoJsonPolygonToPaths(
-    polygon: google.maps.Data.Polygon
-  ): google.maps.LatLng[][] {
-    const paths: google.maps.LatLng[][] = polygon
-      .getArray()
-      .map(linearRing => linearRing.getArray());
-    return paths;
+    const firstPolygon = polygons && polygons[0];
+    this.panAndZoom(firstPolygon?.getPaths().getAt(0).getAt(0));
   }
 
   private addPolygonToMap(
@@ -444,7 +456,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     color: string | undefined,
     jobName: string | undefined,
     polygonModel: Polygon
-  ) {
+  ): google.maps.Polygon {
     const linearRings = [polygonModel.shell, ...polygonModel.holes];
     const paths = linearRings.map(linearRing =>
       linearRing.points
@@ -468,7 +480,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
       this.onPolygonClick(event);
     });
-    this.polygons.set(loiId, polygon);
+    return polygon;
   }
 
   private onPolygonClick(event: google.maps.PolyMouseEvent) {
@@ -476,9 +488,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const candidatePolygons: google.maps.Polygon[] = [];
-    for (const polygon of this.polygons.values()) {
-      if (google.maps.geometry.poly.containsLocation(event.latLng!, polygon)) {
-        candidatePolygons.push(polygon);
+    for (const loiPolygons of this.polygons.values()) {
+      for (const polygon of loiPolygons) {
+        if (
+          google.maps.geometry.poly.containsLocation(event.latLng!, polygon)
+        ) {
+          candidatePolygons.push(polygon);
+        }
       }
     }
     if (candidatePolygons.length === 1) {
