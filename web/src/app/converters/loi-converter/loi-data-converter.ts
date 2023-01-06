@@ -74,6 +74,9 @@ export class LoiDataConverter {
     }
   }
 
+  // TODO(Nick): Add polygon / multipolygon conversion, remove AreaOfInterest
+  // and GeoJsonLocationOfInterest. This may not be urgent, as only point
+  // conversion seems to be used on the frontend.
   public static loiToJS(loi: LocationOfInterest): {} | Error {
     // TODO: Set audit info (created / last modified user and timestamp).
     if (loi.geometry instanceof Point) {

@@ -29,10 +29,9 @@ import { DialogService } from 'app/services/dialog/dialog.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { Subscription } from 'rxjs';
-import { GeoJsonLocationOfInterest } from 'app/models/loi.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { Map } from 'immutable';
-import { Point } from 'app/models/geometry/point';
+import { GeometryType, geometryTypeLabel } from 'app/models/geometry/geometry';
 @Component({
   selector: 'ground-loi-panel-header',
   templateUrl: './loi-panel-header.component.html',
@@ -47,9 +46,9 @@ export class LocationOfInterestPanelHeaderComponent
   pinUrl: SafeUrl;
   readonly loiType = LocationOfInterestType;
   subscription: Subscription = new Subscription();
-  loiTypeValue?: LocationOfInterestType;
   private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
   private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
+  private loiGeometryType?: GeometryType;
   private loiProperties?: Map<string, string | number>;
 
   constructor(
@@ -63,11 +62,7 @@ export class LocationOfInterestPanelHeaderComponent
     this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
     this.subscription.add(
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
-        if (loi instanceof GeoJsonLocationOfInterest) {
-          this.loiTypeValue = LocationOfInterestType.Polygon;
-        } else if (loi.geometry instanceof Point) {
-          this.loiTypeValue = LocationOfInterestType.Point;
-        }
+        this.loiGeometryType = loi.geometry?.geometryType;
         this.loiProperties = loi.properties;
       })
     );
@@ -138,8 +133,8 @@ export class LocationOfInterestPanelHeaderComponent
     if (caption) {
       return caption;
     }
-    const loiType =
-      this.loiTypeValue === LocationOfInterestType.Point ? 'Point' : 'Polygon';
+    const loiType = geometryTypeLabel(this.loiGeometryType);
+
     const id = this.findProperty(this.ID_PROPERTIES);
     if (id) {
       return loiType + ' ' + id;
@@ -169,4 +164,5 @@ export class LocationOfInterestPanelHeaderComponent
 enum LocationOfInterestType {
   Point = 'POINT',
   Polygon = 'POLYGON',
+  MultiPolygon = 'MULTIPOLYGON',
 }

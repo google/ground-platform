@@ -33,3 +33,14 @@ export enum GeometryType {
   POLYGON = 'POLYGON',
   MULTI_POLYGON = 'MULTI_POLYGON',
 }
+
+/** A label for a given geometry type. Defaults to 'Polygon'. */
+export function geometryTypeLabel(geometryType?: GeometryType): string {
+  if (geometryType === GeometryType.POINT) {
+    return 'Point';
+  }
+  if (geometryType === GeometryType.MULTI_POLYGON) {
+    return 'Multipolygon';
+  }
+  return 'Polygon';
+}
