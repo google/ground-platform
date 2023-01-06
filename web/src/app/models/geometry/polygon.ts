@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { hash, is, List } from 'immutable';
-import { Geometry, GeometryType } from 'app/models/geometry/geometry';
-import { LinearRing } from 'app/models/geometry/linear-ring';
+import {hash, is, List} from 'immutable';
+import {Geometry, GeometryType} from 'app/models/geometry/geometry';
+import {LinearRing} from 'app/models/geometry/linear-ring';
 
 /**
  * Represents a polygon with linear edges, which may include holes. The outer

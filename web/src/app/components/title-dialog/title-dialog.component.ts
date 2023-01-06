@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {Component} from '@angular/core';
+import {FormControl, FormGroup} from '@angular/forms';
+import {MatDialogRef} from '@angular/material/dialog';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-title-dialog',
@@ -33,7 +33,7 @@ export class TitleDialogComponent {
     private navigationService: NavigationService,
     private surveyService: SurveyService
   ) {
-    this.surveyTitleForm = new FormGroup({ title: new FormControl() });
+    this.surveyTitleForm = new FormGroup({title: new FormControl()});
   }
 
   async onCreateSurvey() {

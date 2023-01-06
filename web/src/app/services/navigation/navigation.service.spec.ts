@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { Router } from '@angular/router';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {Router} from '@angular/router';
 
 describe('NavigationService', () => {
   let service: NavigationService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: Router, useValue: {} }],
+      providers: [{provide: Router, useValue: {}}],
     });
     service = TestBed.inject(NavigationService);
   });

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Coordinate } from 'app/models/geometry/coordinate';
-import { GeometryType } from 'app/models/geometry/geometry';
-import { LineString } from 'app/models/geometry/line-string';
-import { List } from 'immutable';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {GeometryType} from 'app/models/geometry/geometry';
+import {LineString} from 'app/models/geometry/line-string';
+import {List} from 'immutable';
 
 /**
  * Models an OGC SFS LinearRing. A LinearRing is a LineString which is both

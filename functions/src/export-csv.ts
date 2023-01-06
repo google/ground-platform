@@ -17,8 +17,8 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import { geojsonToWKT } from '@terraformer/wkt';
-import { db } from '@/common/context';
+import {geojsonToWKT} from '@terraformer/wkt';
+import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 
 // TODO: Refactor into meaningful pieces.
@@ -42,7 +42,7 @@ export async function exportCsvHandler(
   const task = (Object.values(tasks)[0] as any) || {};
   const elementMap = task['elements'] || {};
   const elements = Object.keys(elementMap)
-    .map(elementId => ({ id: elementId, ...elementMap[elementId] }))
+    .map(elementId => ({id: elementId, ...elementMap[elementId]}))
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
@@ -79,7 +79,7 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
+  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];

@@ -22,8 +22,8 @@ import {
   NgZone,
   ChangeDetectorRef,
 } from '@angular/core';
-import { Survey } from 'app/models/survey.model';
-import { Point } from 'app/models/geometry/point';
+import {Survey} from 'app/models/survey.model';
+import {Point} from 'app/models/geometry/point';
 import {
   LocationOfInterest,
   GenericLocationOfInterest,
@@ -32,21 +32,21 @@ import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { combineLatest, Observable, Subscription } from 'rxjs';
-import { List, Map as ImmutableMap } from 'immutable';
-import { getPinImageSource } from 'app/components/map/ground-pin';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { GoogleMap } from '@angular/google-maps';
-import { MatDialog } from '@angular/material/dialog';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {combineLatest, Observable, Subscription} from 'rxjs';
+import {List, Map as ImmutableMap} from 'immutable';
+import {getPinImageSource} from 'app/components/map/ground-pin';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {GoogleMap} from '@angular/google-maps';
+import {MatDialog} from '@angular/material/dialog';
 import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
 } from 'app/components/select-loi-dialog/select-loi-dialog.component';
-import { Coordinate } from 'app/models/geometry/coordinate';
-import { Polygon } from 'app/models/geometry/polygon';
-import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {Polygon} from 'app/models/geometry/polygon';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 // To make ESLint happy:
 /*global google*/
@@ -248,7 +248,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const jobName = survey.jobs.get(loi.jobId)?.name;
 
       if (loi.geometry instanceof Point) {
-        const { id, jobId, geometry } = loi;
+        const {id, jobId, geometry} = loi;
         const marker = this.addPointOfInterestToMap({
           id,
           jobId,
@@ -288,7 +288,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     geometry: Point;
     color: string | undefined;
   }): google.maps.Marker {
-    const { x: latitude, y: longitude } = geometry.coord;
+    const {x: latitude, y: longitude} = geometry.coord;
     const icon = {
       url: getPinImageSource(color),
       scaledSize: {
@@ -435,7 +435,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       : undefined;
     if (polygons) {
       for (const polygon of polygons) {
-        polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight });
+        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
       }
     }
     const selectedPolygons = this.selectedLocationOfInterestId
@@ -460,9 +460,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const linearRings = [polygonModel.shell, ...polygonModel.holes];
     const paths = linearRings.map(linearRing =>
       linearRing.points
-        .map(
-          ({ x, y }: { x: number; y: number }) => new google.maps.LatLng(y, x)
-        )
+        .map(({x, y}: {x: number; y: number}) => new google.maps.LatLng(y, x))
         .toJS()
     );
     const polygon = new google.maps.Polygon({

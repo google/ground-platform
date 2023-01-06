@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { AuthService } from 'app/services/auth/auth.service';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CurrentUserWidgetComponent } from 'app/components/header/current-user-widget/current-user-widget.component';
-import { Subject } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { User } from 'app/models/user.model';
+import {AuthService} from 'app/services/auth/auth.service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {CurrentUserWidgetComponent} from 'app/components/header/current-user-widget/current-user-widget.component';
+import {Subject} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
+import {User} from 'app/models/user.model';
 
 describe('CurrentUserWidgetComponent', () => {
   let component: CurrentUserWidgetComponent;
@@ -29,8 +29,8 @@ describe('CurrentUserWidgetComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       providers: [
-        { provide: AuthService, useValue: { user$, getUser$: () => user$ } },
-        { provide: MatDialog, useValue: {} },
+        {provide: AuthService, useValue: {user$, getUser$: () => user$}},
+        {provide: MatDialog, useValue: {}},
       ],
       declarations: [CurrentUserWidgetComponent],
     }).compileComponents();

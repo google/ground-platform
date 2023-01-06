@@ -17,7 +17,7 @@
 
 import * as functions from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
-import { db } from '@/common/context';
+import {db} from '@/common/context';
 import * as Busboy from 'busboy';
 import * as JSONStream from 'jsonstream-ts';
 
@@ -34,10 +34,10 @@ export async function importGeoJsonHandler(
     return;
   }
 
-  const busboy = Busboy({ headers: req.headers });
+  const busboy = Busboy({headers: req.headers});
 
   // Dictionary used to accumulate task step values, keyed by step name.
-  const params: { [name: string]: string } = {};
+  const params: {[name: string]: string} = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
@@ -51,11 +51,11 @@ export async function importGeoJsonHandler(
 
   // This code will process each file uploaded.
   busboy.on('file', (_field, file, _filename) => {
-    const { survey: surveyId, job: jobId } = params;
+    const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       res
         .status(HttpStatus.BAD_REQUEST)
-        .end(JSON.stringify({ error: 'Invalid request' }));
+        .end(JSON.stringify({error: 'Invalid request'}));
       return;
     }
     console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
@@ -89,7 +89,7 @@ export async function importGeoJsonHandler(
           req.unpipe(busboy);
           res
             .status(HttpStatus.BAD_REQUEST)
-            .end(JSON.stringify({ error: (err as Error).message }));
+            .end(JSON.stringify({error: (err as Error).message}));
           // TODO(#525): Abort stream on error. How?
         }
       });
@@ -100,7 +100,7 @@ export async function importGeoJsonHandler(
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`${count} lois imported`);
-    res.status(HttpStatus.OK).end(JSON.stringify({ count }));
+    res.status(HttpStatus.OK).end(JSON.stringify({count}));
   });
 
   busboy.on('error', (err: any) => {

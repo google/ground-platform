@@ -21,30 +21,30 @@ import {
   tick,
   fakeAsync,
 } from '@angular/core/testing';
-import { MapComponent } from 'app/components/map/map.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { Survey } from 'app/models/survey.model';
+import {MapComponent} from 'app/components/map/map.component';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {Survey} from 'app/models/survey.model';
 import {
   LocationOfInterest,
   GenericLocationOfInterest,
 } from 'app/models/loi.model';
-import { Map, List } from 'immutable';
-import { Job } from 'app/models/job.model';
-import { BehaviorSubject, of } from 'rxjs';
-import { GoogleMapsModule } from '@angular/google-maps';
-import { urlPrefix } from 'app/components/map/ground-pin';
+import {Map, List} from 'immutable';
+import {Job} from 'app/models/job.model';
+import {BehaviorSubject, of} from 'rxjs';
+import {GoogleMapsModule} from '@angular/google-maps';
+import {urlPrefix} from 'app/components/map/ground-pin';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import { Point } from 'app/models/geometry/point';
-import { Coordinate } from 'app/models/geometry/coordinate';
-import { Polygon } from 'app/models/geometry/polygon';
-import { LinearRing } from 'app/models/geometry/linear-ring';
-import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import {Point} from 'app/models/geometry/point';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {Polygon} from 'app/models/geometry/polygon';
+import {LinearRing} from 'app/models/geometry/linear-ring';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 function polygonShellCoordsToPolygon(coordinates: number[][]): Polygon {
   const coordinateInstances = coordinates.map(
@@ -208,14 +208,14 @@ describe('MapComponent', () => {
       imports: [GoogleMapsModule],
       declarations: [MapComponent],
       providers: [
-        { provide: MatDialog, useValue: dialogSpy },
-        { provide: SurveyService, useValue: surveyServiceSpy },
+        {provide: MatDialog, useValue: dialogSpy},
+        {provide: SurveyService, useValue: surveyServiceSpy},
         {
           provide: LocationOfInterestService,
           useValue: loiServiceSpy,
         },
-        { provide: NavigationService, useValue: navigationServiceSpy },
-        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
+        {provide: NavigationService, useValue: navigationServiceSpy},
+        {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
       ],
     }).compileComponents();
   }));

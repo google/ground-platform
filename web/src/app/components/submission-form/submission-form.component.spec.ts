@@ -14,46 +14,46 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { SubmissionFormComponent } from 'app/components/submission-form/submission-form.component';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {SubmissionFormComponent} from 'app/components/submission-form/submission-form.component';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import { NEVER, of } from 'rxjs';
-import { Survey } from 'app/models/survey.model';
-import { List, Map } from 'immutable';
-import { Submission } from 'app/models/submission/submission.model';
-import { Result } from 'app/models/submission/result.model';
-import { Job } from 'app/models/job.model';
-import { Option } from 'app/models/task/option.model';
+import {NEVER, of} from 'rxjs';
+import {Survey} from 'app/models/survey.model';
+import {List, Map} from 'immutable';
+import {Submission} from 'app/models/submission/submission.model';
+import {Result} from 'app/models/submission/result.model';
+import {Job} from 'app/models/job.model';
+import {Option} from 'app/models/task/option.model';
 import {
   MultipleChoice,
   Cardinality,
 } from 'app/models/task/multiple-choice.model';
-import { TaskType, Task } from 'app/models/task/task.model';
-import { AuditInfo } from 'app/models/audit-info.model';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import { Router } from '@angular/router';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { JobListItemModule } from 'app/components/job-list-item/job-list-item.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AuthService } from 'app/services/auth/auth.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { By } from '@angular/platform-browser';
-import { Point } from 'app/models/geometry/point';
-import { Coordinate } from 'app/models/geometry/coordinate';
+import {TaskType, Task} from 'app/models/task/task.model';
+import {AuditInfo} from 'app/models/audit-info.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {Router} from '@angular/router';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {AuthService} from 'app/services/auth/auth.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {By} from '@angular/platform-browser';
+import {Point} from 'app/models/geometry/point';
+import {Coordinate} from 'app/models/geometry/coordinate';
 
 class MockModel {
   static task001: Task = new Task(
@@ -104,7 +104,7 @@ class MockModel {
     'survey001',
     'title',
     'description',
-    Map({ job001: MockModel.job001 }),
+    Map({job001: MockModel.job001}),
     /*acl=*/ Map({})
   );
 
@@ -185,16 +185,16 @@ describe('SubmissionFormComponent', () => {
         JobListItemModule,
       ],
       providers: [
-        { provide: DataStoreService, useValue: {} },
+        {provide: DataStoreService, useValue: {}},
         {
           provide: LocationOfInterestService,
           useValue: loiService,
         },
-        { provide: SurveyService, useValue: surveyService },
-        { provide: SubmissionService, useValue: submissionService },
-        { provide: Router, useValue: routerSpy },
-        { provide: NavigationService, useValue: navigationService },
-        { provide: AuthService, useValue: { getUser$: () => NEVER } },
+        {provide: SurveyService, useValue: surveyService},
+        {provide: SubmissionService, useValue: submissionService},
+        {provide: Router, useValue: routerSpy},
+        {provide: NavigationService, useValue: navigationService},
+        {provide: AuthService, useValue: {getUser$: () => NEVER}},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { googleMapsConfig } from 'environments/.google-maps-config';
-import { firebaseConfig } from 'environments/.firebase-config';
-import { offlineBaseMapSources } from 'environments/.backend-config.json';
-import { Env } from 'environments/environment-enums';
+import {googleMapsConfig} from 'environments/.google-maps-config';
+import {firebaseConfig} from 'environments/.firebase-config';
+import {offlineBaseMapSources} from 'environments/.backend-config.json';
+import {Env} from 'environments/environment-enums';
 
 export const environment = {
   production: true,

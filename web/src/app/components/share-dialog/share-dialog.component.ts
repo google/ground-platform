@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import {Component} from '@angular/core';
+import {MatDialogRef} from '@angular/material/dialog';
 import {
   Validators,
   FormControl,
@@ -23,13 +23,13 @@ import {
   AbstractControl,
   ValidatorFn,
 } from '@angular/forms';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { Role } from 'app/models/role.model';
-import { Subscription } from 'rxjs';
-import { Survey } from 'app/models/survey.model';
-import { MatSelectChange } from '@angular/material/select';
-import { take } from 'rxjs/operators';
-import { Map } from 'immutable';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Role} from 'app/models/role.model';
+import {Subscription} from 'rxjs';
+import {Survey} from 'app/models/survey.model';
+import {MatSelectChange} from '@angular/material/select';
+import {take} from 'rxjs/operators';
+import {Map} from 'immutable';
 
 /**
  * Represents a single entry in the sharing dialog.
@@ -46,9 +46,9 @@ class AclEntry {
 export class ShareDialogComponent {
   /** Roles and labels for select drop-downs. */
   readonly ROLE_OPTIONS = [
-    { label: 'Data Collector', value: Role.DATA_COLLECTOR },
-    { label: 'Survey Organizer', value: Role.SURVEY_ORGANIZER },
-    { label: 'Viewer', value: Role.VIEWER },
+    {label: 'Data Collector', value: Role.DATA_COLLECTOR},
+    {label: 'Survey Organizer', value: Role.SURVEY_ORGANIZER},
+    {label: 'Viewer', value: Role.VIEWER},
   ];
 
   addUserForm = new FormGroup({
@@ -94,7 +94,7 @@ export class ShareDialogComponent {
     if (!this.surveyId || !this.acl) {
       return;
     }
-    const { email, role } = this.addUserForm.value;
+    const {email, role} = this.addUserForm.value;
 
     // Add new email/role and update change state. Validation rules prevent
     // the same email from being added twice.
@@ -102,7 +102,7 @@ export class ShareDialogComponent {
     this.updateChangeState();
 
     // Clear "Add data collector" field.
-    this.addUserForm.setValue({ email: '', role: Role.DATA_COLLECTOR });
+    this.addUserForm.setValue({email: '', role: Role.DATA_COLLECTOR});
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
@@ -171,11 +171,11 @@ export class ShareDialogComponent {
 
   private notInListValidator(): ValidatorFn {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (control: AbstractControl): { [key: string]: any } | null => {
+    return (control: AbstractControl): {[key: string]: any} | null => {
       const emailsInAcl = this.acl?.map(entry => entry.email) || [];
       const newEmail = control.value;
       return emailsInAcl.includes(newEmail)
-        ? { forbiddenName: { value: control.value } }
+        ? {forbiddenName: {value: control.value}}
         : null;
     };
   }
