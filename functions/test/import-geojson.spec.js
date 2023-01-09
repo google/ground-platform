@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-var assert = require("assert");
+const assert = require('assert');
 const Datastore = require("../common/datastore");
 
-describe("Array", function () {
-  describe("#indexOf()", function () {
-    it("should return -1 when the value is not present", function () {
+describe("Array", () => {
+  describe("#indexOf()", () => {
+    it("should return -1 when the value is not present", () => {
       console.log(
         JSON.stringify(
           Datastore.toFirestoreMap({
