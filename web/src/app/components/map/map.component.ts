@@ -447,8 +447,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           strokeWeight: normalPolygonStrokeWeight,
         });
     }
-    const firstPolygon = polygons && polygons[0];
-    this.panAndZoom(firstPolygon?.getPaths().getAt(0).getAt(0));
   }
 
   private addPolygonToMap(

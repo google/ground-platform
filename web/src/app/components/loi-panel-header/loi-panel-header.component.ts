@@ -31,7 +31,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Subscription} from 'rxjs';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Map} from 'immutable';
-import {GeometryType, geometryTypeLabel} from 'app/models/geometry/geometry';
+import {GeometryType} from 'app/models/geometry/geometry';
 @Component({
   selector: 'ground-loi-panel-header',
   templateUrl: './loi-panel-header.component.html',
@@ -128,12 +128,24 @@ export class LocationOfInterestPanelHeaderComponent
     });
   }
 
+  /** A label for a given geometry type. Defaults to 'Polygon'. */
+  private geometryTypeLabel(geometryType?: GeometryType): string {
+    switch (geometryType) {
+      case GeometryType.POINT:
+        return 'Point';
+      case GeometryType.MULTI_POLYGON:
+        return 'Multipolygon';
+      default:
+        return 'Polygon';
+    }
+  }
+
   getLocationOfInterestName(): string | number {
     const caption = this.findProperty(this.CAPTION_PROPERTIES);
     if (caption) {
       return caption;
     }
-    const loiType = geometryTypeLabel(this.loiGeometryType);
+    const loiType = this.geometryTypeLabel(this.loiGeometryType);
 
     const id = this.findProperty(this.ID_PROPERTIES);
     if (id) {
