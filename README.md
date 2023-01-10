@@ -72,7 +72,7 @@ $ cd functions && npm install && npm run emulators
 Leave the emulator running, and in a new shell execute the following:
 
 ```
-$ cd web && npm install && npm run start:local
+$ cd web && npm install && npm run start:dev
 ```
 
 Once the local server is ready, you can navigate to
