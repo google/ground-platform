@@ -48,7 +48,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
-    readonly surveyService: SurveyService,
+    readonly surveyService: SurveyService
   ) {
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
       groundPinService.getPinImageSource()

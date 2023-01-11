@@ -40,7 +40,7 @@ export class EditStyleButtonComponent implements OnInit {
     // tslint:disable-next-line:no-any
     private dialog: MatDialog,
     private sanitizer: DomSanitizer,
-    private groundPinService: GroundPinService,
+    private groundPinService: GroundPinService
   ) {
     this.markerPinUrl = sanitizer.bypassSecurityTrustUrl(
       groundPinService.getPinImageSource(this.markerColor)
