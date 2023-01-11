@@ -24,6 +24,8 @@ import {SurveyListComponent} from 'app/components/survey-list/survey-list.compon
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {SignInPageModule} from 'app/components/sign-in-page/sign-in-page.module';
 import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
+import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
+import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
 
 const routes: Routes = [
   {
@@ -41,6 +43,16 @@ const routes: Routes = [
     component: SurveyListComponent,
     canActivate: [AuthGuard],
   },
+  {
+    path: `${NavigationService.SURVEYS_SEGMENT}/create`,
+    component: CreateSurveyComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEYS_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_CREATE}`,
+    component: CreateSurveyComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 const config = RouterModule.forRoot(routes, {
   relativeLinkResolution: 'legacy',
@@ -53,6 +65,7 @@ const config = RouterModule.forRoot(routes, {
     RouterModule,
     SignInPageModule,
     SurveyListModule,
+    CreateSurveyModule,
   ],
 })
 export class AppRoutingModule {}

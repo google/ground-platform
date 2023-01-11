@@ -102,10 +102,12 @@ export class FirebaseDataConverter {
   static newSurveyJS(
     ownerEmail: string,
     title: string,
+    description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ) {
     return {
       title,
+      description,
       acl: {[ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER)},
       ...(offlineBaseMapSources?.length ? {offlineBaseMapSources} : {}),
     };

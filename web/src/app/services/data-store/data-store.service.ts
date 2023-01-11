@@ -101,6 +101,24 @@ export class DataStoreService {
       .set({title: newTitle}, {merge: true});
   }
 
+  /**
+   * Updates the survey with new title and new description.
+   *
+   * @param surveyId the id of the survey.
+   * @param newTitle the new title of the survey.
+   * @param newDescription the new description of the survey.
+   */
+  updateSurveyTitleAndDescription(
+    surveyId: string,
+    newTitle: string,
+    newDescription: string
+  ): Promise<void> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .set({title: newTitle, description: newDescription}, {merge: true});
+  }
+
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
@@ -346,6 +364,7 @@ export class DataStoreService {
   async createSurvey(
     ownerEmail: string,
     title: string,
+    description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ): Promise<string> {
     const surveyId = this.generateId();
@@ -356,6 +375,7 @@ export class DataStoreService {
         FirebaseDataConverter.newSurveyJS(
           ownerEmail,
           title,
+          description,
           offlineBaseMapSources
         )
       );
