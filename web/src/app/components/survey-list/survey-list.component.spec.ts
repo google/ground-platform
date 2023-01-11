@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { MatDialog } from '@angular/material/dialog';
-import { Component } from '@angular/core';
-import { NEVER, of } from 'rxjs';
-import { AuthService } from 'app/services/auth/auth.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { Map } from 'immutable';
-import { SurveyListComponent } from 'app/components/survey-list/survey-list.component';
-import { MatCardModule } from '@angular/material/card';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { Survey } from 'app/models/survey.model';
-import { Job } from 'app/models/job.model';
-import { AclEntry } from 'app/models/acl-entry.model';
-import { Role } from 'app/models/role.model';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {MatDialog} from '@angular/material/dialog';
+import {Component} from '@angular/core';
+import {NEVER, of} from 'rxjs';
+import {AuthService} from 'app/services/auth/auth.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Map} from 'immutable';
+import {SurveyListComponent} from 'app/components/survey-list/survey-list.component';
+import {MatCardModule} from '@angular/material/card';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {Survey} from 'app/models/survey.model';
+import {Job} from 'app/models/job.model';
+import {AclEntry} from 'app/models/acl-entry.model';
+import {Role} from 'app/models/role.model';
 
-@Component({ selector: 'ground-header', template: '' })
+@Component({selector: 'ground-header', template: ''})
 class HeaderComponent {}
 
 describe('SurveyListComponent', () => {
@@ -96,12 +96,12 @@ describe('SurveyListComponent', () => {
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [
-        { provide: MatDialog, useValue: dialog },
-        { provide: SurveyService, useValue: surveyServiceSpy },
-        { provide: NavigationService, useValue: navigationService },
-        { provide: AngularFirestore, useValue: {} },
-        { provide: AngularFireAuth, useValue: {} },
-        { provide: AuthService, useValue: authServiceSpy },
+        {provide: MatDialog, useValue: dialog},
+        {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: NavigationService, useValue: navigationService},
+        {provide: AngularFirestore, useValue: {}},
+        {provide: AngularFireAuth, useValue: {}},
+        {provide: AuthService, useValue: authServiceSpy},
       ],
     }).compileComponents();
   }));

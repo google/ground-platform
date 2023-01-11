@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import {TestBed} from '@angular/core/testing';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
 
 describe('DataStoreService', () => {
   beforeEach(() =>
     TestBed.configureTestingModule({
-      providers: [{ provide: AngularFirestore, useValue: {} }],
+      providers: [{provide: AngularFirestore, useValue: {}}],
     })
   );
 

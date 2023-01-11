@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { hash, is } from 'immutable';
-import { Coordinate } from 'app/models/geometry/coordinate';
-import { Geometry, GeometryType } from 'app/models/geometry/geometry';
+import {hash, is} from 'immutable';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {Geometry, GeometryType} from 'app/models/geometry/geometry';
 
 /**
  * Represents a single point.

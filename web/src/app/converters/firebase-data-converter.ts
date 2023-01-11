@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { DocumentData, Timestamp } from '@angular/fire/firestore';
-import { Survey } from 'app/models/survey.model';
-import { Job } from 'app/models/job.model';
-import { Task, TaskType } from 'app/models/task/task.model';
+import {DocumentData, Timestamp} from '@angular/fire/firestore';
+import {Survey} from 'app/models/survey.model';
+import {Job} from 'app/models/job.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {
   MultipleChoice,
   Cardinality,
 } from 'app/models/task/multiple-choice.model';
-import { Submission } from 'app/models/submission/submission.model';
-import { Option } from 'app/models/task/option.model';
-import { List, Map } from 'immutable';
-import { AuditInfo } from 'app/models/audit-info.model';
-import { Result } from 'app/models/submission/result.model';
-import { Role } from 'app/models/role.model';
-import { User } from 'app/models/user.model';
-import { OfflineBaseMapSource } from 'app/models/offline-base-map-source';
+import {Submission} from 'app/models/submission/submission.model';
+import {Option} from 'app/models/task/option.model';
+import {List, Map} from 'immutable';
+import {AuditInfo} from 'app/models/audit-info.model';
+import {Result} from 'app/models/submission/result.model';
+import {Role} from 'app/models/role.model';
+import {User} from 'app/models/user.model';
+import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -102,12 +102,14 @@ export class FirebaseDataConverter {
   static newSurveyJS(
     ownerEmail: string,
     title: string,
+    description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ) {
     return {
       title,
-      acl: { [ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER) },
-      ...(offlineBaseMapSources?.length ? { offlineBaseMapSources } : {}),
+      description,
+      acl: {[ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER)},
+      ...(offlineBaseMapSources?.length ? {offlineBaseMapSources} : {}),
     };
   }
 
@@ -131,12 +133,12 @@ export class FirebaseDataConverter {
   }
 
   static jobToJS(job: Job): {} {
-    const { name, tasks, color, dataCollectorsCanAdd, ...jobDoc } = job;
+    const {name, tasks, color, dataCollectorsCanAdd, ...jobDoc} = job;
     return {
       dataCollectorsCanAdd,
       name,
       tasks: tasks?.map(task => this.taskToJS(task)).toJS(),
-      defaultStyle: { color },
+      defaultStyle: {color},
       ...jobDoc,
     };
   }
@@ -216,7 +218,7 @@ export class FirebaseDataConverter {
   }
 
   private static taskToJS(task: Task): {} {
-    const { type, label, multipleChoice, ...taskDoc } = task;
+    const {type, label, multipleChoice, ...taskDoc} = task;
     if (multipleChoice === undefined) {
       return {
         type: FirebaseDataConverter.taskTypeToString(type),
@@ -307,7 +309,7 @@ export class FirebaseDataConverter {
   }
 
   private static optionToJS(option: Option): {} {
-    const { label, ...optionDoc } = option;
+    const {label, ...optionDoc} = option;
     return {
       label,
       ...optionDoc,

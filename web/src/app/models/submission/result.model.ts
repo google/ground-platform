@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { List } from 'immutable';
-import { Option } from 'app/models/task/option.model';
+import {List} from 'immutable';
+import {Option} from 'app/models/task/option.model';
 
 export class Result {
   constructor(readonly value: number | string | List<Option> | Date) {}

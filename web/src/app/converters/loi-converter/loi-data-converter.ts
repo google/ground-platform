@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DocumentData } from '@angular/fire/firestore';
+import {DocumentData} from '@angular/fire/firestore';
 import {
   LocationOfInterest,
   GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
 } from 'app/models/loi.model';
-import { Map } from 'immutable';
-import { GeoPoint } from 'firebase/firestore';
-import { Geometry } from 'app/models/geometry/geometry';
-import { toGeometry, GEOMETRY_TYPES } from 'app/converters/geometry-converter';
-import { Point } from 'app/models/geometry/point';
+import {Map} from 'immutable';
+import {GeoPoint} from 'firebase/firestore';
+import {Geometry} from 'app/models/geometry/geometry';
+import {toGeometry, GEOMETRY_TYPES} from 'app/converters/geometry-converter';
+import {Point} from 'app/models/geometry/point';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -78,7 +78,7 @@ export class LoiDataConverter {
     // TODO: Set audit info (created / last modified user and timestamp).
     if (loi.geometry instanceof Point) {
       // TODO: Add geometryToJS converters in geometry-converter.ts call it from here. Then GEOMETRY_TYPES can be local.
-      const { jobId, geometry } = loi;
+      const {jobId, geometry} = loi;
       return {
         jobId,
         geometry: {
@@ -87,13 +87,13 @@ export class LoiDataConverter {
         },
       };
     } else if (loi instanceof GeoJsonLocationOfInterest) {
-      const { jobId, geoJson } = loi;
+      const {jobId, geoJson} = loi;
       return {
         jobId,
         geoJson,
       };
     } else if (loi instanceof AreaOfInterest) {
-      const { jobId, polygonVertices } = loi;
+      const {jobId, polygonVertices} = loi;
       return {
         jobId,
         polygonVertices,

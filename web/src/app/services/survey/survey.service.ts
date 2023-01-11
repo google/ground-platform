@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable, ReplaySubject } from 'rxjs';
-import { switchMap, shareReplay } from 'rxjs/operators';
-import { Survey } from 'app/models/survey.model';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { AuthService } from 'app/services/auth/auth.service';
-import { Role } from 'app/models/role.model';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
-import { environment } from 'environments/environment';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { AclEntry } from 'app/models/acl-entry.model';
+import {Injectable} from '@angular/core';
+import {firstValueFrom, Observable, ReplaySubject} from 'rxjs';
+import {switchMap, shareReplay} from 'rxjs/operators';
+import {Survey} from 'app/models/survey.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {AuthService} from 'app/services/auth/auth.service';
+import {Role} from 'app/models/role.model';
+import {List, Map} from 'immutable';
+import {of} from 'rxjs';
+import {environment} from 'environments/environment';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {AclEntry} from 'app/models/acl-entry.model';
 
 @Injectable({
   providedIn: 'root',
@@ -88,17 +88,37 @@ export class SurveyService {
     return this.dataStore.updateSurveyTitle(surveyId, newTitle);
   }
 
+  /**
+   * Updates the survey with new title and new description by calling the data-store service.
+   *
+   * @param surveyId the id of the survey.
+   * @param newTitle the new title of the survey.
+   * @param newDescription the new description of the survey.
+   */
+  updateTitleAndDescription(
+    surveyId: string,
+    newTitle: string,
+    newDescription: string
+  ): Promise<void> {
+    return this.dataStore.updateSurveyTitleAndDescription(
+      surveyId,
+      newTitle,
+      newDescription
+    );
+  }
+
   updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
     return this.dataStore.updateAcl(surveyId, acl);
   }
 
-  async createSurvey(title: string): Promise<string> {
+  async createSurvey(title: string, description?: string): Promise<string> {
     const offlineBaseMapSources = environment.offlineBaseMapSources;
     const user = await firstValueFrom(this.authService.getUser$());
     const email = user?.email || 'Unknown email';
     const surveyId = await this.dataStore.createSurvey(
       email,
       title,
+      description ?? '',
       offlineBaseMapSources
     );
     return Promise.resolve(surveyId);

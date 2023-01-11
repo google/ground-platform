@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Task } from 'app/models/task/task.model';
-import { Map } from 'immutable';
+import {Task} from 'app/models/task/task.model';
+import {Map} from 'immutable';
 
 export class Job {
   constructor(
@@ -28,6 +28,6 @@ export class Job {
   ) {}
 
   withIndex(index: number): Job {
-    return { ...this, index };
+    return {...this, index};
   }
 }

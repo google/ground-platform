@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
-import { HttpParams } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {ActivatedRoute, Router, NavigationExtras} from '@angular/router';
+import {HttpParams} from '@angular/common/http';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -39,6 +39,7 @@ export class NavigationService {
   static readonly SURVEY_SEGMENT = 'survey';
   static readonly SIGN_IN_SEGMENT = 'signin';
   static readonly SURVEYS_SEGMENT = 'surveys';
+  static readonly SURVEYS_CREATE = 'create';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
@@ -74,7 +75,7 @@ export class NavigationService {
     );
     // Pipe values from URL fragment.
     const fragmentParams$ = route.fragment.pipe(
-      map(fragment => new HttpParams({ fromString: fragment || '' }))
+      map(fragment => new HttpParams({fromString: fragment || ''}))
     );
     this.jobId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.JOB_ID_FRAGMENT_PARAM))
@@ -116,7 +117,7 @@ export class NavigationService {
    */
   private getFragmentParams(): HttpParams {
     const fragment = this.activatedRoute!.snapshot.fragment;
-    return new HttpParams({ fromString: fragment || '' });
+    return new HttpParams({fromString: fragment || ''});
   }
 
   /**
@@ -151,19 +152,19 @@ export class NavigationService {
    * Navigate to the current URL, updating the LOI id in the URL fragment.
    */
   selectLocationOfInterest(id: string) {
-    const newParam: { [key: string]: string } = {};
+    const newParam: {[key: string]: string} = {};
     newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = id;
-    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
   showLocationOfInterestList(jobId: string) {
-    const newParam: { [key: string]: string } = {};
+    const newParam: {[key: string]: string} = {};
     newParam[NavigationService.LOI_JOB_ID_FRAGMENT_PARAM] = jobId;
-    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
   clearLocationOfInterestId() {
-    this.setFragmentParams(new HttpParams({ fromString: '' }));
+    this.setFragmentParams(new HttpParams({fromString: ''}));
   }
 
   /**
@@ -180,17 +181,17 @@ export class NavigationService {
    * fragment.
    */
   editSubmission(loiId: string, submissionId: string) {
-    const newParam: { [key: string]: string } = {};
+    const newParam: {[key: string]: string} = {};
     newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = loiId;
     newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
-    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
   clearSubmissionId() {
-    const newParam: { [key: string]: string } = {};
+    const newParam: {[key: string]: string} = {};
     newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] =
       this.getLocationOfInterestId()!;
-    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
   /**
@@ -198,9 +199,9 @@ export class NavigationService {
    * fragment.
    */
   customizeJob(id: string) {
-    const newParam: { [key: string]: string } = {};
+    const newParam: {[key: string]: string} = {};
     newParam[NavigationService.JOB_ID_FRAGMENT_PARAM] = id;
-    this.setFragmentParams(new HttpParams({ fromObject: newParam }));
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
   /**
@@ -225,6 +226,13 @@ export class NavigationService {
    */
   navigateToSurveyList() {
     this.router.navigate([NavigationService.SURVEYS_SEGMENT]);
+  }
+
+  navigateToCreateSurvey(surveyId: string | null): void {
+    const url = `${NavigationService.SURVEYS_SEGMENT}${
+      surveyId ? `/${surveyId}` : ''
+    }/${NavigationService.SURVEYS_CREATE}`;
+    this.router.navigateByUrl(url);
   }
 
   /**

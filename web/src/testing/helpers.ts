@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { is, isValueObject, Collection } from 'immutable';
+import {is, isValueObject, Collection} from 'immutable';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function deepEqualityTester(a: any, b: any): boolean | undefined {

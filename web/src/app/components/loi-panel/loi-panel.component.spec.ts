@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { LocationOfInterestPanelComponent } from 'app/components/loi-panel/loi-panel.component';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { of } from 'rxjs';
-import { Map, List } from 'immutable';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestPanelComponent} from 'app/components/loi-panel/loi-panel.component';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {of} from 'rxjs';
+import {Map, List} from 'immutable';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import { Job } from 'app/models/job.model';
-import { Submission } from 'app/models/submission/submission.model';
-import { Survey } from 'app/models/survey.model';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
-import { SubmissionService } from 'app/services/submission/submission.service';
-import { Router } from '@angular/router';
-import { MatDialogModule } from '@angular/material/dialog';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { Point } from 'app/models/geometry/point';
-import { Coordinate } from 'app/models/geometry/coordinate';
+import {Job} from 'app/models/job.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {Router} from '@angular/router';
+import {MatDialogModule} from '@angular/material/dialog';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {Point} from 'app/models/geometry/point';
+import {Coordinate} from 'app/models/geometry/coordinate';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -97,15 +97,15 @@ describe('LocationOfInterestPanelComponent', () => {
       declarations: [LocationOfInterestPanelComponent],
       imports: [MatDialogModule],
       providers: [
-        { provide: DataStoreService, useValue: {} },
+        {provide: DataStoreService, useValue: {}},
         {
           provide: LocationOfInterestService,
           useValue: loiService,
         },
-        { provide: SurveyService, useValue: surveyService },
-        { provide: SubmissionService, useValue: submissionService },
-        { provide: Router, useValue: routerSpy },
-        { provide: NavigationService, useValue: navigationService },
+        {provide: SurveyService, useValue: surveyService},
+        {provide: SubmissionService, useValue: submissionService},
+        {provide: Router, useValue: routerSpy},
+        {provide: NavigationService, useValue: navigationService},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

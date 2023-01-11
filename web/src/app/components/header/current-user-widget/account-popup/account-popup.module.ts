@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
-import { UserAvatarModule } from 'app/components/user-avatar/user-avatar.module';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {AccountPopupComponent} from 'app/components/header/current-user-widget/account-popup/account-popup.component';
+import {UserAvatarModule} from 'app/components/user-avatar/user-avatar.module';
 
 @NgModule({
   declarations: [AccountPopupComponent],

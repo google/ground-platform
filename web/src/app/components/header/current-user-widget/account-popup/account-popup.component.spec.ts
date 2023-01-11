@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { AuthService } from 'app/services/auth/auth.service';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AccountPopupComponent } from 'app/components/header/current-user-widget/account-popup/account-popup.component';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import {AuthService} from 'app/services/auth/auth.service';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {AccountPopupComponent} from 'app/components/header/current-user-widget/account-popup/account-popup.component';
+import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MatDialogModule} from '@angular/material/dialog';
+import {Router} from '@angular/router';
+import {of} from 'rxjs';
 
 describe('AccountPopupComponent', () => {
   let component: AccountPopupComponent;
@@ -33,10 +33,10 @@ describe('AccountPopupComponent', () => {
       declarations: [AccountPopupComponent],
       imports: [MatDialogModule],
       providers: [
-        { provide: AuthService, useValue: { getUser$: () => of() } },
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: dialogRef },
-        { provide: Router, useValue: routerSpy },
+        {provide: AuthService, useValue: {getUser$: () => of()}},
+        {provide: MAT_DIALOG_DATA, useValue: {}},
+        {provide: MatDialogRef, useValue: dialogRef},
+        {provide: Router, useValue: routerSpy},
       ],
     }).compileComponents();
   }));

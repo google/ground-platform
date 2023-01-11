@@ -22,22 +22,22 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import { BehaviorSubject, of } from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { Job } from 'app/models/job.model';
-import { Survey } from 'app/models/survey.model';
-import { DrawingToolsComponent } from 'app/components/drawing-tools/drawing-tools.component';
-import { DrawingToolsModule } from 'app/components/drawing-tools/drawing-tools.module';
-import { Map } from 'immutable';
-import { AuthService } from 'app/services/auth/auth.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { urlPrefix } from 'app/components/map/ground-pin';
-import { By } from '@angular/platform-browser';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
+import {DrawingToolsComponent} from 'app/components/drawing-tools/drawing-tools.component';
+import {DrawingToolsModule} from 'app/components/drawing-tools/drawing-tools.module';
+import {Map} from 'immutable';
+import {AuthService} from 'app/services/auth/auth.service';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {urlPrefix} from 'app/components/map/ground-pin';
+import {By} from '@angular/platform-browser';
 
 describe('DrawingToolsComponent', () => {
   let fixture: ComponentFixture<DrawingToolsComponent>;
@@ -110,10 +110,10 @@ describe('DrawingToolsComponent', () => {
       imports: [DrawingToolsModule, BrowserAnimationsModule],
       declarations: [DrawingToolsComponent],
       providers: [
-        { provide: AuthService, useValue: authServiceSpy },
-        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
-        { provide: NavigationService, useValue: navigationServiceSpy },
-        { provide: SurveyService, useValue: surveyServiceSpy },
+        {provide: AuthService, useValue: authServiceSpy},
+        {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
+        {provide: NavigationService, useValue: navigationServiceSpy},
+        {provide: SurveyService, useValue: surveyServiceSpy},
       ],
     }).compileComponents();
   }));

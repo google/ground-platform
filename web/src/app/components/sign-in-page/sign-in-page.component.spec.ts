@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { AuthService } from 'app/services/auth/auth.service';
-import { NEVER } from 'rxjs';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { SignInPageComponent } from 'app/components/sign-in-page/sign-in-page.component';
+import {AuthService} from 'app/services/auth/auth.service';
+import {NEVER} from 'rxjs';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
+import {SignInPageComponent} from 'app/components/sign-in-page/sign-in-page.component';
 
 describe('SignInPageComponent', () => {
   let component: SignInPageComponent;
@@ -28,10 +28,10 @@ describe('SignInPageComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SignInPageComponent],
       providers: [
-        { provide: Router, useValue: {} },
+        {provide: Router, useValue: {}},
         {
           provide: AuthService,
-          useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
+          useValue: {getUser$: () => NEVER, isAuthenticated$: () => NEVER},
         },
       ],
     }).compileComponents();

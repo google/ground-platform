@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { JobListComponent } from 'app/components/job-list/job-list.component';
-import { SurveyService } from 'app/services/survey/survey.service';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Survey } from 'app/models/survey.model';
-import { of } from 'rxjs';
-import { Map } from 'immutable';
-import { Job } from 'app/models/job.model';
-import { MatListModule } from '@angular/material/list';
-import { Router } from '@angular/router';
-import { NavigationService } from 'app/services/navigation/navigation.service';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {JobListComponent} from 'app/components/job-list/job-list.component';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {Survey} from 'app/models/survey.model';
+import {of} from 'rxjs';
+import {Map} from 'immutable';
+import {Job} from 'app/models/job.model';
+import {MatListModule} from '@angular/material/list';
+import {Router} from '@angular/router';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -80,18 +80,18 @@ describe('JobListComponent', () => {
       declarations: [JobListComponent],
       imports: [MatListModule],
       providers: [
-        { provide: SurveyService, useValue: surveyService },
+        {provide: SurveyService, useValue: surveyService},
         {
           provide: Router,
           useValue: routerSpy,
         },
-        { provide: NavigationService, useValue: navigationService },
-        { provide: AngularFirestore, useValue: {} },
+        {provide: NavigationService, useValue: navigationService},
+        {provide: AngularFirestore, useValue: {}},
         {
           provide: AngularFireAuth,
           useValue: mockAngularFireAuth,
         },
-        { provide: DataStoreService, useValue: { user$: () => of() } },
+        {provide: DataStoreService, useValue: {user$: () => of()}},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

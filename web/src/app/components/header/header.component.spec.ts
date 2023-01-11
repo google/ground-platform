@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { HeaderComponent } from 'app/components/header/header.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
+import {HeaderComponent} from 'app/components/header/header.component';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -25,7 +25,7 @@ describe('HeaderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [HeaderComponent],
-      providers: [{ provide: Router, useValue: {} }],
+      providers: [{provide: Router, useValue: {}}],
     }).compileComponents();
   });
 
