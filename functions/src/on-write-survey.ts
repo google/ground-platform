@@ -16,8 +16,8 @@
  */
 
 import * as admin from 'firebase-admin';
-import { Change, EventContext } from 'firebase-functions';
-import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
+import {Change, EventContext} from 'firebase-functions';
+import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
 
 export function onWriteSurveyHandler(
   _: Change<DocumentSnapshot>,
@@ -30,5 +30,5 @@ export function onWriteSurveyHandler(
   // See also: https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
   const topic = context.params.surveyId;
   console.debug(`Sending message to ${topic}`);
-  return admin.messaging().send({ topic });
+  return admin.messaging().send({topic});
 }
