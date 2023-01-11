@@ -118,11 +118,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
-      ]).subscribe(([survey, lois, selectedLocationOfInterestId]) =>
+      ]).subscribe(([survey, lois, locationOfInterestId]) =>
         this.onSurveyAndLocationsOfInterestUpdate(
           survey,
           lois,
-          selectedLocationOfInterestId
+          locationOfInterestId
         )
       )
     );
@@ -184,11 +184,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private onSurveyAndLocationsOfInterestUpdate(
     survey: Survey,
     lois: List<LocationOfInterest>,
-    selectedLocationOfInterestId: string | null
+    locationOfInterestId: string | null
   ): void {
     this.removeDeletedLocationsOfInterest(lois);
     this.addNewLocationsOfInterest(survey, lois);
-    this.selectLocationOfInterest(selectedLocationOfInterestId);
+    this.selectLocationOfInterest(locationOfInterestId);
   }
 
   /**
@@ -388,15 +388,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    * pans and zooms to the marker/polygon(s). Selecting null is considered
    * as deselecting which will change the selected back to normal size.
    */
-  private selectLocationOfInterest(
-    selectedLocationOfInterestId: string | null
-  ) {
-    if (selectedLocationOfInterestId === this.selectedLocationOfInterestId) {
+  private selectLocationOfInterest(locationOfInterestId: string | null) {
+    if (locationOfInterestId === this.selectedLocationOfInterestId) {
       return;
     }
-    this.selectMarker(selectedLocationOfInterestId);
-    this.selectPolygons(selectedLocationOfInterestId);
-    this.selectedLocationOfInterestId = selectedLocationOfInterestId;
+    this.selectMarker(locationOfInterestId);
+    this.selectPolygons(locationOfInterestId);
+    this.selectedLocationOfInterestId = locationOfInterestId;
   }
 
   private selectMarker(locationOfInterestId: string | null) {
