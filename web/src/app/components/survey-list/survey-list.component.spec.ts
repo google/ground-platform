@@ -24,7 +24,7 @@ import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Map} from 'immutable';
-import {SurveyListComponent} from 'app/components/survey-list/survey-list.component';
+import {SurveyListComponent} from './survey-list.component';
 import {MatCardModule} from '@angular/material/card';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';

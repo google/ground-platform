@@ -64,7 +64,6 @@
     "@types/webpack-env": "^1.15.3",
     "codelyzer": "^6.0.2",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-absolute-imports": "^0.0.3",
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-tools": "11.16.1",
     "fuzzy": "^0.1.3",

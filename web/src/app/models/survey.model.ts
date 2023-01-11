@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Job} from 'app/models/job.model';
+import {Job} from './job.model';
 
 import {Map} from 'immutable';
-import {Role} from 'app/models/role.model';
+import {Role} from './role.model';
 
 export class Survey {
   static readonly UNSAVED_NEW = new Survey(

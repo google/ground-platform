@@ -22,7 +22,7 @@ import {
   PointOfInterest,
 } from 'app/models/loi.model';
 import {toGeometry, GEOMETRY_TYPES} from 'app/converters/geometry-converter';
-import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {LoiDataConverter} from './loi-data-converter';
 import {Map} from 'immutable';
 import {GeoPoint} from 'firebase/firestore';
 import {Geometry, GeometryType} from 'app/models/geometry/geometry';

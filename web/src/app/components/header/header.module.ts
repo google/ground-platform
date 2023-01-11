@@ -16,9 +16,9 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CurrentUserWidgetModule} from 'app/components/header/current-user-widget/current-user-widget.module';
+import {CurrentUserWidgetModule} from './current-user-widget/current-user-widget.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {HeaderComponent} from 'app/components/header/header.component';
+import {HeaderComponent} from './header.component';
 
 @NgModule({
   declarations: [HeaderComponent],
