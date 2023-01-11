@@ -38,7 +38,7 @@ import {Job} from 'app/models/job.model';
 import {BehaviorSubject, of} from 'rxjs';
 import {GeoPoint} from 'firebase/firestore';
 import {GoogleMapsModule} from '@angular/google-maps';
-import {urlPrefix} from 'app/ground-pin';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {
   DrawingToolsService,
   EditMode,
@@ -570,7 +570,9 @@ describe('MapComponent', () => {
     iconSize: number
   ): void {
     const icon = marker.getIcon() as google.maps.Icon;
-    expect(atob(icon.url.slice(urlPrefix.length))).toContain(iconColor);
+    expect(atob(icon.url.slice(GroundPinService.urlPrefix.length))).toContain(
+      iconColor
+    );
     expect(icon.scaledSize?.height).toEqual(iconSize);
     expect(icon.scaledSize?.width).toEqual(iconSize);
   }

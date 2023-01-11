@@ -24,19 +24,19 @@ import {Injectable} from '@angular/core';
 })
 export class GroundPinService {
   renderPin(color?: string): string {
-    return this.svgTemplate.replace(
+    return GroundPinService.svgTemplate.replace(
       '{{ color }}',
-      color || this.defaultIconColor
+      color || GroundPinService.defaultIconColor
     );
   }
 
   getPinImageSource(color?: string): string {
-    return this.urlPrefix + btoa(this.renderPin(color));
+    return GroundPinService.urlPrefix + btoa(this.renderPin(color));
   }
 
-  private defaultIconColor = 'red';
-  private urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
-  private svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
+  public static urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+  private static defaultIconColor = 'red';
+  private static svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <filter x="-37.5%" y="-60.0%" width="175.0%" height="220.0%" filterUnits="objectBoundingBox" id="filter-1">

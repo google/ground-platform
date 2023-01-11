@@ -27,6 +27,7 @@ import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Job} from 'app/models/job.model';
@@ -36,7 +37,6 @@ import {DrawingToolsModule} from './drawing-tools.module';
 import {Map} from 'immutable';
 import {AuthService} from 'app/services/auth/auth.service';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {urlPrefix} from 'app/ground-pin';
 import {By} from '@angular/platform-browser';
 
 describe('DrawingToolsComponent', () => {
@@ -125,7 +125,9 @@ describe('DrawingToolsComponent', () => {
 
   function assertElementSrcColor(element: Element, color: string) {
     expect(
-      atob(element.getAttribute('src')!.slice(urlPrefix.length))
+      atob(
+        element.getAttribute('src')!.slice(GroundPinService.urlPrefix.length)
+      )
     ).toContain(color);
   }
 
