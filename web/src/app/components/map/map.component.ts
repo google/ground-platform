@@ -405,9 +405,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.setIconSize(marker, enlargedIconScale);
       marker.setDraggable(true);
     }
-    const selectedMarker =
-      this.selectedLocationOfInterestId &&
-      this.markers.get(this.selectedLocationOfInterestId);
+    const selectedMarker = this.selectedLocationOfInterestId
+      ? this.markers.get(this.selectedLocationOfInterestId)
+      : undefined;
     if (selectedMarker) {
       this.setIconSize(selectedMarker, normalIconScale);
       selectedMarker.setDraggable(false);
