@@ -23,7 +23,7 @@ import {
   OnChanges,
 } from '@angular/core';
 import {Job} from 'app/models/job.model';
-import {getPinImageSource} from 'app/ground-pin';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -57,10 +57,13 @@ export class LocationOfInterestPanelHeaderComponent
     private dialogService: DialogService,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
+    private groundPinService: GroundPinService,
     private zone: NgZone,
     readonly loiService: LocationOfInterestService
   ) {
-    this.pinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.pinUrl = sanitizer.bypassSecurityTrustUrl(
+      groundPinService.getPinImageSource()
+    );
     this.subscription.add(
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
         if (loi instanceof GeoJsonLocationOfInterest) {
@@ -75,7 +78,7 @@ export class LocationOfInterestPanelHeaderComponent
 
   ngOnInit() {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.job?.color)
+      this.groundPinService.getPinImageSource(this.job?.color)
     );
     this.subscription.add(
       this.navigationService.getLocationOfInterestId$().subscribe(id => {
@@ -91,7 +94,7 @@ export class LocationOfInterestPanelHeaderComponent
 
   ngOnChanges() {
     this.pinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.job?.color)
+      this.groundPinService.getPinImageSource(this.job?.color)
     );
   }
 

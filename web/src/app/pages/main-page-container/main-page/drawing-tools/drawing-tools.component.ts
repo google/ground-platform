@@ -31,7 +31,7 @@ import {tap} from 'rxjs/operators';
 import {Job} from 'app/models/job.model';
 import {List} from 'immutable';
 import {map} from 'rxjs/internal/operators/map';
-import {getPinImageSource} from 'app/ground-pin';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -54,11 +54,11 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   readonly jobs$: Observable<List<Job>>;
   readonly black = '#202225';
   readonly addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
-    getPinImageSource(this.black)
+    this.groundPinService.getPinImageSource(this.black)
   );
   readonly green = '#3d7d40';
   readonly addPointIconGreen = this.sanitizer.bypassSecurityTrustUrl(
-    getPinImageSource(this.green)
+    this.groundPinService.getPinImageSource(this.green)
   );
   addPointIcon = this.addPointIconBlack;
   isSubmissionSelected$: Observable<boolean>;
@@ -69,6 +69,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     private drawingToolsService: DrawingToolsService,
     private sanitizer: DomSanitizer,
     private navigationService: NavigationService,
+    private groundPinService: GroundPinService,
     surveyService: SurveyService,
     authService: AuthService
   ) {
@@ -115,7 +116,9 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
   }
 
   jobPinUrl(job: Job): SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(getPinImageSource(job?.color));
+    return this.sanitizer.bypassSecurityTrustUrl(
+      this.groundPinService.getPinImageSource(job?.color)
+    );
   }
 
   onJobIdChange() {

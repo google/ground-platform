@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
+import {Injectable} from '@angular/core';
+
 // To make ESLint happy:
 /*global btoa*/
 
-export const defaultIconColor = 'red';
+@Injectable({
+  providedIn: 'root',
+})
+export class GroundPinService {
+  renderPin(color?: string): string {
+    return this.svgTemplate.replace(
+      '{{ color }}',
+      color || this.defaultIconColor
+    );
+  }
 
-export const urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+  getPinImageSource(color?: string): string {
+    return this.urlPrefix + btoa(this.renderPin(color));
+  }
 
-export const renderPin = (color?: string) => {
-  return svgTemplate.replace('{{ color }}', color || defaultIconColor);
-};
-
-export const getPinImageSource = (color?: string) => {
-  return urlPrefix + btoa(renderPin(color));
-};
-
-const svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
+  private defaultIconColor = 'red';
+  private urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+  private svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="22px" height="24px" viewBox="0 0 22 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <filter x="-37.5%" y="-60.0%" width="175.0%" height="220.0%" filterUnits="objectBoundingBox" id="filter-1">
@@ -57,3 +64,4 @@ const svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>
         </g>
     </g>
 </svg>`;
+}

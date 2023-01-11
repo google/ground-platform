@@ -38,7 +38,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {List, Map as ImmutableMap} from 'immutable';
-import {getPinImageSource} from 'app/ground-pin';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {GoogleMap} from '@angular/google-maps';
 import {MatDialog} from '@angular/material/dialog';
@@ -105,6 +105,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private surveyService: SurveyService,
     private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
+    private groundPinService: GroundPinService,
     private zone: NgZone,
     private changeDetectorRef: ChangeDetectorRef,
     private dialog: MatDialog
@@ -272,7 +273,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }) {
     const {x: latitude, y: longitude} = geometry.coord;
     const icon = {
-      url: getPinImageSource(color),
+      url: this.groundPinService.getPinImageSource(color),
       scaledSize: {
         width: normalIconScale,
         height: normalIconScale,

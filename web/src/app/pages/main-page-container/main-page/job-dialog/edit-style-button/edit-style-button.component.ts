@@ -25,7 +25,7 @@ import {
 import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {ColorPickerComponent} from './color-picker/color-picker.component';
-import {getPinImageSource} from 'app/ground-pin';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 
 @Component({
   selector: 'ground-edit-style-button',
@@ -39,16 +39,17 @@ export class EditStyleButtonComponent implements OnInit {
   constructor(
     // tslint:disable-next-line:no-any
     private dialog: MatDialog,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private groundPinService: GroundPinService,
   ) {
     this.markerPinUrl = sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.markerColor)
+      groundPinService.getPinImageSource(this.markerColor)
     );
   }
 
   ngOnInit() {
     this.markerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.markerColor)
+      this.groundPinService.getPinImageSource(this.markerColor)
     );
   }
 
@@ -62,7 +63,7 @@ export class EditStyleButtonComponent implements OnInit {
         this.markerColor = color;
         this.markerColorChange.emit(new MarkerColorEvent(this.markerColor));
         this.markerPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-          getPinImageSource(this.markerColor)
+          this.groundPinService.getPinImageSource(this.markerColor)
         );
       });
   }

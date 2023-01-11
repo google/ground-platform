@@ -18,7 +18,7 @@ import {Component, Input, OnInit, OnDestroy} from '@angular/core';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Job} from 'app/models/job.model';
-import {getPinImageSource} from 'app/ground-pin';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {MatDialog} from '@angular/material/dialog';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -47,14 +47,17 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private importDialog: MatDialog,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    readonly surveyService: SurveyService
+    private groundPinService: GroundPinService,
+    readonly surveyService: SurveyService,
   ) {
-    this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(getPinImageSource());
+    this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
+      groundPinService.getPinImageSource()
+    );
   }
 
   ngOnInit() {
     this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.job?.color)
+      this.groundPinService.getPinImageSource(this.job?.color)
     );
     this.subscription.add(
       this.navigationService.getLocationOfInterestId$().subscribe(id => {
@@ -70,7 +73,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
 
   ngOnChanges() {
     this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      getPinImageSource(this.job?.color)
+      this.groundPinService.getPinImageSource(this.job?.color)
     );
   }
 
