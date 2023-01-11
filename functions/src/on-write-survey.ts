@@ -19,6 +19,12 @@ import * as admin from 'firebase-admin';
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
 
+// Template for survey write triggers capturing survey id.
+export const surveyPathTemplate = 'surveys/{surveyId}';
+
+// Template for LOI write triggers capturing survey and LOI ids.
+export const loiPathTemplate = `${surveyPathTemplate}/lois/{loiId}`;
+
 export function onWriteSurveyHandler(
   _: Change<DocumentSnapshot>,
   context: EventContext

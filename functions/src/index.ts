@@ -22,7 +22,11 @@ import {handleCreateUser} from '@/on-create-user';
 import {importCsvHandler} from '@/import-csv';
 import {importGeoJsonHandler} from '@/import-geojson';
 import {exportCsvHandler} from '@/export-csv';
-import {onWriteSurveyHandler} from '@/on-write-survey';
+import {
+  onWriteSurveyHandler,
+  surveyPathTemplate,
+  loiPathTemplate,
+} from '@/on-write-survey';
 
 const corsOptions = {origin: true};
 const corsMiddleware = cors(corsOptions);
@@ -50,9 +54,9 @@ export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const onWriteSurvey = functions.firestore
-  .document('surveys/{surveyId}')
+  .document(surveyPathTemplate)
   .onWrite(onWriteSurveyHandler);
 
 export const onWriteLoi = functions.firestore
-  .document('surveys/{surveyId}/lois/{loiId}')
+  .document(loiPathTemplate)
   .onWrite(onWriteSurveyHandler);
