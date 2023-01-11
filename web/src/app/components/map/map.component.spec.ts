@@ -327,6 +327,17 @@ describe('MapComponent', () => {
     assertMarkerIcon(marker1, jobColor1, 50);
   }));
 
+  it('should select loi when polygon is clicked', () => {
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
+    google.maps.event.trigger(polygon, 'click', {
+      latLng: new google.maps.LatLng(3, 3),
+    });
+
+    expect(
+      navigationServiceSpy.selectLocationOfInterest
+    ).toHaveBeenCalledOnceWith(polygonLoiId1);
+  });
+
   it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
     mockLocationOfInterestId$.next(polygonLoiId1);
     tick();

@@ -44,7 +44,7 @@ export class LocationOfInterestPanelHeaderComponent
   surveyId?: string | null;
   loiId?: string | null;
   pinUrl: SafeUrl;
-  readonly loiType = LocationOfInterestType;
+  readonly geometryType = GeometryType;
   subscription: Subscription = new Subscription();
   private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
   private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
@@ -171,10 +171,4 @@ export class LocationOfInterestPanelHeaderComponent
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-}
-
-enum LocationOfInterestType {
-  Point = 'POINT',
-  Polygon = 'POLYGON',
-  MultiPolygon = 'MULTIPOLYGON',
 }

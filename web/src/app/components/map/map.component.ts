@@ -507,6 +507,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private openSelectLocationOfInterestDialog(
     candidatePolygons: google.maps.Polygon[]
   ) {
+    // TODO: Account for case where polygons in multipolygon overlap.
     this.zone.run(() => {
       const dialogRef = this.dialog.open(
         SelectLocationOfInterestDialogComponent,
