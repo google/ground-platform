@@ -48,7 +48,7 @@ export class LocationOfInterestPanelHeaderComponent
   subscription: Subscription = new Subscription();
   private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
   private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
-  private loiGeometryType?: GeometryType;
+  loiGeometryType?: GeometryType;
   private loiProperties?: Map<string, string | number>;
 
   constructor(
