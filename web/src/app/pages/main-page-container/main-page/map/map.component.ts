@@ -26,8 +26,6 @@ import {Survey} from 'app/models/survey.model';
 import {Point} from 'app/models/geometry/point';
 import {
   LocationOfInterest,
-  GeoJsonLocationOfInterest,
-  AreaOfInterest,
   GenericLocationOfInterest,
 } from 'app/models/loi.model';
 import {
@@ -47,6 +45,8 @@ import {
   SelectLocationOfInterestDialogComponent,
 } from './select-loi-dialog/select-loi-dialog.component';
 import {Coordinate} from 'app/models/geometry/coordinate';
+import {Polygon} from 'app/models/geometry/polygon';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 // To make ESLint happy:
 /*global google*/
@@ -74,15 +74,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
-  private selectedMarker?: google.maps.Marker;
-  private selectedPolygon?: google.maps.Polygon;
+  private selectedLocationOfInterestId: string | null = null;
   markers: Map<string, google.maps.Marker> = new Map<
     string,
     google.maps.Marker
   >();
-  polygons: Map<string, google.maps.Polygon> = new Map<
+  polygons: Map<string, google.maps.Polygon[]> = new Map<
     string,
-    google.maps.Polygon
+    google.maps.Polygon[]
   >();
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
@@ -120,11 +119,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
-      ]).subscribe(([survey, lois, selectedLocationOfInterestId]) =>
+      ]).subscribe(([survey, lois, locationOfInterestId]) =>
         this.onSurveyAndLocationsOfInterestUpdate(
           survey,
           lois,
-          selectedLocationOfInterestId
+          locationOfInterestId
         )
       )
     );
@@ -186,11 +185,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private onSurveyAndLocationsOfInterestUpdate(
     survey: Survey,
     lois: List<LocationOfInterest>,
-    selectedLocationOfInterestId: string | null
+    locationOfInterestId: string | null
   ): void {
     this.removeDeletedLocationsOfInterest(lois);
     this.addNewLocationsOfInterest(survey, lois);
-    this.selectLocationOfInterest(selectedLocationOfInterestId);
+    this.selectLocationOfInterest(locationOfInterestId);
   }
 
   /**
@@ -217,7 +216,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private removeDeletedPolygons(newLoiIds: List<string>) {
     for (const id of this.polygons.keys()) {
       if (!newLoiIds.contains(id)) {
-        this.polygons.get(id)!.setMap(null);
+        for (const polygon of this.polygons.get(id)!) {
+          polygon.setMap(null);
+        }
         this.polygons.delete(id);
       }
     }
@@ -249,18 +250,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       if (loi.geometry instanceof Point) {
         const {id, jobId, geometry} = loi;
-        this.addPointOfInterest({id, jobId, color, geometry});
+        const marker = this.addPointOfInterestToMap({
+          id,
+          jobId,
+          color,
+          geometry,
+        });
+        this.markers.set(id, marker);
       }
-      if (loi instanceof GeoJsonLocationOfInterest) {
-        this.addGeoJsonLocationOfInterest(color, jobName, loi);
+      if (loi.geometry instanceof Polygon) {
+        const polygon = this.addPolygonToMap(
+          loi.id,
+          color,
+          jobName,
+          loi.geometry
+        );
+        this.polygons.set(loi.id, [polygon]);
       }
-      if (loi instanceof AreaOfInterest) {
-        this.addAreaOfInterest(color, jobName, loi);
+      if (loi.geometry instanceof MultiPolygon) {
+        const geometry: MultiPolygon = loi.geometry;
+        const polygons: google.maps.Polygon[] = [];
+        for (const polygon of geometry.polygons) {
+          polygons.push(this.addPolygonToMap(loi.id, color, jobName, polygon));
+        }
+        this.polygons.set(loi.id, polygons);
       }
     });
   }
 
-  private addPointOfInterest({
+  private addPointOfInterestToMap({
     id,
     jobId,
     geometry,
@@ -270,7 +288,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     jobId: string;
     geometry: Point;
     color: string | undefined;
-  }) {
+  }): google.maps.Marker {
     const {x: latitude, y: longitude} = geometry.coord;
     const icon = {
       url: this.groundPinService.getPinImageSource(color),
@@ -294,7 +312,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
       this.onMarkerDragEnd(event, id, jobId)
     );
-    this.markers.set(id, marker);
+    return marker;
   }
 
   private onMarkerClick(loiId: string) {
@@ -367,36 +385,34 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Selecting LOI enlarges the marker or border of the polygon,
-   * pans and zooms to the marker/polygon. Selecting null is considered
+   * Selecting LOI enlarges the marker or border of the polygon(s),
+   * pans and zooms to the marker/polygon(s). Selecting null is considered
    * as deselecting which will change the selected back to normal size.
    */
-  private selectLocationOfInterest(
-    selectedLocationOfInterestId: string | null
-  ) {
-    const markerToSelect = this.markers.get(
-      selectedLocationOfInterestId as string
-    );
-    this.selectMarker(markerToSelect);
-    const polygonToSelect = this.polygons.get(
-      selectedLocationOfInterestId as string
-    );
-    this.selectPolygon(polygonToSelect);
-  }
-
-  private selectMarker(marker: google.maps.Marker | undefined) {
-    if (marker === this.selectedMarker) {
+  private selectLocationOfInterest(locationOfInterestId: string | null) {
+    if (locationOfInterestId === this.selectedLocationOfInterestId) {
       return;
     }
+    this.selectMarker(locationOfInterestId);
+    this.selectPolygons(locationOfInterestId);
+    this.selectedLocationOfInterestId = locationOfInterestId;
+  }
+
+  private selectMarker(locationOfInterestId: string | null) {
+    const marker = locationOfInterestId
+      ? this.markers.get(locationOfInterestId)
+      : undefined;
     if (marker) {
       this.setIconSize(marker, enlargedIconScale);
       marker.setDraggable(true);
     }
-    if (this.selectedMarker) {
-      this.setIconSize(this.selectedMarker, normalIconScale);
-      this.selectedMarker.setDraggable(false);
+    const selectedMarker = this.selectedLocationOfInterestId
+      ? this.markers.get(this.selectedLocationOfInterestId)
+      : undefined;
+    if (selectedMarker) {
+      this.setIconSize(selectedMarker, normalIconScale);
+      selectedMarker.setDraggable(false);
     }
-    this.selectedMarker = marker;
     this.panAndZoom(marker?.getPosition());
   }
 
@@ -412,77 +428,38 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.setIcon(newIcon);
   }
 
-  private selectPolygon(polygon: google.maps.Polygon | undefined) {
-    if (polygon === this.selectedPolygon) {
-      return;
-    }
-    if (polygon) {
-      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
-    }
-    if (this.selectedPolygon) {
-      this.selectedPolygon.setOptions({
-        strokeWeight: normalPolygonStrokeWeight,
-      });
-    }
-    this.selectedPolygon = polygon;
-    this.panAndZoom(polygon?.getPaths().getAt(0).getAt(0));
-  }
-
-  private addGeoJsonLocationOfInterest(
-    color: string | undefined,
-    jobName: string | undefined,
-    loi: GeoJsonLocationOfInterest
-  ) {
-    const paths: google.maps.LatLng[][] = [];
-    const job = new google.maps.Data();
-    job.addGeoJson(loi.geoJson);
-    job.forEach(f => {
-      if (f.getGeometry() instanceof google.maps.Data.Polygon) {
-        paths.push(
-          ...this.geoJsonPolygonToPaths(
-            f.getGeometry() as google.maps.Data.Polygon
-          )
-        );
+  private selectPolygons(locationOfInterestId: string | null) {
+    const polygons = locationOfInterestId
+      ? this.polygons.get(locationOfInterestId)
+      : undefined;
+    if (polygons) {
+      for (const polygon of polygons) {
+        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
       }
-      if (f.getGeometry() instanceof google.maps.Data.MultiPolygon) {
-        (f.getGeometry() as google.maps.Data.MultiPolygon)
-          .getArray()
-          .forEach(polygon =>
-            paths.push(...this.geoJsonPolygonToPaths(polygon))
-          );
-      }
-    });
-
-    this.addPolygonToMap(loi.id, color, jobName, paths);
-  }
-
-  private geoJsonPolygonToPaths(
-    polygon: google.maps.Data.Polygon
-  ): google.maps.LatLng[][] {
-    const paths: google.maps.LatLng[][] = polygon
-      .getArray()
-      .map(linearRing => linearRing.getArray());
-    return paths;
-  }
-
-  private addAreaOfInterest(
-    color: string | undefined,
-    jobName: string | undefined,
-    loi: AreaOfInterest
-  ) {
-    const vertices: google.maps.LatLng[] = loi.polygonVertices.map(
-      vertex => new google.maps.LatLng(vertex.latitude, vertex.longitude)
-    );
-
-    this.addPolygonToMap(loi.id, color, jobName, [vertices]);
+    }
+    const selectedPolygons = this.selectedLocationOfInterestId
+      ? this.polygons.get(this.selectedLocationOfInterestId)
+      : undefined;
+    if (selectedPolygons) {
+      for (const polygon of selectedPolygons)
+        polygon.setOptions({
+          strokeWeight: normalPolygonStrokeWeight,
+        });
+    }
   }
 
   private addPolygonToMap(
     loiId: string,
     color: string | undefined,
     jobName: string | undefined,
-    paths: google.maps.LatLng[][]
-  ) {
+    polygonModel: Polygon
+  ): google.maps.Polygon {
+    const linearRings = [polygonModel.shell, ...polygonModel.holes];
+    const paths = linearRings.map(linearRing =>
+      linearRing.points
+        .map(({x, y}: {x: number; y: number}) => new google.maps.LatLng(y, x))
+        .toJS()
+    );
     const polygon = new google.maps.Polygon({
       paths: paths,
       clickable: true,
@@ -498,7 +475,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     polygon.addListener('click', (event: google.maps.PolyMouseEvent) => {
       this.onPolygonClick(event);
     });
-    this.polygons.set(loiId, polygon);
+    return polygon;
   }
 
   private onPolygonClick(event: google.maps.PolyMouseEvent) {
@@ -506,9 +483,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return;
     }
     const candidatePolygons: google.maps.Polygon[] = [];
-    for (const polygon of this.polygons.values()) {
-      if (google.maps.geometry.poly.containsLocation(event.latLng!, polygon)) {
-        candidatePolygons.push(polygon);
+    for (const loiPolygons of this.polygons.values()) {
+      for (const polygon of loiPolygons) {
+        if (
+          google.maps.geometry.poly.containsLocation(event.latLng!, polygon)
+        ) {
+          candidatePolygons.push(polygon);
+        }
       }
     }
     if (candidatePolygons.length === 1) {
@@ -525,6 +506,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private openSelectLocationOfInterestDialog(
     candidatePolygons: google.maps.Polygon[]
   ) {
+    // TODO: Account for case where polygons in multipolygon overlap.
     this.zone.run(() => {
       const dialogRef = this.dialog.open(
         SelectLocationOfInterestDialogComponent,

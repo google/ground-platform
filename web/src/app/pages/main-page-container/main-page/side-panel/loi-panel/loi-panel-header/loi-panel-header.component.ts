@@ -29,10 +29,9 @@ import {DialogService} from 'app/services/dialog/dialog.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Subscription} from 'rxjs';
-import {GeoJsonLocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Map} from 'immutable';
-import {Point} from 'app/models/geometry/point';
+import {GeometryType} from 'app/models/geometry/geometry';
 @Component({
   selector: 'ground-loi-panel-header',
   templateUrl: './loi-panel-header.component.html',
@@ -45,11 +44,11 @@ export class LocationOfInterestPanelHeaderComponent
   surveyId?: string | null;
   loiId?: string | null;
   pinUrl: SafeUrl;
-  readonly loiType = LocationOfInterestType;
+  readonly geometryType = GeometryType;
   subscription: Subscription = new Subscription();
-  loiTypeValue?: LocationOfInterestType;
   private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
   private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
+  private loiGeometryType?: GeometryType;
   private loiProperties?: Map<string, string | number>;
 
   constructor(
@@ -66,11 +65,7 @@ export class LocationOfInterestPanelHeaderComponent
     );
     this.subscription.add(
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
-        if (loi instanceof GeoJsonLocationOfInterest) {
-          this.loiTypeValue = LocationOfInterestType.Polygon;
-        } else if (loi.geometry instanceof Point) {
-          this.loiTypeValue = LocationOfInterestType.Point;
-        }
+        this.loiGeometryType = loi.geometry?.geometryType;
         this.loiProperties = loi.properties;
       })
     );
@@ -136,13 +131,25 @@ export class LocationOfInterestPanelHeaderComponent
     });
   }
 
+  /** A label for a given geometry type. Defaults to 'Polygon'. */
+  private geometryTypeLabel(geometryType?: GeometryType): string {
+    switch (geometryType) {
+      case GeometryType.POINT:
+        return 'Point';
+      case GeometryType.MULTI_POLYGON:
+        return 'Multipolygon';
+      default:
+        return 'Polygon';
+    }
+  }
+
   getLocationOfInterestName(): string | number {
     const caption = this.findProperty(this.CAPTION_PROPERTIES);
     if (caption) {
       return caption;
     }
-    const loiType =
-      this.loiTypeValue === LocationOfInterestType.Point ? 'Point' : 'Polygon';
+    const loiType = this.geometryTypeLabel(this.loiGeometryType);
+
     const id = this.findProperty(this.ID_PROPERTIES);
     if (id) {
       return loiType + ' ' + id;
@@ -167,9 +174,4 @@ export class LocationOfInterestPanelHeaderComponent
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-}
-
-enum LocationOfInterestType {
-  Point = 'POINT',
-  Polygon = 'POLYGON',
 }

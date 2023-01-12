@@ -22,19 +22,88 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
-import {NEVER, of} from 'rxjs';
+import {BehaviorSubject, NEVER, of} from 'rxjs';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {LocationOfInterestPanelHeaderComponent} from './loi-panel-header.component';
+import {
+  GenericLocationOfInterest,
+  LocationOfInterest,
+} from 'app/models/loi.model';
+import {Point} from 'app/models/geometry/point';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {List, Map} from 'immutable';
+import {Polygon} from 'app/models/geometry/polygon';
+import {LinearRing} from 'app/models/geometry/linear-ring';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+import {LocationOfInterestPanelHeaderComponent} from 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/loi-panel-header.component';
+
+type LoiPanelHeaderFixture =
+  ComponentFixture<LocationOfInterestPanelHeaderComponent>;
+
+function getAvatarElement(fixture: LoiPanelHeaderFixture): HTMLElement {
+  return fixture.nativeElement.querySelector('img.mat-list-avatar');
+}
+
+function getHeaderElement(fixture: LoiPanelHeaderFixture): HTMLElement {
+  const element = fixture.nativeElement.querySelector('h3');
+  console.log(element);
+  return element;
+}
 
 describe('LocationOfInterestPanelHeaderComponent', () => {
   let component: LocationOfInterestPanelHeaderComponent;
   let fixture: ComponentFixture<LocationOfInterestPanelHeaderComponent>;
+  let mockSelectedLoi$: BehaviorSubject<LocationOfInterest>;
+
+  const pointLocationOfInterest = new GenericLocationOfInterest(
+    'somePoint',
+    'someJob',
+    new Point(new Coordinate(1.23, 4.56)),
+    Map()
+  );
+  const polygon1 = new Polygon(
+    new LinearRing(
+      List([
+        new Coordinate(0, 0),
+        new Coordinate(10, 0),
+        new Coordinate(10, 10),
+        new Coordinate(0, 0),
+      ])
+    ),
+    List()
+  );
+  const polygon2 = new Polygon(
+    new LinearRing(
+      List([new Coordinate(3, 3), new Coordinate(12, 12), new Coordinate(2, 6)])
+    ),
+    List()
+  );
+  const polygonLocationOfInterest = new GenericLocationOfInterest(
+    'somePolygon',
+    'someJob',
+    polygon1,
+    Map()
+  );
+  const multiPolygonLocationOfInterest = new GenericLocationOfInterest(
+    'someMultiPolygon',
+    'someJob',
+    new MultiPolygon(List([polygon1, polygon2])),
+    Map()
+  );
 
   beforeEach(async () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getLocationOfInterestId$: () => of(''),
     };
+
+    mockSelectedLoi$ = new BehaviorSubject<LocationOfInterest>(
+      pointLocationOfInterest
+    );
+    const locationOfInterestService = {
+      getSelectedLocationOfInterest$: () => mockSelectedLoi$,
+    };
+
     await TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelHeaderComponent],
       imports: [MatIconModule, MatListModule, MatMenuModule, MatDialogModule],
@@ -43,6 +112,10 @@ describe('LocationOfInterestPanelHeaderComponent', () => {
         {provide: AngularFirestore, useValue: {}},
         {provide: AngularFireAuth, useValue: {authState: NEVER}},
         {provide: NavigationService, useValue: navigationService},
+        {
+          provide: LocationOfInterestService,
+          useValue: locationOfInterestService,
+        },
       ],
     }).compileComponents();
   });
@@ -55,5 +128,52 @@ describe('LocationOfInterestPanelHeaderComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('the avatar', () => {
+    it('should be a point if the selected LOI is a point', () => {
+      const avatarImg = getAvatarElement(fixture);
+
+      expect(avatarImg.getAttribute('alt')).toBe('point');
+      expect(avatarImg.getAttribute('src')).toContain('data:image/svg');
+    });
+
+    it('should be a polygon if the selected LOI is a polygon', () => {
+      mockSelectedLoi$.next(polygonLocationOfInterest);
+      fixture.detectChanges();
+
+      const avatarImg = getAvatarElement(fixture);
+
+      expect(avatarImg.getAttribute('alt')).toBe('polygon');
+      expect(avatarImg.getAttribute('src')).toBe(
+        '/assets/img/polygon_icon.svg'
+      );
+    });
+  });
+
+  describe('the LOI name', () => {
+    it('should be "Point" if the LOI is a point', () => {
+      const header = getHeaderElement(fixture);
+
+      expect(header.textContent).toBe('Point');
+    });
+
+    it('should be "Polygon" if the LOI is a polygon', () => {
+      mockSelectedLoi$.next(polygonLocationOfInterest);
+      fixture.detectChanges();
+
+      const header = getHeaderElement(fixture);
+
+      expect(header.textContent).toBe('Polygon');
+    });
+
+    it('should be "Multipolygon" if the LOI is a multipolygon', () => {
+      mockSelectedLoi$.next(multiPolygonLocationOfInterest);
+      fixture.detectChanges();
+
+      const header = getHeaderElement(fixture);
+
+      expect(header.textContent).toBe('Multipolygon');
+    });
   });
 });

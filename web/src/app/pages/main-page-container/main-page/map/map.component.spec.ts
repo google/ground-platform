@@ -29,14 +29,11 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Survey} from 'app/models/survey.model';
 import {
   LocationOfInterest,
-  GeoJsonLocationOfInterest,
-  AreaOfInterest,
   GenericLocationOfInterest,
 } from 'app/models/loi.model';
 import {Map, List} from 'immutable';
 import {Job} from 'app/models/job.model';
 import {BehaviorSubject, of} from 'rxjs';
-import {GeoPoint} from 'firebase/firestore';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {
@@ -45,6 +42,16 @@ import {
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {Point} from 'app/models/geometry/point';
 import {Coordinate} from 'app/models/geometry/coordinate';
+import {Polygon} from 'app/models/geometry/polygon';
+import {LinearRing} from 'app/models/geometry/linear-ring';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+
+function polygonShellCoordsToPolygon(coordinates: number[][]): Polygon {
+  const coordinateInstances = coordinates.map(
+    ([longitude, latitude]) => new Coordinate(longitude, latitude)
+  );
+  return new Polygon(new LinearRing(List(coordinateInstances)), List());
+}
 
 describe('MapComponent', () => {
   let component: MapComponent;
@@ -64,8 +71,8 @@ describe('MapComponent', () => {
   const poiId2 = 'poi002';
   const poiId3 = 'poi003';
   const poiId4 = 'poi004';
-  const geoJsonLoiId1 = 'geo_json_loi001';
-  const aoiId1 = 'aoi001';
+  const polygonLoiId1 = 'polygon_loi001';
+  const multipolygonLoiId1 = 'multipolygon_loi001';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
   const jobColor1 = 'red';
@@ -116,38 +123,37 @@ describe('MapComponent', () => {
     new Point(new Coordinate(45, 45)),
     Map()
   );
-  const geoJson1 = {
-    type: 'FeatureCollection',
-    features: [
-      {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [
-            [
-              [0, 0],
-              [10, 0],
-              [10, 10],
-              [0, 10],
-              [0, 0],
-            ],
-          ],
-        },
-      },
-    ],
-  };
-  const geoJsonLoi1 = new GeoJsonLocationOfInterest(
-    geoJsonLoiId1,
+  const polygon1ShellCoordinates = [
+    [0, 0],
+    [10, 0],
+    [10, 10],
+    [0, 10],
+    [0, 0],
+  ];
+  const polygon2ShellCoordinates = [
+    [-10, -10],
+    [-10, 20],
+    [20, 20],
+    [20, -10],
+    [-10, -10],
+  ];
+  const polygonLoi1 = new GenericLocationOfInterest(
+    polygonLoiId1,
     jobId1,
-    geoJson1
+    polygonShellCoordsToPolygon(polygon1ShellCoordinates),
+    Map()
   );
-  const aoi1 = new AreaOfInterest(aoiId1, jobId2, [
-    new GeoPoint(-10, -10),
-    new GeoPoint(20, -10),
-    new GeoPoint(20, 20),
-    new GeoPoint(-10, 20),
-    new GeoPoint(-10, -10),
-  ]);
+  const multipolygonLoi1 = new GenericLocationOfInterest(
+    multipolygonLoiId1,
+    jobId1,
+    new MultiPolygon(
+      List([
+        polygonShellCoordsToPolygon(polygon1ShellCoordinates),
+        polygonShellCoordsToPolygon(polygon2ShellCoordinates),
+      ])
+    ),
+    Map()
+  );
 
   beforeEach(waitForAsync(() => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -160,7 +166,7 @@ describe('MapComponent', () => {
       ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
     );
     mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
-      List<LocationOfInterest>([poi1, poi2, geoJsonLoi1, aoi1])
+      List<LocationOfInterest>([poi1, poi2, polygonLoi1])
     );
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
@@ -232,23 +238,36 @@ describe('MapComponent', () => {
     expect(marker2.getMap()).toEqual(component.map.googleMap!);
   });
 
-  it('should render polygons on map - geojson loi', () => {
-    const polygon = component.polygons.get(geoJsonLoiId1)!;
+  it('should render polygons on map - polygon loi', () => {
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(0, 0),
         new google.maps.LatLng(0, 10),
         new google.maps.LatLng(10, 10),
         new google.maps.LatLng(10, 0),
+        new google.maps.LatLng(0, 0),
       ],
     ]);
     assertPolygonStyle(polygon, jobColor1, 3);
     expect(polygon.getMap()).toEqual(component.map.googleMap!);
   });
 
-  it('should render polygons on map - polygon loi', () => {
-    const polygon = component.polygons.get(aoiId1)!;
-    assertPolygonPaths(polygon, [
+  it('should render polygons on map - multipolygon loi', fakeAsync(() => {
+    mockLois$.next(List<LocationOfInterest>([multipolygonLoi1]));
+    tick();
+
+    const [polygon1, polygon2] = component.polygons.get(multipolygonLoiId1)!;
+    assertPolygonPaths(polygon1, [
+      [
+        new google.maps.LatLng(0, 0),
+        new google.maps.LatLng(0, 10),
+        new google.maps.LatLng(10, 10),
+        new google.maps.LatLng(10, 0),
+        new google.maps.LatLng(0, 0),
+      ],
+    ]);
+    assertPolygonPaths(polygon2, [
       [
         new google.maps.LatLng(-10, -10),
         new google.maps.LatLng(20, -10),
@@ -257,12 +276,14 @@ describe('MapComponent', () => {
         new google.maps.LatLng(-10, -10),
       ],
     ]);
-    assertPolygonStyle(polygon, jobColor2, 3);
-    expect(polygon.getMap()).toEqual(component.map.googleMap!);
-  });
+    assertPolygonStyle(polygon1, jobColor1, 3);
+    assertPolygonStyle(polygon2, jobColor1, 3);
+    expect(polygon1.getMap()).toEqual(component.map.googleMap!);
+    expect(polygon2.getMap()).toEqual(component.map.googleMap!);
+  }));
 
   it('should update lois when backend lois update', fakeAsync(() => {
-    mockLois$.next(List<LocationOfInterest>([poi1, poi3, geoJsonLoi1]));
+    mockLois$.next(List<LocationOfInterest>([poi1, poi3, polygonLoi1]));
     tick();
 
     expect(component.markers.size).toEqual(2);
@@ -275,13 +296,14 @@ describe('MapComponent', () => {
     assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap!);
     expect(component.polygons.size).toEqual(1);
-    const polygon = component.polygons.get(geoJsonLoiId1)!;
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
     assertPolygonPaths(polygon, [
       [
         new google.maps.LatLng(0, 0),
         new google.maps.LatLng(0, 10),
         new google.maps.LatLng(10, 10),
         new google.maps.LatLng(10, 0),
+        new google.maps.LatLng(0, 0),
       ],
     ]);
     assertPolygonStyle(polygon, jobColor1, 3);
@@ -306,21 +328,21 @@ describe('MapComponent', () => {
   }));
 
   it('should select loi when polygon is clicked', () => {
-    const polygon = component.polygons.get(aoiId1)!;
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
     google.maps.event.trigger(polygon, 'click', {
-      latLng: new google.maps.LatLng(-9, -9),
+      latLng: new google.maps.LatLng(3, 3),
     });
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(aoiId1);
+    ).toHaveBeenCalledOnceWith(polygonLoiId1);
   });
 
   it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
-    mockLocationOfInterestId$.next(geoJsonLoiId1);
+    mockLocationOfInterestId$.next(polygonLoiId1);
     tick();
 
-    const polygon = component.polygons.get(geoJsonLoiId1)!;
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
     assertPolygonStyle(polygon, jobColor1, 6);
   }));
 
@@ -410,7 +432,7 @@ describe('MapComponent', () => {
     google.maps.event.trigger(marker, 'dragstart', {
       latLng: new google.maps.LatLng(1.23, 4.56),
     });
-    const polygon = component.polygons.get(geoJsonLoiId1)!;
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
     google.maps.event.trigger(polygon, 'click');
 
     expect(navigationServiceSpy.selectLocationOfInterest).toHaveBeenCalledTimes(
@@ -504,18 +526,21 @@ describe('MapComponent', () => {
   }));
 
   it('should pop up dialog when overlapping polygons are clicked', fakeAsync(() => {
-    const polygon = component.polygons.get(geoJsonLoiId1)!;
+    mockLois$.next(List<LocationOfInterest>([polygonLoi1, multipolygonLoi1]));
+    tick();
+
+    const [polygon] = component.polygons.get(polygonLoiId1)!;
     google.maps.event.trigger(polygon, 'click', {
-      latLng: new google.maps.LatLng(0, 0),
+      latLng: new google.maps.LatLng(2, 2),
     });
-    mockDialogAfterClosed$.next(aoiId1);
+    mockDialogAfterClosed$.next(multipolygonLoiId1);
     tick();
 
     expect(dialogSpy.open).toHaveBeenCalledTimes(1);
     expect(dialogRefSpy.afterClosed).toHaveBeenCalledTimes(1);
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(aoiId1);
+    ).toHaveBeenCalledOnceWith(multipolygonLoiId1);
   }));
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {

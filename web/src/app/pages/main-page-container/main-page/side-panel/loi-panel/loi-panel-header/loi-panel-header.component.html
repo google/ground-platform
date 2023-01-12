@@ -20,13 +20,13 @@ limitations under the License.
 </button>
 <mat-list-item>
   <img
-    *ngIf="loiTypeValue === loiType.Point"
+    *ngIf="loiGeometryType === geometryType.POINT"
     matListAvatar
     [src]="pinUrl"
     alt="point"
   />
   <img
-    *ngIf="loiTypeValue === loiType.Polygon"
+    *ngIf="loiGeometryType === geometryType.POLYGON"
     matListAvatar
     src="/assets/img/polygon_icon.svg"
     alt="polygon"
