@@ -39,6 +39,7 @@ export class NavigationService {
   static readonly SURVEY_SEGMENT = 'survey';
   static readonly SIGN_IN_SEGMENT = 'signin';
   static readonly SURVEYS_SEGMENT = 'surveys';
+  static readonly SURVEYS_CREATE = 'create';
 
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
@@ -225,6 +226,13 @@ export class NavigationService {
    */
   navigateToSurveyList() {
     this.router.navigate([NavigationService.SURVEYS_SEGMENT]);
+  }
+
+  navigateToCreateSurvey(surveyId: string | null): void {
+    const url = `${NavigationService.SURVEYS_SEGMENT}${
+      surveyId ? `/${surveyId}` : ''
+    }/${NavigationService.SURVEYS_CREATE}`;
+    this.router.navigateByUrl(url);
   }
 
   /**

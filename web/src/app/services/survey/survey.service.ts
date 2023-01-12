@@ -88,17 +88,37 @@ export class SurveyService {
     return this.dataStore.updateSurveyTitle(surveyId, newTitle);
   }
 
+  /**
+   * Updates the survey with new title and new description by calling the data-store service.
+   *
+   * @param surveyId the id of the survey.
+   * @param newTitle the new title of the survey.
+   * @param newDescription the new description of the survey.
+   */
+  updateTitleAndDescription(
+    surveyId: string,
+    newTitle: string,
+    newDescription: string
+  ): Promise<void> {
+    return this.dataStore.updateSurveyTitleAndDescription(
+      surveyId,
+      newTitle,
+      newDescription
+    );
+  }
+
   updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
     return this.dataStore.updateAcl(surveyId, acl);
   }
 
-  async createSurvey(title: string): Promise<string> {
+  async createSurvey(title: string, description?: string): Promise<string> {
     const offlineBaseMapSources = environment.offlineBaseMapSources;
     const user = await firstValueFrom(this.authService.getUser$());
     const email = user?.email || 'Unknown email';
     const surveyId = await this.dataStore.createSurvey(
       email,
       title,
+      description ?? '',
       offlineBaseMapSources
     );
     return Promise.resolve(surveyId);
