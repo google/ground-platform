@@ -24,6 +24,7 @@ import {
   Cardinality,
 } from 'app/models/task/multiple-choice.model';
 import {Timestamp} from 'firebase/firestore';
+import {Role} from 'app/models/role.model';
 
 class MockFirebaseData {
   static submission001 = {
@@ -142,5 +143,29 @@ describe('FirebaseDataConverter', () => {
         )
       )
     ).toEqual(MockFirebaseData.submission001);
+  });
+
+  it('converts role back and forth', () => {
+    const ownerRole = Role.OWNER;
+    const surveyOrganizerRole = Role.SURVEY_ORGANIZER;
+    const dataCollectorRole = Role.DATA_COLLECTOR;
+    const viewerRole = Role.VIEWER;
+
+    expect(
+      FirebaseDataConverter.toRole(FirebaseDataConverter.toRoleId(ownerRole))
+    ).toEqual(ownerRole);
+    expect(
+      FirebaseDataConverter.toRole(
+        FirebaseDataConverter.toRoleId(surveyOrganizerRole)
+      )
+    ).toEqual(surveyOrganizerRole);
+    expect(
+      FirebaseDataConverter.toRole(
+        FirebaseDataConverter.toRoleId(dataCollectorRole)
+      )
+    ).toEqual(dataCollectorRole);
+    expect(
+      FirebaseDataConverter.toRole(FirebaseDataConverter.toRoleId(viewerRole))
+    ).toEqual(viewerRole);
   });
 });

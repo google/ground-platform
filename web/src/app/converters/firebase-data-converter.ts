@@ -83,13 +83,13 @@ export class FirebaseDataConverter {
     );
   }
 
-  private static toRole(roleString: string) {
+  static toRole(roleString: string) {
     switch (roleString) {
       case 'owner':
         return Role.OWNER;
-      case 'survey-organizer':
+      case 'survey_organizer':
         return Role.SURVEY_ORGANIZER;
-      case 'data-collector':
+      case 'data_collector':
         return Role.DATA_COLLECTOR;
       case 'viewer':
         return Role.VIEWER;
