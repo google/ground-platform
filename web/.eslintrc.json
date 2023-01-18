@@ -3,9 +3,7 @@
   "env": {
     "jasmine": true
   },
-  "plugins": ["eslint-plugin-absolute-imports"],
   "rules": {
-    "absolute-imports/only-absolute-imports": "error",
     "node/no-unpublished-import": "off",
     "node/no-unpublished-require": "off",
     "object-curly-spacing": ["error", "always"]
