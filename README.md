@@ -4,21 +4,17 @@
 
 Ground is an open-source, map-first data collection platform built
 to seamlessly connect the offline world with cloud-based storage and
-computation. The platform consists of a web app for survey management, and an
-Android app for offline data collection. Our goal is to provide a "just right"
-data collection solution that meets the needs of community organizers,
-conservationists, humanitarian workers, and researchers addressing some of
-today's most pressing issues.
+computation. The platform consists of a web app for survey cration and
+management, and an Android app for offline data collection. Our goal is to
+make geospatial data collection at scale accessible to local communities,
+conservationists, humanitarian workers, and researchers.
 
-**Note:** Ground is not an officially supported Google product, and is developed
-on a best-effort basis.
+**Note:** Ground is not an officially supported Google product. It is being
+developed on a best-effort basis.
 
-You can learn more about Ground on the [project
-website](https://google.github.io/ground-platform).
+## About this repository
 
-## About this Repository
-
-This repo contains all Ground cloud-based / hosted components:
+This repo contains Ground's hosted components:
 
 | Directory                | Component                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
@@ -32,64 +28,11 @@ development environment for each component.
 
 ## Contributing
 
-We'd love to accept your patches and contributions to this project. For more
-information, including details on the required Contributor License Agreement
-(CLA), code reviews, and environment setup, see
-[Contributing to Ground Platform](CONTRIBUTING.md).
+We welcome patches and contributions from the open-source community. To get
+started, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Getting started
+### Building and deploying
 
-### Node.js
-
-> **Note**: This guide assumes nvm (Node Version Manager) will be used to
-> install and manage Node.js versions. For more information on nvm,
-> including installation instructions, see
-> https://github.com/creationix/nvm#installation>
-
-Once you have nvm installed, install Node.js with:
-
-```
-$ nvm install 16 && nvm use 16
-```
-
-Then install the Angular CLI using npm using:
-
-```
-$ npm install -g @angular/cli
-```
-
-### Quickstart
-
-To get up and running quickly, you can run the web app against the local
-Firebase emulator.
-
-To install dependencies and start the emulator, run:
-
-```
-$ cd functions && npm install && npm run emulators
-```
-
-Leave the emulator running, and in a new shell execute the following:
-
-```
-$ cd web && npm install && npm run start:dev
-```
-
-Once the local server is ready, you can navigate to
-http://localhost:4200/survey/new to create a new Ground survey. Note that for
-expediency, the above commands start the app without valid API keys, so
-warnings related to missing API keys are expected.
-
-### Next steps
-
-To set up your environment for developing Cloud Functions against a real
-Firebase project, see [functions/README.md](functions/README.md).
-
-For further instructions on working with the Angular web app, see
-[web/README.md](web/README.md).
-
-### Building and Deploying Ground from Source
-
-For step-by-step instructions setting up your own instance of Ground, see the
-documentation for [building and deploying Ground from the
+For step-by-step instructions on how to do set up your own hosted Ground
+instance, see [building and deploying Ground from the
 source](docs/build-and-deploy-ground-from-source.md).

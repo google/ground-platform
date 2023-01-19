@@ -1,127 +1,30 @@
-# Contributing to Ground Platform
+# Contributing to Ground
 
-This document covers everything you need to know about contributing to Ground
-Platform. Before you get started, please make sure you read all of the 
-sections and are able to sign our CLA.
+This document provides details on how to get started contributing to the
+project. Please read this document carefully and be sure to sign the [Google
+ Contributor License Agreement (CLA)](https://cla.developers.google.com)
+ before you begin.
 
-## Contributor License Agreement (CLA)
+This project follows
+[Google's Open Source Community Guidelines](https://opensource.google.com/conduct/).
+Take some time to familiarize yourself with these guidelines before
+contributing.
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
-
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
-
-## Code reviews
+## Submitting code
 
 Before starting work on a change, comment on one of the [open issues](https://github.com/google/ground-platform/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen)
 saying you'd like to take it on. If one does not exist, you can also
 [create one here](https://github.com/google/ground-platform/issues/new).
 
-Be sure to reference this issue number in your pull request (e.g., 
-"Fix truncated text values #27"), and preferably in your commit message.
+Once an issue has been assigned to you, you may start writing your own code.
+The first time you contribute, be sure to must [create a fork](https://github.com/google/ground-platform/fork)
+of the `ground-platform` repostory. You may then
+[clone your new fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+to your local workspace and begin editing.
 
-All submissions, including submissions by project members, require review. We
+All submissions require review and approval by at least one maintainer. We
 use GitHub pull requests for this purpose. Consult
 [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+information on using pull requests. When creating an issue or pull requiest,
+be sure to fill in or remove all template fields (e.g., "Fixes #...").
 
-## Community Guidelines
-
-This project follows
-[Google's Open Source Community Guidelines](https://opensource.google.com/conduct/).
-
-## Setup
-
-The following instructions describe how to fork this repository in order 
-to contribute to the ground-platform codebase.
-
-1. Fork this repository, see <https://help.github.com/articles/fork-a-repo/>.
-
-2. Clone your fork:
-    
-    `git clone https://github.com/<username>/ground-platform.git`
-    
-    Where `<username>` is your github username.
-
-3. Add the base repository as a remote:
-    
-    `git remote add upstream https://github.com/google/ground-platform.git`
-
-4. Follow the instructions in the README files of each of the directories listed under [About this Repository](README.md#about-this-repository) section of this readme to set up your development environment.
-
-## Development Workflow
-
-After you have forked and cloned the repository, use the following steps to
-make and manage changes. After you have finished making changes, you can 
-submit them to the base repository using a pull request. 
-
-1. Pull changes from the base repository's master branch:
-    
-    `git pull upstream master`
-
-1. Create a new branch to track your changes:
-    
-    `git checkout -b <branch>`
-    
-    Where `<branch>` is a meaningful name for the branch you'll use to track
-    changes.
-
-1. Make and test changes locally.
-
-1. Add your changes to the staging area:
-    
-    `git add <files>`
-    
-    Where `<files>` are the files you changed.
-    
-    > **Note:** Run `git add .` to add all currently modified files to the staging area.
-
-1. Commit your changes:
-    
-    `git commit -m <message>`
-    
-    Where `<message>` is a meaningful, short message describing the purpose of
-    your changes.
-
-1. Pull changes from the base repository's master branch, resolve conflicts if
-   necessary:
-      
-    `git pull upstream master`
-
-1. Push your changes to your github account:
-    
-    `git push -u origin <branch>`
-    
-    Where `<branch>` is the branch name you used in step 2.
-
-    **Note**: If you have two factor authentication enabled, make sure to use
-    your [Personal Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) instead of your password.
-
-
-    Alternatively, you can [connect to GitHub via SSH](https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) instead of HTTPS and use
-    a public/private key pair for authentication.
-
-1. Create a [pull request](https://help.github.com/articles/about-pull-requests/) to have your changes reviewed and merged into the base 
-repository. Reference the [issue](https://github.com/google/ground-platform/issues) your changes resolve in either the commit message for your changes or in your pull request. 
-
-    > :exclamation: Any subsequent changes committed to the branch you used
-    > to open your PR are automatically included in the PR. If you've opened a
-    > PR but would like to continue to work on unrelated changes, be sure to
-    > start a new branch to track those changes.
-
-    For more information on creating pull requests, see <https://help.github.com/articles/creating-a-pull-request/>. 
-    
-    To learn more about referencing issues in your pull request or commit messages, see <https://help.github.com/articles/closing-issues-using-keywords/>.
-
-1. Celebrate!
-
-## Building and Deploying Ground from Source
-
-For step-by-step instructions setting up your own instance of Ground, see the
-documentation for [building and deploying Ground from the
-source](docs/build-and-deploy-ground-from-source.md).
