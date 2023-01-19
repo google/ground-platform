@@ -26,6 +26,8 @@ import {SignInPageModule} from 'app/components/sign-in-page/sign-in-page.module'
 import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
+import {CreateJobComponent} from 'app/pages/create-job/create-job.component';
+import {CreateJobModule} from 'app/pages/create-job/create-job.module';
 
 const routes: Routes = [
   {
@@ -44,13 +46,18 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEYS_SEGMENT}/create`,
+    path: `${NavigationService.SURVEYS_SEGMENT}/${NavigationService.SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
     canActivate: [AuthGuard],
   },
   {
     path: `${NavigationService.SURVEYS_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEYS_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_CREATE}/${NavigationService.JOB_SEGMENT}`,
+    component: CreateJobComponent,
     canActivate: [AuthGuard],
   },
 ];
@@ -66,6 +73,7 @@ const config = RouterModule.forRoot(routes, {
     SignInPageModule,
     SurveyListModule,
     CreateSurveyModule,
+    CreateJobModule,
   ],
 })
 export class AppRoutingModule {}

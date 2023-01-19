@@ -70,7 +70,7 @@ export class JobService {
   async addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     if (job.index === -1) {
       const index = await this.getJobCount();
-      job = job.withIndex(index);
+      job = job.copyWith({index});
     }
     return this.dataStoreService.addOrUpdateJob(surveyId, job);
   }
