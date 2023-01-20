@@ -77,15 +77,13 @@ export class CreateSurveyComponent implements OnInit {
         title,
         description
       );
-      // TODO go to create job page with survey id once the page is created
-      this.navigationService.navigateToCreateSurvey(this.currentSurveyId);
+      this.navigationService.navigateToCreateJob(this.currentSurveyId);
     } else {
       const createdSurveyId = await this.surveyService.createSurvey(
         title,
         description
       );
-      // TODO go to create job page with survey id once the page is created
-      this.navigationService.navigateToCreateSurvey(createdSurveyId);
+      this.navigationService.navigateToCreateJob(createdSurveyId);
     }
   }
 }

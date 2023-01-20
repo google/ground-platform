@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-import {Task} from './task/task.model';
-import {Map} from 'immutable';
-import {Copiable} from './copiable';
-
-export class Job extends Copiable {
-  constructor(
-    readonly id: string,
-    readonly index: number,
-    readonly color?: string,
-    readonly name?: string,
-    readonly tasks?: Map<string, Task>,
-    readonly dataCollectorsCanAdd?: string[]
-  ) {
-    super();
+export class Copiable {
+  public copyWith(modifyObject: {[P in keyof this]?: this[P]}): this {
+    return Object.assign(Object.create(this.constructor.prototype), {
+      ...this,
+      ...modifyObject,
+    });
   }
 }

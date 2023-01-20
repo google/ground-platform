@@ -24,38 +24,57 @@ import {
   fakeAsync,
   flush,
 } from '@angular/core/testing';
-import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
+import {CreateJobComponent} from 'app/pages/create-job/create-job.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {JobService} from 'app/services/job/job.service';
 import {Subject} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
+import {Job} from 'app/models/job.model';
 
-describe('CreateSurveyComponent', () => {
-  let component: CreateSurveyComponent;
-  let fixture: ComponentFixture<CreateSurveyComponent>;
+describe('CreateJobComponent', () => {
+  let component: CreateJobComponent;
+  let fixture: ComponentFixture<CreateJobComponent>;
   let surveyId$: Subject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
+  let jobServiceSpy: jasmine.SpyObj<JobService>;
 
   const surveyId = 'survey001';
-  const newSurveyId = 'survey002';
-  const title = 'title1';
-  const description = 'description1';
-  const mockSurvey = new Survey(
+  const jobId = 'job001';
+  const name = 'jobX';
+  const mockSurveyNoJob = new Survey(
     surveyId,
-    title,
-    description,
+    'title',
+    'description',
     /* jobs= */ Map(),
+    /* acl= */ Map()
+  );
+  const mockJob = new Job(
+    jobId,
+    /* index */ 0,
+    'red',
+    name,
+    /* tasks= */ Map()
+  );
+  const newJob = new Job(jobId, -1);
+  const mockSurveyWithJob = new Survey(
+    surveyId,
+    'title',
+    'description',
+    /* jobs= */ Map({
+      job001: mockJob,
+    }),
     /* acl= */ Map()
   );
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['init', 'getSurveyId$', 'navigateToSurveyList', 'navigateToCreateJob']
+      ['init', 'getSurveyId$', 'navigateToCreateSurvey', 'navigateToCreateJob']
     );
     surveyId$ = new Subject<string | null>();
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
@@ -64,102 +83,91 @@ describe('CreateSurveyComponent', () => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
       'getActiveSurvey$',
-      'updateTitleAndDescription',
-      'createSurvey',
     ]);
-    surveyServiceSpy.createSurvey.and.returnValue(
-      new Promise(resolve => resolve(newSurveyId))
-    );
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
+    jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
+      'addOrUpdateJob',
+      'createNewJob',
+    ]);
+    jobServiceSpy.createNewJob.and.returnValue(newJob);
+
     TestBed.configureTestingModule({
-      declarations: [CreateSurveyComponent],
+      declarations: [CreateJobComponent],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: JobService, useValue: jobServiceSpy},
         {provide: ActivatedRoute, useValue: route},
       ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateSurveyComponent);
+    fixture = TestBed.createComponent(CreateJobComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('title and description inputs are empty when routed in without survey ID', fakeAsync(() => {
-    surveyId$.next(null);
+  it('name input is empty when active survey does not have any jobs', fakeAsync(() => {
+    surveyId$.next(surveyId);
+    activeSurvey$.next(mockSurveyNoJob);
     tick();
 
-    expect(component.formGroup.controls[component.titleControlKey].value).toBe(
+    expect(component.formGroup.controls[component.nameControlKey].value).toBe(
       ''
     );
-    expect(
-      component.formGroup.controls[component.descriptionControlKey].value
-    ).toBe('');
   }));
 
-  it('title and description inputs are loaded when routed in with survey ID', fakeAsync(() => {
+  it('name input is loaded when active survey has a job', fakeAsync(() => {
     surveyId$.next(surveyId);
-    activeSurvey$.next(mockSurvey);
+    activeSurvey$.next(mockSurveyWithJob);
     tick();
 
-    expect(component.formGroup.controls[component.titleControlKey].value).toBe(
-      title
+    expect(component.formGroup.controls[component.nameControlKey].value).toBe(
+      name
     );
-    expect(
-      component.formGroup.controls[component.descriptionControlKey].value
-    ).toBe(description);
   }));
 
-  it('creates a new survey when routed in without survey ID and continue button is clicked', fakeAsync(() => {
-    surveyId$.next(null);
+  it('creates a new job when active survey does not have any jobs and continue button is clicked', fakeAsync(() => {
+    surveyId$.next(surveyId);
+    activeSurvey$.next(mockSurveyNoJob);
     tick();
 
-    const newTitle = 'newTitle';
-    const newDescription = 'newDescription';
-    component.formGroup.controls[component.titleControlKey].setValue(newTitle);
-    component.formGroup.controls[component.descriptionControlKey].setValue(
-      newDescription
-    );
+    const name = 'jobY';
+    component.formGroup.controls[component.nameControlKey].setValue(name);
     const continueButton = fixture.debugElement.query(
       By.css('#continue-button')
     ).nativeElement as HTMLElement;
     continueButton.click();
     flush();
 
-    expect(surveyServiceSpy.createSurvey).toHaveBeenCalledOnceWith(
-      newTitle,
-      newDescription
+    expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+      surveyId,
+      newJob.copyWith({name})
     );
     expect(navigationServiceSpy.navigateToCreateJob).toHaveBeenCalledOnceWith(
-      newSurveyId
+      surveyId
     );
   }));
 
-  it('updates the existing survey when routed in with survey ID and continue button is clicked', fakeAsync(() => {
+  it('updates the first job when active survey has a job and continue button is clicked', fakeAsync(() => {
     surveyId$.next(surveyId);
-    activeSurvey$.next(mockSurvey);
+    activeSurvey$.next(mockSurveyWithJob);
     tick();
 
-    const newTitle = 'newTitle';
-    const newDescription = 'newDescription';
-    component.formGroup.controls[component.titleControlKey].setValue(newTitle);
-    component.formGroup.controls[component.descriptionControlKey].setValue(
-      newDescription
-    );
+    const name = 'jobY';
+    component.formGroup.controls[component.nameControlKey].setValue(name);
     const continueButton = fixture.debugElement.query(
       By.css('#continue-button')
     ).nativeElement as HTMLElement;
     continueButton.click();
     flush();
 
-    expect(surveyServiceSpy.updateTitleAndDescription).toHaveBeenCalledOnceWith(
+    expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
       surveyId,
-      newTitle,
-      newDescription
+      mockJob.copyWith({name})
     );
     expect(navigationServiceSpy.navigateToCreateJob).toHaveBeenCalledOnceWith(
       surveyId
@@ -173,11 +181,16 @@ describe('CreateSurveyComponent', () => {
     expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(surveyId);
   }));
 
-  it('navigates to survey list page when back button is clicked', () => {
+  it('navigates to create survey page when back button is clicked', fakeAsync(() => {
+    surveyId$.next(surveyId);
+    tick();
+
     const backButton = fixture.debugElement.query(By.css('#back-button'))
       .nativeElement as HTMLElement;
     backButton.click();
 
-    expect(navigationServiceSpy.navigateToSurveyList).toHaveBeenCalled();
-  });
+    expect(
+      navigationServiceSpy.navigateToCreateSurvey
+    ).toHaveBeenCalledOnceWith(surveyId);
+  }));
 });
