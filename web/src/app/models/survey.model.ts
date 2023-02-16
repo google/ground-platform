@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/**
+ * Represents the state of the survey, undefined should be considered as DONE.
+ */
+export enum SurveyState {
+  INITIAL_SETUP,
+  DONE,
+}
+
 import {Job} from './job.model';
 
 import {Map} from 'immutable';
@@ -38,7 +46,8 @@ export class Survey {
     readonly title: string,
     readonly description: string,
     readonly jobs: Map<string, Job>,
-    readonly acl: Map<string, Role>
+    readonly acl: Map<string, Role>,
+    readonly state?: SurveyState
   ) {}
 
   getJob(jobId: string): Job | undefined {

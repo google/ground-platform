@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-.container {
-  display: flex;
-}
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {NameJobComponent} from 'app/pages/create-survey/name-job/name-job.component';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
 
-.card {
-  margin: auto;
-  border: 1px solid lightgray;
-}
+@NgModule({
+  declarations: [NameJobComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatInputModule,
+  ],
+  exports: [NameJobComponent],
+})
+export class NameJobModule {}

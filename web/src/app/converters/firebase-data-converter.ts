@@ -15,7 +15,7 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {Survey} from 'app/models/survey.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {
@@ -79,7 +79,8 @@ export class FirebaseDataConverter {
           id as string,
           FirebaseDataConverter.toRole(data.acl[id]),
         ])
-      )
+      ),
+      data.state
     );
   }
 
@@ -110,6 +111,7 @@ export class FirebaseDataConverter {
       description,
       acl: {[ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER)},
       ...(offlineBaseMapSources?.length ? {offlineBaseMapSources} : {}),
+      state: SurveyState.INITIAL_SETUP,
     };
   }
 

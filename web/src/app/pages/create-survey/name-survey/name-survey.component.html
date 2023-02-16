@@ -14,21 +14,24 @@
   limitations under the License.
 -->
 
-<div class="container" [ngSwitch]="setupPhase">
-  <div class="card">
-    <name-survey
-      *ngSwitchCase="SetupPhase.NAME_SURVEY"
-      #nameSurvey
-      [title]="currentSurvey?.title ?? ''"
-      [description]="currentSurvey?.description ?? ''"
-    ></name-survey>
-    <name-job
-      *ngSwitchCase="SetupPhase.NAME_JOB"
-      #nameJob
-      [name]="job()?.name ?? ''"
-    ></name-job>
-  </div>
-</div>
+<h1>Start building your survey</h1>
+<h2>Provide some basic info about your survey.</h2>
+<form [formGroup]="formGroup">
+  <mat-form-field class="input" appearance="fill">
+    <mat-label> Title </mat-label>
+    <input
+      matInput
+      [formControlName]="titleControlKey"
+      placeholder="Survey title"
+    />
+  </mat-form-field>
 
-<button id="back-button" (click)="back()">back</button>
-<button id="continue-button" (click)="continue()">continue</button>
+  <mat-form-field class="input" appearance="fill">
+    <mat-label> Description </mat-label>
+    <input
+      matInput
+      [formControlName]="descriptionControlKey"
+      placeholder="Survey description"
+    />
+  </mat-form-field>
+</form>
