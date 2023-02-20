@@ -234,34 +234,11 @@ stored on GitHub.
 1. In a terminal window, in the directory where you want to download the web app
    source code, run **`git clone
    https://github.com/google/ground-platform.git`**
-1. Within the _cloned ground-platform_ directory, create a new file for the Maps
-   API configuration:
-   **ground-platform/web-ng/src/environments/.google-maps-config.ts**
-1. Add the following code to the file:
-
-    ```
-    export const googleMapsConfig = {
-    apiKey: 'YOUR_API_KEY',
-    };
-    ```
-
-1. Replace `'YOUR_API_KEY'` with the browser key that you saved in [Enable the Google
-   Maps APIs for your Firebase survey](#enable-maps-api).  
-
-1. Create a new file for the backend configuration: **ground-platform/web-ng/src/environments/.backend-config.json**
-1. Add the following code to the file:
-
-    ```
-    {
-    "offlineBaseMapSources": []
-    }
-    ```
-
-1. Create a new file for the Firebase configuration:
-   **ground-platform/web-ng/src/environments/.firebase-config.ts**
-1. Add code snippet that you copied from the config page in [Add the web app to
+2. Create a new file for the Firebase configuration:
+   **ground-platform/web/src/environments/.firebase-config.ts**
+3. Add code snippet that you copied from the config page in [Add the web app to
    your Firebase survey](#add-the-web-app).
-1. Adding **`export`** before **`const`**, the contents of the file should look roughly like this:
+4. Adding **`export`** before **`const`**, the contents of the file should look roughly like this:
 
     ```
     export const firebaseConfig = {
@@ -275,13 +252,13 @@ stored on GitHub.
     };
     ```
 
-1. In a terminal window, from the _ground-platform_ directory:
+5. In a terminal window, from the _ground-platform_ directory:
     1. Run **`nvm install 14 && nvm use 14`**
-    1. Run **`npm install -g @angular/cli firebase-tools`**
-    1. Run **`firebase use &lt;your-Firebase-survey-id&gt;`**
-    1. Run **`./build.sh`**
-    1. Run **`firebase deploy`**
-1. Once deployment is complete, test the app by going to **https://&lt;your-Firebase-survey-name&gt;.web.app**
+    2. Run **`npm install -g @angular/cli firebase-tools`**
+    3. Run **`firebase use &lt;your-Firebase-survey-id&gt;`**
+    4. Run **`./build.sh`**
+    5. Run **`firebase deploy`**
+6. Once deployment is complete, test the app by going to **https://&lt;your-Firebase-survey-name&gt;.web.app**
 
 ## 3. Configure and build the Android app {#configure-and-build-android}
 

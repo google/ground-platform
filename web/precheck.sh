@@ -13,6 +13,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-echo 'export const googleMapsConfig = {"apiKey": ""};' > src/environments/.google-maps-config.ts
 echo 'export const firebaseConfig = {"projectId": ""};' > src/environments/.firebase-config.ts
-echo '{"offlineBaseMapSources": []}' > src/environments/.backend-config.json
