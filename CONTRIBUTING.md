@@ -41,7 +41,7 @@ Maintainers may push directly to branches in the `google/ground-platform`, and
 so they do not need to fork the repo. Simply clone the repo with:
     
 ```shell
-git clone https://github.com/google/ground-platform.git`
+$ git clone https://github.com/google/ground-platform.git
 ```
 
 #### Community contributors
