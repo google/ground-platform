@@ -46,9 +46,9 @@ git clone https://github.com/google/ground-platform.git
 
 #### Community contributors
 
-1. Fork this repository, see <https://help.github.com/articles/fork-a-repo/>.
+1. [Fork this repository](https://github.com/google/ground-platform/fork).
 
-2. Clone your fork:
+2. Clone the new fork to your local device:
     
     ```shell
     git clone https://github.com/<user>/ground-platform.git`
@@ -79,6 +79,8 @@ nvm install 16
 
 ### Building and running the app
 
+#### Running locally
+
 To get up and running quickly, you can run the web app and Cloud Functions,locally using the Firebase Local Emulator Suite.
 
 To install dependencies, build, and run Ground locally:
@@ -92,6 +94,10 @@ Once the local server is ready, the app will be available at http://localhost:50
 **Note**: The local build variant does not require API keys to run. Warnings related to missing API keys are expected. Authentication is also disabled.
 
 The local emulator is preloaded with a demo Ground survey. Run `npm run export:local` to persist changes to update the snapshot of demo data in the local db.
+
+#### Using live Firebase
+
+Alternatively, you can test and deploy against a live Firebase project. Follow instructions in <web/README.md> for details.
 
 ## Developing Ground
 

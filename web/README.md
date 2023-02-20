@@ -1,28 +1,12 @@
 [![codecov](https://codecov.io/gh/google/ground-platform/branch/master/graph/badge.svg?token=arOkyNs0m9)](https://codecov.io/gh/google/ground-platform)
 
-# Ground Web Console in Angular
+# Ground web console
 
-## First-time setup
+This page describes development against a live Firebase project. Create a project as described in [Getting started with Firebase](https://cloud.google.com/firestore/docs/client/get-firebase) in the Firebase docs, or contact your administrator for access to existing development and production projects.
 
-Before proceeding, follow instructions in [../README.md](../README.md).
+Before proceeding, first follow instructions in <../README.md>.
 
-### Add Google Maps API key
-
-1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
-
-   > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
-   > Platform](https://console.cloud.google.com/) under APIs \> Services \>
-   > Credentials.
-
-2. Write the key to `src/environments/.google-maps-config.ts` as follows:
-
-   ```javascript
-   export const googleMapsConfig = {
-     apiKey: 'YOUR_API_KEY',
-   };
-   ```
-
-   Where `YOUR_API_KEY` is your Google Maps API key.
+## Add Google Maps API key
 
 ### Download Firebase API key
 
@@ -55,6 +39,22 @@ Before proceeding, follow instructions in [../README.md](../README.md).
    };
    ```
 
+1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
+
+   > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
+   > Platform](https://console.cloud.google.com/) under APIs \> Services \>
+   > Credentials.
+
+2. Write the key to `src/environments/.google-maps-config.ts` as follows:
+
+   ```javascript
+   export const googleMapsConfig = {
+     apiKey: 'YOUR_API_KEY',
+   };
+   ```
+
+   Where `YOUR_API_KEY` is your Google Maps API key.
+
 ### Add local environment config
 
 Create a file in `environments/.backend-config.json` containing the following:
@@ -75,15 +75,6 @@ $ npm install
 
 ## Development server
 
-Run `npm run start` to host your web app locally, then navigate to
-<http://localhost:4200/survey/new> to create a new Ground project. The app will
-automatically rebuild and reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `npm run ng generate component component-name` to generate a new component. You can
-also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
 ## Build
 
 Run `npm run build:dev` to build the project. The build artifacts will be stored in the
@@ -103,8 +94,3 @@ Run `npm run e2e` to execute the end-to-end tests via
 ## Deploying web app to development Firebase instance
 
 Run `npm run deploy <project-id>`.
-
-## Further help
-
-To get more help on the Angular CLI use `npm run ng help` or go check out the [Angular
-CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
