@@ -2,95 +2,26 @@
 
 # Ground web console
 
-This page describes development against a live Firebase project. Create a project as described in [Getting started with Firebase](https://cloud.google.com/firestore/docs/client/get-firebase) in the Firebase docs, or contact your administrator for access to existing development and production projects.
+This page describes additional npm scripts for use when developing the Ground web console. Be sure to follow instructions in <../README.md> before proceeding.
 
-Before proceeding, first follow instructions in <../README.md>.
+## Running tests
 
-## Add Google Maps API key
+To run tests locally in a browser:
 
-### Download Firebase API key
-
-1. Visit https://console.firebase.google.com and click "Add project".
-
-1. Once your project is created, on the welcome page under "Get started by
-   adding Firebase to your app", click the Web icon (`</>`).
-
-1. In Step 1, select "Also set up Firebase hosting for this app".
-
-1. Accept defaults for remaining steps to return the main console page.
-
-1. Click "1 app" and then click the gear icon next to your app name.
-
-1. Scroll down to "Firebase SDK snippet" and select "Config".
-
-1. Copy the text that appears in "const firebaseConfig..." into a new file in
-   `src/environments/.firebase-config.ts`, prepending the keyword `export` to
-   the file contents. The contents of the file should look roughly like this:
-
-   ```javascript
-   export const firebaseConfig = {
-     apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
-     authDomain: 'my-app.firebaseapp.com',
-     databaseURL: 'https://my-app.firebaseio.com',
-     projectId: 'my-app',
-     storageBucket: 'my-app.appspot.com',
-     messagingSenderId: '12345678',
-     appId: '1:12345678:web:abc123etcetc',
-   };
-   ```
-
-1. If you don't already have one, generate a new API key by following instructions at https://developers.google.com/maps/documentation/android-sdk/signup#quick-guide.
-
-   > **Note:** Alternatively, you can access an existing project's key via [Google Cloud
-   > Platform](https://console.cloud.google.com/) under APIs \> Services \>
-   > Credentials.
-
-2. Write the key to `src/environments/.google-maps-config.ts` as follows:
-
-   ```javascript
-   export const googleMapsConfig = {
-     apiKey: 'YOUR_API_KEY',
-   };
-   ```
-
-   Where `YOUR_API_KEY` is your Google Maps API key.
-
-### Add local environment config
-
-Create a file in `environments/.backend-config.json` containing the following:
-
-```json
-{
-  "offlineBaseMapSources": []
-}
+```shell
+npm run test
 ```
 
-## Install dependencies
+To execute the end-to-end tests:
 
-Install required npm dependencies:
-
-```
-$ npm install
+```shell
+npm run e2e
 ```
 
-## Development server
+## Deploying web app only
 
-## Build
+To deploy the web app without updating Cloud Functions or Firebase config, from the current directory:
 
-Run `npm run build:dev` to build the project. The build artifacts will be stored in the
-`dist/` directory. Use the `npm run build:prod` flag for a production build.
-
-## Running unit tests
-
-Run `npm run test` to execute run tests locally in Chrome using
-
-[Karma](https://karma-runner.github.io) test runner.
-
-## Running end-to-end tests
-
-Run `npm run e2e` to execute the end-to-end tests via
-[Protractor](http://www.protractortest.org/).
-
-## Deploying web app to development Firebase instance
-
-Run `npm run deploy <project-id>`.
+```shell
+npm run deploy <project-id>
+```

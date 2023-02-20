@@ -97,8 +97,49 @@ The local emulator is preloaded with a demo Ground survey. Run `npm run export:l
 
 #### Using live Firebase
 
-Alternatively, you can test and deploy against a live Firebase project. Follow instructions in <web/README.md> for details.
+Alternatively, you can test and deploy against a real Firebase project:
 
+1. Create a project as described in [Getting started with Firebase](https://cloud.google.com/firestore/docs/client/get-firebase) in the Firebase docs, or contact your administrator to get access to existing development and/or production projects. When creating a new project, be sure the following are enabled under "Build":
+
+  * Authentication > Sign-in method > Google
+  * Firestore Database
+  * Hosting
+  * Storage
+
+2. Create a web app under "Project Overview > Add app > Web" or choose an existing web one.
+
+3. Scroll down to the code snippet under "SDK setup and configuration" and select "Config". Copy the code into `web/src/environments/.firebase-config.ts`, prepending the keyword `export` to the snippet, for example:
+
+   ```javascript
+   export const firebaseConfig = {
+     apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
+     authDomain: 'my-app.firebaseapp.com',
+     databaseURL: 'https://my-app.firebaseio.com',
+     projectId: 'my-app',
+     storageBucket: 'my-app.appspot.com',
+     messagingSenderId: '12345678',
+     appId: '1:12345678:web:abc123etcetc',
+   };
+   ```
+
+4. Build and deploy all the things dev Firebase:
+
+    ```shell
+    npm install && npm run build:dev && npm run deploy <project-id>
+    ```
+
+Once complete, the web app will be available at dev project's Firebase Hosting URL.
+
+The web app may also be develop locally against the dev Firebase server with:
+
+```shell
+cd web && npm run start:dev
+```
+
+The web app will be accessible at http://localhost:4200. The app will be rebuilt and reloaded changes are saved.
+
+See <firebase/README.md> and <web/README.md> for additional npm development script commands.
+ 
 ## Developing Ground
 
 ### Claiming an issue
