@@ -5,6 +5,8 @@ layout: default
 
 # Build and Deploy Ground from Source
 
+**WARNING**: This doc is slightly out of date. It should be updated ASAP ([#1057](https://github.com/google/ground-platform/issues/1057)).
+
 The Ground platform consists of a web app and an Android mobile app, both of
 which use Firebase as a common backend. In order to use Ground, you must build
 and deploy an instance of Ground using the source files hosted on GitHub. This
