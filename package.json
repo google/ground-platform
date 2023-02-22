@@ -25,6 +25,6 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
-    "firebase-tools": "11.16.1"
+    "firebase-tools": "11.23.1"
   }
 }
