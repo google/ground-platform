@@ -10,7 +10,7 @@ First-time setup:
 4. [Set up your environment](#seting-up-your-environment)
 5. [Build and run the app](#building-and-running-the-app)
 
-Developing Ground:
+Contributing to Ground:
 
 1. [Claim an issue](#claiming-an-issue)
 2. [Create a new branch](#creating-a-branch)
@@ -27,7 +27,7 @@ Help us keep the Ground project open and inclusive. Please read and follow [Goog
 
 ### Contributor License Agreement (CLA)
 
-Contributions to this project must be accompanied by a Contributor License Agreement. You (or your employer) retain the copyright to your contribution; this simply gives us permission to use and redistribute your contributions as part of the project. Head over to <https://cla.developers.google.com/> to see your current agreements on file or to sign a new one.
+Contributions to this project must be accompanied by a Contributor License Agreement. You (or your employer) retain the copyright to your contribution; this agreement gives us permission to use and redistribute your contributions as part of the project. Head over to <https://cla.developers.google.com/> to see your current agreements on file or to sign a new one.
 
 You generally only need to submit a CLA once, so if you've already submitted one (even if it was for a different project), you probably don't need to do it again.
 
@@ -148,7 +148,7 @@ Before you begin work on a change, comment on one of the [open issues](https://g
 
 ### Creating a branch
 
-We strongly contributors to create a separate branch for each pull request. Maintainers working directly in `google/ground-platform` should create branches with names in the form `<username>/<issue-no>/<short-desc>`. For example:
+We strongly encourage contributors to create a separate branch for each pull request. Maintainers working directly in `google/ground-platform` should create branches with names in the form `<username>/<issue-no>/<short-desc>`. For example:
 
 ```shell
 git checkout -d gino-m/1234/fix-save-button
