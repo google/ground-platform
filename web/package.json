@@ -4,6 +4,7 @@
   "scripts": {
     "clean": "rm -rf node_modules dist coverage *.log",
     "start:dev": "ng serve -c dev",
+    "start:prod": "ng serve -c prod",
     "build:dev": "ng build -c dev",
     "build:prod": "ng build -c production",
     "build:local": "ng build -c local",
