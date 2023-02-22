@@ -16,21 +16,20 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
-import {JobDetailsModule} from './job-details/job-details.module';
-import {SurveyDetailsModule} from './survey-details/survey-details.module';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {MatInputModule} from '@angular/material/input';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
-  declarations: [CreateSurveyComponent],
+  declarations: [JobDetailsComponent],
   imports: [
-    JobDetailsModule,
-    SurveyDetailsModule,
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatInputModule,
   ],
-  exports: [CreateSurveyComponent],
+  exports: [JobDetailsComponent],
 })
-export class CreateSurveyModule {}
+export class JobDetailsModule {}

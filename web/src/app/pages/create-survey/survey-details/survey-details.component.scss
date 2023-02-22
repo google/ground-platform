@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-.container {
-  display: flex;
-}
-
-.card {
-  margin: auto;
-  border: 1px solid lightgray;
+.input {
+  display: block;
+  max-width: 600px;
 }

@@ -233,14 +233,7 @@ export class NavigationService {
     const url = `${NavigationService.SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
     }/${NavigationService.SURVEYS_CREATE}`;
-    this.router.navigateByUrl(url);
-  }
-
-  navigateToCreateJob(surveyId: string): void {
-    const url =
-      `${NavigationService.SURVEYS_SEGMENT}/${surveyId}` +
-      `/${NavigationService.SURVEYS_CREATE}/${NavigationService.JOB_SEGMENT}`;
-    this.router.navigateByUrl(url);
+    this.router.navigateByUrl(url, {replaceUrl: true});
   }
 
   /**
