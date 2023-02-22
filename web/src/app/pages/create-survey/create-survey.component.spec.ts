@@ -28,8 +28,8 @@ import {
   CreateSurveyComponent,
   SetupPhase,
 } from 'app/pages/create-survey/create-survey.component';
-import {NameSurveyComponent} from 'app/pages/create-survey/name-survey/name-survey.component';
-import {NameJobComponent} from 'app/pages/create-survey/name-job/name-job.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {JobService} from 'app/services/job/job.service';
@@ -110,8 +110,8 @@ describe('CreateSurveyComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CreateSurveyComponent,
-        NameSurveyComponent,
-        NameJobComponent,
+        SurveyDetailsComponent,
+        JobDetailsComponent,
       ],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
@@ -128,150 +128,184 @@ describe('CreateSurveyComponent', () => {
     fixture.detectChanges();
   });
 
-  it('activates current survey ID when routed in with survey ID', fakeAsync(() => {
-    surveyId$.next(surveyId);
-    tick();
+  describe('when routed in with survey ID', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      tick();
+    }));
 
-    expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(surveyId);
-  }));
-
-  it('displays name survey component when no current survey', fakeAsync(() => {
-    surveyId$.next(null);
-    tick();
-    fixture.detectChanges();
-
-    expect(component.nameSurvey).not.toBeUndefined();
-  }));
-
-  it('displays name survey component when active survey has empty title', fakeAsync(() => {
-    surveyId$.next(surveyId);
-    activeSurvey$.next(surveyWithoutTitle);
-    tick();
-    fixture.detectChanges();
-
-    expect(component.nameSurvey).not.toBeUndefined();
-  }));
-
-  it('displays name job component when active survey no job', fakeAsync(() => {
-    surveyId$.next(surveyId);
-    activeSurvey$.next(surveyWithoutJob);
-    tick();
-    fixture.detectChanges();
-
-    expect(component.nameJob).not.toBeUndefined();
-  }));
-
-  describe('Name Survey', () => {
-    beforeEach(() => {
-      component.setupPhase = SetupPhase.NAME_SURVEY;
+    it('activates current survey ID', () => {
+      expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
+        surveyId
+      );
     });
+  });
 
-    it('creates new survey with title and description after clicking continue when no current survey', fakeAsync(() => {
+  describe('when no current survey', () => {
+    beforeEach(fakeAsync(() => {
       surveyId$.next(null);
       tick();
       fixture.detectChanges();
-
-      const newTitle = 'newTitle';
-      const newDescription = 'newDescription';
-      const nameSurveyComponent = component.nameSurvey!;
-      nameSurveyComponent.formGroup.controls[
-        nameSurveyComponent.titleControlKey
-      ].setValue(newTitle);
-      nameSurveyComponent.formGroup.controls[
-        nameSurveyComponent.descriptionControlKey
-      ].setValue(newDescription);
-      clickContinueButton(fixture);
-      flush();
-
-      expect(surveyServiceSpy.createSurvey).toHaveBeenCalledOnceWith(
-        newTitle,
-        newDescription
-      );
-      expect(
-        navigationServiceSpy.navigateToCreateSurvey
-      ).toHaveBeenCalledOnceWith(newSurveyId);
     }));
 
-    it('updates title and description after clicking continue when given current survey', fakeAsync(() => {
+    it('displays survey details component', () => {
+      expect(component.surveyDetails).not.toBeUndefined();
+    });
+  });
+
+  describe('when active survey has empty title', () => {
+    beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
       activeSurvey$.next(surveyWithoutTitle);
       tick();
       fixture.detectChanges();
-
-      const newTitle = 'newTitle';
-      const newDescription = 'newDescription';
-      const nameSurveyComponent = component.nameSurvey!;
-      nameSurveyComponent.formGroup.controls[
-        nameSurveyComponent.titleControlKey
-      ].setValue(newTitle);
-      nameSurveyComponent.formGroup.controls[
-        nameSurveyComponent.descriptionControlKey
-      ].setValue(newDescription);
-      clickContinueButton(fixture);
-      flush();
-
-      expect(
-        surveyServiceSpy.updateTitleAndDescription
-      ).toHaveBeenCalledOnceWith(surveyId, newTitle, newDescription);
     }));
 
-    it('navigates to survey list page when back button is clicked', () => {
+    it('displays survey details component', () => {
+      expect(component.surveyDetails).not.toBeUndefined();
+    });
+  });
+
+  describe('when active survey no job', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithoutJob);
+      tick();
+      fixture.detectChanges();
+    }));
+
+    it('displays job details component', () => {
+      expect(component.jobDetails).not.toBeUndefined();
+    });
+  });
+
+  describe('Survey Details', () => {
+    beforeEach(() => {
+      component.setupPhase = SetupPhase.SURVEY_DETAILS;
+    });
+
+    describe('when no current survey', () => {
+      beforeEach(fakeAsync(() => {
+        surveyId$.next(null);
+        tick();
+        fixture.detectChanges();
+      }));
+
+      it('creates new survey with title and description after clicking continue', fakeAsync(() => {
+        const newTitle = 'newTitle';
+        const newDescription = 'newDescription';
+        const jobDetailsComponent = component.surveyDetails!;
+        jobDetailsComponent.formGroup.controls[
+          jobDetailsComponent.titleControlKey
+        ].setValue(newTitle);
+        jobDetailsComponent.formGroup.controls[
+          jobDetailsComponent.descriptionControlKey
+        ].setValue(newDescription);
+        clickContinueButton(fixture);
+        flush();
+
+        expect(surveyServiceSpy.createSurvey).toHaveBeenCalledOnceWith(
+          newTitle,
+          newDescription
+        );
+        expect(
+          navigationServiceSpy.navigateToCreateSurvey
+        ).toHaveBeenCalledOnceWith(newSurveyId);
+      }));
+    });
+
+    describe('when given current survey', () => {
+      beforeEach(fakeAsync(() => {
+        surveyId$.next(surveyId);
+        activeSurvey$.next(surveyWithoutTitle);
+        tick();
+        fixture.detectChanges();
+      }));
+
+      it('updates title and description after clicking continue', fakeAsync(() => {
+        const newTitle = 'newTitle';
+        const newDescription = 'newDescription';
+        const jobDetailsComponent = component.surveyDetails!;
+        jobDetailsComponent.formGroup.controls[
+          jobDetailsComponent.titleControlKey
+        ].setValue(newTitle);
+        jobDetailsComponent.formGroup.controls[
+          jobDetailsComponent.descriptionControlKey
+        ].setValue(newDescription);
+        clickContinueButton(fixture);
+        flush();
+
+        expect(
+          surveyServiceSpy.updateTitleAndDescription
+        ).toHaveBeenCalledOnceWith(surveyId, newTitle, newDescription);
+      }));
+    });
+
+    it('navigates to survey list page after back button is clicked', () => {
       clickBackButton(fixture);
 
       expect(navigationServiceSpy.navigateToSurveyList).toHaveBeenCalled();
     });
   });
 
-  describe('Name Job', () => {
+  describe('Job Details', () => {
     beforeEach(() => {
-      component.setupPhase = SetupPhase.NAME_JOB;
+      component.setupPhase = SetupPhase.JOB_DETAILS;
     });
 
-    it('creates new job with name after clicking continue when active survey has no job', fakeAsync(() => {
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveyWithoutJob);
-      tick();
-      fixture.detectChanges();
+    describe('when active survey has no job', () => {
+      beforeEach(fakeAsync(() => {
+        surveyId$.next(surveyId);
+        activeSurvey$.next(surveyWithoutJob);
+        tick();
+        fixture.detectChanges();
+      }));
 
-      const name = 'new job name';
-      const nameJobComponent = component.nameJob!;
-      nameJobComponent.formGroup.controls[
-        nameJobComponent.nameControlKey
-      ].setValue(name);
-      clickContinueButton(fixture);
-      flush();
+      it('creates new job with name after clicking continue', fakeAsync(() => {
+        const name = 'new job name';
+        const jobDetailsComponent = component.jobDetails!;
+        jobDetailsComponent.formGroup.controls[
+          jobDetailsComponent.nameControlKey
+        ].setValue(name);
+        clickContinueButton(fixture);
+        flush();
 
-      expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-        surveyId,
-        newJob.copyWith({name})
-      );
-    }));
+        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+          surveyId,
+          newJob.copyWith({name})
+        );
+      }));
+    });
 
-    it('updates the first job after clicking continue when active survey has a job', fakeAsync(() => {
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveyWithJob);
-      tick();
-      fixture.detectChanges();
+    describe('when active survey has a job', () => {
+      beforeEach(fakeAsync(() => {
+        surveyId$.next(surveyId);
+        activeSurvey$.next(surveyWithJob);
+        tick();
+        fixture.detectChanges();
+      }));
 
-      const name = 'new job name';
-      const nameJobComponent = component.nameJob!;
-      nameJobComponent.formGroup.controls[
-        nameJobComponent.nameControlKey
-      ].setValue(name);
-      clickContinueButton(fixture);
-      flush();
+      it('updates the first job after clicking continue', fakeAsync(() => {
+        const name = 'new job name';
+        const jobDetailsComponent = component.jobDetails!;
+        jobDetailsComponent.formGroup.controls[
+          jobDetailsComponent.nameControlKey
+        ].setValue(name);
+        clickContinueButton(fixture);
+        flush();
 
-      expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-        surveyId,
-        job.copyWith({name})
-      );
-    }));
+        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+          surveyId,
+          job.copyWith({name})
+        );
+      }));
+    });
 
-    it('goes back to name survey component when back button is clicked', () => {
+    it('goes back to survey details component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.nameSurvey).not.toBeUndefined();
-      expect(component.nameJob).toBeUndefined();
+      expect(component.surveyDetails).not.toBeUndefined();
+      expect(component.jobDetails).toBeUndefined();
     });
   });
 });

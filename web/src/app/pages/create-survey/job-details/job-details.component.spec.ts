@@ -17,16 +17,16 @@
 // import {ActivatedRoute} from '@angular/router';
 // import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {NameJobComponent} from 'app/pages/create-survey/name-job/name-job.component';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 
-describe('NameJobComponent', () => {
-  let component: NameJobComponent;
-  let fixture: ComponentFixture<NameJobComponent>;
+describe('JobDetailsFormComponent', () => {
+  let component: JobDetailsComponent;
+  let fixture: ComponentFixture<JobDetailsComponent>;
 
   const jobName = 'jobName';
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NameJobComponent);
+    fixture = TestBed.createComponent(JobDetailsComponent);
     component = fixture.componentInstance;
     component.name = jobName;
     fixture.detectChanges();

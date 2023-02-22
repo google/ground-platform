@@ -18,11 +18,11 @@ import {Component, Input, OnChanges} from '@angular/core';
 import {FormGroup, FormBuilder} from '@angular/forms';
 
 @Component({
-  selector: 'name-survey',
-  templateUrl: './name-survey.component.html',
-  styleUrls: ['./name-survey.component.scss'],
+  selector: 'survey-details',
+  templateUrl: './survey-details.component.html',
+  styleUrls: ['./survey-details.component.scss'],
 })
-export class NameSurveyComponent implements OnChanges {
+export class SurveyDetailsComponent implements OnChanges {
   readonly titleControlKey = 'title';
   readonly descriptionControlKey = 'description';
   formGroup: FormGroup;

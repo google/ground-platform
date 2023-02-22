@@ -16,13 +16,13 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {NameSurveyComponent} from 'app/pages/create-survey/name-survey/name-survey.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
-  declarations: [NameSurveyComponent],
+  declarations: [SurveyDetailsComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -30,6 +30,6 @@ import {MatButtonModule} from '@angular/material/button';
     MatButtonModule,
     MatInputModule,
   ],
-  exports: [NameSurveyComponent],
+  exports: [SurveyDetailsComponent],
 })
-export class NameSurveyModule {}
+export class SurveyDetailsModule {}

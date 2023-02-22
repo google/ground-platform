@@ -17,16 +17,16 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
-import {NameJobModule} from './name-job/name-job.module';
-import {NameSurveyModule} from './name-survey/name-survey.module';
+import {JobDetailsModule} from './job-details/job-details.module';
+import {SurveyDetailsModule} from './survey-details/survey-details.module';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
   declarations: [CreateSurveyComponent],
   imports: [
-    NameJobModule,
-    NameSurveyModule,
+    JobDetailsModule,
+    SurveyDetailsModule,
     CommonModule,
     MatButtonModule,
     MatInputModule,

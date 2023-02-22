@@ -14,19 +14,19 @@
   limitations under the License.
 -->
 
-<div class="container" [ngSwitch]="setupPhase">
-  <div class="card">
-    <name-survey
-      *ngSwitchCase="SetupPhase.NAME_SURVEY"
-      #nameSurvey
+<div class="container">
+  <div class="card" [ngSwitch]="setupPhase">
+    <survey-details
+      *ngSwitchCase="SetupPhase.SURVEY_DETAILS"
+      #surveyDetails
       [title]="currentSurvey?.title ?? ''"
       [description]="currentSurvey?.description ?? ''"
-    ></name-survey>
-    <name-job
-      *ngSwitchCase="SetupPhase.NAME_JOB"
-      #nameJob
+    ></survey-details>
+    <job-details
+      *ngSwitchCase="SetupPhase.JOB_DETAILS"
+      #jobDetails
       [name]="job()?.name ?? ''"
-    ></name-job>
+    ></job-details>
   </div>
 </div>
 

@@ -19,8 +19,8 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {NameSurveyComponent} from 'app/pages/create-survey/name-survey/name-survey.component';
-import {NameJobComponent} from 'app/pages/create-survey/name-job/name-job.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 
@@ -32,7 +32,7 @@ import {Job} from 'app/models/job.model';
 export class CreateSurveyComponent implements OnInit {
   currentSurveyId: string | null = null;
   currentSurvey?: Survey;
-  setupPhase = SetupPhase.NAME_SURVEY;
+  setupPhase = SetupPhase.SURVEY_DETAILS;
   readonly SetupPhase = SetupPhase;
 
   constructor(
@@ -58,10 +58,10 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private getSetupPhase(survey: Survey): SetupPhase {
-    if (survey.title && survey.title.trim().length > 0) {
-      return SetupPhase.NAME_JOB;
+    if (survey.title?.trim().length > 0) {
+      return SetupPhase.JOB_DETAILS;
     }
-    return SetupPhase.NAME_SURVEY;
+    return SetupPhase.SURVEY_DETAILS;
   }
 
   job(): Job | undefined {
@@ -73,11 +73,11 @@ export class CreateSurveyComponent implements OnInit {
 
   back(): void {
     switch (this.setupPhase) {
-      case SetupPhase.NAME_SURVEY:
+      case SetupPhase.SURVEY_DETAILS:
         this.navigationService.navigateToSurveyList();
         break;
-      case SetupPhase.NAME_JOB:
-        this.setupPhase = SetupPhase.NAME_SURVEY;
+      case SetupPhase.JOB_DETAILS:
+        this.setupPhase = SetupPhase.SURVEY_DETAILS;
         break;
       default:
         break;
@@ -86,61 +86,59 @@ export class CreateSurveyComponent implements OnInit {
 
   async continue(): Promise<void> {
     switch (this.setupPhase) {
-      case SetupPhase.NAME_SURVEY:
-        this.saveSurveyTitleAndDescription();
+      case SetupPhase.SURVEY_DETAILS: {
+        const createdSurveyId = await this.saveSurveyTitleAndDescription();
+        if (createdSurveyId) {
+          this.navigationService.navigateToCreateSurvey(createdSurveyId);
+        }
         break;
-      case SetupPhase.NAME_JOB:
-        this.saveJobName();
+      }
+      case SetupPhase.JOB_DETAILS:
+        await this.saveJobName();
         break;
       default:
         break;
     }
   }
 
-  @ViewChild('nameSurvey')
-  nameSurvey?: NameSurveyComponent;
+  @ViewChild('surveyDetails')
+  surveyDetails?: SurveyDetailsComponent;
 
-  private async saveSurveyTitleAndDescription(): Promise<void> {
-    const [title, description] = this.nameSurvey!.toTitleAndDescription();
+  private async saveSurveyTitleAndDescription(): Promise<string | void> {
+    const [title, description] = this.surveyDetails!.toTitleAndDescription();
     if (this.currentSurveyId) {
-      await this.surveyService.updateTitleAndDescription(
+      return await this.surveyService.updateTitleAndDescription(
         this.currentSurveyId,
         title,
         description
       );
     } else {
-      const createdSurveyId = await this.surveyService.createSurvey(
-        title,
-        description
-      );
-      this.navigationService.navigateToCreateSurvey(createdSurveyId);
+      return await this.surveyService.createSurvey(title, description);
     }
   }
 
-  @ViewChild('nameJob')
-  nameJob?: NameJobComponent;
+  @ViewChild('jobDetails')
+  jobDetails?: JobDetailsComponent;
 
   private async saveJobName(): Promise<void> {
-    const name = this.nameJob!.toJobName();
+    const name = this.jobDetails!.toJobName();
+    let job;
     if (this.currentSurvey!.jobs.size > 0) {
-      const existingJob = this.currentSurvey!.jobs.values().next().value;
-      await this.jobService.addOrUpdateJob(
-        this.currentSurveyId!,
-        existingJob.copyWith({name})
-      );
+      // there should only be at most one job attached to this survey at this point when user is still in the survey creation flow
+      job = this.currentSurvey!.jobs.values().next().value;
     } else {
-      const newJob = this.jobService.createNewJob();
-      await this.jobService.addOrUpdateJob(
-        this.currentSurveyId!,
-        newJob.copyWith({name})
-      );
+      job = this.jobService.createNewJob();
     }
+    await this.jobService.addOrUpdateJob(
+      this.currentSurveyId!,
+      job.copyWith({name})
+    );
   }
 }
 
 export enum SetupPhase {
-  NAME_SURVEY,
-  NAME_JOB,
+  SURVEY_DETAILS,
+  JOB_DETAILS,
   DEFINE_TASKS,
   DEFINE_LOIS,
   REVIEW,

@@ -15,17 +15,17 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {NameSurveyComponent} from 'app/pages/create-survey/name-survey/name-survey.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 
-describe('NameSurveyComponent', () => {
-  let component: NameSurveyComponent;
-  let fixture: ComponentFixture<NameSurveyComponent>;
+describe('SurveyDetailsComponent', () => {
+  let component: SurveyDetailsComponent;
+  let fixture: ComponentFixture<SurveyDetailsComponent>;
 
   const title = 'title';
   const description = 'description';
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NameSurveyComponent);
+    fixture = TestBed.createComponent(SurveyDetailsComponent);
     component = fixture.componentInstance;
     component.title = title;
     component.description = description;
