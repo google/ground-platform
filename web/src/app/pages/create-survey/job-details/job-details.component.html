@@ -13,16 +13,11 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div>
-  <h1>Add a job</h1>
-  <form [formGroup]="formGroup">
-    <mat-form-field class="input" appearance="fill">
-      <mat-label>
-        Job name
-      </mat-label>
-      <input matInput [formControlName]="nameControlKey" placeholder="Job name" />
-    </mat-form-field>
-  </form>
-  <button id="back-button" mat-stroked-button (click)="back()">Back</button>
-  <button id="continue-button" mat-flat-button color="primary" (click)="continue()">Continue</button>
-</div>
+
+<h1>Add a job</h1>
+<form [formGroup]="formGroup">
+  <mat-form-field class="input" appearance="fill">
+    <mat-label> Job name </mat-label>
+    <input matInput [formControlName]="nameControlKey" placeholder="Job name" />
+  </mat-form-field>
+</form>
