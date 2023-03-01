@@ -1,8 +1,6 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {ShareSurveyComponent} from './share-survey.component';
-import {MatIconModule} from '@angular/material/icon';
-import {MatDialogModule} from '@angular/material/dialog';
+import { ShareSurveyComponent } from './share-survey.component';
 
 describe('ShareSurveyComponent', () => {
   let component: ShareSurveyComponent;
@@ -10,9 +8,9 @@ describe('ShareSurveyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatIconModule, MatDialogModule],
-      declarations: [ShareSurveyComponent],
-    }).compileComponents();
+      declarations: [ ShareSurveyComponent ]
+    })
+    .compileComponents();
 
     fixture = TestBed.createComponent(ShareSurveyComponent);
     component = fixture.componentInstance;
