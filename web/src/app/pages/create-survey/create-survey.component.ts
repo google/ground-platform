@@ -24,6 +24,7 @@ import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-detai
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {first} from 'rxjs';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
 @Component({
   selector: 'create-survey',
@@ -106,6 +107,9 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.JOB_DETAILS:
         this.setupPhase = SetupPhase.SURVEY_DETAILS;
         break;
+      case SetupPhase.REVIEW:
+        this.setupPhase = SetupPhase.JOB_DETAILS;
+        break;
       default:
         break;
     }
@@ -163,6 +167,9 @@ export class CreateSurveyComponent implements OnInit {
       job.copyWith({name})
     );
   }
+
+  @ViewChild('shareSurvey')
+  shareSurvey?: ShareSurveyComponent;
 }
 
 export enum SetupPhase {
