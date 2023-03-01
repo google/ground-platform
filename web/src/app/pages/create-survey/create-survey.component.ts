@@ -25,6 +25,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
 import {first} from 'rxjs';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
 @Component({
   selector: 'create-survey',
@@ -74,7 +75,10 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private getSetupPhase(survey: Survey): SetupPhase {
-    if (this.hasTitle(survey)) {
+    if (this.job()) {
+      return SetupPhase.REVIEW;
+    }
+    if (survey.title?.trim().length > 0) {
       return SetupPhase.JOB_DETAILS;
     }
 
