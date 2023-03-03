@@ -41,6 +41,9 @@ import {By} from '@angular/platform-browser';
 import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
+
+import {MatDialogModule} from '@angular/material/dialog';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -141,6 +144,7 @@ describe('CreateSurveyComponent', () => {
     jobServiceSpy.createNewJob.and.returnValue(newJob);
 
     TestBed.configureTestingModule({
+      imports: [MatDialogModule],
       imports: [MatDialogModule],
       declarations: [
         CreateSurveyComponent,
