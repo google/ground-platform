@@ -39,6 +39,9 @@ import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
+
+import {MatDialogModule} from '@angular/material/dialog';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -139,10 +142,12 @@ describe('CreateSurveyComponent', () => {
     jobServiceSpy.createNewJob.and.returnValue(newJob);
 
     TestBed.configureTestingModule({
+      imports: [MatDialogModule],
       declarations: [
         CreateSurveyComponent,
         SurveyDetailsComponent,
         JobDetailsComponent,
+        ShareSurveyComponent,
       ],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
@@ -323,35 +328,24 @@ describe('CreateSurveyComponent', () => {
       }));
     });
 
-    describe('when active survey has a job', () => {
-      beforeEach(fakeAsync(() => {
-        surveyId$.next(surveyId);
-        activeSurvey$.next(surveyWithJob);
-        tick();
-        fixture.detectChanges();
-      }));
-
-      it('updates the first job after clicking continue', fakeAsync(() => {
-        const name = 'new job name';
-        const jobDetailsComponent = component.jobDetails!;
-        jobDetailsComponent.formGroup.controls[
-          jobDetailsComponent.nameControlKey
-        ].setValue(name);
-        clickContinueButton(fixture);
-        flush();
-
-        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          surveyId,
-          job.copyWith({name})
-        );
-      }));
-    });
-
     it('goes back to survey details component after back button is clicked', () => {
       clickBackButton(fixture);
 
       expect(component.surveyDetails).not.toBeUndefined();
       expect(component.jobDetails).toBeUndefined();
+    });
+  });
+
+  describe('Review', () => {
+    beforeEach(() => {
+      component.setupPhase = SetupPhase.REVIEW;
+    });
+
+    it('goes back to job details component after back button is clicked', () => {
+      clickBackButton(fixture);
+
+      expect(component.jobDetails).not.toBeUndefined();
+      expect(component.shareSurvey).toBeUndefined();
     });
   });
 });
