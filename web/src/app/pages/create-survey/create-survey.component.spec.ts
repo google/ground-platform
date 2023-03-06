@@ -350,7 +350,7 @@ describe('CreateSurveyComponent', () => {
 
       expect(component.setupPhase).toBe(SetupPhase.JOB_DETAILS);
 
-      // TODO: figure out why these are not suceeding 
+      // TODO: figure out why these are not suceeding
       // expect(component.jobDetails).not.toBeUndefined();
       // expect(component.shareSurvey).toBeUndefined();
     });
