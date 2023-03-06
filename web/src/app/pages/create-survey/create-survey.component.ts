@@ -77,6 +77,7 @@ export class CreateSurveyComponent implements OnInit {
     if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
     }
+
     return SetupPhase.SURVEY_DETAILS;
   }
 
