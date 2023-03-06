@@ -27,10 +27,7 @@
       #jobDetails
       [name]="job()?.name ?? ''"
     ></job-details>
-    <share-survey
-      *ngSwitchCase="SetupPhase.REVIEW"
-      #shareSurvey
-    ></share-survey>
+    <share-survey *ngSwitchCase="SetupPhase.REVIEW" #shareSurvey></share-survey>
   </div>
 </div>
 
