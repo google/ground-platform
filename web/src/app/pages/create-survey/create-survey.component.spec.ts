@@ -356,7 +356,13 @@ describe('CreateSurveyComponent', () => {
 
   describe('Review', () => {
     beforeEach(fakeAsync(() => {
+    beforeEach(fakeAsync(() => {
       component.setupPhase = SetupPhase.REVIEW;
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithJob);
+      tick();
+      fixture.detectChanges();
+    }));
       surveyId$.next(surveyId);
       activeSurvey$.next(surveyWithJob);
       tick();
@@ -368,7 +374,7 @@ describe('CreateSurveyComponent', () => {
 
       expect(component.setupPhase).toBe(SetupPhase.JOB_DETAILS);
 
-      // TODO: figure out why these are not suceeding
+      // TODO: figure out why these are not suceeding 
       // expect(component.jobDetails).not.toBeUndefined();
       // expect(component.shareSurvey).toBeUndefined();
     });
