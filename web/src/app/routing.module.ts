@@ -29,6 +29,11 @@ import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
 
 const routes: Routes = [
   {
+    path: '',
+    redirectTo: `${NavigationService.SURVEYS_SEGMENT}`,
+    pathMatch: 'full',
+  },
+  {
     path: NavigationService.SIGN_IN_SEGMENT,
     component: SignInPageComponent,
     canActivate: [AuthGuard],
