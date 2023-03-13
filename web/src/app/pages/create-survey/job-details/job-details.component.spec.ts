@@ -19,7 +19,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 
-describe('JobDetailsFormComponent', () => {
+describe('JobDetailsComponent', () => {
   let component: JobDetailsComponent;
   let fixture: ComponentFixture<JobDetailsComponent>;
 
