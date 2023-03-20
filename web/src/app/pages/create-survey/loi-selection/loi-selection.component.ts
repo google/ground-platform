@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
+import {Component} from '@angular/core';
+import {List} from 'immutable';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'loi-selection',
@@ -22,5 +26,9 @@ import {Component, Input} from '@angular/core';
   styleUrls: ['./loi-selection.component.scss'],
 })
 export class LoiSelectionComponent {
-  constructor() {}
+  lois$: Observable<List<LocationOfInterest>>;
+
+  constructor(private loiService: LocationOfInterestService) {
+    this.lois$ = this.loiService.getLocationsOfInterest$();
+  }
 }

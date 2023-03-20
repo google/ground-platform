@@ -16,5 +16,14 @@
 
 <div id="loi-selection">
   <h1>Where should data be collected?</h1>
-  <ground-map></ground-map>
+  <div>
+    <div class="loi-list">
+      <ul>
+        <li *ngFor="let loi of lois$ | async">{{loi.id}}</li>
+      </ul>
+    </div>
+    <div class="loi-map">
+      <ground-map></ground-map>
+    </div>
+  </div>
 </div>

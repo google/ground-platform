@@ -27,6 +27,10 @@
       #jobDetails
       [name]="job()?.name ?? ''"
     ></job-details>
+    <loi-selection
+      *ngSwitchCase="SetupPhase.DEFINE_LOIS"
+      #loiSelection
+    ></loi-selection>
   </div>
 </div>
 

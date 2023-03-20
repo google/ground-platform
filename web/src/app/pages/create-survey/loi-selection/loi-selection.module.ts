@@ -25,4 +25,4 @@ import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module'
   imports: [CommonModule, MatButtonModule, MapModule],
   exports: [LoiSelectionComponent],
 })
-export class JobDetailsModule {}
+export class LoiSelectionModule {}
