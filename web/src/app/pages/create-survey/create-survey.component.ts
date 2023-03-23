@@ -62,7 +62,6 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private isSetupFinished(survey: Survey): boolean {
-    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
     return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
   }
 
