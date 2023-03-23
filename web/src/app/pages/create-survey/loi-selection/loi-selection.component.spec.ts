@@ -29,8 +29,7 @@ import {List, Map} from 'immutable';
 import {BehaviorSubject} from 'rxjs';
 import {LoiSelectionComponent} from './loi-selection.component';
 
-describe('JobDetailsFormComponent', () => {
-  let component: LoiSelectionComponent;
+describe('LoiSelectionFormComponent', () => {
   let fixture: ComponentFixture<LoiSelectionComponent>;
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
@@ -73,7 +72,6 @@ describe('JobDetailsFormComponent', () => {
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(LoiSelectionComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
