@@ -52,16 +52,37 @@ export class CreateSurveyComponent implements OnInit {
       this.currentSurveyId = surveyId;
     });
     this.surveyService.getActiveSurvey$().subscribe(survey => {
+      if (this.isSetupFinished(survey)) {
+        this.navigationService.navigateToEditSurvey(survey.id);
+        return;
+      }
       this.currentSurvey = survey;
       this.setupPhase = this.getSetupPhase(survey);
     });
   }
 
+  private isSetupFinished(survey: Survey): boolean {
+    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
+    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
+  }
+
   private getSetupPhase(survey: Survey): SetupPhase {
-    if (survey.title?.trim().length > 0) {
+    if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
     }
     return SetupPhase.SURVEY_DETAILS;
+  }
+
+  private hasTitle(survey: Survey): boolean {
+    return survey.title.trim().length > 0;
+  }
+
+  private hasJob(survey: Survey): boolean {
+    return survey.jobs.size > 0;
+  }
+
+  private hasTask(survey: Survey): boolean {
+    return survey.jobs.values().next().value.tasks.size > 0;
   }
 
   job(): Job | undefined {
