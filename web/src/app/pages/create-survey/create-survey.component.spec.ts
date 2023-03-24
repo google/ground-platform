@@ -38,9 +38,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
-import {Task, TaskType} from 'app/models/task/task.model';
 import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
-
 import {MatDialogModule} from '@angular/material/dialog';
 import {Task, TaskType} from 'app/models/task/task.model';
 
