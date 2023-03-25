@@ -75,9 +75,6 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private getSetupPhase(survey: Survey): SetupPhase {
-    if (this.job()) {
-      return SetupPhase.REVIEW;
-    }
     if (survey.title?.trim().length > 0) {
       return SetupPhase.JOB_DETAILS;
     }
