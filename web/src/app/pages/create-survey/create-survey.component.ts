@@ -23,7 +23,6 @@ import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/sur
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
-import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
 import {first} from 'rxjs';
 import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
@@ -109,8 +108,11 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.JOB_DETAILS:
         this.setupPhase = SetupPhase.SURVEY_DETAILS;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.DEFINE_LOIS:
         this.setupPhase = SetupPhase.JOB_DETAILS;
+        break;
+      case SetupPhase.REVIEW:
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       default:
         break;
@@ -130,6 +132,9 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.JOB_DETAILS:
         await this.saveJobName();
         this.setupPhase = SetupPhase.DEFINE_LOIS;
+        break;
+      case SetupPhase.DEFINE_LOIS:
+        this.setupPhase = SetupPhase.REVIEW;
         break;
       default:
         break;

@@ -38,12 +38,9 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
-import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {Task, TaskType} from 'app/models/task/task.model';
-import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
-
-import {MatDialogModule} from '@angular/material/dialog';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -144,7 +141,6 @@ describe('CreateSurveyComponent', () => {
     jobServiceSpy.createNewJob.and.returnValue(newJob);
 
     TestBed.configureTestingModule({
-      imports: [MatDialogModule],
       imports: [MatDialogModule],
       declarations: [
         CreateSurveyComponent,
@@ -345,6 +341,7 @@ describe('CreateSurveyComponent', () => {
         );
       }));
     });
+
     describe('when active survey has a job', () => {
       beforeEach(fakeAsync(() => {
         surveyId$.next(surveyId);
@@ -379,13 +376,7 @@ describe('CreateSurveyComponent', () => {
 
   describe('Review', () => {
     beforeEach(fakeAsync(() => {
-    beforeEach(fakeAsync(() => {
       component.setupPhase = SetupPhase.REVIEW;
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveyWithJob);
-      tick();
-      fixture.detectChanges();
-    }));
       surveyId$.next(surveyId);
       activeSurvey$.next(surveyWithJob);
       tick();
@@ -395,10 +386,7 @@ describe('CreateSurveyComponent', () => {
     it('goes back to job details component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.setupPhase).toBe(SetupPhase.JOB_DETAILS);
-
-      // TODO: figure out why these are not suceeding
-      expect(component.jobDetails).not.toBeUndefined();
+      expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOIS);
       expect(component.shareSurvey).toBeUndefined();
     });
   });
