@@ -23,7 +23,6 @@ import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/sur
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
-import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
 import {first} from 'rxjs';
 
 @Component({

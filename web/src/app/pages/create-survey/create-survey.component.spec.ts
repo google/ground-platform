@@ -41,8 +41,6 @@ import {By} from '@angular/platform-browser';
 import {ShareSurveyComponent} from './share-survey/share-survey.component';
 import {Task, TaskType} from 'app/models/task/task.model';
 
-import {MatDialogModule} from '@angular/material/dialog';
-
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
   let fixture: ComponentFixture<CreateSurveyComponent>;
@@ -393,8 +391,6 @@ describe('CreateSurveyComponent', () => {
   describe('Review', () => {
     beforeEach(fakeAsync(() => {
       component.setupPhase = SetupPhase.REVIEW;
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveyWithJob);
       tick();
       fixture.detectChanges();
     }));
@@ -403,7 +399,6 @@ describe('CreateSurveyComponent', () => {
       clickBackButton(fixture);
 
       expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOIS);
-      expect(component.shareSurvey).toBeUndefined();
     });
   });
 });
