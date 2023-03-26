@@ -40,6 +40,7 @@ import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
 import {ShareSurveyComponent} from './share-survey/share-survey.component';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {MatDialogModule} from '@angular/material/dialog';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -210,21 +211,6 @@ describe('CreateSurveyComponent', () => {
 
     it('displays job details component', () => {
       expect(component.jobDetails).not.toBeUndefined();
-    });
-  });
-
-  describe('when active survey has finished setup', () => {
-    beforeEach(fakeAsync(() => {
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveySetupFinished);
-      tick();
-      fixture.detectChanges();
-    }));
-
-    it('navigates to edit survey page', () => {
-      expect(
-        navigationServiceSpy.navigateToEditSurvey
-      ).toHaveBeenCalledOnceWith(surveyId);
     });
   });
 

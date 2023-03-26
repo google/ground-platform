@@ -24,6 +24,7 @@ import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-detai
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {first} from 'rxjs';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
 @Component({
   selector: 'create-survey',
