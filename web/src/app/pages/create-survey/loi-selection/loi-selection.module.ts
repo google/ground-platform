@@ -16,23 +16,13 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
-import {JobDetailsModule} from './job-details/job-details.module';
-import {SurveyDetailsModule} from './survey-details/survey-details.module';
-import {MatInputModule} from '@angular/material/input';
+import {LoiSelectionComponent} from './loi-selection.component';
 import {MatButtonModule} from '@angular/material/button';
-import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
+import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
 
 @NgModule({
-  declarations: [CreateSurveyComponent],
-  imports: [
-    JobDetailsModule,
-    LoiSelectionModule,
-    SurveyDetailsModule,
-    CommonModule,
-    MatButtonModule,
-    MatInputModule,
-  ],
-  exports: [CreateSurveyComponent],
+  declarations: [LoiSelectionComponent],
+  imports: [CommonModule, MatButtonModule, MapModule],
+  exports: [LoiSelectionComponent],
 })
-export class CreateSurveyModule {}
+export class LoiSelectionModule {}
