@@ -38,6 +38,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
+import {Task, TaskType} from 'app/models/task/task.model';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -80,10 +81,40 @@ describe('CreateSurveyComponent', () => {
     }),
     /* acl= */ Map()
   );
+  const jobWithTask = new Job(
+    jobId,
+    /* index */ 0,
+    'red',
+    name,
+    /* tasks= */ Map({
+      task001: new Task(
+        'task001',
+        TaskType.TEXT,
+        'Text Field',
+        /*required=*/ true,
+        0
+      ),
+    })
+  );
+  const surveySetupFinished = new Survey(
+    surveyId,
+    title,
+    description,
+    /* jobs= */ Map({
+      job001: jobWithTask,
+    }),
+    /* acl= */ Map()
+  );
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['init', 'getSurveyId$', 'navigateToSurveyList', 'navigateToCreateSurvey']
+      [
+        'init',
+        'getSurveyId$',
+        'navigateToSurveyList',
+        'navigateToCreateSurvey',
+        'navigateToEditSurvey',
+      ]
     );
     surveyId$ = new Subject<string | null>();
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
@@ -189,6 +220,21 @@ describe('CreateSurveyComponent', () => {
 
     it('displays LOI selection component', () => {
       expect(component.loiSelection).toBeDefined();
+    });
+  });
+
+  describe('when active survey has finished setup', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveySetupFinished);
+      tick();
+      fixture.detectChanges();
+    }));
+
+    it('navigates to edit survey page', () => {
+      expect(
+        navigationServiceSpy.navigateToEditSurvey
+      ).toHaveBeenCalledOnceWith(surveyId);
     });
   });
 

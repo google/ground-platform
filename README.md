@@ -19,4 +19,4 @@ This repo contains Ground's hosted components and related docs:
 
 ## Contributing guidelines
 
-Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our submission process, coding rules, and more.
+Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our submission process, coding rules and more.

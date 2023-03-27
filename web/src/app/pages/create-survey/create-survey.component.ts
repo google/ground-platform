@@ -24,6 +24,7 @@ import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-detai
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
+import {first} from 'rxjs';
 
 @Component({
   selector: 'create-survey',
@@ -54,18 +55,44 @@ export class CreateSurveyComponent implements OnInit {
     });
     this.surveyService.getActiveSurvey$().subscribe(survey => {
       this.currentSurvey = survey;
-      this.setupPhase = this.getSetupPhase(survey);
     });
+    this.surveyService
+      .getActiveSurvey$()
+      .pipe(first())
+      .subscribe(survey => {
+        if (this.isSetupFinished(survey)) {
+          this.navigationService.navigateToEditSurvey(survey.id);
+          return;
+        }
+        this.setupPhase = this.getSetupPhase(survey);
+      });
+  }
+
+  private isSetupFinished(survey: Survey): boolean {
+    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
+    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
   }
 
   private getSetupPhase(survey: Survey): SetupPhase {
     if (survey.jobs.size > 0) {
       return SetupPhase.DEFINE_LOIS;
     }
-    if (survey.title?.trim().length > 0) {
+    if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
     }
     return SetupPhase.SURVEY_DETAILS;
+  }
+
+  private hasTitle(survey: Survey): boolean {
+    return survey.title.trim().length > 0;
+  }
+
+  private hasJob(survey: Survey): boolean {
+    return survey.jobs.size > 0;
+  }
+
+  private hasTask(survey: Survey): boolean {
+    return survey.jobs.values().next().value.tasks.size > 0;
   }
 
   job(): Job | undefined {
@@ -98,10 +125,12 @@ export class CreateSurveyComponent implements OnInit {
         if (createdSurveyId) {
           this.navigationService.navigateToCreateSurvey(createdSurveyId);
         }
+        this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
       }
       case SetupPhase.JOB_DETAILS:
         await this.saveJobName();
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       default:
         break;

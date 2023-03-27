@@ -21,15 +21,26 @@ import {Router} from '@angular/router';
 
 describe('NavigationService', () => {
   let service: NavigationService;
+  let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
+    routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
     TestBed.configureTestingModule({
-      providers: [{provide: Router, useValue: {}}],
+      providers: [{provide: Router, useValue: routerSpy}],
     });
     service = TestBed.inject(NavigationService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('navigateToEditSurvey navigates to ', () => {
+    const surveyId = 'survey123';
+    service.navigateToEditSurvey(surveyId);
+
+    expect(routerSpy.navigateByUrl).toHaveBeenCalledOnceWith(
+      'surveys/survey123/edit'
+    );
   });
 });
