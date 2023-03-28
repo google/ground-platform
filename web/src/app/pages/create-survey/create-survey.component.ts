@@ -25,6 +25,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {first} from 'rxjs';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
 @Component({
   selector: 'create-survey',
@@ -80,6 +81,7 @@ export class CreateSurveyComponent implements OnInit {
     if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
     }
+
     return SetupPhase.SURVEY_DETAILS;
   }
 
@@ -113,6 +115,9 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.DEFINE_LOIS:
         this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
+      case SetupPhase.REVIEW:
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
+        break;
       default:
         break;
     }
@@ -131,6 +136,9 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.JOB_DETAILS:
         await this.saveJobName();
         this.setupPhase = SetupPhase.DEFINE_LOIS;
+        break;
+      case SetupPhase.DEFINE_LOIS:
+        this.setupPhase = SetupPhase.REVIEW;
         break;
       default:
         break;
@@ -173,6 +181,9 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('loiSelection')
   loiSelection?: LoiSelectionComponent;
+
+  @ViewChild('shareSurvey')
+  shareSurvey?: ShareSurveyComponent;
 }
 
 export enum SetupPhase {

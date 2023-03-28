@@ -38,7 +38,9 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {MatDialogModule} from '@angular/material/dialog';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -139,10 +141,12 @@ describe('CreateSurveyComponent', () => {
     jobServiceSpy.createNewJob.and.returnValue(newJob);
 
     TestBed.configureTestingModule({
+      imports: [MatDialogModule],
       declarations: [
         CreateSurveyComponent,
         SurveyDetailsComponent,
         JobDetailsComponent,
+        ShareSurveyComponent,
       ],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
@@ -368,6 +372,20 @@ describe('CreateSurveyComponent', () => {
 
       expect(component.surveyDetails).toBeDefined();
       expect(component.jobDetails).toBeUndefined();
+    });
+  });
+
+  describe('Review', () => {
+    beforeEach(fakeAsync(() => {
+      component.setupPhase = SetupPhase.REVIEW;
+      tick();
+      fixture.detectChanges();
+    }));
+
+    it('goes back to job details component after back button is clicked', () => {
+      clickBackButton(fixture);
+
+      expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOIS);
     });
   });
 });
