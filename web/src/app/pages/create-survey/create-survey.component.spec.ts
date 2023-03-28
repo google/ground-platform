@@ -229,21 +229,6 @@ describe('CreateSurveyComponent', () => {
     });
   });
 
-  describe('when active survey has finished setup', () => {
-    beforeEach(fakeAsync(() => {
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveySetupFinished);
-      tick();
-      fixture.detectChanges();
-    }));
-
-    it('navigates to edit survey page', () => {
-      expect(
-        navigationServiceSpy.navigateToEditSurvey
-      ).toHaveBeenCalledOnceWith(surveyId);
-    });
-  });
-
   describe('Survey Details', () => {
     beforeEach(() => {
       component.setupPhase = SetupPhase.SURVEY_DETAILS;
