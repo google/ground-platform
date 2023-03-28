@@ -184,7 +184,7 @@ describe('CreateSurveyComponent', () => {
     }));
 
     it('displays survey details component', () => {
-      expect(component.surveyDetails).not.toBeUndefined();
+      expect(component.surveyDetails).toBeDefined();
     });
   });
 
@@ -197,7 +197,7 @@ describe('CreateSurveyComponent', () => {
     }));
 
     it('displays survey details component', () => {
-      expect(component.surveyDetails).not.toBeUndefined();
+      expect(component.surveyDetails).toBeDefined();
     });
   });
 
@@ -210,7 +210,20 @@ describe('CreateSurveyComponent', () => {
     }));
 
     it('displays job details component', () => {
-      expect(component.jobDetails).not.toBeUndefined();
+      expect(component.jobDetails).toBeDefined();
+    });
+  });
+
+  describe('when active survey has at least one job', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithJob);
+      tick();
+      fixture.detectChanges();
+    }));
+
+    it('displays LOI selection component', () => {
+      expect(component.loiSelection).toBeDefined();
     });
   });
 
@@ -332,6 +345,9 @@ describe('CreateSurveyComponent', () => {
         surveyId$.next(surveyId);
         activeSurvey$.next(surveyWithJob);
         tick();
+        // If survey has a job, we navigate to the next section, so we need to
+        // go back to the job form.
+        clickBackButton(fixture);
         fixture.detectChanges();
       }));
 
@@ -354,7 +370,7 @@ describe('CreateSurveyComponent', () => {
     it('goes back to survey details component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.surveyDetails).not.toBeUndefined();
+      expect(component.surveyDetails).toBeDefined();
       expect(component.jobDetails).toBeUndefined();
     });
   });
