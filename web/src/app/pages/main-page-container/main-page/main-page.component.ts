@@ -41,7 +41,6 @@ import {TitleDialogComponent} from './title-dialog/title-dialog.component';
 export class MainPageComponent implements OnInit {
   activeSurvey$: Observable<Survey>;
   subscription: Subscription = new Subscription();
-  sideNavOpened: boolean;
   constructor(
     private navigationService: NavigationService,
     private surveyService: SurveyService,
@@ -50,7 +49,6 @@ export class MainPageComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog
   ) {
-    this.sideNavOpened = true;
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 

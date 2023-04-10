@@ -21,6 +21,10 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {Subject, of} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {Map as ImmutableMap} from 'immutable';
+import {GenericLocationOfInterest} from 'app/models/loi.model';
+import {Point} from 'app/models/geometry/point';
+import {Coordinate} from 'app/models/geometry/coordinate';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
@@ -49,5 +53,61 @@ describe('LocationOfInterestService', () => {
       LocationOfInterestService
     );
     expect(service).toBeTruthy();
+  });
+});
+
+describe('Infer loi name from properties', () => {
+  const activeSurvey$ = new Subject<Survey | null>();
+  let service: LocationOfInterestService;
+  const getMockLoi = (properties: ImmutableMap<string, string | number>) => {
+    return new GenericLocationOfInterest(
+      'loi001',
+      'job001',
+      new Point(new Coordinate(0.0, 0.0)),
+      properties
+    );
+  };
+
+  beforeEach(() => {
+    const navigationService = {
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: DataStoreService, useValue: {}},
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => activeSurvey$,
+          },
+        },
+        {provide: NavigationService, useValue: navigationService},
+      ],
+    });
+    service = TestBed.inject(LocationOfInterestService);
+  });
+
+  it('should not return an inferred loi name if empty or non applicable properties', () => {
+    const properties: ImmutableMap<string, string | number> = ImmutableMap();
+    expect(service.getLoiNameFromProperties(getMockLoi(properties))).toBe(null);
+  });
+
+  it('should return inferred loi name for the loi from the properties', () => {
+    const properties = ImmutableMap([['id', 'loi1']]);
+    expect(service.getLoiNameFromProperties(getMockLoi(properties))).toBe(
+      'loi1'
+    );
+  });
+
+  it('should return correct inferred loi name if multiple options exist from the properties', () => {
+    // Two separate possible names exist, choose one with higher priority.
+    const properties = ImmutableMap([
+      ['id', 'loi1'],
+      ['name', 'loi 1'],
+    ]);
+    expect(service.getLoiNameFromProperties(getMockLoi(properties))).toBe(
+      'loi 1'
+    );
   });
 });

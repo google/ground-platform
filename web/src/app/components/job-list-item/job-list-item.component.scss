@@ -16,17 +16,21 @@
 
 @import 'variables';
 
+.job-list-item-container {
+  margin-bottom: 16px;
+}
+
+::ng-deep .mat-list .mat-list-item .mat-line{
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}
+
 /*
   Workaround to eliminate double-padding between right-hand side overflow
   menu control and list item.
 */
 :host ::ng-deep .mat-list-item-content {
   padding-right: 8px !important;
-}
-
-.job-icon {
-  vertical-align: middle;
-  padding-right: 5px;
 }
 
 .download {

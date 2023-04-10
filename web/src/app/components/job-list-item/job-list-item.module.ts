@@ -25,6 +25,8 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatTreeModule} from '@angular/material/tree';
+import {CdkTreeModule} from '@angular/cdk/tree';
 
 @NgModule({
   imports: [
@@ -37,6 +39,8 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
     MatMenuModule,
     MatDialogModule,
     MatSnackBarModule,
+    MatTreeModule,
+    CdkTreeModule,
   ],
   exports: [JobListItemComponent],
   declarations: [JobListItemComponent],
