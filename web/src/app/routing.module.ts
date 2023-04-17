@@ -56,7 +56,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEYS_SEGMENT}/new`,
+    path: `${NavigationService.SURVEYS_SEGMENT}/${NavigationService.SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
     canActivate: [AuthGuard],
   },
