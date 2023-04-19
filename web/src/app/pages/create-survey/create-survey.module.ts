@@ -23,6 +23,8 @@ import {ShareSurveyModule} from './share-survey/share-survey.module';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
 import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {HeaderModule} from 'app/components/header/header.module';
 
 @NgModule({
   declarations: [CreateSurveyComponent],
@@ -34,6 +36,8 @@ import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-sele
     CommonModule,
     MatButtonModule,
     MatInputModule,
+    MatProgressBarModule,
+    HeaderModule,
   ],
   exports: [CreateSurveyComponent],
 })

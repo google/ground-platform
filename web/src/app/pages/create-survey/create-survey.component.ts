@@ -97,6 +97,30 @@ export class CreateSurveyComponent implements OnInit {
     return survey.jobs.values().next().value.tasks.size > 0;
   }
 
+  readonly setupPhaseToTitle = new Map<SetupPhase, String>([
+    [SetupPhase.SURVEY_DETAILS, 'Create survey'],
+    [SetupPhase.JOB_DETAILS, 'Add a job'],
+    [SetupPhase.DEFINE_LOIS, 'Specify locations of interest'],
+    [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
+    [SetupPhase.REVIEW, 'Review and share survey'],
+  ]);
+
+  progressBarTitle(): String {
+    return this.setupPhaseToTitle.get(this.setupPhase) ?? '';
+  }
+
+  readonly setupPhaseToProgress = new Map<SetupPhase, number>([
+    [SetupPhase.SURVEY_DETAILS, 0],
+    [SetupPhase.JOB_DETAILS, 25],
+    [SetupPhase.DEFINE_LOIS, 50],
+    [SetupPhase.DEFINE_TASKS, 75],
+    [SetupPhase.REVIEW, 100],
+  ]);
+
+  progressBarValue(): number {
+    return this.setupPhaseToProgress.get(this.setupPhase) ?? 0;
+  }
+
   job(): Job | undefined {
     if (this.currentSurvey?.jobs.size ?? 0 > 0) {
       return this.currentSurvey?.jobs.values().next().value;
