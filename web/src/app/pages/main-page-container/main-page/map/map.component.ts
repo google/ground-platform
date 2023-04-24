@@ -16,6 +16,7 @@
 
 import {
   Component,
+  Input,
   AfterViewInit,
   ViewChild,
   OnDestroy,
@@ -99,6 +100,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
+  @Input() shouldEnableDrawingTools = false;
+
   constructor(
     private drawingToolsService: DrawingToolsService,
     private surveyService: SurveyService,
@@ -128,11 +131,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       )
     );
 
-    this.subscription.add(
-      this.drawingToolsService
-        .getEditMode$()
-        .subscribe(editMode => this.onEditModeChange(editMode))
-    );
+    if (this.shouldEnableDrawingTools) {
+      this.subscription.add(
+        this.drawingToolsService
+          .getEditMode$()
+          .subscribe(editMode => this.onEditModeChange(editMode))
+      );
+    }
 
     this.subscription.add(
       combineLatest([
@@ -150,6 +155,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     event: google.maps.MapMouseEvent | google.maps.IconMouseEvent
   ) {
     if (this.disableMapClicks) {
+      return;
+    }
+    if (!this.shouldEnableDrawingTools) {
+      this.navigationService.clearLocationOfInterestId();
       return;
     }
     const editMode = this.drawingToolsService.getEditMode$().getValue();
@@ -306,12 +315,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => this.onMarkerClick(id));
-    marker.addListener('dragstart', (event: google.maps.Data.MouseEvent) =>
-      this.onMarkerDragStart(event, marker)
-    );
-    marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
-      this.onMarkerDragEnd(event, id, jobId)
-    );
+    if (this.shouldEnableDrawingTools) {
+      marker.addListener('dragstart', (event: google.maps.Data.MouseEvent) =>
+        this.onMarkerDragStart(event, marker)
+      );
+      marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
+        this.onMarkerDragEnd(event, id, jobId)
+      );
+    }
     return marker;
   }
 
@@ -404,7 +415,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       : undefined;
     if (marker) {
       this.setIconSize(marker, enlargedIconScale);
-      marker.setDraggable(true);
+      if (this.shouldEnableDrawingTools) {
+        marker.setDraggable(true);
+      }
     }
     const selectedMarker = this.selectedLocationOfInterestId
       ? this.markers.get(this.selectedLocationOfInterestId)

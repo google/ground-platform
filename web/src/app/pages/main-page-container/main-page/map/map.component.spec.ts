@@ -223,6 +223,7 @@ describe('MapComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(MapComponent);
     component = fixture.componentInstance;
+    component.shouldEnableDrawingTools = true;
     fixture.detectChanges();
   });
 
@@ -372,6 +373,15 @@ describe('MapComponent', () => {
 
     const marker1 = component.markers.get(poiId1)!;
     expect(marker1.getDraggable()).toBeTrue();
+  }));
+
+  it('should not set marker draggable when loi is selected and drawing tools turned off', fakeAsync(() => {
+    component.shouldEnableDrawingTools = false;
+    mockLocationOfInterestId$.next(poiId1);
+    tick();
+
+    const marker1 = component.markers.get(poiId1)!;
+    expect(marker1.getDraggable()).toBeFalse();
   }));
 
   it('reposition dialog is not displayed by default', () => {
