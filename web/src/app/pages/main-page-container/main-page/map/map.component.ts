@@ -157,11 +157,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.disableMapClicks) {
       return;
     }
-    if (!this.shouldEnableDrawingTools) {
-      this.navigationService.clearLocationOfInterestId();
-      return;
-    }
-    const editMode = this.drawingToolsService.getEditMode$().getValue();
+    const editMode = this.shouldEnableDrawingTools
+      ? this.drawingToolsService.getEditMode$().getValue()
+      : EditMode.None;
     const selectedJobId = this.drawingToolsService.getSelectedJobId();
     switch (editMode) {
       case EditMode.AddPoint: {
