@@ -41,6 +41,7 @@ import {TitleDialogComponent} from './title-dialog/title-dialog.component';
 export class MainPageComponent implements OnInit {
   activeSurvey$: Observable<Survey>;
   subscription: Subscription = new Subscription();
+  shouldEnableDrawingTools = false;
   constructor(
     private navigationService: NavigationService,
     private surveyService: SurveyService,
