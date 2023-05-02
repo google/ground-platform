@@ -71,7 +71,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
     fullscreenControl: false,
-    mapTypeControl: false,
+    mapTypeControl: true,
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
