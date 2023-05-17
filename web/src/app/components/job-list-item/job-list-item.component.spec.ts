@@ -34,6 +34,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {Router} from '@angular/router';
 import {MatTreeModule} from '@angular/material/tree';
 import {CdkTreeModule} from '@angular/cdk/tree';
+import {By} from '@angular/platform-browser';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Submission} from 'app/models/submission/submission.model';
@@ -65,8 +66,11 @@ describe('JobListItemComponent', () => {
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
+  let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let lois$: Subject<List<LocationOfInterest>>;
   let submissions$: Subject<List<Submission>>;
+  let surveyId$: Subject<string | null>;
+  let locationOfInterestId$: Subject<string | null>;
 
   const user = {
     id: 'user001',
@@ -76,8 +80,9 @@ describe('JobListItemComponent', () => {
 
   const job = new Job('job001', /* index */ 0);
 
+  const surveyId = 'survey1';
   const survey = new Survey(
-    'survey1',
+    surveyId,
     'title1',
     'description1',
     /* jobs= */ Map({
@@ -137,18 +142,24 @@ describe('JobListItemComponent', () => {
       ['submissions$']
     );
 
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      ['getSurveyId$', 'getLocationOfInterestId$', 'selectLocationOfInterest']
+    );
+
     lois$ = new Subject<List<LocationOfInterest>>();
     submissions$ = new Subject<List<Submission>>();
+    surveyId$ = new Subject<string | null>();
+    locationOfInterestId$ = new Subject<string | null>();
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     loiServiceSpy.getLoiNameFromProperties.and.returnValue(null);
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.submissions$.and.returnValue(submissions$);
-
-    const navigationService = {
-      getSurveyId$: () => of(''),
-      getLocationOfInterestId$: () => of(''),
-    };
+    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
+    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
+      locationOfInterestId$
+    );
 
     TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
@@ -162,7 +173,7 @@ describe('JobListItemComponent', () => {
       ],
       providers: [
         {provide: DataStoreService, useValue: {user$: () => of()}},
-        {provide: NavigationService, useValue: navigationService},
+        {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: Router, useValue: {}},
         {provide: SurveyService, useValue: surveyServiceSpy},
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
@@ -182,6 +193,8 @@ describe('JobListItemComponent', () => {
     component.job = job;
     fixture.detectChanges();
     loader = TestbedHarnessEnvironment.loader(fixture);
+
+    surveyId$.next(surveyId);
   });
 
   it('should create', () => {
@@ -237,5 +250,33 @@ describe('JobListItemComponent', () => {
     submissions$.next(createSubmissions(lois.first(), 5));
     // Expect 6 nodes since one is for the loi and 5 for submissions
     expect((await job.getNodes()).length).toBe(6);
+  });
+
+  it('should highlight LOI when it is selected', () => {
+    const lois = createLois(1);
+    lois$.next(lois);
+
+    locationOfInterestId$.next(lois.first()!.id);
+    fixture.detectChanges();
+
+    const loiNodeElement = fixture.debugElement.query(By.css('mat-tree-node'));
+    expect(loiNodeElement.classes).toEqual(
+      jasmine.objectContaining({'tree-node-selected': true})
+    );
+  });
+
+  it('should select LOI when LOI is clicked', () => {
+    const lois = createLois(1);
+    lois$.next(lois);
+    const loiId = lois.first()!.id;
+
+    const selectLoiButton = fixture.debugElement.query(
+      By.css('mat-tree-node #select-loi')
+    ).nativeElement as HTMLElement;
+    selectLoiButton.click();
+
+    expect(
+      navigationServiceSpy.selectLocationOfInterest
+    ).toHaveBeenCalledOnceWith(loiId);
   });
 });
