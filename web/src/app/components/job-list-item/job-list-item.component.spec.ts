@@ -23,6 +23,7 @@ import {
   MatTreeHarness,
   MatTreeNodeHarness,
 } from '@angular/material/tree/testing';
+import {MatButtonHarness} from '@angular/material/button/testing';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {JobListItemComponent} from './job-list-item.component';
 import {MatIconModule} from '@angular/material/icon';
@@ -34,7 +35,6 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {Router} from '@angular/router';
 import {MatTreeModule} from '@angular/material/tree';
 import {CdkTreeModule} from '@angular/cdk/tree';
-import {By} from '@angular/platform-browser';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Submission} from 'app/models/submission/submission.model';
@@ -252,28 +252,27 @@ describe('JobListItemComponent', () => {
     expect((await job.getNodes()).length).toBe(6);
   });
 
-  it('should highlight LOI when it is selected', () => {
+  it('should highlight LOI when it is selected', async () => {
     const lois = createLois(1);
     lois$.next(lois);
 
     locationOfInterestId$.next(lois.first()!.id);
-    fixture.detectChanges();
 
-    const loiNodeElement = fixture.debugElement.query(By.css('mat-tree-node'));
-    expect(loiNodeElement.classes).toEqual(
-      jasmine.objectContaining({'tree-node-selected': true})
-    );
+    const loiNode = await loader.getHarness(MatTreeNodeHarness);
+    expect(
+      await (await loiNode.host()).hasClass('tree-node-selected')
+    ).toBeTrue();
   });
 
-  it('should select LOI when LOI is clicked', () => {
+  it('should select LOI when LOI is clicked', async () => {
     const lois = createLois(1);
     lois$.next(lois);
     const loiId = lois.first()!.id;
 
-    const selectLoiButton = fixture.debugElement.query(
-      By.css('mat-tree-node #select-loi')
-    ).nativeElement as HTMLElement;
-    selectLoiButton.click();
+    const selectLoiButton = await loader.getHarness(
+      MatButtonHarness.with({selector: '#select-loi'})
+    );
+    await selectLoiButton.click();
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
