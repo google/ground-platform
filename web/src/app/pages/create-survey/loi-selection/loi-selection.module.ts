@@ -19,10 +19,18 @@ import {CommonModule} from '@angular/common';
 import {LoiSelectionComponent} from './loi-selection.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
 
 @NgModule({
   declarations: [LoiSelectionComponent],
-  imports: [CommonModule, MatButtonModule, MapModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatListModule,
+    MapModule,
+    MatIconModule,
+  ],
   exports: [LoiSelectionComponent],
 })
 export class LoiSelectionModule {}
