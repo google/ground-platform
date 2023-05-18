@@ -20,7 +20,7 @@
   margin-bottom: 16px;
 }
 
-::ng-deep .mat-list .mat-list-item .mat-line{
+::ng-deep .mat-list .mat-list-item .mat-line {
   word-wrap: break-word !important;
   white-space: pre-wrap !important;
 }
@@ -36,4 +36,8 @@
 .download {
   color: mat-color($foreground, text) !important;
   text-decoration: none;
+}
+
+.tree-node-selected {
+  background-color: #d5e8d0;
 }

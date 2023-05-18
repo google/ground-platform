@@ -43,12 +43,13 @@ export class NavigationService {
   static readonly SURVEYS_EDIT = 'edit';
   static readonly JOB_SEGMENT = 'job';
 
+  // TODO: remove this logic once the new side panel replaces the old one
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
       return SideNavMode.SUBMISSION;
     }
     if (params.get(NavigationService.LOI_ID_FRAGMENT_PARAM)) {
-      return SideNavMode.LOI;
+      return SideNavMode.JOB_LIST;
     }
     if (params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM)) {
       return SideNavMode.LOI_LIST;
