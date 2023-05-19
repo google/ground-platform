@@ -26,13 +26,21 @@ import {
 } from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {List, Map} from 'immutable';
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 import {LoiSelectionComponent} from './loi-selection.component';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
+import {MatDialog} from '@angular/material/dialog';
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 
 describe('LoiSelectionFormComponent', () => {
   let fixture: ComponentFixture<LoiSelectionComponent>;
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
+
+  let matDialogSpy: jasmine.SpyObj<MatDialog>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
+  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
   const poiId1 = 'poi001';
   const poiId2 = 'poi002';
@@ -50,24 +58,49 @@ describe('LoiSelectionFormComponent', () => {
     new Point(new Coordinate(12.3, 45.6)),
     Map()
   );
+  const job = new Job(jobId1, /* index */ 0);
+  const survey = new Survey(
+    'survey1',
+    'title1',
+    'description1',
+    /* jobs= */ Map({
+      [jobId1]: job,
+    }),
+    /* acl= */ Map()
+  );
 
   beforeEach(() => {
+    matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
       ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
     );
+    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+      'canManageSurvey',
+      'getActiveSurvey$',
+    ]);
     mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
       List<LocationOfInterest>([poi1, poi2])
     );
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
+    surveyServiceSpy.canManageSurvey.and.returnValue(true);
 
     TestBed.configureTestingModule({
       imports: [GoogleMapsModule],
       declarations: [LoiSelectionComponent],
       providers: [
         {
+          provide: MatDialog,
+          useValue: matDialogSpy,
+        },
+        {
           provide: LocationOfInterestService,
           useValue: loiServiceSpy,
+        },
+        {
+          provide: SurveyService,
+          useValue: surveyServiceSpy,
         },
       ],
     }).compileComponents();
@@ -90,9 +123,29 @@ describe('LoiSelectionFormComponent', () => {
   it('shows list of LOIs', () => {
     const loiList: HTMLElement =
       fixture.debugElement.nativeElement.querySelector('.loi-list');
-    const loiListValues = Array.from(loiList.querySelectorAll('li')).map(
-      (item: HTMLElement) => item.textContent
-    );
+    const loiListValues = Array.from(
+      loiList.querySelectorAll('.loi-list-item')
+    ).map((element: Element) => element.textContent);
     expect(loiListValues).toEqual(['poi001', 'poi002']);
+  });
+
+  describe('when the import button is clicked', () => {
+    let importButton: HTMLElement;
+
+    beforeEach(() => {
+      importButton = fixture.debugElement.nativeElement.querySelector(
+        '.import-lois-button'
+      );
+    });
+
+    it('opens the import dialog with survey and job data', () => {
+      importButton.click();
+
+      expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
+        data: {surveyId: survey.id, jobId: job.id},
+        width: '350px',
+        maxHeight: '800px',
+      });
+    });
   });
 });

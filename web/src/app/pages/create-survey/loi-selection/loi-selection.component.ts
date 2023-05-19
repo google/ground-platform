@@ -19,6 +19,10 @@ import {List} from 'immutable';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Observable} from 'rxjs';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Survey} from 'app/models/survey.model';
+import {MatDialog} from '@angular/material/dialog';
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 
 @Component({
   selector: 'loi-selection',
@@ -28,7 +32,23 @@ import {Observable} from 'rxjs';
 export class LoiSelectionComponent {
   lois$: Observable<List<LocationOfInterest>>;
 
-  constructor(private loiService: LocationOfInterestService) {
+  constructor(
+    private importDialog: MatDialog,
+    private loiService: LocationOfInterestService,
+    readonly surveyService: SurveyService
+  ) {
     this.lois$ = this.loiService.getLocationsOfInterest$();
+  }
+
+  onImportLois(survey: Survey) {
+    const [job] = survey.jobs.values();
+    if (!survey.id || !job.id) {
+      return;
+    }
+    this.importDialog.open(ImportDialogComponent, {
+      data: {surveyId: survey.id, jobId: job.id},
+      width: '350px',
+      maxHeight: '800px',
+    });
   }
 }

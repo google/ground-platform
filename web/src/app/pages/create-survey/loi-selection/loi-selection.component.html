@@ -16,11 +16,27 @@
 
 <div id="loi-selection">
   <h1>Where should data be collected?</h1>
-  <div>
+  <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
     <div class="loi-list">
-      <ul>
-        <li *ngFor="let loi of lois$ | async">{{loi.id}}</li>
-      </ul>
+      <ng-container *ngIf="surveyService.canManageSurvey()">
+        <button
+          fxFill
+          mat-stroked-button
+          color="primary"
+          class="import-lois-button"
+          (click)="onImportLois(survey)"
+        >
+          <mat-icon class="import-lois-icon">add</mat-icon>
+          Import LOIs
+        </button>
+      </ng-container>
+      <mat-list>
+        <mat-list-item class="loi-list-item"
+          *ngFor="let loi of lois$ | async"
+        >
+          <p matLine>{{ loi.id }}</p>
+        </mat-list-item>
+      </mat-list>
     </div>
     <div class="loi-map">
       <ground-map></ground-map>
