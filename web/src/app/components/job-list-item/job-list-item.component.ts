@@ -107,18 +107,12 @@ export class JobListItemComponent implements OnInit, OnDestroy {
           // Reset nodes for new loi values since we don't know how many lois
           // were added or removed from the previous value
           this.resetLoiNodes();
-          let numOfNoLabelLois = 0;
-          this.lois.forEach(loi => {
-            let displayName = this.loiService.getLoiNameFromProperties(loi);
-            if (displayName === null) {
-              numOfNoLabelLois++;
-              const geometryType = loi.geometry?.geometryType
-                .toLocaleLowerCase()
-                .replace(/_/g, ' ');
-              displayName = `Unnamed ${geometryType} ${numOfNoLabelLois}`;
-            }
-            this.addLoiNode(loi, displayName);
-          });
+          for (const loi of this.loiService.getLoisWithNames.apply(
+            this.loiService,
+            [this.lois]
+          )) {
+            this.addLoiNode(loi, loi.name!);
+          }
         })
     );
   }

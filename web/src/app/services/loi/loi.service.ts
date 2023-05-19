@@ -78,6 +78,31 @@ export class LocationOfInterestService {
     return this.lois$;
   }
 
+  private getAnonymousDisplayName({
+    loi,
+    index,
+  }: {
+    loi: LocationOfInterest;
+    index: number;
+  }): string {
+    const geometryType = loi.geometry?.geometryType
+      .toLocaleLowerCase()
+      .replace(/_/g, ' ');
+    return `Unnamed ${geometryType} ${index + 1}`;
+  }
+
+  getLoisWithNames(lois: List<LocationOfInterest>): List<LocationOfInterest> {
+    return lois.map((loi, index) => {
+      let displayName =
+        this.getLoiNameFromProperties(loi) ||
+        this.getAnonymousDisplayName({loi, index});
+      return {
+        ...loi,
+        name: displayName,
+      };
+    });
+  }
+
   getLoiNameFromProperties(loi: LocationOfInterest): string | null {
     const properties = loi.properties;
     let applicableProperties: string[] = [];
