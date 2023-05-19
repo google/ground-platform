@@ -203,6 +203,14 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     });
   }
 
+  isSelectedLoi(node: DynamicFlatNode): boolean {
+    return node.loi?.id === this.loiId;
+  }
+
+  selectLoi(node: DynamicFlatNode) {
+    this.navigationService.selectLocationOfInterest(node.loi!.id);
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.submissionSubscriptions.forEach(subscription => {
