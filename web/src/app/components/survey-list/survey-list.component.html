@@ -13,28 +13,32 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div fxLayout="column">
-  <ground-header> </ground-header>
-
-  <h1 fxFlex class="recent-surveys">All Surveys</h1>
-  <div fxFlex class="container-surveys">
-    <div class="container">
-      <mat-card (click)="onNewSurvey()" class="survey-add">
-        <mat-card-content class="card-content">
-          <mat-icon color="primary" class="title-add">add</mat-icon>
-        </mat-card-content>
-      </mat-card>
-      <mat-card
-        (click)="onSurveyClicked(i)"
-        class="survey-card"
-        *ngFor="let survey of surveys; let i = index"
-      >
-        <mat-card-header>
-          <mat-card-title class="title-survey">{{
-            survey.title
-          }}</mat-card-title>
-        </mat-card-header>
-      </mat-card>
+<div fxLayout="column" class="surveys-page">
+  <div fxFlex fxLayout="row" class="surveys-page-title-container">
+    <img class="surveys-page-title-logo" src="/assets/img/logo.svg" />
+    <div fxLayout="column" class="title-text">
+      <div fxFlex fxFlexAlign="start" class="small-title">Ground</div>
+      <h1 fxFlex fxFlexAlign="center" class="surveys-page-title">Surveys</h1>
     </div>
+  </div>
+  <div fxFlex class="surveys-container">
+    <mat-card (click)="onNewSurvey()" class="survey-card new-survey-card">
+      <mat-card-header>
+        <div class="add-icon-container">
+          <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
+        </div>
+        <mat-card-title class="survey-title">Start new survey</mat-card-title>
+      </mat-card-header>
+    </mat-card>
+    <mat-card
+      (click)="onSurveyClicked(i)"
+      class="survey-card"
+      *ngFor="let survey of surveys; let i = index"
+    >
+      <mat-card-header>
+        <mat-card-title class="survey-title">{{ survey.title }}</mat-card-title>
+        <mat-card-subtitle>{{ survey.description }}</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
   </div>
 </div>

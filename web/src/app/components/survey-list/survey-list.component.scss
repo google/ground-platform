@@ -13,61 +13,96 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import '_variables';
+@import "_variables";
 
-.survey-card {
-  background-image: url(/assets/img/happy-land.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  width: 160px;
-  height: 120px;
-  margin: 32px;
-  padding: 32px;
-  cursor: pointer;
+.surveys-page {
+  background-color: var(--survey-list-background);
 }
 
-.recent-surveys {
-  padding: 16px;
+.surveys-page-title-container {
+  padding-top: 100px;
+  padding-left: 160px;
 }
 
-.card-content {
-  height: 100%;
-  width: 100%;
+.surveys-page-title-logo {
+  height: 124px;
+  width: 124px;
 }
 
-.survey-add {
-  background-color: mat-color($white);
-  width: 160px;
-  height: 120px;
-  margin: 32px;
-  padding: 32px;
+.surveys-page .title-text {
+  padding-left: 14px;
 }
 
-.logo {
-  width: 64px;
-  height: 64px;
+.surveys-page .small-title {
+  margin-top: 10px;
 }
 
-.container {
+.surveys-page-title {
+  margin-top: 0;
+  font-family: "Google Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 45px;
+  line-height: 52px;
+  /* identical to box height, or 116% */
+
+  /* M3/sys/light/on-background */
+  color: #1a1c19;
+}
+
+.surveys-container {
   display: flex;
   flex-wrap: wrap;
+  margin: 60px 0 60px 160px;
 }
 
-.title-survey {
-  color: mat-color($white);
-  word-wrap: break-word;
+.survey-card {
+  background-color: rgba(33, 108, 46, 0.12);
+  width: 278px;
+  height: 245px;
+  margin: 12px;
+  cursor: pointer;
+  border-radius: 24px;
+  box-shadow: none;
 }
 
-.title-add {
+.new-survey-card {
+  background-color: mat-color($white);
+}
+
+.add-icon-container {
   position: absolute;
-  font-size: 72px;
-  width: 72px;
-  height: 72px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  left: 28px;
+  top: 28px;
+  background: #a7f5a7;
+  border-radius: 4px;
 }
 
-.container-surveys {
-  background-color: var(--survey-list-background);
+.add-icon {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+}
+
+.survey-title {
+  word-wrap: break-word;
+  margin-top: 60px;
+
+  font-family: "Google Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 28px;
+  display: flex;
+  align-items: center;
+
+  /* M3/sys/light/on-surface */
+  color: #1a1c19;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
