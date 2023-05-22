@@ -38,7 +38,7 @@ export class LocationOfInterestService {
 
   // Properties in this order are used to give a LOI a name, otherwise it will
   // be given a default name.
-  private _inferredNamesProperties = [
+  private static _inferredNamesProperties = [
     'label',
     'caption',
     'name',
@@ -78,7 +78,7 @@ export class LocationOfInterestService {
     return this.lois$;
   }
 
-  private getAnonymousDisplayName({
+  private static getAnonymousDisplayName({
     loi,
     index,
   }: {
@@ -91,7 +91,9 @@ export class LocationOfInterestService {
     return `Unnamed ${geometryType} ${index + 1}`;
   }
 
-  getLoisWithNames(lois: List<LocationOfInterest>): List<LocationOfInterest> {
+  static getLoisWithNames(
+    lois: List<LocationOfInterest>
+  ): List<LocationOfInterest> {
     return lois.map((loi, index) => {
       let displayName =
         this.getLoiNameFromProperties(loi) ||
@@ -103,7 +105,7 @@ export class LocationOfInterestService {
     });
   }
 
-  getLoiNameFromProperties(loi: LocationOfInterest): string | null {
+  static getLoiNameFromProperties(loi: LocationOfInterest): string | null {
     const properties = loi.properties;
     let applicableProperties: string[] = [];
 

@@ -39,11 +39,7 @@ export class LoiSelectionComponent {
   ) {
     this.lois$ = this.loiService
       .getLocationsOfInterest$()
-      .pipe(
-        map(lois =>
-          this.loiService.getLoisWithNames.apply(this.loiService, [lois])
-        )
-      );
+      .pipe(map(lois => LocationOfInterestService.getLoisWithNames(lois)));
   }
 
   onImportLois(survey: Survey) {
