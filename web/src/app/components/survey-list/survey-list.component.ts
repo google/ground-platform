@@ -39,7 +39,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const allSurveys = this.surveyService.getAccessibleSurveys$();
     this.subscription.add(
-      allSurveys?.subscribe((surveys) => {
+      allSurveys?.subscribe(surveys => {
         this.surveys = surveys;
       })
     );
