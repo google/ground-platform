@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from "@angular/core";
 
-import {SurveyService} from 'app/services/survey/survey.service';
-import {Subscription} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {List} from 'immutable';
+import { SurveyService } from "app/services/survey/survey.service";
+import { Subscription } from "rxjs";
+import { Survey } from "app/models/survey.model";
+import { NavigationService } from "app/services/navigation/navigation.service";
+import { List } from "immutable";
 
 @Component({
-  selector: 'ground-survey-list',
-  templateUrl: './survey-list.component.html',
-  styleUrls: ['./survey-list.component.scss'],
+  selector: "ground-survey-list",
+  templateUrl: "./survey-list.component.html",
+  styleUrls: ["./survey-list.component.scss"],
 })
 export class SurveyListComponent implements OnInit, OnDestroy {
   surveys = List<Survey>();
@@ -39,7 +39,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const allSurveys = this.surveyService.getAccessibleSurveys$();
     this.subscription.add(
-      allSurveys?.subscribe(surveys => {
+      allSurveys?.subscribe((surveys) => {
         this.surveys = surveys;
       })
     );
@@ -50,7 +50,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   }
 
   onNewSurvey() {
-    this.navigationService.newSurvey();
+    this.navigationService.navigateToCreateSurvey(null);
   }
   /**
    * Clean up Rx subscription when cleaning up the component.
