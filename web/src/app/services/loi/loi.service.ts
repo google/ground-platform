@@ -95,7 +95,7 @@ export class LocationOfInterestService {
     lois: List<LocationOfInterest>
   ): List<LocationOfInterest> {
     return lois.map((loi, index) => {
-      let displayName =
+      const displayName =
         this.getLoiNameFromProperties(loi) ||
         this.getAnonymousDisplayName({loi, index});
       return {
