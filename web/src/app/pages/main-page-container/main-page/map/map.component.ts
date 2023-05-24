@@ -100,7 +100,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
-  @Input() shouldEnableDrawingTools = true;
+  @Input() shouldEnableDrawingTools = false;
 
   constructor(
     private drawingToolsService: DrawingToolsService,
