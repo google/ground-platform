@@ -18,7 +18,7 @@ import {Component} from '@angular/core';
 import {List} from 'immutable';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {Observable} from 'rxjs';
+import {Observable, map} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Survey} from 'app/models/survey.model';
 import {MatDialog} from '@angular/material/dialog';
@@ -34,10 +34,12 @@ export class LoiSelectionComponent {
 
   constructor(
     private importDialog: MatDialog,
-    private loiService: LocationOfInterestService,
+    readonly loiService: LocationOfInterestService,
     readonly surveyService: SurveyService
   ) {
-    this.lois$ = this.loiService.getLocationsOfInterest$();
+    this.lois$ = this.loiService
+      .getLocationsOfInterest$()
+      .pipe(map(lois => LocationOfInterestService.getLoisWithNames(lois)));
   }
 
   onImportLois(survey: Survey) {
