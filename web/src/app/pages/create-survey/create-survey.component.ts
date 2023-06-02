@@ -24,6 +24,7 @@ import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-detai
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
+import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {first} from 'rxjs';
 import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
@@ -81,6 +82,7 @@ export class CreateSurveyComponent implements OnInit {
     if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
     }
+    // TODO(os-micmec): add task-details related logic here. This may need a UX discussion.
 
     return SetupPhase.SURVEY_DETAILS;
   }
@@ -139,8 +141,11 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.DEFINE_LOIS:
         this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.DEFINE_TASKS:
         this.setupPhase = SetupPhase.DEFINE_LOIS;
+        break;
+      case SetupPhase.REVIEW:
+        this.setupPhase = SetupPhase.DEFINE_TASKS;
         break;
       default:
         break;
@@ -162,6 +167,9 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       case SetupPhase.DEFINE_LOIS:
+        this.setupPhase = SetupPhase.DEFINE_TASKS;
+        break;
+      case SetupPhase.DEFINE_TASKS:
         this.setupPhase = SetupPhase.REVIEW;
         break;
       default:
@@ -205,6 +213,9 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('loiSelection')
   loiSelection?: LoiSelectionComponent;
+
+  @ViewChild('taskDetails')
+  taskDetails?: TaskDetailsComponent;
 
   @ViewChild('shareSurvey')
   shareSurvey?: ShareSurveyComponent;
