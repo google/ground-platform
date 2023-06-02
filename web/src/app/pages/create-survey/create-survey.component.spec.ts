@@ -385,7 +385,7 @@ describe('CreateSurveyComponent', () => {
     it('goes back to job details component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOIS);
+      expect(component.setupPhase).toBe(SetupPhase.DEFINE_TASKS);
     });
   });
 });
