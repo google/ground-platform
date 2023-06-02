@@ -15,21 +15,11 @@
  */
 
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
 import {TaskDetailsComponent} from './task-details.component';
-import {MatButtonModule} from '@angular/material/button';
-import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
-import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
 
 @NgModule({
   declarations: [TaskDetailsComponent],
   imports: [
-    CommonModule,
-    MatButtonModule,
-    MatListModule,
-    MapModule,
-    MatIconModule,
   ],
   exports: [TaskDetailsComponent],
 })
