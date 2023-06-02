@@ -24,9 +24,9 @@ describe('TaskDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskDetailsComponent ]
+      declarations: [TaskDetailsComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
