@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'task-details',
   templateUrl: './task-details.component.html',
-  styleUrls: ['./task-details.component.scss']
+  styleUrls: ['./task-details.component.scss'],
 })
 export class TaskDetailsComponent implements OnInit {
+  constructor() {}
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
+  ngOnInit(): void {}
 }

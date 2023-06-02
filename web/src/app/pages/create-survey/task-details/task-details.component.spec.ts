@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { TaskDetailsComponent } from './task-details.component';
+import {TaskDetailsComponent} from './task-details.component';
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
@@ -24,9 +24,8 @@ describe('TaskDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TaskDetailsComponent]
-    })
-      .compileComponents();
+      declarations: [TaskDetailsComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
