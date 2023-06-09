@@ -159,8 +159,8 @@ describe('LoiSelectionFormComponent', () => {
     });
   });
 
-  describe('when the "Clear all" button is clicked', () => {
-    it('makes a deleteLocationOfInterest call per LOI', () => {
+  describe('the "Clear all" button', () => {
+    it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
       const clearAllButton =
         fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
       const loiList = fixture.debugElement.nativeElement
@@ -171,6 +171,15 @@ describe('LoiSelectionFormComponent', () => {
       expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
         loiList.length
       );
+    });
+
+    it('does not show when there are no LOIs', () => {
+      mockLois$.next(List([]));
+      fixture.detectChanges();
+
+      const clearAllButton =
+        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
+      expect(clearAllButton).toBe(null);
     });
   });
 });

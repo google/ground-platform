@@ -35,7 +35,7 @@
           <p matLine>{{ loi.name }}</p>
         </mat-list-item>
       </mat-list>
-      <button
+      <button *ngIf="lois.size > 0"
         class="clear-all-lois"
         (click)="clearLois(survey.id, lois)"
         mat-button
