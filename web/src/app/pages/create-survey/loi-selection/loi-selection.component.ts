@@ -23,6 +23,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {Survey} from 'app/models/survey.model';
 import {MatDialog} from '@angular/material/dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 @Component({
   selector: 'loi-selection',
@@ -33,6 +34,7 @@ export class LoiSelectionComponent {
   lois$: Observable<List<LocationOfInterest>>;
 
   constructor(
+    private dataStoreService: DataStoreService,
     private importDialog: MatDialog,
     readonly loiService: LocationOfInterestService,
     readonly surveyService: SurveyService
@@ -52,5 +54,11 @@ export class LoiSelectionComponent {
       width: '350px',
       maxHeight: '800px',
     });
+  }
+
+  clearLois(surveyId: string, lois: List<LocationOfInterest>) {
+    for (const loi of lois) {
+      this.dataStoreService.deleteLocationOfInterest(surveyId, loi.id);
+    }
   }
 }
