@@ -134,7 +134,7 @@ describe('JobListItemComponent', () => {
 
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['getLocationsOfInterest$', 'getLoiNameFromProperties']
+      ['getLocationsOfInterest$']
     );
 
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
@@ -153,7 +153,10 @@ describe('JobListItemComponent', () => {
     locationOfInterestId$ = new Subject<string | null>();
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
-    loiServiceSpy.getLoiNameFromProperties.and.returnValue(null);
+    spyOn(
+      LocationOfInterestService,
+      'getLoiNameFromProperties'
+    ).and.returnValue(null);
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.submissions$.and.returnValue(submissions$);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);

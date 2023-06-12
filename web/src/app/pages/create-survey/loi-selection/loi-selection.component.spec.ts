@@ -126,7 +126,7 @@ describe('LoiSelectionFormComponent', () => {
     const loiListValues = Array.from(
       loiList.querySelectorAll('.loi-list-item')
     ).map((element: Element) => element.textContent);
-    expect(loiListValues).toEqual(['poi001', 'poi002']);
+    expect(loiListValues).toEqual(['Unnamed point 1', 'Unnamed point 2']);
   });
 
   describe('when the import button is clicked', () => {
