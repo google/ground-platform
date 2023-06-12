@@ -24,7 +24,8 @@ import {MatDialog} from '@angular/material/dialog';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {NEVER} from 'rxjs';
+import {LoadingState} from 'app/services/loading-state.model';
+import {NEVER, of} from 'rxjs';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -57,7 +58,11 @@ describe('MainPageComponent', () => {
 
     const submissionService = jasmine.createSpyObj('SubmissionService', [
       'selectSubmission$',
+      'getSelectedSubmission$'
     ]);
+
+    // No submission selected initially
+    submissionService.getSelectedSubmission$.and.returnValue(of(LoadingState.LOADING));
 
     const navigationService = {
       getSurveyId$: () => NEVER,

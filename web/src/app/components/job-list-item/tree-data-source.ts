@@ -23,7 +23,9 @@ export class DynamicFlatNode {
     public expandable = false,
     // Specific for nodes that represent lois.
     public loi?: LocationOfInterest,
-    public submissionCount?: number
+    public submissionCount?: number,
+    // Specific for nodes that represent submissions.
+    public submission?: Submission
   ) {}
 }
 
@@ -101,7 +103,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
           // currently being shown because that information will be needed;
           // for the separate side panel that expands with more details.
           const nodes = submissions.map(submission => {
-            return new DynamicFlatNode(submission.id, 1, false);
+            return new DynamicFlatNode(submission.id, 1, false, undefined, undefined, submission);
           });
 
           let existingSubmissions = 0;
