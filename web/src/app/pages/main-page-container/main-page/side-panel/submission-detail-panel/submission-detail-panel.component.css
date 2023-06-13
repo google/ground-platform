@@ -1,0 +1,40 @@
+.submission-detail-panel {
+  z-index: 1;
+  position: absolute;
+  margin: 10px;
+  max-width: 256px;
+  max-height: calc(100% - 50px);
+
+  .submission-detail-panel-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    .submission-detail-panel-title {
+      display: flex;
+      font-size: 16px;
+      flex-wrap: wrap;
+    }
+
+    .submission-detail-panel-buttons {
+      display: flex;
+    }
+  }
+
+  .submission-detail-panel-time {
+    color: #70757A;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .submission-detail-panel-question {
+    color: #80868B;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  .submission-detail-panel-response {
+    font-size: 16px;
+    margin: 8px 0px;
+  }
+}
