@@ -58,11 +58,13 @@ describe('MainPageComponent', () => {
 
     const submissionService = jasmine.createSpyObj('SubmissionService', [
       'selectSubmission$',
-      'getSelectedSubmission$'
+      'getSelectedSubmission$',
     ]);
 
     // No submission selected initially
-    submissionService.getSelectedSubmission$.and.returnValue(of(LoadingState.LOADING));
+    submissionService.getSelectedSubmission$.and.returnValue(
+      of(LoadingState.LOADING)
+    );
 
     const navigationService = {
       getSurveyId$: () => NEVER,

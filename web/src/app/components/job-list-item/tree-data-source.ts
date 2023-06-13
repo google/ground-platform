@@ -103,7 +103,14 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
           // currently being shown because that information will be needed;
           // for the separate side panel that expands with more details.
           const nodes = submissions.map(submission => {
-            return new DynamicFlatNode(submission.id, 1, false, undefined, undefined, submission);
+            return new DynamicFlatNode(
+              submission.id,
+              1,
+              false,
+              undefined,
+              undefined,
+              submission
+            );
           });
 
           let existingSubmissions = 0;

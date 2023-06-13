@@ -27,7 +27,6 @@ import {JobListModule} from './job-list/job-list.module';
 import {SubmissionFormModule} from './submission-form/submission-form.module';
 import {LocationOfInterestListModule} from './loi-list/loi-list.module';
 
-
 @NgModule({
   imports: [
     BrowserModule,

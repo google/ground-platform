@@ -93,9 +93,8 @@ export class MainPageComponent implements OnInit {
     );
     // Show selected submission details when expanded
     this.subscription.add(
-      this.submissionService.getSelectedSubmission$()
-      .subscribe(submission => {
-        if (submission instanceof Submission){
+      this.submissionService.getSelectedSubmission$().subscribe(submission => {
+        if (submission instanceof Submission) {
           this.selectedSubmission = submission;
           this.openSelectedSubmissionDetailPanel();
         }

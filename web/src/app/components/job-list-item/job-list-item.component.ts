@@ -211,9 +211,8 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   selectLoi(node: DynamicFlatNode) {
     if (this.isLoiNode(node)) {
       this.navigationService.selectLocationOfInterest(node.loi!.id);
-    }
-    else if (this.isSubmissionNode(node)) {
-      this.submissionService.selectSubmission(node.submission!.id)
+    } else if (this.isSubmissionNode(node)) {
+      this.submissionService.selectSubmission(node.submission!.id);
     }
   }
 

@@ -19,4 +19,3 @@ export class SubmissionDetailPanelComponent {
     return this.submission.job?.tasks?.get(taskId)?.label;
   }
 }
-
