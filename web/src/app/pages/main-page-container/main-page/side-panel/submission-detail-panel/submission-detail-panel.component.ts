@@ -4,7 +4,7 @@ import {Submission} from 'app/models/submission/submission.model';
 @Component({
   selector: 'submission-detail-panel',
   templateUrl: './submission-detail-panel.component.html',
-  styleUrls: ['./submission-detail-panel.component.css'],
+  styleUrls: ['./submission-detail-panel.component.scss'],
 })
 export class SubmissionDetailPanelComponent {
   @Input() submission!: Submission;

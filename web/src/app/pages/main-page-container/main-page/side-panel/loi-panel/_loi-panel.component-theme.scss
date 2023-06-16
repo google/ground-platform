@@ -1,0 +1,54 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  $color-config: mat.get-color-config($theme);
+  $foreground: map.get($color-config, foreground);
+
+  .submission {
+    .task-label {
+      color: map.get($foreground, secondary-text);
+    }
+
+    .task-result {
+      color: map.get($foreground, text);
+    }
+  }
+
+  .no-submission-text {
+    color: map.get($foreground, secondary-text);
+  }
+}
+
+@mixin typography($theme) {
+  $typography-config: mat.get-typography-config($theme);
+
+  // TODO(amysorto): use typography-config once typography levels defined
+
+  .submission {
+    .task-label {
+      font-size: 12px;
+      line-height: 16px;
+    }
+    .task-result {
+      font-size: 14px;
+      line-height: 20px;
+    }
+  }
+
+  .no-submission-text {
+    font-style: italic;
+  }
+}
+
+@mixin theme($theme) {
+  $color-config: mat.get-color-config($theme);
+  @if $color-config != null {
+    @include color($theme);
+  }
+
+  $typography-config: mat.get-typography-config($theme);
+  @if $typography-config != null {
+    @include typography($theme);
+  }
+}

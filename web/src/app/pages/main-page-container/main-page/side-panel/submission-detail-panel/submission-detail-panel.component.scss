@@ -12,7 +12,6 @@
 
     .submission-detail-panel-title {
       display: flex;
-      font-size: 16px;
       flex-wrap: wrap;
     }
 
@@ -22,19 +21,14 @@
   }
 
   .submission-detail-panel-time {
-    color: #70757A;
-    font-size: 12px;
     margin-bottom: 8px;
   }
 
   .submission-detail-panel-question {
-    color: #80868B;
-    font-size: 12px;
     margin-top: 8px;
   }
 
   .submission-detail-panel-response {
-    font-size: 16px;
     margin: 8px 0px;
   }
 }
