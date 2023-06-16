@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,48 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
+// Include Angular Material theme mixins globally using shared Ground palette
+// defined in src/app/styles.
+@use '@angular/material' as mat;
 
-@import 'variables';
+@import '@angular/material/theming';
 @import 'firebaseui/dist/firebaseui.css';
 
+// Include the common styles for Angular Material. This allows us to only
+// have to load a single css file for Angular Material in your app.
+// This mixin but be included exactly once!
+@include mat.core();
+
+$primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
+$accent: mat.define-palette(mat.$amber-palette, 700, 600, 800);
+$warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
+
+// TODO(amysorto): add typography levels
+$typography: mat.define-typography-config(
+  $font-family: 'Google Sans,Roboto,Arial,sans-serif',
+);
+
+$theme: mat.define-light-theme((
+ color: (
+   primary: $primary,
+   accent: $accent,
+   warn: $warn,
+ ),
+ typography: $typography,
+ density: 0,
+));
+
+$foreground: map-get($theme, foreground);
+
+// TODO(amysorto): call themes on a component level
+@include mat.all-component-themes($theme);
+
+// Global styles
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  font-size: 14px;
 }
 
 /* Space between button icon and label. */
