@@ -125,7 +125,7 @@
             "stylePreprocessorOptions": {
               "includePaths": ["src/app/styles"]
             },
-            "styles": ["src/custom-theme.scss", "src/styles.scss"],
+            "styles": ["src/ground-theme.scss"],
             "scripts": [],
             "codeCoverage": true
           }
