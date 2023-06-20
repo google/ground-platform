@@ -37,7 +37,7 @@ import {Submission} from 'app/models/submission/submission.model';
 @Component({
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
-  styleUrls: ['./main-page.component.css'],
+  styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit {
   activeSurvey$: Observable<Survey>;

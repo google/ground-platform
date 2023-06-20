@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@import '_variables';
-
 .button-group {
   position: absolute;
   bottom: 3em;
@@ -26,18 +24,5 @@
   position: absolute;
   top: 2em;
   left: 50%;
-  background-color: white;
   transform: translate(-50%, 0);
-}
-
-.add-point-button {
-  background-color: var(--drawing-tools-black);
-}
-
-.add-point-button:hover {
-  background-color: mat-color($primary);
-}
-
-.mat-button-toggle-checked {
-  background-color: mat-color($primary);
 }

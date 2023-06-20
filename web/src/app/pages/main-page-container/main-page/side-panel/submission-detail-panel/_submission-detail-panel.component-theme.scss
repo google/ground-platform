@@ -1,0 +1,57 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  $color-config: mat.get-color-config($theme);
+  $foreground: map.get($color-config, foreground);
+
+  .ground-title {
+    color: map.get($foreground, secondary-text);
+  }
+
+  .submission-detail-panel-time {
+    // TODO(amysorto): find corresponding color in palette
+    color: #70757A;
+  }
+
+  .submission-detail-panel-question {
+    color: #80868B; /* Grey/600 */
+  }
+}
+
+@mixin typography($theme) {
+  $typography-config: mat.get-typography-config($theme);
+
+  // TODO(amysorto): use typography-config once typography levels defined
+
+  .submission-detail-panel {
+    .submission-detail-panel-title-container
+    .submission-detail-panel-title {
+      font-size: 16px;
+    }
+
+    .submission-detail-panel-time {
+      font-size: 12px;
+    }
+
+    .submission-detail-panel-question {
+      font-size: 12px;
+    }
+
+    .submission-detail-panel-response {
+      font-size: 16px;
+    }
+  }
+}
+
+@mixin theme($theme) {
+  $color-config: mat.get-color-config($theme);
+  @if $color-config != null {
+    @include color($theme);
+  }
+
+  $typography-config: mat.get-typography-config($theme);
+  @if $typography-config != null {
+    @include typography($theme);
+  }
+}
