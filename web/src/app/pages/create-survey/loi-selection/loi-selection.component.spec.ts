@@ -33,11 +33,13 @@ import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {MatDialog} from '@angular/material/dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 describe('LoiSelectionFormComponent', () => {
   let fixture: ComponentFixture<LoiSelectionComponent>;
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
 
+  let dataStoreService: jasmine.SpyObj<DataStoreService>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
@@ -70,6 +72,10 @@ describe('LoiSelectionFormComponent', () => {
   );
 
   beforeEach(() => {
+    dataStoreService = jasmine.createSpyObj<DataStoreService>(
+      'DataStoreService',
+      ['deleteLocationOfInterest']
+    );
     matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
@@ -90,6 +96,10 @@ describe('LoiSelectionFormComponent', () => {
       imports: [GoogleMapsModule],
       declarations: [LoiSelectionComponent],
       providers: [
+        {
+          provide: DataStoreService,
+          useValue: dataStoreService,
+        },
         {
           provide: MatDialog,
           useValue: matDialogSpy,
@@ -146,6 +156,30 @@ describe('LoiSelectionFormComponent', () => {
         width: '350px',
         maxHeight: '800px',
       });
+    });
+  });
+
+  describe('the "Clear all" button', () => {
+    it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
+      const clearAllButton =
+        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
+      const loiList = fixture.debugElement.nativeElement
+        .querySelector('.loi-list')
+        .querySelectorAll('.loi-list-item');
+      clearAllButton.click();
+
+      expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
+        loiList.length
+      );
+    });
+
+    it('does not show when there are no LOIs', () => {
+      mockLois$.next(List([]));
+      fixture.detectChanges();
+
+      const clearAllButton =
+        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
+      expect(clearAllButton).toBe(null);
     });
   });
 });
