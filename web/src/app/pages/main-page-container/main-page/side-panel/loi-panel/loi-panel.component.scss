@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-@import 'variables';
+.submission {
+  .card {
+    margin: 16px;
+  }
 
-.submission.card {
-  margin: 16px;
+  .task-label {
+    margin-bottom: 3px;
+  }
+
+  .task-result {
+    margin-bottom: 12px;
+  }
 }
-.submission .task-label {
-  font-size: 12px;
-  line-height: 16px;
-  color: mat-color($foreground, secondary-text);
-  margin-bottom: 3px;
-}
-.submission .task-result {
-  font-size: 14px;
-  line-height: 20px;
-  color: mat-color($foreground, text);
-  margin-bottom: 12px;
-}
+
 .option-label:not(:last-child):after {
   content: ', ';
   display: inline-block;
@@ -51,8 +48,6 @@
 }
 
 .no-submission-text {
-  font-style: italic;
-  color: mat-color($foreground, secondary-text);
   margin: 16px;
   width: 267px;
   bottom: 32px;

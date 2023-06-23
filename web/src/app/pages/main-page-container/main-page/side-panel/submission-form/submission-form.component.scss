@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-@import 'variables';
-@import 'firebaseui/dist/firebaseui.css';
-
 .submission {
   margin: 16px;
+
+  .task-label {
+    margin-bottom: 3px;
+  }
+
+  .task-result {
+    margin-bottom: 12px;
+  }
 }
-.submission .task-label {
-  font-size: 12px;
-  line-height: 16px;
-  margin-bottom: 3px;
-}
-.submission .task-result {
-  font-size: 14px;
-  line-height: 20px;
-  margin-bottom: 12px;
-}
+
 .task-result .mat-form-field {
   width: 100%;
 }
@@ -56,5 +52,4 @@
 }
 .asterix--after:after {
   content: '*';
-  color: mat-color($warn);
 }

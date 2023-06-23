@@ -25,7 +25,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   templateUrl: './sign-in-page.component.html',
-  styleUrls: ['./sign-in-page.component.css'],
+  styleUrls: ['./sign-in-page.component.scss'],
 })
 export class SignInPageComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();

@@ -1,0 +1,26 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin typography($theme) {
+  $typography-config: mat.get-typography-config($theme);
+
+  // TODO(amysorto): use typography-config once typography levels defined
+
+  .title {
+    font-family: mat.font-family($typography-config);
+    font-size: 1.8em;
+    font-weight: bold;
+  }
+
+  .content {
+    text-align: center;
+    padding: 40px;
+  }
+}
+
+@mixin theme($theme) {
+  $typography-config: mat.get-typography-config($theme);
+  @if $typography-config != null {
+    @include typography($theme);
+  }
+}
