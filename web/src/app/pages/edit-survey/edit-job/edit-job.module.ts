@@ -16,23 +16,11 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
-import {HeaderModule} from 'app/components/header/header.module';
-import {MatListModule} from '@angular/material/list';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {RouterModule} from '@angular/router';
+import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 
 @NgModule({
-  declarations: [EditSurveyComponent],
-  imports: [
-    CommonModule,
-    HeaderModule,
-    MatListModule,
-    MatButtonModule,
-    MatIconModule,
-    RouterModule,
-  ],
-  exports: [EditSurveyComponent],
+  declarations: [EditJobComponent],
+  imports: [CommonModule],
+  exports: [EditJobComponent],
 })
-export class EditSurveyModule {}
+export class EditJobModule {}

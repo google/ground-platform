@@ -14,45 +14,20 @@
  * limitations under the License.
  */
 
-.page {
-  min-height: 100%;
-}
+import {Component} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/internal/operators/map';
 
-.container {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-}
+@Component({
+  selector: 'edit-job',
+  templateUrl: './edit-job.component.html',
+  styleUrls: ['./edit-job.component.scss'],
+})
+export class EditJobComponent {
+  id$: Observable<string>;
 
-.card {
-  border-radius: 18px;
-  display: flex;
-  margin-top: 24px;
-  min-height: 450px;
-  width: 880px;
-}
-
-.picture {
-  height: 450px;
-  width: 330px;
-}
-
-.content {
-  flex: 1;
-  margin: 24px;
-}
-
-.progress-bar-title {
-  margin: 14px 0 8px;
-}
-
-.button-section {
-  display: flex;
-  margin: 24px 0;
-  justify-content: space-between;
-  width: 880px;
-}
-
-.continue-button {
-  border-radius: 100px;
+  constructor(route: ActivatedRoute) {
+    this.id$ = route.params.pipe(map(params => params['id']));
+  }
 }
