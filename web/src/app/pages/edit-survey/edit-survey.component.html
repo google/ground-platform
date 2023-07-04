@@ -20,9 +20,9 @@
   <div class="container">
     <mat-nav-list class="left-menu">
       <a mat-list-item id="survey-button" [routerLink]="['./survey']">
-        <mat-icon class="material-symbols-outlined button-icon"
-          >content_paste</mat-icon
-        >
+        <mat-icon class="material-symbols-outlined button-icon">
+          content_paste
+        </mat-icon>
         <span>Survey</span>
       </a>
 
@@ -39,7 +39,7 @@
         mat-list-item
         [routerLink]="jobRouterLink(job.id)"
       >
-        <span matLine>{{ job.name }} extra extra extra</span>
+        <span matLine>{{ job.name }}</span>
         <button mat-icon-button (click)="onMenu($event)">
           <mat-icon>more_vert</mat-icon>
         </button>

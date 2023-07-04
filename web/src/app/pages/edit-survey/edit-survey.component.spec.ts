@@ -24,8 +24,6 @@ import {
   fakeAsync,
 } from '@angular/core/testing';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Subject} from 'rxjs';
@@ -34,7 +32,6 @@ import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 import {Job} from 'app/models/job.model';
-import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
@@ -89,18 +86,9 @@ describe('EditSurveyComponent', () => {
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
-    const routes = [
-      {path: `job/${jobId1}`, component: EditJobComponent},
-      {path: `job/${jobId2}`, component: EditJobComponent},
-      {path: 'survey', component: SurveyDetailsComponent},
-    ];
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule.withRoutes(routes)],
-      declarations: [
-        EditSurveyComponent,
-        SurveyDetailsComponent,
-        JobDetailsComponent,
-      ],
+      imports: [RouterTestingModule],
+      declarations: [EditSurveyComponent],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
@@ -135,32 +123,39 @@ describe('EditSurveyComponent', () => {
       fixture.detectChanges();
     }));
 
-    it('displays left menu items with router link', () => {
-      const surveyButton = fixture.debugElement.query(By.css('#survey-button'))
-        .nativeElement as Element;
-      const shareButton = fixture.debugElement.query(By.css('#share-button'))
-        .nativeElement as Element;
-      const jobButton1 = fixture.debugElement.query(By.css('#job-0'))
-        .nativeElement as Element;
-      const jobButton2 = fixture.debugElement.query(By.css('#job-1'))
-        .nativeElement as Element;
+    describe('menu item tests', () => {
+      [
+        {
+          buttonSelector: '#survey-button',
+          expectedLabel: 'Survey',
+          expectedRouterLink: './survey',
+        },
+        {
+          buttonSelector: '#share-button',
+          expectedLabel: 'Sharing',
+          expectedRouterLink: './survey',
+        },
+        {
+          buttonSelector: '#job-0',
+          expectedLabel: jobName1,
+          expectedRouterLink: `./job/${jobId1}`,
+        },
+        {
+          buttonSelector: '#job-1',
+          expectedLabel: jobName2,
+          expectedRouterLink: `./job/${jobId2}`,
+        },
+      ].forEach(({buttonSelector, expectedLabel, expectedRouterLink}) => {
+        it('displays button with correct label and router link', () => {
+          const button = fixture.debugElement.query(By.css(buttonSelector))
+            .nativeElement as HTMLElement;
 
-      expect(surveyButton.innerHTML).toContain('Survey');
-      expect(surveyButton.getAttribute('ng-reflect-router-link')).toContain(
-        './survey'
-      );
-      expect(shareButton.innerHTML).toContain('Sharing');
-      expect(shareButton.getAttribute('ng-reflect-router-link')).toContain(
-        './survey'
-      );
-      expect(jobButton1.innerHTML).toContain(jobName1);
-      expect(jobButton1.getAttribute('ng-reflect-router-link')).toContain(
-        `./job/${jobId1}`
-      );
-      expect(jobButton2.innerHTML).toContain(jobName2);
-      expect(jobButton2.getAttribute('ng-reflect-router-link')).toContain(
-        `./job/${jobId2}`
-      );
+          expect(button.textContent).toContain(expectedLabel);
+          expect(button.getAttribute('ng-reflect-router-link')).toEqual(
+            expectedRouterLink
+          );
+        });
+      });
     });
   });
 });
