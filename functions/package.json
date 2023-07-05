@@ -9,10 +9,10 @@
     "shell": "firebase functions:shell",
     "emulators": "firebase emulators:start --only functions",
     "login": "firebase login",
-    "deploy": "firebase deploy --only functions --project",
+    "deploy": "npm run build && firebase deploy --only functions:profile.refresh --project",
     "logs": "firebase functions:log",
     "test": "npm run lint && mocha --reporter list",
-    "build": "tsc",
+    "build": "npm install && tsc",
     "watch": "tsc --watch"
   },
   "dependencies": {

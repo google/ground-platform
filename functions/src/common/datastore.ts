@@ -30,9 +30,9 @@ export class Datastore {
    * Stores user email, name, and avatar to db for use in application LOIs.
    * These attributes are merged with other existing ones if already present.
    */
-  mergeUserProfile(user: functions.auth.UserRecord) {
+  async mergeUserProfile(user: functions.auth.UserRecord) {
     const {uid, email, displayName, photoURL} = user;
-    return this.db_
+    await this.db_
       .doc(`users/${uid}`)
       .set({uid, email, displayName, photoURL}, {merge: true});
   }

@@ -5,10 +5,10 @@
     "clean": "rm -rf node_modules dist coverage *.log",
     "start:dev": "ng serve -c dev",
     "start:prod": "ng serve -c prod",
-    "build:dev": "ng build -c dev",
-    "build:prod": "ng build -c production",
-    "build:local": "ng build -c local",
-    "watch:local": "ng build -c local --watch",
+    "build:dev": "npm install && ng build -c dev",
+    "build:prod": "npm install && ng build -c production",
+    "build:local": "npm install && ng build -c local",
+    "watch:local": "npm install && ng build -c local --watch",
     "pretest": "./pretest.sh",
     "test": "ng test",
     "test:headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
@@ -18,7 +18,7 @@
     "e2e": "ng e2e",
     "posttest": "./posttest.sh && npm run lint",
     "login": "firebase login",
-    "deploy": "firebase deploy --only hosting"
+    "deploy:dev": "npm run build:dev && npm run login && firebase deploy --only hosting --project"
   },
   "private": true,
   "dependencies": {
