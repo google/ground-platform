@@ -33,6 +33,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {firebaseui, FirebaseUIModule} from 'firebaseui-angular';
 import {AngularFireModule} from '@angular/fire/compat';
 import {AngularFireAuthModule} from '@angular/fire/compat/auth';
+import {AngularFireFunctionsModule} from '@angular/fire/compat/functions';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -74,6 +75,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AngularFireModule,
     AngularFireAuthModule,
     AngularFirestoreModule,
+    AngularFireFunctionsModule,
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
