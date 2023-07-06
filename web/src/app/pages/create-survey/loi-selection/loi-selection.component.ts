@@ -18,7 +18,12 @@ import {Component} from '@angular/core';
 import {List} from 'immutable';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {Observable} from 'rxjs';
+import {Observable, map} from 'rxjs';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Survey} from 'app/models/survey.model';
+import {MatDialog} from '@angular/material/dialog';
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 @Component({
   selector: 'loi-selection',
@@ -28,7 +33,32 @@ import {Observable} from 'rxjs';
 export class LoiSelectionComponent {
   lois$: Observable<List<LocationOfInterest>>;
 
-  constructor(private loiService: LocationOfInterestService) {
-    this.lois$ = this.loiService.getLocationsOfInterest$();
+  constructor(
+    private dataStoreService: DataStoreService,
+    private importDialog: MatDialog,
+    readonly loiService: LocationOfInterestService,
+    readonly surveyService: SurveyService
+  ) {
+    this.lois$ = this.loiService
+      .getLocationsOfInterest$()
+      .pipe(map(lois => LocationOfInterestService.getLoisWithNames(lois)));
+  }
+
+  onImportLois(survey: Survey) {
+    const [job] = survey.jobs.values();
+    if (!survey.id || !job.id) {
+      return;
+    }
+    this.importDialog.open(ImportDialogComponent, {
+      data: {surveyId: survey.id, jobId: job.id},
+      width: '350px',
+      maxHeight: '800px',
+    });
+  }
+
+  clearLois(surveyId: string, lois: List<LocationOfInterest>) {
+    for (const loi of lois) {
+      this.dataStoreService.deleteLocationOfInterest(surveyId, loi.id);
+    }
   }
 }

@@ -1,0 +1,27 @@
+<mat-card class="submission-detail-panel">
+  <mat-card-content>
+  <div class="submission-detail-panel-title-container">
+    <div class="submission-detail-panel-title">
+      {{submission.id}}
+    </div>
+    <div class="submission-detail-panel-buttons">
+      <!-- TODO(amysorto): Add edit button -->
+      <button mat-icon-button (click)="closeDetailPanel()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="submission-detail-panel-time">
+    {{submission.lastModified.clientTime}}
+  </div>
+      <div *ngFor="let result of submission.results">
+        <mat-divider></mat-divider>
+        <div class="submission-detail-panel-question">
+          {{getTaskLabel(result[0])}}
+        </div>
+        <div class="submission-detail-panel-response">
+          {{result[1].value}}
+        </div>
+      </div>
+  </mat-card-content>
+</mat-card>

@@ -146,6 +146,9 @@ class MockLocationOfInterestService {
   getSelectedLocationOfInterest$() {
     return of<LocationOfInterest>(MockModel.loi001);
   }
+  getLocationsOfInterest$() {
+    return of<LocationOfInterest>(MockModel.loi001);
+  }
 }
 
 class MockSubmissionService {

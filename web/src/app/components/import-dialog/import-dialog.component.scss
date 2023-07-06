@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-@import '_variables';
-
 file-upload {
   width: 300px;
-}
-
-file-upload div {
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif !important;
-  font-size: 14px !important;
-  color: mat-color($foreground) !important;
 }
 
 .spinner {

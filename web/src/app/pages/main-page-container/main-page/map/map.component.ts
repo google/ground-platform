@@ -16,6 +16,7 @@
 
 import {
   Component,
+  Input,
   AfterViewInit,
   ViewChild,
   OnDestroy,
@@ -70,7 +71,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     center: new google.maps.LatLng(40.767716, -73.971714),
     zoom: 3,
     fullscreenControl: false,
-    mapTypeControl: false,
+    mapTypeControl: true,
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
@@ -98,6 +99,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   disableMapClicks = false;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
+
+  @Input() shouldEnableDrawingTools = false;
 
   constructor(
     private drawingToolsService: DrawingToolsService,
@@ -128,11 +131,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       )
     );
 
-    this.subscription.add(
-      this.drawingToolsService
-        .getEditMode$()
-        .subscribe(editMode => this.onEditModeChange(editMode))
-    );
+    if (this.shouldEnableDrawingTools) {
+      this.subscription.add(
+        this.drawingToolsService
+          .getEditMode$()
+          .subscribe(editMode => this.onEditModeChange(editMode))
+      );
+    }
 
     this.subscription.add(
       combineLatest([
@@ -152,7 +157,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.disableMapClicks) {
       return;
     }
-    const editMode = this.drawingToolsService.getEditMode$().getValue();
+    const editMode = this.shouldEnableDrawingTools
+      ? this.drawingToolsService.getEditMode$().getValue()
+      : EditMode.None;
     const selectedJobId = this.drawingToolsService.getSelectedJobId();
     switch (editMode) {
       case EditMode.AddPoint: {
@@ -306,12 +313,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     };
     const marker = new google.maps.Marker(options);
     marker.addListener('click', () => this.onMarkerClick(id));
-    marker.addListener('dragstart', (event: google.maps.Data.MouseEvent) =>
-      this.onMarkerDragStart(event, marker)
-    );
-    marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
-      this.onMarkerDragEnd(event, id, jobId)
-    );
+    if (this.shouldEnableDrawingTools) {
+      marker.addListener('dragstart', (event: google.maps.Data.MouseEvent) =>
+        this.onMarkerDragStart(event, marker)
+      );
+      marker.addListener('dragend', (event: google.maps.Data.MouseEvent) =>
+        this.onMarkerDragEnd(event, id, jobId)
+      );
+    }
     return marker;
   }
 
@@ -404,7 +413,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       : undefined;
     if (marker) {
       this.setIconSize(marker, enlargedIconScale);
-      marker.setDraggable(true);
+      if (this.shouldEnableDrawingTools) {
+        marker.setDraggable(true);
+      }
     }
     const selectedMarker = this.selectedLocationOfInterestId
       ? this.markers.get(this.selectedLocationOfInterestId)

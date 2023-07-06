@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-@import 'variables';
+.job-list-item-container {
+  margin-bottom: 16px;
+}
+
+::ng-deep .mat-list .mat-list-item .mat-line {
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}
 
 /*
   Workaround to eliminate double-padding between right-hand side overflow
@@ -24,12 +31,3 @@
   padding-right: 8px !important;
 }
 
-.job-icon {
-  vertical-align: middle;
-  padding-right: 5px;
-}
-
-.download {
-  color: mat-color($foreground, text) !important;
-  text-decoration: none;
-}

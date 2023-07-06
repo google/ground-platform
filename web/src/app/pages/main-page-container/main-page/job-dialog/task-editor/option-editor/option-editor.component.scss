@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 :host {
   display: flex;
 }
 
 .dot {
-  color: mat-color($foreground, icon);
   align-self: center;
 }
 
@@ -30,7 +27,6 @@
   margin: 0px auto;
   cursor: move;
   align-self: center;
-  color: mat-color($foreground, icon);
   margin-right: 5px !important;
   visibility: hidden;
 }

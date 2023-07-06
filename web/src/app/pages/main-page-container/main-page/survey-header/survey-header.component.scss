@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 .header-divider {
   display: inline-block;
-  border-left: 1px solid mat-color($foreground, divider);
   width: 1px;
   height: 30px;
   margin-left: 14px;

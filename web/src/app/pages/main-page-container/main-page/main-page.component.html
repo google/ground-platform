@@ -20,25 +20,18 @@
   <div class="content">
     <mat-sidenav-container class="main-page-container">
       <mat-sidenav-content class="mat-sidenav-content">
-        <ground-map></ground-map>
-        <ground-drawing-tools></ground-drawing-tools>
-        <div fxLayout="row">
-          <button
-            mat-raised-button
-            class="sidenav-toggle"
-            (click)="sideNavOpened = !sideNavOpened"
-          >
-            <mat-icon *ngIf="sideNavOpened">navigate_next</mat-icon>
-            <mat-icon *ngIf="!sideNavOpened">navigate_before</mat-icon>
-          </button>
+        <submission-detail-panel *ngIf="showSubmissionPanel"
+          [submission]="selectedSubmission"
+          (closePanel)="closeSelectedSubmissionDetailPanel()">
+        </submission-detail-panel>
+        <ground-map
+          [shouldEnableDrawingTools]="shouldEnableDrawingTools"
+        ></ground-map>
+        <div *ngIf="shouldEnableDrawingTools">
+          <ground-drawing-tools></ground-drawing-tools>
         </div>
       </mat-sidenav-content>
-      <mat-sidenav
-        #sidenav
-        mode="side"
-        position="end"
-        [(opened)]="sideNavOpened"
-      >
+      <mat-sidenav #sidenav mode="side" position="start" opened>
         <ground-side-panel></ground-side-panel>
       </mat-sidenav>
     </mat-sidenav-container>

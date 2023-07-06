@@ -23,7 +23,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 @Component({
   selector: 'ground-title-dialog',
   templateUrl: './title-dialog.component.html',
-  styleUrls: ['./title-dialog.component.css'],
+  styleUrls: ['./title-dialog.component.scss'],
 })
 export class TitleDialogComponent {
   surveyTitleForm: FormGroup;
