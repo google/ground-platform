@@ -15,7 +15,7 @@
  */
 
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Observable, from, of} from 'rxjs';
+import {Observable, from} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 import {User} from 'app/models/user.model';
 import {Injectable} from '@angular/core';
@@ -29,9 +29,8 @@ import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {Role} from 'app/models/role.model';
 import firebase from 'firebase/compat/app';
-import { getFunctions, httpsCallable, HttpsCallable } from '@firebase/functions';
-import { firstValueFrom } from 'rxjs';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import {firstValueFrom} from 'rxjs';
+import {AngularFireFunctions} from '@angular/fire/compat/functions';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -62,7 +61,9 @@ export class AuthService {
     this.user$.subscribe(user => (this.currentUser = user));
   }
 
-  private async onAuthStateChange(user: firebase.User | null): Promise<User | undefined> {
+  private async onAuthStateChange(
+    user: firebase.User | null
+  ): Promise<User | undefined> {
     if (!user) {
       return undefined;
     }
@@ -73,8 +74,8 @@ export class AuthService {
   async callProfileRefresh() {
     const refreshProfile = this.functions.httpsCallable('profile-refresh');
     const result = await firstValueFrom(refreshProfile({}));
-    if (result !== "OK") {
-      throw new Error("User profile could not be updated");
+    if (result !== 'OK') {
+      throw new Error('User profile could not be updated');
     }
   }
 

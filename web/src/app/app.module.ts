@@ -20,7 +20,6 @@ import {
   AngularFirestoreModule,
   USE_EMULATOR as USE_FIRESTORE_EMULATOR,
   SETTINGS as FIRESTORE_SETTINGS,
-  AngularFirestore,
 } from '@angular/fire/compat/firestore';
 import {USE_EMULATOR as USE_DATABASE_EMULATOR} from '@angular/fire/compat/database';
 import {USE_EMULATOR as USE_FUNCTIONS_EMULATOR} from '@angular/fire/compat/functions';
@@ -34,7 +33,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {firebaseui, FirebaseUIModule} from 'firebaseui-angular';
 import {AngularFireModule} from '@angular/fire/compat';
 import {AngularFireAuthModule} from '@angular/fire/compat/auth';
-import { AngularFireFunctionsModule } from '@angular/fire/compat/functions';
+import {AngularFireFunctionsModule} from '@angular/fire/compat/functions';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -66,7 +65,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     {
       provide: USE_FUNCTIONS_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
-    } 
+    },
   ],
   imports: [
     // TODO(#967): Replace compat libs with new AngularFire APIs:
