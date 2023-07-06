@@ -15,12 +15,10 @@
  * limitations under the License.
  */
 
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
 import {Datastore} from '@/common/datastore';
+import {initializeApp} from "firebase-admin/app";
+import {getFirestore} from "firebase-admin/firestore";
 
-// functions.config().firebase is auto-populated with configuration needed to
-// initialize the firebase-admin SDK when deploying via Firebase CLI.
-admin.initializeApp(functions.config().firebase);
+initializeApp();
 
-export const db = new Datastore(admin.firestore());
+export const db = new Datastore(getFirestore());
