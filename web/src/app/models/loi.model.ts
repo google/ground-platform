@@ -21,6 +21,7 @@ import {Geometry} from './geometry/geometry';
 export interface LocationOfInterest {
   readonly id: string;
   readonly jobId: string;
+  readonly name?: string;
   // TODO: Make non-null once other subtypes are removed.
   readonly geometry?: Geometry;
   // TODO: Make non-null, init to empty by default.

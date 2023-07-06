@@ -1,0 +1,138 @@
+/**
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Include Angular Material theme mixins globally using shared Ground palette
+// defined in src/app/styles.
+@use '@angular/material' as mat;
+
+@use 'app/components/header/current-user-widget/account-popup/_account-popup.component-theme' as account-popup;
+@use 'app/components/header/_header.component-theme.scss' as header;
+@use 'app/components/import-dialog/_import-dialog.component-theme' as import-dialog;
+@use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
+@use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
+@use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
+@use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
+@use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
+@use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
+@use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
+@use 'app/pages/create-survey/survey-details/_survey-details.component-theme' as survey-details;
+@use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
+@use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
+@use 'app/pages/main-page-container/main-page/job-dialog/task-editor/option-editor/_option-editor.component-theme' as option-editor;
+@use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
+@use 'app/pages/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
+@use 'app/pages/main-page-container/main-page/map/_map.component-theme' as map;
+@use 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/_loi-panel-header.component-theme' as loi-panel-header;
+@use 'app/pages/main-page-container/main-page/side-panel/loi-panel/_loi-panel.component-theme' as loi-panel;
+@use 'app/pages/main-page-container/main-page/side-panel/submission-detail-panel/_submission-detail-panel.component-theme' as submission-detail-panel;
+@use 'app/pages/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
+@use 'app/pages/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
+@use 'app/pages/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
+@use 'app/pages/main-page-container/main-page/_main-page.component-theme' as main-page;
+
+@import '@angular/material/theming';
+@import 'firebaseui/dist/firebaseui.css';
+
+// Include the common styles for Angular Material. This allows us to only
+// have to load a single css file for Angular Material in your app.
+// This mixin but be included exactly once!
+@include mat.core();
+
+$primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
+$accent: mat.define-palette(mat.$amber-palette, 700, 600, 800);
+$warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
+
+// TODO(amysorto): add typography levels
+$typography: mat.define-typography-config(
+  $font-family: 'Google Sans,Roboto,Arial,sans-serif',
+);
+
+$theme: mat.define-light-theme((
+ color: (
+   primary: $primary,
+   accent: $accent,
+   warn: $warn,
+ ),
+ typography: $typography,
+ density: 0,
+));
+
+$foreground: map-get($theme, foreground);
+
+// TODO(amysorto): call themes on a component level
+@include mat.all-component-themes($theme);
+
+// Custom component themes
+@include account-popup.theme($theme);
+@include header.theme($theme);
+@include import-dialog.theme($theme);
+@include inline-editor.theme($theme);
+@include job-list-item.theme($theme);
+@include share-dialog.theme($theme);
+@include sign-in-page.theme($theme);
+@include survey-list.theme($theme);
+@include user-avatar.theme($theme);
+@include create-survey.theme($theme);
+@include survey-details.theme($theme);
+@include job-details.theme($theme);
+@include drawing-tools.theme($theme);
+@include option-editor.theme($theme);
+@include task-editor.theme($theme);
+@include job-dialog.theme($theme);
+@include map.theme($theme);
+@include loi-panel-header.theme($theme);
+@include loi-panel.theme($theme);
+@include submission-detail-panel.theme($theme);
+@include submission-form.theme($theme);
+@include survey-header.theme($theme);
+@include title-dialog.theme($theme);
+@include main-page.theme($theme);
+
+// Global styles
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Space between button icon and label. */
+button .mat-icon + label {
+  padding-left: 6px;
+  cursor: pointer;
+}
+
+.mat-menu-item mat-icon {
+  color: mat-color($foreground, icon) !important;
+}
+
+snack-bar-container.success {
+  background-color: mat-color($primary);
+}
+
+snack-bar-container.error {
+  background-color: mat-color($warn);
+}
+
+snack-bar-container.notification {
+  color: white;
+  font-weight: bold;
+}
+
+.job-dialog-container .mat-dialog-container {
+  margin: 24px;
+  width: 1024px;
+}

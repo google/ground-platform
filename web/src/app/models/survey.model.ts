@@ -15,9 +15,8 @@
  */
 
 import {Job} from './job.model';
-
-import {Map} from 'immutable';
 import {Role} from './role.model';
+import {Map} from 'immutable';
 
 export class Survey {
   static readonly UNSAVED_NEW = new Survey(

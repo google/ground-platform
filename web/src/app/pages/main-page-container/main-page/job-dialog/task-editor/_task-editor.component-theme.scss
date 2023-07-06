@@ -1,0 +1,49 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  $color-config: mat.get-color-config($theme);
+  $foreground: map.get($color-config, foreground);
+
+  .vertical-divider {
+    border-left: 1px solid map.get($foreground, divider);
+  }
+
+  .question-container {
+    border: 1px map.get($foreground, divider);
+  }
+
+  .drag-icon {
+    color: map.get($foreground, icon);
+  }
+
+  .horizontal-line {
+    border: 1px solid map.get($foreground, divider);
+  }
+}
+
+@mixin typography($theme) {
+  $typography-config: mat.get-typography-config($theme);
+
+  // TODO(amysorto): use typography-config once typography levels defined
+
+  .task-type {
+    font-size: 12px;
+  }
+
+  .task-type-select {
+    font-size: 14px;
+  }
+}
+
+@mixin theme($theme) {
+  $color-config: mat.get-color-config($theme);
+  @if $color-config != null {
+    @include color($theme);
+  }
+
+  $typography-config: mat.get-typography-config($theme);
+  @if $typography-config != null {
+    @include typography($theme);
+  }
+}

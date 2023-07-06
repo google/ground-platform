@@ -15,11 +15,18 @@
  */
 
 import {ActivatedRoute} from '@angular/router';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {FormGroup, FormBuilder} from '@angular/forms';
+import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {Survey} from 'app/models/survey.model';
+import {Job} from 'app/models/job.model';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
+import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {first} from 'rxjs';
+import {ShareSurveyComponent} from './share-survey/share-survey.component';
 
 @Component({
   selector: 'create-survey',
@@ -27,20 +34,17 @@ import {Survey} from 'app/models/survey.model';
   styleUrls: ['./create-survey.component.scss'],
 })
 export class CreateSurveyComponent implements OnInit {
-  readonly titleControlKey = 'title';
-  readonly descriptionControlKey = 'description';
-  private currentSurveyId: string | null = null;
-  formGroup: FormGroup;
+  currentSurveyId: string | null = null;
+  currentSurvey?: Survey;
+  setupPhase = SetupPhase.SURVEY_DETAILS;
+  readonly SetupPhase = SetupPhase;
 
   constructor(
     private surveyService: SurveyService,
+    private jobService: JobService,
     private navigationService: NavigationService,
     route: ActivatedRoute
   ) {
-    this.formGroup = new FormBuilder().group({
-      [this.titleControlKey]: '',
-      [this.descriptionControlKey]: '',
-    });
     navigationService.init(route);
   }
 
@@ -51,39 +55,176 @@ export class CreateSurveyComponent implements OnInit {
       }
       this.currentSurveyId = surveyId;
     });
+    this.surveyService.getActiveSurvey$().subscribe(survey => {
+      this.currentSurvey = survey;
+    });
     this.surveyService
       .getActiveSurvey$()
-      .subscribe(survey => this.loadExistingSurvey(survey));
+      .pipe(first())
+      .subscribe(survey => {
+        if (this.isSetupFinished(survey)) {
+          this.navigationService.navigateToEditSurvey(survey.id);
+          return;
+        }
+        this.setupPhase = this.getSetupPhase(survey);
+      });
   }
 
-  loadExistingSurvey(survey: Survey): void {
-    this.formGroup.controls[this.titleControlKey].setValue(survey.title);
-    this.formGroup.controls[this.descriptionControlKey].setValue(
-      survey.description
-    );
+  private isSetupFinished(survey: Survey): boolean {
+    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
+    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
+  }
+
+  private getSetupPhase(survey: Survey): SetupPhase {
+    if (survey.jobs.size > 0) {
+      return SetupPhase.DEFINE_LOIS;
+    }
+    if (this.hasTitle(survey)) {
+      return SetupPhase.JOB_DETAILS;
+    }
+    // TODO(os-micmec): add task-details related logic here. This may need a UX discussion.
+
+    return SetupPhase.SURVEY_DETAILS;
+  }
+
+  private hasTitle(survey: Survey): boolean {
+    return survey.title.trim().length > 0;
+  }
+
+  private hasJob(survey: Survey): boolean {
+    return survey.jobs.size > 0;
+  }
+
+  private hasTask(survey: Survey): boolean {
+    return survey.jobs.values().next().value.tasks.size > 0;
+  }
+
+  readonly setupPhaseToTitle = new Map<SetupPhase, String>([
+    [SetupPhase.SURVEY_DETAILS, 'Create survey'],
+    [SetupPhase.JOB_DETAILS, 'Add a job'],
+    [SetupPhase.DEFINE_LOIS, 'Specify locations of interest'],
+    [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
+    [SetupPhase.REVIEW, 'Review and share survey'],
+  ]);
+
+  progressBarTitle(): String {
+    return this.setupPhaseToTitle.get(this.setupPhase) ?? '';
+  }
+
+  readonly setupPhaseToProgress = new Map<SetupPhase, number>([
+    [SetupPhase.SURVEY_DETAILS, 0],
+    [SetupPhase.JOB_DETAILS, 25],
+    [SetupPhase.DEFINE_LOIS, 50],
+    [SetupPhase.DEFINE_TASKS, 75],
+    [SetupPhase.REVIEW, 100],
+  ]);
+
+  progressBarValue(): number {
+    return this.setupPhaseToProgress.get(this.setupPhase) ?? 0;
+  }
+
+  job(): Job | undefined {
+    if (this.currentSurvey?.jobs.size ?? 0 > 0) {
+      return this.currentSurvey?.jobs.values().next().value;
+    }
+    return undefined;
   }
 
   back(): void {
-    this.navigationService.navigateToSurveyList();
+    switch (this.setupPhase) {
+      case SetupPhase.SURVEY_DETAILS:
+        this.navigationService.navigateToSurveyList();
+        break;
+      case SetupPhase.JOB_DETAILS:
+        this.setupPhase = SetupPhase.SURVEY_DETAILS;
+        break;
+      case SetupPhase.DEFINE_LOIS:
+        this.setupPhase = SetupPhase.JOB_DETAILS;
+        break;
+      case SetupPhase.DEFINE_TASKS:
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
+        break;
+      case SetupPhase.REVIEW:
+        this.setupPhase = SetupPhase.DEFINE_TASKS;
+        break;
+      default:
+        break;
+    }
   }
 
   async continue(): Promise<void> {
-    const title = this.formGroup.controls[this.titleControlKey].value;
-    const description =
-      this.formGroup.controls[this.descriptionControlKey].value;
+    switch (this.setupPhase) {
+      case SetupPhase.SURVEY_DETAILS: {
+        const createdSurveyId = await this.saveSurveyTitleAndDescription();
+        if (createdSurveyId) {
+          this.navigationService.navigateToCreateSurvey(createdSurveyId);
+        }
+        this.setupPhase = SetupPhase.JOB_DETAILS;
+        break;
+      }
+      case SetupPhase.JOB_DETAILS:
+        await this.saveJobName();
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
+        break;
+      case SetupPhase.DEFINE_LOIS:
+        this.setupPhase = SetupPhase.DEFINE_TASKS;
+        break;
+      case SetupPhase.DEFINE_TASKS:
+        this.setupPhase = SetupPhase.REVIEW;
+        break;
+      default:
+        break;
+    }
+  }
+
+  @ViewChild('surveyDetails')
+  surveyDetails?: SurveyDetailsComponent;
+
+  private async saveSurveyTitleAndDescription(): Promise<string | void> {
+    const [title, description] = this.surveyDetails!.toTitleAndDescription();
     if (this.currentSurveyId) {
-      await this.surveyService.updateTitleAndDescription(
+      return await this.surveyService.updateTitleAndDescription(
         this.currentSurveyId,
         title,
         description
       );
-      this.navigationService.navigateToCreateJob(this.currentSurveyId);
     } else {
-      const createdSurveyId = await this.surveyService.createSurvey(
-        title,
-        description
-      );
-      this.navigationService.navigateToCreateJob(createdSurveyId);
+      return await this.surveyService.createSurvey(title, description);
     }
   }
+
+  @ViewChild('jobDetails')
+  jobDetails?: JobDetailsComponent;
+
+  private async saveJobName(): Promise<void> {
+    const name = this.jobDetails!.toJobName();
+    let job;
+    if (this.currentSurvey!.jobs.size > 0) {
+      // there should only be at most one job attached to this survey at this point when user is still in the survey creation flow
+      job = this.currentSurvey!.jobs.values().next().value;
+    } else {
+      job = this.jobService.createNewJob();
+    }
+    await this.jobService.addOrUpdateJob(
+      this.currentSurveyId!,
+      job.copyWith({name})
+    );
+  }
+
+  @ViewChild('loiSelection')
+  loiSelection?: LoiSelectionComponent;
+
+  @ViewChild('taskDetails')
+  taskDetails?: TaskDetailsComponent;
+
+  @ViewChild('shareSurvey')
+  shareSurvey?: ShareSurveyComponent;
+}
+
+export enum SetupPhase {
+  SURVEY_DETAILS,
+  JOB_DETAILS,
+  DEFINE_TASKS,
+  DEFINE_LOIS,
+  REVIEW,
 }

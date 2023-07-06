@@ -84,6 +84,8 @@ export class FirebaseDataConverter {
   }
 
   static toRole(roleString: string) {
+    // Compatibility for older versions of Ground db.
+    roleString = roleString.replace(/-/g, '_');
     switch (roleString) {
       case 'owner':
         return Role.OWNER;

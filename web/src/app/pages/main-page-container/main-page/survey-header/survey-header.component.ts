@@ -19,7 +19,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Subscription} from 'rxjs';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {ShareDialogComponent} from './share-dialog/share-dialog.component';
+import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
 
 @Component({
   selector: 'ground-survey-header',

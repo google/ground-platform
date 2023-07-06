@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 .user-default-thumb {
   display: inline-block;
-  font-size: 1em;
   width: 2.5em;
   height: 2.5em;
   line-height: 2.5em;
   text-align: center;
   border-radius: 50%;
-  background: mat-color($primary);
   vertical-align: middle;
-  color: white;
   cursor: pointer;
 }
