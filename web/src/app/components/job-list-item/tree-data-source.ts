@@ -64,7 +64,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     );
   }
 
-  disconnect(collectionViewer: CollectionViewer): void {}
+  disconnect(_: CollectionViewer): void {}
 
   /** Handle expand/collapse behaviors */
   handleTreeControl(change: SelectionChange<DynamicFlatNode>) {
