@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 .job-list-item-container {
   margin-bottom: 16px;
 }
 
-::ng-deep .mat-list .mat-list-item .mat-line{
+::ng-deep .mat-list .mat-list-item .mat-line {
   word-wrap: break-word !important;
   white-space: pre-wrap !important;
 }
@@ -33,7 +31,3 @@
   padding-right: 8px !important;
 }
 
-.download {
-  color: mat-color($foreground, text) !important;
-  text-decoration: none;
-}

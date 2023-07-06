@@ -46,6 +46,10 @@
           *ngSwitchCase="SetupPhase.DEFINE_LOIS"
           #loiSelection
         ></loi-selection>
+        <task-details
+          *ngSwitchCase="SetupPhase.DEFINE_TASKS"
+          #taskDetails
+        ></task-details>
         <share-survey
           *ngSwitchCase="SetupPhase.REVIEW"
           #shareSurvey

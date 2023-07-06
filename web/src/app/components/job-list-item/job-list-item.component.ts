@@ -107,18 +107,11 @@ export class JobListItemComponent implements OnInit, OnDestroy {
           // Reset nodes for new loi values since we don't know how many lois
           // were added or removed from the previous value
           this.resetLoiNodes();
-          let numOfNoLabelLois = 0;
-          this.lois.forEach(loi => {
-            let displayName = this.loiService.getLoiNameFromProperties(loi);
-            if (displayName === null) {
-              numOfNoLabelLois++;
-              const geometryType = loi.geometry?.geometryType
-                .toLocaleLowerCase()
-                .replace(/_/g, ' ');
-              displayName = `Unnamed ${geometryType} ${numOfNoLabelLois}`;
-            }
-            this.addLoiNode(loi, displayName);
-          });
+          for (const loi of LocationOfInterestService.getLoisWithNames(
+            this.lois
+          )) {
+            this.addLoiNode(loi, loi.name!);
+          }
         })
     );
   }
@@ -201,6 +194,26 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     this.submissionSubscriptions.forEach(subscription => {
       subscription.unsubscribe();
     });
+  }
+
+  isSelectedLoi(node: DynamicFlatNode): boolean {
+    return node.loi?.id === this.loiId;
+  }
+
+  isLoiNode(node: DynamicFlatNode): boolean {
+    return node.loi ? true : false;
+  }
+
+  isSubmissionNode(node: DynamicFlatNode): boolean {
+    return node.submission ? true : false;
+  }
+
+  selectLoi(node: DynamicFlatNode) {
+    if (this.isLoiNode(node)) {
+      this.navigationService.selectLocationOfInterest(node.loi!.id);
+    } else if (this.isSubmissionNode(node)) {
+      this.submissionService.selectSubmission(node.submission!.id);
+    }
   }
 
   ngOnDestroy(): void {

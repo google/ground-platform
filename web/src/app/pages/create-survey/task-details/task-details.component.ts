@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-.create-survey-btn {
-  color: white;
-  background-color: rgb(0, 145, 19);
-  font-family: 'Open Sans', Arial, sans-serif;
-}
+import {Component, OnInit} from '@angular/core';
 
-.title-input {
-  width: 100%;
+@Component({
+  selector: 'task-details',
+  templateUrl: './task-details.component.html',
+  styleUrls: ['./task-details.component.scss'],
+})
+export class TaskDetailsComponent implements OnInit {
+  constructor() {}
+
+  ngOnInit(): void {}
 }
