@@ -34,7 +34,7 @@ export class Datastore {
     const {uid, email, displayName, photoURL} = user;
     await this.db_
       .doc(`users/${uid}`)
-      .set({uid, email, displayName, photoURL}, {merge: true});
+      .set({email, displayName, photoURL}, {merge: true});
   }
 
   async fetch_(
