@@ -28,7 +28,6 @@ import {Coordinate} from 'app/models/geometry/coordinate';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
-  let service: LocationOfInterestService;
 
   const getMockLoi = (
     properties: ImmutableMap<string, string | number> = ImmutableMap()
@@ -58,7 +57,6 @@ describe('LocationOfInterestService', () => {
         {provide: NavigationService, useValue: navigationService},
       ],
     });
-    service = TestBed.inject(LocationOfInterestService);
   });
 
   it('should be created', () => {
