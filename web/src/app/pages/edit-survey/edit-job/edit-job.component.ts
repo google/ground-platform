@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
-import {db} from '@/common/context';
+import {Component} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/internal/operators/map';
 
-/**
- * Called when a new user logs in for the first time.
- */
-export function handleCreateUser(user: functions.auth.UserRecord) {
-  db.mergeUserProfile(user);
+@Component({
+  selector: 'edit-job',
+  templateUrl: './edit-job.component.html',
+  styleUrls: ['./edit-job.component.scss'],
+})
+export class EditJobComponent {
+  id$: Observable<string>;
+
+  constructor(route: ActivatedRoute) {
+    this.id$ = route.params.pipe(map(params => params['id']));
+  }
 }

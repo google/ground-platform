@@ -19,7 +19,7 @@ import {Component, OnInit} from '@angular/core';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Survey} from 'app/models/survey.model';
-import {Observable} from 'rxjs';
+import {Job} from 'app/models/job.model';
 
 @Component({
   selector: 'edit-survey',
@@ -27,14 +27,16 @@ import {Observable} from 'rxjs';
   styleUrls: ['./edit-survey.component.scss'],
 })
 export class EditSurveyComponent implements OnInit {
-  activeSurvey$: Observable<Survey>;
+  survey?: Survey;
 
   constructor(
     private surveyService: SurveyService,
     private navigationService: NavigationService,
     route: ActivatedRoute
   ) {
-    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
+    this.surveyService
+      .getActiveSurvey$()
+      .subscribe(survey => (this.survey = survey));
     navigationService.init(route);
   }
 
@@ -44,5 +46,18 @@ export class EditSurveyComponent implements OnInit {
         this.surveyService.activateSurvey(surveyId);
       }
     });
+  }
+
+  jobs(): Job[] {
+    return Array.from(this.survey?.jobs.values() ?? []);
+  }
+
+  jobRouterLink(jobId: string): string[] {
+    return [`./job/${jobId}`];
+  }
+
+  onMenu(e: Event): void {
+    e.preventDefault();
+    e.stopImmediatePropagation();
   }
 }

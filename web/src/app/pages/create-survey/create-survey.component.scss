@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+.page {
+  min-height: 100%;
+}
+
 .container {
   align-items: center;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
 }
 
 .card {

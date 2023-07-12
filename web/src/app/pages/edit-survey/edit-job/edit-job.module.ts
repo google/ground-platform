@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 
-@Component({
-  selector: 'ground-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss'],
+@NgModule({
+  declarations: [EditJobComponent],
+  imports: [CommonModule],
+  exports: [EditJobComponent],
 })
-export class HeaderComponent {
-  constructor(public navigationService: NavigationService) {}
-
-  onSurveysButtonClick(): void {
-    this.navigationService.navigateToSurveyList();
-  }
-}
+export class EditJobModule {}
