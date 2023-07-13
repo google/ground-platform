@@ -37,7 +37,7 @@ jobs:
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Build using development configuration
-        run: npm install && npm run build:dev
+        run: npm run build:dev
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

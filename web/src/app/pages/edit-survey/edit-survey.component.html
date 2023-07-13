@@ -14,4 +14,40 @@
   limitations under the License.
 -->
 
-<h1 id="temp-title">Edit survey {{ (activeSurvey$ | async)?.id }}</h1>
+<div class="page">
+  <ground-header> </ground-header>
+
+  <div class="container">
+    <mat-nav-list class="left-menu">
+      <a mat-list-item id="survey-button" [routerLink]="['./survey']">
+        <mat-icon class="material-symbols-outlined button-icon">
+          content_paste
+        </mat-icon>
+        <span>Survey</span>
+      </a>
+
+      <a mat-list-item id="share-button" [routerLink]="['./survey']">
+        <mat-icon class="material-symbols-outlined button-icon">group</mat-icon>
+        <span>Sharing</span>
+      </a>
+
+      <h3 matSubheader class="item job-label">Jobs</h3>
+
+      <a
+        *ngFor="let job of jobs(); index as i"
+        id="job-{{ i }}"
+        mat-list-item
+        [routerLink]="jobRouterLink(job.id)"
+      >
+        <span matLine>{{ job.name }}</span>
+        <button mat-icon-button (click)="onMenu($event)">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </a>
+    </mat-nav-list>
+
+    <div class="card">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

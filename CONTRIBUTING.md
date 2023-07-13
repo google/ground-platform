@@ -86,7 +86,7 @@ To get up and running quickly, you can run the web app and Cloud Functions,local
 To install dependencies, build, and run Ground locally:
 
 ```shell
-npm install && npm run build:local && npm run start:local
+npm run build:local && npm run start:local
 ```
 
 Once the local server is ready, the app will be available at http://localhost:5000. The Firebase Emulator Suite UI can be accessed at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
@@ -125,7 +125,7 @@ Alternatively, you can test and deploy against a real Firebase project:
 4. Build and deploy all the things dev Firebase:
 
     ```shell
-    npm install && npm run build:dev && npm run deploy <project-id>
+    npm run deploy:dev <project-id>
     ```
 
 Once complete, the web app will be available at dev project's Firebase Hosting URL.

@@ -27,6 +27,8 @@ import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
 import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
+import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
+import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
 import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
 
 const routes: Routes = [
@@ -64,6 +66,10 @@ const routes: Routes = [
     path: `${NavigationService.SURVEYS_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_EDIT}`,
     component: EditSurveyComponent,
     canActivate: [AuthGuard],
+    children: [
+      {path: 'job/:id', component: EditJobComponent},
+      {path: 'survey', component: SurveyDetailsComponent},
+    ],
   },
 ];
 const config = RouterModule.forRoot(routes, {

@@ -13,3 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.page {
+  min-height: 100%;
+}
+
+.container {
+  display: flex;
+}
+
+.left-menu {
+  width: 300px;
+}
+
+.mat-list-base .mat-list-item {
+  height: 56px;
+}
+
+.button-icon {
+  margin: 0 12px;
+}
+
+.job-label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.card {
+  background-color: #fcfdf7;
+  border-radius: 18px;
+  flex-grow: 1;
+  margin: 12px 24px 0;
+}

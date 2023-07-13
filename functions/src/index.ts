@@ -18,7 +18,7 @@
 import 'module-alias/register';
 import * as functions from 'firebase-functions';
 import {onHttpsRequest} from "@/handlers";
-import {handleCreateUser} from '@/on-create-user';
+import {handleProfileRefresh} from '@/profile-refresh';
 import {importCsvHandler} from '@/import-csv';
 import {importGeoJsonHandler} from '@/import-geojson';
 import {exportCsvHandler} from '@/export-csv';
@@ -27,9 +27,11 @@ import {
   surveyPathTemplate,
   loiPathTemplate,
 } from '@/on-write-survey';
+import { onCall } from 'firebase-functions/v2/https';
 
-// Create user profile in database when user first logs in.
-export const onCreateUser = functions.auth.user().onCreate(handleCreateUser);
+export const profile = {
+  refresh: onCall((request) => handleProfileRefresh(request))
+};
 
 export const importCsv = onHttpsRequest(importCsvHandler);
 
