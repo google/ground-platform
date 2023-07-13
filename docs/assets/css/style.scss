@@ -22,8 +22,9 @@ body {
 }
 
 h1 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-family: $font-heading;
+  color: #ffffff;
 }
 
 h2, h3, h4, h5, h6 {
@@ -49,11 +50,11 @@ h2, h3, h4, h5, h6 {
 }
 
 .project-tagline {
-  font-family: sans-serif;
+  font-family: $font-heading;
   font-weight: normal;
   margin-bottom: 2rem;
-  font-variant: all-small-caps;
   text-transform: none;
   text-shadow: 1px 1px #333;
   opacity: 0.8;
+  color: #ffffff;
 }
