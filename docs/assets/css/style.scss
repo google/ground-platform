@@ -5,10 +5,14 @@
 
 // Variables
 
-$font-heading: "Google Sans", sans-serif;
-$font-body: "Google Sans Text", serif;
+$font-heading: "Open Sans", sans-serif;
+$font-body: "Open Sans", sans-serif;
 
 // Style declarations
+
+body {
+  background-color: #e5e5e5;
+}
 
 .page-header {
   background-image: url(https://github.com/google/ground-platform/raw/master/docs/assets/images/aerial-forest-lake.jpg);
@@ -17,18 +21,18 @@ $font-body: "Google Sans Text", serif;
   background-size: cover;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: $font-heading;
-  color: #233E5A;
-} 
-
 h1 {
   font-size: 1.8rem;
+  font-family: $font-heading;
+}
+
+h2, h3, h4, h5, h6 {
+  font-family: $font-heading;
+  color: #233E5A;
 }
 
 .main-content p {
   font-family: $font-body;
-  background-color: #e5e5e5;
 }
 
 .project-logo {

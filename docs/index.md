@@ -7,7 +7,7 @@ Ground is an open-source, map-first data collection platform built in collaborat
 
 Ground incorporates best-in-class UX design and engineering to produce a tool which can be used by non-technical users with little to no special training. Our goal is to provide a "just right" data collection solution that meets the needs of community organizers, conservationists, humanitarian workers, and researchers. The platform consists of a web app for survey management, and an Android app for online/offline data collection. 
 
-*Important: Ground is not a supported Google product. It is being developed on a best-effort basis.*
+*Important: Ground is not an officially supported Google product. It is being developed on a best-effort basis.*
 
 # Stay informed
 
