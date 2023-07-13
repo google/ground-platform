@@ -5,8 +5,8 @@
 
 // Variables
 
-$font-heading: "Fredoka One", sans-serif;
-$font-body: "Lora", serif;
+$font-heading: "Google Sans", sans-serif;
+$font-body: "Google Sans Text", serif;
 
 // Style declarations
 
@@ -19,7 +19,7 @@ $font-body: "Lora", serif;
 
 h1, h2, h3, h4, h5, h6 {
   font-family: $font-heading;
-  text-transform: uppercase;
+  color: #233E5A;
 } 
 
 h1 {
@@ -28,6 +28,7 @@ h1 {
 
 .main-content p {
   font-family: $font-body;
+  background-color: #e5e5e5;
 }
 
 .project-logo {
@@ -37,7 +38,6 @@ h1 {
 
 .project-name {
   font-family: $font-heading;
-  font-variant: all-small-caps;
   font-weight: lighter;
   letter-spacing: 1pt;
   font-size: 4.5rem;
