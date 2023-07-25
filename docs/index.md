@@ -17,7 +17,7 @@ The platform consists of a web app for survey management, and an Android app for
 
 *Important: Ground is not an officially supported Google product. It is being developed on a best-effort basis.*
 
-<img src="/assets/images/web-screenshot.png" alt=“Preview of web UI” height="600">&nbsp;&nbsp;<img src="/assets/images/android-screenshot.png" alt=“Preview of mobile UI” height="600">
+![Preview of web UI](/assets/images/web-screenshot.png){:height="600"}&nbsp;&nbsp;![Preview of mobile UI](/assets/images/android-screenshot.png){:height="600"}
 
 # Stay informed
 
