@@ -89,7 +89,7 @@ To install dependencies, build, and run Ground locally:
 npm run build:local && npm run start:local
 ```
 
-Once the local server is ready, the app will be available at http://localhost:5000. The Firebase Emulator Suite UI can be accessed at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
+Once the local server is ready, the app will be available at http://localhost:5000/surveys. The Firebase Emulator Suite UI can be accessed at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
 
 **Note**: The local build variant does not require API keys to run. Warnings related to missing API keys are expected. Authentication is also disabled.
 
