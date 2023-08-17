@@ -26,8 +26,10 @@ import {
   onWriteSurveyHandler,
   surveyPathTemplate,
   loiPathTemplate,
+  submissionPathTemplate,
 } from '@/on-write-survey';
 import { onCall } from 'firebase-functions/v2/https';
+import { onWriteSubmissionHandler } from './on-write-submission';
 
 export const profile = {
   refresh: onCall((request) => handleProfileRefresh(request))
@@ -46,3 +48,7 @@ export const onWriteSurvey = functions.firestore
 export const onWriteLoi = functions.firestore
   .document(loiPathTemplate)
   .onWrite(onWriteSurveyHandler);
+
+export const onWriteSubmission = functions.firestore
+  .document(submissionPathTemplate)
+  .onWrite(onWriteSubmissionHandler);

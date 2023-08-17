@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,29 @@
  * limitations under the License.
  */
 
-import * as admin from 'firebase-admin';
+// import * as admin from 'firebase-admin';
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-
-// Template for survey write triggers capturing survey id.
-export const surveyPathTemplate = 'surveys/{surveyId}';
-
-// Template for LOI write triggers capturing survey and LOI ids.
-export const loiPathTemplate = `${surveyPathTemplate}/lois/{loiId}`;
+import { surveyPathTemplate } from './on-write-survey';
+import {db} from '@/common/context';
 
 // Template for submission write triggers capturing survey and submission ids.
 export const submissionPathTemplate = `${surveyPathTemplate}/submissions/{submissionId}`;
 
-export function onWriteSurveyHandler(
-  _: Change<DocumentSnapshot>,
+export async function onWriteSubmissionHandler(
+  change: Change<DocumentSnapshot>,
   context: EventContext
-): Promise<string> {
+) {
   // Messages are sent without a payload so that they can collapsed. Collapsible
   // messages are more performant, and they may be replaced by newer messages if
   // necessary. This is important when importing LOIs, which may trigger
   // hundred of updates in a short period of time.
   // See also: https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
-  const topic = context.params.surveyId;
-  console.debug(`Sending message to ${topic}`);
-  return admin.messaging().send({topic});
+  // const topic = context.params.surveyId;
+  const surveyId = context.params.surveyId;
+  const loiId = change.after.get("loiId") || change.before.get("loiId");
+  if (!loiId) return;
+  const count = await db.countSubmissionsForLoi(surveyId, loiId);
+  console.debug(`Updating submission count survey ${surveyId} loi ${loiId}: ${count}`);
+  await db.updateSubmissionCount(surveyId, loiId, count);
 }
