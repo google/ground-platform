@@ -1,0 +1,38 @@
+<!--
+  Copyright 2023 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<h1 class="title">Who decides where data is collected?</h1>
+<h2 class="description">
+  Specify who defines locations of interest where data will be collected
+</h2>
+
+<mat-radio-group
+  [id]="dataCollectionControlKey"
+  [formControlName]="dataCollectionControlKey"
+>
+  <ng-container *ngFor="let option of dataCollectionOptions">
+    <mat-card class="data-collection-option"
+      (click)="dataCollectionOptionSelected(option.value)"
+    >
+      <mat-card-content>
+        <mat-radio-button class="option-radio-button" [value]="option.value">
+          {{ option.label }}
+        </mat-radio-button>
+        <p class="option-description">{{ option.description }}</p>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</mat-radio-group>
