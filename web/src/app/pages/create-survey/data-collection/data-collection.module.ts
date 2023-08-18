@@ -35,4 +35,4 @@ import {MatCardModule} from '@angular/material/card';
   ],
   exports: [DataCollectionComponent],
 })
-export class LoiSelectionModule {}
+export class DataCollectionModule {}
