@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { db } from '@/common/context';
+import { db } from './common/context';
 import { CallableRequest, HttpsError } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';
 

@@ -19,7 +19,7 @@ import * as functions from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
 import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
-import {db} from '@/common/context';
+import {db} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 
 /**

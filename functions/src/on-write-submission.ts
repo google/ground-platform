@@ -19,7 +19,7 @@
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
 import { surveyPathTemplate } from './on-write-survey';
-import {db} from '@/common/context';
+import {db} from './common/context';
 
 // Template for submission write triggers capturing survey and submission ids.
 export const submissionPathTemplate = `${surveyPathTemplate}/submissions/{submissionId}`;
