@@ -11,7 +11,7 @@
     "login": "firebase login",
     "deploy": "npm run build && firebase deploy --only functions:profile.refresh --project",
     "logs": "firebase functions:log",
-    "test": "ts-mocha",
+    "test": "ts-mocha lib/test",
     "build": "npm install && tsc",
     "watch": "tsc --watch"
   },
