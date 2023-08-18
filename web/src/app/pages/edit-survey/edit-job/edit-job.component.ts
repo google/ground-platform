@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,20 @@
  * limitations under the License.
  */
 
-.body-container {
-  background-image: url(/assets/img/happy-land.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  width: 100vw;
-}
+import {Component} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/internal/operators/map';
 
-.logo {
-  width: 64px;
-  height: 64px;
-}
+@Component({
+  selector: 'edit-job',
+  templateUrl: './edit-job.component.html',
+  styleUrls: ['./edit-job.component.scss'],
+})
+export class EditJobComponent {
+  id$: Observable<string>;
 
-.title {
-  font-family: 'Open Sans', 'Helvetica neue', sans-serif;
-  font-size: 1.8em;
-  font-weight: bold;
-}
-
-.card {
-  width: 420px;
-  height: 460px;
-}
-
-.content {
-  text-align: center;
-  padding: 40px;
-}
-
-.buttons {
-  margin-top: 48px;
-}
-
-.firebaseui-container {
-  max-width: 240px;
+  constructor(route: ActivatedRoute) {
+    this.id$ = route.params.pipe(map(params => params['id']));
+  }
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 .job-list-item-container {
   margin-bottom: 16px;
 }
@@ -33,11 +31,3 @@
   padding-right: 8px !important;
 }
 
-.download {
-  color: mat-color($foreground, text) !important;
-  text-decoration: none;
-}
-
-.tree-node-selected {
-  background-color: #d5e8d0;
-}

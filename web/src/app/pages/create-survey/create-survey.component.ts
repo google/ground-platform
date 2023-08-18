@@ -27,6 +27,8 @@ import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-s
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {first} from 'rxjs';
 import {ShareSurveyComponent} from './share-survey/share-survey.component';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {LocationOfInterest} from 'app/models/loi.model';
 
 @Component({
   selector: 'create-survey',
@@ -36,6 +38,9 @@ import {ShareSurveyComponent} from './share-survey/share-survey.component';
 export class CreateSurveyComponent implements OnInit {
   currentSurveyId: string | null = null;
   currentSurvey?: Survey;
+  // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
+  // We should display a loading bar while we are waiting for the data to make a decision
+  // about which phase we are in.
   setupPhase = SetupPhase.SURVEY_DETAILS;
   readonly SetupPhase = SetupPhase;
 
@@ -43,6 +48,7 @@ export class CreateSurveyComponent implements OnInit {
     private surveyService: SurveyService,
     private jobService: JobService,
     private navigationService: NavigationService,
+    private loiService: LocationOfInterestService,
     route: ActivatedRoute
   ) {
     navigationService.init(route);
@@ -66,7 +72,9 @@ export class CreateSurveyComponent implements OnInit {
           this.navigationService.navigateToEditSurvey(survey.id);
           return;
         }
-        this.setupPhase = this.getSetupPhase(survey);
+        this.loiService.getLocationsOfInterest$().subscribe(lois => {
+          this.setupPhase = this.getSetupPhase(survey, lois);
+        });
       });
   }
 
@@ -75,15 +83,19 @@ export class CreateSurveyComponent implements OnInit {
     return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
   }
 
-  private getSetupPhase(survey: Survey): SetupPhase {
+  private getSetupPhase(
+    survey: Survey,
+    lois: Immutable.List<LocationOfInterest>
+  ): SetupPhase {
+    if (!lois.isEmpty()) {
+      return SetupPhase.DEFINE_TASKS;
+    }
     if (survey.jobs.size > 0) {
       return SetupPhase.DEFINE_LOIS;
     }
     if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
     }
-    // TODO(os-micmec): add task-details related logic here. This may need a UX discussion.
-
     return SetupPhase.SURVEY_DETAILS;
   }
 

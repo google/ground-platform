@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,41 +14,13 @@
  * limitations under the License.
  */
 
-.container {
-  display: flex;
-  flex-flow: column;
-  height: 100%;
-}
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 
-.header {
-  flex: 0 1 auto;
-}
-
-.content {
-  flex: 1 1 auto;
-}
-
-.main-page-container {
-  height: 100%;
-}
-
-.mat-sidenav {
-  width: 300px;
-}
-
-.sidenav-toggle {
-  top: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: unset;
-  right: -5px;
-  width: 5px;
-  height: 50px;
-  background-color: #d6d6d2;
-  position: absolute;
-}
-
-.mat-sidenav-content {
-  overflow: hidden;
-}
+@NgModule({
+  declarations: [EditJobComponent],
+  imports: [CommonModule],
+  exports: [EditJobComponent],
+})
+export class EditJobModule {}

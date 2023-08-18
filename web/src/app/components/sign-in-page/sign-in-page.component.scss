@@ -14,12 +14,31 @@
  * limitations under the License.
  */
 
-.create-survey-btn {
-  color: white;
-  background-color: rgb(0, 145, 19);
-  font-family: 'Open Sans', Arial, sans-serif;
+.body-container {
+  background-image: url(/assets/img/happy-land.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 100vw;
 }
 
-.title-input {
-  width: 100%;
+.logo {
+  width: 64px;
+  height: 64px;
+}
+
+.card {
+  width: 420px;
+  height: 460px;
+}
+
+.content {
+  padding: 40px;
+}
+
+.buttons {
+  margin-top: 48px;
+}
+
+.firebaseui-container {
+  max-width: 240px;
 }

@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 :host {
   display: block;
   width: 250px;
-  text-align: center;
 }
 
 .user-thumb {
@@ -29,16 +26,11 @@
 }
 
 .user-email {
-  font-size: 14px;
-  color: grey;
-  text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .user-display-name {
-  font-size: 16px;
-  text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -46,13 +38,8 @@
 .user-description {
   margin: 0px auto;
   margin-top: 10px;
-  text-align: center;
 }
 
 .btn-signout {
   margin-top: 20px;
-}
-
-.user-avatar {
-  font-size: 1.8em;
 }

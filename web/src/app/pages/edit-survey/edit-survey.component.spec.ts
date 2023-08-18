@@ -24,14 +24,14 @@ import {
   fakeAsync,
 } from '@angular/core/testing';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Subject} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
+import {RouterTestingModule} from '@angular/router/testing';
+import {Job} from 'app/models/job.model';
 
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
@@ -42,11 +42,32 @@ describe('EditSurveyComponent', () => {
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
   const surveyId = 'survey001';
+  const jobId1 = 'job001';
+  const jobName1 = 'Job Name 1';
+  const jobId2 = 'job002';
+  const jobName2 = 'Job Name 2';
+  const job1 = new Job(
+    jobId1,
+    /* index */ -1,
+    'red',
+    jobName1,
+    /* tasks= */ Map()
+  );
+  const job2 = new Job(
+    jobId2,
+    /* index */ -1,
+    'blue',
+    jobName2,
+    /* tasks= */ Map()
+  );
   const survey = new Survey(
     surveyId,
     'title',
     'description',
-    /* jobs= */ Map(),
+    /* jobs= */ Map([
+      [jobId1, job1],
+      [jobId2, job2],
+    ]),
     /* acl= */ Map()
   );
   beforeEach(waitForAsync(() => {
@@ -66,11 +87,8 @@ describe('EditSurveyComponent', () => {
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
     TestBed.configureTestingModule({
-      declarations: [
-        EditSurveyComponent,
-        SurveyDetailsComponent,
-        JobDetailsComponent,
-      ],
+      imports: [RouterTestingModule],
+      declarations: [EditSurveyComponent],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
@@ -105,10 +123,39 @@ describe('EditSurveyComponent', () => {
       fixture.detectChanges();
     }));
 
-    it('displays survey id in title', () => {
-      const tempTitle = fixture.debugElement.query(By.css('#temp-title'))
-        .nativeElement.innerText;
-      expect(tempTitle).toContain(surveyId);
+    describe('menu item tests', () => {
+      [
+        {
+          buttonSelector: '#survey-button',
+          expectedLabel: 'Survey',
+          expectedRouterLink: './survey',
+        },
+        {
+          buttonSelector: '#share-button',
+          expectedLabel: 'Sharing',
+          expectedRouterLink: './survey',
+        },
+        {
+          buttonSelector: '#job-0',
+          expectedLabel: jobName1,
+          expectedRouterLink: `./job/${jobId1}`,
+        },
+        {
+          buttonSelector: '#job-1',
+          expectedLabel: jobName2,
+          expectedRouterLink: `./job/${jobId2}`,
+        },
+      ].forEach(({buttonSelector, expectedLabel, expectedRouterLink}) => {
+        it('displays button with correct label and router link', () => {
+          const button = fixture.debugElement.query(By.css(buttonSelector))
+            .nativeElement as HTMLElement;
+
+          expect(button.textContent).toContain(expectedLabel);
+          expect(button.getAttribute('ng-reflect-router-link')).toEqual(
+            expectedRouterLink
+          );
+        });
+      });
     });
   });
 });

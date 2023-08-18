@@ -27,6 +27,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {AuthService} from 'app/services/auth/auth.service';
 import {environment} from 'environments/environment';
 import {TitleDialogComponent} from './title-dialog/title-dialog.component';
+import {Submission} from 'app/models/submission/submission.model';
 
 /**
  * Root component for main application page showing map, jobs list, and
@@ -36,12 +37,14 @@ import {TitleDialogComponent} from './title-dialog/title-dialog.component';
 @Component({
   selector: 'ground-main-page',
   templateUrl: './main-page.component.html',
-  styleUrls: ['./main-page.component.css'],
+  styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit {
   activeSurvey$: Observable<Survey>;
   subscription: Subscription = new Subscription();
-  shouldEnableDrawingTools = true;
+  shouldEnableDrawingTools = false;
+  showSubmissionPanel: Boolean = false;
+  selectedSubmission!: Submission;
   constructor(
     private navigationService: NavigationService,
     private surveyService: SurveyService,
@@ -88,10 +91,27 @@ export class MainPageComponent implements OnInit {
         }
       })
     );
+    // Show selected submission details when expanded
+    this.subscription.add(
+      this.submissionService.getSelectedSubmission$().subscribe(submission => {
+        if (submission instanceof Submission) {
+          this.selectedSubmission = submission;
+          this.openSelectedSubmissionDetailPanel();
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  openSelectedSubmissionDetailPanel() {
+    this.showSubmissionPanel = true;
+  }
+
+  closeSelectedSubmissionDetailPanel() {
+    this.showSubmissionPanel = false;
   }
 
   private showTitleDialog() {

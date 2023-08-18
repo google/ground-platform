@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import "_variables";
-
-.surveys-page {
-  background-color: var(--survey-list-background);
-}
 
 .surveys-page-title-container {
   padding-top: 100px;
@@ -39,15 +34,7 @@
 
 .surveys-page-title {
   margin-top: 0;
-  font-family: "Google Sans";
-  font-style: normal;
-  font-weight: 500;
-  font-size: 45px;
   line-height: 52px;
-  /* identical to box height, or 116% */
-
-  /* M3/sys/light/on-background */
-  color: #1a1c19;
 }
 
 .surveys-container {
@@ -57,7 +44,6 @@
 }
 
 .survey-card {
-  background-color: rgba(33, 108, 46, 0.12);
   width: 278px;
   height: 245px;
   margin: 12px;
@@ -66,17 +52,12 @@
   box-shadow: none;
 }
 
-.new-survey-card {
-  background-color: mat-color($white);
-}
-
 .add-icon-container {
   position: absolute;
   width: 28px;
   height: 28px;
   left: 28px;
   top: 28px;
-  background: #a7f5a7;
   border-radius: 4px;
 }
 
@@ -89,18 +70,9 @@
 .survey-title {
   word-wrap: break-word;
   margin-top: 60px;
-
-  font-family: "Google Sans";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 25px;
   line-height: 28px;
   display: flex;
   align-items: center;
-
-  /* M3/sys/light/on-surface */
-  color: #1a1c19;
-
   /* Inside auto layout */
   flex: none;
   order: 0;

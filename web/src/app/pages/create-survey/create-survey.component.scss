@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-.container {
-  align-items: center;
-  background-color: #f1f6ed;
-  display: flex;
-  flex-direction: column;
+.page {
   min-height: 100%;
 }
 
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
 .card {
-  background-color: #fcfdf7;
   border-radius: 18px;
   display: flex;
   margin-top: 24px;
@@ -42,20 +43,14 @@
 }
 
 .progress-bar-title {
-  font-weight: 500;
   margin: 14px 0 8px;
 }
 
 .button-section {
   display: flex;
-  font-weight: 400;
   margin: 24px 0;
   justify-content: space-between;
   width: 880px;
-}
-
-.button {
-  font-family: sans-serif;
 }
 
 .continue-button {

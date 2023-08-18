@@ -19,6 +19,7 @@ import {NEVER, of} from 'rxjs';
 import {Router} from '@angular/router';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {AngularFireFunctions} from '@angular/fire/compat/functions';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {AuthService} from 'app/services/auth/auth.service';
 
@@ -28,6 +29,7 @@ describe('AuthService', () => {
       imports: [],
       providers: [
         {provide: AngularFirestore, useValue: {}},
+        {provide: AngularFireFunctions, useValue: {}},
         {provide: AngularFireAuth, useValue: {authState: NEVER}},
         {provide: DataStoreService, useValue: {user$: () => of()}},
         {provide: Router, useValue: {}},
