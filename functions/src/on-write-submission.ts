@@ -28,15 +28,15 @@ export async function onWriteSubmissionHandler(
   change: Change<DocumentSnapshot>,
   context: EventContext
 ) {
-  // Messages are sent without a payload so that they can collapsed. Collapsible
-  // messages are more performant, and they may be replaced by newer messages if
-  // necessary. This is important when importing LOIs, which may trigger
-  // hundred of updates in a short period of time.
-  // See also: https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
-  // const topic = context.params.surveyId;
   const surveyId = context.params.surveyId;
   const loiId = change.after.get("loiId") || change.before.get("loiId");
   if (!loiId) return;
+  // Note: Counting submissions requires scanning the index, which has O(N) cost,
+  // where N=submission count. This could be done in constant time by
+  // incrementing/decrementing the count on create/delete, however that could lead to
+  // skew or invalid states should the event not be handled for any reason. 
+  // An example of how this might be done for is shared here for future reference:
+  //   https://gist.github.com/gino-m/6097f38c950921b7f98d8de87bbde4dd
   const count = await db.countSubmissionsForLoi(surveyId, loiId);
   console.debug(`Updating submission count survey ${surveyId} loi ${loiId}: ${count}`);
   await db.updateSubmissionCount(surveyId, loiId, count);
