@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
-import {ConfirmationDialogComponent} from './confirmation-dialog.component';
+import {ConfirmationDialogComponent} from '@/confirmation-dialog.component';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 describe('ConfirmationDialogComponent', () => {

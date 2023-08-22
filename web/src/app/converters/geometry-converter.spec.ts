@@ -21,7 +21,7 @@ import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Polygon} from 'app/models/geometry/polygon';
 import {LinearRing} from 'app/models/geometry/linear-ring';
 import {Point} from 'app/models/geometry/point';
-import {toGeometry, GEOMETRY_TYPES} from './geometry-converter';
+import {toGeometry, GEOMETRY_TYPES} from '@/geometry-converter';
 import {GeoPoint} from 'firebase/firestore';
 import {GeometryType} from 'app/models/geometry/geometry';
 

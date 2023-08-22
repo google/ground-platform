@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Task} from './task/task.model';
+import {Task} from '@/task/task.model';
 import {Map} from 'immutable';
-import {Copiable} from './copiable';
+import {Copiable} from '@/copiable';
 
 export class Job extends Copiable {
   constructor(

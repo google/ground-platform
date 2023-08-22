@@ -18,7 +18,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {ImportDialogModule} from 'app/components/import-dialog/import-dialog.module';
 import {NgModule} from '@angular/core';
-import {JobListItemComponent} from './job-list-item.component';
+import {JobListItemComponent} from '@/job-list-item.component';
 import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';

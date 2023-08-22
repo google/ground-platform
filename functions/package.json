@@ -1,6 +1,6 @@
 {
   "name": "functions",
-  "main": "lib/src/index.js",
+  "main": "lib/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "clean": "rm -rf node_modules lib *.log",
@@ -11,7 +11,7 @@
     "login": "firebase login",
     "deploy": "npm run build && firebase deploy --only functions:profile.refresh --project",
     "logs": "firebase functions:log",
-    "test": "jasmine lib/test",
+    "test": "npm run build && jasmine lib/**/*.spec.js",
     "build": "npm install && tsc",
     "watch": "tsc --watch"
   },

@@ -17,9 +17,9 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {Component} from '@angular/core';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
-import {TaskEditorModule} from './task-editor/task-editor.module';
-import {JobDialogComponent} from './job-dialog.component';
+import {EditStyleButtonModule} from '@/edit-style-button/edit-style-button.module';
+import {TaskEditorModule} from '@/task-editor/task-editor.module';
+import {JobDialogComponent} from '@/job-dialog.component';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,

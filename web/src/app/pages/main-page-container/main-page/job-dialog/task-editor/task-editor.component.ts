@@ -49,7 +49,7 @@ import {
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {JobService} from 'app/services/job/job.service';
 import {firstValueFrom, Subscription} from 'rxjs';
-import {OptionEditorComponent} from './option-editor/option-editor.component';
+import {OptionEditorComponent} from '@/option-editor/option-editor.component';
 
 export interface TaskTypeSelectOption {
   icon: string;

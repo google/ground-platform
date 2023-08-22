@@ -29,7 +29,7 @@ import {environment} from 'environments/environment';
 import {shareReplay, Subscription} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
-import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
+import {DynamicDataSource, DynamicFlatNode} from '@/tree-data-source';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {List} from 'immutable';
 

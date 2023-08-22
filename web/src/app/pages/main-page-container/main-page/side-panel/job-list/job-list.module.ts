@@ -16,7 +16,7 @@
 
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {JobListComponent} from './job-list.component';
+import {JobListComponent} from '@/job-list.component';
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
 import {MatListModule} from '@angular/material/list';
 import {MatButtonModule} from '@angular/material/button';

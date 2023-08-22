@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Polygon} from './polygon';
-import {Geometry, GeometryType} from './geometry';
+import {Polygon} from '@/polygon';
+import {Geometry, GeometryType} from '@/geometry';
 import {hash, is, List} from 'immutable';
 
 /**

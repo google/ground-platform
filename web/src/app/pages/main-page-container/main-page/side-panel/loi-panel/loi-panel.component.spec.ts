@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestPanelComponent} from './loi-panel.component';
+import {LocationOfInterestPanelComponent} from '@/loi-panel.component';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {of} from 'rxjs';
 import {Map, List} from 'immutable';

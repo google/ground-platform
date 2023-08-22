@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
-import {MainPageComponent} from './main-page.component';
+import {MainPageComponent} from '@/main-page.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {SurveyService} from 'app/services/survey/survey.service';

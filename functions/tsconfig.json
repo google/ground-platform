@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "module": "CommonJS",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -7,10 +8,15 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
-    "allowJs": true
+    "allowJs": true,
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
   "compileOnSave": true,
-  "typeRoots": [
-    "node_modules/@types"
-]
+  "include": [
+    "src/**/*"
+  ]
 }

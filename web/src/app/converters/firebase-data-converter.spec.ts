@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FirebaseDataConverter} from './firebase-data-converter';
+import {FirebaseDataConverter} from '@/firebase-data-converter';
 import {Job} from 'app/models/job.model';
 import {List, Map} from 'immutable';
 import {Option} from 'app/models/task/option.model';

@@ -18,7 +18,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import {HeaderModule} from 'app/components/header/header.module';
-import {SurveyListComponent} from './survey-list.component';
+import {SurveyListComponent} from '@/survey-list.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';

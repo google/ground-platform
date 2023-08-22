@@ -16,7 +16,7 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {LocationOfInterestListComponent} from './loi-list.component';
+import {LocationOfInterestListComponent} from '@/loi-list.component';
 
 @NgModule({
   declarations: [LocationOfInterestListComponent],

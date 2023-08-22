@@ -18,7 +18,7 @@ import {AuthService} from 'app/services/auth/auth.service';
 import {NEVER} from 'rxjs';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
-import {SignInPageComponent} from './sign-in-page.component';
+import {SignInPageComponent} from '@/sign-in-page.component';
 
 describe('SignInPageComponent', () => {
   let component: SignInPageComponent;

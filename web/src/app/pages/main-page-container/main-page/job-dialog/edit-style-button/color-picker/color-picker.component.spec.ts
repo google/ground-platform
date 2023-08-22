@@ -15,7 +15,7 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {ColorPickerComponent} from './color-picker.component';
+import {ColorPickerComponent} from '@/color-picker.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {NO_ERRORS_SCHEMA} from '@angular/core';

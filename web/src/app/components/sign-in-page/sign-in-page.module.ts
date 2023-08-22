@@ -23,7 +23,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCardModule} from '@angular/material/card';
 import {NgModule} from '@angular/core';
-import {SignInPageComponent} from './sign-in-page.component';
+import {SignInPageComponent} from '@/sign-in-page.component';
 
 @NgModule({
   declarations: [SignInPageComponent],

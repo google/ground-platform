@@ -25,7 +25,7 @@ import {
 } from '@angular/material/tree/testing';
 import {MatButtonHarness} from '@angular/material/button/testing';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {JobListItemComponent} from './job-list-item.component';
+import {JobListItemComponent} from '@/job-list-item.component';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatListModule} from '@angular/material/list';

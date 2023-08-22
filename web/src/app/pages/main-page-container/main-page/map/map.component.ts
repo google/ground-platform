@@ -44,7 +44,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
-} from './select-loi-dialog/select-loi-dialog.component';
+} from '@/select-loi-dialog/select-loi-dialog.component';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Polygon} from 'app/models/geometry/polygon';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
