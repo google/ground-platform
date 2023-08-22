@@ -1,9 +1,9 @@
 {
   "name": "functions",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "clean": "rm -rf node_modules lib *.log",
+    "clean": "rm -rf node_modules dist *.log",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "shell": "firebase functions:shell",
@@ -11,7 +11,7 @@
     "login": "firebase login",
     "deploy": "npm run build && firebase deploy --only functions:profile.refresh --project",
     "logs": "firebase functions:log",
-    "test": "npm run build && jasmine lib/**/*.spec.js",
+    "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm install && tsc",
     "watch": "tsc --watch"
   },
@@ -58,6 +58,6 @@
     "wkt": "0.1.1"
   },
   "_moduleAliases": {
-    "@": "lib"
+    "@": "dist"
   }
 }
