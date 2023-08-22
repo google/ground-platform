@@ -108,8 +108,8 @@ export class Datastore {
     const submissionsForLoiQuery = submissionsRef.where("loiId", "==", loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
-
   }
+  
   async updateSubmissionCount(surveyId: string, loiId: string, count:number) {
     const loiRef = this.db_.collection('surveys').doc(surveyId).collection('lois').doc(loiId);
     await loiRef.update({submissionCount: count});

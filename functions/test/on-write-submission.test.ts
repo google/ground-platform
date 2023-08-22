@@ -14,27 +14,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as admin from "firebase-admin";
 import * as firebaseFunctionsTest from "firebase-functions-test";
 
-// At the top of test/index.test.js
-const test = firebaseFunctionsTest({
-  databaseURL: 'https://gnd-dev.firebaseio.com',
-  storageBucket: 'gnd-dev.appspot.com',
-  projectId: 'gnd-dev',
-}, '.test-service-account-key.json');
+const test = firebaseFunctionsTest();
 
-// import { describe, it } from "node:test";
- 
-// import assert from 'chai';
-import { onWriteSubmission } from '../src/index'; // relative path to functions code
+describe('Cloud Functions', () => {
+  let functions: any, initializeAppSpy: any;
 
-
-// describe("onWriteSubmissionTest", async () => {
-  it("should update count on new submission", async () => {
-    const before = test.firestore.makeDocumentSnapshot({}, 'survey/100/submissions/123');
-    const after = test.firestore.makeDocumentSnapshot({loiId: '999'}, 'survey/100/submissions/123');
-    const change = test.makeChange(before, after);
-    const wrapped = test.wrap(onWriteSubmission);
-    await wrapped(change);
+  before(() => {    
+    const docSpy = jasmine.createSpy('doc');
+    const collectionSpy = jasmine.createSpy('collection');
+    const firestoreMock: admin.firestore.Firestore = {
+      doc: docSpy,
+      collection: collectionSpy,
+    } as any;
+    const appSpy = jasmine.createSpyObj('App', [], {firestore: () => firestoreMock});    
+    initializeAppSpy = spyOn(admin, 'initializeApp').and.returnValue(appSpy);
+    functions = require('../src/index');
   });
-// });
+
+  after(() => {
+    initializeAppSpy.calls.reset();
+    test.cleanup();
+  });
+
+
+describe("onWriteSubmissionTest", async () => {
+    it("should update count on new submission", async () => {
+      const before = {
+        get: () => {}
+      };
+      const after = {
+        get: () => {}
+      }
+      // TODO: Test actual behaviors once implemented.
+      await test.wrap(functions.onWriteSubmission)({before, after});
+    });
+  });
+});
