@@ -1,13 +1,13 @@
 {
   "name": "functions",
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "clean": "rm -rf node_modules lib *.log",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "shell": "firebase functions:shell",
-    "emulators": "firebase emulators:start --only functions",
+    "emulators": "firebase emulators:start --only functions,firestore --project",
     "login": "firebase login",
     "deploy": "npm run build && firebase deploy --only functions:profile.refresh --project",
     "logs": "firebase functions:log",
