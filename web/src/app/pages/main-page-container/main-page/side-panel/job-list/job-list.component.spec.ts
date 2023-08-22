@@ -17,7 +17,7 @@
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {JobListComponent} from '@/job-list.component';
+import {JobListComponent} from './job-list.component';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {Survey} from 'app/models/survey.model';

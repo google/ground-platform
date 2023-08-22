@@ -26,10 +26,10 @@ import {SignInPageModule} from 'app/components/sign-in-page/sign-in-page.module'
 import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
-import {EditSurveyComponent} from '@/pages/edit-survey/edit-survey.component';
-import {EditJobComponent} from '@/pages/edit-survey/edit-job/edit-job.component';
-import {SurveyDetailsComponent} from '@/pages/create-survey/survey-details/survey-details.component';
-import {EditSurveyModule} from '@/pages/edit-survey/edit-survey.module';
+import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
+import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
+import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
+import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
 
 const routes: Routes = [
   {

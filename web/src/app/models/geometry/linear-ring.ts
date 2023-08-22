@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Coordinate} from '@/coordinate';
-import {GeometryType} from '@/geometry';
-import {LineString} from '@/line-string';
+import {Coordinate} from './coordinate';
+import {GeometryType} from './geometry';
+import {LineString} from './line-string';
 import {List} from 'immutable';
 
 /**

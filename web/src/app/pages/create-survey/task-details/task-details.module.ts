@@ -15,7 +15,7 @@
  */
 
 import {NgModule} from '@angular/core';
-import {TaskDetailsComponent} from '@/task-details.component';
+import {TaskDetailsComponent} from './task-details.component';
 
 @NgModule({
   declarations: [TaskDetailsComponent],

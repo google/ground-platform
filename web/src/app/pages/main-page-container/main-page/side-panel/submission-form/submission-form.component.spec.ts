@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SubmissionFormComponent} from '@/submission-form.component';
+import {SubmissionFormComponent} from './submission-form.component';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,

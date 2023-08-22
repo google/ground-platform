@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Job} from '@/job.model';
-import {Role} from '@/role.model';
+import {Job} from './job.model';
+import {Role} from './role.model';
 import {Map} from 'immutable';
 
 export class Survey {

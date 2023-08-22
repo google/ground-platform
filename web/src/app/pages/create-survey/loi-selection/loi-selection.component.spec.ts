@@ -27,7 +27,7 @@ import {
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
-import {LoiSelectionComponent} from '@/loi-selection.component';
+import {LoiSelectionComponent} from './loi-selection.component';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';

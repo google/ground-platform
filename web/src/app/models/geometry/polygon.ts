@@ -15,8 +15,8 @@
  */
 
 import {hash, is, List} from 'immutable';
-import {Geometry, GeometryType} from '@/geometry';
-import {LinearRing} from '@/linear-ring';
+import {Geometry, GeometryType} from './geometry';
+import {LinearRing} from './linear-ring';
 
 /**
  * Represents a polygon with linear edges, which may include holes. The outer

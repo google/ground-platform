@@ -16,7 +16,7 @@
 
 import {NgModule} from '@angular/core';
 import {MatDialogModule} from '@angular/material/dialog';
-import {TitleDialogComponent} from '@/title-dialog.component';
+import {TitleDialogComponent} from './title-dialog.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';

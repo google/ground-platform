@@ -21,7 +21,7 @@ import {
   tick,
   fakeAsync,
 } from '@angular/core/testing';
-import {MapComponent} from '@/map.component';
+import {MapComponent} from './map.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';

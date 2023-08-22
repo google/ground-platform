@@ -16,7 +16,7 @@
 
 import {CommonModule} from '@angular/common';
 import {FileUploadModule} from '@iplab/ngx-file-upload';
-import {ImportDialogComponent} from '@/import-dialog.component';
+import {ImportDialogComponent} from './import-dialog.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
 import {ReactiveFormsModule} from '@angular/forms';

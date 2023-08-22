@@ -16,16 +16,16 @@
 
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {SidePanelComponent} from '@/side-panel.component';
-import {SubmissionDetailPanelComponent} from '@/submission-detail-panel/submission-detail-panel.component';
-import {LocationOfInterestPanelModule} from '@/loi-panel/loi-panel.module';
+import {SidePanelComponent} from './side-panel.component';
+import {SubmissionDetailPanelComponent} from './submission-detail-panel/submission-detail-panel.component';
+import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
-import {JobListModule} from '@/job-list/job-list.module';
-import {SubmissionFormModule} from '@/submission-form/submission-form.module';
-import {LocationOfInterestListModule} from '@/loi-list/loi-list.module';
+import {JobListModule} from './job-list/job-list.module';
+import {SubmissionFormModule} from './submission-form/submission-form.module';
+import {LocationOfInterestListModule} from './loi-list/loi-list.module';
 
 @NgModule({
   imports: [

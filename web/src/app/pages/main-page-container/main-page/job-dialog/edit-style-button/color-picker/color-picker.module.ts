@@ -16,7 +16,7 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ColorPickerComponent} from '@/color-picker.component';
+import {ColorPickerComponent} from './color-picker.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {ColorCircleModule} from 'ngx-color/circle';
 import {MatFormFieldModule} from '@angular/material/form-field';
