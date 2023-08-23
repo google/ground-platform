@@ -104,14 +104,14 @@ export class Datastore {
   }
 
   async countSubmissionsForLoi(surveyId: string, loiId: string): Promise<number> {
-    const submissionsRef = this.db_.collection('surveys').doc(surveyId).collection('submissions');
+    const submissionsRef = this.db_.collection(`surveys/${surveyId}/submissions`);
     const submissionsForLoiQuery = submissionsRef.where("loiId", "==", loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }
   
   async updateSubmissionCount(surveyId: string, loiId: string, count:number) {
-    const loiRef = this.db_.collection('surveys').doc(surveyId).collection('lois').doc(loiId);
+    const loiRef = this.db_.doc(`surveys/${surveyId}/lois/${loiId}`);
     await loiRef.update({submissionCount: count});
   }
 

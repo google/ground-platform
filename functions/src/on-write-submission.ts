@@ -29,7 +29,7 @@ export async function onWriteSubmissionHandler(
   context: EventContext
 ) {
   const surveyId = context.params.surveyId;
-  const loiId = change.after.get("loiId") || change.before.get("loiId");
+  const loiId = change.after?.get("loiId") || change.before?.get("loiId");
   if (!loiId) return;
   // Note: Counting submissions requires scanning the index, which has O(N) cost,
   // where N=submission count. This could be done in constant time by
@@ -38,6 +38,5 @@ export async function onWriteSubmissionHandler(
   // An example of how this might be done for is shared here for future reference:
   //   https://gist.github.com/gino-m/6097f38c950921b7f98d8de87bbde4dd
   const count = await db.countSubmissionsForLoi(surveyId, loiId);
-  console.debug(`Updating submission count survey ${surveyId} loi ${loiId}: ${count}`);
   await db.updateSubmissionCount(surveyId, loiId, count);
 }
