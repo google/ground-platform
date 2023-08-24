@@ -30,6 +30,7 @@
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
 @use 'app/pages/create-survey/survey-details/_survey-details.component-theme' as survey-details;
 @use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
+@use 'app/pages/create-survey/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/option-editor/_option-editor.component-theme' as option-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
@@ -82,6 +83,7 @@ $foreground: map-get($theme, foreground);
 @include inline-editor.theme($theme);
 @include job-list-item.theme($theme);
 @include share-dialog.theme($theme);
+@include share-survey.theme($theme);
 @include sign-in-page.theme($theme);
 @include survey-list.theme($theme);
 @include user-avatar.theme($theme);

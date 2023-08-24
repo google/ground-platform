@@ -54,6 +54,12 @@
   .pending-changes {
     font-style: italic;
   }
+
+  h2 {
+    font-family: mat.font-family($typography-config);
+    font-size: medium;
+    font-weight: normal;
+  }
 }
 
 @mixin theme($theme) {
