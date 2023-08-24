@@ -23,6 +23,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
+import {ShareListModule} from 'app/components/share-list/share-list.module';
+import {MatCardModule} from '@angular/material/card';
 
 @NgModule({
   declarations: [ShareSurveyComponent],
@@ -33,8 +35,10 @@ import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module
     MatButtonModule,
     MatIconModule,
     MatInputModule,
+    MatCardModule,
     MatDialogModule,
     ShareDialogModule,
+    ShareListModule,
   ],
   exports: [ShareSurveyComponent],
 })
