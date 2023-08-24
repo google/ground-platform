@@ -21,6 +21,14 @@
   padding-bottom: 6px;
 }
 
+.mat-dialog-actions {
+  .mat-flat-button {
+    &:not(:first-child) {
+        margin-left: 1em;
+      }
+    }
+}
+
 .role-select {
   margin: -4px 0;
 }

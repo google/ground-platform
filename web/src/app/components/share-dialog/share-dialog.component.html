@@ -34,25 +34,15 @@
   </div>
 </form>
 <div mat-dialog-actions align="end">
-  <div *ngIf="hasChanges">
-    <span class="pending-changes">Pending changes</span>
-    <button mat-flat-button color="primary" (click)="onSaveClicked()">
-      <label>Save</label>
-    </button>
-  </div>
-  <div>
-    <button mat-flat-button color="primary" (click)="onCancelClicked()">
-      <label>Cancel</label>
-    </button>
-  </div>
-  <div>
-    <button
-      mat-flat-button
-      color="primary"
-      [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
-      (click)="onAddUserSubmit()"
-    >
-      <label>Done</label>
-    </button>
-  </div>
+  <button mat-button mat-flat-button (click)="onCancelClicked()">
+    <label>Cancel</label>
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
+    (click)="onAddUserSubmit()"
+  >
+    <label>Done</label>
+  </button>
 </div>
