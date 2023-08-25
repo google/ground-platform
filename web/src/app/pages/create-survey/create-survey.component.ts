@@ -26,7 +26,7 @@ import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {first} from 'rxjs';
-import {ShareSurveyComponent} from './share-survey/share-survey.component';
+import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
 

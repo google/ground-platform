@@ -30,7 +30,7 @@ import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
 import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
-import {ShareSurveyComponent} from './pages/create-survey/share-survey/share-survey.component';
+import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
 
 const routes: Routes = [
   {
