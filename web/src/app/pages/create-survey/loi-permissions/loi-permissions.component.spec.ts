@@ -19,20 +19,20 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {BrowserModule} from '@angular/platform-browser';
 import {
-  DataCollectionComponent,
-  DataCollectionOption,
-} from 'app/pages/create-survey/data-collection/data-collection.component';
+  LoiPermissionsComponent,
+  LoiPermissionsOption,
+} from './loi-permissions.component';
 
-describe('DataCollectionComponent', () => {
-  let component: DataCollectionComponent;
-  let fixture: ComponentFixture<DataCollectionComponent>;
+describe('LoiPermissionsComponent', () => {
+  let component: LoiPermissionsComponent;
+  let fixture: ComponentFixture<LoiPermissionsComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [BrowserModule],
-      declarations: [DataCollectionComponent],
+      declarations: [LoiPermissionsComponent],
     }).compileComponents();
-    fixture = TestBed.createComponent(DataCollectionComponent);
+    fixture = TestBed.createComponent(LoiPermissionsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -54,14 +54,14 @@ describe('DataCollectionComponent', () => {
 
   it('sets the default data collection option to survey organizers', () => {
     expect(
-      component.formGroup.controls[component.dataCollectionControlKey].value
-    ).toBe(DataCollectionOption.SURVEY_ORGANIZERS);
+      component.formGroup.controls[component.loiPermissionsControlKey].value
+    ).toBe(LoiPermissionsOption.SURVEY_ORGANIZERS);
   });
 
   it('displays mat-cards for each of the three data collection options', () => {
     const matCards: HTMLElement[] =
       fixture.debugElement.nativeElement.querySelectorAll(
-        '.data-collection-option'
+        '.loi-permissions-option'
       );
     const contentValues = Array.from(matCards).map((card: HTMLElement) => ({
       label: card.querySelector('.option-radio-button')!.textContent!.trim(),
@@ -88,23 +88,23 @@ describe('DataCollectionComponent', () => {
     ]);
   });
 
-  it('updates the dataCollectionMethod value on click of the card', () => {
+  it('updates the loiPermissionsMethod value on click of the card', () => {
     const matCards: HTMLElement[] =
       fixture.debugElement.nativeElement.querySelectorAll(
-        '.data-collection-option'
+        '.loi-permissions-option'
       );
     const [, collectorsCard, bothCard] = matCards;
 
     collectorsCard.click();
 
     expect(
-      component.formGroup.controls[component.dataCollectionControlKey].value
-    ).toBe(DataCollectionOption.DATA_COLLECTORS);
+      component.formGroup.controls[component.loiPermissionsControlKey].value
+    ).toBe(LoiPermissionsOption.DATA_COLLECTORS);
 
     bothCard.click();
 
     expect(
-      component.formGroup.controls[component.dataCollectionControlKey].value
-    ).toBe(DataCollectionOption.ORGANIZERS_AND_COLLECTORS);
+      component.formGroup.controls[component.loiPermissionsControlKey].value
+    ).toBe(LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS);
   });
 });

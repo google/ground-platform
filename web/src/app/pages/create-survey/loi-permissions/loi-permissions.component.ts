@@ -18,42 +18,42 @@ import {Component} from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
 
 /** Options for radio buttons determining who can set where data is collected */
-export enum DataCollectionOption {
+export enum LoiPermissionsOption {
   SURVEY_ORGANIZERS = 'SURVEY_ORGANIZERS',
   DATA_COLLECTORS = 'DATA_COLLECTORS',
   ORGANIZERS_AND_COLLECTORS = 'ORGANIZERS_AND_COLLECTORS',
 }
 
 interface OptionCardConfig {
-  value: DataCollectionOption;
+  value: LoiPermissionsOption;
   label: string;
   description: string;
 }
 
 @Component({
-  selector: 'data-collection',
-  templateUrl: './data-collection.component.html',
-  styleUrls: ['./data-collection.component.scss'],
+  selector: 'loi-permissions',
+  templateUrl: './loi-permissions.component.html',
+  styleUrls: ['./loi-permissions.component.scss'],
 })
-export class DataCollectionComponent {
-  readonly dataCollectionControlKey = 'dataCollectionMethod';
+export class LoiPermissionsComponent {
+  readonly loiPermissionsControlKey = 'loiPermissionsMethod';
   formGroup: FormGroup;
 
-  dataCollectionOptions: OptionCardConfig[] = [
+  loiPermissionsOptions: OptionCardConfig[] = [
     {
-      value: DataCollectionOption.SURVEY_ORGANIZERS,
+      value: LoiPermissionsOption.SURVEY_ORGANIZERS,
       label: 'Survey organizers',
       description:
         'Data collectors collect data exclusively about locations of interest uploaded by you and other survey organizers.',
     },
     {
-      value: DataCollectionOption.DATA_COLLECTORS,
+      value: LoiPermissionsOption.DATA_COLLECTORS,
       label: 'Data collectors',
       description:
         'Data collectors suggest and collect data about new locations of interest as they discover them.',
     },
     {
-      value: DataCollectionOption.ORGANIZERS_AND_COLLECTORS,
+      value: LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS,
       label: 'Both',
       description:
         'Data collectors may collect data about locations of interest uploaded by survey organizers, or suggest new locations as needed.',
@@ -62,11 +62,11 @@ export class DataCollectionComponent {
 
   constructor() {
     this.formGroup = new FormBuilder().group({
-      [this.dataCollectionControlKey]: this.dataCollectionOptions[0].value,
+      [this.loiPermissionsControlKey]: this.loiPermissionsOptions[0].value,
     });
   }
 
-  dataCollectionOptionSelected(value: DataCollectionOption) {
-    this.formGroup.controls[this.dataCollectionControlKey].setValue(value);
+  loiPermissionsOptionSelected(value: LoiPermissionsOption) {
+    this.formGroup.controls[this.loiPermissionsControlKey].setValue(value);
   }
 }

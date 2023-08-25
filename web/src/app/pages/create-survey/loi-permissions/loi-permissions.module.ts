@@ -15,7 +15,7 @@
  */
 
 import {NgModule} from '@angular/core';
-import {DataCollectionComponent} from './data-collection.component';
+import {LoiPermissionsComponent} from './loi-permissions.component';
 import {MatButtonModule} from '@angular/material/button';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -24,7 +24,7 @@ import {CommonModule} from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
 
 @NgModule({
-  declarations: [DataCollectionComponent],
+  declarations: [LoiPermissionsComponent],
   imports: [
     CommonModule,
     MatButtonModule,
@@ -33,6 +33,6 @@ import {MatCardModule} from '@angular/material/card';
     MatRadioModule,
     ReactiveFormsModule,
   ],
-  exports: [DataCollectionComponent],
+  exports: [LoiPermissionsComponent],
 })
-export class DataCollectionModule {}
+export class LoiPermissionsModule {}
