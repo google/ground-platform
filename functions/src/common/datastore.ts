@@ -16,8 +16,38 @@
  */
 
 import * as functions from 'firebase-functions';
-import {firestore} from 'firebase-admin';
-import {GeoPoint} from 'firebase-admin/firestore';
+import { firestore } from 'firebase-admin';
+import { GeoPoint } from 'firebase-admin/firestore';
+
+/**
+ * Returns path to survey colection. This is a function for consistency with other path functions.
+ */
+export const surveys = () => 'surveys';
+
+/**
+ * Returns the path of survey doc with the specified id.
+ */
+export const survey = (surveyId: string) => surveys() + '/' + surveyId;
+
+/**
+ * Returns the path of the survey collection in the survey with the specified id.
+ */
+export const lois = (surveyId: string) => survey(surveyId) + '/lois';
+
+/**
+ * Returns the path of the LOI doc with the specified id.
+ */
+export const loi = (surveyId: string, loiId: string) => lois(surveyId) + '/' + loiId;
+
+/**
+ * Returns the path of the submissions collection in the survey with the specified id.
+ */
+export const submissions = (surveyId: string) => survey(surveyId) + '/submissions';
+
+/**
+ * Returns the path of the submission doc with the specified id.
+ */
+export const submission = (surveyId: string, submissionId: string) => submissions(surveyId) + '/' + submissionId;
 
 export class Datastore {
   private db_: firestore.Firestore;
@@ -31,10 +61,10 @@ export class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   async mergeUserProfile(user: functions.auth.UserRecord) {
-    const {uid, email, displayName, photoURL} = user;
+    const { uid, email, displayName, photoURL } = user;
     await this.db_
       .doc(`users/${uid}`)
-      .set({email, displayName, photoURL}, {merge: true});
+      .set({ email, displayName, photoURL }, { merge: true });
   }
 
   async fetch_(
@@ -53,41 +83,29 @@ export class Datastore {
   }
 
   fetchSurvey(surveyId: string) {
-    return this.db_.doc(`surveys/${surveyId}`).get();
-  }
-
-  fetchRecord(surveyId: string, loiId: string, recordId: string) {
-    return this.fetchDoc_(
-      `surveys/${surveyId}/lois/${loiId}/records/${recordId}`
-    );
+    return this.db_.doc(survey(surveyId)).get();
   }
 
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
     return this.db_
-      .collection(`surveys/${surveyId}/submissions`)
+      .collection(submissions(surveyId))
       .where('jobId', '==', jobId)
       .get();
   }
 
   fetchLocationOfInterest(surveyId: string, loiId: string) {
-    return this.fetchDoc_(`surveys/${surveyId}/lois/${loiId}`);
+    return this.fetchDoc_(loi(surveyId, loiId));
   }
 
   fetchLocationsOfInterestByJobId(surveyId: string, jobId: string) {
     return this.db_
-      .collection(`surveys/${surveyId}/lois`)
+      .collection(lois(surveyId))
       .where('jobId', '==', jobId)
       .get();
   }
 
-  fetchTask(surveyId: string, loiTypeId: string, taskId: string) {
-    return this.fetchDoc_(
-      `surveys/${surveyId}/loiTypes/${loiTypeId}/tasks/${taskId}`
-    );
-  }
-
   fetchSheetsConfig(surveyId: string) {
-    return this.fetchDoc_(`surveys/${surveyId}/sheets/config`);
+    return this.fetchDoc_(`${survey(surveyId)}/sheets/config`);
   }
 
   async insertLocationOfInterest(surveyId: string, loi: any) {
@@ -95,24 +113,24 @@ export class Datastore {
       ...loi,
       geometry: Datastore.toFirestoreMap(loi.geometry),
     };
-    const docRef = this.db_.collection('surveys').doc(surveyId);
+    const docRef = this.db_.doc(survey(surveyId));
     const doc = await docRef.get();
     if (!doc.exists) {
-      throw new Error(`/surveys/${surveyId} not found`);
+      throw new Error(`${survey(surveyId)} not found`);
     }
     await docRef.collection('lois').add(loiDoc);
   }
 
   async countSubmissionsForLoi(surveyId: string, loiId: string): Promise<number> {
-    const submissionsRef = this.db_.collection(`surveys/${surveyId}/submissions`);
+    const submissionsRef = this.db_.collection(submissions(surveyId));
     const submissionsForLoiQuery = submissionsRef.where("loiId", "==", loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }
-  
-  async updateSubmissionCount(surveyId: string, loiId: string, count:number) {
-    const loiRef = this.db_.doc(`surveys/${surveyId}/lois/${loiId}`);
-    await loiRef.update({submissionCount: count});
+
+  async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
+    const loiRef = this.db_.doc(loi(surveyId, loiId));
+    await loiRef.update({ submissionCount: count });
   }
 
   static toFirestoreMap(geometry: any) {
