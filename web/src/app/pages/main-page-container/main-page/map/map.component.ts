@@ -361,7 +361,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.newLocationOfInterestToReposition = new GenericLocationOfInterest(
       id,
       jobId,
-      new Point(new Coordinate(event.latLng!.lat(), event.latLng!.lng())),
+      new Point(new Coordinate(event.latLng!.lng(), event.latLng!.lat())),
       ImmutableMap<string, string | number>()
     );
   }
