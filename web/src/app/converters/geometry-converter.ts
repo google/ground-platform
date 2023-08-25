@@ -113,7 +113,7 @@ function toCoordinate(coordinates?: any): Coordinate {
   if (!(coordinates && coordinates instanceof GeoPoint)) {
     throw new Error(`Expected GeoPoint, got ${stringify(coordinates)}`);
   }
-  return new Coordinate(coordinates.latitude, coordinates.longitude);
+  return new Coordinate(coordinates.longitude, coordinates.latitude);
 }
 
 function toLinearRing(coordinateList: List<any>): LinearRing {
