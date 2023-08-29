@@ -25,6 +25,7 @@ import {toGeometry, GEOMETRY_TYPES} from './geometry-converter';
 import {GeoPoint} from 'firebase/firestore';
 import {GeometryType} from 'app/models/geometry/geometry';
 
+// Pairs of (latitude, longitude).
 type Path = Array<[number, number]>;
 
 const x = -42.121;
@@ -76,7 +77,7 @@ function multiPolygon(...polygons: Array<Polygon>): MultiPolygon {
 }
 
 function coordinateList(path: Path): List<Coordinate> {
-  return List(path.map(it => new Coordinate(it[0], it[1])));
+  return List(path.map(it => new Coordinate(it[1], it[0])));
 }
 
 function indexedGeoPointMap(path: Path): {} {
@@ -99,7 +100,7 @@ describe('geometry-converter.ts', () => {
         expectation: 'converts map to Point',
         input: {
           type: GEOMETRY_TYPES.get(GeometryType.POINT),
-          coordinates: new GeoPoint(x, y),
+          coordinates: new GeoPoint(y, x),
         },
         expectedOutput: point(x, y),
       },
@@ -148,7 +149,7 @@ describe('geometry-converter.ts', () => {
         expectation: 'fails on unknown type',
         input: {
           type: 'Squircle',
-          coordinates: new GeoPoint(x, y),
+          coordinates: new GeoPoint(y, x),
         },
       },
       {

@@ -4,7 +4,7 @@
     "module": "CommonJS",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "lib",
+    "outDir": "dist",
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
@@ -13,7 +13,7 @@
       "@/*": [
         "src/*"
       ]
-    }    
+    }
   },
   "compileOnSave": true,
   "include": [
