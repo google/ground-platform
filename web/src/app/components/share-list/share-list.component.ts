@@ -21,6 +21,7 @@ import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Subscription, take} from 'rxjs';
+import {Map} from 'immutable';
 
 @Component({
   selector: 'ground-share-list',
@@ -45,7 +46,7 @@ export class ShareListComponent {
     this.subscription.add(
       this.surveyService
         .getActiveSurvey$()
-        .subscribe(p => this.onSurveyLoaded(p))
+        .subscribe(survey => this.onSurveyLoaded(survey))
     );
   }
 
@@ -70,6 +71,14 @@ export class ShareListComponent {
       // Update data collector role.
       this.acl[index] = new AclEntry(this.acl[index].email, event.value);
     }
-    // this.updateChangeState();
+
+    this.surveyService.updateAcl(
+      this.surveyId!,
+      Map(this.acl.map(entry => [entry.email, entry.role]))
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
