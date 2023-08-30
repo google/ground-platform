@@ -17,12 +17,14 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
-import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
 import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
+import {ShareListModule} from 'app/components/share-list/share-list.module';
+import {MatCardModule} from '@angular/material/card';
+import {ShareSurveyComponent} from './share-survey.component';
 
 @NgModule({
   declarations: [ShareSurveyComponent],
@@ -33,8 +35,10 @@ import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module
     MatButtonModule,
     MatIconModule,
     MatInputModule,
+    MatCardModule,
     MatDialogModule,
     ShareDialogModule,
+    ShareListModule,
   ],
   exports: [ShareSurveyComponent],
 })
