@@ -488,7 +488,7 @@ describe('MapComponent', () => {
       new GenericLocationOfInterest(
         poi1.id,
         poi1.jobId,
-        new Point(new Coordinate(2.23, 5.56)),
+        new Point(new Coordinate(5.56, 2.23)),
         Map()
       )
     );

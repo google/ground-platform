@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import {firebaseConfig} from 'environments/.firebase-config';
-import {Env} from 'environments/environment-enums';
+.role-select {
+  margin: -4px 0;
+}
 
-export const environment = {
-  production: false,
-  googleMapsApiKey: firebaseConfig.apiKey,
-  firebase: firebaseConfig,
-  cloudFunctionsUrl: `https://${firebaseConfig.projectId}.web.app`,
-  offlineBaseMapSources: [],
-  useEmulators: false,
-  env: Env.Dev,
-};
+tr {
+  border-bottom: 1px black solid;
+}

@@ -30,6 +30,7 @@ import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
 import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
+import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
 
 const routes: Routes = [
   {
@@ -69,6 +70,7 @@ const routes: Routes = [
     children: [
       {path: 'job/:id', component: EditJobComponent},
       {path: 'survey', component: SurveyDetailsComponent},
+      {path: 'share', component: ShareSurveyComponent},
     ],
   },
 ];

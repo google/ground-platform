@@ -30,13 +30,7 @@ import {Survey} from 'app/models/survey.model';
 import {MatSelectChange} from '@angular/material/select';
 import {take} from 'rxjs/operators';
 import {Map} from 'immutable';
-
-/**
- * Represents a single entry in the sharing dialog.
- */
-class AclEntry {
-  constructor(readonly email: string, readonly role: Role) {}
-}
+import {AclEntry} from 'app/models/acl-entry.model';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -103,6 +97,8 @@ export class ShareDialogComponent {
 
     // Clear "Add data collector" field.
     this.addUserForm.setValue({email: '', role: Role.DATA_COLLECTOR});
+
+    this.onSaveClicked();
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
@@ -121,9 +117,9 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Close the dialog when "Done" is clicked.
+   * Close the dialog when "Cancel" is clicked.
    */
-  onDoneClicked(): void {
+  onCancelClicked(): void {
     this.dialogRef.close();
   }
 

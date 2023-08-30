@@ -1,0 +1,15 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  $color-config: mat.get-color-config($theme);
+  $primary: map.get($color-config, 'primary');
+
+  .mat-flat-button {
+    background-color: map.get($primary, 100);
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+}

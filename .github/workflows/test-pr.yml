@@ -21,9 +21,10 @@ name: Run tests
 on:
   pull_request:
     paths:
+      - "functions/**"
       - "web/**"
 jobs:
-  test-coverage:
+  web-test-coverage:
     name: web
     runs-on: ubuntu-latest
     defaults:
@@ -52,3 +53,22 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  test-functions:
+    name: functions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./functions
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Run Jasmine tests
+        run: npm run test

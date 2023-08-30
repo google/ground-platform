@@ -19,7 +19,7 @@ import {CommonModule} from '@angular/common';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {JobDetailsModule} from './job-details/job-details.module';
 import {SurveyDetailsModule} from './survey-details/survey-details.module';
-import {ShareSurveyModule} from './share-survey/share-survey.module';
+import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
 import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';

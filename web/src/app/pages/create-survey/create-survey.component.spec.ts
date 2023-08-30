@@ -33,14 +33,17 @@ import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-detai
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {JobService} from 'app/services/job/job.service';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
-import {ShareSurveyComponent} from './share-survey/share-survey.component';
+import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {MatDialogModule} from '@angular/material/dialog';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {LocationOfInterest} from 'app/models/loi.model';
+import Immutable from 'immutable';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -49,8 +52,10 @@ describe('CreateSurveyComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
+  let loisActiveSurvey$: Immutable.List<LocationOfInterest>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
+  let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
 
   const surveyId = 'survey001';
   const newSurveyId = 'survey002';
@@ -140,6 +145,18 @@ describe('CreateSurveyComponent', () => {
     ]);
     jobServiceSpy.createNewJob.and.returnValue(newJob);
 
+    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+      'LocationOfInterestService',
+      ['getLocationsOfInterest$']
+    );
+    loisActiveSurvey$ = Immutable.List();
+    loiServiceSpy.getLocationsOfInterest$.and.returnValue(
+      new Observable(observer => {
+        observer.next(loisActiveSurvey$);
+        observer.complete();
+      })
+    );
+
     TestBed.configureTestingModule({
       imports: [MatDialogModule],
       declarations: [
@@ -152,6 +169,7 @@ describe('CreateSurveyComponent', () => {
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
         {provide: JobService, useValue: jobServiceSpy},
+        {provide: LocationOfInterestService, useValue: loiServiceSpy},
         {provide: ActivatedRoute, useValue: route},
       ],
     }).compileComponents();
