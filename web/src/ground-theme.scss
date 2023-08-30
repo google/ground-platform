@@ -24,6 +24,7 @@
 @use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
 @use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
 @use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
+@use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
 @use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
@@ -82,6 +83,7 @@ $foreground: map-get($theme, foreground);
 @include inline-editor.theme($theme);
 @include job-list-item.theme($theme);
 @include share-dialog.theme($theme);
+@include share-survey.theme($theme);
 @include sign-in-page.theme($theme);
 @include survey-list.theme($theme);
 @include user-avatar.theme($theme);
