@@ -133,7 +133,7 @@ describe('EditSurveyComponent', () => {
         {
           buttonSelector: '#share-button',
           expectedLabel: 'Sharing',
-          expectedRouterLink: './survey',
+          expectedRouterLink: './share',
         },
         {
           buttonSelector: '#job-0',
