@@ -19,8 +19,8 @@
  * at most one role.
  */
 export enum Role {
-  OWNER,
-  SURVEY_ORGANIZER,
-  DATA_COLLECTOR,
-  VIEWER,
+  OWNER = 'OWNER',
+  SURVEY_ORGANIZER = 'SURVEY_ORGANIZER',
+  DATA_COLLECTOR = 'DATA_COLLECTOR',
+  VIEWER = 'VIEWER',
 }

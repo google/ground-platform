@@ -83,22 +83,15 @@ export class FirebaseDataConverter {
     );
   }
 
-  static toRole(roleString: string) {
+  static toRole(roleString: string): Role {
     // Compatibility for older versions of Ground db.
-    roleString = roleString.replace(/-/g, '_');
-    switch (roleString) {
-      case 'owner':
-        return Role.OWNER;
-      case 'survey_organizer':
-        return Role.SURVEY_ORGANIZER;
-      case 'data_collector':
-        return Role.DATA_COLLECTOR;
-      case 'viewer':
-        return Role.VIEWER;
-      default:
-        console.log('User has unsupported role: ', roleString);
-        return Role.VIEWER;
+    roleString = roleString.replace(/-/g, '_').toUpperCase();
+    let role: Role | undefined = Role[roleString as keyof typeof Role];
+    if (!role) {
+      console.log('User has unsupported role: ', roleString);
+      role = Role.VIEWER;
     }
+    return role;
   }
 
   static newSurveyJS(
@@ -486,6 +479,6 @@ export class FirebaseDataConverter {
    * @param role the Role to be converted.
    */
   static toRoleId(role: Role): string {
-    return Role[role].toLowerCase();
+    return Role[role].toUpperCase();
   }
 }
