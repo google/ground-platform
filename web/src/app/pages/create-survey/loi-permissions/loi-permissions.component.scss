@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-/**
- * Represents a possible role in a survey's ACLs. Each user can be assigned
- * at most one role.
- */
-export enum Role {
-  OWNER = 'OWNER',
-  SURVEY_ORGANIZER = 'SURVEY_ORGANIZER',
-  DATA_COLLECTOR = 'DATA_COLLECTOR',
-  VIEWER = 'VIEWER',
+.title {
+  font-family: 'Google Sans';
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 36px;
+  margin-top: 45px;
+}
+
+.description {
+  font-family: 'Google Sans Text';
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  margin-bottom: 45px;
 }
