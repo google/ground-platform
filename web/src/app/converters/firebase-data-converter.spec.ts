@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { FirebaseDataConverter } from './firebase-data-converter';
-import { Job } from 'app/models/job.model';
-import { List, Map } from 'immutable';
-import { Option } from 'app/models/task/option.model';
-import { Task, TaskType } from 'app/models/task/task.model';
+import {FirebaseDataConverter} from './firebase-data-converter';
+import {Job} from 'app/models/job.model';
+import {List, Map} from 'immutable';
+import {Option} from 'app/models/task/option.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {
   MultipleChoice,
   Cardinality,
 } from 'app/models/task/multiple-choice.model';
-import { Timestamp } from 'firebase/firestore';
-import { Role } from 'app/models/role.model';
+import {Timestamp} from 'firebase/firestore';
+import {Role} from 'app/models/role.model';
 
 class MockFirebaseData {
   static submission001 = {
@@ -147,22 +147,30 @@ describe('FirebaseDataConverter', () => {
 
   describe('toRole()', () => {
     it('converts enums to strings', () => {
-      expect(FirebaseDataConverter.toRoleId(Role.OWNER)).toEqual("OWNER");
-      expect(FirebaseDataConverter.toRoleId(Role.SURVEY_ORGANIZER)).toEqual("SURVEY_ORGANIZER");
-      expect(FirebaseDataConverter.toRoleId(Role.DATA_COLLECTOR)).toEqual("DATA_COLLECTOR");
-      expect(FirebaseDataConverter.toRoleId(Role.VIEWER)).toEqual("VIEWER");
+      expect(FirebaseDataConverter.toRoleId(Role.OWNER)).toEqual('OWNER');
+      expect(FirebaseDataConverter.toRoleId(Role.SURVEY_ORGANIZER)).toEqual(
+        'SURVEY_ORGANIZER'
+      );
+      expect(FirebaseDataConverter.toRoleId(Role.DATA_COLLECTOR)).toEqual(
+        'DATA_COLLECTOR'
+      );
+      expect(FirebaseDataConverter.toRoleId(Role.VIEWER)).toEqual('VIEWER');
     });
-   
+
     it('converts strings to enums', () => {
-      expect(FirebaseDataConverter.toRole("OWNER")).toEqual(Role.OWNER);
-      expect(FirebaseDataConverter.toRole("SURVEY_ORGANIZER")).toEqual(Role.SURVEY_ORGANIZER);
-      expect(FirebaseDataConverter.toRole("DATA_COLLECTOR")).toEqual(Role.DATA_COLLECTOR);
-      expect(FirebaseDataConverter.toRole("OWNVIEWERER")).toEqual(Role.VIEWER);
+      expect(FirebaseDataConverter.toRole('OWNER')).toEqual(Role.OWNER);
+      expect(FirebaseDataConverter.toRole('SURVEY_ORGANIZER')).toEqual(
+        Role.SURVEY_ORGANIZER
+      );
+      expect(FirebaseDataConverter.toRole('DATA_COLLECTOR')).toEqual(
+        Role.DATA_COLLECTOR
+      );
+      expect(FirebaseDataConverter.toRole('OWNVIEWERER')).toEqual(Role.VIEWER);
     });
 
     it('returns VIEWER on unrecognized role', () => {
       expect(
-        FirebaseDataConverter.toRole("some_rule_i_dont_recognize")
+        FirebaseDataConverter.toRole('some_rule_i_dont_recognize')
       ).toEqual(Role.VIEWER);
     });
   });
