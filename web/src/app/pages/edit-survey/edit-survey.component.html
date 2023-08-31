@@ -26,7 +26,7 @@
         <span>Survey</span>
       </a>
 
-      <a mat-list-item id="share-button" [routerLink]="['./survey']">
+      <a mat-list-item id="share-button" [routerLink]="['./share']">
         <mat-icon class="material-symbols-outlined button-icon">group</mat-icon>
         <span>Sharing</span>
       </a>
@@ -47,7 +47,9 @@
     </mat-nav-list>
 
     <div class="card">
-      <router-outlet></router-outlet>
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
     </div>
   </div>
 </div>

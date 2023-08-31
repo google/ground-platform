@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-/**
- * Represents a possible role in a survey's ACLs. Each user can be assigned
- * at most one role.
- */
-export enum Role {
-  OWNER = 'OWNER',
-  SURVEY_ORGANIZER = 'SURVEY_ORGANIZER',
-  DATA_COLLECTOR = 'DATA_COLLECTOR',
-  VIEWER = 'VIEWER',
+.role-select {
+  margin: -4px 0;
+}
+
+tr {
+  border-bottom: 1px black solid;
 }
