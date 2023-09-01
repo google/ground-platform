@@ -23,7 +23,7 @@ import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-i
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {TaskEditorModule} from './task-editor/task-editor.module';

@@ -28,7 +28,7 @@ import {SurveyListComponent} from './survey-list.component';
 import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {AclEntry} from 'app/models/acl-entry.model';

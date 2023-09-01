@@ -17,10 +17,6 @@
   .add-point-button:hover {
     background-color: map.get($primary, 500);
   }
-
-  .mat-button-toggle-checked {
-    background-color: map.get($primary, 500);
-  }
 }
 
 @mixin theme($theme) {

@@ -17,7 +17,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {DrawingToolsComponent} from './drawing-tools.component';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button'; // ?
+import {MatButtonModule} from '@angular/material/button'; // ?
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatExpansionModule} from '@angular/material/expansion';

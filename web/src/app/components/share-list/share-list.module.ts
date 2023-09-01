@@ -19,7 +19,7 @@ import {CommonModule} from '@angular/common';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {ShareListComponent} from './share-list.component';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {ReactiveFormsModule, FormsModule} from '@angular/forms';
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';

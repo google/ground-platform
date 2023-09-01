@@ -21,7 +21,7 @@ import {JobDetailsModule} from './job-details/job-details.module';
 import {SurveyDetailsModule} from './survey-details/survey-details.module';
 import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
 import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-details.module';
 import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';

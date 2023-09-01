@@ -19,7 +19,7 @@ import {NgModule} from '@angular/core';
 import {SidePanelComponent} from './side-panel.component';
 import {SubmissionDetailPanelComponent} from './submission-detail-panel/submission-detail-panel.component';
 import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';

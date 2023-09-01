@@ -23,7 +23,7 @@ import {
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
 import {SurveyService} from 'app/services/survey/survey.service';

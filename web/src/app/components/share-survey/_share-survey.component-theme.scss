@@ -5,7 +5,7 @@
   $color-config: mat.get-color-config($theme);
   $primary: map.get($color-config, 'primary');
 
-  .mat-flat-button {
+  .mat-mdc-unelevated-button {
     background-color: map.get($primary, 100);
   }
 }

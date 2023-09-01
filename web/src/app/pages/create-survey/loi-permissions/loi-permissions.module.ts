@@ -16,7 +16,7 @@
 
 import {NgModule} from '@angular/core';
 import {LoiPermissionsComponent} from './loi-permissions.component';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {ReactiveFormsModule} from '@angular/forms';
 import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';

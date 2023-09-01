@@ -19,7 +19,7 @@ import {JobDialogModule} from './job-dialog/job-dialog.module';
 import {DrawingToolsModule} from './drawing-tools/drawing-tools.module';
 import {MainPageComponent} from './main-page.component';
 import {MapModule} from './map/map.module';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
