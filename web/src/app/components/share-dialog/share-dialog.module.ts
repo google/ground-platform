@@ -24,13 +24,11 @@ import {MatInputModule} from '@angular/material/input';
 import {ReactiveFormsModule, FormsModule} from '@angular/forms';
 import {MatSelectModule} from '@angular/material/select';
 import {MatListModule} from '@angular/material/list';
-import {FlexLayoutModule} from '@angular/flex-layout';
 
 @NgModule({
   declarations: [ShareDialogComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,

@@ -23,7 +23,6 @@ import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
@@ -42,7 +41,6 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     InlineEditorModule,
     EditStyleButtonModule,
     MatInputModule,
-    FlexLayoutModule,
     MatButtonModule,
     TaskEditorModule,
     DragDropModule,

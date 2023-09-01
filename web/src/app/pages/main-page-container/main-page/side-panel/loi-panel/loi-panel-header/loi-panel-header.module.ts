@@ -23,7 +23,6 @@ import {MatMenuModule} from '@angular/material/menu';
 import {BrowserModule} from '@angular/platform-browser';
 import {MatDialogModule} from '@angular/material/dialog';
 import {LocationOfInterestPanelHeaderComponent} from './loi-panel-header.component';
-import {FlexLayoutModule} from '@angular/flex-layout';
 
 @NgModule({
   declarations: [LocationOfInterestPanelHeaderComponent],
@@ -36,7 +35,6 @@ import {FlexLayoutModule} from '@angular/flex-layout';
     MatButtonModule,
     MatMenuModule,
     MatDialogModule,
-    FlexLayoutModule,
   ],
   exports: [LocationOfInterestPanelHeaderComponent],
 })

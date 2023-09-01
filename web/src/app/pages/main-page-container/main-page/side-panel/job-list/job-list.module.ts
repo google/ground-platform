@@ -21,7 +21,6 @@ import {JobListItemModule} from 'app/components/job-list-item/job-list-item.modu
 import {MatListModule} from '@angular/material/list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {FlexLayoutModule} from '@angular/flex-layout';
 
 @NgModule({
   imports: [
@@ -30,7 +29,6 @@ import {FlexLayoutModule} from '@angular/flex-layout';
     JobListItemModule,
     MatButtonModule,
     MatIconModule,
-    FlexLayoutModule,
   ],
   exports: [JobListComponent],
   declarations: [JobListComponent],
