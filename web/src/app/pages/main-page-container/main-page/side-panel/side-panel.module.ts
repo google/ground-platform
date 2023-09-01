@@ -20,7 +20,7 @@ import {SidePanelComponent} from './side-panel.component';
 import {SubmissionDetailPanelComponent} from './submission-detail-panel/submission-detail-panel.component';
 import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
 import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
+import {MatCardModule} from '@angular/material/card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
 import {JobListModule} from './job-list/job-list.module';

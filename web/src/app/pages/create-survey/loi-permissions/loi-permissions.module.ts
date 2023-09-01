@@ -21,7 +21,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
 import {CommonModule} from '@angular/common';
-import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
+import {MatCardModule} from '@angular/material/card';
 
 @NgModule({
   declarations: [LoiPermissionsComponent],

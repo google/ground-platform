@@ -23,7 +23,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
 import {ShareListModule} from 'app/components/share-list/share-list.module';
-import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
+import {MatCardModule} from '@angular/material/card';
 import {ShareSurveyComponent} from './share-survey.component';
 
 @NgModule({

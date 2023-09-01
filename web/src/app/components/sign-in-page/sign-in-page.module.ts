@@ -20,7 +20,7 @@ import {HeaderModule} from 'app/components/header/header.module';
 import {FirebaseUIModule} from 'firebaseui-angular';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
+import {MatCardModule} from '@angular/material/card';
 import {NgModule} from '@angular/core';
 import {SignInPageComponent} from './sign-in-page.component';
 
