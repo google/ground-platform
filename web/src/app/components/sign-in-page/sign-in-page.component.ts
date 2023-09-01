@@ -22,6 +22,7 @@ import {AuthService} from 'app/services/auth/auth.service';
 import {filter} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import { environment } from 'environments/environment';
 
 @Component({
   templateUrl: './sign-in-page.component.html',
@@ -34,12 +35,12 @@ export class SignInPageComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {  
     this.subscription.add(
       // TODO(#545): Redirect to original URL on success.
       this.authService
         .isAuthenticated$()
-        .pipe(filter(isAuth => isAuth))
+        .pipe(filter(isAuth => isAuth || environment.useEmulators))
         .subscribe(() => this.navigationService.navigateToSurveyList())
     );
   }
