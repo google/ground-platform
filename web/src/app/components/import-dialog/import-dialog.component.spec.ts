@@ -19,15 +19,15 @@ import {waitForAsync, ComponentFixture, TestBed} from '@angular/core/testing';
 import {DataImportService} from 'app/services/data-import/data-import.service';
 import {FileUploadModule} from '@iplab/ngx-file-upload';
 import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialogModule as MatDialogModule,
+  MatLegacyDialogRef as MatDialogRef,
+} from '@angular/material/legacy-dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {NEVER} from 'rxjs';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ReactiveFormsModule} from '@angular/forms';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
 
 describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;

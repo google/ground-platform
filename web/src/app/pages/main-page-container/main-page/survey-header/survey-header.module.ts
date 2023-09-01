@@ -18,9 +18,9 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {HeaderModule} from 'app/components/header/header.module';
 import {SurveyHeaderComponent} from './survey-header.component';
-import {MatButtonModule} from '@angular/material/button';
+import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
 import {MatIconModule} from '@angular/material/icon';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
 

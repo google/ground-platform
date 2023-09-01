@@ -21,7 +21,7 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {Job} from 'app/models/job.model';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';

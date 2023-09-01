@@ -23,15 +23,15 @@ import {
   MatTreeHarness,
   MatTreeNodeHarness,
 } from '@angular/material/tree/testing';
-import {MatButtonHarness} from '@angular/material/button/testing';
+import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {JobListItemComponent} from './job-list-item.component';
 import {MatIconModule} from '@angular/material/icon';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatListModule} from '@angular/material/list';
+import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {of, Subject} from 'rxjs';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {Router} from '@angular/router';
 import {MatTreeModule} from '@angular/material/tree';
 import {CdkTreeModule} from '@angular/cdk/tree';

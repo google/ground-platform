@@ -22,7 +22,10 @@ import {
   fakeAsync,
 } from '@angular/core/testing';
 import {MapComponent} from './map.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {
+  MatLegacyDialog as MatDialog,
+  MatLegacyDialogRef as MatDialogRef,
+} from '@angular/material/legacy-dialog';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';

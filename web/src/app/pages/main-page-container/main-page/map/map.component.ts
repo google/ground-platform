@@ -40,7 +40,7 @@ import {List, Map as ImmutableMap} from 'immutable';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {GoogleMap} from '@angular/google-maps';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,

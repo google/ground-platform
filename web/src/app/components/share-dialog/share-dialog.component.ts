@@ -15,7 +15,7 @@
  */
 
 import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {
   Validators,
   FormControl,
@@ -27,7 +27,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {Role} from 'app/models/role.model';
 import {Subscription} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
-import {MatSelectChange} from '@angular/material/select';
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 import {take} from 'rxjs/operators';
 import {Map} from 'immutable';
 import {AclEntry} from 'app/models/acl-entry.model';

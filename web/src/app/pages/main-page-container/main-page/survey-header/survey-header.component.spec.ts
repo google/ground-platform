@@ -19,7 +19,7 @@ import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.mod
 import {SurveyHeaderComponent} from './survey-header.component';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {MatIconModule} from '@angular/material/icon';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {NEVER} from 'rxjs';
 import {Router} from '@angular/router';
 
