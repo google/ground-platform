@@ -44,7 +44,7 @@ import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
-import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';

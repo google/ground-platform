@@ -28,7 +28,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {TaskEditorModule} from './task-editor/task-editor.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 @NgModule({
   declarations: [JobDialogComponent, ConfirmationDialogComponent],

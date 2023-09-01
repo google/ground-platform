@@ -32,7 +32,7 @@ import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyCheckboxModule as MatCheckboxModule} from '@angular/material/legacy-checkbox';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NEVER} from 'rxjs';
 
