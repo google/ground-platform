@@ -22,7 +22,6 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {CommonModule} from '@angular/common';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
@@ -36,7 +35,6 @@ describe('OptionEditorComponent', () => {
       imports: [
         CommonModule,
         BrowserAnimationsModule,
-        FlexLayoutModule,
         MatIconModule,
         MatFormFieldModule,
         FormsModule,

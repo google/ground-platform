@@ -20,8 +20,8 @@
 <mat-dialog-content>
   <color-circle (onChange)="handleColorChange($event)"> </color-circle>
 </mat-dialog-content>
-<mat-dialog-actions fxLayout fxLayoutAlign="end" class="action-dialog">
-  <div fxLayoutAlign="end">
+<mat-dialog-actions class="action-dialog">
+  <div>
     <button type="button" mat-raised-button (click)="close()">Cancel</button>
     <button color="primary" mat-raised-button type="submit" (click)="onSave()">
       Apply

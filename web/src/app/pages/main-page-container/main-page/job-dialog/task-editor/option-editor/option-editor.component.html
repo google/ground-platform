@@ -15,43 +15,38 @@
 -->
 
 <form [formGroup]="optionGroup">
-  <div fxLayout fxLayoutGap="15px">
+  <div class="option-content">
     <mat-icon cdkDragHandle class="drag-icon">drag_indicator</mat-icon>
     <mat-icon class="dot">radio_button_unchecked</mat-icon>
-    <div fxFlex>
-      <mat-form-field class="task-option">
-        <mat-label>Option</mat-label>
-        <input
-          #optionInput
-          matInput
-          formControlName="label"
-          autocomplete="off"
-          (blur)="onLabelBlur()"
-        />
-        <mat-error *ngIf="labelControl.touched && labelControl.invalid">
-          <ng-container *ngIf="labelControl.getError('required')">
-            Option is required
-          </ng-container>
-        </mat-error>
-      </mat-form-field>
-    </div>
-    <div fxFlex>
-      <mat-form-field class="code-option">
-        <mat-label>Code</mat-label>
-        <input
-          matInput
-          formControlName="code"
-          autocomplete="off"
-          (blur)="onCodeBlur()"
-        />
-      </mat-form-field>
-    </div>
+    <mat-form-field class="task-option">
+      <mat-label>Option</mat-label>
+      <input
+        #optionInput
+        matInput
+        formControlName="label"
+        autocomplete="off"
+        (blur)="onLabelBlur()"
+      />
+      <mat-error *ngIf="labelControl.touched && labelControl.invalid">
+        <ng-container *ngIf="labelControl.getError('required')">
+          Option is required
+        </ng-container>
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="code-option">
+      <mat-label>Code</mat-label>
+      <input
+        matInput
+        formControlName="code"
+        autocomplete="off"
+        (blur)="onCodeBlur()"
+      />
+    </mat-form-field>
     <button
       *ngIf="index"
       tabindex="-1"
       mat-icon-button
       (click)="onDeleteOption(index)"
-      fxFlexAlign="center"
       matTooltip="Delete Option"
     >
       <mat-icon>close</mat-icon>
