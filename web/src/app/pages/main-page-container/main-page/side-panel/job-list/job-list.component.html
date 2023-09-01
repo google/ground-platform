@@ -17,7 +17,6 @@ limitations under the License.
 <mat-list
   *ngIf="jobs$ | async as jobs"
   role="list"
-  fxLayoutRow
   class="jobs"
 >
   <ground-job-list-item
@@ -26,7 +25,6 @@ limitations under the License.
   ></ground-job-list-item>
   <div *ngIf="surveyService.canManageSurvey()">
     <button
-      fxFill
       mat-stroked-button
       color="primary"
       class="add-job-btn"

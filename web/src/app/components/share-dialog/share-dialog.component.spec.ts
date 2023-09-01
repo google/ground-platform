@@ -21,7 +21,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatListModule} from '@angular/material/list';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -38,7 +37,6 @@ describe('ShareDialogComponent', () => {
       declarations: [ShareDialogComponent],
       imports: [
         NoopAnimationsModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatDialogModule,
         MatFormFieldModule,

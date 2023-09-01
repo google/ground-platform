@@ -16,7 +16,6 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {HeaderModule} from 'app/components/header/header.module';
 import {SurveyHeaderComponent} from './survey-header.component';
 import {MatButtonModule} from '@angular/material/button';
@@ -29,7 +28,6 @@ import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module
   declarations: [SurveyHeaderComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     HeaderModule,
     MatButtonModule,
     MatIconModule,

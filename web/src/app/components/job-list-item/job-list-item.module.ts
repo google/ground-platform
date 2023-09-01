@@ -15,7 +15,6 @@
  */
 
 import {BrowserModule} from '@angular/platform-browser';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {ImportDialogModule} from 'app/components/import-dialog/import-dialog.module';
 import {NgModule} from '@angular/core';
 import {JobListItemComponent} from './job-list-item.component';
@@ -31,7 +30,6 @@ import {CdkTreeModule} from '@angular/cdk/tree';
 @NgModule({
   imports: [
     BrowserModule,
-    FlexLayoutModule,
     ImportDialogModule,
     MatButtonModule,
     MatIconModule,

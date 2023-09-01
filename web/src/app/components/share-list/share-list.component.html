@@ -15,19 +15,17 @@
 -->
 
 <div *ngIf="acl && acl.length > 0">
-  <table mat-table role="list" fxFill>
+  <table mat-table role="list">
     <!-- TODO: Format list, role names, allow edit role, delete. -->
     <tr
       mat-row
       *ngFor="let entry of acl; let i = index"
       role="listitem"
-      fxLayout="row"
-      fxLayoutGap="8px"
     >
-      <td fxFlex="fill" fxFlexAlign="center">
+      <td>
         {{ entry.email }}
       </td>
-      <td class="user-role" fxFlexAlign="center">
+      <td class="user-role">
         <mat-form-field>
           <mat-select
             *ngIf="entry.role != roles.OWNER; else ownerText"
