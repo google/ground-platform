@@ -17,21 +17,19 @@
 <h1 mat-dialog-title>Share survey</h1>
 <h2>Who do you want to invite for the survey?</h2>
 <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
-  <div fxLayout="row" fxLayoutGap="8px">
-    <mat-form-field class="email-input" fxFlex="fill" fxFlexAlign="baseline">
-      <mat-label>Email address</mat-label>
-      <input matInput formControlName="email" autocomplete="off" />
-    </mat-form-field>
-    <mat-form-field fxFlexAlign="baseline">
-      <mat-select formControlName="role">
-        <mat-option
-          *ngFor="let option of ROLE_OPTIONS"
-          [value]="option.value"
-          >{{ option.label }}</mat-option
-        >
-      </mat-select>
-    </mat-form-field>
-  </div>
+  <mat-form-field class="email-input">
+    <mat-label>Email address</mat-label>
+    <input matInput formControlName="email" autocomplete="off" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-select formControlName="role">
+      <mat-option
+        *ngFor="let option of ROLE_OPTIONS"
+        [value]="option.value"
+        >{{ option.label }}</mat-option
+      >
+    </mat-select>
+  </mat-form-field>
 </form>
 <div mat-dialog-actions align="end">
   <button mat-button mat-flat-button (click)="onCancelClicked()">

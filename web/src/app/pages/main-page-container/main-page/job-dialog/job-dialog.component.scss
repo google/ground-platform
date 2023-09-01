@@ -37,3 +37,13 @@
 .label-helper-text {
   padding-top: 5px;
 }
+
+.options {
+  display: flex;
+}
+
+.permissions, .default-style {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

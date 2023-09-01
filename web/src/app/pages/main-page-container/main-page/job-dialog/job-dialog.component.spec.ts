@@ -28,7 +28,6 @@ import {
 import {Router} from '@angular/router';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
@@ -61,7 +60,6 @@ describe('JobDialogComponent', () => {
         InlineEditorModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        FlexLayoutModule,
         MatFormFieldModule,
         MatInputModule,
         MatDialogModule,

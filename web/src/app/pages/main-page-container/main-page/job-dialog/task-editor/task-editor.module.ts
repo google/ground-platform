@@ -16,7 +16,6 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -32,7 +31,6 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
   declarations: [TaskEditorComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,

@@ -16,8 +16,8 @@
 
 <form [formGroup]="taskGroup" class="question-container">
   <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
-  <div fxLayout>
-    <mat-form-field class="question" appearance="fill" fxFlex="2 1 auto">
+  <div class="question-section">
+    <mat-form-field class="question" appearance="fill">
       <mat-label>Question</mat-label>
       <input
         #questionInput
@@ -33,7 +33,7 @@
         </ng-container>
       </mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex class="task-type" appearance="outline">
+    <mat-form-field class="task-type" appearance="outline">
       <mat-select
         formControlName="selectTaskOption"
         class="task-type-select"
@@ -66,7 +66,6 @@
           trackBy: trackByFn
         "
         cdkDrag
-        fxLayout
       >
         <ground-option-editor
           [label]="option.label"
@@ -88,8 +87,6 @@
     </div>
     <hr class="horizontal-line" />
     <div
-      fxLayout
-      fxLayoutAlign="end"
       (keydown.Tab)="onTaskBlur()"
       class="question-actions"
     >
