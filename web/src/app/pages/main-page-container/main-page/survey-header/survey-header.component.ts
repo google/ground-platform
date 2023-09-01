@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Subscription} from 'rxjs';
 import {NavigationService} from 'app/services/navigation/navigation.service';

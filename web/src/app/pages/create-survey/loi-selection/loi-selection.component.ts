@@ -21,7 +21,7 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Observable, map} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Survey} from 'app/models/survey.model';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 

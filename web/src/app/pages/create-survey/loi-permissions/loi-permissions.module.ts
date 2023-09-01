@@ -16,12 +16,12 @@
 
 import {NgModule} from '@angular/core';
 import {LoiPermissionsComponent} from './loi-permissions.component';
-import {MatButtonModule} from '@angular/material/button';
+import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
 import {ReactiveFormsModule} from '@angular/forms';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatRadioModule} from '@angular/material/radio';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
 import {CommonModule} from '@angular/common';
-import {MatCardModule} from '@angular/material/card';
+import {MatLegacyCardModule as MatCardModule} from '@angular/material/legacy-card';
 
 @NgModule({
   declarations: [LoiPermissionsComponent],

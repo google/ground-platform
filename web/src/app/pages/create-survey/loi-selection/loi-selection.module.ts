@@ -17,10 +17,10 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {LoiSelectionComponent} from './loi-selection.component';
-import {MatButtonModule} from '@angular/material/button';
+import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
 import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
 import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 
 @NgModule({
   declarations: [LoiSelectionComponent],

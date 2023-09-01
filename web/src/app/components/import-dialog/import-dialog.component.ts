@@ -17,7 +17,7 @@
 import {Component, Inject, NgZone} from '@angular/core';
 import {DataImportService} from 'app/services/data-import/data-import.service';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {NotificationService} from 'app/services/notification/notification.service';
 
 @Component({

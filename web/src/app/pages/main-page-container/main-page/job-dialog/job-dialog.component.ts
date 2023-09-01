@@ -22,7 +22,7 @@ import {
   QueryList,
   ViewChildren,
 } from '@angular/core';
-import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA} from '@angular/material/legacy-dialog';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {Job} from 'app/models/job.model';
 import {Subscription} from 'rxjs';

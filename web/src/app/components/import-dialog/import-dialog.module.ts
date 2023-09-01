@@ -17,11 +17,11 @@
 import {CommonModule} from '@angular/common';
 import {FileUploadModule} from '@iplab/ngx-file-upload';
 import {ImportDialogComponent} from './import-dialog.component';
-import {MatButtonModule} from '@angular/material/button';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {ReactiveFormsModule} from '@angular/forms';
 import {NgModule} from '@angular/core';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
 
 @NgModule({
   declarations: [ImportDialogComponent],

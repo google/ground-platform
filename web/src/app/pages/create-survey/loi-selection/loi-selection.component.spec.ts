@@ -31,7 +31,7 @@ import {LoiSelectionComponent} from './loi-selection.component';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
