@@ -16,14 +16,14 @@
 
 import {Component} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-title-dialog',
   templateUrl: './title-dialog.component.html',
-  styleUrls: ['./title-dialog.component.css'],
+  styleUrls: ['./title-dialog.component.scss'],
 })
 export class TitleDialogComponent {
   surveyTitleForm: FormGroup;

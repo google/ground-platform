@@ -16,12 +16,11 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {HeaderModule} from 'app/components/header/header.module';
 import {SurveyListComponent} from './survey-list.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatCardModule} from '@angular/material/card';
 
@@ -29,7 +28,6 @@ import {MatCardModule} from '@angular/material/card';
   declarations: [SurveyListComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     HeaderModule,
     MatButtonModule,
     MatIconModule,

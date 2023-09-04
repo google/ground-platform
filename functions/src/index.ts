@@ -17,35 +17,18 @@
 
 import 'module-alias/register';
 import * as functions from 'firebase-functions';
-import * as cors from 'cors';
-import {handleCreateUser} from '@/on-create-user';
-import {importCsvHandler} from '@/import-csv';
-import {importGeoJsonHandler} from '@/import-geojson';
-import {exportCsvHandler} from '@/export-csv';
-import {
-  onWriteSurveyHandler,
-  surveyPathTemplate,
-  loiPathTemplate,
-} from '@/on-write-survey';
+import { onHttpsRequest } from "./handlers";
+import { handleProfileRefresh } from '@/profile-refresh';
+import { importCsvHandler } from '@/import-csv';
+import { importGeoJsonHandler } from '@/import-geojson';
+import { exportCsvHandler } from '@/export-csv';
+import { surveyPathTemplate, loiPathTemplate, onWriteSurveyHandler } from '@/on-write-survey';
+import { onCall } from 'firebase-functions/v2/https';
+import { onWriteSubmissionHandler, submissionPathTemplate } from '@/on-write-submission';
 
-const corsOptions = {origin: true};
-const corsMiddleware = cors(corsOptions);
-
-function onHttpsRequest(handler: any) {
-  return functions.https.onRequest((req, res) =>
-    corsMiddleware(req, res, () =>
-      handler(req, res).catch((error: any) => onError(res, error))
-    )
-  );
-}
-
-function onError(res: any, err: any) {
-  console.error(err);
-  res.status(500).send('Internal error');
-}
-
-// Create user profile in database when user first logs in.
-export const onCreateUser = functions.auth.user().onCreate(handleCreateUser);
+export const profile = {
+  refresh: onCall((request) => handleProfileRefresh(request))
+};
 
 export const importCsv = onHttpsRequest(importCsvHandler);
 
@@ -60,3 +43,7 @@ export const onWriteSurvey = functions.firestore
 export const onWriteLoi = functions.firestore
   .document(loiPathTemplate)
   .onWrite(onWriteSurveyHandler);
+
+export const onWriteSubmission = functions.firestore
+  .document(submissionPathTemplate)
+  .onWrite(onWriteSubmissionHandler);

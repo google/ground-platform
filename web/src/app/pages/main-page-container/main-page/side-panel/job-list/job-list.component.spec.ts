@@ -24,7 +24,7 @@ import {Survey} from 'app/models/survey.model';
 import {of} from 'rxjs';
 import {Map} from 'immutable';
 import {Job} from 'app/models/job.model';
-import {MatListModule} from '@angular/material/list';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {Router} from '@angular/router';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';

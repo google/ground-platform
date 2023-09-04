@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-@import '_variables';
-
 .task-type {
   margin-left: 30px;
-  font-size: 12px;
+}
+
+.question-section {
+  display: flex;
 }
 
 .question {
   margin-top: 3px;
+  width: 100%;
 }
 
 .icon-task-type {
@@ -32,12 +34,13 @@
 }
 
 .question-actions {
+  display: flex;
   margin-bottom: 20px;
   margin-right: 10px;
+  justify-content: flex-end;
 }
 
 .vertical-divider {
-  border-left: 1px solid mat-color($foreground, divider);
   height: 30px;
   margin: 3px 20px;
 }
@@ -54,7 +57,6 @@
   border-radius: 10px;
   padding: 0px 10px;
   margin-top: 10px;
-  border: 1px mat-color($foreground, divider);
   border-style: solid;
 }
 
@@ -63,7 +65,6 @@
   margin: 0px auto;
   cursor: move;
   padding: 5px;
-  color: mat-color($foreground, icon);
   visibility: hidden;
 }
 
@@ -74,12 +75,4 @@
 
 .add-option {
   margin-left: 30px;
-}
-
-.task-type-select {
-  font-size: 14px;
-}
-
-.horizontal-line {
-  border: 1px solid mat-color($foreground, divider);
 }

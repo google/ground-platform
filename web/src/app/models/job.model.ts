@@ -16,8 +16,9 @@
 
 import {Task} from './task/task.model';
 import {Map} from 'immutable';
+import {Copiable} from './copiable';
 
-export class Job {
+export class Job extends Copiable {
   constructor(
     readonly id: string,
     readonly index: number,
@@ -25,10 +26,8 @@ export class Job {
     readonly name?: string,
     readonly tasks?: Map<string, Task>,
     readonly dataCollectorsCanAdd?: string[]
-  ) {}
-
-  withIndex(index: number): Job {
-    return {...this, index};
+  ) {
+    super();
   }
 
   copyWith(modifyObject: {[P in keyof this]?: this[P]}): this {

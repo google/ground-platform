@@ -40,13 +40,16 @@ export class NavigationService {
   static readonly SIGN_IN_SEGMENT = 'signin';
   static readonly SURVEYS_SEGMENT = 'surveys';
   static readonly SURVEYS_CREATE = 'create';
+  static readonly SURVEYS_EDIT = 'edit';
+  static readonly JOB_SEGMENT = 'job';
 
+  // TODO: remove this logic once the new side panel replaces the old one
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
       return SideNavMode.SUBMISSION;
     }
     if (params.get(NavigationService.LOI_ID_FRAGMENT_PARAM)) {
-      return SideNavMode.LOI;
+      return SideNavMode.JOB_LIST;
     }
     if (params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM)) {
       return SideNavMode.LOI_LIST;
@@ -232,6 +235,11 @@ export class NavigationService {
     const url = `${NavigationService.SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
     }/${NavigationService.SURVEYS_CREATE}`;
+    this.router.navigateByUrl(url, {replaceUrl: true});
+  }
+
+  navigateToEditSurvey(surveyId: string): void {
+    const url = `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`;
     this.router.navigateByUrl(url);
   }
 

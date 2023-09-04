@@ -22,32 +22,29 @@
 ></inline-editor>
 <hr class="horizontal-line" />
 <mat-dialog-content>
-  <div fxLayout="column" fxLayoutGap="10px">
-    <div fxLayout>
-      <div fxFlex>Permissions</div>
-      <div fxFlex>Default style</div>
+  <div class="options">
+    <div class="permissions">
+      Permissions
+      <label>
+        <mat-checkbox
+          [(ngModel)]="dataCollectorsCanAddPoints"
+          color="primary"
+        >
+          Data collectors may add points
+        </mat-checkbox>
+      </label>
+      <label>
+        <mat-checkbox
+          [(ngModel)]="dataCollectorsCanAddPolygons"
+          color="primary"
+        >
+          Data collectors may add polygons
+        </mat-checkbox>
+      </label>
     </div>
-    <div fxLayout>
-      <div fxLayout="column" fxLayoutGap="10px" fxFlex fxFlexAlign="center">
-        <label>
-          <mat-checkbox
-            [(ngModel)]="dataCollectorsCanAddPoints"
-            color="primary"
-          >
-            Data collectors may add points
-          </mat-checkbox>
-        </label>
-        <label>
-          <mat-checkbox
-            [(ngModel)]="dataCollectorsCanAddPolygons"
-            color="primary"
-          >
-            Data collectors may add polygons
-          </mat-checkbox>
-        </label>
-      </div>
+    <div class="default-style">
+      Default style
       <ground-edit-style-button
-        fxFlex
         [markerColor]="job!.color || defaultJobColor"
         (markerColorChange)="onMarkerColorChange($event)"
       ></ground-edit-style-button>
@@ -63,7 +60,6 @@
   <div cdkDropList (cdkDropListDropped)="drop($event)">
     <div
       *ngFor="let task of tasks; let i = index; trackBy: trackByFn"
-      fxLayout
       cdkDrag
     >
       <ground-task-editor
@@ -75,7 +71,6 @@
         [taskCount]="tasks.size"
         (update)="onTaskUpdate($event, i)"
         (delete)="onTaskDelete(i)"
-        fxFlex="2 1 auto"
       >
       </ground-task-editor>
     </div>
@@ -85,8 +80,8 @@
     <span class="link-add-question">Add question</span>
   </button>
 </mat-dialog-content>
-<mat-dialog-actions fxLayout fxLayoutAlign="end">
-  <div fxLayoutAlign="end">
+<mat-dialog-actions>
+  <div>
     <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-flat-button color="primary" type="submit" (click)="onSave()">
       Save

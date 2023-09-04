@@ -1,0 +1,34 @@
+.submission-detail-panel {
+  z-index: 1;
+  position: absolute;
+  margin: 10px;
+  max-width: 256px;
+  max-height: calc(100% - 50px);
+
+  .submission-detail-panel-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    .submission-detail-panel-title {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .submission-detail-panel-buttons {
+      display: flex;
+    }
+  }
+
+  .submission-detail-panel-time {
+    margin-bottom: 8px;
+  }
+
+  .submission-detail-panel-question {
+    margin-top: 8px;
+  }
+
+  .submission-detail-panel-response {
+    margin: 8px 0px;
+  }
+}

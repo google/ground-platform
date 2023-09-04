@@ -1,0 +1,42 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  // TODO: Use theme colors once GM3 is supported (or custom palette is defined)
+  // The colors defined below are a part of the GM3 color schemes, while the
+  // theme colors are based on M2 palettes.
+  .page {
+    background-color: #edeee9; /* M3/sys/light/surface-container */
+  }
+
+  .card {
+    background-color: #f9faf4; /* M3/sys/light/surface */
+  }
+}
+
+@mixin typography($theme) {
+  $typography-config: mat.get-typography-config($theme);
+
+  // TODO(amysorto): use typography-config once typography levels defined
+
+  .progress-bar-title {
+    font-weight: 500;
+  }
+
+  .card {
+    font-family: mat.font-family($typography-config);
+  }
+
+  .button-section {
+    font-weight: 400;
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+
+  $typography-config: mat.get-typography-config($theme);
+  @if $typography-config != null {
+    @include typography($theme);
+  }
+}

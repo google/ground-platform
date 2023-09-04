@@ -1,0 +1,55 @@
+<!--
+  Copyright 2023 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div class="page">
+  <ground-header> </ground-header>
+
+  <div class="container">
+    <mat-nav-list class="left-menu">
+      <a mat-list-item id="survey-button" [routerLink]="['./survey']">
+        <mat-icon class="material-symbols-outlined button-icon">
+          content_paste
+        </mat-icon>
+        <span>Survey</span>
+      </a>
+
+      <a mat-list-item id="share-button" [routerLink]="['./share']">
+        <mat-icon class="material-symbols-outlined button-icon">group</mat-icon>
+        <span>Sharing</span>
+      </a>
+
+      <h3 matSubheader class="item job-label">Jobs</h3>
+
+      <a
+        *ngFor="let job of jobs(); index as i"
+        id="job-{{ i }}"
+        mat-list-item
+        [routerLink]="jobRouterLink(job.id)"
+      >
+        <span matLine>{{ job.name }}</span>
+        <button mat-icon-button (click)="onMenu($event)">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </a>
+    </mat-nav-list>
+
+    <div class="card">
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+</div>

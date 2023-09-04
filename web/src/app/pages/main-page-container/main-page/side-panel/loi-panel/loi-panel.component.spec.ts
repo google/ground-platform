@@ -31,7 +31,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {Router} from '@angular/router';
-import {MatDialogModule} from '@angular/material/dialog';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Point} from 'app/models/geometry/point';
 import {Coordinate} from 'app/models/geometry/coordinate';

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-@import 'variables';
-
 .ground-title {
   margin-left: 12px;
-  font-family: 'Google Sans', 'Roboto', 'Arial', 'sans-serif';
-  font-size: 14pt;
-  font-weight: 300;
-  color: mat-color($foreground, secondary-text);
 }
 
 .header {
   padding: 16px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .header-actions {
+    display: flex;
+  }
 }
 
 .header div,

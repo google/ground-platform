@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
+import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Input, OnInit, OnDestroy} from '@angular/core';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Job} from 'app/models/job.model';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {environment} from 'environments/environment';
-import {Subscription} from 'rxjs';
+import {shareReplay, Subscription} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {List} from 'immutable';
 
 @Component({
   selector: 'ground-job-list-item',
@@ -40,18 +46,38 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   jobPinUrl: SafeUrl;
   readonly jobListItemActionsType = JobListItemActionsType;
   subscription: Subscription = new Subscription();
+  treeControl: FlatTreeControl<DynamicFlatNode>;
+  dataSource: DynamicDataSource;
+  lois: List<LocationOfInterest> = List();
+  submissionSubscriptions = new Map<string, Subscription>();
+
+  getLevel = (node: DynamicFlatNode) => node.level;
+  isExpandable = (node: DynamicFlatNode) => node.expandable;
+  hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
 
   constructor(
     private sanitizer: DomSanitizer,
     private dialogService: DialogService,
     private importDialog: MatDialog,
     private dataStoreService: DataStoreService,
+    private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
+    private submissionService: SubmissionService,
     readonly surveyService: SurveyService
   ) {
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
       groundPinService.getPinImageSource()
+    );
+    this.treeControl = new FlatTreeControl<DynamicFlatNode>(
+      this.getLevel,
+      this.isExpandable
+    );
+    this.dataSource = new DynamicDataSource(
+      this.treeControl,
+      this.submissionSubscriptions,
+      submissionService,
+      surveyService
     );
   }
 
@@ -68,6 +94,25 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       this.navigationService.getSurveyId$().subscribe(id => {
         this.surveyId = id;
       })
+    );
+
+    this.subscription.add(
+      this.loiService
+        .getLocationsOfInterest$()
+        .pipe(shareReplay())
+        .subscribe(lois => {
+          this.lois = lois.filter(loi => {
+            return loi.jobId === this.job?.id;
+          });
+          // Reset nodes for new loi values since we don't know how many lois
+          // were added or removed from the previous value
+          this.resetLoiNodes();
+          for (const loi of LocationOfInterestService.getLoisWithNames(
+            this.lois
+          )) {
+            this.addLoiNode(loi, loi.name!);
+          }
+        })
     );
   }
 
@@ -137,8 +182,45 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     this.navigationService.showLocationOfInterestList(this.job.id);
   }
 
+  addLoiNode(loi: LocationOfInterest, displayName: string) {
+    // Pushing does not cause the tree to rerender, but reassignment does.
+    this.dataSource.data = this.dataSource.data.concat([
+      new DynamicFlatNode(displayName, 0, true, loi),
+    ]);
+  }
+
+  resetLoiNodes() {
+    this.dataSource.data = [];
+    this.submissionSubscriptions.forEach(subscription => {
+      subscription.unsubscribe();
+    });
+  }
+
+  isSelectedLoi(node: DynamicFlatNode): boolean {
+    return node.loi?.id === this.loiId;
+  }
+
+  isLoiNode(node: DynamicFlatNode): boolean {
+    return node.loi ? true : false;
+  }
+
+  isSubmissionNode(node: DynamicFlatNode): boolean {
+    return node.submission ? true : false;
+  }
+
+  selectLoi(node: DynamicFlatNode) {
+    if (this.isLoiNode(node)) {
+      this.navigationService.selectLocationOfInterest(node.loi!.id);
+    } else if (this.isSubmissionNode(node)) {
+      this.submissionService.selectSubmission(node.submission!.id);
+    }
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.submissionSubscriptions.forEach(subscription => {
+      subscription.unsubscribe();
+    });
   }
 }
 

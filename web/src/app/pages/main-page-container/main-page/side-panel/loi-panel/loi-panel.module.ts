@@ -20,8 +20,8 @@ import {LocationOfInterestPanelComponent} from './loi-panel.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
-import {MatMenuModule} from '@angular/material/menu';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 
 import {LocationOfInterestPanelHeaderModule} from './loi-panel-header/loi-panel-header.module';
 

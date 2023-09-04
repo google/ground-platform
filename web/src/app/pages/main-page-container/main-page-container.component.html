@@ -18,7 +18,7 @@
   *ngIf="activeSurvey$ | async; else loading"
 ></ground-main-page>
 <ng-template #loading>
-  <div fxLayout="row" fxLayoutAlign="center center" fxFill>
+  <div class="progress-spinner">
     <mat-spinner mode="indeterminate"></mat-spinner>
   </div>
 </ng-template>

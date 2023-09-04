@@ -17,12 +17,11 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CurrentUserWidgetModule} from './current-user-widget/current-user-widget.module';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {HeaderComponent} from './header.component';
 
 @NgModule({
   declarations: [HeaderComponent],
-  imports: [CommonModule, CurrentUserWidgetModule, FlexLayoutModule],
+  imports: [CommonModule, CurrentUserWidgetModule],
   exports: [HeaderComponent],
 })
 export class HeaderModule {}

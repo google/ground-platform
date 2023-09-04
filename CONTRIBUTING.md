@@ -1,127 +1,168 @@
-# Contributing to Ground Platform
+# Contributing to Ground
 
-This document covers everything you need to know about contributing to Ground
-Platform. Before you get started, please make sure you read all of the 
-sections and are able to sign our CLA.
+This guide describes how to contribute to the Ground open-source project. Please read it in its entirety before you begin.
 
-## Contributor License Agreement (CLA)
+First-time setup:
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
+1. Read the [Code of Conduct](#code-of-conduct)
+2. Read and accept the [Contributor License Agreement](#contributor-license-agreement-cla)
+3. [Clone the repo](#cloning-the-repo)
+4. [Set up your environment](#seting-up-your-environment)
+5. [Build and run the app](#building-and-running-the-app)
 
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+Contributing to Ground:
 
-## Code reviews
+1. [Claim an issue](#claiming-an-issue)
+2. [Create a new branch](#creating-a-branch)
+3. Iterate on your change
+4. [Create a pull request](#creating-a-pull-request)
 
-Before starting work on a change, comment on one of the [open issues](https://github.com/google/ground-platform/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen)
-saying you'd like to take it on. If one does not exist, you can also
-[create one here](https://github.com/google/ground-platform/issues/new).
+**Note**: This guide assumes you are comfortable working with Git and GitHub. If you're new to Git and/or GitHub, check out [Quickstart - GitHub Docs](https://docs.github.com/en/get-started/quickstart) to help you get started.
 
-Be sure to reference this issue number in your pull request (e.g., 
-"Fix truncated text values #27"), and preferably in your commit message.
+## First time setup
 
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+### Code of Conduct
 
-## Community Guidelines
+Help us keep the Ground project open and inclusive. Please read and follow [Google's Open Source Community Guidelines](https://opensource.google.com/conduct/) when contributing.
 
-This project follows
-[Google's Open Source Community Guidelines](https://opensource.google.com/conduct/).
+### Contributor License Agreement (CLA)
 
-## Setup
+Contributions to this project must be accompanied by a Contributor License Agreement. You (or your employer) retain the copyright to your contribution; this agreement gives us permission to use and redistribute your contributions as part of the project. Head over to <https://cla.developers.google.com/> to see your current agreements on file or to sign a new one.
 
-The following instructions describe how to fork this repository in order 
-to contribute to the ground-platform codebase.
+You generally only need to submit a CLA once, so if you've already submitted one (even if it was for a different project), you probably don't need to do it again.
 
-1. Fork this repository, see <https://help.github.com/articles/fork-a-repo/>.
+### Cloning the repo
 
-2. Clone your fork:
+The following instructions describe how to fork this repository in order to contribute to the Ground codebase. If you are a maintainer on the Ground core team, follow the instructions under [Maintainers](#maintainers). Community contributors should instead proceed as described in [Community contributors](#community-contributors).
+
+#### Maintainers
+
+Maintainers may push directly to branches in the `google/ground-platform`, and
+so they do not need to fork the repo. Simply clone the repo with:
     
-    `git clone https://github.com/<username>/ground-platform.git`
+```shell
+git clone https://github.com/google/ground-platform.git
+```
+
+#### Community contributors
+
+1. [Fork this repository](https://github.com/google/ground-platform/fork).
+
+2. Clone the new fork to your local device:
     
-    Where `<username>` is your github username.
-
-3. Add the base repository as a remote:
+    ```shell
+    git clone https://github.com/<user>/ground-platform.git`
+    ```
     
-    `git remote add upstream https://github.com/google/ground-platform.git`
+    Where `<user>` is your GitHub username.
 
-4. Follow the instructions in the README files of each of the directories listed under [About this Repository](README.md#about-this-repository) section of this readme to set up your development environment.
-
-## Development Workflow
-
-After you have forked and cloned the repository, use the following steps to
-make and manage changes. After you have finished making changes, you can 
-submit them to the base repository using a pull request. 
-
-1. Pull changes from the base repository's master branch:
+3. To be able to pull changes from upstream, add the base repository as a remote:
     
-    `git pull upstream master`
+    ```shell
+    git remote add upstream https://github.com/google/ground-platform.git
+    ```
 
-1. Create a new branch to track your changes:
-    
-    `git checkout -b <branch>`
-    
-    Where `<branch>` is a meaningful name for the branch you'll use to track
-    changes.
+   You can then pull future upstream changes into your local clone with `git pull upstream master`.
 
-1. Make and test changes locally.
+### Setting up your environment
 
-1. Add your changes to the staging area:
-    
-    `git add <files>`
-    
-    Where `<files>` are the files you changed.
-    
-    > **Note:** Run `git add .` to add all currently modified files to the staging area.
+> **Note**: This guide assumes nvm (Node Version Manager) will be used to
+> install and manage Node.js versions. For more information on nvm,
+> including installation instructions, see
+> https://github.com/creationix/nvm#installation>
 
-1. Commit your changes:
-    
-    `git commit -m <message>`
-    
-    Where `<message>` is a meaningful, short message describing the purpose of
-    your changes.
+Install Node.js using:
 
-1. Pull changes from the base repository's master branch, resolve conflicts if
-   necessary:
-      
-    `git pull upstream master`
+```shell
+nvm install 16
+```
 
-1. Push your changes to your github account:
-    
-    `git push -u origin <branch>`
-    
-    Where `<branch>` is the branch name you used in step 2.
+### Building and running the app
 
-    **Note**: If you have two factor authentication enabled, make sure to use
-    your [Personal Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) instead of your password.
+#### Running locally
 
+To get up and running quickly, you can run the web app and Cloud Functions,locally using the Firebase Local Emulator Suite.
 
-    Alternatively, you can [connect to GitHub via SSH](https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) instead of HTTPS and use
-    a public/private key pair for authentication.
+To install dependencies, build, and run Ground locally:
 
-1. Create a [pull request](https://help.github.com/articles/about-pull-requests/) to have your changes reviewed and merged into the base 
-repository. Reference the [issue](https://github.com/google/ground-platform/issues) your changes resolve in either the commit message for your changes or in your pull request. 
+```shell
+npm run build:local && npm run start:local
+```
+
+Once the local server is ready, the app will be available at http://localhost:5000. The Firebase Emulator Suite UI can be accessed at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatially rebuilt and reloaded on save.
+
+**Note**: The local build variant does not require API keys to run. Warnings related to missing API keys are expected. Authentication is also disabled.
+
+The local emulator is preloaded with a demo Ground survey. Run `npm run export:local` to persist changes to update the snapshot of demo data in the local db.
+
+#### Using live Firebase
+
+Alternatively, you can test and deploy against a real Firebase project:
+
+1. Create a project as described in [Getting started with Firebase](https://cloud.google.com/firestore/docs/client/get-firebase) in the Firebase docs, or contact your administrator to get access to existing development and/or production projects. When creating a new project, be sure the following are enabled under "Build":
+
+  * Authentication > Sign-in method > Google
+  * Firestore Database
+  * Hosting
+  * Storage
+
+2. Create a web app under "Project Overview > Add app > Web" or choose an existing web one.
+
+3. Scroll down to the code snippet under "SDK setup and configuration" and select "Config". Copy the code into `web/src/environments/.firebase-config.ts`, prepending the keyword `export` to the snippet, for example:
+
+   ```javascript
+   export const firebaseConfig = {
+     apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
+     authDomain: 'my-app.firebaseapp.com',
+     databaseURL: 'https://my-app.firebaseio.com',
+     projectId: 'my-app',
+     storageBucket: 'my-app.appspot.com',
+     messagingSenderId: '12345678',
+     appId: '1:12345678:web:abc123etcetc',
+   };
+   ```
+
+4. Build and deploy all the things dev Firebase:
+
+    ```shell
+    npm run deploy:dev <project-id>
+    ```
+
+Once complete, the web app will be available at dev project's Firebase Hosting URL.
+
+The web app may also be develop locally against the dev Firebase server with:
+
+```shell
+cd web && npm run start:dev
+```
+
+The web app will be accessible at http://localhost:4200. The app will be rebuilt and reloaded changes are saved.
+
+See <firebase/README.md> and <web/README.md> for additional npm development script commands.
+ 
+## Developing Ground
+
+### Claiming an issue
+
+Before you begin work on a change, comment on one of the [open issues](https://github.com/google/ground-platform/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen) saying you'd like to take it on. If one does not exist, you can also [create one here](https://github.com/google/ground-platform/issues/new).
+
+### Creating a branch
+
+We strongly encourage contributors to create a separate branch for each pull request. Maintainers working directly in `google/ground-platform` should create branches with names in the form `<username>/<issue-no>/<short-desc>`. For example:
+
+```shell
+git checkout -d gino-m/1234/fix-save-button
+```
+
+### Creating a pull request
+
+All submissions require review and approval by at least one maintainer. The same rule also applies to mainatiners themselves. We use GitHub pull requests for this purpose.
+
+When creating a new pull request from one of the provide templates, be sure to replace template fields, especially the PR title and `Fixes #<issue no>` field in the comment field.
+
+For more information about creating pull requests, see <https://help.github.com/articles/creating-a-pull-request/>. To learn more about referencing issues in your pull request or commit messages, see <https://help.github.com/articles/closing-issues-using-keywords/>.
 
     > :exclamation: Any subsequent changes committed to the branch you used
     > to open your PR are automatically included in the PR. If you've opened a
     > PR but would like to continue to work on unrelated changes, be sure to
     > start a new branch to track those changes.
-
-    For more information on creating pull requests, see <https://help.github.com/articles/creating-a-pull-request/>. 
-    
-    To learn more about referencing issues in your pull request or commit messages, see <https://help.github.com/articles/closing-issues-using-keywords/>.
-
-1. Celebrate!
-
-## Building and Deploying Ground from Source
-
-For step-by-step instructions setting up your own instance of Ground, see the
-documentation for [building and deploying Ground from the
-source](docs/build-and-deploy-ground-from-source.md).

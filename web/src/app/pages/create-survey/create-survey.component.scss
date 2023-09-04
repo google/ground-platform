@@ -14,7 +14,45 @@
  * limitations under the License.
  */
 
-.input {
-  display: block;
-  width: 600px;
+.page {
+  min-height: 100%;
+}
+
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  border-radius: 18px;
+  display: flex;
+  margin-top: 24px;
+  min-height: 450px;
+  width: 880px;
+}
+
+.picture {
+  height: 450px;
+  width: 330px;
+}
+
+.content {
+  flex: 1;
+  margin: 24px;
+}
+
+.progress-bar-title {
+  margin: 14px 0 8px;
+}
+
+.button-section {
+  display: flex;
+  margin: 24px 0;
+  justify-content: space-between;
+  width: 880px;
+}
+
+.continue-button {
+  border-radius: 100px;
 }

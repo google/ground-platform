@@ -16,14 +16,13 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {TaskEditorComponent} from './task-editor.component';
 import {OptionEditorModule} from './option-editor/option-editor.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
@@ -32,7 +31,6 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
   declarations: [TaskEditorComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,

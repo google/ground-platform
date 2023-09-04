@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
- $dialog-color: #188038;
-
 .reposition-confirm-dialog {
   position: absolute;
   bottom: 2em;
@@ -24,7 +22,6 @@
   width: 407px;
   height: 66px;
   border-radius: 8px;
-  background: $dialog-color;
 }
 
 .dialog-content {
@@ -36,10 +33,6 @@
 
 .dialog-text {
   margin: 0 20px;
-  font-family: Roboto;
-  font-size: 14px;
-  letter-spacing: 0.1px;
-  color: white;
   mix-blend-mode: normal;
 }
 
@@ -47,16 +40,7 @@
   margin: 0 10px;
   width: 89px;
   height: 42px;
-  background: $dialog-color;
-  border: 1px solid rgba(255, 255, 255, 0.4);
   box-sizing: border-box;
   border-radius: 8px;
-
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 12px;
-  letter-spacing: 0.1px;
-  color: white;
   mix-blend-mode: normal;
 }

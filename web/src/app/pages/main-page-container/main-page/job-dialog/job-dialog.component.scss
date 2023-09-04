@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-@import '_variables';
-
 .mat-dialog-content {
   width: 100%;
 }
 
-.link-add-question {
-  color: mat-color($primary);
-}
-
 .add-question {
   padding: 10px;
-  border: 1px solid #e6e7ea;
   border-radius: 10px;
   margin-top: 20px;
   width: 100%;
-  text-align: left;
 }
 
 .mat-dialog-actions {
@@ -39,12 +31,19 @@
 }
 
 .horizontal-line {
-  border: 1px solid mat-color($foreground, divider);
   margin: -20px 0 20px 0;
 }
 
 .label-helper-text {
-  color: mat-color($foreground, secondary-text);
   padding-top: 5px;
-  line-height: 1.6;
+}
+
+.options {
+  display: flex;
+}
+
+.permissions, .default-style {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }

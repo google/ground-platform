@@ -21,16 +21,15 @@ import {EditStyleButtonModule} from './edit-style-button/edit-style-button.modul
 import {TaskEditorModule} from './task-editor/task-editor.module';
 import {JobDialogComponent} from './job-dialog.component';
 import {
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-  MatDialogModule,
-} from '@angular/material/dialog';
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialogRef as MatDialogRef,
+  MatLegacyDialogModule as MatDialogModule,
+} from '@angular/material/legacy-dialog';
 import {Router} from '@angular/router';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {MatIconModule} from '@angular/material/icon';
 import {MatCheckboxModule} from '@angular/material/checkbox';
@@ -61,7 +60,6 @@ describe('JobDialogComponent', () => {
         InlineEditorModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
-        FlexLayoutModule,
         MatFormFieldModule,
         MatInputModule,
         MatDialogModule,
