@@ -21,8 +21,8 @@
     "login": "npx firebase login",
     "deploy:dev": "npm run build:dev && npm run login && npx firebase deploy --only hosting --project"
   },
+  "private": true,
   "dependencies": {
-    "private": true,
     "@angular/animations": "^15.2.9",
     "@angular/cdk": "^15.2.9",
     "@angular/common": "^15.2.9",
