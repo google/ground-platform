@@ -30,4 +30,11 @@ export class Job {
   withIndex(index: number): Job {
     return {...this, index};
   }
+
+  copyWith(modifyObject: {[P in keyof this]?: this[P]}): this {
+    return Object.assign(Object.create(this.constructor.prototype), {
+      ...this,
+      ...modifyObject,
+    });
+ }
 }
