@@ -19,7 +19,7 @@ import {NgModule} from '@angular/core';
 import {JobListComponent} from './job-list.component';
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({

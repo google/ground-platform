@@ -19,7 +19,7 @@ import {CommonModule} from '@angular/common';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatLegacyButtonModule as MatButtonModule} from '@angular/material/legacy-button';
+import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
   declarations: [JobDetailsComponent],
