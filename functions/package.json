@@ -9,7 +9,7 @@
     "shell": "firebase functions:shell",
     "emulators": "firebase emulators:start --only functions,firestore --project",
     "login": "firebase login",
-    "deploy": "npm run build && firebase deploy --project",
+    "deploy": "npm run build && npx firebase deploy --project",
     "logs": "firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm install && tsc",
