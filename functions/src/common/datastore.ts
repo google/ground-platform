@@ -61,10 +61,13 @@ export class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   async mergeUserProfile(user: functions.auth.UserRecord) {
-    const { uid, email, displayName, photoURL } = user;
+    const {uid, email, displayName, photoURL} = user;
     await this.db_
       .doc(`users/${uid}`)
-      .set({ email, displayName, photoURL }, { merge: true });
+      .set(
+        {email, displayName, photoURL: photoURL?.replace(/=s..-[c]$/g, '')},
+        {merge: true}
+      );
   }
 
   async fetch_(
