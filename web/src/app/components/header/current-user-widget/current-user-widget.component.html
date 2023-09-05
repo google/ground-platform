@@ -15,17 +15,15 @@
 -->
 <div *ngIf="auth.getUser$() | async as user">
   <div *ngIf="user.isAuthenticated">
-    <button mat-icon-button>
+    <button mat-icon-button (click)="openProfileDialog($event)">
       <img
         *ngIf="user.photoURL; else showDefaultPhoto"
         referrerpolicy="no-referrer"
         src="{{ user.photoURL }}=s32"
         class="user-thumb"
-        (click)="openProfileDialog($event)"
       />
       <ng-template #showDefaultPhoto>
         <user-avatar
-          (click)="openProfileDialog($event)"
           [displayText]="user.displayName?.charAt(0)"
         ></user-avatar>
       </ng-template>
