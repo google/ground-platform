@@ -26,7 +26,7 @@
     }
 
     /**
-     * Returns user profile data associated with specified userId.
+     * Returns user the profile data associated with specified `userId`.
      */
     function user(userId) {
       return get(/databases/$(database)/documents/users/$(userId)).data
@@ -61,7 +61,7 @@
     }
 
     /**
-     * Return true iff the user's email is in the implicit regex or
+     * Returns true iff the user's email is in the implicit regex or
      * explicit passlist.
      */
     function canAccess(email) {
@@ -69,7 +69,7 @@
     }
 
     /**
-     * Return true iff the user with the given email can read the specified
+     * Returns true iff the user with the given email can read the specified
      * survey.
      */
     function canViewSurvey(surveyId, email) {
@@ -77,7 +77,7 @@
     }
 
     /**
-     * Return true iff the user with the given email can manage the specified
+     * Returns true iff the user with the given email can manage the specified
      * survey (i.e., modify the survey document).
      */
     function canManageSurvey(surveyId, email) {
@@ -85,12 +85,19 @@
     }
 
     /**
-     * Return true iff the user with the given email can contribute LOIs 
+     * Returns true iff the user with the given email can contribute LOIs 
      * and submissions to the specified survey (i.e., add/edit LOIs and
      * submissions).
      */
     function canContributeToSurvey(surveyId, email) {
       return canAccess(email) && role(surveyId, email) in ['owner', 'survey-organizer', 'data-collector'];
+    }
+
+    /**
+     * Returns true iff the user with the provided email is the owner of the specified resource.
+     */
+    function isOwner(resource, email) {
+      return resource.data.owner == email;     
     }
 
     // All users need to be able to read the passlist for rules to work.
@@ -117,14 +124,18 @@
 
     // Apply survey-level ACLs and passlist to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      allow read: if canViewSurvey(surveyId, email())
-      allow read, write, create: if canContributeToSurvey(surveyId, email())
+      let email = email()
+      allow read: if canViewSurvey(surveyId, email)
+      allow create: if canContributeToSurvey(surveyId, email)
+      allow write: if canManageSurvey(surveyId, email) || isOwner(resource, email)
     }
 
     // Apply survey-level ACLs and passlist to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      allow read: if canViewSurvey(surveyId, email())
-      allow read, write, create: if canContributeToSurvey(surveyId, email())
+      let email = email()
+      allow read: if canViewSurvey(surveyId, email)
+      allow create: if canContributeToSurvey(surveyId, email)
+      allow write: if canManageSurvey(surveyId, email) || isOwner(resource, email)
     }
   }
 }
