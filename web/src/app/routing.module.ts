@@ -31,6 +31,8 @@ import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component'
 import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
 import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
+import {ErrorComponent} from './pages/error/error.component';
+import {ErrorModule} from './pages/error/error.module';
 
 const routes: Routes = [
   {
@@ -73,6 +75,11 @@ const routes: Routes = [
       {path: 'share', component: ShareSurveyComponent},
     ],
   },
+  {
+    path: NavigationService.ERROR,
+    component: ErrorComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 const config = RouterModule.forRoot(routes, {});
 
@@ -85,6 +92,7 @@ const config = RouterModule.forRoot(routes, {});
     SurveyListModule,
     CreateSurveyModule,
     EditSurveyModule,
+    ErrorModule,
   ],
 })
 export class AppRoutingModule {}
