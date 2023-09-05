@@ -126,16 +126,14 @@
     match /surveys/{surveyId}/lois/{loiId} {
       let email = email()
       allow read: if canViewSurvey(surveyId, email)
-      allow create: if canContributeToSurvey(surveyId, email)
-      allow write: if canManageSurvey(surveyId, email) || isOwner(resource, email)
+      allow create, write: if canManageSurvey(surveyId, email) || isOwner(resource, email)
     }
 
     // Apply survey-level ACLs and passlist to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
       let email = email()
       allow read: if canViewSurvey(surveyId, email)
-      allow create: if canContributeToSurvey(surveyId, email)
-      allow write: if canManageSurvey(surveyId, email) || isOwner(resource, email)
+      allow create, write: if canManageSurvey(surveyId, email) || isOwner(resource, email)
     }
   }
 }
