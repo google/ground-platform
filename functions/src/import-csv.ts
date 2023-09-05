@@ -21,6 +21,7 @@ import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
+import {getAuth} from 'firebase-admin/auth';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -30,6 +31,11 @@ export async function importCsvHandler(
   req: functions.https.Request,
   res: functions.Response<any>
 ) {
+  const user = await validateFirebaseIdToken(req, res);
+  if (!user) {
+    return;
+  }
+  functions.logger.info('User: ', user);
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== 'POST') {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
