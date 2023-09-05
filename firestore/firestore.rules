@@ -97,7 +97,8 @@
      * Returns true iff the user with the provided email is the owner of the specified resource.
      */
     function isOwner(resource, email) {
-      return resource.data.owner == email;     
+      // TODO(#1154): Make `owner` its own field and stop assuming `creator==owner`.
+      return resource.data.created.user.email == email;     
     }
 
     // All users need to be able to read the passlist for rules to work.
