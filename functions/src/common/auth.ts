@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +21,10 @@ import {https, Response} from 'firebase-functions/v1';
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
 export const SESSION_COOKIE_NAME = '__session';
 
+/**
+ * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
+ * if present, or `undefined` if not.
+ */
 export function getAuthBearer(req: https.Request): string | undefined {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
@@ -31,6 +34,9 @@ export function getAuthBearer(req: https.Request): string | undefined {
   }
 }
 
+/**
+ * Verifies and returns the decoded user details from the `Authorization` header or session cookie.
+ */
 export async function getDecodedIdToken(req: https.Request): Promise<DecodedIdToken | undefined> {
   const idToken = getAuthBearer(req);   
   if (idToken) {
@@ -42,6 +48,9 @@ export async function getDecodedIdToken(req: https.Request): Promise<DecodedIdTo
   }
 }
 
+/**
+ * Generates and sets a session cookie for the current user into the provided response.
+ */
 export async function setSessionCookie(req: https.Request, res: Response): Promise<void> {
   const token = getAuthBearer(req);
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days

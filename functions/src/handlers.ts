@@ -19,12 +19,15 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 import { https, Response } from 'firebase-functions';
 import { getDecodedIdToken } from './common/auth';
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
-import * as functions from 'firebase-functions';
 import * as cookieParser from 'cookie-parser';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
+/**
+ * Checks for and extracts the current user's details, passing them to the provided function if found.
+ * Sends an UNAUTHORIZED HTTP response code if not present or invalid.
+ */
 async function requireIdToken(req: https.Request, res: Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
   const token = await getDecodedIdToken(req);
   if (token) {

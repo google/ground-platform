@@ -18,6 +18,9 @@ import * as functions from 'firebase-functions';
 import { setSessionCookie } from './common/auth';
 import { UNAUTHORIZED } from 'http-status-codes';
 
+/**
+ * Generates and sets a session cookie for the current user.
+ */
 export async function sessionLoginHandler(req: functions.https.Request, res: functions.Response) {
     try {
       // Required for CDN:
