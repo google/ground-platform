@@ -40,12 +40,6 @@ const SURVEYS_COLLECTION_NAME = 'surveys';
   providedIn: 'root',
 })
 export class DataStoreService {
-  private readonly VALID_ROLES = [
-    'owner',
-    'data-collector',
-    'survey-organizer',
-    'viewer',
-  ];
   constructor(private db: AngularFirestore) {}
 
   /**
@@ -72,7 +66,7 @@ export class DataStoreService {
   loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath('acl', userEmail), 'in', this.VALID_ROLES)
+        ref.where(new FieldPath('acl', userEmail), 'in', Object.keys(Role))
       )
       .snapshotChanges()
       .pipe(
