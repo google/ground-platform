@@ -16,7 +16,7 @@
  */
 
 import {https, Response} from 'firebase-functions';
-import * as HttpStatus from 'http-status-codes';
+import {BAD_REQUEST, METHOD_NOT_ALLOWED, OK} from 'http-status-codes';
 import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
@@ -34,7 +34,7 @@ export async function importCsvHandler(
 ) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== 'POST') {
-    res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
+    res.status(METHOD_NOT_ALLOWED).end();
     return;
   }
   const busboy = Busboy({headers: req.headers});
@@ -56,7 +56,7 @@ export async function importCsvHandler(
   busboy.on('file', (_key, file, _) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
-      res.status(HttpStatus.BAD_REQUEST).end();
+      res.status(BAD_REQUEST).end();
       return;
     }
 
@@ -74,7 +74,7 @@ export async function importCsvHandler(
         console.error(err);
         req.unpipe(busboy);
         res
-          .status(HttpStatus.BAD_REQUEST)
+          .status(BAD_REQUEST)
           .end(JSON.stringify({error: err.message}));
       }
     });
@@ -85,7 +85,7 @@ export async function importCsvHandler(
     await Promise.all(inserts);
     const count = inserts.length;
     console.log(`Inserted ${count} rows`);
-    res.status(HttpStatus.OK).end(JSON.stringify({count}));
+    res.status(OK).end(JSON.stringify({count}));
   });
 
   busboy.on('error', (err: any) => {
