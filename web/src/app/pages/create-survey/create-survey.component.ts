@@ -75,7 +75,7 @@ export class CreateSurveyComponent implements OnInit {
           return;
         }
         this.loiService.getLocationsOfInterest$().subscribe(lois => {
-          this.setupPhase = SetupPhase.DEFINE_TASKS; //this.getSetupPhase(survey, lois);
+          this.setupPhase = this.getSetupPhase(survey, lois);
         });
       });
   }
