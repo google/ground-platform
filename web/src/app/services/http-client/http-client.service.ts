@@ -25,6 +25,10 @@ import {Injectable} from '@angular/core';
 export class HttpClientService {
   constructor(private httpClient: HttpClient, private  afAuth: AngularFireAuth) {}
 
+  /**
+   * Sends an HTTP post with the Authorization Bearer token of the current user
+   * in the request header.
+   */
   async postWithAuth<T>(url: string, body: any | null): Promise<T> {
     const token = await firstValueFrom(this.afAuth.idToken);
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
