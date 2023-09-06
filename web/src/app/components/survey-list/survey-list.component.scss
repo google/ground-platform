@@ -14,42 +14,23 @@
  * limitations under the License.
  */
 
-.surveys-page-title-container {
-  padding-top: 100px;
-  padding-left: 160px;
-}
+.page {
+  min-height: 100%;
 
-.surveys-page-title-logo {
-  height: 124px;
-  width: 124px;
-}
+  .surveys-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 60px 0 60px 160px;
 
-.surveys-page .title-text {
-  padding-left: 14px;
-}
-
-.surveys-page .small-title {
-  margin-top: 10px;
-}
-
-.surveys-page-title {
-  margin-top: 0;
-  line-height: 52px;
-}
-
-.surveys-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 60px 0 60px 160px;
-}
-
-.survey-card {
-  width: 278px;
-  height: 245px;
-  margin: 12px;
-  cursor: pointer;
-  border-radius: 24px;
-  box-shadow: none;
+    .survey-card {
+      width: 278px;
+      height: 245px;
+      margin: 12px;
+      cursor: pointer;
+      border-radius: 24px;
+      box-shadow: none;
+    }
+  }
 }
 
 .add-icon-container {

@@ -5,12 +5,9 @@
   // TODO: Use theme colors once GM3 is supported (or custom palette is defined)
   // The colors defined below are a part of the GM3 color schemes, while the
   // theme colors are based on M2 palettes.
-  .surveys-page {
-    background-color: #edeee9; /* M3/sys/light/surface-container */
-  }
 
-  .surveys-page-title {
-    color: #1a1c19; /* M3/sys/light/on-surface */
+  .page {
+    background-color: #edeee9;
   }
 
   .survey-card {
@@ -34,13 +31,6 @@
   $typography-config: mat.get-typography-config($theme);
 
   // TODO(amysorto): use typography-config once typography levels defined
-
-  .surveys-page-title {
-    font-family: mat.font-family($typography-config);
-    font-style: normal;
-    font-weight: 500;
-    font-size: 45px;
-  }
 
   .survey-title {
     font-family: mat.font-family($typography-config);
