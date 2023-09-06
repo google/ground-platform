@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import {https, Response} from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
 import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
@@ -28,8 +28,8 @@ import { DecodedIdToken } from 'firebase-admin/auth';
  * 'survey' id and 'job' id to the database.
  */
 export async function importCsvHandler(
-  req: functions.https.Request,
-  res: functions.Response<any>,
+  req: https.Request,
+  res: Response<any>,
   idToken: DecodedIdToken
 ) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
