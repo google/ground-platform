@@ -42,6 +42,7 @@ export class NavigationService {
   static readonly SURVEYS_CREATE = 'create';
   static readonly SURVEYS_EDIT = 'edit';
   static readonly JOB_SEGMENT = 'job';
+  static readonly ERROR = 'error';
 
   // TODO: remove this logic once the new side panel replaces the old one
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
@@ -255,6 +256,13 @@ export class NavigationService {
    */
   signOut() {
     this.router.navigate(['/']);
+  }
+
+  /**
+   * Navigate to the URL for error.
+   */
+  error(error: Error) {
+    this.router.navigate([NavigationService.ERROR, {error}]);
   }
 }
 
