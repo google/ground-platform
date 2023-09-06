@@ -21,7 +21,7 @@ import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
-import {requireIdToken} from './common/auth';
+import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -29,13 +29,9 @@ import {requireIdToken} from './common/auth';
  */
 export async function importCsvHandler(
   req: functions.https.Request,
-  res: functions.Response<any>
+  res: functions.Response<any>,
+  idToken: DecodedIdToken
 ) {
-  // TODO(gino-m): Refactor and apply check to importGeoJson as well.
-  const user = await requireIdToken(req, res);
-  if(!user) {
-    return;
-  }
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== 'POST') {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();

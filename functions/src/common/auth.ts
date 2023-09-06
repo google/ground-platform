@@ -16,16 +16,13 @@
  */
 
 import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
-import {https, Response} from 'firebase-functions/v1';
-import {UNAUTHORIZED} from 'http-status-codes';
+import {https} from 'firebase-functions/v1';
 
 async function getIdToken(req: https.Request): Promise<string | undefined> {
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer ')
-  ) {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
     // Read the ID Token from the Authorization header.
-    return req.headers.authorization.split('Bearer ')[1];
+    return authHeader.split('Bearer ')[1];
   } else if (req.cookies) {
     // Read the ID Token from cookie.
     return req.cookies.__session;
@@ -44,15 +41,4 @@ export async function decodeIdToken(
   const idToken = await getIdToken(req);
   if (!idToken) return;
   return await getAuth().verifyIdToken(idToken);
-}
-
-export async function requireIdToken(
-  req: https.Request,
-  res: Response<any>
-): Promise<DecodedIdToken | undefined> {
-  const decodedIdToken = decodeIdToken(req);
-  if (!decodeIdToken) {
-    res.status(UNAUTHORIZED).send('Unauthorized');
-  }
-  return decodedIdToken;
 }
