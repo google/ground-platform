@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-h1,
-h2 {
-    text-align: left;
-}
+import {NgModule} from '@angular/core';
+import {TaskButtonComponent} from './task-button.component';
+import {MatIconModule} from '@angular/material/icon';
 
-h2 {
-    font-size: 1.8ch;
-}
-
-#tasks-help-text {
-    padding: 3ch;
-}
-
-task-button:hover {
-    cursor: pointer;
-}
+@NgModule({
+  declarations: [TaskButtonComponent],
+  imports: [MatIconModule],
+  exports: [TaskButtonComponent],
+})
+export class TaskButtonModule {}

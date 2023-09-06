@@ -160,6 +160,10 @@ export class FirebaseDataConverter {
     );
   }
 
+  static tasksToJs(tasks: List<Task>): {} {
+    return tasks?.map(task => this.taskToJS(task)).toJS()
+  }
+
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable Task instance.

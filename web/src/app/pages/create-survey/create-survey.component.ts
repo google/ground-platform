@@ -29,6 +29,7 @@ import {first} from 'rxjs';
 import {ShareSurveyComponent} from './share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
+import { TaskService } from 'app/services/task/task.service';
 
 @Component({
   selector: 'create-survey',
@@ -47,6 +48,7 @@ export class CreateSurveyComponent implements OnInit {
   constructor(
     private surveyService: SurveyService,
     private jobService: JobService,
+    private taskService: TaskService,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
     route: ActivatedRoute
@@ -73,7 +75,7 @@ export class CreateSurveyComponent implements OnInit {
           return;
         }
         this.loiService.getLocationsOfInterest$().subscribe(lois => {
-          this.setupPhase = this.getSetupPhase(survey, lois);
+          this.setupPhase = SetupPhase.DEFINE_TASKS; //this.getSetupPhase(survey, lois);
         });
       });
   }
@@ -182,6 +184,7 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.DEFINE_TASKS;
         break;
       case SetupPhase.DEFINE_TASKS:
+        await this.saveTasks();
         this.setupPhase = SetupPhase.REVIEW;
         break;
       default:
@@ -221,6 +224,16 @@ export class CreateSurveyComponent implements OnInit {
       this.currentSurveyId!,
       job.copyWith({name})
     );
+  }
+
+  private async saveTasks() {
+    const tasks = this.taskDetails?.toTasks();
+
+    await this.taskService.addOrUpdateTasks(
+      this.currentSurveyId!,
+      this.currentSurvey!.jobs.values().next().value.id,
+      tasks!
+    )
   }
 
   @ViewChild('loiSelection')
