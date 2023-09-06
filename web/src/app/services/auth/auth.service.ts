@@ -31,6 +31,8 @@ import {Role} from 'app/models/role.model';
 import firebase from 'firebase/compat/app';
 import {firstValueFrom} from 'rxjs';
 import {AngularFireFunctions} from '@angular/fire/compat/functions';
+import { HttpClientService } from '../http-client/http-client.service';
+import { environment } from 'environments/environment';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -50,7 +52,8 @@ export class AuthService {
     private afAuth: AngularFireAuth,
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
-    private functions: AngularFireFunctions
+    private functions: AngularFireFunctions,
+    private httpClientService: HttpClientService
   ) {
     this.user$ = this.afAuth.authState.pipe(
       switchMap(user => from(this.onAuthStateChange(user))),
@@ -59,6 +62,21 @@ export class AuthService {
       shareReplay(1)
     );
     this.user$.subscribe(user => (this.currentUser = user));
+  }
+
+  /**
+   * Calls a server endpoint to create a session cookie which may be used for authenticating against
+   * backend functions which require session auth. Namely, this is necessary for functions which
+   * download arbitrarily large files (namely, "/exportCsv"). These functions can only be invoked via
+   * HTTP GET, since browser do not allow streaming directly to disk via POST or other methods.
+   */
+  async createSessionCookie() {
+    try {
+      // TODO(#1159): Refactor access to Cloud Functions into new service.
+      await this.httpClientService.postWithAuth(`${environment.cloudFunctionsUrl}/sessionLogin`, {});
+    } catch (err: any) {
+      console.error("Session login failed. Some features may be unavailable");
+    }
   }
 
   private async onAuthStateChange(
@@ -72,6 +90,7 @@ export class AuthService {
   }
 
   async callProfileRefresh() {
+    // TODO(#1159): Refactor access to Cloud Functions into new service.
     const refreshProfile = this.functions.httpsCallable('profile-refresh');
     const result = await firstValueFrom(refreshProfile({}));
     if (result !== 'OK') {

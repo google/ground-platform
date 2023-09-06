@@ -17,16 +17,18 @@
 import * as cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { https, Response } from 'firebase-functions';
-import { decodeIdToken } from './common/auth';
+import { getDecodedIdToken } from './common/auth';
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
+import * as functions from 'firebase-functions';
+import * as cookieParser from 'cookie-parser';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
 async function requireIdToken(req: https.Request, res: Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
-  const decodedIdToken = await decodeIdToken(req);
-  if (decodedIdToken) {
-    return next(decodedIdToken);
+  const token = await getDecodedIdToken(req);
+  if (token) {
+    return next(token);
   } else {
     return res.status(UNAUTHORIZED).send('Unauthorized');
   }
@@ -42,8 +44,10 @@ export type HttpsRequestHandler = (req: https.Request, res: Response, idToken: D
 export function onHttpsRequest(handler: HttpsRequestHandler) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
-      requireIdToken(req, res, (idToken: DecodedIdToken) =>
-        handler(req, res, idToken).catch((error: any) => onError(res, error))
+      cookieParser()(req, res, () => 
+        requireIdToken(req, res, (idToken: DecodedIdToken) =>
+          handler(req, res, idToken).catch((error: any) => onError(res, error))
+        )
       )
     )
   );

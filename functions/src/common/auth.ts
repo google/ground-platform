@@ -16,29 +16,35 @@
  */
 
 import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
-import {https} from 'firebase-functions/v1';
+import {https, Response} from 'firebase-functions/v1';
 
-async function getIdToken(req: https.Request): Promise<string | undefined> {
+// This is the only cookie not stripped by Firebase CDN.
+// https://firebase.google.com/docs/hosting/manage-cache#using_cookies
+export const SESSION_COOKIE_NAME = '__session';
+
+export function getAuthBearer(req: https.Request): string | undefined {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
-    // Read the ID Token from the Authorization header.
     return authHeader.split('Bearer ')[1];
-  } else if (req.cookies) {
-    // Read the ID Token from cookie.
-    return req.cookies.__session;
   } else {
     return;
   }
 }
 
-// The Firebase ID token needs to be passed as a Bearer token in the Authorization HTTP header like this:
-// `Authorization: Bearer <Firebase ID Token>`.
-// when decoded successfully, the ID Token content will be added as `req.user`.
-// Based on https://github.com/firebase/functions-samples/blob/main/Node-1st-gen/authorized-https-endpoint/functions/index.js
-export async function decodeIdToken(
-  req: https.Request
-): Promise<DecodedIdToken | undefined> {
-  const idToken = await getIdToken(req);
-  if (!idToken) return;
-  return await getAuth().verifyIdToken(idToken);
+export async function getDecodedIdToken(req: https.Request): Promise<DecodedIdToken | undefined> {
+  const idToken = getAuthBearer(req);   
+  if (idToken) {
+    return getAuth().verifyIdToken(idToken);
+  } else if (req.cookies) {
+    return await getAuth().verifySessionCookie(req.cookies[SESSION_COOKIE_NAME], true /** checkRevoked */);
+  } else {
+    return;
+  }
+}
+
+export async function setSessionCookie(req: https.Request, res: Response): Promise<void> {
+  const token = getAuthBearer(req);
+  const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+  const cookie = await getAuth().createSessionCookie(token!!, { expiresIn });
+  res.cookie(SESSION_COOKIE_NAME, cookie, { maxAge: expiresIn, httpOnly: true, secure: true });
 }
