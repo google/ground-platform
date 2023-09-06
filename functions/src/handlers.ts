@@ -18,7 +18,7 @@ import * as cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import * as functions from 'firebase-functions';
 import { decodeIdToken } from './common/auth';
-import { UNAUTHORIZED } from 'http-status-codes';
+import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
@@ -34,7 +34,7 @@ async function requireIdToken(req: functions.https.Request, res: functions.Respo
 
 function onError(res: any, err: any) {
   console.error(err);
-  res.status(500).send('Internal error');
+  res.status(INTERNAL_SERVER_ERROR).send('Internal error');
 }
 
 export type HttpsRequestHandler = (req: functions.https.Request, res: functions.Response, idToken: DecodedIdToken) => Promise<any>
