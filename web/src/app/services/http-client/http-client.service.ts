@@ -25,9 +25,8 @@ import {Injectable} from '@angular/core';
 export class HttpClientService {
   constructor(private httpClient: HttpClient, private  afAuth: AngularFireAuth) {}
 
-  async post<T>(url: string, body: any | null): Promise<T> {
+  async postWithAuth<T>(url: string, body: any | null): Promise<T> {
     const token = await firstValueFrom(this.afAuth.idToken);
-    // TODO(gino-m): Figure out how to set __session cookie and authenticate export as well.
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return firstValueFrom(
       this.httpClient.post<T>(url, body, {headers})
