@@ -15,16 +15,15 @@
  */
 
 import * as cors from 'cors';
-import * as express from "express";
 import { DecodedIdToken } from 'firebase-admin/auth';
 import * as functions from 'firebase-functions';
 import { decodeIdToken } from './common/auth';
 import { UNAUTHORIZED } from 'http-status-codes';
 
-const corsOptions = {origin: true};
+const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
-async function requireIdToken(req: functions.https.Request, res: express.Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
+async function requireIdToken(req: functions.https.Request, res: functions.Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
   const decodedIdToken = await decodeIdToken(req);
   if (decodedIdToken) {
     return next(decodedIdToken);
@@ -34,16 +33,16 @@ async function requireIdToken(req: functions.https.Request, res: express.Respons
 }
 
 function onError(res: any, err: any) {
-    console.error(err);
-    res.status(500).send('Internal error');
+  console.error(err);
+  res.status(500).send('Internal error');
 }
 
-export type HttpsRequestHandler = (req: functions.https.Request, res: express.Response, idToken: DecodedIdToken) => Promise<any>
+export type HttpsRequestHandler = (req: functions.https.Request, res: functions.Response, idToken: DecodedIdToken) => Promise<any>
 
 export function onHttpsRequest(handler: HttpsRequestHandler) {
-  return functions.https.onRequest((req: functions.https.Request, res: express.Response) =>
+  return functions.https.onRequest((req: functions.https.Request, res: functions.Response) =>
     corsMiddleware(req, res, () =>
-      requireIdToken(req, res, (idToken: DecodedIdToken) => 
+      requireIdToken(req, res, (idToken: DecodedIdToken) =>
         handler(req, res, idToken).catch((error: any) => onError(res, error))
       )
     )
