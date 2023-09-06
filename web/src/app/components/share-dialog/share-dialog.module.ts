@@ -16,21 +16,19 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {ShareDialogComponent} from './share-dialog.component';
 import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {ReactiveFormsModule, FormsModule} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
-import {MatListModule} from '@angular/material/list';
-import {FlexLayoutModule} from '@angular/flex-layout';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 
 @NgModule({
   declarations: [ShareDialogComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,

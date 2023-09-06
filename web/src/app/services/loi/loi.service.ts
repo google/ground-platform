@@ -167,7 +167,7 @@ export class LocationOfInterestService {
     const newLocationOfInterest = new GenericLocationOfInterest(
       this.dataStore.generateId(),
       jobId,
-      new Point(new Coordinate(lat, lng)),
+      new Point(new Coordinate(lng, lat)),
       ImmutableMap()
     );
     await this.dataStore.updateLocationOfInterest(

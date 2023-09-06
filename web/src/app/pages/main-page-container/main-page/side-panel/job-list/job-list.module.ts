@@ -18,10 +18,9 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {JobListComponent} from './job-list.component';
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
-import {MatListModule} from '@angular/material/list';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {FlexLayoutModule} from '@angular/flex-layout';
 
 @NgModule({
   imports: [
@@ -30,7 +29,6 @@ import {FlexLayoutModule} from '@angular/flex-layout';
     JobListItemModule,
     MatButtonModule,
     MatIconModule,
-    FlexLayoutModule,
   ],
   exports: [JobListComponent],
   declarations: [JobListComponent],

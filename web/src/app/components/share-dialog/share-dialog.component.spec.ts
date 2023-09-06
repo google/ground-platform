@@ -16,14 +16,16 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {ShareDialogComponent} from './share-dialog.component';
-import {MatDialogRef, MatDialogModule} from '@angular/material/dialog';
+import {
+  MatLegacyDialogRef as MatDialogRef,
+  MatLegacyDialogModule as MatDialogModule,
+} from '@angular/material/legacy-dialog';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatListModule} from '@angular/material/list';
-import {MatInputModule} from '@angular/material/input';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
 import {MatButtonModule} from '@angular/material/button';
-import {FlexLayoutModule} from '@angular/flex-layout';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {of} from 'rxjs';
@@ -38,7 +40,6 @@ describe('ShareDialogComponent', () => {
       declarations: [ShareDialogComponent],
       imports: [
         NoopAnimationsModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatDialogModule,
         MatFormFieldModule,

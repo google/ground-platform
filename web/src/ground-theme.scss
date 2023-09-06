@@ -24,6 +24,7 @@
 @use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
 @use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
 @use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
+@use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
 @use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
@@ -49,6 +50,21 @@
 // Include the common styles for Angular Material. This allows us to only
 // have to load a single css file for Angular Material in your app.
 // This mixin but be included exactly once!
+// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
+//  The following line adds:
+//    1. Default typography styles for all components
+//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
+//  If you specify typography styles for the components you use elsewhere, you should delete this line.
+//  If you don't need the default component typographies but still want the hierarchy styles,
+//  you can delete this line and instead use:
+//    `@include mat.legacy-typography-hierarchy(mat.define-typography-config());`
+/*TODO(mdc-migration): Remove all-legacy-component-typographies once all legacy components are migrated
+ */
+@include mat.all-legacy-component-typographies();
+@include mat.all-component-typographies();
+/*TODO(mdc-migration): Remove legacy-core once all legacy components are migrated
+ */
+@include mat.legacy-core();
 @include mat.core();
 
 $primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
@@ -73,6 +89,9 @@ $theme: mat.define-light-theme((
 $foreground: map-get($theme, foreground);
 
 // TODO(amysorto): call themes on a component level
+/*TODO(mdc-migration): Remove all-legacy-component-themes once all legacy components are migrated
+ */
+@include mat.all-legacy-component-themes($theme);
 @include mat.all-component-themes($theme);
 
 // Custom component themes
@@ -82,6 +101,7 @@ $foreground: map-get($theme, foreground);
 @include inline-editor.theme($theme);
 @include job-list-item.theme($theme);
 @include share-dialog.theme($theme);
+@include share-survey.theme($theme);
 @include sign-in-page.theme($theme);
 @include survey-list.theme($theme);
 @include user-avatar.theme($theme);

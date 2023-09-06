@@ -29,14 +29,6 @@
 .task-result .mat-form-field {
   width: 100%;
 }
-/**
- * Make sure that inline items have proper spacing between them,
- * e.g. on Submission Form page.
- */
-.mat-radio-label-content,
-.mat-checkbox-label {
-  margin-right: 17px;
-}
 /* The spacing below text box should be smaller. */
 .mat-form-field-wrapper {
   margin-bottom: -1.34em;
@@ -47,7 +39,7 @@
 }
 /* The spacing between radio buttons and checkboxes should be larger */
 .mat-radio-button,
-.mat-checkbox {
+.mat-mdc-checkbox {
   margin-right: 1em;
 }
 .asterix--after:after {

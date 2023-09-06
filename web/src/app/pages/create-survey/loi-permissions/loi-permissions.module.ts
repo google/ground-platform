@@ -15,27 +15,24 @@
  */
 
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MatIconModule} from '@angular/material/icon';
-import {ShareSurveyComponent} from 'app/pages/create-survey/share-survey/share-survey.component';
-import {MatInputModule} from '@angular/material/input';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {LoiPermissionsComponent} from './loi-permissions.component';
 import {MatButtonModule} from '@angular/material/button';
-import {MatDialogModule} from '@angular/material/dialog';
-import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
+import {CommonModule} from '@angular/common';
+import {MatCardModule} from '@angular/material/card';
 
 @NgModule({
-  declarations: [ShareSurveyComponent],
+  declarations: [LoiPermissionsComponent],
   imports: [
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
     MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatDialogModule,
-    ShareDialogModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatRadioModule,
+    ReactiveFormsModule,
   ],
-  exports: [ShareSurveyComponent],
+  exports: [LoiPermissionsComponent],
 })
-export class ShareSurveyModule {}
+export class LoiPermissionsModule {}

@@ -73,7 +73,7 @@ export class DataStoreService {
   loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath('acl', userEmail), 'in', this.VALID_ROLES)
+        ref.where(new FieldPath('acl', userEmail), 'in', Object.keys(Role))
       )
       .snapshotChanges()
       .pipe(

@@ -16,7 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {JobDialogComponent} from './job-dialog/job-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Observable, Subscription} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';

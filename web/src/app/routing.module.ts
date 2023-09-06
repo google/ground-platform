@@ -30,6 +30,9 @@ import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
 import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
+import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
+import {ErrorComponent} from './pages/error/error.component';
+import {ErrorModule} from './pages/error/error.module';
 
 const routes: Routes = [
   {
@@ -69,12 +72,16 @@ const routes: Routes = [
     children: [
       {path: 'job/:id', component: EditJobComponent},
       {path: 'survey', component: SurveyDetailsComponent},
+      {path: 'share', component: ShareSurveyComponent},
     ],
   },
+  {
+    path: NavigationService.ERROR,
+    component: ErrorComponent,
+    canActivate: [AuthGuard],
+  },
 ];
-const config = RouterModule.forRoot(routes, {
-  relativeLinkResolution: 'legacy',
-});
+const config = RouterModule.forRoot(routes, {});
 
 @NgModule({
   imports: [config],
@@ -85,6 +92,7 @@ const config = RouterModule.forRoot(routes, {
     SurveyListModule,
     CreateSurveyModule,
     EditSurveyModule,
+    ErrorModule,
   ],
 })
 export class AppRoutingModule {}

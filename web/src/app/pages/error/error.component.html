@@ -14,11 +14,16 @@
   limitations under the License.
 -->
 
-<h1>You've added a job to your survey</h1>
-<p>You can run a survey with one job, or continue editing to add more.</p>
+<div class="page">
+  <ground-header> </ground-header>
 
-<p>Is your survey ready? Share it with collectors.</p>
-<button mat-flat-button (click)="openShareDialog()">
-  <mat-icon>people_alt</mat-icon>
-  <label>Add data collectors</label>
-</button>
+  <div class="container">
+    <div class="card">
+      <div class="content">
+        <h1>Oops, something went wrong</h1>
+
+        <h2>{{error}}</h2>
+      </div>
+    </div>
+  </div>
+</div>

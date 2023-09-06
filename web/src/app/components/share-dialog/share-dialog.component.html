@@ -14,87 +14,33 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>Share with collaborators</h1>
-<!-- TODO(#296): Remove check that acl is loaded. -->
-<div *ngIf="acl">
-  <form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
-    <div fxLayout="row" fxLayoutGap="8px">
-      <mat-form-field class="email-input" fxFlex="fill" fxFlexAlign="baseline">
-        <mat-label>Email address</mat-label>
-        <input matInput formControlName="email" autocomplete="off" />
-      </mat-form-field>
-      <mat-form-field fxFlexAlign="baseline">
-        <mat-select formControlName="role">
-          <mat-option
-            *ngFor="let option of ROLE_OPTIONS"
-            [value]="option.value"
-            >{{ option.label }}</mat-option
-          >
-        </mat-select>
-      </mat-form-field>
-      <span fxFlexAlign="baseline">
-        <button
-          mat-flat-button
-          color="primary"
-          [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
-          (click)="onAddUserSubmit()"
-        >
-          <label>Add</label>
-        </button>
-      </span>
-    </div>
-  </form>
-  <div *ngIf="acl.length > 0">
-    <div class="list-heading">Collaborators</div>
-  </div>
-</div>
-<div mat-dialog-content *ngIf="acl && acl.length > 0">
-  <table mat-table role="list" fxFill>
-    <!-- TODO: Format list, role names, allow edit role, delete. -->
-    <tr
-      mat-row
-      *ngFor="let entry of acl; let i = index"
-      role="listitem"
-      fxLayout="row"
-      fxLayoutGap="8px"
-    >
-      <td class="user-email" fxFlex="fill" fxFlexAlign="center">
-        {{ entry.email }}
-      </td>
-      <td class="user-role" fxFlexAlign="center">
-        <mat-form-field>
-          <mat-select
-            *ngIf="entry.role != roles.OWNER; else ownerText"
-            class="role-select"
-            (selectionChange)="onRoleChange($event, i)"
-            [value]="entry.role"
-          >
-            <!-- TODO: Present OWNER as read-only -->
-            <mat-option
-              *ngFor="let option of ROLE_OPTIONS"
-              [value]="option.value"
-              >{{ option.label }}</mat-option
-            >
-            <mat-option value="-1" class="remove-option">Remove</mat-option>
-          </mat-select>
-          <ng-template #ownerText>
-            <input matInput disabled value="Owner" />
-          </ng-template>
-        </mat-form-field>
-      </td>
-    </tr>
-  </table>
-</div>
+<h1 mat-dialog-title>Share survey</h1>
+<h2>Who do you want to invite for the survey?</h2>
+<form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
+  <mat-form-field class="email-input">
+    <mat-label>Email address</mat-label>
+    <input matInput formControlName="email" autocomplete="off" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-select formControlName="role">
+      <mat-option
+        *ngFor="let option of ROLE_OPTIONS"
+        [value]="option.value"
+        >{{ option.label }}</mat-option
+      >
+    </mat-select>
+  </mat-form-field>
+</form>
 <div mat-dialog-actions align="end">
-  <div *ngIf="hasChanges">
-    <span class="pending-changes">Pending changes</span>
-    <button mat-flat-button color="primary" (click)="onSaveClicked()">
-      <label>Save</label>
-    </button>
-  </div>
-  <div *ngIf="!hasChanges">
-    <button mat-flat-button color="primary" (click)="onDoneClicked()">
-      <label>Done</label>
-    </button>
-  </div>
+  <button mat-button mat-flat-button (click)="onCancelClicked()">
+    <label>Cancel</label>
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
+    (click)="onAddUserSubmit()"
+  >
+    <label>Done</label>
+  </button>
 </div>

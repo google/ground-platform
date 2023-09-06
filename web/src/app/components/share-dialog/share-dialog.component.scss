@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-.list-heading {
-  padding: 16px 0 12px 0;
-}
-
 .mat-dialog-content {
   border-width: 1px 0;
   border-style: solid;
@@ -25,6 +21,13 @@
   padding-bottom: 6px;
 }
 
+.mat-dialog-actions {
+  .mat-mdc-unelevated-button {
+    &:not(:first-child) {
+        margin-left: 1em;
+      }
+    }
+}
 
 .role-select {
   margin: -4px 0;

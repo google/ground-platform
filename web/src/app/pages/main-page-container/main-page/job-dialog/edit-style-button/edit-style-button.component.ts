@@ -22,7 +22,7 @@ import {
   Output,
   OnInit,
 } from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {ColorPickerComponent} from './color-picker/color-picker.component';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';

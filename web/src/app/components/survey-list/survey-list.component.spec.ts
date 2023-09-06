@@ -17,7 +17,7 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Component} from '@angular/core';
 import {NEVER, of} from 'rxjs';
 import {AuthService} from 'app/services/auth/auth.service';

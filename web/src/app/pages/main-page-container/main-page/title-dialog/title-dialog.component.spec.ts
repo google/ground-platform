@@ -15,7 +15,10 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
+import {
+  MatLegacyDialogModule as MatDialogModule,
+  MatLegacyDialogRef as MatDialogRef,
+} from '@angular/material/legacy-dialog';
 import {TitleDialogComponent} from './title-dialog.component';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {SurveyService} from 'app/services/survey/survey.service';

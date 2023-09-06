@@ -20,7 +20,7 @@ import {MainPageComponent} from './main-page.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';

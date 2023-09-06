@@ -13,22 +13,20 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div fxLayout="column" fxFlexFill>
-  <ground-header></ground-header>
-  <div fxFlex fxLayoutAlign="center center" class="body-container">
-    <mat-card class="card">
-      <mat-card-content class="content">
-        <div>
-          <img class="logo" alt="Ground logo" src="/assets/img/logo.svg" />
-        </div>
-        <p class="title">Ground</p>
-        <p class="cta" *ngIf="!(isAuthenticated$() | async)">
-          Sign in to continue
-        </p>
-        <div class="buttons">
-          <firebase-ui (signInFailure)="errorCallback($event)"></firebase-ui>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
+<ground-header></ground-header>
+<div class="body-container">
+  <mat-card class="card">
+    <mat-card-content class="content">
+      <div>
+        <img class="logo" alt="Ground logo" src="/assets/img/logo.svg" />
+      </div>
+      <p class="title">Ground</p>
+      <p class="cta" *ngIf="!(isAuthenticated$() | async)">
+        Sign in to continue
+      </p>
+      <div class="buttons">
+        <firebase-ui (signInFailure)="errorCallback($event)"></firebase-ui>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

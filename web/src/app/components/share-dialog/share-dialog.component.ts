@@ -15,7 +15,7 @@
  */
 
 import {Component} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {
   Validators,
   FormControl,
@@ -27,16 +27,10 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {Role} from 'app/models/role.model';
 import {Subscription} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
-import {MatSelectChange} from '@angular/material/select';
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 import {take} from 'rxjs/operators';
 import {Map} from 'immutable';
-
-/**
- * Represents a single entry in the sharing dialog.
- */
-class AclEntry {
-  constructor(readonly email: string, readonly role: Role) {}
-}
+import {AclEntry} from 'app/models/acl-entry.model';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -103,6 +97,8 @@ export class ShareDialogComponent {
 
     // Clear "Add data collector" field.
     this.addUserForm.setValue({email: '', role: Role.DATA_COLLECTOR});
+
+    this.onSaveClicked();
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
@@ -121,9 +117,9 @@ export class ShareDialogComponent {
   }
 
   /**
-   * Close the dialog when "Done" is clicked.
+   * Close the dialog when "Cancel" is clicked.
    */
-  onDoneClicked(): void {
+  onCancelClicked(): void {
     this.dialogRef.close();
   }
 

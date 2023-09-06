@@ -15,10 +15,9 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {MainPageContainerComponent} from './main-page-container.component';
 import {MainPageModule} from './main-page/main-page.module';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 
@@ -27,7 +26,6 @@ import {RouterModule} from '@angular/router';
   declarations: [MainPageContainerComponent],
   imports: [
     CommonModule,
-    FlexLayoutModule,
     RouterModule,
     MainPageModule,
     MatProgressSpinnerModule,
