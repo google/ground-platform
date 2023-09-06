@@ -261,7 +261,7 @@ export class NavigationService {
   /**
    * Navigate to the URL for error.
    */
-  error(error: any) {
+  error(error: Error) {
     this.router.navigate([NavigationService.ERROR, {error}]);
   }
 }
