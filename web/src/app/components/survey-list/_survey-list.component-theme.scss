@@ -10,20 +10,22 @@
     background-color: #edeee9;
   }
 
-  .survey-card {
-    background-color: #f9faf4; /* M3/sys/light/surface */
-  }
+  .mat-mdc-card {
+    &.survey-card {
+      background-color: #f9faf4; /* M3/sys/light/surface */
+    }
 
-  .new-survey-card {
-    background-color: #dde5d9; /* M3/sys/light/surface-variant */
-  }
+    &.new-survey-card {
+      background-color: #dde5d9; /* M3/sys/light/surface-variant */
+    }
 
-  .add-icon-container {
-    background: #89FA9B; /* M3/sys/light/primary-container */
-  }
-
-  .survey-title {
-    color: #1a1c19; /* M3/sys/light/on-surface */
+    .add-icon-container {
+      background: #89FA9B; /* M3/sys/light/primary-container */
+    }
+  
+    .survey-title {
+      color: #1a1c19; /* M3/sys/light/on-surface */
+    }
   }
 }
 
@@ -31,6 +33,13 @@
   $typography-config: mat.get-typography-config($theme);
 
   // TODO(amysorto): use typography-config once typography levels defined
+
+  .page-title {
+    font-family: mat.font-family($typography-config);
+    font-style: normal;
+    font-weight: 400;
+    font-size: 45px;
+  }
 
   .survey-title {
     font-family: mat.font-family($typography-config);
