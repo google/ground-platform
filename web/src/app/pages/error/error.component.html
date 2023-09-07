@@ -1,5 +1,5 @@
 <!--
-  Copyright 2022 Google LLC
+  Copyright 2023 Google LLC
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,20 +13,17 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<div *ngIf="auth.getUser$() | async as user">
-  <div *ngIf="user.isAuthenticated">
-    <button mat-icon-button (click)="openProfileDialog($event)">
-      <img
-        *ngIf="user.photoURL; else showDefaultPhoto"
-        referrerpolicy="no-referrer"
-        src="{{ user.photoURL }}=s32"
-        class="user-thumb"
-      />
-      <ng-template #showDefaultPhoto>
-        <user-avatar
-          [displayText]="user.displayName?.charAt(0)"
-        ></user-avatar>
-      </ng-template>
-    </button>
+
+<div class="page">
+  <ground-header> </ground-header>
+
+  <div class="container">
+    <div class="card">
+      <div class="content">
+        <h1>Oops, something went wrong</h1>
+
+        <h2>{{error}}</h2>
+      </div>
+    </div>
   </div>
 </div>

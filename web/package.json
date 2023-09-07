@@ -18,8 +18,8 @@
     "lint:fix": "npm run lint -- --fix",
     "e2e": "ng e2e",
     "posttest": "./posttest.sh && npm run lint",
-    "login": "firebase login",
-    "deploy:dev": "npm run build:dev && npm run login && firebase deploy --only hosting --project"
+    "login": "npx firebase login",
+    "deploy:dev": "npm run build:dev && npm run login && npx firebase deploy --only hosting --project"
   },
   "private": true,
   "dependencies": {

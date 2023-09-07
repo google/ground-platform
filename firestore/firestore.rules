@@ -81,7 +81,7 @@
      * survey (i.e., modify the survey document).
      */
     function canManageSurvey(surveyId, email) {
-      return canAccess(email) && role(surveyId, email) in ['owner', 'survey-organizer'];
+      return canAccess(email) && role(surveyId, email) in ['OWNER', 'SURVEY_ORGANIZER'];
     }
 
     /**
@@ -90,7 +90,7 @@
      * submissions).
      */
     function canContributeToSurvey(surveyId, email) {
-      return canAccess(email) && role(surveyId, email) in ['owner', 'survey-organizer', 'data-collector'];
+      return canAccess(email) && role(surveyId, email) in ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR'];
     }
 
     // All users need to be able to read the passlist for rules to work.
