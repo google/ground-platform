@@ -17,8 +17,8 @@
 import {TestBed} from '@angular/core/testing';
 
 import {DataImportService} from 'app/services/data-import/data-import.service';
-import {HttpClient} from '@angular/common/http';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {HttpClientService} from '../http-client/http-client.service';
 
 describe('DataImportService', () => {
   let service: DataImportService;
@@ -26,7 +26,7 @@ describe('DataImportService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [MatDialogModule],
-      providers: [{provide: HttpClient, useValue: {}}],
+      providers: [{provide: HttpClientService, useValue: {}}],
     });
     service = TestBed.inject(DataImportService);
   });

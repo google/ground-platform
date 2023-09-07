@@ -22,6 +22,7 @@ import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {AngularFireFunctions} from '@angular/fire/compat/functions';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {AuthService} from 'app/services/auth/auth.service';
+import {HttpClientService} from '../http-client/http-client.service';
 
 describe('AuthService', () => {
   beforeEach(() => {
@@ -33,6 +34,7 @@ describe('AuthService', () => {
         {provide: AngularFireAuth, useValue: {authState: NEVER}},
         {provide: DataStoreService, useValue: {user$: () => of()}},
         {provide: Router, useValue: {}},
+        {provide: HttpClientService, useValue: {}}
       ],
     });
   });

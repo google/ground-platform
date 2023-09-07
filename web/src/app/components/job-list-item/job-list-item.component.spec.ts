@@ -49,6 +49,7 @@ import {Coordinate} from 'app/models/geometry/coordinate';
 import {Job} from 'app/models/job.model';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Survey} from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
 const authState = {
   displayName: null,
   isAnonymous: true,
@@ -182,6 +183,7 @@ describe('JobListItemComponent', () => {
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
         {provide: SubmissionService, useValue: submissionServiceSpy},
         {provide: AngularFirestore, useValue: {}},
+        {provide: AuthService, useValue: {}},
         {
           provide: AngularFireAuth,
           useValue: mockAngularFireAuth,
