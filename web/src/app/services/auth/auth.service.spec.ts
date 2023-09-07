@@ -34,7 +34,7 @@ describe('AuthService', () => {
         {provide: AngularFireAuth, useValue: {authState: NEVER}},
         {provide: DataStoreService, useValue: {user$: () => of()}},
         {provide: Router, useValue: {}},
-        {provide: HttpClientService, useValue: {}}
+        {provide: HttpClientService, useValue: {}},
       ],
     });
   });

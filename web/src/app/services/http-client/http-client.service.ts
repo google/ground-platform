@@ -23,7 +23,10 @@ import {Injectable} from '@angular/core';
   providedIn: 'root',
 })
 export class HttpClientService {
-  constructor(private httpClient: HttpClient, private  afAuth: AngularFireAuth) {}
+  constructor(
+    private httpClient: HttpClient,
+    private afAuth: AngularFireAuth
+  ) {}
 
   /**
    * Sends an HTTP post with the Authorization Bearer token of the current user
@@ -32,8 +35,6 @@ export class HttpClientService {
   async postWithAuth<T>(url: string, body: any | null): Promise<T> {
     const token = await firstValueFrom(this.afAuth.idToken);
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return firstValueFrom(
-      this.httpClient.post<T>(url, body, {headers})
-    );
+    return firstValueFrom(this.httpClient.post<T>(url, body, {headers}));
   }
 }

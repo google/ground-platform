@@ -31,8 +31,8 @@ import {Role} from 'app/models/role.model';
 import firebase from 'firebase/compat/app';
 import {firstValueFrom} from 'rxjs';
 import {AngularFireFunctions} from '@angular/fire/compat/functions';
-import { HttpClientService } from '../http-client/http-client.service';
-import { environment } from 'environments/environment';
+import {HttpClientService} from '../http-client/http-client.service';
+import {environment} from 'environments/environment';
 
 const ANONYMOUS_USER: User = {
   id: '',
@@ -73,9 +73,12 @@ export class AuthService {
   async createSessionCookie() {
     try {
       // TODO(#1159): Refactor access to Cloud Functions into new service.
-      await this.httpClientService.postWithAuth(`${environment.cloudFunctionsUrl}/sessionLogin`, {});
+      await this.httpClientService.postWithAuth(
+        `${environment.cloudFunctionsUrl}/sessionLogin`,
+        {}
+      );
     } catch (err: any) {
-      console.error("Session login failed. Some features may be unavailable");
+      console.error('Session login failed. Some features may be unavailable');
     }
   }
 

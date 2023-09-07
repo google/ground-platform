@@ -49,7 +49,7 @@ import {Coordinate} from 'app/models/geometry/coordinate';
 import {Job} from 'app/models/job.model';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Survey} from 'app/models/survey.model';
-import { AuthService } from 'app/services/auth/auth.service';
+import {AuthService} from 'app/services/auth/auth.service';
 const authState = {
   displayName: null,
   isAnonymous: true,

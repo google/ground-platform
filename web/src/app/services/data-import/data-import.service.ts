@@ -50,7 +50,10 @@ export class DataImportService {
     } else {
       throw new Error('Invalid file format');
     }
-    
-    return this.httpClientService.postWithAuth<ImportResult>(importUrl, formData);
+
+    return this.httpClientService.postWithAuth<ImportResult>(
+      importUrl,
+      formData
+    );
   }
 }

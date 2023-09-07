@@ -32,7 +32,7 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {List} from 'immutable';
-import { AuthService } from 'app/services/auth/auth.service';
+import {AuthService} from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-job-list-item',
@@ -175,7 +175,8 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     await this.authService.createSessionCookie();
     window.open(
       `${environment.cloudFunctionsUrl}/exportCsv?` +
-      `survey=${this.surveyId}&job=${this.job?.id}`, '_blank'
+        `survey=${this.surveyId}&job=${this.job?.id}`,
+      '_blank'
     );
   }
 
