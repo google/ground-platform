@@ -13,6 +13,10 @@
   .mat-mdc-card {
     &.survey-card {
       background-color: #f9faf4; /* M3/sys/light/surface */
+
+      &:hover {
+        background-color: #dde5d9; /* M3/sys/light/surface-variant */
+      }
     }
 
     &.new-survey-card {
