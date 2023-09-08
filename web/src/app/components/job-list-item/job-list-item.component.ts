@@ -32,6 +32,7 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {List} from 'immutable';
+import {AuthService} from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-job-list-item',
@@ -64,6 +65,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
     private submissionService: SubmissionService,
+    private authService: AuthService,
     readonly surveyService: SurveyService
   ) {
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
@@ -168,10 +170,13 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     });
   }
 
-  getDownloadCsvUrl() {
-    return (
+  async onDownloadCsvClick() {
+    // TODO(#1160): This can be optimized to only create a cookie when missing or expired.
+    await this.authService.createSessionCookie();
+    window.open(
       `${environment.cloudFunctionsUrl}/exportCsv?` +
-      `survey=${this.surveyId}&job=${this.job?.id}`
+        `survey=${this.surveyId}&job=${this.job?.id}`,
+      '_blank'
     );
   }
 
