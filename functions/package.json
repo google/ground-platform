@@ -19,6 +19,7 @@
     "@fast-csv/format": "4.3.5",
     "@terraformer/wkt": "2.1.2",
     "busboy": "1.5.0",
+    "cookie-parser": "^1.4.6",
     "cors": "2.8.5",
     "csv-parser": "2.3.3",
     "firebase-admin": "11.5.0",
@@ -37,6 +38,7 @@
   "private": true,
   "devDependencies": {
     "@types/busboy": "^1.5.0",
+    "@types/cookie-parser": "^1.4.4",
     "@types/cors": "2.8.12",
     "@types/jasmine": "^4.3.5",
     "@types/jsonstream": "0.8.30",
