@@ -16,19 +16,19 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TaskButtonComponent } from './task-button.component';
+import { AddTaskButtonComponent } from './add-task-button.component';
 
 describe('TaskButtonComponent', () => {
-  let component: TaskButtonComponent;
-  let fixture: ComponentFixture<TaskButtonComponent>;
+  let component: AddTaskButtonComponent;
+  let fixture: ComponentFixture<AddTaskButtonComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskButtonComponent ]
+      declarations: [ AddTaskButtonComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TaskButtonComponent);
+    fixture = TestBed.createComponent(AddTaskButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

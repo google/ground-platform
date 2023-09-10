@@ -15,12 +15,12 @@
  */
 
 import {NgModule} from '@angular/core';
-import {TaskButtonComponent} from './task-button.component';
+import {AddTaskButtonComponent} from './add-task-button.component';
 import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
-  declarations: [TaskButtonComponent],
+  declarations: [AddTaskButtonComponent],
   imports: [MatIconModule],
-  exports: [TaskButtonComponent],
+  exports: [AddTaskButtonComponent],
 })
-export class TaskButtonModule {}
+export class AddTaskButtonModule {}

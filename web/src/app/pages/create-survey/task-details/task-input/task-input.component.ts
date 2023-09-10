@@ -23,8 +23,6 @@ import {
   OnChanges,
   SimpleChanges,
   OnDestroy,
-  ViewChildren,
-  QueryList,
   HostListener,
   ElementRef,
   ViewChild,
@@ -38,19 +36,18 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { DialogService } from 'app/services/dialog/dialog.service';
-import { TaskType } from 'app/models/task/task.model';
-import { Option } from 'app/models/task/option.model';
-import { List } from 'immutable';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {TaskType} from 'app/models/task/task.model';
+import {Option} from 'app/models/task/option.model';
+import {List} from 'immutable';
 import {
   MultipleChoice,
   Cardinality,
 } from 'app/models/task/multiple-choice.model';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { JobService } from 'app/services/job/job.service';
-import { firstValueFrom, Subscription } from 'rxjs';
-import { TaskGroup } from '../task-details.component';
-
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {JobService} from 'app/services/job/job.service';
+import {firstValueFrom, Subscription} from 'rxjs';
+import {TaskGroup} from '../task-details.component';
 
 export interface TaskTypeSelectOption {
   icon: string;
@@ -76,12 +73,12 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   taskOptions: MultipleChoice | undefined;
   selectTaskOptions: TaskTypeSelectOption[];
   @Input() taskIndex?: number;
-  // TODO: This name TaskGroup is ambigous. We need to resolve this in
+  // TODO(#1163): This name TaskGroup is ambiguous. We need to resolve this in
   // relation to the TaskType above.
   @Input() group?: TaskGroup;
 
   taskGroup: FormGroup;
-  @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
+  @ViewChild('questionInput', {static: true}) questionInput?: ElementRef;
 
   /** When expanded, options and actions below the fold are visible to the user. */
   expanded: boolean;
@@ -157,7 +154,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
       label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select task to be of text type.
-      selectTaskOption: this.selectTaskOptions[TaskType.TEXT]
+      selectTaskOption: this.selectTaskOptions[TaskType.TEXT],
     });
   }
 
@@ -243,7 +240,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({ selectTaskOption: event });
+    this.taskGroup.patchValue({selectTaskOption: event});
     if (event.type === TaskType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
@@ -267,7 +264,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: { label: string; code: string }, index: number): void {
+  onOptionUpdate(event: {label: string; code: string}, index: number): void {
     const option = this.jobService.createOption(event.code, event.label, index);
     const options = this.setTaskOptions(index, option);
     this.emitTaskOptions(options);
@@ -279,7 +276,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         .openConfirmationDialog(
           'Warning',
           'Are you sure you wish to delete this option? ' +
-          'Any associated data will be lost. This cannot be undone.'
+            'Any associated data will be lost. This cannot be undone.'
         )
         .afterClosed()
     ).then(dialogResult => {

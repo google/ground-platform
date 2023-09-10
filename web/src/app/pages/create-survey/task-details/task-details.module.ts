@@ -16,14 +16,14 @@
 
 import { NgModule } from '@angular/core';
 import { TaskDetailsComponent } from './task-details.component';
-import { TaskButtonModule } from './task-button/task-button.module';
+import { AddTaskButtonModule } from './add-task-button/add-task-button.module';
 import { TaskInputModule } from './task-input/task-input.module';
 import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [TaskDetailsComponent],
   imports: [
-    TaskButtonModule,
+    AddTaskButtonModule,
     TaskInputModule,
     CommonModule
   ],

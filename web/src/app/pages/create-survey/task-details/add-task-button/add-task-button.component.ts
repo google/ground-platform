@@ -18,11 +18,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { TaskGroup } from '../task-details.component';
 
 @Component({
-  selector: 'task-button',
-  templateUrl: './task-button.component.html',
-  styleUrls: ['./task-button.component.scss'],
+  selector: 'add-task-button',
+  templateUrl: './add-task-button.component.html',
+  styleUrls: ['./add-task-button.component.scss'],
 })
-export class TaskButtonComponent {
+export class AddTaskButtonComponent {
   @Input() taskGroup?: TaskGroup;
 
   constructor() {

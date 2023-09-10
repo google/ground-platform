@@ -16,23 +16,22 @@
 
 import {NgModule} from '@angular/core';
 import {TaskInputComponent} from './task-input.component';
-import {MatIconModule} from '@angular/material/icon';
 import {CommonModule} from '@angular/common';
-import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
+import {MatButtonModule} from '@angular/material/button';
+import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
 
 @NgModule({
   declarations: [TaskInputComponent],
   imports: [
     MatIconModule,
     CommonModule,
-    FlexLayoutModule,
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
@@ -42,6 +41,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
     MatSlideToggleModule,
     MatButtonModule,
     DragDropModule,
+    MatDialogModule,
 ],
   exports: [TaskInputComponent],
 })
