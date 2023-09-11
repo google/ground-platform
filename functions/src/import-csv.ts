@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 
-import * as functions from 'firebase-functions';
+import {https, Response} from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
 import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
+import { DecodedIdToken } from 'firebase-admin/auth';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'survey' id and 'job' id to the database.
  */
 export async function importCsvHandler(
-  req: functions.https.Request,
-  res: functions.Response<any>
+  req: https.Request,
+  res: Response<any>,
+  idToken: DecodedIdToken
 ) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== 'POST') {
@@ -57,6 +59,9 @@ export async function importCsvHandler(
       res.status(HttpStatus.BAD_REQUEST).end();
       return;
     }
+
+    // TODO(#941): Verify user is OWNER or SURVEY_ORGANIZER of the survey.
+
     console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is

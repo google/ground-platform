@@ -15,9 +15,8 @@
  */
 
 import {environment} from 'environments/environment';
-import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {firstValueFrom} from 'rxjs';
+import {HttpClientService} from '../http-client/http-client.service';
 
 const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;
 
@@ -32,9 +31,9 @@ export interface ImportResult {
   providedIn: 'root',
 })
 export class DataImportService {
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClientService: HttpClientService) {}
 
-  importLocationsOfInterest(
+  async importLocationsOfInterest(
     surveyId: string,
     jobId: string,
     file: File
@@ -51,8 +50,10 @@ export class DataImportService {
     } else {
       throw new Error('Invalid file format');
     }
-    return firstValueFrom(
-      this.httpClient.post<ImportResult>(importUrl, formData)
+
+    return this.httpClientService.postWithAuth<ImportResult>(
+      importUrl,
+      formData
     );
   }
 }
