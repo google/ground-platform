@@ -18,9 +18,9 @@ import {NgModule} from '@angular/core';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {TitleDialogComponent} from './title-dialog.component';
 import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatInputModule} from '@angular/material/input';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatFormFieldModule} from '@angular/material/form-field';
 
 @NgModule({
   declarations: [TitleDialogComponent],
