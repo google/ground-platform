@@ -6,15 +6,17 @@
 
   // TODO(amysorto): use typography-config once typography levels defined
 
-  .title {
-    font-family: mat.font-family($typography-config);
-    font-size: 1.8em;
-    font-weight: bold;
-  }
-
-  .content {
-    text-align: center;
-    padding: 40px;
+  .body-container {
+    .title {
+      font-family: mat.font-family($typography-config);
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+  
+    .content {
+      text-align: center;
+      padding: 40px;
+    }
   }
 }
 
