@@ -20,6 +20,7 @@ import * as functions from 'firebase-functions';
 import { onHttpsRequest } from "./handlers";
 import { handleProfileRefresh } from '@/profile-refresh';
 import { importCsvHandler } from '@/import-csv';
+import { sessionLoginHandler } from '@/session-login';
 import { importGeoJsonHandler } from '@/import-geojson';
 import { exportCsvHandler } from '@/export-csv';
 import { surveyPathTemplate, loiPathTemplate, onWriteSurveyHandler } from '@/on-write-survey';
@@ -38,7 +39,7 @@ export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const onWriteSurvey = functions.firestore
   .document(surveyPathTemplate)
-  .onWrite(onWriteSurveyHandler);
+.onWrite(onWriteSurveyHandler);
 
 export const onWriteLoi = functions.firestore
   .document(loiPathTemplate)
@@ -47,3 +48,5 @@ export const onWriteLoi = functions.firestore
 export const onWriteSubmission = functions.firestore
   .document(submissionPathTemplate)
   .onWrite(onWriteSubmissionHandler);
+
+export const sessionLogin = onHttpsRequest(sessionLoginHandler);

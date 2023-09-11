@@ -15,23 +15,43 @@
  */
 
 import * as cors from 'cors';
-import * as express from "express";
-import * as functions from 'firebase-functions';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { https, Response } from 'firebase-functions';
+import { getDecodedIdToken } from './common/auth';
+import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
+import * as cookieParser from 'cookie-parser';
 
-const corsOptions = {origin: true};
+const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
-function onError(res: any, err: any) {
-    console.error(err);
-    res.status(500).send('Internal error');
+/**
+ * Checks for and extracts the current user's details, passing them to the provided function if found.
+ * Sends an UNAUTHORIZED HTTP response code if not present or invalid.
+ */
+async function requireIdToken(req: https.Request, res: Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
+  const token = await getDecodedIdToken(req);
+  if (token) {
+    return next(token);
+  } else {
+    return res.status(UNAUTHORIZED).send('Unauthorized');
+  }
 }
 
-export type HttpsRequestHandler = (req: functions.https.Request, res: express.Response) => Promise<any>
+function onError(res: any, err: any) {
+  console.error(err);
+  res.status(INTERNAL_SERVER_ERROR).send('Internal error');
+}
+
+export type HttpsRequestHandler = (req: https.Request, res: Response, idToken: DecodedIdToken) => Promise<any>
 
 export function onHttpsRequest(handler: HttpsRequestHandler) {
-  return functions.https.onRequest((req: functions.https.Request, res: express.Response) =>
+  return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
-      handler(req, res).catch((error: any) => onError(res, error))
+      cookieParser()(req, res, () => 
+        requireIdToken(req, res, (idToken: DecodedIdToken) =>
+          handler(req, res, idToken).catch((error: any) => onError(res, error))
+        )
+      )
     )
   );
 }

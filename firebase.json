@@ -36,6 +36,10 @@
         "function": "exportCsv"
       },
       {
+        "source": "/sessionLogin",
+        "function": "sessionLogin"
+      },
+      {
         "source": "**/!(*.*)",
         "destination": "/index.html"
       }

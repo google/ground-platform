@@ -38,7 +38,7 @@ limitations under the License.
             <mat-icon>cloud_upload</mat-icon>
             <span>Import lois</span>
           </button>
-          <a class="download" [href]="getDownloadCsvUrl()" target="_blank">
+          <a class="download" (click)="onDownloadCsvClick()" target="_blank">
             <button mat-menu-item>
               <mat-icon>cloud_download</mat-icon>
               <span>Download submissions</span>
