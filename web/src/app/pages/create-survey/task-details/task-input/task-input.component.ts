@@ -253,7 +253,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   /*
    * This is used to track input added or removed in case of task options.
    */
-  trackByFn(index: number): number {
+  getIndex(index: number): number {
     return index;
   }
 
