@@ -61,10 +61,15 @@ export class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   async mergeUserProfile(user: functions.auth.UserRecord) {
-    const { uid, email, displayName, photoURL } = user;
-    await this.db_
-      .doc(`users/${uid}`)
-      .set({ email, displayName, photoURL }, { merge: true });
+    const {uid, email, displayName, photoURL} = user;
+    await this.db_.doc(`users/${uid}`).set(
+      {
+        email,
+        displayName,
+        photoURL: photoURL && Datastore.trimPhotoURLSizeSuffix(photoURL),
+      },
+      {merge: true}
+    );
   }
 
   async fetch_(
@@ -158,5 +163,14 @@ export class Datastore {
       );
     }
     return value;
+  }
+
+  /**
+   * Removes a possible size suffix from the user's photo URL.
+   *
+   * @param photoURL The user's photo URL.
+   */
+  static trimPhotoURLSizeSuffix(photoURL: string): string {
+    return photoURL.replace(/=s.*$/g, '');
   }
 }
