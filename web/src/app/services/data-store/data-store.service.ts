@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import { getStorage, getDownloadURL, ref } from 'firebase/storage';
-import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { DocumentData, FieldPath } from '@angular/fire/firestore';
-import { FirebaseDataConverter } from 'app/converters/firebase-data-converter';
-import { firstValueFrom, Observable, of } from 'rxjs';
-import { Survey } from 'app/models/survey.model';
-import { map } from 'rxjs/operators';
-import { User } from 'app/models/user.model';
-import { LocationOfInterest } from 'app/models/loi.model';
-import { Job } from 'app/models/job.model';
-import { List, Map } from 'immutable';
-import { Submission } from 'app/models/submission/submission.model';
-import { Role } from 'app/models/role.model';
-import { OfflineBaseMapSource } from 'app/models/offline-base-map-source';
-import { LoiDataConverter } from 'app/converters/loi-converter/loi-data-converter';
-import { deleteField, serverTimestamp } from 'firebase/firestore';
-import { Task } from 'app/models/task/task.model';
+import {getStorage, getDownloadURL, ref} from 'firebase/storage';
+import {Injectable} from '@angular/core';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {DocumentData, FieldPath} from '@angular/fire/firestore';
+import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
+import {firstValueFrom, Observable, of} from 'rxjs';
+import {Survey} from 'app/models/survey.model';
+import {map} from 'rxjs/operators';
+import {User} from 'app/models/user.model';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {Job} from 'app/models/job.model';
+import {List, Map} from 'immutable';
+import {Submission} from 'app/models/submission/submission.model';
+import {Role} from 'app/models/role.model';
+import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
+import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {deleteField, serverTimestamp} from 'firebase/firestore';
+import {Task} from 'app/models/task/task.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -47,7 +47,7 @@ export class DataStoreService {
     'survey-organizer',
     'viewer',
   ];
-  constructor(private db: AngularFirestore) { }
+  constructor(private db: AngularFirestore) {}
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
@@ -99,7 +99,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({ title: newTitle }, { merge: true });
+      .set({title: newTitle}, {merge: true});
   }
 
   /**
@@ -117,7 +117,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({ title: newTitle, description: newDescription }, { merge: true });
+      .set({title: newTitle, description: newDescription}, {merge: true});
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
@@ -243,10 +243,10 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  lois$({ id }: Survey): Observable<List<LocationOfInterest>> {
+  lois$({id}: Survey): Observable<List<LocationOfInterest>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`)
-      .valueChanges({ idField: 'id' })
+      .valueChanges({idField: 'id'})
       .pipe(
         map(array =>
           List(
@@ -281,7 +281,7 @@ export class DataStoreService {
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
         ref.where('loiId', '==', loi.id)
       )
-      .valueChanges({ idField: 'id' })
+      .valueChanges({idField: 'id'})
       .pipe(
         map(array =>
           List(
@@ -330,8 +330,8 @@ export class DataStoreService {
           }
           let data = doc.data() as DocumentData;
           let survey = FirebaseDataConverter.toSurvey(surveyId, data);
-          let tasks = survey.getJob(jobId)?.tasks
-          if (!tasks || typeof tasks === "undefined") {
+          let tasks = survey.getJob(jobId)?.tasks;
+          if (!tasks || typeof tasks === 'undefined') {
             return List<Task>();
           }
           return survey.getJob(jobId)?.tasks!.toList()!;
@@ -350,7 +350,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update({ acl: FirebaseDataConverter.aclToJs(acl) });
+      .update({acl: FirebaseDataConverter.aclToJs(acl)});
   }
 
   generateId() {
@@ -408,9 +408,16 @@ export class DataStoreService {
     return getDownloadURL(ref(getStorage(), path));
   }
 
-  addOrUpdateTasks(surveyId: string, jobId: string, tasks: List<Task>): Promise<void> {
-    return this.db.collection(SURVEYS_COLLECTION_NAME).doc(surveyId).update({
-      [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJs(tasks),
-    });
+  addOrUpdateTasks(
+    surveyId: string,
+    jobId: string,
+    tasks: List<Task>
+  ): Promise<void> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .update({
+        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJs(tasks),
+      });
   }
 }

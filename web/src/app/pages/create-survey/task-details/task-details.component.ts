@@ -47,7 +47,7 @@ export class TaskDetailsComponent {
   }
 
   onQuestionAdd() {
-    let task = this.taskService.createTask(
+    const task = this.taskService.createTask(
       TaskType.TEXT,
       /* label= */
       '',

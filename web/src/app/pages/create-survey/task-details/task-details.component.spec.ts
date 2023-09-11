@@ -24,12 +24,12 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
 import {Map} from 'immutable';
-import { of } from 'rxjs';
+import {of} from 'rxjs';
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
   let fixture: ComponentFixture<TaskDetailsComponent>;
-  let survey = new Survey(
+  const survey = new Survey(
     '123',
     'title',
     'description',

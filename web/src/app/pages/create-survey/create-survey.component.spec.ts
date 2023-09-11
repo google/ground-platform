@@ -159,10 +159,9 @@ describe('CreateSurveyComponent', () => {
       })
     );
 
-    taskServiceSpy = jasmine.createSpyObj<TaskService>(
-      'TaskService',
-      ['getTasks$']
-    )
+    taskServiceSpy = jasmine.createSpyObj<TaskService>('TaskService', [
+      'getTasks$',
+    ]);
 
     TestBed.configureTestingModule({
       imports: [MatDialogModule],

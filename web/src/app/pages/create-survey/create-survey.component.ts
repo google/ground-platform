@@ -29,7 +29,7 @@ import {first} from 'rxjs';
 import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
-import { TaskService } from 'app/services/task/task.service';
+import {TaskService} from 'app/services/task/task.service';
 
 @Component({
   selector: 'create-survey',
@@ -233,7 +233,7 @@ export class CreateSurveyComponent implements OnInit {
       this.currentSurveyId!,
       this.currentSurvey!.jobs.values().next().value.id,
       tasks!
-    )
+    );
   }
 
   @ViewChild('loiSelection')

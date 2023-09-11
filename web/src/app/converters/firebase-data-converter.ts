@@ -154,7 +154,7 @@ export class FirebaseDataConverter {
   }
 
   static tasksToJs(tasks: List<Task>): {} {
-    return tasks?.map(task => this.taskToJS(task)).toJS()
+    return tasks?.map(task => this.taskToJS(task)).toJS();
   }
 
   /**
