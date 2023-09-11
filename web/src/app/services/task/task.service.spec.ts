@@ -14,19 +14,35 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-
-import { TaskService } from './task.service';
+import {TestBed} from '@angular/core/testing';
+import {TaskService} from './task.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {RouterTestingModule} from '@angular/router/testing';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Subject} from 'rxjs';
+import {Survey} from 'app/models/survey.model';
 
 describe('TaskService', () => {
-  let service: TaskService;
+  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  const activeSurvey$ = new Subject<Survey | null>();
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(TaskService);
+    TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
+      providers: [
+        {provide: DataStoreService, useValue: dataStoreServiceStub},
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => activeSurvey$,
+          },
+        },
+      ],
+    });
   });
 
   it('should be created', () => {
+    const service: TaskService = TestBed.inject(TaskService);
     expect(service).toBeTruthy();
   });
 });

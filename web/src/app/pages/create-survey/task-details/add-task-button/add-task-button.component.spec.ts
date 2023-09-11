@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AddTaskButtonComponent } from './add-task-button.component';
+import {AddTaskButtonComponent} from './add-task-button.component';
 
 describe('TaskButtonComponent', () => {
   let component: AddTaskButtonComponent;
@@ -24,9 +24,8 @@ describe('TaskButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AddTaskButtonComponent ]
-    })
-    .compileComponents();
+      declarations: [AddTaskButtonComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AddTaskButtonComponent);
     component = fixture.componentInstance;

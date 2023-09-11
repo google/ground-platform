@@ -25,7 +25,7 @@ import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
 import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {MatButtonModule} from '@angular/material/button';
-import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/legacy-dialog';
+// import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 
 @NgModule({
   declarations: [TaskInputComponent],
@@ -41,8 +41,8 @@ import { MatLegacyDialogModule as MatDialogModule } from '@angular/material/lega
     MatSlideToggleModule,
     MatButtonModule,
     DragDropModule,
-    MatDialogModule,
-],
+    // MatDialogModule,
+  ],
   exports: [TaskInputComponent],
 })
 export class TaskInputModule {}

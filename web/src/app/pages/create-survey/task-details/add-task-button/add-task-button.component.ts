@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { TaskGroup } from '../task-details.component';
+import {Component, Input} from '@angular/core';
+import {TaskGroup} from '../task-details.component';
 
 @Component({
   selector: 'add-task-button',
@@ -25,15 +25,14 @@ import { TaskGroup } from '../task-details.component';
 export class AddTaskButtonComponent {
   @Input() taskGroup?: TaskGroup;
 
-  constructor() {
-  }
+  constructor() {}
 
   taskText(): string {
     switch (this.taskGroup) {
       case TaskGroup.QUESTION:
-        return "Answer a question"
+        return 'Answer a question';
       default:
-        return ""
+        return '';
     }
   }
 }

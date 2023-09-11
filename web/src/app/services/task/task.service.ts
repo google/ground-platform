@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {MultipleChoice} from 'app/models/task/multiple-choice.model';
 import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from '../data-store/data-store.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {List} from 'immutable';
 import {Observable, switchMap} from 'rxjs';
 import {SurveyService} from '../survey/survey.service';
@@ -38,15 +38,18 @@ export class TaskService {
 
   constructor(
     private dataStoreService: DataStoreService,
-    private surveyService: SurveyService,
-    private dataStore: DataStoreService
+    private surveyService: SurveyService
   ) {
-    this.tasks$ = this.surveyService.getActiveSurvey$().pipe(
-      switchMap(survey => {
-        let jobId = survey.jobs.values().next().value.id;
-        return this.dataStore.tasks$(survey.id, jobId);
-      })
-    );
+    this.tasks$ = this.surveyService
+      .getActiveSurvey$()
+      .pipe(
+        switchMap(survey =>
+          this.dataStoreService.tasks$(
+            survey.id,
+            survey.jobs.values().next().value.id
+          )
+        )
+      );
   }
 
   /**

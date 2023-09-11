@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component } from '@angular/core';
-import { Task, TaskType } from 'app/models/task/task.model';
-import { DialogService } from 'app/services/dialog/dialog.service';
-import { TaskService, TaskUpdate } from 'app/services/task/task.service';
-import { List } from 'immutable';
+import {Component} from '@angular/core';
+import {Task, TaskType} from 'app/models/task/task.model';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {TaskService} from 'app/services/task/task.service';
+import {List} from 'immutable';
 
 export enum TaskGroup {
   QUESTION = 1,
@@ -38,7 +38,7 @@ export class TaskDetailsComponent {
 
   constructor(
     private taskService: TaskService,
-    private dialogService: DialogService,
+    private dialogService: DialogService
   ) {
     this.taskService.getTasks$().subscribe(tasks => {
       this.tasks = tasks;
@@ -55,7 +55,7 @@ export class TaskDetailsComponent {
       false,
       /* index= */
       this.tasks.size
-    )
+    );
     this.tasks = this.tasks.push(task);
   }
 
@@ -77,7 +77,7 @@ export class TaskDetailsComponent {
       .openConfirmationDialog(
         'Warning',
         'Are you sure you wish to delete this question? Any associated data ' +
-        'will be lost. This cannot be undone.'
+          'will be lost. This cannot be undone.'
       )
       .afterClosed()
       .subscribe(dialogResult => {

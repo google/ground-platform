@@ -15,57 +15,57 @@
  */
 
 .task-type {
-    margin-left: 30px;
+  margin-left: 30px;
 }
 
 .question {
-    margin-top: 3px;
+  margin-top: 3px;
 }
 
 .icon-task-type {
-    vertical-align: middle;
-    margin-right: 20px;
-    padding-left: 10px;
+  vertical-align: middle;
+  margin-right: 20px;
+  padding-left: 10px;
 }
 
 .question-actions {
-    margin-bottom: 20px;
-    margin-right: 10px;
+  margin-bottom: 20px;
+  margin-right: 10px;
 }
 
 .vertical-divider {
-    height: 30px;
-    margin: 3px 20px;
+  height: 30px;
+  margin: 3px 20px;
 }
 
 .required-toggle {
-    padding-top: 5px;
+  padding-top: 5px;
 }
 
 .required-label {
-    margin-right: 20px;
+  margin-right: 20px;
 }
 
 .question-container {
-    border-radius: 10px;
-    padding: 0px 10px;
-    margin-top: 10px;
-    border-style: solid;
+  border-radius: 10px;
+  padding: 0px 10px;
+  margin-top: 10px;
+  border-style: solid;
 }
 
 .drag-icon {
-    display: block;
-    margin: 0px auto;
-    cursor: move;
-    padding: 5px;
-    visibility: hidden;
+  display: block;
+  margin: 0px auto;
+  cursor: move;
+  padding: 5px;
+  visibility: hidden;
 }
 
 .question-container:hover .drag-icon,
 .question-container:focus-within .drag-icon {
-    visibility: visible;
+  visibility: visible;
 }
 
 .add-option {
-    margin-left: 30px;
+  margin-left: 30px;
 }

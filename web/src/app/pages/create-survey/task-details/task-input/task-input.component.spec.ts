@@ -13,19 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { TaskInputComponent } from './task-input.component';
+import {TaskInputComponent} from './task-input.component';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import {Map} from 'immutable';
+import { Survey } from 'app/models/survey.model';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
+import { of } from 'rxjs';
 
 describe('TaskInputComponent', () => {
   let component: TaskInputComponent;
   let fixture: ComponentFixture<TaskInputComponent>;
+  let survey = new Survey(
+    '123',
+    'title',
+    'description',
+    Map<string, Job>(),
+    Map<string, Role>()
+  );
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskInputComponent ]
-    })
-    .compileComponents();
+      declarations: [TaskInputComponent],
+      providers: [
+        {provide: DataStoreService, useValue: {generateId: () => '123'}},
+        {provide: DialogService, useValue: {}},
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => of(survey),
+          },
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskInputComponent);
     component = fixture.componentInstance;
