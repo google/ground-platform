@@ -91,7 +91,7 @@ export class TaskDetailsComponent {
     return TaskGroup.QUESTION;
   }
 
-  trackByFn(index: number) {
+  getIndex(index: number) {
     return index;
   }
 
