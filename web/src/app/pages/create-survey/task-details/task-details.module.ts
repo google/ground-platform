@@ -16,10 +16,13 @@
 
 import {NgModule} from '@angular/core';
 import {TaskDetailsComponent} from './task-details.component';
+import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
+import {TaskInputModule} from './task-input/task-input.module';
+import {CommonModule} from '@angular/common';
 
 @NgModule({
   declarations: [TaskDetailsComponent],
-  imports: [],
+  imports: [AddTaskButtonModule, TaskInputModule, CommonModule],
   exports: [TaskDetailsComponent],
 })
 export class TaskDetailsModule {}

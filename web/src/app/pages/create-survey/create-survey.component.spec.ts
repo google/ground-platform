@@ -44,6 +44,7 @@ import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
 import Immutable from 'immutable';
+import {TaskService} from 'app/services/task/task.service';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -56,6 +57,7 @@ describe('CreateSurveyComponent', () => {
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
+  let taskServiceSpy: jasmine.SpyObj<TaskService>;
 
   const surveyId = 'survey001';
   const newSurveyId = 'survey002';
@@ -157,6 +159,10 @@ describe('CreateSurveyComponent', () => {
       })
     );
 
+    taskServiceSpy = jasmine.createSpyObj<TaskService>('TaskService', [
+      'getTasks$',
+    ]);
+
     TestBed.configureTestingModule({
       imports: [MatDialogModule],
       declarations: [
@@ -171,6 +177,7 @@ describe('CreateSurveyComponent', () => {
         {provide: JobService, useValue: jobServiceSpy},
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
         {provide: ActivatedRoute, useValue: route},
+        {provide: TaskService, useValue: taskServiceSpy},
       ],
     }).compileComponents();
   }));

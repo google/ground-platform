@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-h1,
-h2 {
-  text-align: left;
-}
+import {Component, Input} from '@angular/core';
+import {TaskGroup} from '../task-details.component';
 
-h2 {
-  font-size: 1.8ch;
-}
+@Component({
+  selector: 'add-task-button',
+  templateUrl: './add-task-button.component.html',
+  styleUrls: ['./add-task-button.component.scss'],
+})
+export class AddTaskButtonComponent {
+  @Input() taskGroup?: TaskGroup;
 
-#tasks-help-text {
-  padding: 3ch;
-}
+  constructor() {}
 
-task-button:hover {
-  cursor: pointer;
+  taskText(): string {
+    switch (this.taskGroup) {
+      case TaskGroup.QUESTION:
+        return 'Answer a question';
+      default:
+        return '';
+    }
+  }
 }
