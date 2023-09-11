@@ -15,6 +15,7 @@
 -->
 <div class="header">
   <div>
+    <ng-content select="[beginning]"></ng-content>
     <img class="logo" src="/assets/img/logo.svg" (click)="onSurveysButtonClick()" />
     <span class="ground-title">Ground</span>
     <ng-content select="[left]"></ng-content>
