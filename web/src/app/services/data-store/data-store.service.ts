@@ -328,13 +328,13 @@ export class DataStoreService {
           if (!doc.exists) {
             return List<Task>();
           }
-          let data = doc.data() as DocumentData;
-          let survey = FirebaseDataConverter.toSurvey(surveyId, data);
-          let tasks = survey.getJob(jobId)?.tasks;
+          const data = doc.data() as DocumentData;
+          const survey = FirebaseDataConverter.toSurvey(surveyId, data);
+          const tasks = survey.getJob(jobId)?.tasks;
           if (!tasks || typeof tasks === 'undefined') {
             return List<Task>();
           }
-          return survey.getJob(jobId)?.tasks!.toList()!;
+          return tasks.toList()!;
         })
       );
   }
