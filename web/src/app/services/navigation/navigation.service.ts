@@ -232,11 +232,11 @@ export class NavigationService {
     this.router.navigate([NavigationService.SURVEYS_SEGMENT]);
   }
 
-  navigateToCreateSurvey(surveyId: string | null): void {
+  navigateToCreateSurvey(surveyId: string | null, replaceUrl = false): void {
     const url = `${NavigationService.SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
     }/${NavigationService.SURVEYS_CREATE}`;
-    this.router.navigateByUrl(url, {replaceUrl: true});
+    this.router.navigateByUrl(url, {replaceUrl: replaceUrl});
   }
 
   navigateToEditSurvey(surveyId: string): void {

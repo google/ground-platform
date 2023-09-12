@@ -25,7 +25,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
-import {first} from 'rxjs';
+import {filter, first} from 'rxjs';
 import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -37,7 +37,7 @@ import {TaskService} from 'app/services/task/task.service';
   styleUrls: ['./create-survey.component.scss'],
 })
 export class CreateSurveyComponent implements OnInit {
-  currentSurveyId: string | null = null;
+  currentSurveyId?: string;
   currentSurvey?: Survey;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
   // We should display a loading bar while we are waiting for the data to make a decision
@@ -58,25 +58,34 @@ export class CreateSurveyComponent implements OnInit {
 
   ngOnInit(): void {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
-      if (surveyId) {
-        this.surveyService.activateSurvey(surveyId);
-      }
-      this.currentSurveyId = surveyId;
+      this.currentSurveyId = surveyId
+        ? surveyId
+        : NavigationService.SURVEY_ID_NEW;
+      this.surveyService.activateSurvey(this.currentSurveyId);
     });
-    this.surveyService.getActiveSurvey$().subscribe(survey => {
-      this.currentSurvey = survey;
-    });
+
     this.surveyService
       .getActiveSurvey$()
-      .pipe(first())
+      .pipe(
+        filter(
+          survey =>
+            this.currentSurveyId === NavigationService.SURVEY_ID_NEW ||
+            survey.id === this.currentSurveyId
+        ),
+        first()
+      )
       .subscribe(survey => {
         if (this.isSetupFinished(survey)) {
           this.navigationService.navigateToEditSurvey(survey.id);
           return;
         }
-        this.loiService.getLocationsOfInterest$().subscribe(lois => {
-          this.setupPhase = this.getSetupPhase(survey, lois);
-        });
+        this.loiService
+          .getLocationsOfInterest$()
+          .pipe(first())
+          .subscribe(lois => {
+            this.setupPhase = this.getSetupPhase(survey, lois);
+            this.currentSurvey = survey;
+          });
       });
   }
 
@@ -164,6 +173,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
+    this.currentSurvey = this.surveyService.getCurrentSurvey();
   }
 
   async continue(): Promise<void> {
@@ -171,7 +181,7 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.SURVEY_DETAILS: {
         const createdSurveyId = await this.saveSurveyTitleAndDescription();
         if (createdSurveyId) {
-          this.navigationService.navigateToCreateSurvey(createdSurveyId);
+          this.navigationService.navigateToCreateSurvey(createdSurveyId, true);
         }
         this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
@@ -190,6 +200,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
+    this.currentSurvey = this.surveyService.getCurrentSurvey();
   }
 
   @ViewChild('surveyDetails')
@@ -197,15 +208,14 @@ export class CreateSurveyComponent implements OnInit {
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
     const [title, description] = this.surveyDetails!.toTitleAndDescription();
-    if (this.currentSurveyId) {
-      return await this.surveyService.updateTitleAndDescription(
-        this.currentSurveyId,
-        title,
-        description
-      );
-    } else {
+    if (this.currentSurveyId === NavigationService.SURVEY_ID_NEW) {
       return await this.surveyService.createSurvey(title, description);
     }
+    return await this.surveyService.updateTitleAndDescription(
+      this.currentSurveyId!,
+      title,
+      description
+    );
   }
 
   @ViewChild('jobDetails')

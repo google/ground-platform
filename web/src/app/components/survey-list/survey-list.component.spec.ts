@@ -19,7 +19,7 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Component} from '@angular/core';
-import {NEVER, of} from 'rxjs';
+import {of} from 'rxjs';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -33,6 +33,8 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
+import {Task, TaskType} from 'app/models/task/task.model';
+import {By} from '@angular/platform-browser';
 
 @Component({selector: 'ground-header', template: ''})
 class HeaderComponent {}
@@ -40,9 +42,11 @@ class HeaderComponent {}
 describe('SurveyListComponent', () => {
   let component: SurveyListComponent;
   let fixture: ComponentFixture<SurveyListComponent>;
+  let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   const dialog: Partial<MatDialog> = {};
 
-  const mockSurvey1 = new Survey(
+  // A survey that hasn't gone through creation flow
+  const incompleteSurvey = new Survey(
     'survey001',
     'title1',
     'description1',
@@ -58,7 +62,8 @@ describe('SurveyListComponent', () => {
     /* acl= */ Map()
   );
 
-  const mockSurvey2 = new Survey(
+  // A survey that has gone through creation flow
+  const completeSurvey = new Survey(
     'survey002',
     'title2',
     'description2',
@@ -68,7 +73,15 @@ describe('SurveyListComponent', () => {
         /* index */ -1,
         'green',
         'name',
-        /* tasks= */ Map()
+        /* tasks= */ Map({
+          task001: new Task(
+            'task001',
+            TaskType.TEXT,
+            'Text Field',
+            /*required=*/ true,
+            0
+          ),
+        })
       ),
     }),
     /* acl= */ Map()
@@ -83,9 +96,10 @@ describe('SurveyListComponent', () => {
   ]);
 
   beforeEach(waitForAsync(() => {
-    const navigationService = {
-      newSurvey: () => NEVER,
-    };
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      ['navigateToCreateSurvey', 'selectSurvey']
+    );
 
     TestBed.configureTestingModule({
       imports: [
@@ -98,7 +112,7 @@ describe('SurveyListComponent', () => {
       providers: [
         {provide: MatDialog, useValue: dialog},
         {provide: SurveyService, useValue: surveyServiceSpy},
-        {provide: NavigationService, useValue: navigationService},
+        {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: AngularFirestore, useValue: {}},
         {provide: AngularFireAuth, useValue: {}},
         {provide: AuthService, useValue: authServiceSpy},
@@ -108,7 +122,7 @@ describe('SurveyListComponent', () => {
 
   beforeEach(() => {
     surveyServiceSpy.getAccessibleSurveys$.and.returnValue(
-      of<Survey[]>([mockSurvey1, mockSurvey2])
+      of<Survey[]>([incompleteSurvey, completeSurvey])
     );
     surveyServiceSpy.getSurveyAcl.and.returnValue([
       new AclEntry('test@gmail.com', Role.SURVEY_ORGANIZER),
@@ -122,4 +136,37 @@ describe('SurveyListComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should go to create survey page when add card is clicked', () => {
+    clickCard(fixture, 'add-card');
+
+    expect(
+      navigationServiceSpy.navigateToCreateSurvey
+    ).toHaveBeenCalledOnceWith(null);
+  });
+
+  it('should go to create survey page with id when a incomplete survey card is clicked', () => {
+    clickCard(fixture, 'survey-card-0');
+
+    expect(
+      navigationServiceSpy.navigateToCreateSurvey
+    ).toHaveBeenCalledOnceWith(incompleteSurvey.id);
+  });
+
+  it('should go to map page with id when a complete survey card is clicked', () => {
+    clickCard(fixture, 'survey-card-1');
+
+    expect(navigationServiceSpy.selectSurvey).toHaveBeenCalledOnceWith(
+      completeSurvey.id
+    );
+  });
 });
+
+function clickCard(
+  fixture: ComponentFixture<SurveyListComponent>,
+  id: string
+): void {
+  const button = fixture.debugElement.query(By.css('#' + id))
+    .nativeElement as HTMLElement;
+  button.click();
+}

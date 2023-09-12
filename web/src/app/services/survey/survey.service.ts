@@ -61,6 +61,10 @@ export class SurveyService {
     this.activeSurvey$.subscribe(survey => (this.currentSurvey = survey));
   }
 
+  getCurrentSurvey(): Survey {
+    return this.currentSurvey;
+  }
+
   activateSurvey(id: string) {
     this.activeSurveyId$.next(id);
   }

@@ -102,6 +102,13 @@ describe('EditSurveyComponent', () => {
     fixture.detectChanges();
   });
 
+  it('shows spinner when current survey not loaded', () => {
+    const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
+      .nativeElement as HTMLElement;
+    // TODO(daoyu): replace it with a spinner component
+    expect(spinner.innerHTML).toEqual('Nothing');
+  });
+
   describe('when routed in with survey ID', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
