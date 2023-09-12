@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-.mat-dialog-content {
-  border-width: 1px 0;
-  border-style: solid;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
-
-.mat-dialog-actions {
-  .mat-mdc-unelevated-button {
-    &:not(:first-child) {
-        margin-left: 1em;
-      }
-    }
-}
-
-.role-select {
-  margin: -4px 0;
-}
-
-.pending-changes {
-  margin: 16px;
-}
-
-.share-form {
+.task-button {
   display: flex;
+  width: 116px;
+  height: 100px;
+  padding: 13px 16px 11px 14px;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  border-style: none;
+  background: var(--ground-sys-light-inverse-on-surface, #f0f1eb);
+}
+
+mat-icon {
+  padding: 20px 10px 10px 10px;
+}
+
+p {
+  margin: 0;
 }

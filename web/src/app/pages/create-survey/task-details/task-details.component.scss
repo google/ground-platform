@@ -13,3 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+h1,
+h2 {
+  text-align: left;
+}
+
+h2 {
+  font-size: 1.8ch;
+}
+
+#tasks-help-text {
+  padding: 3ch;
+}
+
+task-button:hover {
+  cursor: pointer;
+}

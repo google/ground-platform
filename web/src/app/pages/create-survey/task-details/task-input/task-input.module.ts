@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,34 @@
  */
 
 import {NgModule} from '@angular/core';
+import {TaskInputComponent} from './task-input.component';
 import {CommonModule} from '@angular/common';
-import {ColorPickerComponent} from './color-picker.component';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {ColorCircleModule} from 'ngx-color/circle';
-import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
+import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {MatButtonModule} from '@angular/material/button';
+// import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 
 @NgModule({
-  declarations: [ColorPickerComponent],
+  declarations: [TaskInputComponent],
   imports: [
-    CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    ColorCircleModule,
-    ReactiveFormsModule,
     MatIconModule,
-    MatButtonModule,
+    CommonModule,
+    MatFormFieldModule,
     FormsModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    MatButtonModule,
+    DragDropModule,
+    // MatDialogModule,
   ],
-  exports: [ColorPickerComponent],
+  exports: [TaskInputComponent],
 })
-export class ColorPickerModule {}
+export class TaskInputModule {}

@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-.container {
-  display: flex;
-  flex-flow: column;
-  height: 100%;
-}
+.page {
+  min-height: 100%;
 
-.header {
-  flex: 0 1 auto;
-}
+  .mat-sidenav-container {
+    height: calc(100vh - 80px);
 
-.content {
-  flex: 1 1 auto;
-}
+    .mat-sidenav {
+      width: 300px;
+    }
 
-.main-page-container {
-  height: 100%;
-}
-
-.mat-sidenav {
-  width: 300px;
+    .mat-sidenav-content {
+      overflow: hidden;
+      width: calc(100% - 300px);
+      min-width: calc(100% - 300px);
+    }
+  }
 }
 
 .sidenav-toggle {
@@ -46,8 +42,4 @@
   width: 5px;
   height: 50px;
   position: absolute;
-}
-
-.mat-sidenav-content {
-  overflow: hidden;
 }

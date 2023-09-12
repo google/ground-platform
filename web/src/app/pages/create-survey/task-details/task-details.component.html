@@ -15,5 +15,29 @@
 -->
 
 <div id="task-details">
-    <h1>task-details works!</h1>
+  <h1>Define how specified data should be collected</h1>
+  <h2>
+    Data collectors will be prompted to complete the tasks you define here in
+    order.
+  </h2>
+
+  <div id="tasks-added">
+    <task-input
+      *ngFor="let task of tasks; let i = index; trackBy: getIndex"
+      (update)="onTaskUpdate($event, i)"
+      (delete)="onTaskDelete(i)"
+      [label]="task.label"
+      [required]="task.required"
+      [taskType]="task.type"
+      [cardinality]="task.multipleChoice?.cardinality"
+      [multipleChoice]="task.multipleChoice"
+      [taskCount]="tasks.size"
+    >
+    </task-input>
+  </div>
+  <div id="tasks-help-text">Select task to add</div>
+  <add-task-button
+    [taskGroup]="taskGroupQuestion()"
+    (click)="onQuestionAdd()"
+  ></add-task-button>
 </div>

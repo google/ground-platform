@@ -19,7 +19,7 @@ import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {DocumentData, FieldPath} from '@angular/fire/firestore';
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {firstValueFrom, Observable} from 'rxjs';
+import {firstValueFrom, Observable, of} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {map} from 'rxjs/operators';
 import {User} from 'app/models/user.model';
@@ -31,6 +31,7 @@ import {Role} from 'app/models/role.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
 import {deleteField, serverTimestamp} from 'firebase/firestore';
+import {Task} from 'app/models/task/task.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -40,6 +41,12 @@ const SURVEYS_COLLECTION_NAME = 'surveys';
   providedIn: 'root',
 })
 export class DataStoreService {
+  private readonly VALID_ROLES = [
+    'owner',
+    'data-collector',
+    'survey-organizer',
+    'viewer',
+  ];
   constructor(private db: AngularFirestore) {}
 
   /**
@@ -311,6 +318,27 @@ export class DataStoreService {
       );
   }
 
+  tasks$(surveyId: string, jobId: string): Observable<List<Task>> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .get()
+      .pipe(
+        map(doc => {
+          if (!doc.exists) {
+            return List<Task>();
+          }
+          const data = doc.data() as DocumentData;
+          const survey = FirebaseDataConverter.toSurvey(surveyId, data);
+          const tasks = survey.getJob(jobId)?.tasks;
+          if (!tasks || typeof tasks === 'undefined') {
+            return List<Task>();
+          }
+          return tasks.toList()!;
+        })
+      );
+  }
+
   /**
    * Adds or overwrites the role of the specified user in the survey with the
    * specified id.
@@ -378,5 +406,18 @@ export class DataStoreService {
 
   getImageDownloadURL(path: string) {
     return getDownloadURL(ref(getStorage(), path));
+  }
+
+  addOrUpdateTasks(
+    surveyId: string,
+    jobId: string,
+    tasks: List<Task>
+  ): Promise<void> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .update({
+        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJs(tasks),
+      });
   }
 }

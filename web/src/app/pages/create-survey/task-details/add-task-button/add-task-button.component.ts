@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,25 @@
  * limitations under the License.
  */
 
-.mat-dialog-content {
-  border-width: 1px 0;
-  border-style: solid;
-  padding-top: 6px;
-  padding-bottom: 6px;
-}
+import {Component, Input} from '@angular/core';
+import {TaskGroup} from '../task-details.component';
 
-.mat-dialog-actions {
-  .mat-mdc-unelevated-button {
-    &:not(:first-child) {
-        margin-left: 1em;
-      }
+@Component({
+  selector: 'add-task-button',
+  templateUrl: './add-task-button.component.html',
+  styleUrls: ['./add-task-button.component.scss'],
+})
+export class AddTaskButtonComponent {
+  @Input() taskGroup?: TaskGroup;
+
+  constructor() {}
+
+  taskText(): string {
+    switch (this.taskGroup) {
+      case TaskGroup.QUESTION:
+        return 'Answer a question';
+      default:
+        return '';
     }
-}
-
-.role-select {
-  margin: -4px 0;
-}
-
-.pending-changes {
-  margin: 16px;
-}
-
-.share-form {
-  display: flex;
-  flex-direction: column;
+  }
 }

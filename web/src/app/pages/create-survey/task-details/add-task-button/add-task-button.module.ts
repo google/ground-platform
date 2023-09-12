@@ -15,21 +15,12 @@
  */
 
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {MatInputModule} from '@angular/material/input';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
+import {AddTaskButtonComponent} from './add-task-button.component';
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
-  declarations: [SurveyDetailsComponent],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatInputModule,
-  ],
-  exports: [SurveyDetailsComponent],
+  declarations: [AddTaskButtonComponent],
+  imports: [MatIconModule],
+  exports: [AddTaskButtonComponent],
 })
-export class SurveyDetailsModule {}
+export class AddTaskButtonModule {}
