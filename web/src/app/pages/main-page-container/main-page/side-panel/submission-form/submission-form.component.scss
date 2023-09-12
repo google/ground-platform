@@ -26,9 +26,10 @@
   }
 }
 
-.task-result .mat-form-field {
+.task-result .mat-mdc-form-field {
   width: 100%;
 }
+/* TODO(#1169): Update the following rule targets to latest MDC version if necessary. */
 /* The spacing below text box should be smaller. */
 .mat-form-field-wrapper {
   margin-bottom: -1.34em;

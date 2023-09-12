@@ -15,7 +15,7 @@
  */
 
 import {Component} from '@angular/core';
-import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
+import {MatSelectChange} from '@angular/material/select';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';

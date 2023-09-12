@@ -16,7 +16,7 @@
 
 <h1 mat-dialog-title>Share survey</h1>
 <h2>Who do you want to invite for the survey?</h2>
-<form [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
+<form class="share-form" [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
   <mat-form-field class="email-input">
     <mat-label>Email address</mat-label>
     <input matInput formControlName="email" autocomplete="off" />
