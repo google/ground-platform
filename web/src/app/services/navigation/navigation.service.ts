@@ -236,7 +236,7 @@ export class NavigationService {
     const url = `${NavigationService.SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
     }/${NavigationService.SURVEYS_CREATE}`;
-    this.router.navigateByUrl(url, {replaceUrl: replaceUrl});
+    this.router.navigateByUrl(url, {replaceUrl});
   }
 
   navigateToEditSurvey(surveyId: string): void {

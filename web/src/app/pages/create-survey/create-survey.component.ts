@@ -25,7 +25,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
-import {filter, first} from 'rxjs';
+import {filter, first, firstValueFrom} from 'rxjs';
 import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -56,7 +56,7 @@ export class CreateSurveyComponent implements OnInit {
     navigationService.init(route);
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
       this.currentSurveyId = surveyId
         ? surveyId
@@ -64,28 +64,27 @@ export class CreateSurveyComponent implements OnInit {
       this.surveyService.activateSurvey(this.currentSurveyId);
     });
 
-    this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        filter(
-          survey =>
-            this.currentSurveyId === NavigationService.SURVEY_ID_NEW ||
-            survey.id === this.currentSurveyId
-        ),
-        first()
-      )
-      .subscribe(survey => {
-        if (this.isSetupFinished(survey)) {
-          this.navigationService.navigateToEditSurvey(survey.id);
-          return;
-        }
-        this.loiService
-          .getLocationsOfInterest$()
-          .pipe(first())
-          .subscribe(lois => {
-            this.setupPhase = this.getSetupPhase(survey, lois);
-            this.currentSurvey = survey;
-          });
+    const survey = await firstValueFrom(
+      this.surveyService
+        .getActiveSurvey$()
+        .pipe(
+          filter(
+            survey =>
+              this.currentSurveyId === NavigationService.SURVEY_ID_NEW ||
+              survey.id === this.currentSurveyId
+          )
+        )
+    );
+    if (this.isSetupFinished(survey)) {
+      this.navigationService.navigateToEditSurvey(survey.id);
+      return;
+    }
+    this.loiService
+      .getLocationsOfInterest$()
+      .pipe(first())
+      .subscribe(lois => {
+        this.setupPhase = this.getSetupPhase(survey, lois);
+        this.currentSurvey = survey;
       });
   }
 

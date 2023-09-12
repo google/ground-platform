@@ -53,7 +53,7 @@ describe('CreateSurveyComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
-  let loisActiveSurvey: Immutable.List<LocationOfInterest>;
+  let lois: Immutable.List<LocationOfInterest>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
@@ -152,10 +152,10 @@ describe('CreateSurveyComponent', () => {
       'LocationOfInterestService',
       ['getLocationsOfInterest$']
     );
-    loisActiveSurvey = Immutable.List();
+    lois = Immutable.List();
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(
       new Observable(observer => {
-        observer.next(loisActiveSurvey);
+        observer.next(lois);
         observer.complete();
       })
     );

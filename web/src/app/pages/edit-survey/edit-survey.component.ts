@@ -20,7 +20,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
-import {filter, first} from 'rxjs';
+import {filter, first, firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'edit-survey',
@@ -39,20 +39,18 @@ export class EditSurveyComponent implements OnInit {
     navigationService.init(route);
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
       if (surveyId) {
         this.currentSurveyId = surveyId;
         this.surveyService.activateSurvey(surveyId);
       }
     });
-    this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        filter(survey => survey.id === this.currentSurveyId),
-        first()
-      )
-      .subscribe(survey => (this.currentSurvey = survey));
+    this.currentSurvey = await firstValueFrom(
+      this.surveyService
+        .getActiveSurvey$()
+        .pipe(filter(survey => survey.id === this.currentSurveyId))
+    );
   }
 
   jobs(): Job[] {
