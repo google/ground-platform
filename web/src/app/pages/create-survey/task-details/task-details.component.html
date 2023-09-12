@@ -35,9 +35,20 @@
     >
     </task-input>
   </div>
+
   <div id="tasks-help-text">Select task to add</div>
-  <add-task-button
-    [taskGroup]="taskGroupQuestion()"
-    (click)="onQuestionAdd()"
-  ></add-task-button>
+
+  <div id="add-task-buttons-list">
+    <add-task-button
+      [taskGroup]="TaskGroup.QUESTION"
+      (click)="onQuestionAdd()"
+    >
+    </add-task-button>
+
+    <add-task-button
+      [taskGroup]="TaskGroup.PHOTO"
+      (click)="onQuestionAdd()"
+    >
+    </add-task-button>
+  </div>
 </div>

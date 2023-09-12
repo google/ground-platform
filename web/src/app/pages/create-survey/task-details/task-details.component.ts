@@ -36,6 +36,10 @@ export enum TaskGroup {
 export class TaskDetailsComponent {
   tasks: List<Task>;
 
+  public get TaskGroup() {
+    return TaskGroup;
+  }
+
   constructor(
     private taskService: TaskService,
     private dialogService: DialogService
@@ -85,10 +89,6 @@ export class TaskDetailsComponent {
           this.tasks = this.tasks.splice(index, 1);
         }
       });
-  }
-
-  taskGroupQuestion(): TaskGroup {
-    return TaskGroup.QUESTION;
   }
 
   getIndex(index: number) {
