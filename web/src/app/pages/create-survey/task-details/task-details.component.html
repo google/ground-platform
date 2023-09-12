@@ -16,6 +16,7 @@
 
 <div id="task-details">
   <h1>Define how specified data should be collected</h1>
+
   <h2>
     Data collectors will be prompted to complete the tasks you define here in
     order.
@@ -35,9 +36,20 @@
     >
     </task-input>
   </div>
+
   <div id="tasks-help-text">Select task to add</div>
-  <add-task-button
-    [taskGroup]="taskGroupQuestion()"
-    (click)="onQuestionAdd()"
-  ></add-task-button>
+
+  <div id="add-task-buttons-list">
+    <add-task-button
+      [taskGroup]="TaskGroup.QUESTION"
+      (click)="onQuestionAdd()"
+    >
+    </add-task-button>
+
+    <add-task-button
+      [taskGroup]="TaskGroup.PHOTO"
+      (click)="onPhotoAdd()"
+    >
+    </add-task-button>
+  </div>
 </div>
