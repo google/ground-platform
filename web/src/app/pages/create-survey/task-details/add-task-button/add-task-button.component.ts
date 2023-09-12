@@ -25,14 +25,22 @@ import {TaskGroup} from '../task-details.component';
 export class AddTaskButtonComponent {
   @Input() taskGroup?: TaskGroup;
 
-  constructor() {}
+  text = '';
+  icon = '';
 
-  taskText(): string {
+  ngOnInit(): void {
     switch (this.taskGroup) {
       case TaskGroup.QUESTION:
-        return 'Answer a question';
+        this.text = 'Answer a question';
+        this.icon = 'forum';
+        break;
+      case TaskGroup.PHOTO:
+        this.text = 'Take a photo';
+        this.icon = 'photo_camera';
+        break;
       default:
-        return '';
+        this.text = 'Undefined Task';
+        this.icon = 'question_mark';
     }
   }
 }
