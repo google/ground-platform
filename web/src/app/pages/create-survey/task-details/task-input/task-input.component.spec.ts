@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {TaskDetailsComponent} from './task-details.component';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+
+import {TaskInputComponent} from './task-input.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {Map} from 'immutable';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Map} from 'immutable';
 import {of} from 'rxjs';
 
-describe('TaskDetailsComponent', () => {
-  let component: TaskDetailsComponent;
-  let fixture: ComponentFixture<TaskDetailsComponent>;
+describe('TaskInputComponent', () => {
+  let component: TaskInputComponent;
+  let fixture: ComponentFixture<TaskInputComponent>;
   const survey = new Survey(
     '123',
     'title',
@@ -39,8 +38,7 @@ describe('TaskDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TaskDetailsComponent],
-      imports: [MatDialogModule],
+      declarations: [TaskInputComponent],
       providers: [
         {provide: DataStoreService, useValue: {generateId: () => '123'}},
         {provide: DialogService, useValue: {}},
@@ -53,7 +51,7 @@ describe('TaskDetailsComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TaskDetailsComponent);
+    fixture = TestBed.createComponent(TaskInputComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

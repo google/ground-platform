@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-h1,
-h2 {
-  text-align: left;
+.task-button {
+  display: flex;
+  width: 116px;
+  height: 100px;
+  padding: 13px 16px 11px 14px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  border-style: none;
+  background: var(--ground-sys-light-inverse-on-surface, #f0f1eb);
 }
 
-h2 {
-  font-size: 1.8ch;
+mat-icon {
+  padding: 20px 10px 10px 10px;
 }
 
-#tasks-help-text {
-  padding: 3ch;
-}
-
-task-button:hover {
-  cursor: pointer;
+p {
+  margin: 0;
 }
