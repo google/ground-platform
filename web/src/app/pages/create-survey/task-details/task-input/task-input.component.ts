@@ -88,6 +88,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
 
   subscription: Subscription = new Subscription();
 
+  TaskGroup = TaskGroup;
+
   @HostListener('click')
   onTaskFocus() {
     this.expanded = true;

@@ -18,20 +18,24 @@
   display: flex;
   width: 116px;
   height: 100px;
-  padding: 13px 16px 11px 14px;
+  padding: 16px;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   border-radius: 8px;
   border-style: none;
   background: var(--ground-sys-light-inverse-on-surface, #f0f1eb);
-}
 
-mat-icon {
-  padding: 20px 10px 10px 10px;
-}
+  &:hover {
+    background-color: white;
+  }
 
-p {
-  margin: 0;
+  mat-icon {
+    padding: 10px;
+  }
+
+  p {
+    margin: 0;
+    text-align: center;
+  }
 }

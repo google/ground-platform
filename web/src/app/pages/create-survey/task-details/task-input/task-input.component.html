@@ -32,7 +32,8 @@
         </ng-container>
       </mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex class="task-type" appearance="outline">
+
+    <mat-form-field fxFlex class="task-type" appearance="outline" *ngIf="group === TaskGroup.QUESTION">
       <mat-select
         formControlName="selectTaskOption"
         class="task-type-select"

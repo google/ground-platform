@@ -36,6 +36,8 @@ export enum TaskGroup {
 export class TaskDetailsComponent {
   tasks: List<Task>;
 
+  TaskGroup = TaskGroup;
+
   constructor(
     private taskService: TaskService,
     private dialogService: DialogService
@@ -49,6 +51,19 @@ export class TaskDetailsComponent {
   onQuestionAdd() {
     const task = this.taskService.createTask(
       TaskType.TEXT,
+      /* label= */
+      '',
+      /* required= */
+      false,
+      /* index= */
+      this.tasks.size
+    );
+    this.tasks = this.tasks.push(task);
+  }
+
+  onPhotoAdd() {
+    const task = this.taskService.createTask(
+      TaskType.PHOTO,
       /* label= */
       '',
       /* required= */
@@ -85,10 +100,6 @@ export class TaskDetailsComponent {
           this.tasks = this.tasks.splice(index, 1);
         }
       });
-  }
-
-  taskGroupQuestion(): TaskGroup {
-    return TaskGroup.QUESTION;
   }
 
   getIndex(index: number) {
