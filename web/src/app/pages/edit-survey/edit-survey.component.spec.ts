@@ -105,7 +105,7 @@ describe('EditSurveyComponent', () => {
   it('shows spinner when survey not loaded', () => {
     const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
       .nativeElement as HTMLElement;
-    // TODO(daoyu): replace it with a spinner component
+    // TODO(#1170): replace it with a spinner component
     expect(spinner.innerHTML).toEqual('Nothing');
   });
 
