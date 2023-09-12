@@ -36,9 +36,7 @@ export enum TaskGroup {
 export class TaskDetailsComponent {
   tasks: List<Task>;
 
-  public get TaskGroup() {
-    return TaskGroup;
-  }
+  TaskGroup = TaskGroup;
 
   constructor(
     private taskService: TaskService,
@@ -53,6 +51,19 @@ export class TaskDetailsComponent {
   onQuestionAdd() {
     const task = this.taskService.createTask(
       TaskType.TEXT,
+      /* label= */
+      '',
+      /* required= */
+      false,
+      /* index= */
+      this.tasks.size
+    );
+    this.tasks = this.tasks.push(task);
+  }
+
+  onPhotoAdd() {
+    const task = this.taskService.createTask(
+      TaskType.PHOTO,
       /* label= */
       '',
       /* required= */
