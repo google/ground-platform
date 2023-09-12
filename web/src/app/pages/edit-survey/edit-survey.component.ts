@@ -28,8 +28,8 @@ import {filter, first, firstValueFrom} from 'rxjs';
   styleUrls: ['./edit-survey.component.scss'],
 })
 export class EditSurveyComponent implements OnInit {
-  currentSurveyId?: string;
-  currentSurvey?: Survey;
+  surveyId?: string;
+  survey?: Survey;
 
   constructor(
     private surveyService: SurveyService,
@@ -42,19 +42,19 @@ export class EditSurveyComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
       if (surveyId) {
-        this.currentSurveyId = surveyId;
+        this.surveyId = surveyId;
         this.surveyService.activateSurvey(surveyId);
       }
     });
-    this.currentSurvey = await firstValueFrom(
+    this.survey = await firstValueFrom(
       this.surveyService
         .getActiveSurvey$()
-        .pipe(filter(survey => survey.id === this.currentSurveyId))
+        .pipe(filter(survey => survey.id === this.surveyId))
     );
   }
 
   jobs(): Job[] {
-    return Array.from(this.currentSurvey?.jobs.values() ?? []);
+    return Array.from(this.survey?.jobs.values() ?? []);
   }
 
   jobRouterLink(jobId: string): string[] {

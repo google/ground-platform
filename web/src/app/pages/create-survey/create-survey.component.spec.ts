@@ -134,7 +134,7 @@ describe('CreateSurveyComponent', () => {
       'getActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
-      'getCurrentSurvey',
+      'getActiveSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
@@ -189,7 +189,7 @@ describe('CreateSurveyComponent', () => {
     fixture.detectChanges();
   });
 
-  it('shows spinner when current survey not loaded', () => {
+  it('shows spinner when survey not loaded', () => {
     const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
       .nativeElement as HTMLElement;
     // TODO(daoyu): replace it with a spinner component
@@ -202,14 +202,14 @@ describe('CreateSurveyComponent', () => {
       tick();
     }));
 
-    it('activates current survey ID', () => {
+    it('activates survey ID', () => {
       expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
         surveyId
       );
     });
   });
 
-  describe('when no current survey', () => {
+  describe('when no survey', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(NavigationService.SURVEY_ID_NEW);
       activeSurvey$.next(Survey.UNSAVED_NEW);
@@ -277,7 +277,7 @@ describe('CreateSurveyComponent', () => {
   });
 
   describe('Survey Details', () => {
-    describe('when no current survey', () => {
+    describe('when no survey', () => {
       beforeEach(fakeAsync(() => {
         surveyId$.next(NavigationService.SURVEY_ID_NEW);
         activeSurvey$.next(Survey.UNSAVED_NEW);
@@ -308,7 +308,7 @@ describe('CreateSurveyComponent', () => {
       }));
     });
 
-    describe('when given current survey', () => {
+    describe('when given survey', () => {
       beforeEach(fakeAsync(() => {
         surveyId$.next(surveyId);
         activeSurvey$.next(surveyWithoutTitle);
@@ -375,7 +375,7 @@ describe('CreateSurveyComponent', () => {
         fixture.detectChanges();
         // If survey has a job, we navigate to the next section, so we need to
         // go back to the job form.
-        surveyServiceSpy.getCurrentSurvey.and.returnValue(surveyWithJob);
+        surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
         clickBackButton(fixture);
         fixture.detectChanges();
       }));

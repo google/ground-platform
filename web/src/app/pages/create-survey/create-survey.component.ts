@@ -37,8 +37,8 @@ import {TaskService} from 'app/services/task/task.service';
   styleUrls: ['./create-survey.component.scss'],
 })
 export class CreateSurveyComponent implements OnInit {
-  currentSurveyId?: string;
-  currentSurvey?: Survey;
+  surveyId?: string;
+  survey?: Survey;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
   // We should display a loading bar while we are waiting for the data to make a decision
   // about which phase we are in.
@@ -58,10 +58,8 @@ export class CreateSurveyComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
-      this.currentSurveyId = surveyId
-        ? surveyId
-        : NavigationService.SURVEY_ID_NEW;
-      this.surveyService.activateSurvey(this.currentSurveyId);
+      this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
+      this.surveyService.activateSurvey(this.surveyId);
     });
 
     const survey = await firstValueFrom(
@@ -70,8 +68,8 @@ export class CreateSurveyComponent implements OnInit {
         .pipe(
           filter(
             survey =>
-              this.currentSurveyId === NavigationService.SURVEY_ID_NEW ||
-              survey.id === this.currentSurveyId
+              this.surveyId === NavigationService.SURVEY_ID_NEW ||
+              survey.id === this.surveyId
           )
         )
     );
@@ -84,7 +82,7 @@ export class CreateSurveyComponent implements OnInit {
       .pipe(first())
       .subscribe(lois => {
         this.setupPhase = this.getSetupPhase(survey, lois);
-        this.currentSurvey = survey;
+        this.survey = survey;
       });
   }
 
@@ -146,8 +144,8 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   job(): Job | undefined {
-    if (this.currentSurvey?.jobs.size ?? 0 > 0) {
-      return this.currentSurvey?.jobs.values().next().value;
+    if (this.survey?.jobs.size ?? 0 > 0) {
+      return this.survey?.jobs.values().next().value;
     }
     return undefined;
   }
@@ -172,7 +170,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.currentSurvey = this.surveyService.getCurrentSurvey();
+    this.survey = this.surveyService.getActiveSurvey();
   }
 
   async continue(): Promise<void> {
@@ -199,7 +197,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.currentSurvey = this.surveyService.getCurrentSurvey();
+    this.survey = this.surveyService.getActiveSurvey();
   }
 
   @ViewChild('surveyDetails')
@@ -207,11 +205,11 @@ export class CreateSurveyComponent implements OnInit {
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
     const [title, description] = this.surveyDetails!.toTitleAndDescription();
-    if (this.currentSurveyId === NavigationService.SURVEY_ID_NEW) {
+    if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
       return await this.surveyService.createSurvey(title, description);
     }
     return await this.surveyService.updateTitleAndDescription(
-      this.currentSurveyId!,
+      this.surveyId!,
       title,
       description
     );
@@ -223,24 +221,21 @@ export class CreateSurveyComponent implements OnInit {
   private async saveJobName(): Promise<void> {
     const name = this.jobDetails!.toJobName();
     let job;
-    if (this.currentSurvey!.jobs.size > 0) {
+    if (this.survey!.jobs.size > 0) {
       // there should only be at most one job attached to this survey at this point when user is still in the survey creation flow
-      job = this.currentSurvey!.jobs.values().next().value;
+      job = this.survey!.jobs.values().next().value;
     } else {
       job = this.jobService.createNewJob();
     }
-    await this.jobService.addOrUpdateJob(
-      this.currentSurveyId!,
-      job.copyWith({name})
-    );
+    await this.jobService.addOrUpdateJob(this.surveyId!, job.copyWith({name}));
   }
 
   private async saveTasks() {
     const tasks = this.taskDetails?.toTasks();
 
     await this.taskService.addOrUpdateTasks(
-      this.currentSurveyId!,
-      this.currentSurvey!.jobs.values().next().value.id,
+      this.surveyId!,
+      this.survey!.jobs.values().next().value.id,
       tasks!
     );
   }

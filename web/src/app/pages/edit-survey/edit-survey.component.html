@@ -18,8 +18,8 @@
   <ground-header></ground-header>
 
   <!-- TODO(daoyu): replace it with a spinner component -->
-  <div id="loading-spinner" *ngIf="!currentSurvey">Nothing</div>
-  <div *ngIf="currentSurvey" class="container">
+  <div id="loading-spinner" *ngIf="!survey">Nothing</div>
+  <div *ngIf="survey" class="container">
     <mat-nav-list class="left-menu">
       <a mat-list-item id="survey-button" [routerLink]="['./survey']">
         <mat-icon class="material-symbols-outlined button-icon">
