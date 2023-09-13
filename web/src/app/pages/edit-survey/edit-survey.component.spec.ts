@@ -102,13 +102,20 @@ describe('EditSurveyComponent', () => {
     fixture.detectChanges();
   });
 
+  it('shows spinner when survey not loaded', () => {
+    const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
+      .nativeElement as HTMLElement;
+    // TODO(#1170): replace it with a spinner component
+    expect(spinner.innerHTML).toEqual('Nothing');
+  });
+
   describe('when routed in with survey ID', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
       tick();
     }));
 
-    it('activates current survey ID', () => {
+    it('activates survey ID', () => {
       expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
         surveyId
       );

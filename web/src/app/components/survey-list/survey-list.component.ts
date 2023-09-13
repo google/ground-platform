@@ -51,8 +51,12 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     );
   }
 
-  onSurveyClicked(index: number) {
-    this.navigationService.selectSurvey(this.surveys.get(index)!.id);
+  onSurveyClicked(clickedSurvey: Survey) {
+    if (this.isSetupFinished(clickedSurvey)) {
+      this.navigationService.selectSurvey(clickedSurvey.id);
+    } else {
+      this.navigationService.navigateToCreateSurvey(clickedSurvey.id);
+    }
   }
 
   onNewSurvey() {
@@ -63,5 +67,22 @@ export class SurveyListComponent implements OnInit, OnDestroy {
    */
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  private isSetupFinished(survey: Survey): boolean {
+    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
+    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
+  }
+
+  private hasTitle(survey: Survey): boolean {
+    return survey.title.trim().length > 0;
+  }
+
+  private hasJob(survey: Survey): boolean {
+    return survey.jobs.size > 0;
+  }
+
+  private hasTask(survey: Survey): boolean {
+    return survey.jobs.values().next().value.tasks.size > 0;
   }
 }

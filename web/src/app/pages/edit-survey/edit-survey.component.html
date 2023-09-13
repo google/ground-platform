@@ -17,7 +17,9 @@
 <div class="page">
   <ground-header></ground-header>
 
-  <div class="container">
+  <!-- TODO(#1170): replace it with a spinner component -->
+  <div id="loading-spinner" *ngIf="!survey">Nothing</div>
+  <div *ngIf="survey" class="container">
     <mat-nav-list class="left-menu">
       <a mat-list-item id="survey-button" [routerLink]="['./survey']">
         <mat-icon class="material-symbols-outlined button-icon">

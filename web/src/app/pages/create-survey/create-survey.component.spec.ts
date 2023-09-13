@@ -53,7 +53,7 @@ describe('CreateSurveyComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
-  let loisActiveSurvey$: Immutable.List<LocationOfInterest>;
+  let lois: Immutable.List<LocationOfInterest>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
@@ -134,6 +134,7 @@ describe('CreateSurveyComponent', () => {
       'getActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
+      'getActiveSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
@@ -151,10 +152,10 @@ describe('CreateSurveyComponent', () => {
       'LocationOfInterestService',
       ['getLocationsOfInterest$']
     );
-    loisActiveSurvey$ = Immutable.List();
+    lois = Immutable.List();
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(
       new Observable(observer => {
-        observer.next(loisActiveSurvey$);
+        observer.next(lois);
         observer.complete();
       })
     );
@@ -188,22 +189,30 @@ describe('CreateSurveyComponent', () => {
     fixture.detectChanges();
   });
 
+  it('shows spinner when survey not loaded', () => {
+    const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
+      .nativeElement as HTMLElement;
+    // TODO(#1170): replace it with a spinner component
+    expect(spinner.innerHTML).toEqual('Nothing');
+  });
+
   describe('when routed in with survey ID', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
       tick();
     }));
 
-    it('activates current survey ID', () => {
+    it('activates survey ID', () => {
       expect(surveyServiceSpy.activateSurvey).toHaveBeenCalledOnceWith(
         surveyId
       );
     });
   });
 
-  describe('when no current survey', () => {
+  describe('when no survey', () => {
     beforeEach(fakeAsync(() => {
-      surveyId$.next(null);
+      surveyId$.next(NavigationService.SURVEY_ID_NEW);
+      activeSurvey$.next(Survey.UNSAVED_NEW);
       tick();
       fixture.detectChanges();
     }));
@@ -268,13 +277,10 @@ describe('CreateSurveyComponent', () => {
   });
 
   describe('Survey Details', () => {
-    beforeEach(() => {
-      component.setupPhase = SetupPhase.SURVEY_DETAILS;
-    });
-
-    describe('when no current survey', () => {
+    describe('when no survey', () => {
       beforeEach(fakeAsync(() => {
-        surveyId$.next(null);
+        surveyId$.next(NavigationService.SURVEY_ID_NEW);
+        activeSurvey$.next(Survey.UNSAVED_NEW);
         tick();
         fixture.detectChanges();
       }));
@@ -282,12 +288,12 @@ describe('CreateSurveyComponent', () => {
       it('creates new survey with title and description after clicking continue', fakeAsync(() => {
         const newTitle = 'newTitle';
         const newDescription = 'newDescription';
-        const jobDetailsComponent = component.surveyDetails!;
-        jobDetailsComponent.formGroup.controls[
-          jobDetailsComponent.titleControlKey
+        const surveyDetailsComponent = component.surveyDetails!;
+        surveyDetailsComponent.formGroup.controls[
+          surveyDetailsComponent.titleControlKey
         ].setValue(newTitle);
-        jobDetailsComponent.formGroup.controls[
-          jobDetailsComponent.descriptionControlKey
+        surveyDetailsComponent.formGroup.controls[
+          surveyDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
         clickContinueButton(fixture);
         flush();
@@ -298,11 +304,11 @@ describe('CreateSurveyComponent', () => {
         );
         expect(
           navigationServiceSpy.navigateToCreateSurvey
-        ).toHaveBeenCalledOnceWith(newSurveyId);
+        ).toHaveBeenCalledOnceWith(newSurveyId, true);
       }));
     });
 
-    describe('when given current survey', () => {
+    describe('when given survey', () => {
       beforeEach(fakeAsync(() => {
         surveyId$.next(surveyId);
         activeSurvey$.next(surveyWithoutTitle);
@@ -327,20 +333,16 @@ describe('CreateSurveyComponent', () => {
           surveyServiceSpy.updateTitleAndDescription
         ).toHaveBeenCalledOnceWith(surveyId, newTitle, newDescription);
       }));
-    });
 
-    it('navigates to survey list page after back button is clicked', () => {
-      clickBackButton(fixture);
+      it('navigates to survey list page after back button is clicked', () => {
+        clickBackButton(fixture);
 
-      expect(navigationServiceSpy.navigateToSurveyList).toHaveBeenCalled();
+        expect(navigationServiceSpy.navigateToSurveyList).toHaveBeenCalled();
+      });
     });
   });
 
   describe('Job Details', () => {
-    beforeEach(() => {
-      component.setupPhase = SetupPhase.JOB_DETAILS;
-    });
-
     describe('when active survey has no job', () => {
       beforeEach(fakeAsync(() => {
         surveyId$.next(surveyId);
@@ -370,8 +372,10 @@ describe('CreateSurveyComponent', () => {
         surveyId$.next(surveyId);
         activeSurvey$.next(surveyWithJob);
         tick();
+        fixture.detectChanges();
         // If survey has a job, we navigate to the next section, so we need to
         // go back to the job form.
+        surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
         clickBackButton(fixture);
         fixture.detectChanges();
       }));
@@ -390,20 +394,24 @@ describe('CreateSurveyComponent', () => {
           job.copyWith({name})
         );
       }));
-    });
 
-    it('goes back to survey details component after back button is clicked', () => {
-      clickBackButton(fixture);
+      it('goes back to survey details component after back button is clicked', () => {
+        clickBackButton(fixture);
+        fixture.detectChanges();
 
-      expect(component.surveyDetails).toBeDefined();
-      expect(component.jobDetails).toBeUndefined();
+        expect(component.surveyDetails).toBeDefined();
+        expect(component.jobDetails).toBeUndefined();
+      });
     });
   });
 
   describe('Review', () => {
     beforeEach(fakeAsync(() => {
-      component.setupPhase = SetupPhase.REVIEW;
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithJob);
       tick();
+      // Forcibly set phase to REVIEW for now since other steps are not ready yet
+      component.setupPhase = SetupPhase.REVIEW;
       fixture.detectChanges();
     }));
 

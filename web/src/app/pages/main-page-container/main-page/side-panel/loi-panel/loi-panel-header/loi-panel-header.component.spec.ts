@@ -46,7 +46,6 @@ function getAvatarElement(fixture: LoiPanelHeaderFixture): HTMLElement {
 
 function getHeaderElement(fixture: LoiPanelHeaderFixture): HTMLElement {
   const element = fixture.nativeElement.querySelector('h3');
-  console.log(element);
   return element;
 }
 

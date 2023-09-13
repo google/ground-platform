@@ -15,9 +15,11 @@
 -->
 
 <div class="page">
-  <ground-header></ground-header>
+  <ground-header> </ground-header>
 
-  <div class="container">
+  <!-- TODO(#1170): replace it with a spinner component -->
+  <div id="loading-spinner" *ngIf="!survey">Nothing</div>
+  <div *ngIf="survey" class="container">
     <div class="card">
       <img
         *ngIf="setupPhase === SetupPhase.JOB_DETAILS"
@@ -25,7 +27,7 @@
         src="/assets/img/add-job.svg"
         alt="Add a job"
       />
-      <div class="content">
+      <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
         <mat-progress-bar
           mode="determinate"
@@ -35,8 +37,8 @@
           <survey-details
             *ngSwitchCase="SetupPhase.SURVEY_DETAILS"
             #surveyDetails
-            [title]="currentSurvey?.title ?? ''"
-            [description]="currentSurvey?.description ?? ''"
+            [title]="survey.title"
+            [description]="survey.description"
           ></survey-details>
           <job-details
             *ngSwitchCase="SetupPhase.JOB_DETAILS"
@@ -47,10 +49,10 @@
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
             #loiSelection
           ></loi-selection>
-        <task-details
-          *ngSwitchCase="SetupPhase.DEFINE_TASKS"
-          #taskDetails
-        ></task-details>
+          <task-details
+            *ngSwitchCase="SetupPhase.DEFINE_TASKS"
+            #taskDetails
+          ></task-details>
           <share-survey
             *ngSwitchCase="SetupPhase.REVIEW"
             #shareSurvey

@@ -25,7 +25,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
-import {first} from 'rxjs';
+import {filter, first, firstValueFrom} from 'rxjs';
 import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -37,8 +37,8 @@ import {TaskService} from 'app/services/task/task.service';
   styleUrls: ['./create-survey.component.scss'],
 })
 export class CreateSurveyComponent implements OnInit {
-  currentSurveyId: string | null = null;
-  currentSurvey?: Survey;
+  surveyId?: string;
+  survey?: Survey;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
   // We should display a loading bar while we are waiting for the data to make a decision
   // about which phase we are in.
@@ -56,27 +56,33 @@ export class CreateSurveyComponent implements OnInit {
     navigationService.init(route);
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
-      if (surveyId) {
-        this.surveyService.activateSurvey(surveyId);
-      }
-      this.currentSurveyId = surveyId;
+      this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
+      this.surveyService.activateSurvey(this.surveyId);
     });
-    this.surveyService.getActiveSurvey$().subscribe(survey => {
-      this.currentSurvey = survey;
-    });
-    this.surveyService
-      .getActiveSurvey$()
+
+    const survey = await firstValueFrom(
+      this.surveyService
+        .getActiveSurvey$()
+        .pipe(
+          filter(
+            survey =>
+              this.surveyId === NavigationService.SURVEY_ID_NEW ||
+              survey.id === this.surveyId
+          )
+        )
+    );
+    if (this.isSetupFinished(survey)) {
+      this.navigationService.navigateToEditSurvey(survey.id);
+      return;
+    }
+    this.loiService
+      .getLocationsOfInterest$()
       .pipe(first())
-      .subscribe(survey => {
-        if (this.isSetupFinished(survey)) {
-          this.navigationService.navigateToEditSurvey(survey.id);
-          return;
-        }
-        this.loiService.getLocationsOfInterest$().subscribe(lois => {
-          this.setupPhase = this.getSetupPhase(survey, lois);
-        });
+      .subscribe(lois => {
+        this.setupPhase = this.getSetupPhase(survey, lois);
+        this.survey = survey;
       });
   }
 
@@ -138,8 +144,8 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   job(): Job | undefined {
-    if (this.currentSurvey?.jobs.size ?? 0 > 0) {
-      return this.currentSurvey?.jobs.values().next().value;
+    if (this.survey?.jobs.size ?? 0 > 0) {
+      return this.survey?.jobs.values().next().value;
     }
     return undefined;
   }
@@ -164,6 +170,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
+    this.survey = this.surveyService.getActiveSurvey();
   }
 
   async continue(): Promise<void> {
@@ -171,7 +178,7 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.SURVEY_DETAILS: {
         const createdSurveyId = await this.saveSurveyTitleAndDescription();
         if (createdSurveyId) {
-          this.navigationService.navigateToCreateSurvey(createdSurveyId);
+          this.navigationService.navigateToCreateSurvey(createdSurveyId, true);
         }
         this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
@@ -190,6 +197,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
+    this.survey = this.surveyService.getActiveSurvey();
   }
 
   @ViewChild('surveyDetails')
@@ -197,15 +205,14 @@ export class CreateSurveyComponent implements OnInit {
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
     const [title, description] = this.surveyDetails!.toTitleAndDescription();
-    if (this.currentSurveyId) {
-      return await this.surveyService.updateTitleAndDescription(
-        this.currentSurveyId,
-        title,
-        description
-      );
-    } else {
+    if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
       return await this.surveyService.createSurvey(title, description);
     }
+    return await this.surveyService.updateTitleAndDescription(
+      this.surveyId!,
+      title,
+      description
+    );
   }
 
   @ViewChild('jobDetails')
@@ -214,24 +221,21 @@ export class CreateSurveyComponent implements OnInit {
   private async saveJobName(): Promise<void> {
     const name = this.jobDetails!.toJobName();
     let job;
-    if (this.currentSurvey!.jobs.size > 0) {
+    if (this.survey!.jobs.size > 0) {
       // there should only be at most one job attached to this survey at this point when user is still in the survey creation flow
-      job = this.currentSurvey!.jobs.values().next().value;
+      job = this.survey!.jobs.values().next().value;
     } else {
       job = this.jobService.createNewJob();
     }
-    await this.jobService.addOrUpdateJob(
-      this.currentSurveyId!,
-      job.copyWith({name})
-    );
+    await this.jobService.addOrUpdateJob(this.surveyId!, job.copyWith({name}));
   }
 
   private async saveTasks() {
     const tasks = this.taskDetails?.toTasks();
 
     await this.taskService.addOrUpdateTasks(
-      this.currentSurveyId!,
-      this.currentSurvey!.jobs.values().next().value.id,
+      this.surveyId!,
+      this.survey!.jobs.values().next().value.id,
       tasks!
     );
   }
