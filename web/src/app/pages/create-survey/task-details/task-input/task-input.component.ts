@@ -64,7 +64,7 @@ export interface TaskTypeSelectOption {
 export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
-  @Input() taskType?: TaskType;
+  @Input() taskType: TaskType = TaskType.TEXT;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
   @Input() taskCount?: Number;
@@ -112,7 +112,6 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   ) {
     this.expanded = false;
     this.selected = false;
-    this.taskType = TaskType.TEXT;
     this.selectTaskOptions = [
       {
         icon: 'short_text',
