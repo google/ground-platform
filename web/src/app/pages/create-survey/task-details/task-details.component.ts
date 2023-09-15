@@ -36,7 +36,7 @@ export const taskGroupToTypes = new Map([
   [TaskGroup.SUGGEST_LOI, List([TaskType.DROP_PIN])],
 ]);
 
-export const taskTypesToGroup = new Map([
+export const taskTypeToGroup = new Map([
   [TaskType.TEXT, TaskGroup.QUESTION],
   [TaskType.DATE, TaskGroup.QUESTION],
   [TaskType.PHOTO, TaskGroup.PHOTO],

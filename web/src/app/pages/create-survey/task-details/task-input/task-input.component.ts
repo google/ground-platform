@@ -47,7 +47,7 @@ import {
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {JobService} from 'app/services/job/job.service';
 import {firstValueFrom, Subscription} from 'rxjs';
-import {TaskGroup, taskTypesToGroup} from '../task-details.component';
+import {TaskGroup, taskTypeToGroup} from '../task-details.component';
 
 export interface TaskTypeSelectOption {
   icon: string;
@@ -157,7 +157,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.taskGroup = taskTypesToGroup.get(this.taskType) ?? TaskGroup.QUESTION;
+    this.taskGroup = taskTypeToGroup.get(this.taskType) ?? TaskGroup.QUESTION;
 
     // As the task tasks value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
