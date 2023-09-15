@@ -76,8 +76,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   // TODO(#1163): This name TaskGroup is ambiguous. We need to resolve this in
   // relation to the TaskType above.
   @Input() group?: TaskGroup;
+  formGroup: FormGroup;
 
-  taskGroup: FormGroup;
   @ViewChild('questionInput', {static: true}) questionInput?: ElementRef;
 
   /** When expanded, options and actions below the fold are visible to the user. */
@@ -152,7 +152,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         type: TaskType.TIME,
       },
     ];
-    this.taskGroup = this.taskBuilder.group({
+    this.formGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select task to be of text type.
@@ -175,7 +175,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     // As the task tasks value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
-      this.taskGroup.valueChanges.subscribe(value => {
+      this.formGroup.valueChanges.subscribe(value => {
         this.update.emit({
           label: value.label,
           required: value.required,
@@ -194,7 +194,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
     if (changes.multipleChoice) {
       this.taskOptions = this.multipleChoice;
     }
-    this.taskGroup.setValue({
+    this.formGroup.setValue({
       label: this.label,
       required: this.required,
       selectTaskOption: this.getSelectedTaskTypeOption(),
@@ -224,7 +224,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getSelectTaskType(): TaskTypeSelectOption {
-    return this.taskGroup.get('selectTaskOption')?.value;
+    return this.formGroup.get('selectTaskOption')?.value;
   }
 
   /**
@@ -242,7 +242,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({selectTaskOption: event});
+    this.formGroup.patchValue({selectTaskOption: event});
     if (event.type === TaskType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
@@ -340,7 +340,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get labelControl(): AbstractControl {
-    return this.taskGroup.get('label')!;
+    return this.formGroup.get('label')!;
   }
 
   ngOnDestroy(): void {
