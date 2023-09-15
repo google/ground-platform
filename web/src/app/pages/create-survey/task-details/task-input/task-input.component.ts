@@ -47,7 +47,7 @@ import {
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {JobService} from 'app/services/job/job.service';
 import {firstValueFrom, Subscription} from 'rxjs';
-import {TaskGroup} from '../task-details.component';
+import {TaskGroup, taskTypesToGroup} from '../task-details.component';
 
 export interface TaskTypeSelectOption {
   icon: string;
@@ -73,9 +73,9 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   taskOptions: MultipleChoice | undefined;
   selectTaskOptions: TaskTypeSelectOption[];
   @Input() taskIndex?: number;
-  // TODO(#1163): This name TaskGroup is ambiguous. We need to resolve this in
-  // relation to the TaskType above.
-  @Input() group?: TaskGroup;
+
+  taskGroup: TaskGroup = TaskGroup.QUESTION;
+
   formGroup: FormGroup;
 
   @ViewChild('questionInput', {static: true}) questionInput?: ElementRef;
@@ -172,6 +172,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.taskGroup = taskTypesToGroup.get(this.taskType) ?? TaskGroup.QUESTION;
+
     // As the task tasks value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
       this.formGroup.valueChanges.subscribe(value => {
