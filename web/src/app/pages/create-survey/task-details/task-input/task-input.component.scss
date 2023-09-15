@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+.tasks-container {
+  border-radius: 10px;
+  padding: 24px;
+  margin-top: 10px;
+  border-style: solid;
+
+  .task-toolbar {
+    display: flex;
+    gap: 12px;
+  }
+
+  .task-form {
+    display: flex;
+  
+    .question {
+      flex: 1;
+    }
+  }
+}
+
+
+
 .task-type {
   margin-left: 30px;
 }
@@ -44,13 +66,6 @@
 
 .required-label {
   margin-right: 20px;
-}
-
-.question-container {
-  border-radius: 10px;
-  padding: 0px 10px;
-  margin-top: 10px;
-  border-style: solid;
 }
 
 .drag-icon {
