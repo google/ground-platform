@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-.tasks-container {
-  border-radius: 10px;
+.task-input {
+  border-radius: 8px;
+  border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+  background: var(--ground-sys-light-surface-container-lowest, #FFF);
   padding: 24px;
-  margin-top: 10px;
-  border-style: solid;
 
   .task-toolbar {
     display: flex;
@@ -27,21 +27,12 @@
 
   .task-form {
     display: flex;
+    gap: 16px;
   
     .question {
       flex: 1;
     }
   }
-}
-
-
-
-.task-type {
-  margin-left: 30px;
-}
-
-.question {
-  margin-top: 3px;
 }
 
 .icon-task-type {

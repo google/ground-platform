@@ -114,7 +114,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
     this.selected = false;
     this.selectTaskOptions = [
       {
-        icon: 'short_text',
+        icon: 'notes',
         label: 'Text',
         type: TaskType.TEXT,
       },
