@@ -56,6 +56,52 @@ export interface TaskTypeSelectOption {
   cardinality?: Cardinality;
 }
 
+export const Tasks: {
+  [key in TaskGroup]: {
+    icon: string;
+    label: string;
+    placeholder: string;
+    requiredMessage: string;
+  };
+} = {
+  [TaskGroup.QUESTION]: {
+    icon: 'forum',
+    label: 'Answer a question',
+    placeholder: 'Question',
+    requiredMessage: 'Question is required',
+  },
+  [TaskGroup.PHOTO]: {
+    icon: 'photo_camera',
+    label: 'Take a photo',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.DROP_PIN]: {
+    icon: 'pin_drop',
+    label: 'Drop a pin',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.DRAW_AREA]: {
+    icon: 'draw',
+    label: 'Draw an area',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.CAPTURE_LOCATION]: {
+    icon: 'share_location',
+    label: 'Capture location',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.SUGGEST_LOI]: {
+    icon: 'question_mark',
+    label: '',
+    placeholder: '',
+    requiredMessage: '',
+  },
+};
+
 @Component({
   selector: 'task-input',
   templateUrl: './task-input.component.html',
@@ -89,6 +135,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   subscription: Subscription = new Subscription();
 
   TaskGroup = TaskGroup;
+
+  Tasks = Tasks;
 
   @HostListener('click')
   onTaskFocus() {
