@@ -63,30 +63,21 @@ export class TaskDetailsComponent {
     this.tasks = List<Task>();
   }
 
-  onQuestionAdd() {
-    const task = this.taskService.createTask(
-      TaskType.TEXT,
-      /* label= */
-      '',
-      /* required= */
-      false,
-      /* index= */
-      this.tasks.size
-    );
-    this.tasks = this.tasks.push(task);
-  }
+  onTaskAdd(group: TaskGroup) {
+    const types = taskGroupToTypes.get(group);
 
-  onPhotoAdd() {
-    const task = this.taskService.createTask(
-      TaskType.PHOTO,
-      /* label= */
-      '',
-      /* required= */
-      false,
-      /* index= */
-      this.tasks.size
-    );
-    this.tasks = this.tasks.push(task);
+    const type = types?.first();
+
+    if (type) {
+      const task = this.taskService.createTask(
+        type,
+        '',
+        false,
+        this.tasks.size
+      );
+
+      this.tasks = this.tasks.push(task);
+    }
   }
 
   onTaskUpdate(event: Task, index: number) {
