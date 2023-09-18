@@ -24,6 +24,19 @@
   .task-toolbar {
     display: flex;
     gap: 12px;
+    height: 32px;
+    margin-bottom: 16px;
+
+    .toolbar-right {
+      display: flex;
+      justify-content: end;
+      flex: 1;
+      gap: 8px;
+
+      .mat-slide-toggle {
+        margin-left: 12px;
+      }
+    }
   }
 
   .task-form {
@@ -50,14 +63,6 @@
 .vertical-divider {
   height: 30px;
   margin: 3px 20px;
-}
-
-.required-toggle {
-  padding-top: 5px;
-}
-
-.required-label {
-  margin-right: 20px;
 }
 
 .drag-icon {

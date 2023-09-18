@@ -19,7 +19,24 @@
 
     <div>{{ Tasks[taskGroup].label }}</div>
 
-    <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
+    <div class="toolbar-right">
+      <div>
+        <mat-label>Required</mat-label>
+
+        <mat-slide-toggle formControlName="required" color="primary"></mat-slide-toggle>
+      </div>
+
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onTaskDelete()">
+          <mat-icon>delete_forever</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
   </div>
 
   <div fxLayout class="task-form">
@@ -102,15 +119,6 @@
       (keydown.Tab)="onTaskBlur()"
       class="question-actions"
     >
-      <button type="button" mat-icon-button (click)="onTaskDelete()">
-        <mat-icon>delete_forever</mat-icon>
-      </button>
-      <span class="vertical-divider"></span>
-      <div class="required-toggle">
-        <span class="required-label">Required</span>
-        <mat-slide-toggle formControlName="required" color="primary">
-        </mat-slide-toggle>
-      </div>
     </div>
   </div>
 </form>
