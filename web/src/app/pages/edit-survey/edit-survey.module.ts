@@ -21,6 +21,7 @@ import {HeaderModule} from 'app/components/header/header.module';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {RouterModule} from '@angular/router';
 
 @NgModule({
@@ -31,6 +32,7 @@ import {RouterModule} from '@angular/router';
     MatListModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     RouterModule,
   ],
   exports: [EditSurveyComponent],
