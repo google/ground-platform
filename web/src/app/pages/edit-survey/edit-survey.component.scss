@@ -18,6 +18,13 @@
   min-height: 100%;
 }
 
+.loading-spinner {
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  min-height: 500px;
+}
+
 .container {
   display: flex;
 }

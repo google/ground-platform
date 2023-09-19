@@ -17,8 +17,13 @@
 <div class="page">
   <ground-header> </ground-header>
 
-  <!-- TODO(#1170): replace it with a spinner component -->
-  <div id="loading-spinner" *ngIf="!survey">Nothing</div>
+  <!-- TODO(#1170): Extract the spinner into a component -->
+  <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
+    <div>
+      <mat-spinner></mat-spinner>
+      <p class="loading-label">Loading survey...</p>
+    </div>
+  </div>
   <div *ngIf="survey" class="container">
     <div class="card">
       <img
