@@ -105,8 +105,8 @@ describe('EditSurveyComponent', () => {
   it('shows spinner when survey not loaded', () => {
     const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
       .nativeElement as HTMLElement;
-    // TODO(#1170): replace it with a spinner component
-    expect(spinner.innerHTML).toEqual('Nothing');
+    // TODO(#1170): Extract the spinner into a component
+    expect(spinner.innerHTML).toContain('Loading survey...');
   });
 
   describe('when routed in with survey ID', () => {
