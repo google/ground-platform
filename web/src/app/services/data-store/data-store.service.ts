@@ -67,6 +67,27 @@ export class DataStoreService {
   }
 
   /**
+   * Returns the raw survey object from the db. Used for debbuging only.
+   */
+  async loadRawSurvey(id: string) {
+    return (
+      await firstValueFrom(
+        this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).get()
+      )
+    ).data();
+  }
+
+  /**
+   * Updates the raw survey object in the db. Used for debbuging only.
+   */
+  async saveRawSurvey(id: string, data: any) {
+    await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(id)
+      .set(JSON.parse(data));
+  }
+
+  /**
    * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
    *
    */

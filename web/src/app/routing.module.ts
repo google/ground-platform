@@ -33,6 +33,7 @@ import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
+import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
 
 const routes: Routes = [
   {
@@ -73,6 +74,7 @@ const routes: Routes = [
       {path: 'job/:id', component: EditJobComponent},
       {path: 'survey', component: SurveyDetailsComponent},
       {path: 'share', component: ShareSurveyComponent},
+      {path: 'json', component: SurveyJsonComponent},
     ],
   },
   {
