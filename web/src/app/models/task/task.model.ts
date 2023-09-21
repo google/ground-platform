@@ -47,6 +47,9 @@ export enum TaskType {
   NUMBER = 4,
   DATE = 5,
   TIME = 6,
+  DATE_TIME = 7,
+  DRAW_AREA = 8,
+  DROP_PIN = 9,
 }
 
 // TODO: add a subclass of Task for each task type.

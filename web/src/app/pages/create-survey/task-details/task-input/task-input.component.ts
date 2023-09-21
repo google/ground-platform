@@ -47,7 +47,7 @@ import {
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {JobService} from 'app/services/job/job.service';
 import {firstValueFrom, Subscription} from 'rxjs';
-import {TaskGroup} from '../task-details.component';
+import {TaskGroup, taskTypeToGroup} from '../task-details.component';
 
 export interface TaskTypeSelectOption {
   icon: string;
@@ -55,6 +55,52 @@ export interface TaskTypeSelectOption {
   type: TaskType;
   cardinality?: Cardinality;
 }
+
+export const Tasks: {
+  [key in TaskGroup]: {
+    icon: string;
+    label: string;
+    placeholder: string;
+    requiredMessage: string;
+  };
+} = {
+  [TaskGroup.QUESTION]: {
+    icon: 'forum',
+    label: 'Answer a question',
+    placeholder: 'Question',
+    requiredMessage: 'Question is required',
+  },
+  [TaskGroup.PHOTO]: {
+    icon: 'photo_camera',
+    label: 'Take a photo',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.DROP_PIN]: {
+    icon: 'pin_drop',
+    label: 'Drop a pin',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.DRAW_AREA]: {
+    icon: 'draw',
+    label: 'Draw an area',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.CAPTURE_LOCATION]: {
+    icon: 'share_location',
+    label: 'Capture location',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+  },
+  [TaskGroup.SUGGEST_LOI]: {
+    icon: 'question_mark',
+    label: '',
+    placeholder: '',
+    requiredMessage: '',
+  },
+};
 
 @Component({
   selector: 'task-input',
@@ -64,7 +110,7 @@ export interface TaskTypeSelectOption {
 export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label?: string;
   @Input() required?: boolean;
-  @Input() taskType?: TaskType;
+  @Input() taskType: TaskType = TaskType.TEXT;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
   @Input() taskCount?: Number;
@@ -73,11 +119,11 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   taskOptions: MultipleChoice | undefined;
   selectTaskOptions: TaskTypeSelectOption[];
   @Input() taskIndex?: number;
-  // TODO(#1163): This name TaskGroup is ambiguous. We need to resolve this in
-  // relation to the TaskType above.
-  @Input() group?: TaskGroup;
 
-  taskGroup: FormGroup;
+  taskGroup: TaskGroup = TaskGroup.QUESTION;
+
+  formGroup: FormGroup;
+
   @ViewChild('questionInput', {static: true}) questionInput?: ElementRef;
 
   /** When expanded, options and actions below the fold are visible to the user. */
@@ -89,6 +135,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   subscription: Subscription = new Subscription();
 
   TaskGroup = TaskGroup;
+
+  Tasks = Tasks;
 
   @HostListener('click')
   onTaskFocus() {
@@ -112,12 +160,16 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   ) {
     this.expanded = false;
     this.selected = false;
-    this.taskType = TaskType.TEXT;
     this.selectTaskOptions = [
       {
-        icon: 'short_text',
+        icon: 'notes',
         label: 'Text',
         type: TaskType.TEXT,
+      },
+      {
+        icon: 'access_time',
+        label: 'Date/Time',
+        type: TaskType.DATE_TIME,
       },
       {
         icon: 'radio_button_checked',
@@ -131,28 +183,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         type: TaskType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_MULTIPLE,
       },
-      {
-        icon: 'photo',
-        label: 'Photo',
-        type: TaskType.PHOTO,
-      },
-      {
-        icon: 'tag',
-        label: 'Number',
-        type: TaskType.NUMBER,
-      },
-      {
-        icon: 'calendar_today',
-        label: 'Date',
-        type: TaskType.DATE,
-      },
-      {
-        icon: 'access_time',
-        label: 'Time',
-        type: TaskType.TIME,
-      },
     ];
-    this.taskGroup = this.taskBuilder.group({
+    this.formGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select task to be of text type.
@@ -173,9 +205,11 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.taskGroup = taskTypeToGroup.get(this.taskType) ?? TaskGroup.QUESTION;
+
     // As the task tasks value change we are emitting the updated value to the job-dialog.
     this.subscription.add(
-      this.taskGroup.valueChanges.subscribe(value => {
+      this.formGroup.valueChanges.subscribe(value => {
         this.update.emit({
           label: value.label,
           required: value.required,
@@ -194,7 +228,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
     if (changes.multipleChoice) {
       this.taskOptions = this.multipleChoice;
     }
-    this.taskGroup.setValue({
+    this.formGroup.setValue({
       label: this.label,
       required: this.required,
       selectTaskOption: this.getSelectedTaskTypeOption(),
@@ -224,7 +258,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getSelectTaskType(): TaskTypeSelectOption {
-    return this.taskGroup.get('selectTaskOption')?.value;
+    return this.formGroup.get('selectTaskOption')?.value;
   }
 
   /**
@@ -242,7 +276,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({selectTaskOption: event});
+    this.formGroup.patchValue({selectTaskOption: event});
     if (event.type === TaskType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
@@ -340,7 +374,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get labelControl(): AbstractControl {
-    return this.taskGroup.get('label')!;
+    return this.formGroup.get('label')!;
   }
 
   ngOnDestroy(): void {

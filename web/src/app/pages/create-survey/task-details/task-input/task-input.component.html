@@ -13,11 +13,36 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<form [formGroup]="taskGroup" class="question-container">
-  <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
-  <div fxLayout>
+<form [formGroup]="formGroup" class="task-input">
+  <div class="task-toolbar">
+    <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+
+    <div>{{ Tasks[taskGroup].label }}</div>
+
+    <div class="toolbar-right">
+      <div>
+        <mat-label>Required</mat-label>
+
+        <mat-slide-toggle formControlName="required" color="primary"></mat-slide-toggle>
+      </div>
+
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onTaskDelete()">
+          <mat-icon>delete_forever</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <div fxLayout class="task-form">
     <mat-form-field class="question" appearance="fill" fxFlex="2 1 auto">
-      <mat-label>Question</mat-label>
+      <mat-label>{{ Tasks[taskGroup].placeholder }}</mat-label>
+
       <input
         #questionInput
         matInput
@@ -26,14 +51,15 @@
         (focus)="onTaskFocus()"
         (blur)="onLabelBlur()"
       />
+
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
         <ng-container *ngIf="labelControl.getError('required')">
-          Question is required
+          {{ Tasks[taskGroup].requiredMessage }}
         </ng-container>
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field fxFlex class="task-type" appearance="outline" *ngIf="group === TaskGroup.QUESTION">
+    <mat-form-field fxFlex class="task-type" appearance="outline" *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
         formControlName="selectTaskOption"
         class="task-type-select"
@@ -93,15 +119,6 @@
       (keydown.Tab)="onTaskBlur()"
       class="question-actions"
     >
-      <button type="button" mat-icon-button (click)="onTaskDelete()">
-        <mat-icon>delete_forever</mat-icon>
-      </button>
-      <span class="vertical-divider"></span>
-      <div class="required-toggle">
-        <span class="required-label">Required</span>
-        <mat-slide-toggle formControlName="required" color="primary">
-        </mat-slide-toggle>
-      </div>
     </div>
   </div>
 </form>

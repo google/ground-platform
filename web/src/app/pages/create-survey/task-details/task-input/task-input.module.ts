@@ -25,6 +25,7 @@ import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
 import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {MatButtonModule} from '@angular/material/button';
+import {MatMenuModule} from '@angular/material/menu';
 // import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 
 @NgModule({
@@ -40,6 +41,7 @@ import {MatButtonModule} from '@angular/material/button';
     MatIconModule,
     MatSlideToggleModule,
     MatButtonModule,
+    MatMenuModule,
     DragDropModule,
     // MatDialogModule,
   ],

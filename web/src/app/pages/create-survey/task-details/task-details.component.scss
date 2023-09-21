@@ -30,8 +30,9 @@ h2 {
 
 #add-task-buttons-list {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 1rem;
+  gap: 8px;
 }
 
 task-button:hover {
