@@ -35,6 +35,8 @@ import {Task} from 'app/models/task/task.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
+export type JsonBlob = {[field: string]: any};
+
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({
@@ -80,11 +82,11 @@ export class DataStoreService {
   /**
    * Updates the raw survey object in the db. Used for debbuging only.
    */
-  async saveRawSurvey(id: string, data: any) {
+  async saveRawSurvey(id: string, data: JsonBlob) {
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(id)
-      .set(JSON.parse(data));
+      .set(data);
   }
 
   /**

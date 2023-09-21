@@ -46,6 +46,6 @@ export class SurveyJsonComponent {
   }
 
   async onSave() {
-    this.dataStoreService.saveRawSurvey(this.surveyId!, this.json);
+    this.dataStoreService.saveRawSurvey(this.surveyId!, JSON.parse(this.json));
   }
 }
