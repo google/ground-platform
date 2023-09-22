@@ -75,21 +75,6 @@ export class JobService {
     return this.dataStoreService.addOrUpdateJob(surveyId, job);
   }
 
-  /**
-   * Converts list of tasks to map.
-   */
-  convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
-    let tasksMap = Map<string, Task>();
-    tasks.forEach((task: Task, index: number) => {
-      const jobFieldId = tasks && tasks.get(index)?.id;
-      const taskId = jobFieldId
-        ? jobFieldId
-        : this.dataStoreService.generateId();
-      tasksMap = tasksMap.set(taskId, task);
-    });
-    return tasksMap;
-  }
-
   private async getJobCount(): Promise<number> {
     const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
     return survey.jobs?.size;
