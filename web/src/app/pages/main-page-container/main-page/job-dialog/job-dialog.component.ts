@@ -36,7 +36,7 @@ import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {JobService} from 'app/services/job/job.service';
 import {TaskEditorComponent} from './task-editor/task-editor.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import { DataStoreService } from 'app/services/data-store/data-store.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 // To make ESLint happy:
 /*global alert*/
