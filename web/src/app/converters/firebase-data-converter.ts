@@ -132,7 +132,7 @@ export class FirebaseDataConverter {
     return {
       dataCollectorsCanAdd,
       name,
-      tasks: tasks?.map(task => this.taskToJS(task)).toJS(),
+      tasks: this.tasksToJS(tasks),
       defaultStyle: {color},
       ...jobDoc,
     };
@@ -153,7 +153,11 @@ export class FirebaseDataConverter {
     );
   }
 
-  static tasksToJs(tasks: List<Task>): {} {
+  static tasksToJS(tasks: Map<string, Task> | undefined): {} {
+    if (!tasks) {
+      return {};
+    }
+
     return tasks?.map(task => this.taskToJS(task)).toJS();
   }
 
