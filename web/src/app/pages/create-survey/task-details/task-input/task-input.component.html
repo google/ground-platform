@@ -32,7 +32,16 @@
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onTaskDelete()">
-          <mat-icon>delete_forever</mat-icon>
+          <span>Rename</span>
+        </button>
+
+        <button mat-menu-item (click)="onTaskDelete()">
+          <span>Duplicate</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item (click)="onTaskDelete()">
           <span>Delete</span>
         </button>
       </mat-menu>
