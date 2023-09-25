@@ -35,6 +35,9 @@ import {Task} from 'app/models/task/task.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonBlob = {[field: string]: any};
+
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({
@@ -64,6 +67,24 @@ export class DataStoreService {
         // Convert object to Survey instance.
         map(data => FirebaseDataConverter.toSurvey(id, data as DocumentData))
       );
+  }
+
+  /**
+   * Returns the raw survey object from the db. Used for debbuging only.
+   */
+  async loadRawSurvey(id: string) {
+    return (
+      await firstValueFrom(
+        this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).get()
+      )
+    ).data();
+  }
+
+  /**
+   * Updates the raw survey object in the db. Used for debbuging only.
+   */
+  async saveRawSurvey(id: string, data: JsonBlob) {
+    await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
   }
 
   /**

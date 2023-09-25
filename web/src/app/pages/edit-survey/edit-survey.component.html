@@ -38,6 +38,11 @@
         <span>Sharing</span>
       </a>
 
+      <a *ngIf="!production" mat-list-item id="survey-json" [routerLink]="['./json']">
+        <mat-icon class="material-symbols-outlined button-icon">code</mat-icon>
+        <span>JSON</span>
+      </a>
+
       <h3 matSubheader class="item job-label">Jobs</h3>
 
       <a
