@@ -440,7 +440,22 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJs(tasks),
+        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJS(
+          this.convertTasksListToMap(tasks)
+        ),
       });
+  }
+
+  /**
+   * Converts list of tasks to map.
+   */
+  convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
+    let tasksMap = Map<string, Task>();
+    tasks.forEach((task: Task, index: number) => {
+      const jobFieldId = tasks && tasks.get(index)?.id;
+      const taskId = jobFieldId ? jobFieldId : this.generateId();
+      tasksMap = tasksMap.set(taskId, task);
+    });
+    return tasksMap;
   }
 }
