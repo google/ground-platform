@@ -35,6 +35,7 @@ import {Task} from 'app/models/task/task.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonBlob = {[field: string]: any};
 
 // TODO: Make DataStoreService and interface and turn this into concrete
@@ -83,10 +84,7 @@ export class DataStoreService {
    * Updates the raw survey object in the db. Used for debbuging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
-    await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(id)
-      .set(data);
+    await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
   }
 
   /**

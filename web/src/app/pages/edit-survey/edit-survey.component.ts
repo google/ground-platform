@@ -31,6 +31,7 @@ import {environment} from 'environments/environment';
 export class EditSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   production = !!(environment as any)['production'];
 
   constructor(

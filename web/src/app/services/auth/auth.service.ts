@@ -77,7 +77,7 @@ export class AuthService {
         `${environment.cloudFunctionsUrl}/sessionLogin`,
         {}
       );
-    } catch (err: any) {
+    } catch (err) {
       console.error('Session login failed. Some features may be unavailable');
     }
   }
