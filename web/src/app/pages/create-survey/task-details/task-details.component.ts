@@ -26,23 +26,25 @@ export enum TaskGroup {
   DROP_PIN = 3,
   DRAW_AREA = 4,
   CAPTURE_LOCATION = 5,
-  SUGGEST_LOI = 6,
 }
 
 export const taskGroupToTypes = new Map([
-  [TaskGroup.QUESTION, List([TaskType.TEXT, TaskType.DATE])],
+  [
+    TaskGroup.QUESTION,
+    List([TaskType.TEXT, TaskType.DATE, TaskType.MULTIPLE_CHOICE]),
+  ],
   [TaskGroup.PHOTO, List([TaskType.PHOTO])],
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
   [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
-  [TaskGroup.SUGGEST_LOI, List([TaskType.DROP_PIN])],
 ]);
 
 export const taskTypeToGroup = new Map([
   [TaskType.TEXT, TaskGroup.QUESTION],
   [TaskType.DATE, TaskGroup.QUESTION],
+  [TaskType.MULTIPLE_CHOICE, TaskGroup.QUESTION],
   [TaskType.PHOTO, TaskGroup.PHOTO],
-  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
+  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
 ]);
 
 @Component({

@@ -94,12 +94,6 @@ export const Tasks: {
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
   },
-  [TaskGroup.SUGGEST_LOI]: {
-    icon: 'question_mark',
-    label: '',
-    placeholder: '',
-    requiredMessage: '',
-  },
 };
 
 @Component({
