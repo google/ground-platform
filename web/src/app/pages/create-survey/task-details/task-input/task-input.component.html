@@ -63,7 +63,7 @@
 
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">
         <ng-container *ngIf="labelControl.getError('required')">
-          {{ Tasks[taskGroup].requiredMessage }}
+          {{ Tasks[taskGroup]?.requiredMessage }}
         </ng-container>
       </mat-error>
     </mat-form-field>
@@ -76,18 +76,20 @@
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-task-type">{{
-            getSelectTaskType().icon
-          }}</mat-icon>
+          <mat-icon class="icon-task-type">{{ getSelectTaskType().icon }}</mat-icon>
+
           <span> {{ getSelectTaskType().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let task of selectTaskOptions" [value]="task">
-          <mat-icon>{{ task.icon }}</mat-icon>
-          <span>{{ task.label }}</span>
+
+        <mat-option *ngFor="let taskOption of TaskOptions" [value]="taskOption">
+          <mat-icon>{{ taskOption.icon }}</mat-icon>
+
+          <span>{{ taskOption.label }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>
   </div>
+
   <div *ngIf="expanded">
     <div
       *ngIf="taskOptions?.options"

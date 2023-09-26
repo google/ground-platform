@@ -56,6 +56,31 @@ export interface TaskTypeSelectOption {
   cardinality?: Cardinality;
 }
 
+export const TaskOptions: Array<TaskTypeSelectOption> = [
+  {
+    icon: 'notes',
+    label: 'Text',
+    type: TaskType.TEXT,
+  },
+  {
+    icon: 'access_time',
+    label: 'Date/Time',
+    type: TaskType.DATE_TIME,
+  },
+  {
+    icon: 'radio_button_checked',
+    label: 'Select One',
+    type: TaskType.MULTIPLE_CHOICE,
+    cardinality: Cardinality.SELECT_ONE,
+  },
+  {
+    icon: 'library_add_check',
+    label: 'Select multiple',
+    type: TaskType.MULTIPLE_CHOICE,
+    cardinality: Cardinality.SELECT_MULTIPLE,
+  },
+];
+
 export const Tasks: {
   [key in TaskGroup]: {
     icon: string;
@@ -112,7 +137,6 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();
   taskOptions: MultipleChoice | undefined;
-  selectTaskOptions: TaskTypeSelectOption[];
   @Input() taskIndex?: number;
 
   taskGroup: TaskGroup = TaskGroup.QUESTION;
@@ -132,6 +156,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   TaskGroup = TaskGroup;
 
   Tasks = Tasks;
+
+  TaskOptions = TaskOptions;
 
   @HostListener('click')
   onTaskFocus() {
@@ -155,35 +181,11 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   ) {
     this.expanded = false;
     this.selected = false;
-    this.selectTaskOptions = [
-      {
-        icon: 'notes',
-        label: 'Text',
-        type: TaskType.TEXT,
-      },
-      {
-        icon: 'access_time',
-        label: 'Date/Time',
-        type: TaskType.DATE_TIME,
-      },
-      {
-        icon: 'radio_button_checked',
-        label: 'Select One',
-        type: TaskType.MULTIPLE_CHOICE,
-        cardinality: Cardinality.SELECT_ONE,
-      },
-      {
-        icon: 'library_add_check',
-        label: 'Select multiple',
-        type: TaskType.MULTIPLE_CHOICE,
-        cardinality: Cardinality.SELECT_MULTIPLE,
-      },
-    ];
     this.formGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select task to be of text type.
-      selectTaskOption: this.selectTaskOptions[TaskType.TEXT],
+      selectTaskOption: TaskOptions[0],
     });
   }
 
@@ -230,17 +232,15 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  getSelectedTaskTypeOption(): TaskTypeSelectOption {
-    const selectedOption = this.selectTaskOptions.find(
-      option =>
-        option.type === this.taskType &&
-        (option.type !== TaskType.MULTIPLE_CHOICE ||
-          option.cardinality === this.cardinality)
+  getSelectedTaskTypeOption(): TaskTypeSelectOption | undefined {
+    return (
+      TaskOptions.find(
+        option =>
+          option.type === this.taskType &&
+          (option.type !== TaskType.MULTIPLE_CHOICE ||
+            option.cardinality === this.cardinality)
+      ) ?? TaskOptions[0]
     );
-    if (!selectedOption) {
-      throw new Error(`Unsupported task type ${this.taskType}`);
-    }
-    return selectedOption;
   }
 
   /**
