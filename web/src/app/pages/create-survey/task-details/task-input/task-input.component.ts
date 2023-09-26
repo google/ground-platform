@@ -110,6 +110,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   @Input() taskCount?: Number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+  @Output() duplicate = new EventEmitter();
   taskOptions: MultipleChoice | undefined;
   selectTaskOptions: TaskTypeSelectOption[];
   @Input() taskIndex?: number;
@@ -249,6 +250,15 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    */
   onTaskDelete(): void {
     this.delete.emit(this.taskIndex);
+  }
+
+  /**
+   * Emits the duplicate task event to the job dialog component.
+   *
+   * @returns void
+   */
+  onTaskDuplicate(): void {
+    this.duplicate.emit(this.taskIndex);
   }
 
   getSelectTaskType(): TaskTypeSelectOption {
