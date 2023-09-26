@@ -26,9 +26,8 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {environment} from 'environments/environment';
-import {shareReplay, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
 import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {List} from 'immutable';
@@ -50,7 +49,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   treeControl: FlatTreeControl<DynamicFlatNode>;
   dataSource: DynamicDataSource;
   lois: List<LocationOfInterest> = List();
-  submissionSubscriptions = new Map<string, Subscription>();
 
   getLevel = (node: DynamicFlatNode) => node.level;
   isExpandable = (node: DynamicFlatNode) => node.expandable;
@@ -64,7 +62,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
-    private submissionService: SubmissionService,
     private authService: AuthService,
     readonly surveyService: SurveyService
   ) {
@@ -75,12 +72,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       this.getLevel,
       this.isExpandable
     );
-    this.dataSource = new DynamicDataSource(
-      this.treeControl,
-      this.submissionSubscriptions,
-      submissionService,
-      surveyService
-    );
+    this.dataSource = new DynamicDataSource(this.treeControl, this.loiService);
   }
 
   ngOnInit() {
@@ -98,24 +90,17 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subscription.add(
-      this.loiService
-        .getLocationsOfInterest$()
-        .pipe(shareReplay())
-        .subscribe(lois => {
-          this.lois = lois.filter(loi => {
-            return loi.jobId === this.job?.id;
-          });
-          // Reset nodes for new loi values since we don't know how many lois
-          // were added or removed from the previous value
-          this.resetLoiNodes();
-          for (const loi of LocationOfInterestService.getLoisWithNames(
-            this.lois
-          )) {
-            this.addLoiNode(loi, loi.name!);
-          }
-        })
-    );
+    // Add initial node for current job
+    this.dataSource.data = this.dataSource.data.concat([
+      new DynamicFlatNode(
+        /* name= */ this.job!.name!,
+        /* level= */ 0,
+        /* expandable= */ true,
+        /* iconName= */ 'label',
+        /* iconColo= */ this.job!.color!,
+        /* jobId= */ this.job!.id
+      ),
+    ]);
   }
 
   ngOnChanges() {
@@ -187,20 +172,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     this.navigationService.showLocationOfInterestList(this.job.id);
   }
 
-  addLoiNode(loi: LocationOfInterest, displayName: string) {
-    // Pushing does not cause the tree to rerender, but reassignment does.
-    this.dataSource.data = this.dataSource.data.concat([
-      new DynamicFlatNode(displayName, 0, true, loi),
-    ]);
-  }
-
-  resetLoiNodes() {
-    this.dataSource.data = [];
-    this.submissionSubscriptions.forEach(subscription => {
-      subscription.unsubscribe();
-    });
-  }
-
   isSelectedLoi(node: DynamicFlatNode): boolean {
     return node.loi?.id === this.loiId;
   }
@@ -209,23 +180,14 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     return node.loi ? true : false;
   }
 
-  isSubmissionNode(node: DynamicFlatNode): boolean {
-    return node.submission ? true : false;
-  }
-
   selectLoi(node: DynamicFlatNode) {
     if (this.isLoiNode(node)) {
       this.navigationService.selectLocationOfInterest(node.loi!.id);
-    } else if (this.isSubmissionNode(node)) {
-      this.submissionService.selectSubmission(node.submission!.id);
     }
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-    this.submissionSubscriptions.forEach(subscription => {
-      subscription.unsubscribe();
-    });
   }
 }
 
