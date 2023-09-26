@@ -69,9 +69,7 @@ export class TaskDetailsComponent {
 
   onTaskAdd(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
-
     const type = types?.first();
-
     if (type) {
       const task = this.taskService.createTask(
         type,
@@ -79,7 +77,6 @@ export class TaskDetailsComponent {
         false,
         this.tasks.size
       );
-
       this.tasks = this.tasks.push(task);
     }
   }
@@ -108,6 +105,29 @@ export class TaskDetailsComponent {
       .subscribe(dialogResult => {
         if (dialogResult) {
           this.tasks = this.tasks.splice(index, 1);
+        }
+      });
+  }
+
+  onTaskDuplicate(index: number) {
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to duplicate this task? Any associated data'
+      )
+      .afterClosed()
+      .subscribe(dialogResult => {
+        if (dialogResult) {
+          const taskToDuplicate = this.tasks.get(index);
+          if (taskToDuplicate) {
+            const task = this.taskService.createTask(
+              taskToDuplicate?.type,
+              taskToDuplicate?.label,
+              taskToDuplicate?.required,
+              this.tasks.size
+            );
+            this.tasks = this.tasks.push(task);
+          }
         }
       });
   }
