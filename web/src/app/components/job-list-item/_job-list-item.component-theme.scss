@@ -3,10 +3,10 @@
 
 @mixin color($theme) {
   $color-config: mat.get-color-config($theme);
-  $primary: map.get($color-config, primary);
+  $background: map.get($color-config, background);
 
   .tree-node-selected {
-    background-color: map.get($primary, 100);
+    background-color: map.get($background, selected-button);
   }
   .mat-tree {
     background-color: #edeee9; /* M3/sys/light/surface-container */
