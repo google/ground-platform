@@ -36,6 +36,7 @@ export const taskGroupToTypes = new Map([
   [TaskGroup.PHOTO, List([TaskType.PHOTO])],
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
   [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
+  [TaskGroup.CAPTURE_LOCATION, List([TaskType.CAPTURE_LOCATION])],
 ]);
 
 export const taskTypeToGroup = new Map([
@@ -45,6 +46,7 @@ export const taskTypeToGroup = new Map([
   [TaskType.PHOTO, TaskGroup.PHOTO],
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
   [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
+  [TaskType.CAPTURE_LOCATION, TaskGroup.CAPTURE_LOCATION],
 ]);
 
 @Component({
