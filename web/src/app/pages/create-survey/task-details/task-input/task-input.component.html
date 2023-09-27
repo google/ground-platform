@@ -23,7 +23,10 @@
       <div>
         <mat-label>Required</mat-label>
 
-        <mat-slide-toggle formControlName="required" color="primary"></mat-slide-toggle>
+        <mat-slide-toggle
+          formControlName="required"
+          color="primary"
+        ></mat-slide-toggle>
       </div>
 
       <button mat-icon-button [matMenuTriggerFor]="menu">
@@ -59,7 +62,12 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field fxFlex class="task-type" appearance="outline" *ngIf="taskGroup === TaskGroup.QUESTION">
+    <mat-form-field
+      fxFlex
+      class="task-type"
+      appearance="outline"
+      *ngIf="taskGroup === TaskGroup.QUESTION"
+    >
       <mat-select
         formControlName="selectTaskOption"
         class="task-type-select"
@@ -118,7 +126,6 @@
       fxLayoutAlign="end"
       (keydown.Tab)="onTaskBlur()"
       class="question-actions"
-    >
-    </div>
+    ></div>
   </div>
 </form>

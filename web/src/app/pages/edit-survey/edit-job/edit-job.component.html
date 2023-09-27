@@ -1,2 +1,18 @@
 <!-- TODO: add map editor & task editor here -->
-<h1 id="temp-title">Edit JOB {{id$ | async}}</h1>
+<!-- <h1 id="temp-title">Edit JOB {{ jobId$ | async }}</h1> -->
+<div *ngIf="job$ | async as job">
+  <ng-container *ngIf="job.tasks">
+    <task-input
+      *ngFor="let task of job.tasks; let i = index; trackBy: getIndex"
+      (update)="onTaskUpdate($event, i)"
+      (delete)="onTaskDelete(i)"
+      [label]="task[1].label"
+      [required]="task[1].required"
+      [taskType]="task[1].type"
+      [cardinality]="task[1].multipleChoice?.cardinality"
+      [multipleChoice]="task[1].multipleChoice"
+      [taskCount]="job.tasks.size"
+    >
+    </task-input>
+  </ng-container>
+</div>

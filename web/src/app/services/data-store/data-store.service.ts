@@ -70,6 +70,35 @@ export class DataStoreService {
   }
 
   /**
+   * Returns an Observable that loads and emits the job with the specified
+   * uuid and survet uuid.
+   *
+   * @param jobId the id of the requested job.
+   * @param surveyId the id of the requested survey.
+   */
+  loadJob$(jobId: string, surveyId: string) {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .valueChanges()
+      .pipe(
+        // Convert object to Survey instance.
+        map(data => {
+          const job = FirebaseDataConverter.toSurvey(
+            surveyId,
+            data as DocumentData
+          ).getJob(jobId);
+
+          if (!job) {
+            throw Error('job does not exist with id ' + jobId);
+          }
+
+          return job;
+        })
+      );
+  }
+
+  /**
    * Returns the raw survey object from the db. Used for debbuging only.
    */
   async loadRawSurvey(id: string) {
@@ -434,6 +463,9 @@ export class DataStoreService {
     jobId: string,
     tasks: List<Task>
   ): Promise<void> {
+    console.log('survey', surveyId);
+    console.log('job', jobId);
+
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)

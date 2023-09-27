@@ -132,12 +132,15 @@ export class SurveyService {
    * Returns the acl of the current survey.
    */
   getActiveSurveyAcl(): AclEntry[] {
-    return this.activeSurvey.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
+    if (this.activeSurvey) {
+      return this.activeSurvey.acl
+        .entrySeq()
+        .map(entry => new AclEntry(entry[0], entry[1]))
+        .toList()
+        .sortBy(entry => entry.email)
+        .toArray();
+    }
+    throw Error('no active survey');
   }
 
   /**
@@ -152,4 +155,8 @@ export class SurveyService {
     const acl = this.getActiveSurveyAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
+
+  // clearActiveSurvey() {
+  //   this.activeSurvey = undefined;
+  // }
 }
