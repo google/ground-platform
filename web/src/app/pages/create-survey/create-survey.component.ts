@@ -62,6 +62,8 @@ export class CreateSurveyComponent implements OnInit {
       this.surveyService.activateSurvey(this.surveyId);
     });
 
+    this.surveyService.clearActiveSurvey();
+
     const survey = await firstValueFrom(
       this.surveyService
         .getActiveSurvey$()
@@ -82,6 +84,7 @@ export class CreateSurveyComponent implements OnInit {
       .pipe(first())
       .subscribe(lois => {
         this.setupPhase = this.getSetupPhase(survey, lois);
+        console.log('HERE', survey.id);
         this.survey = survey;
       });
   }
@@ -174,6 +177,8 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   async continue(): Promise<void> {
+    console.log('survey', 'before', this.survey);
+    console.log('surveyId', this.surveyId);
     switch (this.setupPhase) {
       case SetupPhase.SURVEY_DETAILS: {
         const createdSurveyId = await this.saveSurveyTitleAndDescription();
@@ -198,6 +203,7 @@ export class CreateSurveyComponent implements OnInit {
         break;
     }
     this.survey = this.surveyService.getActiveSurvey();
+    console.log('survey', 'after', this.survey);
   }
 
   @ViewChild('surveyDetails')
@@ -233,9 +239,13 @@ export class CreateSurveyComponent implements OnInit {
   private async saveTasks() {
     const tasks = this.taskDetails?.toTasks();
 
+    // Assume the survey exists
+    const survey = this.survey!;
+
     await this.taskService.addOrUpdateTasks(
-      this.surveyId!,
-      this.survey!.jobs.values().next().value.id,
+      survey.id,
+      // Assume there is at least one job
+      survey.jobs.first()!.id,
       tasks!
     );
   }

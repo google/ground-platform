@@ -33,7 +33,7 @@ import {AclEntry} from 'app/models/acl-entry.model';
 export class SurveyService {
   private activeSurveyId$ = new ReplaySubject<string>(1);
   private activeSurvey$: Observable<Survey>;
-  private activeSurvey!: Survey;
+  private activeSurvey!: Survey | undefined;
 
   constructor(
     private dataStore: DataStoreService,
@@ -62,7 +62,10 @@ export class SurveyService {
   }
 
   getActiveSurvey(): Survey {
-    return this.activeSurvey;
+    if (this.activeSurvey) {
+      return this.activeSurvey;
+    }
+    throw Error('no active survey');
   }
 
   activateSurvey(id: string) {
@@ -132,12 +135,15 @@ export class SurveyService {
    * Returns the acl of the current survey.
    */
   getActiveSurveyAcl(): AclEntry[] {
-    return this.activeSurvey.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
+    if (this.activeSurvey) {
+      return this.activeSurvey.acl
+        .entrySeq()
+        .map(entry => new AclEntry(entry[0], entry[1]))
+        .toList()
+        .sortBy(entry => entry.email)
+        .toArray();
+    }
+    throw Error('no active survey');
   }
 
   /**
@@ -151,5 +157,9 @@ export class SurveyService {
     const userEmail = user.email;
     const acl = this.getActiveSurveyAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
+  }
+
+  clearActiveSurvey() {
+    this.activeSurvey = undefined;
   }
 }

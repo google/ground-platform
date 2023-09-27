@@ -17,10 +17,11 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
+import {TaskInputModule} from 'app/pages/create-survey/task-details/task-input/task-input.module';
 
 @NgModule({
   declarations: [EditJobComponent],
-  imports: [CommonModule],
+  imports: [CommonModule, TaskInputModule],
   exports: [EditJobComponent],
 })
 export class EditJobModule {}

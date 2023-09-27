@@ -213,7 +213,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         this.update.emit({
           label: value.label,
           required: value.required,
-          type: value.selectTaskOption.type,
+          type: this.taskType,
           multipleChoice: this.taskOptions,
           index: this.taskIndex,
         });
