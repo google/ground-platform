@@ -111,7 +111,7 @@ export class TaskDetailsComponent {
       });
   }
 
-  onTaskDuplicate(index: number) {
+  onDuplicateTask(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',

@@ -259,7 +259,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    *
    * @returns void
    */
-  onTaskDuplicate(): void {
+  onDuplicateTask(): void {
     this.duplicate.emit(this.taskIndex);
   }
 
