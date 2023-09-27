@@ -57,7 +57,13 @@ export const taskTypeToGroup = new Map([
 export class TaskDetailsComponent {
   tasks: List<Task>;
 
-  TaskGroup = TaskGroup;
+  addableTaskGroups: Array<TaskGroup> = [
+    TaskGroup.QUESTION,
+    TaskGroup.PHOTO,
+    TaskGroup.DROP_PIN,
+    TaskGroup.DRAW_AREA,
+    TaskGroup.CAPTURE_LOCATION,
+  ];
 
   constructor(
     private taskService: TaskService,
