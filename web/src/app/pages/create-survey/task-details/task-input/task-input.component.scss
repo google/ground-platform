@@ -36,12 +36,14 @@
 
   .task-toolbar {
     display: flex;
+    align-items: center;
     gap: 12px;
     height: 32px;
     margin-bottom: 16px;
 
     .toolbar-right {
       display: flex;
+      align-items: center;
       justify-content: end;
       flex: 1;
       gap: 8px;
