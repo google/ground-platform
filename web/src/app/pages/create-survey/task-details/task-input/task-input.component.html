@@ -104,14 +104,15 @@
         cdkDrag
         fxLayout
       >
-        <!-- <ground-option-editor
+        <ground-option-editor
             [label]="option.label"
             [code]="option.code"
             [index]="i"
             (update)="onOptionUpdate($event, i)"
             (delete)="onOptionDelete(i)"
-          ></ground-option-editor> -->
+          ></ground-option-editor>
       </div>
+
       <button
         mat-button
         type="button"
@@ -121,13 +122,6 @@
       >
         Add option
       </button>
-    </div>
-    <div
-      fxLayout
-      fxLayoutAlign="end"
-      (keydown.Tab)="onTaskBlur()"
-      class="question-actions"
-    >
     </div>
   </div>
 </form>

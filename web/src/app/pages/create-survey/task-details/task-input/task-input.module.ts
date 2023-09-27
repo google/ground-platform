@@ -27,6 +27,7 @@ import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/mater
 import {MatButtonModule} from '@angular/material/button';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatDividerModule} from '@angular/material/divider';
+import {OptionEditorModule} from './option-editor/option-editor.module';
 // import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 
 @NgModule({
@@ -45,6 +46,7 @@ import {MatDividerModule} from '@angular/material/divider';
     MatMenuModule,
     DragDropModule,
     MatDividerModule,
+    OptionEditorModule,
     // MatDialogModule,
   ],
   exports: [TaskInputComponent],
