@@ -21,20 +21,20 @@
 
 <form [formGroup]="formGroup">
   <mat-radio-group
+    class="loi-permissions"
     [id]="loiPermissionsControlKey"
     [formControlName]="loiPermissionsControlKey"
   >
-    <ng-container *ngFor="let option of loiPermissionsOptions">
-      <mat-card class="loi-permissions-option"
-        (click)="loiPermissionsOptionSelected(option.value)"
-      >
-        <mat-card-content>
-          <mat-radio-button class="option-radio-button" [value]="option.value">
-            {{ option.label }}
-          </mat-radio-button>
-          <p class="option-description">{{ option.description }}</p>
-        </mat-card-content>
-      </mat-card>
-    </ng-container>
+    <mat-card class="loi-permissions-option"
+      *ngFor="let option of loiPermissionsOptions"
+      (click)="loiPermissionsOptionCardClicked(option.value)"
+    >
+      <mat-card-content>
+        <mat-radio-button class="option-radio-button" [value]="option.value">
+          {{ option.label }}
+        </mat-radio-button>
+        <p class="option-description">{{ option.description }}</p>
+      </mat-card-content>
+    </mat-card>
   </mat-radio-group>
 </form>

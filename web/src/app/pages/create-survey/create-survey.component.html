@@ -45,6 +45,12 @@
             #jobDetails
             [name]="job()?.name ?? ''"
           ></job-details>
+          <loi-permissions
+            *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
+            #loiPermissions
+            [permissionsOption]="loiPermissionsOption"
+            (permissionsOptionSelected)="permissionsOptionSelected($event)"
+          ></loi-permissions>
           <loi-selection
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
             #loiSelection
