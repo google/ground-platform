@@ -155,6 +155,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
 
   TaskGroup = TaskGroup;
 
+  TaskType = TaskType;
+
   Tasks = Tasks;
 
   TaskOptions = TaskOptions;

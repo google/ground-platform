@@ -18,8 +18,14 @@
   border-radius: 8px;
   border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
   background: var(--ground-sys-light-surface-container-lowest, #FFF);
-  padding: 24px;
+  padding: 0px 24px 24px 24px;
   margin-top: 8px;
+
+  &.selected {
+    border-left: 8px solid #6DDD81;
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.30), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+    padding-left: 17px;
+  }
 
   .task-toolbar {
     display: flex;
