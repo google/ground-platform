@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ import {CommonModule} from '@angular/common';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
-import {OptionEditorComponent} from './option-editor.component';
+import {EditOptionComponent} from './edit-option.component';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
 
 @NgModule({
-  declarations: [OptionEditorComponent],
+  declarations: [EditOptionComponent],
   imports: [
     CommonModule,
     MatFormFieldModule,
@@ -36,6 +36,6 @@ import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/lega
     MatButtonModule,
     MatTooltipModule,
   ],
-  exports: [OptionEditorComponent],
+  exports: [EditOptionComponent],
 })
-export class OptionEditorModule {}
+export class EditOptionModule {}

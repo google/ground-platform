@@ -104,13 +104,13 @@
         cdkDrag
         fxLayout
       >
-        <ground-option-editor
+        <ground-edit-option
             [label]="option.label"
             [code]="option.code"
             [index]="i"
             (update)="onOptionUpdate($event, i)"
             (delete)="onOptionDelete(i)"
-          ></ground-option-editor>
+          ></ground-edit-option>
       </div>
 
       <button

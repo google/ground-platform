@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@ import {
 } from '@angular/forms';
 
 @Component({
-  selector: 'ground-option-editor',
-  templateUrl: './option-editor.component.html',
-  styleUrls: ['./option-editor.component.scss'],
+  selector: 'ground-edit-option',
+  templateUrl: './edit-option.component.html',
+  styleUrls: ['./edit-option.component.scss'],
 })
-export class OptionEditorComponent implements OnInit, OnChanges {
+export class EditOptionComponent implements OnInit, OnChanges {
   @Input() code?: string;
   @Input() label?: string;
   @Input() index?: number;

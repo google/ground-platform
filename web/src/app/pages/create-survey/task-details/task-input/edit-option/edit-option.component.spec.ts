@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
-import {OptionEditorComponent} from './option-editor.component';
+import {EditOptionComponent} from './edit-option.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
@@ -25,13 +25,13 @@ import {MatButtonModule} from '@angular/material/button';
 import {CommonModule} from '@angular/common';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
-describe('OptionEditorComponent', () => {
-  let component: OptionEditorComponent;
-  let fixture: ComponentFixture<OptionEditorComponent>;
+describe('EditOptionComponent', () => {
+  let component: EditOptionComponent;
+  let fixture: ComponentFixture<EditOptionComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [OptionEditorComponent],
+      declarations: [EditOptionComponent],
       imports: [
         CommonModule,
         BrowserAnimationsModule,
@@ -46,7 +46,7 @@ describe('OptionEditorComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(OptionEditorComponent);
+    fixture = TestBed.createComponent(EditOptionComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
