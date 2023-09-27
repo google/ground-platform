@@ -32,6 +32,7 @@ export class HttpClientService {
    * Sends an HTTP post with the Authorization Bearer token of the current user
    * in the request header.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async postWithAuth<T>(url: string, body: any | null): Promise<T> {
     const token = await firstValueFrom(this.afAuth.idToken);
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);

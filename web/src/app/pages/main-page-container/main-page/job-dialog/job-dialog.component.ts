@@ -36,6 +36,7 @@ import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {JobService} from 'app/services/job/job.service';
 import {TaskEditorComponent} from './task-editor/task-editor.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 // To make ESLint happy:
 /*global alert*/
@@ -69,6 +70,7 @@ export class JobDialogComponent implements OnDestroy {
     private dialogRef: MatDialogRef<JobDialogComponent>,
     private dialogService: DialogService,
     private jobService: JobService,
+    private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private readonly cdr: ChangeDetectorRef
   ) {
@@ -162,7 +164,7 @@ export class JobDialogComponent implements OnDestroy {
         return;
       }
     }
-    const tasks = this.jobService.convertTasksListToMap(this.tasks);
+    const tasks = this.dataStoreService.convertTasksListToMap(this.tasks);
     const allowedLoiTypes: string[] = [];
     if (this.dataCollectorsCanAddPoints) {
       allowedLoiTypes.push('points');
