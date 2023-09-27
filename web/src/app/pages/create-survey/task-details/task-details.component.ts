@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,24 @@ export enum TaskGroup {
   DROP_PIN = 3,
   DRAW_AREA = 4,
   CAPTURE_LOCATION = 5,
+  SUGGEST_LOI = 6,
 }
+
+export const taskGroupToTypes = new Map([
+  [TaskGroup.QUESTION, List([TaskType.TEXT, TaskType.DATE])],
+  [TaskGroup.PHOTO, List([TaskType.PHOTO])],
+  [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
+  [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
+  [TaskGroup.SUGGEST_LOI, List([TaskType.DROP_PIN])],
+]);
+
+export const taskTypeToGroup = new Map([
+  [TaskType.TEXT, TaskGroup.QUESTION],
+  [TaskType.DATE, TaskGroup.QUESTION],
+  [TaskType.PHOTO, TaskGroup.PHOTO],
+  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
+  [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
+]);
 
 @Component({
   selector: 'task-details',
@@ -48,30 +65,21 @@ export class TaskDetailsComponent {
     this.tasks = List<Task>();
   }
 
-  onQuestionAdd() {
-    const task = this.taskService.createTask(
-      TaskType.TEXT,
-      /* label= */
-      '',
-      /* required= */
-      false,
-      /* index= */
-      this.tasks.size
-    );
-    this.tasks = this.tasks.push(task);
-  }
+  onTaskAdd(group: TaskGroup) {
+    const types = taskGroupToTypes.get(group);
 
-  onPhotoAdd() {
-    const task = this.taskService.createTask(
-      TaskType.PHOTO,
-      /* label= */
-      '',
-      /* required= */
-      false,
-      /* index= */
-      this.tasks.size
-    );
-    this.tasks = this.tasks.push(task);
+    const type = types?.first();
+
+    if (type) {
+      const task = this.taskService.createTask(
+        type,
+        '',
+        false,
+        this.tasks.size
+      );
+
+      this.tasks = this.tasks.push(task);
+    }
   }
 
   onTaskUpdate(event: Task, index: number) {

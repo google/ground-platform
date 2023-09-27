@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -79,13 +79,18 @@ describe('JobListItemComponent', () => {
     isAuthenticated: false,
   };
 
-  const job = new Job('job001', /* index */ 0);
+  const job = new Job(
+    /* id= */ 'job001',
+    /* index= */ 0,
+    /* color= */ '#fff',
+    /* name= */ 'job 1'
+  );
 
   const surveyId = 'survey1';
   const survey = new Survey(
-    surveyId,
-    'title1',
-    'description1',
+    /* id= */ surveyId,
+    /* title= */ 'title1',
+    /* description= */ 'description1',
     /* jobs= */ Map({
       job001: job,
     }),
@@ -97,10 +102,10 @@ describe('JobListItemComponent', () => {
     for (let i = 0; i < count; i++) {
       lois.push(
         new GenericLocationOfInterest(
-          'loi' + i,
-          job.id,
-          new Point(new Coordinate(1.23, 4.56)),
-          Map()
+          /* id= */ 'loi' + i,
+          /* jobId= */ job.id,
+          /* geometry= */ new Point(new Coordinate(1.23, 4.56)),
+          /* properties= */ Map()
         )
       );
     }
@@ -206,70 +211,39 @@ describe('JobListItemComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should render job tree', async () => {
+    const jobTree = await loader.getHarness(MatTreeHarness);
+    expect((await jobTree.getNodes()).length).toBe(1);
+  });
+
   it('should render lois for a job', async () => {
+    const jobTree = await loader.getHarness(MatTreeHarness);
+    const jobNode = (await jobTree.getNodes())[0];
+    await jobNode.expand();
+
     lois$.next(createLois(2));
 
-    const job = await loader.getHarness(MatTreeHarness);
-    const loiNodes = await job.getNodes();
-    expect(loiNodes.length).toBe(2);
+    // One node for the job, 2 nodes for the lois
+    expect((await jobTree.getNodes()).length).toBe(3);
   });
 
   it('should dynamically render lois for a job', async () => {
+    const jobTree = await loader.getHarness(MatTreeHarness);
+    const jobNode = (await jobTree.getNodes())[0];
+    await jobNode.expand();
+
+    lois$.next(createLois(2));
     lois$.next(createLois(1));
 
-    const job = await loader.getHarness(MatTreeHarness);
-    expect((await job.getNodes()).length).toBe(1);
-
-    lois$.next(createLois(4));
-    expect((await job.getNodes()).length).toBe(4);
-  });
-
-  it('should render submissions for an loi', async () => {
-    const lois = createLois(1);
-    lois$.next(lois);
-
-    const loiNode = await loader.getHarness(MatTreeNodeHarness);
-    await loiNode.toggle();
-
-    submissions$.next(createSubmissions(lois.first(), 3));
-
-    const job = await loader.getHarness(MatTreeHarness);
-    // Expect 4 nodes since one is for the loi and 3 for submissions
-    expect((await job.getNodes()).length).toBe(4);
-  });
-
-  it('should dynamically render submissions for an loi', async () => {
-    const lois = createLois(1);
-    lois$.next(lois);
-
-    const loiNode = await loader.getHarness(MatTreeNodeHarness);
-    await loiNode.toggle();
-
-    submissions$.next(createSubmissions(lois.first(), 3));
-    submissions$.next(createSubmissions(lois.first(), 9));
-
-    const job = await loader.getHarness(MatTreeHarness);
-    // Expect 10 nodes since one is for the loi and 9 for submissions
-    expect((await job.getNodes()).length).toBe(10);
-
-    submissions$.next(createSubmissions(lois.first(), 5));
-    // Expect 6 nodes since one is for the loi and 5 for submissions
-    expect((await job.getNodes()).length).toBe(6);
-  });
-
-  it('should highlight LOI when it is selected', async () => {
-    const lois = createLois(1);
-    lois$.next(lois);
-
-    locationOfInterestId$.next(lois.first()!.id);
-
-    const loiNode = await loader.getHarness(MatTreeNodeHarness);
-    expect(
-      await (await loiNode.host()).hasClass('tree-node-selected')
-    ).toBeTrue();
+    // One node for the job, one node for the loi
+    expect((await jobTree.getNodes()).length).toBe(2);
   });
 
   it('should select LOI when LOI is clicked', async () => {
+    const jobTree = await loader.getHarness(MatTreeHarness);
+    const jobNode = (await jobTree.getNodes())[0];
+    await jobNode.expand();
+
     const lois = createLois(1);
     lois$.next(lois);
     const loiId = lois.first()!.id;

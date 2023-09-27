@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2019 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ export class FirebaseDataConverter {
     return {
       dataCollectorsCanAdd,
       name,
-      tasks: tasks?.map(task => this.taskToJS(task)).toJS(),
+      tasks: this.tasksToJS(tasks),
       defaultStyle: {color},
       ...jobDoc,
     };
@@ -153,7 +153,11 @@ export class FirebaseDataConverter {
     );
   }
 
-  static tasksToJs(tasks: List<Task>): {} {
+  static tasksToJS(tasks: Map<string, Task> | undefined): {} {
+    if (!tasks) {
+      return {};
+    }
+
     return tasks?.map(task => this.taskToJS(task)).toJS();
   }
 

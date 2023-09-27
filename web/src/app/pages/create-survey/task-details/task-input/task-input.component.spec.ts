@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
 import {of} from 'rxjs';
+import {MatMenuModule} from '@angular/material/menu';
 
 describe('TaskInputComponent', () => {
   let component: TaskInputComponent;
@@ -39,6 +40,7 @@ describe('TaskInputComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TaskInputComponent],
+      imports: [MatMenuModule],
       providers: [
         {provide: DataStoreService, useValue: {generateId: () => '123'}},
         {provide: DialogService, useValue: {}},

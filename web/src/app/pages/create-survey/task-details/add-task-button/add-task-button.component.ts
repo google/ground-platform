@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,18 @@ export class AddTaskButtonComponent {
       case TaskGroup.PHOTO:
         this.text = 'Take a photo';
         this.icon = 'photo_camera';
+        break;
+      case TaskGroup.DROP_PIN:
+        this.text = 'Drop a pin';
+        this.icon = 'pin_drop';
+        break;
+      case TaskGroup.DRAW_AREA:
+        this.text = 'Draw an area';
+        this.icon = 'draw';
+        break;
+      case TaskGroup.SUGGEST_LOI:
+        this.text = 'Capture location';
+        this.icon = 'share_location';
         break;
       default:
         this.text = 'Undefined Task';

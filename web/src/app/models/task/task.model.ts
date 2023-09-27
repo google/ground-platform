@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,9 @@ export enum TaskType {
   NUMBER = 4,
   DATE = 5,
   TIME = 6,
+  DATE_TIME = 7,
+  DRAW_AREA = 8,
+  DROP_PIN = 9,
 }
 
 // TODO: add a subclass of Task for each task type.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2019 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,9 @@ import {Task} from 'app/models/task/task.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonBlob = {[field: string]: any};
+
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
 @Injectable({
@@ -64,6 +67,24 @@ export class DataStoreService {
         // Convert object to Survey instance.
         map(data => FirebaseDataConverter.toSurvey(id, data as DocumentData))
       );
+  }
+
+  /**
+   * Returns the raw survey object from the db. Used for debbuging only.
+   */
+  async loadRawSurvey(id: string) {
+    return (
+      await firstValueFrom(
+        this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).get()
+      )
+    ).data();
+  }
+
+  /**
+   * Updates the raw survey object in the db. Used for debbuging only.
+   */
+  async saveRawSurvey(id: string, data: JsonBlob) {
+    await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
   }
 
   /**
@@ -417,7 +438,22 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJs(tasks),
+        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJS(
+          this.convertTasksListToMap(tasks)
+        ),
       });
+  }
+
+  /**
+   * Converts list of tasks to map.
+   */
+  convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
+    let tasksMap = Map<string, Task>();
+    tasks.forEach((task: Task, index: number) => {
+      const jobFieldId = tasks && tasks.get(index)?.id;
+      const taskId = jobFieldId ? jobFieldId : this.generateId();
+      tasksMap = tasksMap.set(taskId, task);
+    });
+    return tasksMap;
   }
 }

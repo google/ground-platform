@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,13 @@
 
 .page {
   min-height: 100%;
+}
+
+.loading-spinner {
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  min-height: 500px;
 }
 
 .container {

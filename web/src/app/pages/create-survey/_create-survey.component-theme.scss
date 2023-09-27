@@ -19,6 +19,10 @@
 
   // TODO(amysorto): use typography-config once typography levels defined
 
+  .loading-label {
+    font-family: mat.font-family($typography-config);
+  }
+
   .progress-bar-title {
     font-weight: 500;
   }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2019 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ export class AuthService {
         `${environment.cloudFunctionsUrl}/sessionLogin`,
         {}
       );
-    } catch (err: any) {
+    } catch (err) {
       console.error('Session login failed. Some features may be unavailable');
     }
   }

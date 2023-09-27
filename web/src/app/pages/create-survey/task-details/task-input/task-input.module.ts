@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
 import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {MatButtonModule} from '@angular/material/button';
+import {MatMenuModule} from '@angular/material/menu';
 // import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 
 @NgModule({
@@ -40,6 +41,7 @@ import {MatButtonModule} from '@angular/material/button';
     MatIconModule,
     MatSlideToggleModule,
     MatButtonModule,
+    MatMenuModule,
     DragDropModule,
     // MatDialogModule,
   ],

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -73,21 +73,6 @@ export class JobService {
       job = job.copyWith({index});
     }
     return this.dataStoreService.addOrUpdateJob(surveyId, job);
-  }
-
-  /**
-   * Converts list of tasks to map.
-   */
-  convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
-    let tasksMap = Map<string, Task>();
-    tasks.forEach((task: Task, index: number) => {
-      const jobFieldId = tasks && tasks.get(index)?.id;
-      const taskId = jobFieldId
-        ? jobFieldId
-        : this.dataStoreService.generateId();
-      tasksMap = tasksMap.set(taskId, task);
-    });
-    return tasksMap;
   }
 
   private async getJobCount(): Promise<number> {

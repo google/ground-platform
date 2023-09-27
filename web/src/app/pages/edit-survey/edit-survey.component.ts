@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {filter, first, firstValueFrom} from 'rxjs';
+import {environment} from 'environments/environment';
 
 @Component({
   selector: 'edit-survey',
@@ -30,6 +31,8 @@ import {filter, first, firstValueFrom} from 'rxjs';
 export class EditSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  production = !!(environment as any)['production'];
 
   constructor(
     private surveyService: SurveyService,

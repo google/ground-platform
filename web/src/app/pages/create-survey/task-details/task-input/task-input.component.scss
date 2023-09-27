@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,39 @@
  * limitations under the License.
  */
 
-.task-type {
-  margin-left: 30px;
-}
+.task-input {
+  border-radius: 8px;
+  border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+  background: var(--ground-sys-light-surface-container-lowest, #FFF);
+  padding: 24px;
+  margin-top: 8px;
 
-.question {
-  margin-top: 3px;
+  .task-toolbar {
+    display: flex;
+    gap: 12px;
+    height: 32px;
+    margin-bottom: 16px;
+
+    .toolbar-right {
+      display: flex;
+      justify-content: end;
+      flex: 1;
+      gap: 8px;
+
+      .mat-slide-toggle {
+        margin-left: 12px;
+      }
+    }
+  }
+
+  .task-form {
+    display: flex;
+    gap: 16px;
+  
+    .question {
+      flex: 1;
+    }
+  }
 }
 
 .icon-task-type {
@@ -36,21 +63,6 @@
 .vertical-divider {
   height: 30px;
   margin: 3px 20px;
-}
-
-.required-toggle {
-  padding-top: 5px;
-}
-
-.required-label {
-  margin-right: 20px;
-}
-
-.question-container {
-  border-radius: 10px;
-  padding: 0px 10px;
-  margin-top: 10px;
-  border-style: solid;
 }
 
 .drag-icon {
