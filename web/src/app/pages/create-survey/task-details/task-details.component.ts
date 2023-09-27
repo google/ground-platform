@@ -114,8 +114,8 @@ export class TaskDetailsComponent {
   onDuplicateTask(index: number) {
     this.dialogService
       .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to duplicate this task? Any associated data'
+        'Duplicate task',
+        'Are you sure you wish to duplicate this task?'
       )
       .afterClosed()
       .subscribe(dialogResult => {
