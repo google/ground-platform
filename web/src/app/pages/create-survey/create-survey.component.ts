@@ -244,7 +244,7 @@ export class CreateSurveyComponent implements OnInit {
   @ViewChild('loiPermissions')
   loiPermissions?: LoiPermissionsComponent;
 
-  private getExistingJob(): Job {
+  private getFirstJob(): Job {
     // there should only be at most one job attached to this survey at this
     // point when user is still in the survey creation flow.
     return this.survey!.jobs.values().next().value;
@@ -254,7 +254,7 @@ export class CreateSurveyComponent implements OnInit {
     const name = this.jobDetails!.toJobName();
     let job;
     if (this.survey!.jobs.size > 0) {
-      job = this.getExistingJob();
+      job = this.getFirstJob();
     } else {
       job = this.jobService.createNewJob();
     }
@@ -273,7 +273,7 @@ export class CreateSurveyComponent implements OnInit {
       ? ['points', 'polygons']
       : [];
 
-    const job = this.getExistingJob();
+    const job = this.getFirstJob();
     await this.jobService.addOrUpdateJob(
       this.surveyId!,
       job.copyWith({dataCollectorsCanAdd})
