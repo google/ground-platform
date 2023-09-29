@@ -15,40 +15,27 @@
  */
 
 import {NgModule} from '@angular/core';
-import {TaskInputComponent} from './task-input.component';
 import {CommonModule} from '@angular/common';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {DragDropModule} from '@angular/cdk/drag-drop';
+import {MatInputModule} from '@angular/material/input';
+import {EditOptionComponent} from './edit-option.component';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
-import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
-import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
-import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {MatButtonModule} from '@angular/material/button';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatDividerModule} from '@angular/material/divider';
-import {EditOptionModule} from './edit-option/edit-option.module';
-// import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
 
 @NgModule({
-  declarations: [TaskInputComponent],
+  declarations: [EditOptionComponent],
   imports: [
-    MatIconModule,
     CommonModule,
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatSelectModule,
     MatIconModule,
-    MatSlideToggleModule,
     MatButtonModule,
-    MatMenuModule,
-    DragDropModule,
-    MatDividerModule,
-    EditOptionModule,
-    // MatDialogModule,
+    MatTooltipModule,
   ],
-  exports: [TaskInputComponent],
+  exports: [EditOptionComponent],
 })
-export class TaskInputModule {}
+export class EditOptionModule {}

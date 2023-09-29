@@ -13,7 +13,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<form [formGroup]="formGroup" class="task-input">
+
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}">
+  <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
+
   <div class="task-toolbar">
     <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
 
@@ -31,16 +34,21 @@
       </button>
 
       <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onDuplicateTask()">
+          <span>Duplicate</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
         <button mat-menu-item (click)="onTaskDelete()">
-          <mat-icon>delete_forever</mat-icon>
           <span>Delete</span>
         </button>
       </mat-menu>
     </div>
   </div>
 
-  <div fxLayout class="task-form">
-    <mat-form-field class="question" appearance="fill" fxFlex="2 1 auto">
+  <div class="task-form">
+    <mat-form-field class="question" appearance="fill">
       <mat-label>{{ Tasks[taskGroup].placeholder }}</mat-label>
 
       <input
@@ -67,19 +75,21 @@
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-task-type">{{
-            getSelectTaskType().icon
-          }}</mat-icon>
+          <mat-icon class="icon-task-type">{{ getSelectTaskType().icon }}</mat-icon>
+
           <span> {{ getSelectTaskType().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let task of selectTaskOptions" [value]="task">
-          <mat-icon>{{ task.icon }}</mat-icon>
-          <span>{{ task.label }}</span>
+
+        <mat-option *ngFor="let taskOption of TaskOptions" [value]="taskOption">
+          <mat-icon>{{ taskOption.icon }}</mat-icon>
+
+          <span>{{ taskOption.label }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-  <div *ngIf="expanded">
+
+  <div *ngIf="taskType === TaskType.MULTIPLE_CHOICE">
     <div
       *ngIf="taskOptions?.options"
       cdkDropList
@@ -94,14 +104,15 @@
         cdkDrag
         fxLayout
       >
-        <!-- <ground-option-editor
+        <ground-edit-option
             [label]="option.label"
             [code]="option.code"
             [index]="i"
             (update)="onOptionUpdate($event, i)"
             (delete)="onOptionDelete(i)"
-          ></ground-option-editor> -->
+          ></ground-edit-option>
       </div>
+
       <button
         mat-button
         type="button"
@@ -111,14 +122,6 @@
       >
         Add option
       </button>
-    </div>
-    <hr class="horizontal-line" />
-    <div
-      fxLayout
-      fxLayoutAlign="end"
-      (keydown.Tab)="onTaskBlur()"
-      class="question-actions"
-    >
     </div>
   </div>
 </form>
