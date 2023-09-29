@@ -55,6 +55,8 @@ export const taskTypeToGroup = new Map([
   styleUrls: ['./task-details.component.scss'],
 })
 export class TaskDetailsComponent {
+  @Input() label?: string;
+
   tasks: List<Task>;
 
   addableTaskGroups: Array<TaskGroup> = [
