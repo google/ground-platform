@@ -132,12 +132,13 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   @Input() taskType: TaskType = TaskType.TEXT;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
-  @Input() taskCount?: Number;
+  @Input() taskCount?: number;
+  @Input() taskIndex?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();
+
   taskOptions: MultipleChoice | undefined;
-  @Input() taskIndex?: number;
 
   taskGroup: TaskGroup = TaskGroup.QUESTION;
 
@@ -212,7 +213,7 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
         this.update.emit({
           label: value.label,
           required: value.required,
-          type: value.selectTaskOption.type,
+          type: this.taskType,
           multipleChoice: this.taskOptions,
           index: this.taskIndex,
         });
@@ -224,6 +225,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    * This method is used to get the updated values of task from the job-dialog.
    */
   ngOnChanges(changes: SimpleChanges): void {
+    this.taskGroup = taskTypeToGroup.get(this.taskType) ?? TaskGroup.QUESTION;
+
     if (changes.multipleChoice) {
       this.taskOptions = this.multipleChoice;
     }

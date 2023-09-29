@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Component, Input} from '@angular/core';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -135,7 +135,8 @@ export class TaskDetailsComponent {
               taskToDuplicate?.type,
               taskToDuplicate?.label,
               taskToDuplicate?.required,
-              this.tasks.size
+              this.tasks.size,
+              taskToDuplicate?.multipleChoice
             );
             this.tasks = this.tasks.push(task);
           }
