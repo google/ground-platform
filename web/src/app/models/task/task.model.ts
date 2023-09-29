@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Copiable} from '../copiable';
 import {MultipleChoice} from './multiple-choice.model';
 import {Option} from './option.model';
 
@@ -54,7 +55,7 @@ export enum TaskType {
 }
 
 // TODO: add a subclass of Task for each task type.
-export class Task {
+export class Task extends Copiable {
   constructor(
     readonly id: string,
     readonly type: TaskType,
@@ -62,7 +63,9 @@ export class Task {
     readonly required: boolean,
     readonly index: number,
     readonly multipleChoice?: MultipleChoice
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * For MULTIPLE_CHOICE tasks, returns the option with the specified id.
