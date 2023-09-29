@@ -62,8 +62,6 @@ export class CreateSurveyComponent implements OnInit {
       this.surveyService.activateSurvey(this.surveyId);
     });
 
-    // this.surveyService.clearActiveSurvey();
-
     const survey = await firstValueFrom(
       this.surveyService
         .getActiveSurvey$()

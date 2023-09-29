@@ -83,6 +83,7 @@ export class TaskDetailsComponent {
   }
 
   onTaskUpdate(event: Task, index: number) {
+    console.log('updating', event);
     const taskId = this.tasks.get(index)?.id;
     const task = new Task(
       taskId || '',

@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Job} from 'app/models/job.model';
-import {Task} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {Observable} from 'rxjs';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Job } from 'app/models/job.model';
+import { Task } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { JobService } from 'app/services/job/job.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { List } from 'immutable';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'edit-job',
@@ -29,42 +31,50 @@ import {Observable} from 'rxjs';
   styleUrls: ['./edit-job.component.scss'],
 })
 export class EditJobComponent {
-  // jobId$: Observable<string>;
   surveyId?: string;
-  job$?: Observable<Job>;
+  @Input() job?: Job;
+  @Output() jobUpdate = new EventEmitter();
 
   constructor(
     route: ActivatedRoute,
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private jobService: JobService,
   ) {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
       if (surveyId) {
         route.params.subscribe(params => {
           const jobId = params['id'];
-          this.job$ = this.dataStoreService.loadJob$(jobId, surveyId);
         });
       }
     });
   }
 
-  // async ngOnInit(): Promise<void> {
-  //   this.navigationService.getSurveyId$().subscribe(async surveyId => {
-  //     if (surveyId) {
-  //       this.jobId$.subscribe(jobId => {
-  //         this.job$ = this.dataStoreService.loadJob$(jobId, surveyId);
-  //       });
-  //     }
-  //   });
-  // }
+  async ngOnInit(): Promise<void> {
+    // this.navigationService.getSurveyId$().subscribe(async surveyId => {
+    //   if (surveyId) {
+    //     this.jobId$.subscribe(jobId => {
+    //       this.job$ = this.dataStoreService.loadJob$(jobId, surveyId);
+    //     });
+    //   }
+    // });
+  }
 
   getIndex(index: number) {
     return index;
   }
 
   onTaskUpdate(event: Task, index: number) {
-    // const taskId = this.tasks.get(index)?.id;
+    // if (!this.job) {
+    //   throw Error('job instance is empty');
+    // }
+
+    // const tasks = this.job.tasks;
+    // if (!tasks) {
+    //   throw Error('tasks list is is empty');
+    // }
+
     // const task = new Task(
     //   taskId || '',
     //   event.type,
@@ -73,7 +83,13 @@ export class EditJobComponent {
     //   index,
     //   event.multipleChoice
     // );
-    // this.tasks = this.tasks.set(index, task);
+
+    // this.jobService.addOrUpdateJob
+    this.jobUpdate.emit({
+      job: this.job,
+      task: event,
+      index: index,
+    })
   }
 
   onTaskDelete(index: number) {
