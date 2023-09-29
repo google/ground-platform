@@ -155,8 +155,4 @@ export class SurveyService {
     const acl = this.getActiveSurveyAcl();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
-
-  // clearActiveSurvey() {
-  //   this.activeSurvey = undefined;
-  // }
 }
