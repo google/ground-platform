@@ -54,7 +54,7 @@ export class DataStoreService {
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
-   * uuid.
+   * id once, then emits a new value on each change.
    *
    * @param id the id of the requested survey.
    */

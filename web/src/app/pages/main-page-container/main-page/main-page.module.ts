@@ -27,6 +27,7 @@ import {NgModule} from '@angular/core';
 import {SidePanelModule} from './side-panel/side-panel.module';
 import {SurveyHeaderModule} from './survey-header/survey-header.module';
 import {MatIconModule} from '@angular/material/icon';
+import { SurveyContainerModule } from 'app/components/survey-container/survey-container.module';
 
 @NgModule({
   declarations: [MainPageComponent],
@@ -43,6 +44,7 @@ import {MatIconModule} from '@angular/material/icon';
     MatSidenavModule,
     SidePanelModule,
     SurveyHeaderModule,
+    SurveyContainerModule
   ],
 })
 export class MainPageModule {}

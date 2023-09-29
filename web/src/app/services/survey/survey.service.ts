@@ -61,6 +61,11 @@ export class SurveyService {
     this.activeSurvey$.subscribe(survey => (this.activeSurvey = survey));
   }
 
+  getSurvey$(id?: string): Observable<Survey | undefined>{
+    if (!id) return of(undefined);
+    return this.dataStore.loadSurvey$(id);
+  }
+
   getActiveSurvey(): Survey {
     return this.activeSurvey;
   }
