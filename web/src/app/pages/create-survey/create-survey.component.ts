@@ -60,7 +60,7 @@ export class CreateSurveyComponent implements OnInit {
     route: ActivatedRoute
   ) {
     navigationService.init(route);
-    this.permissionsOptionSelected(LoiPermissionsOption.SURVEY_ORGANIZERS);
+    this.onLoiPermissionsChange(LoiPermissionsOption.SURVEY_ORGANIZERS);
   }
 
   async ngOnInit(): Promise<void> {
@@ -217,7 +217,7 @@ export class CreateSurveyComponent implements OnInit {
     this.survey = this.surveyService.getActiveSurvey();
   }
 
-  permissionsOptionSelected(permissionsOption: LoiPermissionsOption) {
+  onLoiPermissionsChange(permissionsOption: LoiPermissionsOption) {
     this.loiPermissionsOption = permissionsOption;
     this.skipLoiSelection =
       permissionsOption === LoiPermissionsOption.DATA_COLLECTORS;
@@ -261,6 +261,7 @@ export class CreateSurveyComponent implements OnInit {
     await this.jobService.addOrUpdateJob(this.surveyId!, job.copyWith({name}));
   }
 
+  // TODO: Move LOI permissions saving to job service.
   private async saveLoiPermissions() {
     if (!this.loiPermissionsOption) return;
 

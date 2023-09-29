@@ -44,8 +44,8 @@ interface OptionCardConfig {
   styleUrls: ['./loi-permissions.component.scss'],
 })
 export class LoiPermissionsComponent implements OnInit, OnChanges {
-  @Input() permissionsOption!: LoiPermissionsOption;
-  @Output() permissionsOptionSelected: EventEmitter<LoiPermissionsOption> =
+  @Input() defaultSelection!: LoiPermissionsOption;
+  @Output() select: EventEmitter<LoiPermissionsOption> =
     new EventEmitter<LoiPermissionsOption>();
 
   readonly loiPermissionsControlKey = 'loiPermissionsOption';
@@ -81,20 +81,20 @@ export class LoiPermissionsComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.formGroup.controls.loiPermissionsOption.valueChanges.subscribe(
       permissionOption => {
-        this.permissionsOptionSelected.emit(permissionOption);
+        this.select.emit(permissionOption);
       }
     );
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['permissionsOption']) {
+    if (changes['defaultSelection']) {
       this.formGroup.controls.loiPermissionsOption.setValue(
-        this.permissionsOption
+        this.defaultSelection
       );
     }
   }
 
-  loiPermissionsOptionCardClicked(value: LoiPermissionsOption) {
+  optionCardClicked(value: LoiPermissionsOption) {
     this.formGroup.controls[this.loiPermissionsControlKey].setValue(value);
   }
 }

@@ -53,8 +53,8 @@
           <loi-permissions
             *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
             #loiPermissions
-            [permissionsOption]="loiPermissionsOption"
-            (permissionsOptionSelected)="permissionsOptionSelected($event)"
+            [defaultSelection]="loiPermissionsOption"
+            (select)="onLoiPermissionsChange($event)"
           ></loi-permissions>
           <loi-selection
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"

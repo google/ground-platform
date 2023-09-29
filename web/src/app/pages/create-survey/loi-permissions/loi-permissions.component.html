@@ -27,7 +27,7 @@
   >
     <mat-card class="loi-permissions-option"
       *ngFor="let option of loiPermissionsOptions"
-      (click)="loiPermissionsOptionCardClicked(option.value)"
+      (click)="optionCardClicked(option.value)"
     >
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
