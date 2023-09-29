@@ -306,13 +306,13 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: {label: string; code: string}, index: number): void {
+  onUpdateOption(event: {label: string; code: string}, index: number): void {
     const option = this.jobService.createOption(event.code, event.label, index);
     const options = this.setTaskOptions(index, option);
     this.emitTaskOptions(options);
   }
 
-  onOptionDelete(index: number) {
+  onDeleteOption(index: number) {
     firstValueFrom(
       this.dialogService
         .openConfirmationDialog(
