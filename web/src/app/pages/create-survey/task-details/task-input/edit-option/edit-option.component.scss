@@ -14,28 +14,37 @@
  * limitations under the License.
  */
 
-h1,
-h2 {
-  text-align: left;
-}
-
-h2 {
-  font-size: 1.8ch;
-}
-
-#tasks-help-text {
-  padding: 3ch;
-  text-align: center;
-  color: #727970;
-}
-
-#add-task-buttons-list {
+:host {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
 }
 
-task-button:hover {
-  cursor: pointer;
+.dot {
+  align-self: center;
+}
+
+.drag-icon {
+  display: block;
+  margin: 0px auto;
+  cursor: move;
+  align-self: center;
+  margin-right: 5px !important;
+  visibility: hidden;
+}
+
+:host:hover .drag-icon,
+:host:focus-within .drag-icon {
+  visibility: visible;
+}
+
+.task-option {
+  width: 300px;
+}
+
+.code-option {
+  margin-left: 16px;
+  width: 100px;
+}
+
+.option-content {
+  display: flex;
 }
