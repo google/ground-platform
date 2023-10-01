@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
- .loading-spinner {
-    align-items: center;
-    display: flex;
-    justify-content: space-around;
-    min-height: 500px;
-  }
-  
+:host {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100vh;
+}

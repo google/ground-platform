@@ -22,11 +22,11 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {Component, OnInit, OnDestroy} from '@angular/core';
 
 @Component({
-  selector: 'ground-main-page-container',
-  templateUrl: './main-page-container.component.html',
-  styleUrls: ['./main-page-container.component.css'],
+  selector: 'ground-survey-page-container',
+  templateUrl: './survey-page-container.component.html',
+  styleUrls: ['./survey-page-container.component.css'],
 })
-export class MainPageContainerComponent implements OnInit, OnDestroy {
+export class SurveyPageContainerComponent implements OnInit, OnDestroy {
   activeSurvey$: Observable<Survey>;
   private subscription = new Subscription();
 

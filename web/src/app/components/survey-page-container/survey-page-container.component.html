@@ -1,5 +1,5 @@
 <!--
-  Copyright 2023 The Ground Authors.
+  Copyright 2020 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
   limitations under the License.
 -->
 
-<div>  
-  <div *ngIf="activeSurvey$ | async else loadingSpinner">
-    <ng-content></ng-content>
+<ng-content *ngIf="activeSurvey$ | async; else loading"></ng-content>
+
+<ng-template #loading>
+  <div class="loading-spinner">
+    <mat-spinner mode="indeterminate"></mat-spinner>
   </div>
-  <ng-template class="loading-spinner" #loadingSpinner>
-    <mat-spinner></mat-spinner>
-  </ng-template>    
-</div>
+</ng-template>

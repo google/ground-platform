@@ -15,20 +15,19 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {MainPageContainerComponent} from './main-page-container.component';
-import {MainPageModule} from './main-page/main-page.module';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
+import {SurveyPageContainerComponent} from './survey-page-container.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 
 @NgModule({
   entryComponents: [],
-  declarations: [MainPageContainerComponent],
+  declarations: [SurveyPageContainerComponent],
+  exports: [SurveyPageContainerComponent],
   imports: [
     CommonModule,
     RouterModule,
-    MainPageModule,
     MatProgressSpinnerModule,
   ],
 })
-export class MainPageContainerModule {}
+export class SurveyPageContainerModule {}

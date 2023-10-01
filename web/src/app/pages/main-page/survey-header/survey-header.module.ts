@@ -23,7 +23,6 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
-import { SurveyContainerModule } from 'app/components/survey-container/survey-container.module';
 
 @NgModule({
   declarations: [SurveyHeaderComponent],

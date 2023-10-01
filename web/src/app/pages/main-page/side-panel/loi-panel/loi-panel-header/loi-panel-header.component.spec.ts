@@ -35,7 +35,7 @@ import {Polygon} from 'app/models/geometry/polygon';
 import {LinearRing} from 'app/models/geometry/linear-ring';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {LocationOfInterestPanelHeaderComponent} from 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/loi-panel-header.component';
+import {LocationOfInterestPanelHeaderComponent} from 'app/pages/main-page/side-panel/loi-panel/loi-panel-header/loi-panel-header.component';
 
 type LoiPanelHeaderFixture =
   ComponentFixture<LocationOfInterestPanelHeaderComponent>;

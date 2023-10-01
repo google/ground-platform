@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2019 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,38 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {SurveyContainerComponent} from './survey-container.component';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+:host {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
 
-@NgModule({
-  declarations: [SurveyContainerComponent],
-  imports: [CommonModule, MatProgressSpinnerModule],
-  exports: [SurveyContainerComponent],
-})
-export class SurveyContainerModule {}
+.page {
+  min-height: 100%;
+
+  .mat-sidenav-container {
+    height: calc(100vh - 80px);
+
+    .mat-sidenav {
+      width: 300px;
+    }
+
+    .mat-sidenav-content {
+      overflow: hidden;
+      width: calc(100% - 300px);
+      min-width: calc(100% - 300px);
+    }
+  }
+}
+
+.sidenav-toggle {
+  top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: unset;
+  right: -5px;
+  width: 5px;
+  height: 50px;
+  position: absolute;
+}

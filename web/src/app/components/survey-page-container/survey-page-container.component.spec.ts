@@ -17,8 +17,8 @@
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ActivatedRoute} from '@angular/router';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MainPageContainerComponent} from './main-page-container.component';
-import {MainPageComponent} from './main-page/main-page.component';
+import {SurveyPageContainerComponent} from './survey-page-container.component';
+import {MainPageComponent} from '../../pages/main-page/main-page.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {NEVER} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -34,15 +34,15 @@ const surveyService = jasmine.createSpyObj('SurveyService', [
   'activateSurvey',
 ]);
 
-describe('MainPageContainerComponent', () => {
-  let component: MainPageContainerComponent;
-  let fixture: ComponentFixture<MainPageContainerComponent>;
+describe('SurveyPageContainerComponent', () => {
+  let component: SurveyPageContainerComponent;
+  let fixture: ComponentFixture<SurveyPageContainerComponent>;
   let route: ActivatedRouteStub;
 
   beforeEach(waitForAsync(() => {
     route = new ActivatedRouteStub();
     TestBed.configureTestingModule({
-      declarations: [MainPageContainerComponent, MainPageComponent],
+      declarations: [SurveyPageContainerComponent, MainPageComponent],
       providers: [
         {provide: ActivatedRoute, useValue: route},
         {provide: NavigationService, useValue: navigationService},
@@ -51,7 +51,7 @@ describe('MainPageContainerComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MainPageContainerComponent);
+    fixture = TestBed.createComponent(SurveyPageContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
