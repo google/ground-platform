@@ -58,7 +58,7 @@ export class DataStoreService {
    *
    * @param id the id of the requested survey.
    */
-  loadSurvey$(id: string) {
+  getSurvey$(id: string) {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(id)

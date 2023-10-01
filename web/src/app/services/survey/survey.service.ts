@@ -16,7 +16,7 @@
 
 import {Injectable} from '@angular/core';
 import {firstValueFrom, Observable, ReplaySubject} from 'rxjs';
-import {switchMap, shareReplay} from 'rxjs/operators';
+import {switchMap, shareReplay, distinctUntilChanged, tap} from 'rxjs/operators';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -31,7 +31,7 @@ import {AclEntry} from 'app/models/acl-entry.model';
   providedIn: 'root',
 })
 export class SurveyService {
-  private activeSurveyId$ = new ReplaySubject<string>(1);
+  private activateSurveyRequest$ = new ReplaySubject<string>(1);
   private activeSurvey$: Observable<Survey>;
   private activeSurvey!: Survey;
 
@@ -41,29 +41,39 @@ export class SurveyService {
   ) {
     // Reload active survey each time authenticated user changes.
     this.activeSurvey$ = authService.getUser$().pipe(
-      switchMap(() =>
-        //  on each change to survey id.
-        this.activeSurveyId$.pipe(
-          // Asynchronously load survey. switchMap() internally disposes
-          // of previous subscription if present.
-          switchMap(id => {
-            if (id === NavigationService.SURVEY_ID_NEW) {
-              return of(Survey.UNSAVED_NEW);
-            }
-            return this.dataStore.loadSurvey$(id);
-          })
-        )
-      ),
-      // Cache last loaded survey so that late subscribers don't cause
-      // survey to be reloaded.
+      switchMap(() => this.createActiveSurvey$()),
+      // Cache last loaded survey so that late subscribers don't cause survey to be
+      // reloaded (i.e., make this stream "hot").
       shareReplay(1)
     );
-    this.activeSurvey$.subscribe(survey => (this.activeSurvey = survey));
   }
 
-  getSurvey$(id?: string): Observable<Survey | undefined>{
-    if (!id) return of(undefined);
-    return this.dataStore.loadSurvey$(id);
+  /**
+   * Returns a new stream containing the last loaded active survey, or if loading
+   * hasn't started or is still in progress / incomplete.
+   */
+  createActiveSurvey$(): Observable<Survey> {
+    return this.activateSurveyRequest$.pipe(
+      distinctUntilChanged(),          
+      // Asynchronously load survey. `switchMap()` internally disposes
+      // of previous subscription before subscribing to new stream.
+      switchMap(id => this.getSurvey$(id)),
+      // Use side-effects (`tap()`) rather than subscribe to avoid race condition between emission of
+      // values from `activeSurvey$` and latest value in `activeSurvey`.
+      tap(survey => (this.activeSurvey = survey))
+    );
+  }
+
+  /**
+   * Returns a new stream which emits the latest snapshot of the survey with the specified
+   * id on subscribe, and on each successive change in the remote datastore.
+   */
+  getSurvey$(id: string): Observable<Survey> {
+    if (id === NavigationService.SURVEY_ID_NEW) {
+      return of(Survey.UNSAVED_NEW);
+    }
+    // TODO: Emit `null` before loading.
+    return this.dataStore.getSurvey$(id);    
   }
 
   getActiveSurvey(): Survey {
@@ -71,7 +81,7 @@ export class SurveyService {
   }
 
   activateSurvey(id: string) {
-    this.activeSurveyId$.next(id);
+    this.activateSurveyRequest$.next(id);
   }
 
   getActiveSurvey$(): Observable<Survey> {
