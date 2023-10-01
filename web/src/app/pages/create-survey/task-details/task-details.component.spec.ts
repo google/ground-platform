@@ -47,7 +47,7 @@ describe('TaskDetailsComponent', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => of(survey),
+            requireActiveSurvey$: () => of(survey),
           },
         },
       ],

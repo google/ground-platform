@@ -62,7 +62,7 @@ const mockLocationOfInterest = new GenericLocationOfInterest(
 const mockSubmissions = List<Submission>([]);
 
 class MockSurveyService {
-  getActiveSurvey$() {
+  requireActiveSurvey$() {
     return of<Survey>(mockSurvey);
   }
 }

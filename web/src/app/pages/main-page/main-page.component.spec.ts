@@ -48,7 +48,7 @@ describe('MainPageComponent', () => {
     route = new ActivatedRouteStub();
 
     const surveyService = jasmine.createSpyObj('SurveyService', [
-      'getActiveSurvey$',
+      'requireActiveSurvey$',
       'activateSurvey',
     ]);
 

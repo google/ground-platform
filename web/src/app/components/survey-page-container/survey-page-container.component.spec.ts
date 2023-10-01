@@ -31,6 +31,7 @@ const navigationService = {
 
 const surveyService = jasmine.createSpyObj('SurveyService', [
   'getActiveSurvey$',
+  'requireActiveSurvey$',
   'activateSurvey',
 ]);
 

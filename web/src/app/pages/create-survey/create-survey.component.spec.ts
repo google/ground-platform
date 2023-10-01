@@ -131,16 +131,16 @@ describe('CreateSurveyComponent', () => {
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
-      'getActiveSurvey$',
+      'requireActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
-      'getActiveSurvey',
+      'requireActiveSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
     );
     activeSurvey$ = new Subject<Survey>();
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.requireActiveSurvey$.and.returnValue(activeSurvey$);
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'addOrUpdateJob',
@@ -375,7 +375,7 @@ describe('CreateSurveyComponent', () => {
         fixture.detectChanges();
         // If survey has a job, we navigate to the next section, so we need to
         // go back to the job form.
-        surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
+        surveyServiceSpy.requireActiveSurvey.and.returnValue(surveyWithJob);
         clickBackButton(fixture);
         fixture.detectChanges();
       }));

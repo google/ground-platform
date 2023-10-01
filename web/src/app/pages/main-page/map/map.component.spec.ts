@@ -160,9 +160,11 @@ describe('MapComponent', () => {
 
   beforeEach(waitForAsync(() => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
+      'requireActiveSurvey$',
     ]);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
+    surveyServiceSpy.requireActiveSurvey$.and.returnValue(
+      of<Survey>(mockSurvey)
+    );
 
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',

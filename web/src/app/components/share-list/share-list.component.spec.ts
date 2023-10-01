@@ -46,12 +46,12 @@ describe('ShareListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
+      'requireActiveSurvey$',
     ]);
 
     activeSurvey$ = new Subject<Survey>();
 
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.requireActiveSurvey$.and.returnValue(activeSurvey$);
 
     TestBed.configureTestingModule({
       declarations: [ShareListComponent],

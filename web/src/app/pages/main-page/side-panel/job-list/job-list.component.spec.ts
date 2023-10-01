@@ -56,7 +56,7 @@ const mockAngularFireAuth = {
 };
 
 class MockSurveyService {
-  getActiveSurvey$() {
+  requireActiveSurvey$() {
     return of<Survey>(mockSurvey);
   }
   getCurrentSurvey() {}

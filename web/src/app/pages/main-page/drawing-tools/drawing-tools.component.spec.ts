@@ -102,9 +102,11 @@ describe('DrawingToolsComponent', () => {
     navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
+      'requireActiveSurvey$',
     ]);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
+    surveyServiceSpy.requireActiveSurvey$.and.returnValue(
+      of<Survey>(mockSurvey)
+    );
 
     TestBed.configureTestingModule({
       imports: [DrawingToolsModule, BrowserAnimationsModule],

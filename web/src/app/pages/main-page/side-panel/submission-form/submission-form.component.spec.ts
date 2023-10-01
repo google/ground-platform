@@ -135,7 +135,7 @@ class MockModel {
 }
 
 class MockSurveyService {
-  getActiveSurvey$() {
+  requireActiveSurvey$() {
     return of<Survey>(MockModel.survey001);
   }
   getSurveyAcl() {}
