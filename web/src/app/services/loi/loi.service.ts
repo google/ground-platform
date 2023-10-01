@@ -144,14 +144,18 @@ export class LocationOfInterestService {
   ): Promise<LocationOfInterest | null> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const survey = await firstValueFrom(this.surveyService.requireActiveSurvey$());
+    const survey = await firstValueFrom(
+      this.surveyService.requireActiveSurvey$()
+    );
     return await this.addPointInternal(survey, lat, lng, jobId);
   }
 
   async updatePoint(loi: LocationOfInterest): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const survey = await firstValueFrom(this.surveyService.requireActiveSurvey$());
+    const survey = await firstValueFrom(
+      this.surveyService.requireActiveSurvey$()
+    );
     return await this.updatePointInternal(survey, loi);
   }
 

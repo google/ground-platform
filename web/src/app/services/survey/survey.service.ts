@@ -88,7 +88,7 @@ export class SurveyService {
   }
 
   requireActiveSurvey(): Survey {
-    return this.activeSurvey!!;
+    return this.activeSurvey!;
   }
 
   activateSurvey(id: string) {
@@ -96,7 +96,7 @@ export class SurveyService {
   }
 
   requireActiveSurvey$(): Observable<Survey> {
-    return this.activeSurvey$.pipe(map(s => s!!));
+    return this.activeSurvey$.pipe(map(s => s!));
   }
 
   getActiveSurvey$(): Observable<Survey | null> {
@@ -162,12 +162,14 @@ export class SurveyService {
    * Returns the acl of the currently active survey, or an empty list if none is active.
    */
   getActiveSurveyAcl(): AclEntry[] {
-    return this.activeSurvey?.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray() || [];
+    return (
+      this.activeSurvey?.acl
+        .entrySeq()
+        .map(entry => new AclEntry(entry[0], entry[1]))
+        .toList()
+        .sortBy(entry => entry.email)
+        .toArray() || []
+    );
   }
 
   /**
