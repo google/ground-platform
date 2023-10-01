@@ -24,10 +24,6 @@ import {RouterModule} from '@angular/router';
   entryComponents: [],
   declarations: [SurveyPageContainerComponent],
   exports: [SurveyPageContainerComponent],
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, RouterModule, MatProgressSpinnerModule],
 })
 export class SurveyPageContainerModule {}

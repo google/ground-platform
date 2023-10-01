@@ -44,7 +44,7 @@ import {SurveyPageContainerModule} from 'app/components/survey-page-container/su
     MatSidenavModule,
     SidePanelModule,
     SurveyHeaderModule,
-    SurveyPageContainerModule
+    SurveyPageContainerModule,
   ],
 })
 export class MainPageModule {}

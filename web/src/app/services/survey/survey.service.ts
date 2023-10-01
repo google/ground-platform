@@ -16,7 +16,12 @@
 
 import {Injectable} from '@angular/core';
 import {firstValueFrom, Observable, ReplaySubject} from 'rxjs';
-import {switchMap, shareReplay, distinctUntilChanged, tap} from 'rxjs/operators';
+import {
+  switchMap,
+  shareReplay,
+  distinctUntilChanged,
+  tap,
+} from 'rxjs/operators';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -54,7 +59,7 @@ export class SurveyService {
    */
   createActiveSurvey$(): Observable<Survey> {
     return this.activateSurveyRequest$.pipe(
-      distinctUntilChanged(),          
+      distinctUntilChanged(),
       // Asynchronously load survey. `switchMap()` internally disposes
       // of previous subscription before subscribing to new stream.
       switchMap(id => this.getSurvey$(id)),
@@ -73,7 +78,7 @@ export class SurveyService {
       return of(Survey.UNSAVED_NEW);
     }
     // TODO: Emit `null` before loading.
-    return this.dataStore.getSurvey$(id);    
+    return this.dataStore.getSurvey$(id);
   }
 
   getActiveSurvey(): Survey {

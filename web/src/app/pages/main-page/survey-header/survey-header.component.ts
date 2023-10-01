@@ -20,7 +20,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {Subscription} from 'rxjs';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
-import { Survey } from 'app/models/survey.model';
+import {Survey} from 'app/models/survey.model';
 
 @Component({
   selector: 'ground-survey-header',

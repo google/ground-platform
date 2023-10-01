@@ -34,7 +34,7 @@ import {ShareSurveyComponent} from './components/share-survey/share-survey.compo
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
 import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
-import { MainPageComponent } from './pages/main-page/main-page.component';
+import {MainPageComponent} from './pages/main-page/main-page.component';
 
 const routes: Routes = [
   {

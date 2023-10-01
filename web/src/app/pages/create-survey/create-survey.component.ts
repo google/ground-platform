@@ -69,7 +69,7 @@ export class CreateSurveyComponent implements OnInit {
           filter(
             survey =>
               this.surveyId === NavigationService.SURVEY_ID_NEW ||
-              survey.id === this.surveyId    
+              survey.id === this.surveyId
           )
         )
     );
