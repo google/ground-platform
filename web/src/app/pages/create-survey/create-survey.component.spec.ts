@@ -45,6 +45,10 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
 import Immutable from 'immutable';
 import {TaskService} from 'app/services/task/task.service';
+import {
+  LoiPermissionsComponent,
+  LoiPermissionsOption,
+} from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -170,6 +174,7 @@ describe('CreateSurveyComponent', () => {
         CreateSurveyComponent,
         SurveyDetailsComponent,
         JobDetailsComponent,
+        LoiPermissionsComponent,
         ShareSurveyComponent,
       ],
       providers: [
@@ -256,8 +261,8 @@ describe('CreateSurveyComponent', () => {
       fixture.detectChanges();
     }));
 
-    it('displays LOI selection component', () => {
-      expect(component.loiSelection).toBeDefined();
+    it('displays LOI permissions component', () => {
+      expect(component.loiPermissions).toBeDefined();
     });
   });
 
@@ -405,6 +410,138 @@ describe('CreateSurveyComponent', () => {
     });
   });
 
+  describe('LOI Permissions', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithJob);
+      tick();
+      fixture.detectChanges();
+      surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
+      fixture.detectChanges();
+    }));
+
+    describe('clicking continue', () => {
+      describe('when "Survey organizers" is selected', () => {
+        beforeEach(fakeAsync(() => {
+          const loiPermissions = component.loiPermissions!;
+          loiPermissions.formGroup.controls[
+            loiPermissions.loiPermissionsControlKey
+          ].setValue(LoiPermissionsOption.SURVEY_ORGANIZERS);
+          clickContinueButton(fixture);
+          flush();
+          fixture.detectChanges();
+        }));
+
+        it('calls addOrUpdateJob with an empty array for dataCollectorsCanAdd', () => {
+          const dataCollectorsCanAdd: string[] = [];
+
+          expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+            surveyId,
+            job.copyWith({dataCollectorsCanAdd})
+          );
+        });
+
+        it('navigates to the LOI selection component', () => {
+          expect(component.loiSelection).toBeDefined();
+          expect(component.loiPermissions).toBeUndefined();
+        });
+      });
+
+      describe('when "Data Collectors" is selected', () => {
+        beforeEach(fakeAsync(() => {
+          const loiPermissions = component.loiPermissions!;
+          loiPermissions.formGroup.controls[
+            loiPermissions.loiPermissionsControlKey
+          ].setValue(LoiPermissionsOption.DATA_COLLECTORS);
+          clickContinueButton(fixture);
+          flush();
+          fixture.detectChanges();
+        }));
+
+        it('calls addOrUpdateJob with a filled array for dataCollectorsCanAdd', () => {
+          const dataCollectorsCanAdd = ['points', 'polygons'];
+
+          expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+            surveyId,
+            job.copyWith({dataCollectorsCanAdd})
+          );
+        });
+
+        it('navigates to the task definition component', () => {
+          expect(component.taskDetails).toBeDefined();
+          expect(component.loiPermissions).toBeUndefined();
+        });
+      });
+
+      describe('when "Both" is selected', () => {
+        beforeEach(fakeAsync(() => {
+          const loiPermissions = component.loiPermissions!;
+          loiPermissions.formGroup.controls[
+            loiPermissions.loiPermissionsControlKey
+          ].setValue(LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS);
+          clickContinueButton(fixture);
+          flush();
+          fixture.detectChanges();
+        }));
+
+        it('calls addOrUpdateJob with filled array for dataCollectorsCanAdd', () => {
+          const dataCollectorsCanAdd = ['points', 'polygons'];
+
+          expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+            surveyId,
+            job.copyWith({dataCollectorsCanAdd})
+          );
+        });
+
+        it('navigates to the LOI selection component', () => {
+          expect(component.loiSelection).toBeDefined();
+          expect(component.loiPermissions).toBeUndefined();
+        });
+      });
+    });
+
+    describe('clicking back', () => {
+      it('navigates to the job details component', fakeAsync(() => {
+        clickBackButton(fixture);
+        flush();
+        fixture.detectChanges();
+
+        expect(component.jobDetails).toBeDefined();
+        expect(component.loiPermissions).toBeUndefined();
+      }));
+    });
+  });
+
+  describe('Task Definition', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithJob);
+      tick();
+      component.setupPhase = SetupPhase.DEFINE_TASKS;
+      fixture.detectChanges();
+    }));
+
+    describe('clicking back', () => {
+      it('navigates to LOI selection when skipLoiSelection=false', fakeAsync(() => {
+        component.skipLoiSelection = false;
+        clickBackButton(fixture);
+        flush();
+        fixture.detectChanges();
+
+        expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOIS);
+      }));
+
+      it('navigates to LOI permissions when skipLoiSelection=true', fakeAsync(() => {
+        component.skipLoiSelection = true;
+        clickBackButton(fixture);
+        flush();
+        fixture.detectChanges();
+
+        expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOI_PERMISSIONS);
+      }));
+    });
+  });
+
   describe('Review', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
@@ -415,7 +552,7 @@ describe('CreateSurveyComponent', () => {
       fixture.detectChanges();
     }));
 
-    it('goes back to job details component after back button is clicked', () => {
+    it('goes back to task definition component after back button is clicked', () => {
       clickBackButton(fixture);
 
       expect(component.setupPhase).toBe(SetupPhase.DEFINE_TASKS);
