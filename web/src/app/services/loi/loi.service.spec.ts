@@ -51,7 +51,7 @@ describe('LocationOfInterestService', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => activeSurvey$,
+            requireActiveSurvey$: () => activeSurvey$,
           },
         },
         {provide: NavigationService, useValue: navigationService},

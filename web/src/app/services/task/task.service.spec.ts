@@ -34,7 +34,7 @@ describe('TaskService', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => activeSurvey$,
+            requireActiveSurvey$: () => activeSurvey$,
           },
         },
       ],

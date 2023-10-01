@@ -71,7 +71,7 @@ export class CreateSurveyComponent implements OnInit {
 
     const survey = await firstValueFrom(
       this.surveyService
-        .getActiveSurvey$()
+        .requireActiveSurvey$()
         .pipe(
           filter(
             survey =>
@@ -181,7 +181,9 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.survey = this.surveyService.getActiveSurvey();
+    // TODO(#1194): This call introduces a race condition. Instead of trying to wait for remote update,
+    // the component should update the state of survey internally.
+    this.survey = this.surveyService.requireActiveSurvey();
   }
 
   async continue(): Promise<void> {
@@ -214,7 +216,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.survey = this.surveyService.getActiveSurvey();
+    this.survey = this.surveyService.requireActiveSurvey();
   }
 
   onLoiPermissionsChange(permissionsOption: LoiPermissionsOption) {

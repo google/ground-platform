@@ -54,7 +54,7 @@ describe('ShareDialogComponent', () => {
         {
           provide: SurveyService,
           useValue: {
-            getActiveSurvey$: () => of({acl: Map()}),
+            requireActiveSurvey$: () => of({acl: Map()}),
             getCurrentSurveyAcl: () => {},
           },
         },

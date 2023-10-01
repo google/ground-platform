@@ -51,7 +51,7 @@ export class EditSurveyComponent implements OnInit {
     });
     this.survey = await firstValueFrom(
       this.surveyService
-        .getActiveSurvey$()
+        .requireActiveSurvey$()
         .pipe(filter(survey => survey.id === this.surveyId))
     );
   }
