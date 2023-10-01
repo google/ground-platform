@@ -17,7 +17,7 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
 import {Survey} from 'app/models/survey.model';
@@ -28,8 +28,7 @@ import {Survey} from 'app/models/survey.model';
   styleUrls: ['./survey-header.component.scss'],
 })
 export class SurveyHeaderComponent implements OnDestroy {
-  @Input() survey: Survey = Survey.UNSAVED_NEW;
-
+  activeSurvey$: Observable<Survey | null>;
   title: string;
   surveyId!: string;
 
@@ -40,11 +39,11 @@ export class SurveyHeaderComponent implements OnDestroy {
     private dialog: MatDialog
   ) {
     this.title = '';
-    const activeSurvey$ = this.surveyService.requireActiveSurvey$();
+    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
     this.subscription.add(
-      activeSurvey$.subscribe(survey => {
-        this.title = survey.title || '';
-        this.surveyId = survey.id;
+      this.activeSurvey$.subscribe(survey => {
+        this.title = survey?.title || '';
+        this.surveyId = survey?.id || '';
       })
     );
   }

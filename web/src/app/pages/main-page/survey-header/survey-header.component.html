@@ -20,7 +20,7 @@
     </button>
   </div>
 
-  <span left>
+  <span left *ngIf="activeSurvey$ | async">
     <span class="header-divider"></span>
     <inline-editor [data]="title" [placeholder]="'Untitled survey'" (focusOut)="updateSurveyTitle($event)" class="inline-editor"></inline-editor>
   </span>

@@ -170,6 +170,8 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
+    // TODO(#1194): This call introduces a race condition. Instead of trying to wait for remote update,
+    // the component should update the state of survey internally.
     this.survey = this.surveyService.requireActiveSurvey();
   }
 
