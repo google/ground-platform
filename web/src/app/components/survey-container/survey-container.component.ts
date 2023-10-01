@@ -23,16 +23,12 @@ import { Observable, switchMap, tap } from 'rxjs';
 @Component({
   selector: 'ground-survey-container',
   templateUrl: './survey-container.component.html',
-  styleUrls: ['./survey-container.component.css']
+  styleUrls: ['./survey-container.component.scss']
 })
 export class SurveyContainerComponent {
-  private survey$: Observable<Survey | undefined>;
+  activeSurvey$: Observable<Survey | undefined>;
 
-  constructor(surveyService: SurveyService, navigationService: NavigationService) {
-    this.survey$ = navigationService.getSurveyId$().pipe(
-      tap(x => console.log("before: ", x)),
-      switchMap(id => surveyService.getSurvey$(id || undefined)),
-      tap(x => console.log("after: ", x))
-    );
+  constructor(surveyService: SurveyService) {
+    this.activeSurvey$ = surveyService.getActiveSurvey$()
   }
 }

@@ -17,10 +17,11 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SurveyContainerComponent} from './survey-container.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [SurveyContainerComponent],
-  imports: [CommonModule],
+  imports: [CommonModule, MatProgressSpinnerModule],
   exports: [SurveyContainerComponent],
 })
 export class SurveyContainerModule {}

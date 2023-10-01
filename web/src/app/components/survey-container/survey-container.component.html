@@ -14,7 +14,11 @@
   limitations under the License.
 -->
 
-<div>
-  Ye Ole Survey Container
-  <ng-content [survey]="survey$ | async"></ng-content>
+<div>  
+  <div *ngIf="activeSurvey$ | async else loadingSpinner">
+    <ng-content></ng-content>
+  </div>
+  <ng-template class="loading-spinner" #loadingSpinner>
+    <mat-spinner></mat-spinner>
+  </ng-template>    
 </div>
