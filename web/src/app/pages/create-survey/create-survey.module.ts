@@ -27,12 +27,14 @@ import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-detai
 import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {HeaderModule} from 'app/components/header/header.module';
+import {LoiPermissionsModule} from 'app/pages/create-survey/loi-permissions/loi-permissions.module';
 
 @NgModule({
   declarations: [CreateSurveyComponent],
   imports: [
     JobDetailsModule,
     LoiSelectionModule,
+    LoiPermissionsModule,
     TaskDetailsModule,
     ShareSurveyModule,
     SurveyDetailsModule,
