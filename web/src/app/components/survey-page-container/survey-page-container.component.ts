@@ -27,7 +27,7 @@ import {Component, OnInit, OnDestroy} from '@angular/core';
   styleUrls: ['./survey-page-container.component.css'],
 })
 export class SurveyPageContainerComponent implements OnInit, OnDestroy {
-  activeSurvey$: Observable<Survey>;
+  activeSurvey$: Observable<Survey | null>;
   private subscription = new Subscription();
 
   constructor(

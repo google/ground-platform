@@ -45,7 +45,7 @@ export class ShareListComponent {
   constructor(readonly surveyService: SurveyService) {
     this.subscription.add(
       this.surveyService
-        .getActiveSurvey$()
+        .requireActiveSurvey$()
         .subscribe(survey => this.onSurveyLoaded(survey))
     );
   }

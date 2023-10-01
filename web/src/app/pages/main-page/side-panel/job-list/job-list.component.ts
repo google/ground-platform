@@ -69,7 +69,7 @@ export class JobListComponent {
     );
 
     this.jobs$ = surveyService
-      .getActiveSurvey$()
+      .requireActiveSurvey$()
       .pipe(
         map(survey =>
           List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)

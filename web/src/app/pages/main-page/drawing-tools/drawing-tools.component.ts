@@ -77,7 +77,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
       .getSubmissionId$()
       .pipe(map(obs => !!obs));
     this.disabled$ = drawingToolsService.getDisabled$();
-    this.jobs$ = surveyService.getActiveSurvey$().pipe(
+    this.jobs$ = surveyService.requireActiveSurvey$().pipe(
       tap(survey => {
         this.activeSurvey = survey;
         this.selectedJobId = survey.jobs.keySeq().first();

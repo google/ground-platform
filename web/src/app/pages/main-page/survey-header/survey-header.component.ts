@@ -40,7 +40,7 @@ export class SurveyHeaderComponent implements OnDestroy {
     private dialog: MatDialog
   ) {
     this.title = '';
-    const activeSurvey$ = this.surveyService.getActiveSurvey$();
+    const activeSurvey$ = this.surveyService.requireActiveSurvey$();
     this.subscription.add(
       activeSurvey$.subscribe(survey => {
         this.title = survey.title || '';

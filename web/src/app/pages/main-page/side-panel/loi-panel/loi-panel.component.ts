@@ -54,7 +54,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     private zone: NgZone
   ) {
     this.submissions$ = surveyService
-      .getActiveSurvey$()
+      .requireActiveSurvey$()
       .pipe(
         switchMap(survey =>
           loiService
@@ -63,7 +63,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         )
       );
     combineLatest([
-      surveyService.getActiveSurvey$(),
+      surveyService.requireActiveSurvey$(),
       loiService.getSelectedLocationOfInterest$(),
     ]).subscribe(([survey, loi]) => (this.job = survey.jobs.get(loi.jobId)));
     this.photoUrls = new Map();

@@ -113,7 +113,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private dialog: MatDialog
   ) {
     this.lois$ = this.loiService.getLocationsOfInterest$();
-    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
+    this.activeSurvey$ = this.surveyService.requireActiveSurvey$();
   }
 
   ngAfterViewInit() {

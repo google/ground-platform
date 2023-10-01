@@ -53,7 +53,7 @@ export class MainPageComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog
   ) {
-    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
+    this.activeSurvey$ = this.surveyService.requireActiveSurvey$();
   }
 
   ngOnInit() {

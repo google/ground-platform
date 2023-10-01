@@ -64,7 +64,7 @@ export class SubmissionFormComponent {
     surveyService: SurveyService,
     loiService: LocationOfInterestService
   ) {
-    surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
+    surveyService.requireActiveSurvey$().subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
     submissionService
@@ -73,7 +73,7 @@ export class SubmissionFormComponent {
         this.onSelectSubmission(submission)
       );
     this.job$ = surveyService
-      .getActiveSurvey$()
+      .requireActiveSurvey$()
       .pipe(
         switchMap(survey =>
           loiService

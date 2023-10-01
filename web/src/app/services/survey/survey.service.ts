@@ -21,6 +21,8 @@ import {
   shareReplay,
   distinctUntilChanged,
   tap,
+  filter,
+  map,
 } from 'rxjs/operators';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -37,8 +39,8 @@ import {AclEntry} from 'app/models/acl-entry.model';
 })
 export class SurveyService {
   private activateSurveyRequest$ = new ReplaySubject<string>(1);
-  private activeSurvey$: Observable<Survey>;
-  private activeSurvey!: Survey;
+  private activeSurvey$: Observable<Survey | null>;
+  private activeSurvey: Survey | null = null;
 
   constructor(
     private dataStore: DataStoreService,
@@ -57,7 +59,7 @@ export class SurveyService {
    * Returns a new stream containing the last loaded active survey, or if loading
    * hasn't started or is still in progress / incomplete.
    */
-  createActiveSurvey$(): Observable<Survey> {
+  createActiveSurvey$(): Observable<Survey | null> {
     return this.activateSurveyRequest$.pipe(
       distinctUntilChanged(),
       // Asynchronously load survey. `switchMap()` internally disposes
@@ -73,23 +75,31 @@ export class SurveyService {
    * Returns a new stream which emits the latest snapshot of the survey with the specified
    * id on subscribe, and on each successive change in the remote datastore.
    */
-  getSurvey$(id: string): Observable<Survey> {
+  getSurvey$(id: string): Observable<Survey | null> {
     if (id === NavigationService.SURVEY_ID_NEW) {
       return of(Survey.UNSAVED_NEW);
     }
-    // TODO: Emit `null` before loading.
-    return this.dataStore.getSurvey$(id);
+    // Set currently active survey to `null` while loading is in progress.
+    return of(null).pipe(switchMap(() => this.dataStore.getSurvey$(id)));
   }
 
-  getActiveSurvey(): Survey {
+  getActiveSurvey(): Survey | null {
     return this.activeSurvey;
+  }
+
+  requireActiveSurvey(): Survey {
+    return this.activeSurvey!!;
   }
 
   activateSurvey(id: string) {
     this.activateSurveyRequest$.next(id);
   }
 
-  getActiveSurvey$(): Observable<Survey> {
+  requireActiveSurvey$(): Observable<Survey> {
+    return this.activeSurvey$.pipe(map(s => s!!));
+  }
+
+  getActiveSurvey$(): Observable<Survey | null> {
     return this.activeSurvey$;
   }
 
@@ -149,15 +159,15 @@ export class SurveyService {
   }
 
   /**
-   * Returns the acl of the current survey.
+   * Returns the acl of the currently active survey, or an empty list if none is active.
    */
   getActiveSurveyAcl(): AclEntry[] {
-    return this.activeSurvey.acl
+    return this.activeSurvey?.acl
       .entrySeq()
       .map(entry => new AclEntry(entry[0], entry[1]))
       .toList()
       .sortBy(entry => entry.email)
-      .toArray();
+      .toArray() || [];
   }
 
   /**

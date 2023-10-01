@@ -16,7 +16,7 @@
 
 <div id="loi-selection">
   <h1>Where should data be collected?</h1>
-  <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
+  <div *ngIf="surveyService.requireActiveSurvey$() | async as survey">
     <div class="loi-list" *ngIf="lois$ | async as lois">
       <ng-container *ngIf="surveyService.canManageSurvey()">
         <button
