@@ -416,7 +416,7 @@ describe('CreateSurveyComponent', () => {
       activeSurvey$.next(surveyWithJob);
       tick();
       fixture.detectChanges();
-      surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
+      surveyServiceSpy.requireActiveSurvey.and.returnValue(surveyWithJob);
       fixture.detectChanges();
     }));
 
