@@ -33,11 +33,12 @@ import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
+  [TaskType.DATE, 'date'],
   [TaskType.MULTIPLE_CHOICE, 'multiple_choice'],
   [TaskType.PHOTO, 'photo'],
-  [TaskType.NUMBER, 'number'],
-  [TaskType.DATE, 'date'],
-  [TaskType.TIME, 'time'],
+  [TaskType.DROP_PIN, 'drop_pin'],
+  [TaskType.DRAW_AREA, 'draw_area'],
+  [TaskType.CAPTURE_LOCATION, 'capture_location'],
 ]);
 
 const TASK_TYPE_STRINGS_BY_ENUM = Map(

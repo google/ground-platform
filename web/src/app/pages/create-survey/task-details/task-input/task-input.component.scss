@@ -27,11 +27,16 @@
     padding-left: 17px;
   }
 
+  &.cdk-drag-preview {
+    font-family: 'Google Sans';
+  }
+
   .drag-icon {
     display: block;
     margin: 0px auto;
     cursor: move;
     padding: 5px;
+    color: var(--ground-sys-light-surface-variant, #DDE5D9);
   }
 
   .task-toolbar {

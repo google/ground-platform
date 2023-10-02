@@ -14,8 +14,8 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}">
-  <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}" cdkDrag>
+  <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
     <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
@@ -67,7 +67,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field fxFlex class="task-type" appearance="outline" *ngIf="taskGroup === TaskGroup.QUESTION">
+    <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
         formControlName="selectTaskOption"
         class="task-type-select"
@@ -95,23 +95,15 @@
       cdkDropList
       (cdkDropListDropped)="drop($event)"
     >
-      <div
-        *ngFor="
-          let option of taskOptions?.options;
-          let i = index;
-          trackBy: getIndex
-        "
-        cdkDrag
-        fxLayout
+      <ground-edit-option
+        *ngFor="let option of taskOptions?.options; let i = index; trackBy: getIndex"
+        [label]="option.label"
+        [code]="option.code"
+        [index]="i"
+        (update)="onUpdateOption($event, i)"
+        (delete)="onDeleteOption(i)"
       >
-        <ground-edit-option
-            [label]="option.label"
-            [code]="option.code"
-            [index]="i"
-            (update)="onOptionUpdate($event, i)"
-            (delete)="onOptionDelete(i)"
-          ></ground-edit-option>
-      </div>
+      </ground-edit-option>
 
       <button
         mat-button
