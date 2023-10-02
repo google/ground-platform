@@ -76,9 +76,7 @@ export class JobService {
   }
 
   private async getJobCount(): Promise<number> {
-    const survey = await firstValueFrom(
-      this.surveyService.requireActiveSurvey$()
-    );
+    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
     return survey.jobs?.size;
   }
 }

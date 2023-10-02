@@ -59,7 +59,7 @@ export class SubmissionService {
       this.selectedSubmissionId$
         .pipe(
           switchMap(submissionId =>
-            surveyService.requireActiveSurvey$().pipe(
+            surveyService.getActiveSurvey$().pipe(
               switchMap(survey =>
                 loiService.getSelectedLocationOfInterest$().pipe(
                   switchMap(loi =>

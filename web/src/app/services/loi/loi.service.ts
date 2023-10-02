@@ -52,7 +52,7 @@ export class LocationOfInterestService {
     private surveyService: SurveyService
   ) {
     this.lois$ = surveyService
-      .requireActiveSurvey$()
+      .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
           survey.isUnsavedNew()
@@ -64,7 +64,7 @@ export class LocationOfInterestService {
     this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
       switchMap(loiId =>
         surveyService
-          .requireActiveSurvey$()
+          .getActiveSurvey$()
           .pipe(
             switchMap(survey =>
               this.dataStore.loadLocationOfInterest$(survey.id, loiId)
@@ -144,18 +144,14 @@ export class LocationOfInterestService {
   ): Promise<LocationOfInterest | null> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const survey = await firstValueFrom(
-      this.surveyService.requireActiveSurvey$()
-    );
+    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
     return await this.addPointInternal(survey, lat, lng, jobId);
   }
 
   async updatePoint(loi: LocationOfInterest): Promise<void> {
     // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
     // upgrading to RxJS 7.
-    const survey = await firstValueFrom(
-      this.surveyService.requireActiveSurvey$()
-    );
+    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
     return await this.updatePointInternal(survey, loi);
   }
 

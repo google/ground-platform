@@ -16,12 +16,12 @@
 
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {SurveyPageContainerComponent} from 'app/components/survey-page-container/survey-page-container.component';
+import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
 import {AuthGuard} from 'app/services/auth/auth.guard';
 import {SignInPageComponent} from 'app/components/sign-in-page/sign-in-page.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyListComponent} from 'app/components/survey-list/survey-list.component';
-import {SurveyPageContainerModule} from 'app/components/survey-page-container/survey-page-container.module';
+import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {SignInPageModule} from 'app/components/sign-in-page/sign-in-page.module';
 import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
@@ -34,7 +34,6 @@ import {ShareSurveyComponent} from './components/share-survey/share-survey.compo
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
 import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
-import {MainPageComponent} from './pages/main-page/main-page.component';
 
 const routes: Routes = [
   {
@@ -49,7 +48,7 @@ const routes: Routes = [
   },
   {
     path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}`,
-    component: MainPageComponent,
+    component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },
   {
@@ -89,7 +88,7 @@ const config = RouterModule.forRoot(routes, {});
 @NgModule({
   imports: [config],
   exports: [
-    SurveyPageContainerModule,
+    MainPageContainerModule,
     RouterModule,
     SignInPageModule,
     SurveyListModule,

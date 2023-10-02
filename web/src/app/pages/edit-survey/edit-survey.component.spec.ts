@@ -81,10 +81,10 @@ describe('EditSurveyComponent', () => {
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
-      'requireActiveSurvey$',
+      'getActiveSurvey$',
     ]);
     activeSurvey$ = new Subject<Survey>();
-    surveyServiceSpy.requireActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],

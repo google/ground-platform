@@ -73,7 +73,7 @@ export class ShareDialogComponent {
       // successive changes to the remote survey config don't overwrite the
       // contents of the data collectors list in the dialog.
       this.surveyService
-        .requireActiveSurvey$()
+        .getActiveSurvey$()
         .pipe(take(1))
         .subscribe(p => this.onSurveyLoaded(p))
     );

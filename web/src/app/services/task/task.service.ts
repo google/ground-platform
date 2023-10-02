@@ -41,7 +41,7 @@ export class TaskService {
     private surveyService: SurveyService
   ) {
     this.tasks$ = this.surveyService
-      .requireActiveSurvey$()
+      .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
           this.dataStoreService.tasks$(

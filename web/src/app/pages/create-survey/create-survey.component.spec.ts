@@ -135,16 +135,16 @@ describe('CreateSurveyComponent', () => {
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
-      'requireActiveSurvey$',
+      'getActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
-      'requireActiveSurvey',
+      'getActiveSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
     );
     activeSurvey$ = new Subject<Survey>();
-    surveyServiceSpy.requireActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'addOrUpdateJob',
@@ -380,7 +380,7 @@ describe('CreateSurveyComponent', () => {
         fixture.detectChanges();
         // If survey has a job, we navigate to the next section, so we need to
         // go back to the job form.
-        surveyServiceSpy.requireActiveSurvey.and.returnValue(surveyWithJob);
+        surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
         clickBackButton(fixture);
         fixture.detectChanges();
       }));
@@ -416,7 +416,7 @@ describe('CreateSurveyComponent', () => {
       activeSurvey$.next(surveyWithJob);
       tick();
       fixture.detectChanges();
-      surveyServiceSpy.requireActiveSurvey.and.returnValue(surveyWithJob);
+      surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
       fixture.detectChanges();
     }));
 

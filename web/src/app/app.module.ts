@@ -26,7 +26,7 @@ import {USE_EMULATOR as USE_FUNCTIONS_EMULATOR} from '@angular/fire/compat/funct
 import {AppRoutingModule} from 'app/routing.module';
 import {AppComponent} from 'app/app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {SurveyPageContainerModule} from 'app/components/survey-page-container/survey-page-container.module';
+import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {environment} from 'environments/environment';
 import {GoogleAuthProvider} from 'firebase/auth';
 import {HttpClientModule} from '@angular/common/http';
@@ -81,7 +81,7 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     AppRoutingModule,
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     HttpClientModule,
-    SurveyPageContainerModule,
+    MainPageContainerModule,
   ],
   bootstrap: [AppComponent],
 })

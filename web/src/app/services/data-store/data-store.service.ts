@@ -54,11 +54,11 @@ export class DataStoreService {
 
   /**
    * Returns an Observable that loads and emits the survey with the specified
-   * id once, then emits a new value on each change.
+   * uuid.
    *
    * @param id the id of the requested survey.
    */
-  getSurvey$(id: string) {
+  loadSurvey$(id: string) {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(id)
