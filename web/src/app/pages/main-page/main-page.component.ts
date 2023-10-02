@@ -60,6 +60,12 @@ export class MainPageComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Activate new survey on route changes.
+    this.subscription.add(
+      this.navigationService.getSurveyId$().subscribe(id => {
+        id && this.surveyService.activateSurvey(id);
+      })
+    );
     // Show title dialog to assign title on a new survey.
     this.subscription.add(
       this.navigationService
@@ -150,5 +156,5 @@ export class MainPageComponent implements OnInit {
     } else {
       this.submissionService.deselectSubmission();
     }
-  }
+  } 
 }

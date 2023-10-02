@@ -35,17 +35,4 @@ export class SurveyPageContainerComponent implements OnInit, OnDestroy {
   ) {
     this.activeSurvey$ = surveyService.getActiveSurvey$();
   }
-
-  ngOnInit() {
-    // Activate new survey on route changes.
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(id => {
-        id && this.surveyService.activateSurvey(id);
-      })
-    );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
 }
