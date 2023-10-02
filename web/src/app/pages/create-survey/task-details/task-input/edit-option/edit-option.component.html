@@ -15,8 +15,8 @@
 -->
 
 <form [formGroup]="optionGroup">
-  <div class="option-content">
-    <mat-icon cdkDragHandle class="drag-icon">drag_indicator</mat-icon>
+  <div class="option-content" cdkDrag>
+    <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
 
     <mat-form-field class="task-option">
       <mat-label>Option</mat-label>

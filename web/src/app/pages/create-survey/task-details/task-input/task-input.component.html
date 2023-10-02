@@ -95,23 +95,15 @@
       cdkDropList
       (cdkDropListDropped)="drop($event)"
     >
-      <div
-        *ngFor="
-          let option of taskOptions?.options;
-          let i = index;
-          trackBy: getIndex
-        "
-        cdkDrag
-        fxLayout
+      <ground-edit-option
+        *ngFor="let option of taskOptions?.options; let i = index; trackBy: getIndex"
+        [label]="option.label"
+        [code]="option.code"
+        [index]="i"
+        (update)="onUpdateOption($event, i)"
+        (delete)="onDeleteOption(i)"
       >
-        <ground-edit-option
-            [label]="option.label"
-            [code]="option.code"
-            [index]="i"
-            (update)="onUpdateOption($event, i)"
-            (delete)="onDeleteOption(i)"
-          ></ground-edit-option>
-      </div>
+      </ground-edit-option>
 
       <button
         mat-button
