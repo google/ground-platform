@@ -14,8 +14,8 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}">
-  <mat-icon cdkDragHandle class="drag-icon">drag_handle</mat-icon>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}" cdkDrag>
+  <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
     <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
