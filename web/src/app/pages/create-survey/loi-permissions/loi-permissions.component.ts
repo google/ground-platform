@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import {FormBuilder, FormGroup} from '@angular/forms';
 
 /** Options for radio buttons determining who can set where data is collected */
@@ -35,8 +43,12 @@ interface OptionCardConfig {
   templateUrl: './loi-permissions.component.html',
   styleUrls: ['./loi-permissions.component.scss'],
 })
-export class LoiPermissionsComponent {
-  readonly loiPermissionsControlKey = 'loiPermissionsMethod';
+export class LoiPermissionsComponent implements OnInit, OnChanges {
+  @Input() defaultSelection!: LoiPermissionsOption;
+  @Output() select: EventEmitter<LoiPermissionsOption> =
+    new EventEmitter<LoiPermissionsOption>();
+
+  readonly loiPermissionsControlKey = 'loiPermissionsOption';
   formGroup: FormGroup;
 
   loiPermissionsOptions: OptionCardConfig[] = [
@@ -66,7 +78,23 @@ export class LoiPermissionsComponent {
     });
   }
 
-  loiPermissionsOptionSelected(value: LoiPermissionsOption) {
+  ngOnInit(): void {
+    this.formGroup.controls.loiPermissionsOption.valueChanges.subscribe(
+      permissionOption => {
+        this.select.emit(permissionOption);
+      }
+    );
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['defaultSelection']) {
+      this.formGroup.controls.loiPermissionsOption.setValue(
+        this.defaultSelection
+      );
+    }
+  }
+
+  optionCardClicked(value: LoiPermissionsOption) {
     this.formGroup.controls[this.loiPermissionsControlKey].setValue(value);
   }
 }
