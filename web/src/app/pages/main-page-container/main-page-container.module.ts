@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {LoiSelectionComponent} from './loi-selection.component';
-import {MatButtonModule} from '@angular/material/button';
-import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
-import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MainPageContainerComponent} from './main-page-container.component';
+import {MainPageModule} from './main-page/main-page.module';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
 @NgModule({
-  declarations: [LoiSelectionComponent],
+  entryComponents: [],
+  declarations: [MainPageContainerComponent],
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatListModule,
-    MapModule,
-    MatIconModule,
+    RouterModule,
+    MainPageModule,
+    MatProgressSpinnerModule,
   ],
-  exports: [LoiSelectionComponent],
 })
-export class LoiSelectionModule {}
+export class MainPageContainerModule {}

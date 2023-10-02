@@ -47,7 +47,7 @@ describe('TaskInputComponent', () => {
         {
           provide: SurveyService,
           useValue: {
-            requireActiveSurvey$: () => of(survey),
+            getActiveSurvey$: () => of(survey),
           },
         },
       ],

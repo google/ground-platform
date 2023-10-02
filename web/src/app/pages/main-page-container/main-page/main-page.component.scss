@@ -13,3 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+.page {
+  min-height: 100%;
+
+  .mat-sidenav-container {
+    height: calc(100vh - 80px);
+
+    .mat-sidenav {
+      width: 300px;
+    }
+
+    .mat-sidenav-content {
+      overflow: hidden;
+      width: calc(100% - 300px);
+      min-width: calc(100% - 300px);
+    }
+  }
+}
+
+.sidenav-toggle {
+  top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: unset;
+  right: -5px;
+  width: 5px;
+  height: 50px;
+  position: absolute;
+}

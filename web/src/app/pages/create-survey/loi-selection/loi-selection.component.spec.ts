@@ -35,7 +35,7 @@ import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
-describe('LoiSelectionComponent', () => {
+describe('LoiSelectionFormComponent', () => {
   let fixture: ComponentFixture<LoiSelectionComponent>;
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
 
@@ -83,13 +83,13 @@ describe('LoiSelectionComponent', () => {
     );
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'canManageSurvey',
-      'requireActiveSurvey$',
+      'getActiveSurvey$',
     ]);
     mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
       List<LocationOfInterest>([poi1, poi2])
     );
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
-    surveyServiceSpy.requireActiveSurvey$.and.returnValue(of(survey));
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     surveyServiceSpy.canManageSurvey.and.returnValue(true);
 
     TestBed.configureTestingModule({
