@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Observable, Subscription} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
@@ -32,11 +31,9 @@ export class SurveyPageContainerComponent implements OnInit, OnDestroy {
 
   constructor(
     private navigationService: NavigationService,
-    private surveyService: SurveyService,
-    route: ActivatedRoute
+    private surveyService: SurveyService
   ) {
     this.activeSurvey$ = surveyService.getActiveSurvey$();
-    navigationService.init(route);
   }
 
   ngOnInit() {

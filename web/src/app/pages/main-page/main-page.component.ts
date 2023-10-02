@@ -28,6 +28,7 @@ import {AuthService} from 'app/services/auth/auth.service';
 import {environment} from 'environments/environment';
 import {TitleDialogComponent} from './title-dialog/title-dialog.component';
 import {Submission} from 'app/models/submission/submission.model';
+import {ActivatedRoute} from '@angular/router';
 
 /**
  * Root component for main application page showing map, jobs list, and
@@ -51,8 +52,10 @@ export class MainPageComponent implements OnInit {
     private loiService: LocationOfInterestService,
     private submissionService: SubmissionService,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    route: ActivatedRoute
   ) {
+    navigationService.init(route);
     this.activeSurvey$ = this.surveyService.requireActiveSurvey$();
   }
 

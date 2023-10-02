@@ -18,12 +18,11 @@ import {CommonModule} from '@angular/common';
 import {SurveyPageContainerComponent} from './survey-page-container.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {NgModule} from '@angular/core';
-import {RouterModule} from '@angular/router';
 
 @NgModule({
   entryComponents: [],
   declarations: [SurveyPageContainerComponent],
   exports: [SurveyPageContainerComponent],
-  imports: [CommonModule, RouterModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatProgressSpinnerModule],
 })
 export class SurveyPageContainerModule {}
