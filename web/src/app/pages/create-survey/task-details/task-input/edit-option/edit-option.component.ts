@@ -85,8 +85,4 @@ export class EditOptionComponent implements OnInit, OnChanges {
   onLabelBlur(): void {
     this.labelControl.setValue(this.labelControl.value.trim());
   }
-
-  onCodeBlur(): void {
-    this.codeControl.setValue(this.codeControl.value.trim());
-  }
 }
