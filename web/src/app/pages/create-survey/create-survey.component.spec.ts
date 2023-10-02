@@ -139,7 +139,7 @@ describe('CreateSurveyComponent', () => {
       'requireActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
-      'requireActiveSurvey',
+      'getActiveSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
@@ -375,7 +375,7 @@ describe('CreateSurveyComponent', () => {
         fixture.detectChanges();
         // If survey has a job, we navigate to the next section, so we need to
         // go back to the job form.
-        surveyServiceSpy.requireActiveSurvey.and.returnValue(surveyWithJob);
+        surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
         clickBackButton(fixture);
         fixture.detectChanges();
       }));

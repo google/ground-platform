@@ -87,10 +87,6 @@ export class SurveyService {
     return this.activeSurvey;
   }
 
-  requireActiveSurvey(): Survey {
-    return this.activeSurvey!;
-  }
-
   activateSurvey(id: string) {
     this.activateSurveyRequest$.next(id);
   }

@@ -183,7 +183,7 @@ export class CreateSurveyComponent implements OnInit {
     }
     // TODO(#1194): This call introduces a race condition. Instead of trying to wait for remote update,
     // the component should update the state of survey internally.
-    // this.survey = this.surveyService.requireActiveSurvey();
+    // this.survey = this.surveyService.getActiveSurvey()!;
   }
 
   async continue(): Promise<void> {
@@ -216,7 +216,7 @@ export class CreateSurveyComponent implements OnInit {
       default:
         break;
     }
-    this.survey = this.surveyService.requireActiveSurvey();
+    this.survey = this.surveyService.getActiveSurvey()!;
   }
 
   onLoiPermissionsChange(permissionsOption: LoiPermissionsOption) {
