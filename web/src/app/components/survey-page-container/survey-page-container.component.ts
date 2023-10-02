@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {Component} from '@angular/core';
