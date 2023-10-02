@@ -23,6 +23,7 @@ import {EditOptionComponent} from './edit-option.component';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [EditOptionComponent],
@@ -34,6 +35,7 @@ import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/lega
     MatInputModule,
     MatIconModule,
     MatButtonModule,
+    DragDropModule,
     MatTooltipModule,
   ],
   exports: [EditOptionComponent],

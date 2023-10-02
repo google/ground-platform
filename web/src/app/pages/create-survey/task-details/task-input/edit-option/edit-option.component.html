@@ -15,8 +15,9 @@
 -->
 
 <form [formGroup]="optionGroup">
-  <div class="option-content">
-    <mat-icon cdkDragHandle class="drag-icon">drag_indicator</mat-icon>
+  <div class="option-content" cdkDrag>
+    <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
+
     <mat-form-field class="task-option">
       <mat-label>Option</mat-label>
       <input
@@ -32,15 +33,7 @@
         </ng-container>
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="code-option">
-      <mat-label>Code</mat-label>
-      <input
-        matInput
-        formControlName="code"
-        autocomplete="off"
-        (blur)="onCodeBlur()"
-      />
-    </mat-form-field>
+
     <button
       *ngIf="index"
       tabindex="-1"
