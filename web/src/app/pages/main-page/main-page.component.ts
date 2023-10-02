@@ -55,7 +55,7 @@ export class MainPageComponent implements OnInit {
     private dialog: MatDialog,
     route: ActivatedRoute
   ) {
-    navigationService.init(route);
+    this.navigationService.init(route);
     this.activeSurvey$ = this.surveyService.requireActiveSurvey$();
   }
 
@@ -156,5 +156,5 @@ export class MainPageComponent implements OnInit {
     } else {
       this.submissionService.deselectSubmission();
     }
-  } 
+  }
 }

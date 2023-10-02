@@ -67,6 +67,7 @@ describe('MainPageComponent', () => {
     );
 
     const navigationService = {
+      init: () => null,
       getSurveyId$: () => NEVER,
       getJobId$: () => NEVER,
       getLocationOfInterestId$: () => NEVER,
