@@ -135,6 +135,7 @@ describe('CreateSurveyComponent', () => {
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
+      'getActiveSurvey$',
       'requireActiveSurvey$',
       'updateTitleAndDescription',
       'createSurvey',
@@ -144,6 +145,7 @@ describe('CreateSurveyComponent', () => {
       new Promise(resolve => resolve(newSurveyId))
     );
     activeSurvey$ = new Subject<Survey>();
+    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
     surveyServiceSpy.requireActiveSurvey$.and.returnValue(activeSurvey$);
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
@@ -192,13 +194,6 @@ describe('CreateSurveyComponent', () => {
     fixture = TestBed.createComponent(CreateSurveyComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('shows spinner when survey not loaded', () => {
-    const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
-      .nativeElement as HTMLElement;
-    // TODO(#1170): Extract the spinner into a component
-    expect(spinner.innerHTML).toContain('Loading survey...');
   });
 
   describe('when routed in with survey ID', () => {

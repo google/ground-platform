@@ -16,15 +16,7 @@
 
 <div class="page">
   <ground-header></ground-header>
-
-  <!-- TODO(#1170): Extract the spinner into a component -->
-  <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
-    <div>
-      <mat-spinner></mat-spinner>
-      <p class="loading-label">Loading survey...</p>
-    </div>
-  </div>
-  <div *ngIf="survey" class="container">
+  <ground-survey-page-container class="container">
     <mat-nav-list class="left-menu">
       <a mat-list-item id="survey-button" [routerLink]="['./survey']">
         <mat-icon class="material-symbols-outlined button-icon">
@@ -63,5 +55,5 @@
         <router-outlet></router-outlet>
       </div>
     </div>
-  </div>
+  </ground-survey-page-container>
 </div>

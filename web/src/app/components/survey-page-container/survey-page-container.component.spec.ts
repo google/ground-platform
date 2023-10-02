@@ -16,13 +16,28 @@
 
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ActivatedRoute} from '@angular/router';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+  waitForAsync,
+} from '@angular/core/testing';
 import {SurveyPageContainerComponent} from './survey-page-container.component';
 import {MainPageComponent} from '../../pages/main-page/main-page.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {NEVER} from 'rxjs';
+import {NEVER, Subject} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
+import {By} from '@angular/platform-browser';
+import {Survey} from 'app/models/survey.model';
+
+@Component({
+  template: ` <ground-survey-page-container>
+    Page body
+  </ground-survey-page-container>`,
+})
+class TestHostComponent {}
 
 const navigationService = {
   init: () => {},
@@ -36,14 +51,20 @@ const surveyService = jasmine.createSpyObj('SurveyService', [
 ]);
 
 describe('SurveyPageContainerComponent', () => {
-  let component: SurveyPageContainerComponent;
-  let fixture: ComponentFixture<SurveyPageContainerComponent>;
+  let component: TestHostComponent;
+  let fixture: ComponentFixture<TestHostComponent>;
   let route: ActivatedRouteStub;
+  const activeSurvey$ = new Subject<Survey | null>();
 
   beforeEach(waitForAsync(() => {
+    surveyService.getActiveSurvey$.and.returnValue(activeSurvey$);
     route = new ActivatedRouteStub();
     TestBed.configureTestingModule({
-      declarations: [SurveyPageContainerComponent, MainPageComponent],
+      declarations: [
+        SurveyPageContainerComponent,
+        MainPageComponent,
+        TestHostComponent,
+      ],
       providers: [
         {provide: ActivatedRoute, useValue: route},
         {provide: NavigationService, useValue: navigationService},
@@ -52,7 +73,7 @@ describe('SurveyPageContainerComponent', () => {
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SurveyPageContainerComponent);
+    fixture = TestBed.createComponent(TestHostComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));
@@ -60,4 +81,22 @@ describe('SurveyPageContainerComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('shows spinner while loading', fakeAsync(() => {
+    activeSurvey$.next(null);
+    fixture.detectChanges();
+    tick();
+    const spinner = fixture.debugElement.query(By.css('.loading-spinner'));
+    expect(spinner).not.toBeNull();
+  }));
+
+  it('shows content when loaded', fakeAsync(() => {
+    activeSurvey$.next(Survey.UNSAVED_NEW);
+    fixture.detectChanges();
+    tick();
+    const div = fixture.debugElement.query(
+      By.css('ground-survey-page-container')
+    );
+    expect(div.nativeElement.textContent.trim()).toEqual('Page body');
+  }));
 });
