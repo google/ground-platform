@@ -55,11 +55,17 @@ export class MainPageComponent implements OnInit {
     private dialog: MatDialog,
     route: ActivatedRoute
   ) {
-    navigationService.init(route);
+    this.navigationService.init(route);
     this.activeSurvey$ = this.surveyService.requireActiveSurvey$();
   }
 
   ngOnInit() {
+    // Activate new survey on route changes.
+    this.subscription.add(
+      this.navigationService.getSurveyId$().subscribe(id => {
+        id && this.surveyService.activateSurvey(id);
+      })
+    );
     // Show title dialog to assign title on a new survey.
     this.subscription.add(
       this.navigationService

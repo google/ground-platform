@@ -18,34 +18,17 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Observable, Subscription} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'ground-survey-page-container',
   templateUrl: './survey-page-container.component.html',
   styleUrls: ['./survey-page-container.component.css'],
 })
-export class SurveyPageContainerComponent implements OnInit, OnDestroy {
+export class SurveyPageContainerComponent {
   activeSurvey$: Observable<Survey | null>;
-  private subscription = new Subscription();
 
-  constructor(
-    private navigationService: NavigationService,
-    private surveyService: SurveyService
-  ) {
+  constructor(surveyService: SurveyService) {
     this.activeSurvey$ = surveyService.getActiveSurvey$();
-  }
-
-  ngOnInit() {
-    // Activate new survey on route changes.
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(id => {
-        id && this.surveyService.activateSurvey(id);
-      })
-    );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

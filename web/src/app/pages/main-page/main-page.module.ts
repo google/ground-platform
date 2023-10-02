@@ -46,7 +46,7 @@ import {RouterModule} from '@angular/router';
     SidePanelModule,
     SurveyHeaderModule,
     SurveyPageContainerModule,
-    RouterModule
+    RouterModule,
   ],
 })
 export class MainPageModule {}
