@@ -45,6 +45,7 @@ export class CreateSurveyComponent implements OnInit {
   survey?: Survey;
   loiPermissionsOption!: LoiPermissionsOption;
   skipLoiSelection = false;
+  canContinue = true;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
   // We should display a loading bar while we are waiting for the data to make a decision
   // about which phase we are in.
@@ -221,6 +222,10 @@ export class CreateSurveyComponent implements OnInit {
     this.loiPermissionsOption = permissionsOption;
     this.skipLoiSelection =
       permissionsOption === LoiPermissionsOption.DATA_COLLECTORS;
+  }
+
+  onCanContinueChange(canContinue: boolean) {
+    this.canContinue = canContinue;
   }
 
   @ViewChild('surveyDetails')

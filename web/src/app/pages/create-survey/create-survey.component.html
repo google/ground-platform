@@ -44,11 +44,13 @@
             #surveyDetails
             [title]="survey.title"
             [description]="survey.description"
+            (canContinue)="onCanContinueChange($event)"
           ></survey-details>
           <job-details
             *ngSwitchCase="SetupPhase.JOB_DETAILS"
             #jobDetails
             [name]="job()?.name ?? ''"
+            (canContinue)="onCanContinueChange($event)"
           ></job-details>
           <loi-permissions
             *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
@@ -64,6 +66,7 @@
             *ngSwitchCase="SetupPhase.DEFINE_TASKS"
             #taskDetails
             [label]="job()?.name ?? ''"
+            (canContinue)="onCanContinueChange($event)"
           ></task-details>
           <share-survey
             *ngSwitchCase="SetupPhase.REVIEW"
@@ -88,6 +91,7 @@
         (click)="continue()"
         mat-flat-button
         color="primary"
+        [disabled]="!canContinue"
       >
         Continue
       </button>
