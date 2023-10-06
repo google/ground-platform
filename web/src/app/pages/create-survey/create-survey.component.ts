@@ -283,12 +283,12 @@ export class CreateSurveyComponent implements OnInit {
   private async saveTasks() {
     const tasks = this.taskDetails?.toTasks();
 
-    // Assume the survey exists
+    // Assume the survey exists.
     const survey = this.survey!;
 
     await this.taskService.addOrUpdateTasks(
       survey.id,
-      // Assume there is at least one job
+      // Assume there is at least one job.
       survey.jobs.first()!.id,
       tasks!
     );
