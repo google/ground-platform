@@ -14,42 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {Task} from 'app/models/task/task.model';
+import { TaskGroup, taskGroupToTypes } from 'app/pages/create-survey/task-details/task-details.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
-import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
-import {Observable, filter, firstValueFrom, map} from 'rxjs';
+import {filter, firstValueFrom, map} from 'rxjs';
 
-export enum TaskGroup {
-  QUESTION = 1,
-  PHOTO = 2,
-  DROP_PIN = 3,
-  DRAW_AREA = 4,
-  CAPTURE_LOCATION = 5,
-  SUGGEST_LOI = 6,
-}
-
-export const taskGroupToTypes = new Map([
-  [TaskGroup.QUESTION, List([TaskType.TEXT, TaskType.DATE])],
-  [TaskGroup.PHOTO, List([TaskType.PHOTO])],
-  [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
-  [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
-  [TaskGroup.SUGGEST_LOI, List([TaskType.DROP_PIN])],
-]);
-
-export const taskTypeToGroup = new Map([
-  [TaskType.TEXT, TaskGroup.QUESTION],
-  [TaskType.DATE, TaskGroup.QUESTION],
-  [TaskType.PHOTO, TaskGroup.PHOTO],
-  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
-  [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
-]);
 
 @Component({
   selector: 'edit-job',
@@ -95,11 +71,12 @@ export class EditJobComponent {
             survey
               .getJob(this.jobId!)
               ?.tasks?.toList()
+              .sortBy(task => task.index)
           )
         )
     );
 
-    this.tasks = this.tasks!.sort((t1, t2) => t1.index-t2.index)
+    this.tasks = this.tasks!.sortBy(task => task.index);
   }
 
   getIndex(index: number) {
@@ -146,6 +123,46 @@ export class EditJobComponent {
       .subscribe(dialogResult => {
         if (dialogResult) {
           this.tasks = this.tasks!.splice(index, 1);
+        }
+      });
+  }
+
+  drop(event: CdkDragDrop<string[]>): void {
+    const {previousIndex, currentIndex} = event;
+    this.tasks = this.tasks!
+      .update(
+        previousIndex,
+        task => task?.copyWith({index: currentIndex}) as Task
+      )
+      .update(
+        currentIndex,
+        task => task?.copyWith({index: previousIndex}) as Task
+      )
+      .sortBy(task => task.index);
+
+      console.log(this.tasks)
+  }
+
+  onDuplicateTask(index: number) {
+    this.dialogService
+      .openConfirmationDialog(
+        'Duplicate task',
+        'Are you sure you wish to duplicate this task?'
+      )
+      .afterClosed()
+      .subscribe(dialogResult => {
+        if (dialogResult) {
+          const taskToDuplicate = this.tasks!.get(index);
+          if (taskToDuplicate) {
+            const task = this.taskService.createTask(
+              taskToDuplicate?.type,
+              taskToDuplicate?.label,
+              taskToDuplicate?.required,
+              this.tasks!.size,
+              taskToDuplicate?.multipleChoice
+            );
+            this.tasks = this.tasks!.push(task);
+          }
         }
       });
   }
