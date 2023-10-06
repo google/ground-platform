@@ -139,8 +139,6 @@ export class EditJobComponent {
         task => task?.copyWith({index: previousIndex}) as Task
       )
       .sortBy(task => task.index);
-
-      console.log(this.tasks)
   }
 
   onDuplicateTask(index: number) {
