@@ -145,7 +145,7 @@ export class CreateSurveyComponent implements OnInit {
       this.setupPhaseToTitle.keys()
     ).findIndex(phase => phase === this.setupPhase);
     return currentPhaseIndex > -1
-      ? Math.round(((currentPhaseIndex + 1) / numberOfSteps) * 100)
+      ? Math.round((currentPhaseIndex / numberOfSteps) * 100)
       : 0;
   }
 
