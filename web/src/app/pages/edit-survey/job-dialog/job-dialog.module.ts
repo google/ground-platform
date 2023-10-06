@@ -16,31 +16,23 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
-import {HeaderModule} from 'app/components/header/header.module';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {JobDialogComponent} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
 import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {RouterModule} from '@angular/router';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatDividerModule} from '@angular/material/divider';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
-  declarations: [EditSurveyComponent],
+  declarations: [JobDialogComponent],
   imports: [
     CommonModule,
-    HeaderModule,
-    MatListModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    RouterModule,
-    MatMenuModule,
-    MatDividerModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    MatButtonModule,
   ],
-  exports: [EditSurveyComponent],
+  exports: [JobDialogComponent],
 })
-export class EditSurveyModule {}
+export class JobDialogModule {}
