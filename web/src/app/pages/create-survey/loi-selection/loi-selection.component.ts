@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {List} from 'immutable';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -31,6 +31,10 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
   styleUrls: ['./loi-selection.component.scss'],
 })
 export class LoiSelectionComponent {
+  @Input() isStandalonePage = true;
+
+  readonly header = 'Where should data be collected?';
+
   lois$: Observable<List<LocationOfInterest>>;
 
   constructor(

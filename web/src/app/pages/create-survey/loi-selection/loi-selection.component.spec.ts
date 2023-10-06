@@ -118,9 +118,17 @@ describe('LoiSelectionFormComponent', () => {
     fixture.detectChanges();
   });
 
-  it('loads LOI section header', () => {
+  it('loads h1 header when standalone page', () => {
     expect(
       fixture.debugElement.nativeElement.querySelector('h1').textContent
+    ).toBe('Where should data be collected?');
+  });
+
+  it('loads h2 header when not standalone page', () => {
+    fixture.componentInstance.isStandalonePage = false;
+    fixture.detectChanges();
+    expect(
+      fixture.debugElement.nativeElement.querySelector('h2').textContent
     ).toBe('Where should data be collected?');
   });
 
