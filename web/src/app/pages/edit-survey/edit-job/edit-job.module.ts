@@ -17,10 +17,11 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
+import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
 
 @NgModule({
   declarations: [EditJobComponent],
-  imports: [CommonModule],
+  imports: [CommonModule, LoiSelectionModule],
   exports: [EditJobComponent],
 })
 export class EditJobModule {}

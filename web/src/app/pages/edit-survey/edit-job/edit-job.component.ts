@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/internal/operators/map';
 
@@ -26,6 +27,9 @@ import {map} from 'rxjs/internal/operators/map';
 })
 export class EditJobComponent {
   id$: Observable<string>;
+
+  @ViewChild('loiSelection')
+  loiSelection?: LoiSelectionComponent;
 
   constructor(route: ActivatedRoute) {
     this.id$ = route.params.pipe(map(params => params['id']));
