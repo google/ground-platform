@@ -14,29 +14,32 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges} from '@angular/core';
-import {FormGroup, FormBuilder} from '@angular/forms';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
 
 @Component({
   selector: 'job-details',
   templateUrl: './job-details.component.html',
   styleUrls: ['./job-details.component.scss'],
 })
-export class JobDetailsComponent implements OnChanges {
+export class JobDetailsComponent {
   readonly nameControlKey = 'name';
-  formGroup: FormGroup;
 
-  @Input()
-  name = '';
+  formGroup!: FormGroup;
 
-  constructor() {
+  @Input() name = '';
+  @Output() canContinue: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  ngOnInit(): void {
     this.formGroup = new FormBuilder().group({
-      [this.nameControlKey]: '',
+      [this.nameControlKey]: [this.name, Validators.required],
     });
-  }
 
-  ngOnChanges(): void {
-    this.formGroup.controls[this.nameControlKey].setValue(this.name);
+    this.formGroup.valueChanges.subscribe(_ => {
+      this.canContinue.emit(this.formGroup?.valid);
+    });
+
+    this.canContinue.emit(this.formGroup?.valid);
   }
 
   toJobName(): string {

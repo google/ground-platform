@@ -14,37 +14,35 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges} from '@angular/core';
-import {FormGroup, FormBuilder} from '@angular/forms';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {FormGroup, FormBuilder, Validators} from '@angular/forms';
 
 @Component({
   selector: 'survey-details',
   templateUrl: './survey-details.component.html',
   styleUrls: ['./survey-details.component.scss'],
 })
-export class SurveyDetailsComponent implements OnChanges {
+export class SurveyDetailsComponent {
   readonly titleControlKey = 'title';
   readonly descriptionControlKey = 'description';
-  formGroup: FormGroup;
 
-  @Input()
-  title = '';
+  formGroup!: FormGroup;
 
-  @Input()
-  description = '';
+  @Input() title!: string;
+  @Input() description!: string;
+  @Output() canContinue: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  constructor() {
+  ngOnInit(): void {
     this.formGroup = new FormBuilder().group({
-      [this.titleControlKey]: '',
+      [this.titleControlKey]: [this.title, Validators.required],
       [this.descriptionControlKey]: '',
     });
-  }
 
-  ngOnChanges(): void {
-    this.formGroup = new FormBuilder().group({
-      [this.titleControlKey]: this.title,
-      [this.descriptionControlKey]: this.description,
+    this.formGroup.valueChanges.subscribe(_ => {
+      this.canContinue.emit(this.formGroup?.valid);
     });
+
+    this.canContinue.emit(this.formGroup?.valid);
   }
 
   toTitleAndDescription(): [string, string] {
