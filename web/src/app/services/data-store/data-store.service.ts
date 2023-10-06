@@ -90,7 +90,7 @@ export class DataStoreService {
           ).getJob(jobId);
 
           if (!job) {
-            throw Error('job does not exist with id ' + jobId);
+            throw Error(`Job $jobId not found`);
           }
 
           return job;
