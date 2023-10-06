@@ -14,14 +14,13 @@
   limitations under the License.
 -->
 
-<form [formGroup]="optionGroup">
+<form [formGroup]="formGroup">
   <div class="option-content" cdkDrag>
     <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
 
     <mat-form-field class="task-option">
       <mat-label>Option</mat-label>
       <input
-        #optionInput
         matInput
         formControlName="label"
         autocomplete="off"

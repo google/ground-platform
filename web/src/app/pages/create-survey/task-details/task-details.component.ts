@@ -15,10 +15,23 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import {
+  Cardinality,
+  MultipleChoice,
+} from 'app/models/task/multiple-choice.model';
+import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
-import {TaskService} from 'app/services/task/task.service';
+import {moveItemInFormArray} from 'app/utils/utils';
 import {List} from 'immutable';
 
 export enum TaskGroup {
@@ -56,9 +69,10 @@ export const taskTypeToGroup = new Map([
   styleUrls: ['./task-details.component.scss'],
 })
 export class TaskDetailsComponent {
-  @Input() label?: string;
+  formGroup!: FormGroup;
 
-  tasks: List<Task>;
+  @Input() label?: string;
+  @Output() canContinue: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
@@ -69,43 +83,42 @@ export class TaskDetailsComponent {
   ];
 
   constructor(
-    private taskService: TaskService,
+    private dataStoreService: DataStoreService,
     private dialogService: DialogService
-  ) {
-    this.taskService.getTasks$().subscribe(tasks => {
-      this.tasks = tasks;
+  ) {}
+
+  ngOnInit(): void {
+    this.formGroup = new FormBuilder().group({
+      tasks: new FormBuilder().array([]),
     });
-    this.tasks = List<Task>();
+
+    this.formGroup.valueChanges.subscribe(_ => {
+      this.canContinue.emit(this.formGroup?.valid);
+    });
+
+    this.canContinue.emit(this.formGroup?.valid);
+  }
+
+  get formArray() {
+    return this.formGroup.get('tasks') as FormArray;
   }
 
   onTaskAdd(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
-    const type = types?.first();
-    if (type) {
-      const task = this.taskService.createTask(
-        type,
-        '',
-        false,
-        this.tasks.size
-      );
-      this.tasks = this.tasks.push(task);
-    }
+
+    const formGroup = new FormBuilder().group({
+      id: this.dataStoreService.generateId(),
+      type: types?.first(),
+      required: false,
+      label: ['', Validators.required],
+      cardinality: null,
+      options: new FormBuilder().array([]),
+    });
+
+    this.formArray.push(formGroup);
   }
 
-  onTaskUpdate(event: Task, index: number) {
-    const taskId = this.tasks.get(index)?.id;
-    const task = new Task(
-      taskId || '',
-      event.type,
-      event.label,
-      event.required,
-      index,
-      event.multipleChoice
-    );
-    this.tasks = this.tasks.set(index, task);
-  }
-
-  onTaskDelete(index: number) {
+  onDeleteTask(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
@@ -115,7 +128,7 @@ export class TaskDetailsComponent {
       .afterClosed()
       .subscribe(dialogResult => {
         if (dialogResult) {
-          this.tasks = this.tasks.splice(index, 1);
+          this.formArray.removeAt(index);
         }
       });
   }
@@ -129,17 +142,22 @@ export class TaskDetailsComponent {
       .afterClosed()
       .subscribe(dialogResult => {
         if (dialogResult) {
-          const taskToDuplicate = this.tasks.get(index);
-          if (taskToDuplicate) {
-            const task = this.taskService.createTask(
-              taskToDuplicate?.type,
-              taskToDuplicate?.label,
-              taskToDuplicate?.required,
-              this.tasks.size,
-              taskToDuplicate?.multipleChoice
-            );
-            this.tasks = this.tasks.push(task);
-          }
+          const formGroupToDuplicate = this.formArray.controls[index];
+
+          const formGroup = new FormBuilder().group({
+            id: this.dataStoreService.generateId(),
+            type: formGroupToDuplicate.get('type')?.value,
+            required: formGroupToDuplicate.get('required')?.value,
+            label: [
+              formGroupToDuplicate.get('label')?.value,
+              Validators.required,
+            ],
+            cardinality: formGroupToDuplicate.get('cardinality')?.value,
+            options: (formGroupToDuplicate.get('options') as FormArray)
+              .controls,
+          });
+
+          this.formArray.push(formGroup);
         }
       });
   }
@@ -149,20 +167,44 @@ export class TaskDetailsComponent {
   }
 
   toTasks(): List<Task> {
-    return this.tasks;
+    return List(
+      this.formArray.controls.map((task: AbstractControl, i: number) => {
+        const cardinality = task.get('cardinality')?.value as Cardinality;
+
+        const options = List(
+          (task.get('options') as FormArray).controls.map(
+            (option: AbstractControl, k: number) =>
+              ({
+                id: option.get('id')?.value as string,
+                label: option.get('label')?.value as string,
+                code: option.get('code')?.value as string,
+                index: k,
+              } as Option)
+          )
+        );
+
+        return {
+          id: task.get('id')?.value as string,
+          type: task.get('type')?.value as TaskType,
+          required: task.get('required')?.value as boolean,
+          label: task.get('label')?.value as string,
+          index: i,
+          multipleChoice: cardinality
+            ? ({
+                cardinality,
+                options,
+              } as MultipleChoice)
+            : undefined,
+        } as Task;
+      })
+    );
   }
 
   drop(event: CdkDragDrop<string[]>): void {
-    const {previousIndex, currentIndex} = event;
-    this.tasks = this.tasks
-      .update(
-        previousIndex,
-        task => task?.copyWith({index: currentIndex}) as Task
-      )
-      .update(
-        currentIndex,
-        task => task?.copyWith({index: previousIndex}) as Task
-      )
-      .sortBy(task => task.index);
+    moveItemInFormArray(
+      this.formArray,
+      event.previousIndex,
+      event.currentIndex
+    );
   }
 }

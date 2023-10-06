@@ -20,10 +20,20 @@ import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
 import {TaskInputModule} from './task-input/task-input.module';
 import {CommonModule} from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {TaskFormModule} from './task-form/task-form.module';
 
 @NgModule({
   declarations: [TaskDetailsComponent],
-  imports: [AddTaskButtonModule, TaskInputModule, CommonModule, DragDropModule],
+  imports: [
+    AddTaskButtonModule,
+    TaskInputModule,
+    TaskFormModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    DragDropModule,
+  ],
   exports: [TaskDetailsComponent],
 })
 export class TaskDetailsModule {}

@@ -14,72 +14,27 @@
  * limitations under the License.
  */
 
-import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  ViewChild,
-  ElementRef,
-} from '@angular/core';
-import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  AbstractControl,
-} from '@angular/forms';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {FormGroup, AbstractControl} from '@angular/forms';
 
 @Component({
   selector: 'ground-edit-option',
   templateUrl: './edit-option.component.html',
   styleUrls: ['./edit-option.component.scss'],
 })
-export class EditOptionComponent implements OnInit, OnChanges {
-  @Input() code?: string;
-  @Input() label?: string;
-  @Input() index?: number;
+export class EditOptionComponent {
+  @Input() formGroup!: FormGroup;
+  @Input() index!: number;
+
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
-  @ViewChild('optionInput', {static: true}) optionInput?: ElementRef;
-
-  optionGroup: FormGroup;
-
-  constructor(private formBuilder: FormBuilder) {
-    this.optionGroup = this.formBuilder.group({
-      code: [''],
-      label: ['', Validators.required],
-    });
-  }
-
-  ngOnInit(): void {
-    // As the options fields value change we are emitting the updated value to the form-field-editor.
-    this.optionGroup.valueChanges.subscribe(value => {
-      this.update.emit({
-        code: value.code,
-        label: value.label,
-      });
-    });
-  }
-
-  ngOnChanges(): void {
-    this.optionGroup.setValue({
-      code: this.code,
-      label: this.label,
-    });
-  }
 
   onDeleteOption(index: number): void {
     this.delete.emit(index);
   }
 
   get labelControl(): AbstractControl {
-    return this.optionGroup.get('label')!;
-  }
-
-  get codeControl(): AbstractControl {
-    return this.optionGroup.get('code')!;
+    return this.formGroup.get('label')!;
   }
 
   onLabelBlur(): void {

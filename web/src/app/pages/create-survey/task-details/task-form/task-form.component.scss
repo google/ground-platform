@@ -1,0 +1,90 @@
+/**
+ * Copyright 2023 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.task-input {
+  border-radius: 8px;
+  border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+  background: var(--ground-sys-light-surface-container-lowest, #FFF);
+  padding: 0px 24px 24px 24px;
+  margin-top: 8px;
+
+  &.selected {
+    border-left: 8px solid #6DDD81;
+    box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.30), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+    padding-left: 17px;
+  }
+
+  &.cdk-drag-preview {
+    font-family: 'Google Sans';
+  }
+
+  .drag-icon {
+    display: block;
+    margin: 0px auto;
+    cursor: move;
+    padding: 5px;
+    color: var(--ground-sys-light-surface-variant, #DDE5D9);
+  }
+
+  .task-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 32px;
+    margin-bottom: 16px;
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      flex: 1;
+      gap: 8px;
+
+      .mat-slide-toggle {
+        margin-left: 12px;
+      }
+    }
+  }
+
+  .task-form {
+    display: flex;
+    gap: 16px;
+  
+    .question {
+      flex: 1;
+    }
+  }
+
+  .ground-option-editor {
+    margin-top: 1rem;
+  }
+}
+
+.icon-task-type {
+  vertical-align: middle;
+  margin-right: 20px;
+  padding-left: 10px;
+}
+
+.question-actions {
+  margin-bottom: 20px;
+  margin-right: 10px;
+}
+
+.vertical-divider {
+  height: 30px;
+  margin: 3px 20px;
+}
