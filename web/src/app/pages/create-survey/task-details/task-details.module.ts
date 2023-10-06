@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ import {TaskDetailsComponent} from './task-details.component';
 import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
 import {TaskInputModule} from './task-input/task-input.module';
 import {CommonModule} from '@angular/common';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [TaskDetailsComponent],
-  imports: [AddTaskButtonModule, TaskInputModule, CommonModule],
+  imports: [AddTaskButtonModule, TaskInputModule, CommonModule, DragDropModule],
   exports: [TaskDetailsComponent],
 })
 export class TaskDetailsModule {}

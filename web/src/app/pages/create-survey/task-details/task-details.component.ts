@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Component, Input} from '@angular/core';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -26,23 +27,27 @@ export enum TaskGroup {
   DROP_PIN = 3,
   DRAW_AREA = 4,
   CAPTURE_LOCATION = 5,
-  SUGGEST_LOI = 6,
 }
 
 export const taskGroupToTypes = new Map([
-  [TaskGroup.QUESTION, List([TaskType.TEXT, TaskType.DATE])],
+  [
+    TaskGroup.QUESTION,
+    List([TaskType.TEXT, TaskType.DATE, TaskType.MULTIPLE_CHOICE]),
+  ],
   [TaskGroup.PHOTO, List([TaskType.PHOTO])],
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
   [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
-  [TaskGroup.SUGGEST_LOI, List([TaskType.DROP_PIN])],
+  [TaskGroup.CAPTURE_LOCATION, List([TaskType.CAPTURE_LOCATION])],
 ]);
 
 export const taskTypeToGroup = new Map([
   [TaskType.TEXT, TaskGroup.QUESTION],
   [TaskType.DATE, TaskGroup.QUESTION],
+  [TaskType.MULTIPLE_CHOICE, TaskGroup.QUESTION],
   [TaskType.PHOTO, TaskGroup.PHOTO],
-  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
+  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
+  [TaskType.CAPTURE_LOCATION, TaskGroup.CAPTURE_LOCATION],
 ]);
 
 @Component({
@@ -51,9 +56,17 @@ export const taskTypeToGroup = new Map([
   styleUrls: ['./task-details.component.scss'],
 })
 export class TaskDetailsComponent {
+  @Input() label?: string;
+
   tasks: List<Task>;
 
-  TaskGroup = TaskGroup;
+  addableTaskGroups: Array<TaskGroup> = [
+    TaskGroup.QUESTION,
+    TaskGroup.PHOTO,
+    TaskGroup.DROP_PIN,
+    TaskGroup.DRAW_AREA,
+    TaskGroup.CAPTURE_LOCATION,
+  ];
 
   constructor(
     private taskService: TaskService,
@@ -67,9 +80,7 @@ export class TaskDetailsComponent {
 
   onTaskAdd(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
-
     const type = types?.first();
-
     if (type) {
       const task = this.taskService.createTask(
         type,
@@ -77,7 +88,6 @@ export class TaskDetailsComponent {
         false,
         this.tasks.size
       );
-
       this.tasks = this.tasks.push(task);
     }
   }
@@ -110,11 +120,49 @@ export class TaskDetailsComponent {
       });
   }
 
+  onDuplicateTask(index: number) {
+    this.dialogService
+      .openConfirmationDialog(
+        'Duplicate task',
+        'Are you sure you wish to duplicate this task?'
+      )
+      .afterClosed()
+      .subscribe(dialogResult => {
+        if (dialogResult) {
+          const taskToDuplicate = this.tasks.get(index);
+          if (taskToDuplicate) {
+            const task = this.taskService.createTask(
+              taskToDuplicate?.type,
+              taskToDuplicate?.label,
+              taskToDuplicate?.required,
+              this.tasks.size,
+              taskToDuplicate?.multipleChoice
+            );
+            this.tasks = this.tasks.push(task);
+          }
+        }
+      });
+  }
+
   getIndex(index: number) {
     return index;
   }
 
   toTasks(): List<Task> {
     return this.tasks;
+  }
+
+  drop(event: CdkDragDrop<string[]>): void {
+    const {previousIndex, currentIndex} = event;
+    this.tasks = this.tasks
+      .update(
+        previousIndex,
+        task => task?.copyWith({index: currentIndex}) as Task
+      )
+      .update(
+        currentIndex,
+        task => task?.copyWith({index: previousIndex}) as Task
+      )
+      .sortBy(task => task.index);
   }
 }

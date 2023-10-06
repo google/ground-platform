@@ -1,5 +1,5 @@
 <!--
-  Copyright 2023 Google LLC
+  Copyright 2023 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,7 +13,10 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<form [formGroup]="formGroup" class="task-input">
+
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}" cdkDrag>
+  <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
+
   <div class="task-toolbar">
     <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
 
@@ -34,16 +37,21 @@
       </button>
 
       <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="onDuplicateTask()">
+          <span>Duplicate</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
         <button mat-menu-item (click)="onTaskDelete()">
-          <mat-icon>delete_forever</mat-icon>
           <span>Delete</span>
         </button>
       </mat-menu>
     </div>
   </div>
 
-  <div fxLayout class="task-form">
-    <mat-form-field class="question" appearance="fill" fxFlex="2 1 auto">
+  <div class="task-form">
+    <mat-form-field class="question" appearance="fill">
       <mat-label>{{ Tasks[taskGroup].placeholder }}</mat-label>
 
       <input
@@ -62,12 +70,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field
-      fxFlex
-      class="task-type"
-      appearance="outline"
-      *ngIf="taskGroup === TaskGroup.QUESTION"
-    >
+    <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
         formControlName="selectTaskOption"
         class="task-type-select"
@@ -75,41 +78,36 @@
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-task-type">{{
-            getSelectTaskType().icon
-          }}</mat-icon>
+          <mat-icon class="icon-task-type">{{ getSelectTaskType().icon }}</mat-icon>
+
           <span> {{ getSelectTaskType().label }}</span>
         </mat-select-trigger>
-        <mat-option *ngFor="let task of selectTaskOptions" [value]="task">
-          <mat-icon>{{ task.icon }}</mat-icon>
-          <span>{{ task.label }}</span>
+
+        <mat-option *ngFor="let taskOption of TaskOptions" [value]="taskOption">
+          <mat-icon>{{ taskOption.icon }}</mat-icon>
+
+          <span>{{ taskOption.label }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-  <div *ngIf="expanded">
+
+  <div *ngIf="taskType === TaskType.MULTIPLE_CHOICE">
     <div
       *ngIf="taskOptions?.options"
       cdkDropList
       (cdkDropListDropped)="drop($event)"
     >
-      <div
-        *ngFor="
-          let option of taskOptions?.options;
-          let i = index;
-          trackBy: getIndex
-        "
-        cdkDrag
-        fxLayout
+      <ground-edit-option
+        *ngFor="let option of taskOptions?.options; let i = index; trackBy: getIndex"
+        [label]="option.label"
+        [code]="option.code"
+        [index]="i"
+        (update)="onUpdateOption($event, i)"
+        (delete)="onDeleteOption(i)"
       >
-        <!-- <ground-option-editor
-            [label]="option.label"
-            [code]="option.code"
-            [index]="i"
-            (update)="onOptionUpdate($event, i)"
-            (delete)="onOptionDelete(i)"
-          ></ground-option-editor> -->
-      </div>
+      </ground-edit-option>
+
       <button
         mat-button
         type="button"
@@ -120,6 +118,7 @@
         Add option
       </button>
     </div>
+<<<<<<< HEAD
     <hr class="horizontal-line" />
     <div
       fxLayout
@@ -127,5 +126,7 @@
       (keydown.Tab)="onTaskBlur()"
       class="question-actions"
     ></div>
+=======
+>>>>>>> 7e1a1591afcd3dd04c0d1207de3ba563511bdc4c
   </div>
 </form>

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2023 Google LLC
+  Copyright 2023 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,20 +21,20 @@
 
 <form [formGroup]="formGroup">
   <mat-radio-group
+    class="loi-permissions"
     [id]="loiPermissionsControlKey"
     [formControlName]="loiPermissionsControlKey"
   >
-    <ng-container *ngFor="let option of loiPermissionsOptions">
-      <mat-card class="loi-permissions-option"
-        (click)="loiPermissionsOptionSelected(option.value)"
-      >
-        <mat-card-content>
-          <mat-radio-button class="option-radio-button" [value]="option.value">
-            {{ option.label }}
-          </mat-radio-button>
-          <p class="option-description">{{ option.description }}</p>
-        </mat-card-content>
-      </mat-card>
-    </ng-container>
+    <mat-card class="loi-permissions-option"
+      *ngFor="let option of loiPermissionsOptions"
+      (click)="optionCardClicked(option.value)"
+    >
+      <mat-card-content>
+        <mat-radio-button class="option-radio-button" [value]="option.value">
+          {{ option.label }}
+        </mat-radio-button>
+        <p class="option-description">{{ option.description }}</p>
+      </mat-card-content>
+    </mat-card>
   </mat-radio-group>
 </form>

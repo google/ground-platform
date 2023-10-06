@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Google LLC
+ * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Copiable} from '../copiable';
 import {MultipleChoice} from './multiple-choice.model';
 import {Option} from './option.model';
 
@@ -50,10 +51,11 @@ export enum TaskType {
   DATE_TIME = 7,
   DRAW_AREA = 8,
   DROP_PIN = 9,
+  CAPTURE_LOCATION = 10,
 }
 
 // TODO: add a subclass of Task for each task type.
-export class Task {
+export class Task extends Copiable {
   constructor(
     readonly id: string,
     readonly type: TaskType,
@@ -61,7 +63,9 @@ export class Task {
     readonly required: boolean,
     readonly index: number,
     readonly multipleChoice?: MultipleChoice
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * For MULTIPLE_CHOICE tasks, returns the option with the specified id.
