@@ -46,4 +46,8 @@ describe('EditJobComponent', () => {
       .nativeElement.innerText;
     expect(tempTitle).toContain(jobId);
   });
+
+  it('displays the loi selection component', () => {
+    expect(fixture.componentInstance.loiSelection).toBeDefined();
+  });
 });
