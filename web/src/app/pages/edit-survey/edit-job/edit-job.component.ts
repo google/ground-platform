@@ -102,7 +102,7 @@ export class EditJobComponent {
     }
 
     // No need to call addOrUpdateTasks because ngOnChange emits an update once
-    // the task-input component is created
+    // the task-input component is created.
   }
 
   onTaskUpdate(event: Task, index: number) {
