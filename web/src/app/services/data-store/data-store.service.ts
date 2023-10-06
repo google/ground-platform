@@ -71,7 +71,7 @@ export class DataStoreService {
 
   /**
    * Returns an Observable that loads and emits the job with the specified
-   * uuid and survet uuid.
+   * uuid and survey uuid.
    *
    * @param jobId the id of the requested job.
    * @param surveyId the id of the requested survey.
