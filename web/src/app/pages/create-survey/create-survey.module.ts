@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-detai
 import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {HeaderModule} from 'app/components/header/header.module';
+import {LoiPermissionsModule} from 'app/pages/create-survey/loi-permissions/loi-permissions.module';
 
 @NgModule({
   declarations: [CreateSurveyComponent],
   imports: [
     JobDetailsModule,
     LoiSelectionModule,
+    LoiPermissionsModule,
     TaskDetailsModule,
     ShareSurveyModule,
     SurveyDetailsModule,

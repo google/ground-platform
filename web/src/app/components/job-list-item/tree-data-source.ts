@@ -5,12 +5,11 @@ import {
 } from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {BehaviorSubject, merge, Subscription, Observable} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {map, shareReplay} from 'rxjs/operators';
 import {List} from 'immutable';
-import {Submission} from 'app/models/submission/submission.model';
+import {GeometryType} from 'app/models/geometry/geometry';
 
 /** Flat node with with information on name, level, and if it is expandable.
  * Loi specific nodes have additional fields for loi info and number of
@@ -21,16 +20,17 @@ export class DynamicFlatNode {
     public name: string,
     public level = 1,
     public expandable = false,
+    public iconName = '',
+    public iconColor = '',
+    public jobId: string,
     // Specific for nodes that represent lois.
-    public loi?: LocationOfInterest,
-    public submissionCount?: number,
-    // Specific for nodes that represent submissions.
-    public submission?: Submission
+    public loi?: LocationOfInterest
   ) {}
 }
 
 export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   dataChange = new BehaviorSubject<DynamicFlatNode[]>([]);
+  private loiSubscription: Subscription | undefined;
 
   // Data represents just the rendered data, only when lois are expanded is when
   // submissions get added to this and to the DOM.
@@ -44,9 +44,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 
   constructor(
     private _treeControl: FlatTreeControl<DynamicFlatNode>,
-    private nodeSubscriptions: Map<string, Subscription>,
-    private submissionService: SubmissionService,
-    readonly surveyService: SurveyService
+    private loiService: LocationOfInterestService
   ) {}
 
   connect(collectionViewer: CollectionViewer): Observable<DynamicFlatNode[]> {
@@ -90,70 +88,61 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     }
 
     if (expand) {
-      this.nodeSubscriptions.set(
-        node.loi!.id,
-        this.getSubmissions$(node.loi!).subscribe(submissions => {
-          if (!submissions || submissions.size === 0) {
-            // If no submissions, no op.
-            return;
-          }
+      // Subscribe to the lois while expanded to dynamically update if needed.
+      this.loiSubscription = this.getLois$().subscribe(
+        (lois: List<LocationOfInterest>) => {
+          // Delete all previously loaded nodes since the new value comes from
+          // a subscription change and we don't know the new value.
+          this.removeLoiNodes();
 
-          // TODO: Submission ids should not be displayed, but rather be
-          // enumerated as 'Submission 1, Submission 2, ...'. The ids are
-          // currently being shown because that information will be needed;
-          // for the separate side panel that expands with more details.
-          const nodes = submissions.map(submission => {
-            return new DynamicFlatNode(
-              submission.id,
-              1,
-              false,
-              undefined,
-              undefined,
-              submission
-            );
+          // Get lois that for specific job
+          const jobLois = lois.filter(loi => {
+            return loi.jobId === node.jobId;
           });
 
-          let existingSubmissions = 0;
-          if (node.submissionCount) {
-            // Delete all previously loaded nodes since the new value comes
-            // from a subscription change and we don't know the new value.
-            existingSubmissions = node.submissionCount;
+          // Create loi nodes for job tree
+          const loiNodes: DynamicFlatNode[] = [];
+          for (const loi of LocationOfInterestService.getLoisWithNames(
+            jobLois
+          )) {
+            const loiNode = new DynamicFlatNode(
+              /* name= */ loi!.name!,
+              /* level= */ 1,
+              /* expandable= */ false,
+              /* iconName= */ this.getLoiIcon(loi),
+              /* iconColor= */ node.iconColor,
+              /* jobId= */ 'undefined',
+              /* loi= */ loi
+            );
+            loiNodes.push(loiNode);
           }
-
-          this.data.splice(index + 1, existingSubmissions, ...nodes);
-
-          // Keep track of nodes adding to delete.
-          node.submissionCount = nodes.size;
-
-          // Notify the change.
-          this.dataChange.next(this.data);
-        })
+          // Add loi nodes to the tree, needs to be reassigned to force
+          // mat-tree to rerender
+          this.data = this.data.concat(loiNodes);
+        }
       );
     } else {
-      const nodeId = node.loi!.id;
-      this.nodeSubscriptions.get(nodeId)?.unsubscribe();
-      this.nodeSubscriptions.delete(nodeId);
-
-      let count = 0;
-      for (
-        let i = index + 1;
-        i < this.data.length && this.data[i].level > node.level;
-        i++
-      ) {
-        count++;
-      }
-      this.data.splice(index + 1, count);
-
-      // Notify the change.
-      this.dataChange.next(this.data);
+      // Remove the loi nodes and unsubscribe when closing the dropdown.
+      this.removeLoiNodes();
+      this.loiSubscription?.unsubscribe();
     }
   }
 
-  getSubmissions$(loi: LocationOfInterest): Observable<List<Submission>> {
-    return this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey => this.submissionService.submissions$(survey, loi))
-      );
+  getLois$(): Observable<List<LocationOfInterest>> {
+    return this.loiService.getLocationsOfInterest$().pipe(shareReplay());
+  }
+
+  removeLoiNodes() {
+    // First node is always job node, the rest are the loi nodes.
+    this.data = [this.data[0]];
+  }
+
+  getLoiIcon(loi: LocationOfInterest): string {
+    let icon = 'point';
+    const type = loi.geometry?.geometryType;
+    if (type === GeometryType.POLYGON || type === GeometryType.MULTI_POLYGON) {
+      icon = 'polygon';
+    }
+    return icon;
   }
 }

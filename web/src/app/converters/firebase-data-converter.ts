@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2019 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,12 @@ import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
+  [TaskType.DATE, 'date'],
   [TaskType.MULTIPLE_CHOICE, 'multiple_choice'],
   [TaskType.PHOTO, 'photo'],
-  [TaskType.NUMBER, 'number'],
-  [TaskType.DATE, 'date'],
-  [TaskType.TIME, 'time'],
+  [TaskType.DROP_PIN, 'drop_pin'],
+  [TaskType.DRAW_AREA, 'draw_area'],
+  [TaskType.CAPTURE_LOCATION, 'capture_location'],
 ]);
 
 const TASK_TYPE_STRINGS_BY_ENUM = Map(

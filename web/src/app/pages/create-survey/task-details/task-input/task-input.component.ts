@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 Google LLC
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,31 @@ export interface TaskTypeSelectOption {
   cardinality?: Cardinality;
 }
 
+export const TaskOptions: Array<TaskTypeSelectOption> = [
+  {
+    icon: 'notes',
+    label: 'Text',
+    type: TaskType.TEXT,
+  },
+  {
+    icon: 'access_time',
+    label: 'Date/Time',
+    type: TaskType.DATE_TIME,
+  },
+  {
+    icon: 'radio_button_checked',
+    label: 'Select One',
+    type: TaskType.MULTIPLE_CHOICE,
+    cardinality: Cardinality.SELECT_ONE,
+  },
+  {
+    icon: 'library_add_check',
+    label: 'Select multiple',
+    type: TaskType.MULTIPLE_CHOICE,
+    cardinality: Cardinality.SELECT_MULTIPLE,
+  },
+];
+
 export const Tasks: {
   [key in TaskGroup]: {
     icon: string;
@@ -94,12 +119,6 @@ export const Tasks: {
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
   },
-  [TaskGroup.SUGGEST_LOI]: {
-    icon: 'question_mark',
-    label: '',
-    placeholder: '',
-    requiredMessage: '',
-  },
 };
 
 @Component({
@@ -113,12 +132,13 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   @Input() taskType: TaskType = TaskType.TEXT;
   @Input() multipleChoice?: MultipleChoice;
   @Input() cardinality?: Cardinality;
-  @Input() taskCount?: Number;
+  @Input() taskCount?: number;
+  @Input() taskIndex?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+  @Output() duplicate = new EventEmitter();
+
   taskOptions: MultipleChoice | undefined;
-  selectTaskOptions: TaskTypeSelectOption[];
-  @Input() taskIndex?: number;
 
   taskGroup: TaskGroup = TaskGroup.QUESTION;
 
@@ -136,7 +156,11 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
 
   TaskGroup = TaskGroup;
 
+  TaskType = TaskType;
+
   Tasks = Tasks;
+
+  TaskOptions = TaskOptions;
 
   @HostListener('click')
   onTaskFocus() {
@@ -160,35 +184,11 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
   ) {
     this.expanded = false;
     this.selected = false;
-    this.selectTaskOptions = [
-      {
-        icon: 'notes',
-        label: 'Text',
-        type: TaskType.TEXT,
-      },
-      {
-        icon: 'access_time',
-        label: 'Date/Time',
-        type: TaskType.DATE_TIME,
-      },
-      {
-        icon: 'radio_button_checked',
-        label: 'Select One',
-        type: TaskType.MULTIPLE_CHOICE,
-        cardinality: Cardinality.SELECT_ONE,
-      },
-      {
-        icon: 'library_add_check',
-        label: 'Select multiple',
-        type: TaskType.MULTIPLE_CHOICE,
-        cardinality: Cardinality.SELECT_MULTIPLE,
-      },
-    ];
     this.formGroup = this.taskBuilder.group({
       label: ['', this.validateLabel.bind(this)],
       required: [false],
       // By default we set the select task to be of text type.
-      selectTaskOption: this.selectTaskOptions[TaskType.TEXT],
+      selectTaskOption: TaskOptions[0],
     });
   }
 
@@ -225,6 +225,8 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    * This method is used to get the updated values of task from the job-dialog.
    */
   ngOnChanges(changes: SimpleChanges): void {
+    this.taskGroup = taskTypeToGroup.get(this.taskType) ?? TaskGroup.QUESTION;
+
     if (changes.multipleChoice) {
       this.taskOptions = this.multipleChoice;
     }
@@ -235,17 +237,15 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  getSelectedTaskTypeOption(): TaskTypeSelectOption {
-    const selectedOption = this.selectTaskOptions.find(
-      option =>
-        option.type === this.taskType &&
-        (option.type !== TaskType.MULTIPLE_CHOICE ||
-          option.cardinality === this.cardinality)
+  getSelectedTaskTypeOption(): TaskTypeSelectOption | undefined {
+    return (
+      TaskOptions.find(
+        option =>
+          option.type === this.taskType &&
+          (option.type !== TaskType.MULTIPLE_CHOICE ||
+            option.cardinality === this.cardinality)
+      ) ?? TaskOptions[0]
     );
-    if (!selectedOption) {
-      throw new Error(`Unsupported task type ${this.taskType}`);
-    }
-    return selectedOption;
   }
 
   /**
@@ -255,6 +255,15 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    */
   onTaskDelete(): void {
     this.delete.emit(this.taskIndex);
+  }
+
+  /**
+   * Emits the duplicate task event to the job dialog component.
+   *
+   * @returns void
+   */
+  onDuplicateTask(): void {
+    this.duplicate.emit(this.taskIndex);
   }
 
   getSelectTaskType(): TaskTypeSelectOption {
@@ -300,13 +309,13 @@ export class TaskInputComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: {label: string; code: string}, index: number): void {
+  onUpdateOption(event: {label: string; code: string}, index: number): void {
     const option = this.jobService.createOption(event.code, event.label, index);
     const options = this.setTaskOptions(index, option);
     this.emitTaskOptions(options);
   }
 
-  onOptionDelete(index: number) {
+  onDeleteOption(index: number) {
     firstValueFrom(
       this.dialogService
         .openConfirmationDialog(

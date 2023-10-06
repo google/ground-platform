@@ -1,5 +1,5 @@
 <!--
-Copyright 2021 Google LLC
+Copyright 2021 The Ground Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,77 +14,80 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <div class="job-list-item-container">
-  <mat-list-item class="job-list-item">
-    <p matLine>{{ job?.name }}</p>
-    <div [ngSwitch]="actionsType">
-      <div *ngSwitchCase="jobListItemActionsType.MENU">
-        <button mat-icon-button [matMenuTriggerFor]="jobMenu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #jobMenu="matMenu">
-          <button
-            mat-menu-item
-            (click)="onCustomizeJob()"
-            *ngIf="surveyService.canManageSurvey()"
-          >
-            <mat-icon>edit</mat-icon>
-            <span>Customize job</span>
-          </button>
-          <button
-            mat-menu-item
-            (click)="onImportLocationsOfInterest()"
-            *ngIf="surveyService.canManageSurvey()"
-          >
-            <mat-icon>cloud_upload</mat-icon>
-            <span>Import lois</span>
-          </button>
-          <a class="download" (click)="onDownloadCsvClick()" target="_blank">
-            <button mat-menu-item>
-              <mat-icon>cloud_download</mat-icon>
-              <span>Download submissions</span>
-            </button>
-          </a>
-          <button mat-menu-item (click)="onDeleteJob()">
-            <mat-icon>delete_forever</mat-icon>
-            <span>Delete job</span>
-          </button>
-        </mat-menu>
-      </div>
-      <div *ngSwitchCase="jobListItemActionsType.BACK">
-        <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-    </div>
-  </mat-list-item>
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+    <!-- Tree node for lois -->
     <mat-tree-node
       *matTreeNodeDef="let node"
       matTreeNodePadding
       [class.tree-node-selected]="isSelectedLoi(node)"
     >
-      <button mat-icon-button disabled></button>
-      <button id="select-loi" mat-flat-button (click)="selectLoi(node)">
+      <mat-icon svgIcon={{node.iconName}} class={{node.jobId}}></mat-icon>
+      <button mat-button id="select-loi" (click)="selectLoi(node)">
         {{ node.name }}
       </button>
     </mat-tree-node>
+    <!-- Tree node for jobs -->
     <mat-tree-node
       [class.tree-node-selected]="isSelectedLoi(node)"
       *matTreeNodeDef="let node; when: hasChild"
       matTreeNodePadding
+      class="expandable-node"
     >
-      <button
-        mat-icon-button
-        [attr.aria-label]="'Toggle ' + node.item"
-        matTreeNodeToggle
-      >
-        <mat-icon class="mat-icon-rtl-mirror">
-          {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+      <div class="expandable-node-start">
+        <button
+          mat-icon-button
+          [attr.aria-label]="'Toggle ' + node.item"
+          matTreeNodeToggle
+        >
+          <mat-icon class="mat-icon-rtl-mirror">
+            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+          </mat-icon>
+        </button>
+        <mat-icon class="job-icon" [ngStyle]="{ color: node.iconColor }">
+          {{node.iconName}}
         </mat-icon>
-      </button>
-      <button id="select-loi" mat-flat-button (click)="selectLoi(node)">
         {{ node.name }}
-      </button>
+      </div>
+      <div [ngSwitch]="actionsType">
+        <div *ngSwitchCase="jobListItemActionsType.MENU">
+          <button mat-icon-button [matMenuTriggerFor]="jobMenu">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #jobMenu="matMenu">
+            <button
+              mat-menu-item
+              (click)="onCustomizeJob()"
+              *ngIf="surveyService.canManageSurvey()"
+            >
+              <mat-icon>edit</mat-icon>
+              <span>Customize job</span>
+            </button>
+            <button
+              mat-menu-item
+              (click)="onImportLocationsOfInterest()"
+              *ngIf="surveyService.canManageSurvey()"
+            >
+              <mat-icon>cloud_upload</mat-icon>
+              <span>Import lois</span>
+            </button>
+            <a class="download" (click)="onDownloadCsvClick()" target="_blank">
+              <button mat-menu-item>
+                <mat-icon>cloud_download</mat-icon>
+                <span>Download submissions</span>
+              </button>
+            </a>
+            <button mat-menu-item (click)="onDeleteJob()">
+              <mat-icon>delete_forever</mat-icon>
+              <span>Delete job</span>
+            </button>
+          </mat-menu>
+        </div>
+        <div *ngSwitchCase="jobListItemActionsType.BACK">
+          <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
     </mat-tree-node>
   </mat-tree>
 </div>

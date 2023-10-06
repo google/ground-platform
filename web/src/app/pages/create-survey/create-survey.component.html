@@ -1,5 +1,5 @@
 <!--
-  Copyright 2023 Google LLC
+  Copyright 2023 The Ground Authors.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 
 <div class="page">
-  <ground-header> </ground-header>
+  <ground-header></ground-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
@@ -50,6 +50,12 @@
             #jobDetails
             [name]="job()?.name ?? ''"
           ></job-details>
+          <loi-permissions
+            *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
+            #loiPermissions
+            [defaultSelection]="loiPermissionsOption"
+            (select)="onLoiPermissionsChange($event)"
+          ></loi-permissions>
           <loi-selection
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
             #loiSelection
@@ -57,6 +63,7 @@
           <task-details
             *ngSwitchCase="SetupPhase.DEFINE_TASKS"
             #taskDetails
+            [label]="job()?.name ?? ''"
           ></task-details>
           <share-survey
             *ngSwitchCase="SetupPhase.REVIEW"
