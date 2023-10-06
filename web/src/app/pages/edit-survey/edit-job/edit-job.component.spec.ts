@@ -26,7 +26,7 @@ import {Survey} from 'app/models/survey.model';
 import {Role} from 'app/models/role.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 describe('EditJobComponent', () => {
   let component: EditJobComponent;
@@ -59,9 +59,12 @@ describe('EditJobComponent', () => {
             params: from([{id: jobId}]),
           },
         },
-        {provide: NavigationService, useValue: {
-          getSurveyId$: () => of(survey.id),
-        }},
+        {
+          provide: NavigationService,
+          useValue: {
+            getSurveyId$: () => of(survey.id),
+          },
+        },
       ],
     }).compileComponents();
 

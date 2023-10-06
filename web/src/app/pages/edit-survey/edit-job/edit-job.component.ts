@@ -18,14 +18,16 @@ import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Task} from 'app/models/task/task.model';
-import { TaskGroup, taskGroupToTypes } from 'app/pages/create-survey/task-details/task-details.component';
+import {
+  TaskGroup,
+  taskGroupToTypes,
+} from 'app/pages/create-survey/task-details/task-details.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
 import {filter, firstValueFrom, map} from 'rxjs';
-
 
 @Component({
   selector: 'edit-job',
@@ -129,11 +131,10 @@ export class EditJobComponent {
 
   drop(event: CdkDragDrop<string[]>): void {
     const {previousIndex, currentIndex} = event;
-    this.tasks = this.tasks!
-      .update(
-        previousIndex,
-        task => task?.copyWith({index: currentIndex}) as Task
-      )
+    this.tasks = this.tasks!.update(
+      previousIndex,
+      task => task?.copyWith({index: currentIndex}) as Task
+    )
       .update(
         currentIndex,
         task => task?.copyWith({index: previousIndex}) as Task
