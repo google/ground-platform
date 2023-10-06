@@ -82,7 +82,6 @@ export class CreateSurveyComponent implements OnInit {
       .pipe(first())
       .subscribe(lois => {
         this.setupPhase = this.getSetupPhase(survey, lois);
-        console.log('HERE', survey.id);
         this.survey = survey;
       });
   }
@@ -175,8 +174,6 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   async continue(): Promise<void> {
-    console.log('survey', 'before', this.survey);
-    console.log('surveyId', this.surveyId);
     switch (this.setupPhase) {
       case SetupPhase.SURVEY_DETAILS: {
         const createdSurveyId = await this.saveSurveyTitleAndDescription();
@@ -201,7 +198,6 @@ export class CreateSurveyComponent implements OnInit {
         break;
     }
     this.survey = this.surveyService.getActiveSurvey();
-    console.log('survey', 'after', this.survey);
   }
 
   @ViewChild('surveyDetails')

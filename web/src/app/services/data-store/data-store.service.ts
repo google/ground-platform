@@ -463,9 +463,6 @@ export class DataStoreService {
     jobId: string,
     tasks: List<Task>
   ): Promise<void> {
-    console.log('survey', surveyId);
-    console.log('job', jobId);
-
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
