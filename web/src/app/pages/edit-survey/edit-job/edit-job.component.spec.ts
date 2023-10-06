@@ -17,7 +17,7 @@
 import {ActivatedRoute} from '@angular/router';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
-import {of} from 'rxjs';
+import {from, of} from 'rxjs';
 import {MatDialogModule} from '@angular/material/dialog';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
@@ -37,6 +37,7 @@ describe('EditJobComponent', () => {
     Map<string, Job>(),
     Map<string, Role>()
   );
+  const jobId = 'job-123';
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -49,6 +50,12 @@ describe('EditJobComponent', () => {
           provide: SurveyService,
           useValue: {
             getActiveSurvey$: () => of(survey),
+          },
+        },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: from([{id: jobId}]),
           },
         },
       ],
