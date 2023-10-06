@@ -132,15 +132,15 @@ export class SurveyService {
    * Returns the acl of the current survey.
    */
   getActiveSurveyAcl(): AclEntry[] {
-    if (this.activeSurvey) {
-      return this.activeSurvey.acl
-        .entrySeq()
-        .map(entry => new AclEntry(entry[0], entry[1]))
-        .toList()
-        .sortBy(entry => entry.email)
-        .toArray();
+    if (!this.activeSurvey) {
+      throw Error('No active survey');
     }
-    throw Error('no active survey');
+    return this.activeSurvey.acl
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toList()
+      .sortBy(entry => entry.email)
+      .toArray();
   }
 
   /**

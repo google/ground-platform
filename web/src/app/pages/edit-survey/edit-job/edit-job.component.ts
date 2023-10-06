@@ -85,7 +85,7 @@ export class EditJobComponent {
     return index;
   }
 
-  onTaskAdd(group: TaskGroup) {
+  onAddTask(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
 
     const type = types?.first();
@@ -105,7 +105,7 @@ export class EditJobComponent {
     // the task-input component is created.
   }
 
-  onTaskUpdate(event: Task, index: number) {
+  onUpdateTask(event: Task, index: number) {
     if (!this.tasks) {
       throw Error('tasks list is is empty');
     }
@@ -114,7 +114,7 @@ export class EditJobComponent {
     this.taskService.addOrUpdateTasks(this.surveyId!, this.jobId!, this.tasks);
   }
 
-  onTaskDelete(index: number) {
+  onDeleteTask(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',

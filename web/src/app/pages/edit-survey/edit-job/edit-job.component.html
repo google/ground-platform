@@ -17,8 +17,8 @@
   <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">
     <task-input
       *ngFor="let task of tasks; let i = index; trackBy: getIndex"
-      (update)="onTaskUpdate($event, i)"
-      (delete)="onTaskDelete(i)"
+      (update)="onUpdateTask($event, i)"
+      (delete)="onDeleteTask(i)"
       (duplicate)="onDuplicateTask(i)"
       [label]="task.label"
       [required]="task.required"
@@ -37,7 +37,7 @@
     <add-task-button
       *ngFor="let taskGroup of addableTaskGroups"
       [taskGroup]="taskGroup"
-      (click)="onTaskAdd(taskGroup)"
+      (click)="onAddTask(taskGroup)"
     >
     </add-task-button>
   </div>
