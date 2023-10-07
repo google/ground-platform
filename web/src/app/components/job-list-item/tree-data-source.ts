@@ -10,6 +10,7 @@ import {BehaviorSubject, merge, Subscription, Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 import {List} from 'immutable';
 import {GeometryType} from 'app/models/geometry/geometry';
+import {getLoiIcon} from 'app/utils/utils';
 
 /** Flat node with with information on name, level, and if it is expandable.
  * Loi specific nodes have additional fields for loi info and number of
@@ -109,7 +110,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
               /* name= */ loi!.name!,
               /* level= */ 1,
               /* expandable= */ false,
-              /* iconName= */ this.getLoiIcon(loi),
+              /* iconName= */ getLoiIcon(loi),
               /* iconColor= */ node.iconColor,
               /* jobId= */ 'undefined',
               /* loi= */ loi
@@ -135,14 +136,5 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   removeLoiNodes() {
     // First node is always job node, the rest are the loi nodes.
     this.data = [this.data[0]];
-  }
-
-  getLoiIcon(loi: LocationOfInterest): string {
-    let icon = 'point';
-    const type = loi.geometry?.geometryType;
-    if (type === GeometryType.POLYGON || type === GeometryType.MULTI_POLYGON) {
-      icon = 'polygon';
-    }
-    return icon;
   }
 }

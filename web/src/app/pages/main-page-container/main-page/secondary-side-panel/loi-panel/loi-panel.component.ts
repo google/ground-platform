@@ -18,12 +18,12 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {GeometryType} from 'app/models/geometry/geometry';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {Subscription, switchMap} from 'rxjs';
 import {Submission} from 'app/models/submission/submission.model';
 import {List} from 'immutable';
+import {getLoiIcon} from 'app/utils/utils';
 
 @Component({
   selector: 'ground-loi-panel',
@@ -59,7 +59,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
                   loi,
                   index: 0,
                 });
-              this.icon = this.getLoiIcon(loi);
+              this.icon = getLoiIcon(loi);
 
               return this.submissionService.submissions$(survey, loi);
             })
@@ -67,15 +67,6 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe(submissions => (this.submissions = submissions));
-  }
-
-  getLoiIcon(loi: LocationOfInterest): string {
-    let icon = 'point';
-    const type = loi.geometry?.geometryType;
-    if (type === GeometryType.POLYGON || type === GeometryType.MULTI_POLYGON) {
-      icon = 'polygon';
-    }
-    return icon;
   }
 
   onSelectSubmission(submissionId: string) {
