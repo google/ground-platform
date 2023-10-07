@@ -46,27 +46,29 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey =>
-          this.loiService.getSelectedLocationOfInterest$().pipe(
-            switchMap(loi => {
-              this.loi = loi;
-              this.name =
-                LocationOfInterestService.getLoiNameFromProperties(loi) ??
-                LocationOfInterestService.getAnonymousDisplayName({
-                  loi,
-                  index: 0,
-                });
-              this.icon = getLoiIcon(loi);
+    this.subscription.add(
+      this.surveyService
+        .getActiveSurvey$()
+        .pipe(
+          switchMap(survey =>
+            this.loiService.getSelectedLocationOfInterest$().pipe(
+              switchMap(loi => {
+                this.loi = loi;
+                this.name =
+                  LocationOfInterestService.getLoiNameFromProperties(loi) ??
+                  LocationOfInterestService.getAnonymousDisplayName({
+                    loi,
+                    index: 0,
+                  });
+                this.icon = getLoiIcon(loi);
 
-              return this.submissionService.submissions$(survey, loi);
-            })
+                return this.submissionService.submissions$(survey, loi);
+              })
+            )
           )
         )
-      )
-      .subscribe(submissions => (this.submissions = submissions));
+        .subscribe(submissions => (this.submissions = submissions))
+    );
   }
 
   onSelectSubmission(submissionId: string) {
