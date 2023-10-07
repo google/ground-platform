@@ -17,34 +17,64 @@
 import {ActivatedRoute} from '@angular/router';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
-import {By} from '@angular/platform-browser';
-import {from} from 'rxjs';
+import {from, of} from 'rxjs';
+import {MatDialogModule} from '@angular/material/dialog';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {Survey} from 'app/models/survey.model';
+import {Role} from 'app/models/role.model';
+import {Job} from 'app/models/job.model';
+import {Map} from 'immutable';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 describe('EditJobComponent', () => {
+  let component: EditJobComponent;
   let fixture: ComponentFixture<EditJobComponent>;
+  const survey = new Survey(
+    '123',
+    'title',
+    'description',
+    Map<string, Job>(),
+    Map<string, Role>()
+  );
   const jobId = 'job-123';
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [EditJobComponent],
+      imports: [MatDialogModule],
       providers: [
+        {provide: DataStoreService, useValue: {generateId: () => '123'}},
+        {provide: DialogService, useValue: {}},
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => of(survey),
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
             params: from([{id: jobId}]),
           },
         },
+        {
+          provide: NavigationService,
+          useValue: {
+            getSurveyId$: () => of(survey.id),
+          },
+        },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EditJobComponent);
+    component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
-  it('displays current job ID from router', () => {
-    const tempTitle = fixture.debugElement.query(By.css('#temp-title'))
-      .nativeElement.innerText;
-    expect(tempTitle).toContain(jobId);
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 
   it('displays the loi selection component', () => {
