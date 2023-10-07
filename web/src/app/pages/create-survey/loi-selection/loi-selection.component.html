@@ -23,7 +23,6 @@
     <div class="loi-container" *ngIf="lois$ | async as lois">
       <ng-container *ngIf="surveyService.canManageSurvey()">
         <button
-          fxFill
           mat-stroked-button
           color="primary"
           class="import-lois-button"
