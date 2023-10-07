@@ -38,12 +38,27 @@
         <span>Sharing</span>
       </a>
 
-      <a *ngIf="!production" mat-list-item id="survey-json" [routerLink]="['./json']">
+      <a
+        *ngIf="!production"
+        mat-list-item
+        id="survey-json"
+        [routerLink]="['./json']"
+      >
         <mat-icon class="material-symbols-outlined button-icon">code</mat-icon>
         <span>JSON</span>
       </a>
 
-      <h3 matSubheader class="item job-label">Jobs</h3>
+      <div class="job-label-and-add-button">
+        <h3 matSubheader class="job-label">Jobs</h3>
+        <button
+          mat-icon-button
+          id="add-button"
+          class="material-symbols-outlined button-icon"
+          (click)="addJob()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
 
       <a
         *ngFor="let job of jobs(); index as i"
@@ -52,9 +67,39 @@
         [routerLink]="jobRouterLink(job.id)"
       >
         <span matLine>{{ job.name }}</span>
-        <button mat-icon-button (click)="onMenu($event)">
+        <button
+          mat-icon-button
+          id="menu-button-{{ i }}"
+          [matMenuTriggerFor]="menu"
+          (click)="onMenu($event)"
+        >
           <mat-icon>more_vert</mat-icon>
         </button>
+
+        <mat-menu #menu>
+          <button
+            mat-menu-item
+            id="rename-button-{{ i }}"
+            (click)="renameJob(job)"
+          >
+            Rename
+          </button>
+          <button
+            mat-menu-item
+            id="duplicate-button-{{ i }}"
+            (click)="duplicateJob(job)"
+          >
+            Duplicate
+          </button>
+          <mat-divider></mat-divider>
+          <button
+            mat-menu-item
+            id="delete-button-{{ i }}"
+            (click)="deleteJob(job)"
+          >
+            Remove
+          </button>
+        </mat-menu>
       </a>
     </mat-nav-list>
 
