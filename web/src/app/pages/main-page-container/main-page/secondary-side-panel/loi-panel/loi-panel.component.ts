@@ -15,13 +15,13 @@
  */
 
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {GeometryType} from 'app/models/geometry/geometry';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
-import {Observable, switchMap} from 'rxjs';
+import {Subscription, switchMap} from 'rxjs';
 import {Submission} from 'app/models/submission/submission.model';
 import {List} from 'immutable';
 
@@ -30,7 +30,9 @@ import {List} from 'immutable';
   templateUrl: './loi-panel.component.html',
   styleUrls: ['./loi-panel.component.scss'],
 })
-export class LocationOfInterestPanelComponent {
+export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
+  subscription: Subscription = new Subscription();
+
   loi!: LocationOfInterest;
   name!: string | null;
   icon!: string;
@@ -41,27 +43,27 @@ export class LocationOfInterestPanelComponent {
     private surveyService: SurveyService,
     private submissionService: SubmissionService,
     private navigationService: NavigationService
-  ) {
-    this.loiService.getSelectedLocationOfInterest$().subscribe(loi => {
-      this.loi = loi;
-      this.name =
-        LocationOfInterestService.getLoiNameFromProperties(loi) ??
-        LocationOfInterestService.getAnonymousDisplayName({
-          loi,
-          index: 0,
-        });
-      this.icon = this.getLoiIcon(loi);
-    });
+  ) {}
 
+  ngOnInit() {
     this.surveyService
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          loiService
-            .getSelectedLocationOfInterest$()
-            .pipe(
-              switchMap(loi => this.submissionService.submissions$(survey, loi))
-            )
+          this.loiService.getSelectedLocationOfInterest$().pipe(
+            switchMap(loi => {
+              this.loi = loi;
+              this.name =
+                LocationOfInterestService.getLoiNameFromProperties(loi) ??
+                LocationOfInterestService.getAnonymousDisplayName({
+                  loi,
+                  index: 0,
+                });
+              this.icon = this.getLoiIcon(loi);
+
+              return this.submissionService.submissions$(survey, loi);
+            })
+          )
         )
       )
       .subscribe(submissions => (this.submissions = submissions));
@@ -78,5 +80,9 @@ export class LocationOfInterestPanelComponent {
 
   onSelectSubmission(submissionId: string) {
     this.navigationService.showSubmissionDetail(submissionId);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
