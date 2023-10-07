@@ -1,5 +1,49 @@
-<!-- TODO: add task editor here -->
+<!--
+  Copyright 2023 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <div class="edit-job">
-  <h1 id="temp-title">Edit JOB {{id$ | async}}</h1>
+  <!-- TODO: Refactor into EditTasks and EditLois. -->
+  <div id="task-details">
+    <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">
+      <task-input
+        *ngFor="let task of tasks; let i = index; trackBy: getIndex"
+        (update)="onUpdateTask($event, i)"
+        (delete)="onDeleteTask(i)"
+        (duplicate)="onDuplicateTask(i)"
+        [label]="task.label"
+        [required]="task.required"
+        [taskType]="task.type"
+        [cardinality]="task.multipleChoice?.cardinality"
+        [multipleChoice]="task.multipleChoice"
+        [taskCount]="tasks!.size"
+        [taskIndex]="i"
+      >
+      </task-input>
+    </div>
+
+    <div id="tasks-help-text">Select task to add</div>
+
+    <div id="add-task-buttons-list">
+      <add-task-button
+        *ngFor="let taskGroup of addableTaskGroups"
+        [taskGroup]="taskGroup"
+        (click)="onAddTask(taskGroup)"
+      >
+      </add-task-button>
+    </div>
+  </div>
+
   <loi-selection #loiSelection></loi-selection>
 </div>

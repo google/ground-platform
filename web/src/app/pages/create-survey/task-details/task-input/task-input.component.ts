@@ -37,7 +37,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import {DialogService} from 'app/services/dialog/dialog.service';
-import {TaskType} from 'app/models/task/task.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {Option} from 'app/models/task/option.model';
 import {List} from 'immutable';
 import {
