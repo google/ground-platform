@@ -26,12 +26,20 @@ import {
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Subject} from 'rxjs';
+import {Subject, of} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
 import {RouterTestingModule} from '@angular/router/testing';
 import {Job} from 'app/models/job.model';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {JobService} from 'app/services/job/job.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from './job-dialog/job-dialog.component';
 
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
@@ -40,6 +48,12 @@ describe('EditSurveyComponent', () => {
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
+  let jobServiceSpy: jasmine.SpyObj<JobService>;
+  let dataStoreServiceSpy: jasmine.SpyObj<DataStoreService>;
+  let dialogRefSpy: jasmine.SpyObj<
+    MatDialogRef<JobDialogComponent, DialogData>
+  >;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
 
   const surveyId = 'survey001';
   const jobId1 = 'job001';
@@ -60,6 +74,8 @@ describe('EditSurveyComponent', () => {
     jobName2,
     /* tasks= */ Map()
   );
+  const newJobId = 'job999';
+  const newJob = new Job(newJobId, /* index */ -1);
   const survey = new Survey(
     surveyId,
     'title',
@@ -86,13 +102,32 @@ describe('EditSurveyComponent', () => {
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
+    jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
+      'addOrUpdateJob',
+      'createNewJob',
+    ]);
+    jobServiceSpy.createNewJob.and.returnValue(newJob);
+    dataStoreServiceSpy = jasmine.createSpyObj<DataStoreService>(
+      'DataStoreService',
+      ['deleteJob']
+    );
+
+    dialogRefSpy = jasmine.createSpyObj<
+      MatDialogRef<JobDialogComponent, DialogData>
+    >('MatDialogRef', ['afterClosed', 'close']);
+    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    dialogSpy.open.and.returnValue(dialogRefSpy);
+
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       declarations: [EditSurveyComponent],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: JobService, useValue: jobServiceSpy},
+        {provide: DataStoreService, useValue: dataStoreServiceSpy},
         {provide: ActivatedRoute, useValue: route},
+        {provide: MatDialog, useValue: dialogSpy},
       ],
     }).compileComponents();
   }));
@@ -162,6 +197,79 @@ describe('EditSurveyComponent', () => {
             expectedRouterLink
           );
         });
+      });
+    });
+
+    describe('add/rename/duplicate/delete a job', () => {
+      it('add a job', () => {
+        const addButton = fixture.debugElement.query(By.css('#add-button'))
+          .nativeElement as HTMLElement;
+        const newJobName = 'new job name';
+        dialogRefSpy.afterClosed.and.returnValue(
+          of({dialogType: DialogType.AddJob, jobName: newJobName})
+        );
+
+        addButton.click();
+
+        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+          surveyId,
+          newJob.copyWith({name: newJobName})
+        );
+      });
+
+      it('rename a job', () => {
+        const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
+          .nativeElement as HTMLElement;
+        const renameButton = fixture.debugElement.query(
+          By.css('#rename-button-0')
+        ).nativeElement as HTMLElement;
+        const newJobName = 'new job name';
+        dialogRefSpy.afterClosed.and.returnValue(
+          of({dialogType: DialogType.RenameJob, jobName: newJobName})
+        );
+
+        menuButton.click();
+        renameButton.click();
+
+        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+          surveyId,
+          job1.copyWith({name: newJobName})
+        );
+      });
+
+      it('duplicate a job', () => {
+        const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
+          .nativeElement as HTMLElement;
+        const duplicateButton = fixture.debugElement.query(
+          By.css('#duplicate-button-0')
+        ).nativeElement as HTMLElement;
+
+        menuButton.click();
+        duplicateButton.click();
+
+        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
+          surveyId,
+          job1.copyWith({id: newJob.id, name: 'Copy of ' + job1.name})
+        );
+      });
+
+      it('delete a job', () => {
+        const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
+          .nativeElement as HTMLElement;
+        const deleteButton = fixture.debugElement.query(
+          By.css('#delete-button-0')
+        ).nativeElement as HTMLElement;
+        dialogRefSpy.afterClosed.and.returnValue(
+          of({dialogType: DialogType.DeleteJob, jobName: ''})
+        );
+
+        menuButton.click();
+        deleteButton.click();
+
+        expect(dataStoreServiceSpy.deleteJob).toHaveBeenCalledOnceWith(
+          surveyId,
+          job1.id
+        );
       });
     });
   });
