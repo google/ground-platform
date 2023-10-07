@@ -17,11 +17,20 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
+import {TaskInputModule} from 'app/pages/create-survey/task-details/task-input/task-input.module';
+import {AddTaskButtonModule} from 'app/pages/create-survey/task-details/add-task-button/add-task-button.module';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
 
 @NgModule({
   declarations: [EditJobComponent],
-  imports: [CommonModule, LoiSelectionModule],
+  imports: [
+    CommonModule,
+    TaskInputModule,
+    AddTaskButtonModule,
+    DragDropModule,
+    LoiSelectionModule,
+  ],
   exports: [EditJobComponent],
 })
 export class EditJobModule {}
