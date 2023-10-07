@@ -167,6 +167,12 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
+  showSubmissionDetail(submissionId: string) {
+    const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+  }
+
   clearLocationOfInterestId() {
     this.setFragmentParams(new HttpParams({fromString: ''}));
   }

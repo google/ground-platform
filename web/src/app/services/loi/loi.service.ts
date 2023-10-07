@@ -78,7 +78,7 @@ export class LocationOfInterestService {
     return this.lois$;
   }
 
-  private static getAnonymousDisplayName({
+  static getAnonymousDisplayName({
     loi,
     index,
   }: {
