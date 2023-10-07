@@ -15,9 +15,12 @@
 -->
 
 <div id="loi-selection">
-  <h1>Where should data be collected?</h1>
+  <h1 class="title" *ngIf="isStandalonePage else secondaryHeader">{{ header }}</h1>
+  <ng-template #secondaryHeader>
+    <h2 class="title">{{ header }}</h2>
+  </ng-template>
   <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
-    <div class="loi-list" *ngIf="lois$ | async as lois">
+    <div class="loi-container" *ngIf="lois$ | async as lois">
       <ng-container *ngIf="surveyService.canManageSurvey()">
         <button
           fxFill
@@ -30,7 +33,7 @@
           Import LOIs
         </button>
       </ng-container>
-      <mat-list>
+      <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
           <p matLine>{{ loi.name }}</p>
         </mat-list-item>

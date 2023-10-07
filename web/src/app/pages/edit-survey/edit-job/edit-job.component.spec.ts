@@ -76,4 +76,8 @@ describe('EditJobComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('displays the loi selection component', () => {
+    expect(fixture.componentInstance.loiSelection).toBeDefined();
+  });
 });

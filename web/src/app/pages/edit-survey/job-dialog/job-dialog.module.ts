@@ -16,21 +16,23 @@
 
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
-import {TaskInputModule} from 'app/pages/create-survey/task-details/task-input/task-input.module';
-import {AddTaskButtonModule} from 'app/pages/create-survey/task-details/add-task-button/add-task-button.module';
-import {DragDropModule} from '@angular/cdk/drag-drop';
-import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
+import {JobDialogComponent} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
+import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
-  declarations: [EditJobComponent],
+  declarations: [JobDialogComponent],
   imports: [
     CommonModule,
-    TaskInputModule,
-    AddTaskButtonModule,
-    DragDropModule,
-    LoiSelectionModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    MatButtonModule,
   ],
-  exports: [EditJobComponent],
+  exports: [JobDialogComponent],
 })
-export class EditJobModule {}
+export class JobDialogModule {}
