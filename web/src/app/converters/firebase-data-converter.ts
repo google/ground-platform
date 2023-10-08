@@ -34,7 +34,6 @@ import {
   MultipleChoiceResponseCondition,
   NewUnplannedLocationOfInterestCondition,
   TaskCondition,
-  TaskConditionType,
 } from 'app/models/task/task-condition.model';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
