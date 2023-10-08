@@ -15,11 +15,11 @@
 -->
 
 <div *ngIf="isImporting; else defaultView">
-  <h2 mat-dialog-title>Uploading lois</h2>
+  <h2 mat-dialog-title>Importing sites...</h2>
   <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
 </div>
 <ng-template #defaultView>
-  <h2 mat-dialog-title>Import lois</h2>
+  <h2 mat-dialog-title>Import data collection sites</h2>
   <mat-dialog-content>
     <form [formGroup]="uploadForm">
       <div>
