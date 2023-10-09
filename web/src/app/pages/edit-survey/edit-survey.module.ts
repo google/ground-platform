@@ -26,12 +26,13 @@ import {RouterModule} from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatDialogModule} from '@angular/material/dialog';
+import {SurveyHeaderModule} from '../main-page-container/main-page/survey-header/survey-header.module';
 
 @NgModule({
   declarations: [EditSurveyComponent],
   imports: [
     CommonModule,
-    HeaderModule,
+    SurveyHeaderModule,
     MatListModule,
     MatButtonModule,
     MatIconModule,
