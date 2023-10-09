@@ -211,6 +211,9 @@ export class CreateSurveyComponent implements OnInit {
         await this.saveTasks();
         this.setupPhase = SetupPhase.REVIEW;
         break;
+      case SetupPhase.REVIEW:
+        !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
+        break;
       default:
         break;
     }
