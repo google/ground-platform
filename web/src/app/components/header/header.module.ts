@@ -18,10 +18,17 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CurrentUserWidgetModule} from './current-user-widget/current-user-widget.module';
 import {HeaderComponent} from './header.component';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
   declarations: [HeaderComponent],
-  imports: [CommonModule, CurrentUserWidgetModule],
+  imports: [
+    CommonModule,
+    CurrentUserWidgetModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   exports: [HeaderComponent],
 })
 export class HeaderModule {}

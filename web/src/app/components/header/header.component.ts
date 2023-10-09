@@ -23,9 +23,23 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
+  surveyId = '';
+  visible = false;
+
   constructor(public navigationService: NavigationService) {}
+
+  async ngOnInit(): Promise<void> {
+    this.navigationService.getSurveyId$().subscribe(surveyId => {
+      if (surveyId) this.surveyId = surveyId;
+    });
+    this.visible = this.navigationService.isSurveyPage(this.surveyId);
+  }
 
   onSurveysButtonClick(): void {
     this.navigationService.navigateToSurveyList();
+  }
+
+  onEditSurveyClick() {
+    this.navigationService.navigateToEditSurvey(this.surveyId);
   }
 }
