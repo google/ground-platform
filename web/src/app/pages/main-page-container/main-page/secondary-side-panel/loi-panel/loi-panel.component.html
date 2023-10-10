@@ -16,8 +16,14 @@ limitations under the License.
 
 <div *ngIf="loi" class="loi-panel">
   <div class="header">
-    <mat-icon svgIcon={{icon}}></mat-icon>
-    {{ name }}
+    <div>
+      <mat-icon svgIcon={{icon}}></mat-icon>
+      {{ name }}
+    </div>
+
+    <button mat-icon-button aria-label="back" (click)="onClosePanel()">
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
 
   <div *ngIf="submissions && submissions.count() === 0">
