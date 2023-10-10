@@ -26,13 +26,13 @@ module.exports = function(config) {
     frameworks:
         ['jasmine', 'jasmine-matchers', '@angular-devkit/build-angular'],
     plugins: [
-      require('karma-jasmine'),
-      require('karma-chrome-launcher'),
-      require('karma-coverage'),
-      require('karma-jasmine-matchers'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter'),
-      require('@angular-devkit/build-angular/plugins/karma'),
+      'karma-jasmine',
+      'karma-chrome-launcher',
+      'karma-coverage',
+      'karma-jasmine-matchers',
+      'karma-jasmine-html-reporter',
+      'karma-coverage-istanbul-reporter',
+      '@angular-devkit/build-angular/plugins/karma',
     ],
     client: {
       clearContext:
