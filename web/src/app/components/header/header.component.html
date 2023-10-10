@@ -22,6 +22,10 @@
   </div>
 
   <div>
+    <button *ngIf="visible" mat-icon-button (click)="onEditSurveyClick()">
+      <mat-icon>settings</mat-icon>
+    </button>
+
     <ground-current-user-widget></ground-current-user-widget>
   </div>
 </div>
