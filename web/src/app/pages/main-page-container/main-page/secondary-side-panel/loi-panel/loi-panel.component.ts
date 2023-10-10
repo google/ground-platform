@@ -75,6 +75,10 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     this.navigationService.showSubmissionDetail(submissionId);
   }
 
+  onClosePanel() {
+    this.navigationService.clearLocationOfInterestId();
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
