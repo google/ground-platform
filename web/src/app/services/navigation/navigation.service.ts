@@ -17,7 +17,12 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {ActivatedRoute, Router, NavigationExtras} from '@angular/router';
+import {
+  ActivatedRoute,
+  Router,
+  NavigationExtras,
+  IsActiveMatchOptions,
+} from '@angular/router';
 import {HttpParams} from '@angular/common/http';
 
 /**
@@ -269,6 +274,18 @@ export class NavigationService {
    */
   error(error: Error) {
     this.router.navigate([NavigationService.ERROR, {error}]);
+  }
+
+  isSurveyPage(surveyId: string): boolean {
+    return this.router.isActive(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}`,
+      {
+        matrixParams: 'ignored',
+        queryParams: 'ignored',
+        paths: 'exact',
+        fragment: 'ignored',
+      } as IsActiveMatchOptions
+    );
   }
 }
 

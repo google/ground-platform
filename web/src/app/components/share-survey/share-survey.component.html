@@ -13,11 +13,18 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<h1 class="title">Review survey</h1>
 
-<button mat-flat-button (click)="openShareDialog()">
+<!-- TODO: Add survey overview here -->
+<!-- <h2 class="description">
+  You can run a survey with one job, or continue editing to add more.
+</h2> -->
+
+<h2 class="description">Is your survey ready? Share it with collectors.</h2>
+<button mat-flat-button class="share-survey-button" (click)="openShareDialog()">
   <mat-icon>people_alt</mat-icon>
 
   <label>Add data collectors</label>
 </button>
 
-<ground-share-list></ground-share-list>  
+<ground-share-list></ground-share-list>

@@ -5,7 +5,7 @@
   $color-config: mat.get-color-config($theme);
   $primary: map.get($color-config, 'primary');
 
-  .mat-mdc-unelevated-button {
+  button.share-survey-button.mdc-button.mdc-button--unelevated {
     background-color: map.get($primary, 100);
   }
 }
