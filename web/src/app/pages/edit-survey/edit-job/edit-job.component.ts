@@ -38,6 +38,8 @@ import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-s
 export class EditJobComponent {
   surveyId?: string;
   jobId?: string;
+  section: 'tasks' | 'lois' = 'tasks';
+
   tasks?: List<Task>;
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
@@ -46,6 +48,7 @@ export class EditJobComponent {
     TaskGroup.DRAW_AREA,
     TaskGroup.CAPTURE_LOCATION,
   ];
+
   @ViewChild('loiSelection')
   loiSelection?: LoiSelectionComponent;
 
@@ -86,6 +89,10 @@ export class EditJobComponent {
 
   getIndex(index: number) {
     return index;
+  }
+
+  onChangeSection(section: 'tasks' | 'lois') {
+    this.section = section;
   }
 
   onAddTask(group: TaskGroup) {

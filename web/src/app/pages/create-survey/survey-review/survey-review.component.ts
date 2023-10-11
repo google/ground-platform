@@ -14,36 +14,13 @@
  * limitations under the License.
  */
 
-.title {
-  font-family: 'Google Sans';
-  font-size: 28px;
-  font-weight: 400;
-  line-height: 36px;
-  margin-top: 45px;
-}
+import {Component} from '@angular/core';
 
-.loi-container {
-  position: relative;
-
-  .loi-panel {
-    position: absolute;
-    background: var(--ground-sys-light-surface, #F9FAF4);
-    top: 60px;
-    left: 12px;
-    padding: 24px;
-    border-radius: 8px;
-    height: calc(100% - 80px - 48px - 24px);
-    width: 20%;
-    z-index: 1;
-
-    .loi-list {
-      max-height: 300px;
-      overflow-y: scroll;
-    }
-  }
-
-  .loi-map {
-    height: 500px;
-    width: 100%;
-  }
+@Component({
+  selector: 'survey-review',
+  templateUrl: './survey-review.component.html',
+  styleUrls: ['./survey-review.component.scss'],
+})
+export class SurveyReviewComponent {
+  constructor() {}
 }
