@@ -297,6 +297,9 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
+  @ViewChild('loiSelection')
+  loiSelection?: LoiSelectionComponent;
+
   @ViewChild('taskDetails')
   taskDetails?: TaskDetailsComponent;
 }
