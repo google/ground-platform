@@ -38,7 +38,7 @@ import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {By} from '@angular/platform-browser';
-import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
+import {SurveyReviewComponent} from './survey-review/survey-review.component';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -175,7 +175,7 @@ describe('CreateSurveyComponent', () => {
         SurveyDetailsComponent,
         JobDetailsComponent,
         LoiPermissionsComponent,
-        ShareSurveyComponent,
+        SurveyReviewComponent,
       ],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
