@@ -88,10 +88,10 @@ export class EditSurveyComponent implements OnInit {
     // TODO: sort by id or remove sort call when task editor is fixed
     return Array.from(this.survey?.jobs.values() ?? []).sort(
       ({id: id1}, {id: id2}) => {
-        if (id1 > id2) {
+        if (id1 < id2) {
           return -1;
         }
-        if (id2 > id1) {
+        if (id2 < id1) {
           return 1;
         }
         return 0;
