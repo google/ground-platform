@@ -26,7 +26,6 @@ import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {filter, first, firstValueFrom} from 'rxjs';
-import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {TaskService} from 'app/services/task/task.service';
@@ -34,6 +33,7 @@ import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
+import {SurveyReviewComponent} from './survey-review/survey-review.component';
 
 @Component({
   selector: 'create-survey',
@@ -302,9 +302,6 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('taskDetails')
   taskDetails?: TaskDetailsComponent;
-
-  @ViewChild('shareSurvey')
-  shareSurvey?: ShareSurveyComponent;
 }
 
 export enum SetupPhase {
