@@ -14,36 +14,60 @@
   limitations under the License.
 -->
 <div class="edit-job">
-  <!-- TODO: Refactor into EditTasks and EditLois. -->
-  <div id="task-details">
-    <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">
-      <task-input
-        *ngFor="let task of tasks; let i = index; trackBy: getIndex"
-        (update)="onUpdateTask($event, i)"
-        (delete)="onDeleteTask(i)"
-        (duplicate)="onDuplicateTask(i)"
-        [label]="task.label"
-        [required]="task.required"
-        [taskType]="task.type"
-        [cardinality]="task.multipleChoice?.cardinality"
-        [multipleChoice]="task.multipleChoice"
-        [taskCount]="tasks!.size"
-        [taskIndex]="i"
-      >
-      </task-input>
-    </div>
+  <div class="section-selector">
+    <button
+      mat-flat-button
+      [color]="section === 'tasks' ? 'primary' : 'basic'"
+      aria-label="tasks"
+      (click)="onChangeSection('tasks')"
+    >
+      <mat-icon>{{ section === 'tasks' ? 'checked_small' : 'list' }}</mat-icon>
+      <span>Tasks</span>
+    </button>
 
-    <div id="tasks-help-text">Select task to add</div>
-
-    <div id="add-task-buttons-list">
-      <add-task-button
-        *ngFor="let taskGroup of addableTaskGroups"
-        [taskGroup]="taskGroup"
-        (click)="onAddTask(taskGroup)"
-      >
-      </add-task-button>
-    </div>
+    <button
+      mat-flat-button
+      [color]="section === 'lois' ? 'primary' : 'basic'"
+      aria-label="lois"
+      (click)="onChangeSection('lois')"
+    >
+      <mat-icon>{{ section === 'lois' ? 'checked_small' : 'place' }}</mat-icon>
+      <span>Sites</span>
+    </button>
   </div>
 
-  <loi-selection #loiSelection></loi-selection>
+  <!-- TODO: Refactor into EditTasks and EditLois. -->
+  <div [ngSwitch]="section">
+    <div id="task-details" *ngSwitchCase="'tasks'">
+      <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">
+        <task-input
+          *ngFor="let task of tasks; let i = index; trackBy: getIndex"
+          (update)="onUpdateTask($event, i)"
+          (delete)="onDeleteTask(i)"
+          (duplicate)="onDuplicateTask(i)"
+          [label]="task.label"
+          [required]="task.required"
+          [taskType]="task.type"
+          [cardinality]="task.multipleChoice?.cardinality"
+          [multipleChoice]="task.multipleChoice"
+          [taskCount]="tasks!.size"
+          [taskIndex]="i"
+        >
+        </task-input>
+      </div>
+  
+      <div id="tasks-help-text">Select task to add</div>
+  
+      <div id="add-task-buttons-list">
+        <add-task-button
+          *ngFor="let taskGroup of addableTaskGroups"
+          [taskGroup]="taskGroup"
+          (click)="onAddTask(taskGroup)"
+        >
+        </add-task-button>
+      </div>
+    </div>
+    
+    <loi-selection #loiSelection *ngSwitchCase="'lois'"></loi-selection>
+  </div>
 </div>
