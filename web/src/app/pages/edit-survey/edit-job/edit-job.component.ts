@@ -26,8 +26,9 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
 import {filter, firstValueFrom, map} from 'rxjs';
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 
 @Component({
   selector: 'edit-job',
@@ -47,6 +48,9 @@ export class EditJobComponent {
     TaskGroup.DRAW_AREA,
     TaskGroup.CAPTURE_LOCATION,
   ];
+
+  @ViewChild('loiSelection')
+  loiSelection?: LoiSelectionComponent;
 
   constructor(
     route: ActivatedRoute,
