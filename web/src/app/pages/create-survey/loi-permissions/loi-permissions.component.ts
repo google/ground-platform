@@ -54,21 +54,21 @@ export class LoiPermissionsComponent implements OnInit, OnChanges {
   loiPermissionsOptions: OptionCardConfig[] = [
     {
       value: LoiPermissionsOption.SURVEY_ORGANIZERS,
-      label: 'Survey organizers',
+      label: 'Predefined',
       description:
-        'Data collectors collect data exclusively about locations of interest uploaded by you and other survey organizers.',
+        'Data collectors gather data exclusively about preloaded data collection sites.',
     },
     {
       value: LoiPermissionsOption.DATA_COLLECTORS,
-      label: 'Data collectors',
+      label: 'Ad hoc',
       description:
-        'Data collectors suggest and collect data about new locations of interest as they discover them.',
+        'Data collectors map and collect data about new sites as they go.',
     },
     {
       value: LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS,
-      label: 'Both',
+      label: 'Mixed',
       description:
-        'Data collectors may collect data about locations of interest uploaded by survey organizers, or suggest new locations as needed.',
+        'Data collectors gather data about preloaded sites, but can also add new sites as needed.',
     },
   ];
 

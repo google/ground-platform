@@ -15,7 +15,7 @@
  */
 
 import {ActivatedRoute} from '@angular/router';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 import {from, of} from 'rxjs';
 import {MatDialogModule} from '@angular/material/dialog';
@@ -27,6 +27,7 @@ import {Role} from 'app/models/role.model';
 import {Job} from 'app/models/job.model';
 import {Map} from 'immutable';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {By} from '@angular/platform-browser';
 
 describe('EditJobComponent', () => {
   let component: EditJobComponent;
@@ -78,6 +79,12 @@ describe('EditJobComponent', () => {
   });
 
   it('displays the loi selection component', () => {
+    const loiButton = fixture.debugElement.query(
+      By.css('.section-selector button:nth-child(2)')
+    ).nativeElement as HTMLElement;
+    console.log(loiButton);
+    loiButton.click();
+    fixture.detectChanges();
     expect(fixture.componentInstance.loiSelection).toBeDefined();
   });
 });

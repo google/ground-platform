@@ -105,6 +105,8 @@
 
     <div class="card">
       <div class="content">
+        <h1 *ngIf="sectionTitle !== ''">{{ sectionTitle }}</h1>
+
         <router-outlet></router-outlet>
       </div>
     </div>
