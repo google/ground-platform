@@ -99,7 +99,7 @@ export async function importGeoJsonHandler(
   busboy.on('finish', async () => {
     await Promise.all(inserts);
     const count = inserts.length;
-    console.log(`${count} lois imported`);
+    console.log(`${count} LOIs imported`);
     res.status(HttpStatus.OK).end(JSON.stringify({count}));
   });
 
