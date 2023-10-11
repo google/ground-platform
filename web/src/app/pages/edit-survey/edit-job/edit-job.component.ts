@@ -25,7 +25,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
-import {filter, firstValueFrom, map} from 'rxjs';
+import {Subscription, filter, firstValueFrom, map} from 'rxjs';
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
@@ -36,6 +36,8 @@ import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-s
   styleUrls: ['./edit-job.component.scss'],
 })
 export class EditJobComponent {
+  subscription: Subscription = new Subscription();
+
   surveyId?: string;
   jobId?: string;
   section: 'tasks' | 'lois' = 'tasks';
@@ -53,38 +55,38 @@ export class EditJobComponent {
   loiSelection?: LoiSelectionComponent;
 
   constructor(
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private navigationService: NavigationService,
     private dialogService: DialogService,
     private surveyService: SurveyService,
     private taskService: TaskService
   ) {
-    this.navigationService.getSurveyId$().subscribe(surveyId => {
-      if (surveyId) {
-        route.params.subscribe(params => {
+    this.subscription.add(
+      this.navigationService.getSurveyId$().subscribe(surveyId => {
+        if (surveyId) {
           this.surveyId = surveyId;
-          this.jobId = params['id'];
-        });
-      }
-    });
+        }
+      })
+    );
   }
 
   async ngOnInit(): Promise<void> {
-    this.tasks = await firstValueFrom(
-      this.surveyService
-        .getActiveSurvey$()
-        .pipe(filter(survey => survey.id === this.surveyId))
-        .pipe(
-          map(survey =>
-            survey
-              .getJob(this.jobId!)
-              ?.tasks?.toList()
-              .sortBy(task => task.index)
-          )
-        )
-    );
+    this.subscription.add(
+      this.route.params.subscribe(async params => {
+        this.jobId = params['id'];
 
-    this.tasks = this.tasks!.sortBy(task => task.index);
+        this.tasks = await firstValueFrom(
+          this.surveyService.getActiveSurvey$().pipe(
+            map(survey =>
+              survey
+                .getJob(this.jobId!)
+                ?.tasks?.toList()
+                .sortBy(task => task.index)
+            )
+          )
+        );
+      })
+    );
   }
 
   getIndex(index: number) {
@@ -174,5 +176,9 @@ export class EditJobComponent {
           }
         }
       });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
