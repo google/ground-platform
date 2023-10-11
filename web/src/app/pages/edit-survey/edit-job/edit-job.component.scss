@@ -41,4 +41,11 @@ task-button:hover {
 
 .edit-job {
   padding: 24px;
+
+  .section-selector {
+    display: flex;
+    justify-content: end;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
 }

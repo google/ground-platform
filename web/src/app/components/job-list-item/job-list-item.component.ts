@@ -123,9 +123,9 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
-        'Are you sure you wish to delete this job? Any associated data ' +
-          'including all lois and submissions in this job will be ' +
-          'lost. This cannot be undone.'
+        'Are you sure you want to delete this job? Data collection sites, ' +
+          'task definitions, and any associated data will be lost. This ' +
+          'cannot be undone.'
       )
       .afterClosed()
       .subscribe(async dialogResult => {

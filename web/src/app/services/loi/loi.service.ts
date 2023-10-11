@@ -27,6 +27,7 @@ import {
 import {List, Map as ImmutableMap} from 'immutable';
 import {Point} from 'app/models/geometry/point';
 import {Coordinate} from 'app/models/geometry/coordinate';
+import {GeometryType} from 'app/models/geometry/geometry';
 
 @Injectable({
   providedIn: 'root',
@@ -78,17 +79,9 @@ export class LocationOfInterestService {
     return this.lois$;
   }
 
-  static getAnonymousDisplayName({
-    loi,
-    index,
-  }: {
-    loi: LocationOfInterest;
-    index: number;
-  }): string {
-    const geometryType = loi.geometry?.geometryType
-      .toLocaleLowerCase()
-      .replace(/_/g, ' ');
-    return `Unnamed ${geometryType} ${index + 1}`;
+  static getAnonymousDisplayName(loi: LocationOfInterest): string {
+    const geometryType = loi.geometry?.geometryType;
+    return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
   }
 
   static getLoisWithNames(
@@ -96,8 +89,7 @@ export class LocationOfInterestService {
   ): List<LocationOfInterest> {
     return lois.map((loi, index) => {
       const displayName =
-        this.getLoiNameFromProperties(loi) ||
-        this.getAnonymousDisplayName({loi, index});
+        this.getLoiNameFromProperties(loi) || this.getAnonymousDisplayName(loi);
       return {
         ...loi,
         name: displayName,

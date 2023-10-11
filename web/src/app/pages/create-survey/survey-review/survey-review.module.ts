@@ -14,36 +14,17 @@
  * limitations under the License.
  */
 
-.title {
-  font-family: 'Google Sans';
-  font-size: 28px;
-  font-weight: 400;
-  line-height: 36px;
-  margin-top: 45px;
-}
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {SurveyReviewComponent} from './survey-review.component';
+import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
 
-.loi-container {
-  position: relative;
-
-  .loi-panel {
-    position: absolute;
-    background: var(--ground-sys-light-surface, #F9FAF4);
-    top: 60px;
-    left: 12px;
-    padding: 24px;
-    border-radius: 8px;
-    height: calc(100% - 80px - 48px - 24px);
-    width: 20%;
-    z-index: 1;
-
-    .loi-list {
-      max-height: 300px;
-      overflow-y: scroll;
-    }
-  }
-
-  .loi-map {
-    height: 500px;
-    width: 100%;
-  }
-}
+@NgModule({
+  declarations: [SurveyReviewComponent],
+  imports: [ShareSurveyModule],
+  exports: [SurveyReviewComponent],
+})
+export class SurveyReviewModule {}

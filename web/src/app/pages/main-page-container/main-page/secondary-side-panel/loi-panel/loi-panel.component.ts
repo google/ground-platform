@@ -56,10 +56,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
                 this.loi = loi;
                 this.name =
                   LocationOfInterestService.getLoiNameFromProperties(loi) ??
-                  LocationOfInterestService.getAnonymousDisplayName({
-                    loi,
-                    index: 0,
-                  });
+                  LocationOfInterestService.getAnonymousDisplayName(loi);
                 this.icon = getLoiIcon(loi);
 
                 return this.submissionService.submissions$(survey, loi);

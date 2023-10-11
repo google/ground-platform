@@ -107,11 +107,11 @@ describe('LocationOfInterestService', () => {
       const [loi1, loi2] = LocationOfInterestService.getLoisWithNames(mockLois);
       expect(loi1).toEqual({
         ...unnamedLoi1,
-        name: 'Unnamed point 1',
+        name: 'Unnamed point',
       });
       expect(loi2).toEqual({
         ...unnamedLoi1,
-        name: 'Unnamed point 2',
+        name: 'Unnamed point',
       });
     });
 
@@ -134,7 +134,7 @@ describe('LocationOfInterestService', () => {
         LocationOfInterestService.getLoisWithNames(mockLois);
       expect(loi1).toEqual({
         ...unnamedLoi1,
-        name: 'Unnamed point 1',
+        name: 'Unnamed point',
       });
       expect(loi2).toEqual({
         ...namedLoi1,
@@ -142,7 +142,7 @@ describe('LocationOfInterestService', () => {
       });
       expect(loi3).toEqual({
         ...unnamedLoi2,
-        name: 'Unnamed point 3',
+        name: 'Unnamed point',
       });
     });
   });
