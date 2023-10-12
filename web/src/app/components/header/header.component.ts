@@ -17,6 +17,12 @@
 import {Component} from '@angular/core';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
+export enum HeaderState {
+  DEFAULT = 1,
+  MAP_VIEW = 2,
+  EDIT_SURVEY = 3,
+}
+
 @Component({
   selector: 'ground-header',
   templateUrl: './header.component.html',
@@ -24,7 +30,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 })
 export class HeaderComponent {
   surveyId = '';
-  isInEditMode = false;
+  state = HeaderState.DEFAULT;
 
   constructor(public navigationService: NavigationService) {}
 
@@ -32,7 +38,11 @@ export class HeaderComponent {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
       if (surveyId) this.surveyId = surveyId;
     });
-    this.isInEditMode = this.navigationService.isSurveyPage(this.surveyId);
+    if (this.navigationService.isSurveyPage(this.surveyId)) {
+      this.state = HeaderState.MAP_VIEW;
+    } else if (this.navigationService.isEditSurveyPage(this.surveyId)) {
+      this.state = HeaderState.EDIT_SURVEY;
+    }
   }
 
   onSurveysButtonClick(): void {
@@ -41,11 +51,11 @@ export class HeaderComponent {
 
   onEditSurveyClick() {
     this.navigationService.navigateToEditSurvey(this.surveyId);
-    this.isInEditMode = false;
+    this.state = HeaderState.EDIT_SURVEY;
   }
 
   onFinishEditSurveyClick() {
     this.navigationService.selectSurvey(this.surveyId);
-    this.isInEditMode = true;
+    this.state = HeaderState.MAP_VIEW;
   }
 }
