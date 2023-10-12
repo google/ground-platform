@@ -8,6 +8,11 @@
   .ground-title {
     color: map.get($foreground, secondary-text);
   }
+
+  .header .finish-edit-button {
+    --mdc-filled-button-container-color: #39656C;
+    --mdc-filled-button-label-text-color: white;
+  }
 }
 
 @mixin typography($theme) {

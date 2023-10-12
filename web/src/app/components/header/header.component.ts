@@ -24,7 +24,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 })
 export class HeaderComponent {
   surveyId = '';
-  visible = false;
+  isInEditMode = false;
 
   constructor(public navigationService: NavigationService) {}
 
@@ -32,7 +32,7 @@ export class HeaderComponent {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
       if (surveyId) this.surveyId = surveyId;
     });
-    this.visible = this.navigationService.isSurveyPage(this.surveyId);
+    this.isInEditMode = this.navigationService.isSurveyPage(this.surveyId);
   }
 
   onSurveysButtonClick(): void {
@@ -41,5 +41,11 @@ export class HeaderComponent {
 
   onEditSurveyClick() {
     this.navigationService.navigateToEditSurvey(this.surveyId);
+    this.isInEditMode = false;
+  }
+
+  onFinishEditSurveyClick() {
+    this.navigationService.selectSurvey(this.surveyId);
+    this.isInEditMode = true;
   }
 }
