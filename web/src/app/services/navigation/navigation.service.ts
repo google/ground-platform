@@ -251,7 +251,7 @@ export class NavigationService {
   }
 
   navigateToEditSurvey(surveyId: string): void {
-    const url = `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`;
+    const url = `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`;
     this.router.navigateByUrl(url);
   }
 

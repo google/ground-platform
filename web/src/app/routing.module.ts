@@ -67,7 +67,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEYS_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_EDIT}`,
+    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_EDIT}`,
     component: EditSurveyComponent,
     canActivate: [AuthGuard],
     children: [
