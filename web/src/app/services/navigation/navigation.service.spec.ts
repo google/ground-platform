@@ -40,7 +40,7 @@ describe('NavigationService', () => {
     service.navigateToEditSurvey(surveyId);
 
     expect(routerSpy.navigateByUrl).toHaveBeenCalledOnceWith(
-      'survey/survey123/edit'
+      'survey/survey123/edit/survey'
     );
   });
 });
