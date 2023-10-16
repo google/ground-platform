@@ -287,6 +287,18 @@ export class NavigationService {
       } as IsActiveMatchOptions
     );
   }
+
+  isEditSurveyPage(surveyId: string): boolean {
+    return this.router.isActive(
+      `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
+      {
+        matrixParams: 'ignored',
+        queryParams: 'ignored',
+        paths: 'subset',
+        fragment: 'ignored',
+      } as IsActiveMatchOptions
+    );
+  }
 }
 
 export enum SideNavMode {
