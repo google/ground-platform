@@ -251,7 +251,7 @@ export class NavigationService {
   }
 
   navigateToEditSurvey(surveyId: string): void {
-    const url = `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`;
+    const url = `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}/${NavigationService.SURVEY_SEGMENT}`;
     this.router.navigateByUrl(url);
   }
 
@@ -283,6 +283,18 @@ export class NavigationService {
         matrixParams: 'ignored',
         queryParams: 'ignored',
         paths: 'exact',
+        fragment: 'ignored',
+      } as IsActiveMatchOptions
+    );
+  }
+
+  isEditSurveyPage(surveyId: string): boolean {
+    return this.router.isActive(
+      `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
+      {
+        matrixParams: 'ignored',
+        queryParams: 'ignored',
+        paths: 'subset',
         fragment: 'ignored',
       } as IsActiveMatchOptions
     );
