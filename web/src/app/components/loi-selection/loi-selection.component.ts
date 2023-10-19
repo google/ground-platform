@@ -17,9 +17,6 @@
 import {Component, Input} from '@angular/core';
 import {List} from 'immutable';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {Observable, map} from 'rxjs';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {Survey} from 'app/models/survey.model';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
@@ -31,22 +28,14 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
   styleUrls: ['./loi-selection.component.scss'],
 })
 export class LoiSelectionComponent {
-  @Input() isStandalonePage = true;
-
-  readonly header = 'Where should data be collected?';
-
-  lois$: Observable<List<LocationOfInterest>>;
+  @Input() canImport!: boolean;
+  @Input() lois!: List<LocationOfInterest>;
+  @Input() survey!: Survey;
 
   constructor(
     private dataStoreService: DataStoreService,
-    private importDialog: MatDialog,
-    readonly loiService: LocationOfInterestService,
-    readonly surveyService: SurveyService
-  ) {
-    this.lois$ = this.loiService
-      .getLocationsOfInterest$()
-      .pipe(map(lois => LocationOfInterestService.getLoisWithNames(lois)));
-  }
+    private importDialog: MatDialog
+  ) {}
 
   onImportLois(survey: Survey) {
     const [job] = survey.jobs.values();

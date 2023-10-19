@@ -15,15 +15,9 @@
 -->
 
 <div id="loi-selection">
-  <h1 class="title" *ngIf="isStandalonePage else secondaryHeader">{{ header }}</h1>
-
-  <ng-template #secondaryHeader>
-    <h2 class="title">{{ header }}</h2>
-  </ng-template>
-
-  <div class="loi-container" *ngIf="surveyService.getActiveSurvey$() | async as survey">
-    <div class="loi-panel" *ngIf="lois$ | async as lois">
-      <ng-container *ngIf="surveyService.canManageSurvey()">
+  <div class="loi-container">
+    <div class="loi-panel" *ngIf="lois">
+      <ng-container *ngIf="canImport">
         <button
           mat-stroked-button
           color="primary"
@@ -37,7 +31,7 @@
 
       <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
-          <p matLine>{{ loi.name }}</p>
+          <p matLine>{{ loi.name }}</p>aaa
         </mat-list-item>
       </mat-list>
 
