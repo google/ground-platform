@@ -25,9 +25,9 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
-import {Subscription, filter, firstValueFrom, map} from 'rxjs';
+import {Subscription, firstValueFrom, map} from 'rxjs';
 import {Component, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Params} from '@angular/router';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 
 @Component({
@@ -62,30 +62,38 @@ export class EditJobComponent {
     private taskService: TaskService
   ) {
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(surveyId => {
-        if (surveyId) {
-          this.surveyId = surveyId;
-        }
-      })
+      this.navigationService
+        .getSurveyId$()
+        .subscribe(surveyId => this.onSurveyIdChange(surveyId))
     );
   }
 
   async ngOnInit(): Promise<void> {
     this.subscription.add(
       this.route.params.subscribe(async params => {
-        this.jobId = params['id'];
-
-        this.tasks = await firstValueFrom(
-          this.surveyService.getActiveSurvey$().pipe(
-            map(survey =>
-              survey
-                .getJob(this.jobId!)
-                ?.tasks?.toList()
-                .sortBy(task => task.index)
-            )
-          )
-        );
+        await this.onJobIdChange(params);
       })
+    );
+  }
+
+  private onSurveyIdChange(surveyId: string | null) {
+    if (surveyId) {
+      this.surveyId = surveyId;
+    }
+  }
+
+  private async onJobIdChange(params: Params) {
+    this.jobId = params['id'];
+
+    this.tasks = await firstValueFrom(
+      this.surveyService.getActiveSurvey$().pipe(
+        map(survey =>
+          survey
+            .getJob(this.jobId!)
+            ?.tasks?.toList()
+            .sortBy(task => task.index)
+        )
+      )
     );
   }
 
