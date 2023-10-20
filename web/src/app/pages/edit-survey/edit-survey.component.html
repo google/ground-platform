@@ -26,11 +26,18 @@
   </div>
   <div *ngIf="survey" class="container">
     <mat-nav-list class="left-menu">
+      <a mat-list-item id="dashboard-button" (click)="surveyId && selectSurvey(surveyId)">
+        <mat-icon class="material-symbols-outlined button-icon">
+          home
+        </mat-icon>
+        <span>Dashboard</span>
+      </a>
+
       <a mat-list-item id="survey-button" [routerLink]="['./survey']">
         <mat-icon class="material-symbols-outlined button-icon">
-          content_paste
+          settings
         </mat-icon>
-        <span>Survey</span>
+        <span>Survey settings</span>
       </a>
 
       <a mat-list-item id="share-button" [routerLink]="['./share']">
