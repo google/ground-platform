@@ -85,11 +85,13 @@ export class EditSurveyComponent implements OnInit {
   }
 
   jobs(): Job[] {
-    return Array.from(this.survey?.jobs.values() ?? []);
+    // TODO: sort by id or remove sort call when task editor is fixed
+    return Array.from(this.survey?.jobs.values() ?? []).sort(
+      ({id: id1}, {id: id2}) => id1.localeCompare(id2)
+    );
   }
 
   addJob(): void {
-    console.log('###addJob');
     this.openDialog(DialogType.AddJob, this.jobService.createNewJob());
   }
 
