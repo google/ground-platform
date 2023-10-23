@@ -66,10 +66,10 @@ export class ImportDialogComponent {
         files[0] as File
       );
       this.notificationService.success(
-        `Successfully imported ${response.count} lois`
+        `${response.count} sites imported`
       );
     } catch (err) {
-      this.notificationService.error('Importing lois failed');
+      this.notificationService.error('Importing data collection sites failed');
     }
     this.isImporting = false;
     this.ngZone.run(() => {
