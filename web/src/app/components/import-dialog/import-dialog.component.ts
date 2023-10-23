@@ -65,9 +65,7 @@ export class ImportDialogComponent {
         this.jobId,
         files[0] as File
       );
-      this.notificationService.success(
-        `${response.count} sites imported`
-      );
+      this.notificationService.success(`${response.count} sites imported`);
     } catch (err) {
       this.notificationService.error('Importing data collection sites failed');
     }
