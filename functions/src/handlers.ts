@@ -24,11 +24,27 @@ import * as cookieParser from 'cookie-parser';
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
+/** Token to be used when running on local emulator for debugging. */
+class EmulatorIdToken implements DecodedIdToken {
+  aud = '';
+  auth_time = 0;
+  exp = 0;
+  firebase = { identities: { }, sign_in_provider: '' };
+  iat = 0;
+  iss = '';
+  sub = '';
+  uid = 'emu';
+}
+
 /**
  * Checks for and extracts the current user's details, passing them to the provided function if found.
  * Sends an UNAUTHORIZED HTTP response code if not present or invalid.
  */
 async function requireIdToken(req: https.Request, res: Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
+  if (process.env.FUNCTIONS_EMULATOR === "true") {      
+    console.warn("Local emulator detected. Bypassing authentication.");
+    return next(new EmulatorIdToken());
+  }
   const token = await getDecodedIdToken(req);
   if (token) {
     return next(token);
