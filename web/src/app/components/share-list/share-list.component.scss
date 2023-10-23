@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-.role-select {
-  margin: -4px 0;
+.share-row {
+  height: 76px;
+
+  .mat-list-item {
+    padding-top: 10px;
+  }
 }
 
-tr {
-  border-bottom: 1px black solid;
+.share-row ::ng-deep .mat-list-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }

@@ -17,7 +17,12 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {ActivatedRoute, Router, NavigationExtras} from '@angular/router';
+import {
+  ActivatedRoute,
+  Router,
+  NavigationExtras,
+  IsActiveMatchOptions,
+} from '@angular/router';
 import {HttpParams} from '@angular/common/http';
 
 /**
@@ -167,6 +172,12 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
+  showSubmissionDetail(submissionId: string) {
+    const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+  }
+
   clearLocationOfInterestId() {
     this.setFragmentParams(new HttpParams({fromString: ''}));
   }
@@ -240,7 +251,7 @@ export class NavigationService {
   }
 
   navigateToEditSurvey(surveyId: string): void {
-    const url = `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`;
+    const url = `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}/${NavigationService.SURVEY_SEGMENT}`;
     this.router.navigateByUrl(url);
   }
 
@@ -263,6 +274,30 @@ export class NavigationService {
    */
   error(error: Error) {
     this.router.navigate([NavigationService.ERROR, {error}]);
+  }
+
+  isSurveyPage(surveyId: string): boolean {
+    return this.router.isActive(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}`,
+      {
+        matrixParams: 'ignored',
+        queryParams: 'ignored',
+        paths: 'exact',
+        fragment: 'ignored',
+      } as IsActiveMatchOptions
+    );
+  }
+
+  isEditSurveyPage(surveyId: string): boolean {
+    return this.router.isActive(
+      `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
+      {
+        matrixParams: 'ignored',
+        queryParams: 'ignored',
+        paths: 'subset',
+        fragment: 'ignored',
+      } as IsActiveMatchOptions
+    );
   }
 }
 

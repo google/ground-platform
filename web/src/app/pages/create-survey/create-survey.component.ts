@@ -26,7 +26,6 @@ import {Job} from 'app/models/job.model';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {filter, first, firstValueFrom} from 'rxjs';
-import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {TaskService} from 'app/services/task/task.service';
@@ -34,6 +33,7 @@ import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
+import {SurveyReviewComponent} from './survey-review/survey-review.component';
 
 @Component({
   selector: 'create-survey',
@@ -129,8 +129,8 @@ export class CreateSurveyComponent implements OnInit {
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([
     [SetupPhase.SURVEY_DETAILS, 'Create survey'],
     [SetupPhase.JOB_DETAILS, 'Add a job'],
-    [SetupPhase.DEFINE_LOI_PERMISSIONS, 'Define who can add LOIs'],
-    [SetupPhase.DEFINE_LOIS, 'Specify locations of interest'],
+    [SetupPhase.DEFINE_LOI_PERMISSIONS, 'Data collection approach'],
+    [SetupPhase.DEFINE_LOIS, 'Import data collection sites'],
     [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
     [SetupPhase.REVIEW, 'Review and share survey'],
   ]);
@@ -145,7 +145,7 @@ export class CreateSurveyComponent implements OnInit {
       this.setupPhaseToTitle.keys()
     ).findIndex(phase => phase === this.setupPhase);
     return currentPhaseIndex > -1
-      ? Math.round(((currentPhaseIndex + 1) / numberOfSteps) * 100)
+      ? Math.round((currentPhaseIndex / numberOfSteps) * 100)
       : 0;
   }
 
@@ -210,6 +210,9 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.DEFINE_TASKS:
         await this.saveTasks();
         this.setupPhase = SetupPhase.REVIEW;
+        break;
+      case SetupPhase.REVIEW:
+        !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
         break;
       default:
         break;
@@ -299,9 +302,6 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('taskDetails')
   taskDetails?: TaskDetailsComponent;
-
-  @ViewChild('shareSurvey')
-  shareSurvey?: ShareSurveyComponent;
 }
 
 export enum SetupPhase {

@@ -14,10 +14,11 @@
   limitations under the License.
 -->
 
-<h1 class="title">Who decides where data is collected?</h1>
-<h2 class="description">
-  Specify who defines sites where data will be collected
-</h2>
+<h1 class="title">How are data collection sites defined?</h1>
+<div class="description">
+  Is data to be collected for a predefined set of data collection sites, for sites
+  defined by data collectors as they're encountered, or both?
+</div>
 
 <form [formGroup]="formGroup">
   <mat-radio-group
@@ -25,7 +26,8 @@
     [id]="loiPermissionsControlKey"
     [formControlName]="loiPermissionsControlKey"
   >
-    <mat-card class="loi-permissions-option"
+    <mat-card
+      class="loi-permissions-option"
       *ngFor="let option of loiPermissionsOptions"
       (click)="optionCardClicked(option.value)"
     >

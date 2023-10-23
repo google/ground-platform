@@ -20,10 +20,21 @@ import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.componen
 import {TaskInputModule} from 'app/pages/create-survey/task-details/task-input/task-input.module';
 import {AddTaskButtonModule} from 'app/pages/create-survey/task-details/add-task-button/add-task-button.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
   declarations: [EditJobComponent],
-  imports: [CommonModule, TaskInputModule, AddTaskButtonModule, DragDropModule],
+  imports: [
+    CommonModule,
+    TaskInputModule,
+    AddTaskButtonModule,
+    DragDropModule,
+    LoiSelectionModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   exports: [EditJobComponent],
 })
 export class EditJobModule {}

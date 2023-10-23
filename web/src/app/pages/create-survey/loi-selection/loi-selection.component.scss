@@ -14,17 +14,36 @@
  * limitations under the License.
  */
 
-#loi-selection {
-  width: 800px;
+.title {
+  font-family: 'Google Sans';
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 36px;
+  margin-top: 45px;
 }
 
-.loi-map {
-  height: 500px;
-  width: 70%;
-  float: right;
-}
+.loi-container {
+  position: relative;
 
-.loi-list {
-  width: 30%;
-  float: left;
+  .loi-panel {
+    position: absolute;
+    background: var(--ground-sys-light-surface, #F9FAF4);
+    top: 60px;
+    left: 12px;
+    padding: 24px;
+    border-radius: 8px;
+    height: calc(100% - 80px - 48px - 24px);
+    width: 20%;
+    z-index: 1;
+
+    .loi-list {
+      max-height: 300px;
+      overflow-y: scroll;
+    }
+  }
+
+  .loi-map {
+    height: 500px;
+    width: 100%;
+  }
 }

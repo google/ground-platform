@@ -15,8 +15,6 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {Task} from 'app/models/task/task.model';
 import {
   TaskGroup,
@@ -27,7 +25,10 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
-import {filter, firstValueFrom, map} from 'rxjs';
+import {Subscription, firstValueFrom, map} from 'rxjs';
+import {Component, ViewChild} from '@angular/core';
+import {ActivatedRoute, Params} from '@angular/router';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 
 @Component({
   selector: 'edit-job',
@@ -35,8 +36,12 @@ import {filter, firstValueFrom, map} from 'rxjs';
   styleUrls: ['./edit-job.component.scss'],
 })
 export class EditJobComponent {
+  subscription: Subscription = new Subscription();
+
   surveyId?: string;
   jobId?: string;
+  section: 'tasks' | 'lois' = 'tasks';
+
   tasks?: List<Task>;
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
@@ -46,46 +51,61 @@ export class EditJobComponent {
     TaskGroup.CAPTURE_LOCATION,
   ];
 
+  @ViewChild('loiSelection')
+  loiSelection?: LoiSelectionComponent;
+
   constructor(
-    route: ActivatedRoute,
+    private route: ActivatedRoute,
     private navigationService: NavigationService,
     private dialogService: DialogService,
     private surveyService: SurveyService,
     private taskService: TaskService
   ) {
-    this.navigationService.getSurveyId$().subscribe(surveyId => {
-      if (surveyId) {
-        route.params.subscribe(params => {
-          this.surveyId = surveyId;
-          this.jobId = params['id'];
-        });
-      }
-    });
+    this.subscription.add(
+      this.navigationService
+        .getSurveyId$()
+        .subscribe(surveyId => this.onSurveyIdChange(surveyId))
+    );
   }
 
   async ngOnInit(): Promise<void> {
-    this.tasks = await firstValueFrom(
-      this.surveyService
-        .getActiveSurvey$()
-        .pipe(filter(survey => survey.id === this.surveyId))
-        .pipe(
-          map(survey =>
-            survey
-              .getJob(this.jobId!)
-              ?.tasks?.toList()
-              .sortBy(task => task.index)
-          )
-        )
+    this.subscription.add(
+      this.route.params.subscribe(async params => {
+        await this.onJobIdChange(params);
+      })
     );
+  }
 
-    this.tasks = this.tasks!.sortBy(task => task.index);
+  private onSurveyIdChange(surveyId: string | null) {
+    if (surveyId) {
+      this.surveyId = surveyId;
+    }
+  }
+
+  private async onJobIdChange(params: Params) {
+    this.jobId = params['id'];
+
+    this.tasks = await firstValueFrom(
+      this.surveyService.getActiveSurvey$().pipe(
+        map(survey =>
+          survey
+            .getJob(this.jobId!)
+            ?.tasks?.toList()
+            .sortBy(task => task.index)
+        )
+      )
+    );
   }
 
   getIndex(index: number) {
     return index;
   }
 
-  onTaskAdd(group: TaskGroup) {
+  onChangeSection(section: 'tasks' | 'lois') {
+    this.section = section;
+  }
+
+  onAddTask(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
 
     const type = types?.first();
@@ -105,7 +125,7 @@ export class EditJobComponent {
     // the task-input component is created.
   }
 
-  onTaskUpdate(event: Task, index: number) {
+  onUpdateTask(event: Task, index: number) {
     if (!this.tasks) {
       throw Error('tasks list is is empty');
     }
@@ -114,7 +134,7 @@ export class EditJobComponent {
     this.taskService.addOrUpdateTasks(this.surveyId!, this.jobId!, this.tasks);
   }
 
-  onTaskDelete(index: number) {
+  onDeleteTask(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
@@ -164,5 +184,9 @@ export class EditJobComponent {
           }
         }
       });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

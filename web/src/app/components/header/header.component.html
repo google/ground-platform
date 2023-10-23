@@ -22,6 +22,20 @@
   </div>
 
   <div>
+    <button *ngIf="state === 2" mat-icon-button (click)="onEditSurveyClick()">
+      <mat-icon>settings</mat-icon>
+    </button>
+    <button
+      class="finish-edit-button"
+      *ngIf="state === 3"
+      mat-flat-button
+      (click)="onFinishEditSurveyClick()"
+    >
+      <mat-icon>
+        done
+      </mat-icon>
+      Finish editing
+    </button>
     <ground-current-user-widget></ground-current-user-widget>
   </div>
 </div>

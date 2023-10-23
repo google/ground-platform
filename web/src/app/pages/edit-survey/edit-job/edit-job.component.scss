@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
- h1,
- h2 {
-   text-align: left;
- }
- 
- h2 {
-   font-size: 1.8ch;
- }
- 
- #tasks-help-text {
-   padding: 3ch;
-   text-align: center;
- }
- 
- #add-task-buttons-list {
-   display: flex;
-   flex-wrap: wrap;
-   justify-content: center;
-   gap: 8px;
- }
- 
- task-button:hover {
-   cursor: pointer;
- }
+h1,
+h2 {
+ text-align: left;
+}
+
+h2 {
+ font-size: 1.8ch;
+}
+
+#tasks-help-text {
+ padding: 3ch;
+ text-align: center;
+}
+
+#add-task-buttons-list {
+ display: flex;
+ flex-wrap: wrap;
+ justify-content: center;
+ gap: 8px;
+}
+
+task-button:hover {
+ cursor: pointer;
+}
+
+.edit-job {
+  .section-selector {
+    display: flex;
+    justify-content: end;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+}
