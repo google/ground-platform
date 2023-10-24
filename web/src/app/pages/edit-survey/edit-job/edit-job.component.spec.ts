@@ -52,6 +52,7 @@ describe('EditJobComponent', () => {
           provide: SurveyService,
           useValue: {
             getActiveSurvey$: () => of(survey),
+            canManageSurvey: () => true,
           },
         },
         {
@@ -82,7 +83,6 @@ describe('EditJobComponent', () => {
     const loiButton = fixture.debugElement.query(
       By.css('.section-selector button:nth-child(2)')
     ).nativeElement as HTMLElement;
-    console.log(loiButton);
     loiButton.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.loiSelection).toBeDefined();

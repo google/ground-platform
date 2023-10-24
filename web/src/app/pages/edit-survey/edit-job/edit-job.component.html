@@ -71,6 +71,7 @@
     <div *ngSwitchCase="'lois'">
       <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
         <loi-selection
+          #loiSelection
           [canImport]="surveyService.canManageSurvey()"
           [lois]="lois"
           [survey]="survey">
