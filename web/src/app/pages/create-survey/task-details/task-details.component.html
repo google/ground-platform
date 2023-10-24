@@ -17,12 +17,12 @@
 <div id="task-details">
   <h1>
     <div *ngIf="label">Job: {{ label }}</div>
-    Define how specified data should be collected
+    What data should be collected?
   </h1>
 
   <h2>
-    Data collectors will be prompted to complete the tasks you define here in
-    order.
+    Data collectors will be prompted to complete the tasks you define here for
+    each data collection site.
   </h2>
 
   <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">

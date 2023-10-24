@@ -1,7 +1,26 @@
+/**
+ * Copyright 2023 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 @use 'sass:map';
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
+  $color-config: mat.get-color-config($theme);
+  $foreground: map.get($color-config, foreground);
+
   // TODO: Use theme colors once GM3 is supported (or custom palette is defined)
   // The colors defined below are a part of the GM3 color schemes, while the
   // theme colors are based on M2 palettes.
@@ -11,7 +30,28 @@
 
   .card {
     background-color: #f9faf4; /* M3/sys/light/surface */
+
+    .mat-progress-bar-buffer {
+      background-color: #e2e3dd;
+      ;
   }
+
+    .mat-mdc-form-field-focus-overlay {
+      background-color: rgb(60, 115, 60, 87);
+    }
+
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      background-color: #f0f1eb;
+    }
+
+    .progress-bar-title, .description, .option-description,
+    .mat-radio-label-content,
+    .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
+      color: map.get($foreground, text);
+    }
+  }
+
+
 }
 
 @mixin typography($theme) {
@@ -24,6 +64,7 @@
   }
 
   .progress-bar-title {
+    font-size: 14px;
     font-weight: 500;
   }
 

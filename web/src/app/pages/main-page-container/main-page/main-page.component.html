@@ -13,6 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <div class="page">
   <ground-survey-header></ground-survey-header>
 
@@ -22,6 +23,8 @@
     </mat-sidenav>
 
     <mat-sidenav-content class="mat-sidenav-content">
+      <ground-secondary-side-panel></ground-secondary-side-panel>
+
       <submission-detail-panel *ngIf="showSubmissionPanel"
         [submission]="selectedSubmission"
         (closePanel)="closeSelectedSubmissionDetailPanel()">

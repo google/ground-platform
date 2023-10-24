@@ -15,7 +15,7 @@
 -->
 
 <div class="page">
-  <ground-header></ground-header>
+  <ground-survey-header></ground-survey-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
   <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
@@ -26,11 +26,18 @@
   </div>
   <div *ngIf="survey" class="container">
     <mat-nav-list class="left-menu">
+      <a mat-list-item id="dashboard-button" (click)="surveyId && selectSurvey(surveyId)">
+        <mat-icon class="material-symbols-outlined button-icon">
+          home
+        </mat-icon>
+        <span>Dashboard</span>
+      </a>
+
       <a mat-list-item id="survey-button" [routerLink]="['./survey']">
         <mat-icon class="material-symbols-outlined button-icon">
-          content_paste
+          settings
         </mat-icon>
-        <span>Survey</span>
+        <span>Survey settings</span>
       </a>
 
       <a mat-list-item id="share-button" [routerLink]="['./share']">
@@ -38,12 +45,27 @@
         <span>Sharing</span>
       </a>
 
-      <a *ngIf="!production" mat-list-item id="survey-json" [routerLink]="['./json']">
+      <a
+        *ngIf="!production"
+        mat-list-item
+        id="survey-json"
+        [routerLink]="['./json']"
+      >
         <mat-icon class="material-symbols-outlined button-icon">code</mat-icon>
         <span>JSON</span>
       </a>
 
-      <h3 matSubheader class="item job-label">Jobs</h3>
+      <div class="job-label-and-add-button">
+        <h3 matSubheader class="job-label">Jobs</h3>
+        <button
+          mat-icon-button
+          id="add-button"
+          class="material-symbols-outlined button-icon"
+          (click)="addJob()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
 
       <a
         *ngFor="let job of jobs(); index as i"
@@ -52,14 +74,46 @@
         [routerLink]="jobRouterLink(job.id)"
       >
         <span matLine>{{ job.name }}</span>
-        <button mat-icon-button (click)="onMenu($event)">
+        <button
+          mat-icon-button
+          id="menu-button-{{ i }}"
+          [matMenuTriggerFor]="menu"
+          (click)="onMenu($event)"
+        >
           <mat-icon>more_vert</mat-icon>
         </button>
+
+        <mat-menu #menu>
+          <button
+            mat-menu-item
+            id="rename-button-{{ i }}"
+            (click)="renameJob(job)"
+          >
+            Rename
+          </button>
+          <button
+            mat-menu-item
+            id="duplicate-button-{{ i }}"
+            (click)="duplicateJob(job)"
+          >
+            Duplicate
+          </button>
+          <mat-divider></mat-divider>
+          <button
+            mat-menu-item
+            id="delete-button-{{ i }}"
+            (click)="deleteJob(job)"
+          >
+            Remove
+          </button>
+        </mat-menu>
       </a>
     </mat-nav-list>
 
     <div class="card">
       <div class="content">
+        <h1 *ngIf="sectionTitle !== ''">{{ sectionTitle }}</h1>
+
         <router-outlet></router-outlet>
       </div>
     </div>

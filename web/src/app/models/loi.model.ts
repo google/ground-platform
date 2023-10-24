@@ -18,14 +18,14 @@ import {Map} from 'immutable';
 import {GeoPoint} from 'firebase/firestore';
 import {Geometry} from './geometry/geometry';
 
-export interface LocationOfInterest {
-  readonly id: string;
-  readonly jobId: string;
-  readonly name?: string;
+export abstract class LocationOfInterest {
+  abstract readonly id: string;
+  abstract readonly jobId: string;
+  abstract readonly name?: string;
   // TODO: Make non-null once other subtypes are removed.
-  readonly geometry?: Geometry;
+  abstract readonly geometry?: Geometry;
   // TODO: Make non-null, init to empty by default.
-  readonly properties?: Map<string, string | number>;
+  abstract readonly properties?: Map<string, string | number>;
 }
 
 // TODO: Delete me in favor of single LOI type.

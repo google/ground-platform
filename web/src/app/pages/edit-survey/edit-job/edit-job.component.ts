@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators/map';
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Task} from 'app/models/task/task.model';
+import {
+  TaskGroup,
+  taskGroupToTypes,
+} from 'app/pages/create-survey/task-details/task-details.component';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
+import {List} from 'immutable';
+import {Subscription, firstValueFrom, map} from 'rxjs';
+import {Component, ViewChild} from '@angular/core';
+import {ActivatedRoute, Params} from '@angular/router';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 
 @Component({
   selector: 'edit-job',
@@ -25,9 +36,157 @@ import {map} from 'rxjs/internal/operators/map';
   styleUrls: ['./edit-job.component.scss'],
 })
 export class EditJobComponent {
-  id$: Observable<string>;
+  subscription: Subscription = new Subscription();
 
-  constructor(route: ActivatedRoute) {
-    this.id$ = route.params.pipe(map(params => params['id']));
+  surveyId?: string;
+  jobId?: string;
+  section: 'tasks' | 'lois' = 'tasks';
+
+  tasks?: List<Task>;
+  addableTaskGroups: Array<TaskGroup> = [
+    TaskGroup.QUESTION,
+    TaskGroup.PHOTO,
+    TaskGroup.DROP_PIN,
+    TaskGroup.DRAW_AREA,
+    TaskGroup.CAPTURE_LOCATION,
+  ];
+
+  @ViewChild('loiSelection')
+  loiSelection?: LoiSelectionComponent;
+
+  constructor(
+    private route: ActivatedRoute,
+    private navigationService: NavigationService,
+    private dialogService: DialogService,
+    private surveyService: SurveyService,
+    private taskService: TaskService
+  ) {
+    this.subscription.add(
+      this.navigationService
+        .getSurveyId$()
+        .subscribe(surveyId => this.onSurveyIdChange(surveyId))
+    );
+  }
+
+  async ngOnInit(): Promise<void> {
+    this.subscription.add(
+      this.route.params.subscribe(async params => {
+        await this.onJobIdChange(params);
+      })
+    );
+  }
+
+  private onSurveyIdChange(surveyId: string | null) {
+    if (surveyId) {
+      this.surveyId = surveyId;
+    }
+  }
+
+  private async onJobIdChange(params: Params) {
+    this.jobId = params['id'];
+
+    this.tasks = await firstValueFrom(
+      this.surveyService.getActiveSurvey$().pipe(
+        map(survey =>
+          survey
+            .getJob(this.jobId!)
+            ?.tasks?.toList()
+            .sortBy(task => task.index)
+        )
+      )
+    );
+  }
+
+  getIndex(index: number) {
+    return index;
+  }
+
+  onChangeSection(section: 'tasks' | 'lois') {
+    this.section = section;
+  }
+
+  onAddTask(group: TaskGroup) {
+    const types = taskGroupToTypes.get(group);
+
+    const type = types?.first();
+
+    if (type && this.tasks) {
+      const task = this.taskService.createTask(
+        type,
+        '',
+        false,
+        this.tasks.size
+      );
+
+      this.tasks = this.tasks.push(task);
+    }
+
+    // No need to call addOrUpdateTasks because ngOnChange emits an update once
+    // the task-input component is created.
+  }
+
+  onUpdateTask(event: Task, index: number) {
+    if (!this.tasks) {
+      throw Error('tasks list is is empty');
+    }
+
+    this.tasks = this.tasks.set(index, event);
+    this.taskService.addOrUpdateTasks(this.surveyId!, this.jobId!, this.tasks);
+  }
+
+  onDeleteTask(index: number) {
+    this.dialogService
+      .openConfirmationDialog(
+        'Warning',
+        'Are you sure you wish to delete this question? Any associated data ' +
+          'will be lost. This cannot be undone.'
+      )
+      .afterClosed()
+      .subscribe(dialogResult => {
+        if (dialogResult) {
+          this.tasks = this.tasks!.splice(index, 1);
+        }
+      });
+  }
+
+  drop(event: CdkDragDrop<string[]>): void {
+    const {previousIndex, currentIndex} = event;
+    this.tasks = this.tasks!.update(
+      previousIndex,
+      task => task?.copyWith({index: currentIndex}) as Task
+    )
+      .update(
+        currentIndex,
+        task => task?.copyWith({index: previousIndex}) as Task
+      )
+      .sortBy(task => task.index);
+  }
+
+  onDuplicateTask(index: number) {
+    this.dialogService
+      .openConfirmationDialog(
+        'Duplicate task',
+        'Are you sure you wish to duplicate this task?'
+      )
+      .afterClosed()
+      .subscribe(dialogResult => {
+        if (dialogResult) {
+          const taskToDuplicate = this.tasks!.get(index);
+          if (taskToDuplicate) {
+            const task = this.taskService.createTask(
+              taskToDuplicate?.type,
+              taskToDuplicate?.label,
+              taskToDuplicate?.required,
+              this.tasks!.size,
+              taskToDuplicate?.multipleChoice
+            );
+            this.tasks = this.tasks!.push(task);
+          }
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

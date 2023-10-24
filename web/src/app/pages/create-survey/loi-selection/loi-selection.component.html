@@ -15,12 +15,16 @@
 -->
 
 <div id="loi-selection">
-  <h1>Where should data be collected?</h1>
-  <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
-    <div class="loi-list" *ngIf="lois$ | async as lois">
+  <h1 class="title" *ngIf="isStandalonePage else secondaryHeader">{{ header }}</h1>
+
+  <ng-template #secondaryHeader>
+    <h2 class="title">{{ header }}</h2>
+  </ng-template>
+
+  <div class="loi-container" *ngIf="surveyService.getActiveSurvey$() | async as survey">
+    <div class="loi-panel" *ngIf="lois$ | async as lois">
       <ng-container *ngIf="surveyService.canManageSurvey()">
         <button
-          fxFill
           mat-stroked-button
           color="primary"
           class="import-lois-button"
@@ -30,11 +34,13 @@
           Import LOIs
         </button>
       </ng-container>
-      <mat-list>
+
+      <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
           <p matLine>{{ loi.name }}</p>
         </mat-list-item>
       </mat-list>
+
       <button *ngIf="lois.size > 0"
         class="clear-all-lois"
         (click)="clearLois(survey.id, lois)"
@@ -44,6 +50,7 @@
         Clear all
       </button>
     </div>
+
     <div class="loi-map">
       <ground-map></ground-map>
     </div>

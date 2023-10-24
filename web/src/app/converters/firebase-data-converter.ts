@@ -30,6 +30,11 @@ import {Result} from 'app/models/submission/result.model';
 import {Role} from 'app/models/role.model';
 import {User} from 'app/models/user.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
+import {
+  MultipleChoiceResponseCondition,
+  NewUnplannedLocationOfInterestCondition,
+  TaskCondition,
+} from 'app/models/task/task-condition.model';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -213,7 +218,8 @@ export class FirebaseDataConverter {
                 FirebaseDataConverter.toOption(id, data.options[id])
               )
             )
-          )
+          ),
+        FirebaseDataConverter.toCondition(data.condition)
       );
     } catch (e) {
       console.error(e);
@@ -221,18 +227,48 @@ export class FirebaseDataConverter {
     }
   }
 
+  private static toCondition(map?: DocumentData): TaskCondition | undefined {
+    switch (map?.type) {
+      case 'multiple_choice_response':
+        return FirebaseDataConverter.toMultipleChoiceResponseCondition(
+          map?.responseIds
+        );
+      case 'new_unplanned_loi':
+        return new NewUnplannedLocationOfInterestCondition();
+      default:
+        return undefined;
+    }
+  }
+
+  private static toMultipleChoiceResponseCondition(
+    taskId?: string,
+    values?: unknown
+  ): MultipleChoiceResponseCondition | undefined {
+    if (
+      !taskId ||
+      !values ||
+      !Array.isArray(values) ||
+      values.some(v => !(v instanceof String))
+    )
+      return undefined;
+    else
+      return new MultipleChoiceResponseCondition(taskId, List<String>(values));
+  }
+
   private static taskToJS(task: Task): {} {
-    const {type, label, multipleChoice, ...taskDoc} = task;
+    const {type, label, multipleChoice, condition, ...taskDoc} = task;
     if (multipleChoice === undefined) {
       return {
         type: FirebaseDataConverter.taskTypeToString(type),
         label,
+        condition: FirebaseDataConverter.taskConditionToJS(condition),
         ...taskDoc,
       };
     } else {
       return {
         type: FirebaseDataConverter.taskTypeToString(type),
         label,
+        condition: FirebaseDataConverter.taskConditionToJS(condition),
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
         ),
@@ -247,6 +283,20 @@ export class FirebaseDataConverter {
           ) || {},
         ...taskDoc,
       };
+    }
+  }
+  private static taskConditionToJS(condition?: TaskCondition): {} | undefined {
+    if (!condition) return undefined;
+    if (condition instanceof NewUnplannedLocationOfInterestCondition) {
+      return {type: 'new_unplanned_loi'};
+    } else if (condition instanceof MultipleChoiceResponseCondition) {
+      return {
+        type: 'multiple_choice_response',
+        taskId: condition.taskId,
+        responseIds: condition.responseIds.toArray(),
+      };
+    } else {
+      throw new Error(`Unimplemented task condition type $condition`);
     }
   }
 

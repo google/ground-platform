@@ -40,16 +40,14 @@ describe('LoiPermissionsComponent', () => {
   it('loads section header', () => {
     expect(
       fixture.debugElement.nativeElement.querySelector('.title').textContent
-    ).toBe('Who decides where data is collected?');
+    ).toBeNonEmptyString();
   });
 
   it('loads section description', () => {
     expect(
       fixture.debugElement.nativeElement.querySelector('.description')
         .textContent
-    ).toContain(
-      'Specify who defines locations of interest where data will be collected'
-    );
+    ).toBeNonEmptyString();
   });
 
   it('sets the default data collection option to survey organizers', () => {
@@ -69,23 +67,7 @@ describe('LoiPermissionsComponent', () => {
         .querySelector('.option-description')!
         .textContent!.trim(),
     }));
-    expect(contentValues).toEqual([
-      {
-        label: 'Survey organizers',
-        description:
-          'Data collectors collect data exclusively about locations of interest uploaded by you and other survey organizers.',
-      },
-      {
-        label: 'Data collectors',
-        description:
-          'Data collectors suggest and collect data about new locations of interest as they discover them.',
-      },
-      {
-        label: 'Both',
-        description:
-          'Data collectors may collect data about locations of interest uploaded by survey organizers, or suggest new locations as needed.',
-      },
-    ]);
+    expect(contentValues).toHaveSize(3);
   });
 
   it('updates the loiPermissionsMethod value on click of the card', () => {

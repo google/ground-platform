@@ -17,6 +17,7 @@
 import {Copiable} from '../copiable';
 import {MultipleChoice} from './multiple-choice.model';
 import {Option} from './option.model';
+import {TaskCondition} from './task-condition.model';
 
 /**
  *
@@ -62,7 +63,12 @@ export class Task extends Copiable {
     readonly label: string,
     readonly required: boolean,
     readonly index: number,
-    readonly multipleChoice?: MultipleChoice
+    readonly multipleChoice?: MultipleChoice,
+    /**
+     * When collecting data, this task will be shown only when the condition is
+     * `null` or when it evaluates to `true`.
+     */
+    readonly condition?: TaskCondition
   ) {
     super();
   }

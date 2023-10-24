@@ -68,10 +68,10 @@
             [label]="job()?.name ?? ''"
             (canContinue)="onCanContinueChange($event)"
           ></task-details>
-          <share-survey
+          <survey-review
             *ngSwitchCase="SetupPhase.REVIEW"
-            #shareSurvey
-          ></share-survey>
+            #surveyReview
+          ></survey-review>
         </div>
       </div>
     </div>

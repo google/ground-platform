@@ -41,18 +41,32 @@
   margin: 0 12px;
 }
 
+.job-label-and-add-button {
+  align-items: flex-end;
+  display: flex;
+  justify-content: space-between;
+}
+
 .job-label {
   font-size: 16px;
   font-weight: 500;
 }
 
 .card {
+  padding: 24px;
   background-color: #fcfdf7;
   border-radius: 18px;
   flex-grow: 1;
-  margin: 12px 24px 0;
+  margin: 12px 24px 24px 12px;
+  padding: 16px 24px;
 
   .content {
     text-align: left;
+
+    h1 {
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 36px;
+    }
   }
 }
