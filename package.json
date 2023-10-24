@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Ground hosted components",
   "scripts": {
-    "clean": "npm run clean --prefix functions && npm run clean --prefix web",
+    "clean": "rm -rf node_modules && npm run clean --prefix functions && npm run clean --prefix web",
     "postinstall": "npm install --prefix functions && npm install --prefix web",
     "build:local": "npm run build --prefix functions && npm run build:local --prefix web",
     "build:dev": "npm run build --prefix functions && npm run build:dev --prefix web",
@@ -27,5 +27,7 @@
   "devDependencies": {
     "firebase-tools": "11.23.1"
   },
-  "engines": { "node": "16" }
+  "engines": {
+    "node": "16"
+  }
 }
