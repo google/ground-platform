@@ -15,13 +15,24 @@
  */
 
 import {NgModule} from '@angular/core';
-import {TaskDetailsComponent} from './task-details.component';
+import {TasksEditorComponent} from './tasks-editor.component';
+
 import {CommonModule} from '@angular/common';
-import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {TaskFormModule} from './task-form/task-form.module';
+import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
 
 @NgModule({
-  declarations: [TaskDetailsComponent],
-  imports: [CommonModule, TasksEditorModule],
-  exports: [TaskDetailsComponent],
+  declarations: [TasksEditorComponent],
+  imports: [
+    CommonModule,
+    DragDropModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TaskFormModule,
+    AddTaskButtonModule,
+  ],
+  exports: [TasksEditorComponent],
 })
-export class TaskDetailsModule {}
+export class TasksEditorModule {}

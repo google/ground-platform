@@ -289,7 +289,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private async saveTasks() {
-    const tasks = this.taskDetails?.toTasks();
+    const tasks = this.taskDetails?.getTasks();
 
     // Assume the survey exists.
     const survey = this.survey!;

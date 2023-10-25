@@ -15,8 +15,8 @@
  */
 
 import {Component, Input} from '@angular/core';
-import {TaskGroup} from '../task-details.component';
-import {Tasks} from '../task-input/task-input.component';
+import {TaskGroup} from '../tasks-editor.component';
+import {Tasks} from '../task-form/task-form.component';
 
 @Component({
   selector: 'add-task-button',

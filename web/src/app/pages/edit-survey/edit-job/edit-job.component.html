@@ -36,38 +36,9 @@
     </button>
   </div>
 
-  <!-- TODO: Refactor into EditTasks and EditLois. -->
   <div [ngSwitch]="section">
-    <div id="task-details" *ngSwitchCase="'tasks'">
-      <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">
-        <task-input
-          *ngFor="let task of tasks; let i = index; trackBy: getIndex"
-          (update)="onUpdateTask($event, i)"
-          (delete)="onDeleteTask(i)"
-          (duplicate)="onDuplicateTask(i)"
-          [label]="task.label"
-          [required]="task.required"
-          [taskType]="task.type"
-          [cardinality]="task.multipleChoice?.cardinality"
-          [multipleChoice]="task.multipleChoice"
-          [taskCount]="tasks!.size"
-          [taskIndex]="i"
-        >
-        </task-input>
-      </div>
-  
-      <div id="tasks-help-text">Select task to add</div>
-  
-      <div id="add-task-buttons-list">
-        <add-task-button
-          *ngFor="let taskGroup of addableTaskGroups"
-          [taskGroup]="taskGroup"
-          (click)="onAddTask(taskGroup)"
-        >
-        </add-task-button>
-      </div>
-    </div>
-    
+    <tasks-editor [tasks]="tasks" *ngSwitchCase="'tasks'"></tasks-editor>
+
     <loi-selection #loiSelection *ngSwitchCase="'lois'"></loi-selection>
   </div>
 </div>

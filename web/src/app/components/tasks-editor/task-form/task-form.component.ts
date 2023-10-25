@@ -27,7 +27,7 @@ import {
   FormBuilder,
   FormGroup,
 } from '@angular/forms';
-import {TaskGroup, taskTypeToGroup} from '../task-details.component';
+
 import {TaskType} from 'app/models/task/task.model';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {firstValueFrom} from 'rxjs';
@@ -35,6 +35,7 @@ import {DialogService} from 'app/services/dialog/dialog.service';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {moveItemInFormArray} from 'app/utils/utils';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {TaskGroup, taskTypeToGroup} from '../tasks-editor.component';
 
 export interface TaskTypeOption {
   icon: string;

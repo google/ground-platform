@@ -26,8 +26,8 @@ import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/mater
 import {MatLegacySelectModule as MatSelectModule} from '@angular/material/legacy-select';
 import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
-import {EditOptionModule} from '../task-input/edit-option/edit-option.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import {EditOptionModule} from './edit-option/edit-option.module';
 
 @NgModule({
   declarations: [TaskFormComponent],
