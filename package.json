@@ -9,8 +9,8 @@
     "build:dev": "npm run build --prefix functions && npm run build:dev --prefix web",
     "build:prod": "npm run build --prefix functions && npm run build:prod --prefix web",
     "watch:local": "npm run build:local && npm run watch --prefix functions & npm run watch:local --prefix web",
-    "start:local": "npm run build:local && npx firebase emulators:exec 'npm run watch:local' --project demo-project --ui --config firebase.local.json --import data/local",
-    "export:local": "npx firebase emulators:export data/local --project demo-project --only firestore",
+    "start:local": "npm run build:local && npx firebase emulators:exec 'npm run watch:local' --project gnd-dev --ui --config firebase.local.json --import data/local",
+    "export:local": "npx firebase emulators:export data/local --project gnd-dev --only firestore",
     "login": "npx firebase login",
     "deploy:dev": "npm run build:dev && npm run login && firebase deploy --project",
     "deploy:prod": "npm run build:prod && npm run login && firebase deploy --project"
