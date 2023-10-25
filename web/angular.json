@@ -26,7 +26,7 @@
               "src/assets/icons/favicon-32x32.png",
               "src/assets/icons/apple-touch-icon.png",
               "src/assets/icons/android-chrome-192x192.png",
-              "src/assets/icons/android-chrome-512x512.png",
+              "src/assets/icons/android-chrome-512x512.png"
             ],
             "stylePreprocessorOptions": {
               "includePaths": ["src/app/styles"]
@@ -136,8 +136,8 @@
               "src/assets/icons/favicon-32x32.png",
               "src/assets/icons/apple-touch-icon.png",
               "src/assets/icons/android-chrome-192x192.png",
-              "src/assets/icons/android-chrome-512x512.png",
-            ],"assets":
+              "src/assets/icons/android-chrome-512x512.png"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": ["src/app/styles"]
             },
