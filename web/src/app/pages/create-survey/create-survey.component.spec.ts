@@ -294,6 +294,7 @@ describe('CreateSurveyComponent', () => {
         const newTitle = 'newTitle';
         const newDescription = 'newDescription';
         const surveyDetailsComponent = component.surveyDetails!;
+        surveyDetailsComponent.ngOnChange();
         surveyDetailsComponent.formGroup.controls[
           surveyDetailsComponent.titleControlKey
         ].setValue(newTitle);
@@ -324,12 +325,13 @@ describe('CreateSurveyComponent', () => {
       it('updates title and description after clicking continue', fakeAsync(() => {
         const newTitle = 'newTitle';
         const newDescription = 'newDescription';
-        const jobDetailsComponent = component.surveyDetails!;
-        jobDetailsComponent.formGroup.controls[
-          jobDetailsComponent.titleControlKey
+        const surveyDetailsComponent = component.surveyDetails!;
+        surveyDetailsComponent.ngOnChange();
+        surveyDetailsComponent.formGroup.controls[
+          surveyDetailsComponent.titleControlKey
         ].setValue(newTitle);
-        jobDetailsComponent.formGroup.controls[
-          jobDetailsComponent.descriptionControlKey
+        surveyDetailsComponent.formGroup.controls[
+          surveyDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
         clickContinueButton(fixture);
         flush();
@@ -359,6 +361,7 @@ describe('CreateSurveyComponent', () => {
       it('creates new job with name after clicking continue', fakeAsync(() => {
         const name = 'new job name';
         const jobDetailsComponent = component.jobDetails!;
+        jobDetailsComponent.ngOnChange();
         jobDetailsComponent.formGroup.controls[
           jobDetailsComponent.nameControlKey
         ].setValue(name);
@@ -388,6 +391,7 @@ describe('CreateSurveyComponent', () => {
       it('updates the first job after clicking continue', fakeAsync(() => {
         const name = 'new job name';
         const jobDetailsComponent = component.jobDetails!;
+        jobDetailsComponent.ngOnChange();
         jobDetailsComponent.formGroup.controls[
           jobDetailsComponent.nameControlKey
         ].setValue(name);

@@ -28,17 +28,17 @@ export class SurveyDetailsComponent {
 
   formGroup!: FormGroup;
 
-  @Input() title!: string;
-  @Input() description!: string;
+  @Input() title = '';
+  @Input() description = '';
   @Output() canContinue: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  ngOnInit(): void {
+  ngOnChange(): void {
     this.formGroup = new FormBuilder().group({
       [this.titleControlKey]: [this.title, Validators.required],
-      [this.descriptionControlKey]: '',
+      [this.descriptionControlKey]: this.description,
     });
 
-    this.formGroup.valueChanges.subscribe(_ => {
+    this.formGroup.statusChanges.subscribe(_ => {
       this.canContinue.emit(this.formGroup?.valid);
     });
 

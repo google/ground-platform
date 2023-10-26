@@ -30,7 +30,7 @@ describe('SurveyDetailsComponent', () => {
     component.title = title;
     component.description = description;
     fixture.detectChanges();
-    component.ngOnInit();
+    component.ngOnChange();
   });
 
   it('loads title and description to form', () => {
