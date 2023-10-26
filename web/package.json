@@ -16,7 +16,6 @@
     "test-with-coverage": "npm run pretest && npm run test:headless -- --code-coverage && npm run posttest",
     "lint": "ng lint",
     "lint:fix": "npm run lint -- --fix",
-    "e2e": "ng e2e",
     "posttest": "./posttest.sh && npm run lint",
     "login": "npx firebase login",
     "deploy:dev": "npm run build:dev && npm run login && npx firebase deploy --only hosting --project"
@@ -87,7 +86,6 @@
     "karma-jasmine-matchers": "5.0.0",
     "prettier": "^2.8.1",
     "prettier-eslint": "^15.0.1",
-    "protractor": "~7.0.0",
     "puppeteer": "^3.3.0",
     "ts-node": "^8.10.2",
     "typescript": "^4.9.0"
