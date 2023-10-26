@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {LocationOfInterestPanelComponent} from './loi-panel.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
+import {BrowserModule} from '@angular/platform-browser';
 
 import {LocationOfInterestPanelHeaderModule} from './loi-panel-header/loi-panel-header.module';
+import {LocationOfInterestPanelComponent} from './loi-panel.component';
 
 @NgModule({
   imports: [

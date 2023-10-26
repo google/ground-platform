@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FirebaseUISignInFailure} from 'firebaseui-angular';
-import {OnInit} from '@angular/core';
-import {Observable} from 'rxjs';
-import {AuthService} from 'app/services/auth/auth.service';
+import {Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+
+import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {environment} from 'environments/environment';
 

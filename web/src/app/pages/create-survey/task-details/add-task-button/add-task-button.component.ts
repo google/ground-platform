@@ -15,6 +15,7 @@
  */
 
 import {Component, Input} from '@angular/core';
+
 import {TaskGroup} from '../task-details.component';
 import {Tasks} from '../task-input/task-input.component';
 

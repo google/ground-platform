@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {HeaderModule} from 'app/components/header/header.module';
-import {SurveyListComponent} from './survey-list.component';
+import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {MatGridListModule} from '@angular/material/grid-list';
-import {MatCardModule} from '@angular/material/card';
+
+import {HeaderModule} from 'app/components/header/header.module';
+
+import {SurveyListComponent} from './survey-list.component';
 
 @NgModule({
   declarations: [SurveyListComponent],

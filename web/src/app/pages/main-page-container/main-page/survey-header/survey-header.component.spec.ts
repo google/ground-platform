@@ -15,13 +15,15 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
-import {SurveyHeaderComponent} from './survey-header.component';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {NEVER} from 'rxjs';
 import {Router} from '@angular/router';
+import {NEVER} from 'rxjs';
+
+import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {SurveyHeaderComponent} from './survey-header.component';
 
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;

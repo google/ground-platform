@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
-import {JobDetailsModule} from './job-details/job-details.module';
-import {SurveyDetailsModule} from './survey-details/survey-details.module';
-import {MatInputModule} from '@angular/material/input';
+import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
-import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-details.module';
+import {MatInputModule} from '@angular/material/input';
 import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+
 import {HeaderModule} from 'app/components/header/header.module';
+import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {LoiPermissionsModule} from 'app/pages/create-survey/loi-permissions/loi-permissions.module';
+import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
+import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-details.module';
+
+import {JobDetailsModule} from './job-details/job-details.module';
+import {SurveyDetailsModule} from './survey-details/survey-details.module';
 import {SurveyReviewModule} from './survey-review/survey-review.module';
 
 @NgModule({

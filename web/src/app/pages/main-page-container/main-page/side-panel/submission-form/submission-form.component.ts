@@ -15,27 +15,27 @@
  */
 
 import {Component} from '@angular/core';
-import {TaskType, Task} from 'app/models/task/task.model';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {List, Map} from 'immutable';
+import {Observable} from 'rxjs';
+import {first, map, switchMap} from 'rxjs/operators';
+
+import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
+import {AuditInfo} from 'app/models/audit-info.model';
+import {Job} from 'app/models/job.model';
+import {Result} from 'app/models/submission/result.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Result} from 'app/models/submission/result.model';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {FormGroup, FormBuilder, FormControl, Validators} from '@angular/forms';
-import {List, Map} from 'immutable';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Survey} from 'app/models/survey.model';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {LoadingState} from 'app/services/loading-state.model';
-import {Observable} from 'rxjs';
-import {first} from 'rxjs/operators';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {switchMap, map} from 'rxjs/operators';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {AuthService} from 'app/services/auth/auth.service';
-import {AuditInfo} from 'app/models/audit-info.model';
-import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LoadingState} from 'app/services/loading-state.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 // To make ESLint happy:
 /*global alert*/

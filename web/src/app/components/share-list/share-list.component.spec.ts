@@ -19,12 +19,14 @@ import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyListHarness as MatListHarness} from '@angular/material/legacy-list/testing';
-import {ShareListComponent} from './share-list.component';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {Subject, of} from 'rxjs';
 import {Map} from 'immutable';
+import {Subject, of} from 'rxjs';
+
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {ShareListComponent} from './share-list.component';
 
 describe('ShareListComponent', () => {
   let component: ShareListComponent;

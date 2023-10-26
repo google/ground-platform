@@ -14,46 +14,48 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SubmissionFormComponent} from './submission-form.component';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
+import {By} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {Router} from '@angular/router';
+import {List, Map} from 'immutable';
+import {NEVER, of} from 'rxjs';
+
+import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
+import {AuditInfo} from 'app/models/audit-info.model';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {Point} from 'app/models/geometry/point';
+import {Job} from 'app/models/job.model';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {NEVER, of} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {List, Map} from 'immutable';
-import {Submission} from 'app/models/submission/submission.model';
 import {Result} from 'app/models/submission/result.model';
-import {Job} from 'app/models/job.model';
-import {Option} from 'app/models/task/option.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
 import {
-  MultipleChoice,
   Cardinality,
+  MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {TaskType, Task} from 'app/models/task/task.model';
-import {AuditInfo} from 'app/models/audit-info.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {Router} from '@angular/router';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {Option} from 'app/models/task/option.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {By} from '@angular/platform-browser';
-import {Point} from 'app/models/geometry/point';
-import {Coordinate} from 'app/models/geometry/coordinate';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {SubmissionFormComponent} from './submission-form.component';
 
 class MockModel {
   static task001: Task = new Task(

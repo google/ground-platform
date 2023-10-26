@@ -15,11 +15,13 @@
  */
 
 import {Injectable} from '@angular/core';
+import {List} from 'immutable';
+import {Observable, switchMap} from 'rxjs';
+
 import {MultipleChoice} from 'app/models/task/multiple-choice.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {List} from 'immutable';
-import {Observable, switchMap} from 'rxjs';
+
 import {SurveyService} from '../survey/survey.service';
 
 export type TaskUpdate = {

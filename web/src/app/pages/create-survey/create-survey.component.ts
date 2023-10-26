@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {JobService} from 'app/services/job/job.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
-import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {ActivatedRoute} from '@angular/router';
 import {filter, first, firstValueFrom} from 'rxjs';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
+
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {TaskService} from 'app/services/task/task.service';
+import {Survey} from 'app/models/survey.model';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {JobService} from 'app/services/job/job.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
+
 import {SurveyReviewComponent} from './survey-review/survey-review.component';
 
 @Component({

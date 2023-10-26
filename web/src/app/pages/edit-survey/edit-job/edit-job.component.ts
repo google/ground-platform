@@ -15,7 +15,13 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Component, ViewChild} from '@angular/core';
+import {ActivatedRoute, Params} from '@angular/router';
+import {List} from 'immutable';
+import {Subscription, firstValueFrom, map} from 'rxjs';
+
 import {Task} from 'app/models/task/task.model';
+import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {
   TaskGroup,
   taskGroupToTypes,
@@ -24,11 +30,6 @@ import {DialogService} from 'app/services/dialog/dialog.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
-import {List} from 'immutable';
-import {Subscription, firstValueFrom, map} from 'rxjs';
-import {Component, ViewChild} from '@angular/core';
-import {ActivatedRoute, Params} from '@angular/router';
-import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 
 @Component({
   selector: 'edit-job',

@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Observable, from} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
-import {User} from 'app/models/user.model';
 import {Injectable} from '@angular/core';
-import {GoogleAuthProvider} from 'firebase/auth';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {map} from 'rxjs/operators';
-import {shareReplay} from 'rxjs/operators';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {AngularFireFunctions} from '@angular/fire/compat/functions';
+import {GoogleAuthProvider} from 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import {Observable, firstValueFrom, from} from 'rxjs';
+import {map, shareReplay, switchMap} from 'rxjs/operators';
+
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
 import {Role} from 'app/models/role.model';
-import firebase from 'firebase/compat/app';
-import {firstValueFrom} from 'rxjs';
-import {AngularFireFunctions} from '@angular/fire/compat/functions';
-import {HttpClientService} from '../http-client/http-client.service';
+import {Survey} from 'app/models/survey.model';
+import {User} from 'app/models/user.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {environment} from 'environments/environment';
+
+import {HttpClientService} from '../http-client/http-client.service';
 
 const ANONYMOUS_USER: User = {
   id: '',

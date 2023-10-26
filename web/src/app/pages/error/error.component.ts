@@ -16,6 +16,7 @@
 
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({

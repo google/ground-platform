@@ -15,6 +15,7 @@
  */
 
 import {Component} from '@angular/core';
+
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({

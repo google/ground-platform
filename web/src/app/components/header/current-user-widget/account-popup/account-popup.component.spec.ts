@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import {AuthService} from 'app/services/auth/auth.service';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {AccountPopupComponent} from 'app/components/header/current-user-widget/account-popup/account-popup.component';
 import {
-  MatLegacyDialogRef as MatDialogRef,
   MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialogModule as MatDialogModule,
+  MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {Router} from '@angular/router';
 import {of} from 'rxjs';
+
+import {AccountPopupComponent} from 'app/components/header/current-user-widget/account-popup/account-popup.component';
+import {AuthService} from 'app/services/auth/auth.service';
 
 describe('AccountPopupComponent', () => {
   let component: AccountPopupComponent;

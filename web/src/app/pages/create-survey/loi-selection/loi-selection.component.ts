@@ -15,15 +15,16 @@
  */
 
 import {Component, Input} from '@angular/core';
-import {List} from 'immutable';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {Observable, map} from 'rxjs';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {Survey} from 'app/models/survey.model';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {List} from 'immutable';
+import {Observable, map} from 'rxjs';
+
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'loi-selection',
