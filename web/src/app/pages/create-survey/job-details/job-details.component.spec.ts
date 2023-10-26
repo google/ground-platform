@@ -23,26 +23,26 @@ describe('JobDetailsComponent', () => {
   let component: JobDetailsComponent;
   let fixture: ComponentFixture<JobDetailsComponent>;
 
-  const jobName = 'jobName';
+  const name = 'name';
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobDetailsComponent);
     component = fixture.componentInstance;
-    component.name = jobName;
-    fixture.detectChanges();
+    component.name = name;
     component.ngOnChange();
+    fixture.detectChanges();
   });
 
   it('loads job name to form', () => {
     expect(component.formGroup.controls[component.nameControlKey].value).toBe(
-      jobName
+      name
     );
   });
 
   it('toJobName returns job name from the form', () => {
-    const newJobName = 'newName';
-    component.formGroup.controls[component.nameControlKey].setValue(newJobName);
+    const newName = 'newName';
+    component.formGroup.controls[component.nameControlKey].setValue(newName);
 
-    expect(component.toJobName()).toBe(newJobName);
+    expect(component.toJobName()).toBe(newName);
   });
 });

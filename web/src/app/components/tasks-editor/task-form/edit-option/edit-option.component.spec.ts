@@ -17,7 +17,12 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {EditOptionComponent} from './edit-option.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -48,6 +53,12 @@ describe('EditOptionComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(EditOptionComponent);
     component = fixture.componentInstance;
+
+    component.formGroup = new FormBuilder().group({
+      code: [''],
+      label: ['', Validators.required],
+    });
+
     fixture.detectChanges();
   });
 
