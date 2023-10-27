@@ -91,43 +91,39 @@ export class TasksEditorComponent {
   ngOnChanges(): void {
     const formBuilder = new FormBuilder();
 
-    this.formGroup = formBuilder.group({
-      tasks: formBuilder.array(
-        this.tasks
-          ?.toArray()
-          .slice(1)
-          .map(task =>
-            formBuilder.group({
-              id: task.id,
-              type: task.type,
-              required: task.required,
-              label: [task.label, Validators.required],
-              cardinality: task.multipleChoice?.cardinality,
-              options: formBuilder.array(
-                task.multipleChoice?.options.toArray().map(option =>
-                  formBuilder.group({
-                    id: option.id,
-                    label: option.label,
-                    code: option.code,
-                  })
-                ) || []
-              ),
-            })
-          ) || []
-      ),
-    });
+    if (this.tasks) {
+      this.formGroup = formBuilder.group({
+        tasks: formBuilder.array(
+          this.tasks
+            ?.toArray()
+            .slice(1)
+            .map(task =>
+              formBuilder.group({
+                id: task.id,
+                type: task.type,
+                required: task.required,
+                label: [task.label, Validators.required],
+                cardinality: task.multipleChoice?.cardinality,
+                options: formBuilder.array(
+                  task.multipleChoice?.options.toArray().map(option =>
+                    formBuilder.group({
+                      id: option.id,
+                      label: option.label,
+                      code: option.code,
+                    })
+                  ) || []
+                ),
+              })
+            ) || []
+        ),
+      });
+    } else {
+      const formBuilder = new FormBuilder();
 
-    this.formGroup.statusChanges.subscribe(() => {
-      this.onChange?.emit(this.formGroup?.valid);
-    });
-  }
-
-  ngOnInit(): void {
-    const formBuilder = new FormBuilder();
-
-    this.formGroup = formBuilder.group({
-      tasks: formBuilder.array([]),
-    });
+      this.formGroup = formBuilder.group({
+        tasks: formBuilder.array([]),
+      });
+    }
 
     this.formGroup.statusChanges.subscribe(() => {
       this.onChange?.emit(this.formGroup?.valid);

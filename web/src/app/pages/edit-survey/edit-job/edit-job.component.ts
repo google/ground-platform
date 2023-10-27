@@ -15,10 +15,8 @@
  */
 
 import {Task} from 'app/models/task/task.model';
-import {DialogService} from 'app/services/dialog/dialog.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
 import {Subscription, firstValueFrom, map} from 'rxjs';
 import {Component, ViewChild} from '@angular/core';
@@ -44,9 +42,7 @@ export class EditJobComponent {
   constructor(
     private route: ActivatedRoute,
     private navigationService: NavigationService,
-    private dialogService: DialogService,
-    private surveyService: SurveyService,
-    private taskService: TaskService
+    private surveyService: SurveyService
   ) {
     this.subscription.add(
       this.navigationService
