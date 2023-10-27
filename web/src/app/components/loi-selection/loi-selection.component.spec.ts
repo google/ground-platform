@@ -20,10 +20,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {List, Map} from 'immutable';
 import {LoiSelectionComponent} from './loi-selection.component';
@@ -34,6 +31,7 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 describe('LoiSelectionFormComponent', () => {
+  let component: LoiSelectionComponent;
   let fixture: ComponentFixture<LoiSelectionComponent>;
 
   let dataStoreService: jasmine.SpyObj<DataStoreService>;
@@ -94,6 +92,7 @@ describe('LoiSelectionFormComponent', () => {
     );
     fixture.componentInstance.survey = survey;
     fixture.componentInstance.canImport = true;
+    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
@@ -110,6 +109,20 @@ describe('LoiSelectionFormComponent', () => {
       loiList.querySelectorAll('.loi-list-item')
     ).map((element: Element) => element.textContent);
     expect(loiListValues).toEqual(['Unnamed point', 'Unnamed point']);
+  });
+
+  it('shows updated list of LOIs', () => {
+    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
+      List([{...poi1, properties: Map({name: 'Test 1'})}, poi2])
+    );
+    fixture.detectChanges();
+
+    const loiList: HTMLElement =
+      fixture.debugElement.nativeElement.querySelector('.loi-list');
+    const loiListValues = Array.from(
+      loiList.querySelectorAll('.loi-list-item')
+    ).map((element: Element) => element.textContent);
+    expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
   });
 
   describe('when the import button is clicked', () => {
