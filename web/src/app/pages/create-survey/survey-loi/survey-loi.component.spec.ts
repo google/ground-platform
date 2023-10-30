@@ -91,10 +91,9 @@ describe('SurveyLoiComponent', () => {
     expect(loiServiceSpy.getLocationsOfInterest$).toHaveBeenCalled();
   }));
 
-  it('loads loi list', done => {
+  it('loads loi list', fakeAsync(() => {
     component.lois$.subscribe(value => {
       expect(value?.size).toBe(1);
-      done();
     });
-  });
+  }));
 });
