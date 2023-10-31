@@ -55,7 +55,7 @@ describe('SurveyLoiComponent', () => {
   beforeEach(waitForAsync(() => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
-      ['getLocationsOfInterest$']
+      ['getLocationsOfInterest$', 'getLoisWithLabels$']
     );
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -63,7 +63,7 @@ describe('SurveyLoiComponent', () => {
       'canManageSurvey',
     ]);
 
-    loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
+    loiServiceSpy.getLoisWithLabels$.and.returnValue(mockLois$);
     surveyServiceSpy.canManageSurvey.and.returnValue(true);
     surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
 
@@ -87,8 +87,8 @@ describe('SurveyLoiComponent', () => {
     fixture.detectChanges();
   });
 
-  it('calls getLocationsOfInterests$ on init', fakeAsync(() => {
-    expect(loiServiceSpy.getLocationsOfInterest$).toHaveBeenCalled();
+  it('calls getLoisWithLabels$ on init', fakeAsync(() => {
+    expect(loiServiceSpy.getLoisWithLabels$).toHaveBeenCalled();
   }));
 
   it('loads loi list', fakeAsync(() => {

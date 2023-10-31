@@ -102,16 +102,7 @@ export class EditJobComponent {
     );
 
     this.lois = await firstValueFrom(
-      this.loiService.getLocationsOfInterest$().pipe(
-        map(lois => LocationOfInterestService.getLoisWithNames(lois)),
-        map(lois =>
-          List(
-            lois
-              .toArray()
-              .filter((loi: LocationOfInterest) => loi.jobId === this.jobId)
-          )
-        )
-      )
+      this.loiService.getLoisByJobId$(this.jobId!)
     );
   }
 

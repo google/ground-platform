@@ -35,8 +35,6 @@ export class SurveyLoiComponent {
   ) {}
 
   ngOnInit() {
-    this.lois$ = this.loiService
-      .getLocationsOfInterest$()
-      .pipe(map(lois => LocationOfInterestService.getLoisWithNames(lois)));
+    this.lois$ = this.loiService.getLoisWithLabels$();
   }
 }

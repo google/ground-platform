@@ -79,10 +79,14 @@ export class LocationOfInterestService {
     return this.lois$;
   }
 
-  getJobLocationsOfInterest$(
-    jobId: string
-  ): Observable<List<LocationOfInterest>> {
+  getLoisWithLabels$(): Observable<List<LocationOfInterest>> {
     return this.lois$.pipe(
+      map(lois => LocationOfInterestService.getLoisWithNames(lois))
+    );
+  }
+
+  getLoisByJobId$(jobId: string): Observable<List<LocationOfInterest>> {
+    return this.getLoisWithLabels$().pipe(
       map(lois => lois.filter(loi => loi.jobId === jobId))
     );
   }
