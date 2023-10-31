@@ -56,10 +56,10 @@
             [defaultSelection]="loiPermissionsOption"
             (select)="onLoiPermissionsChange($event)"
           ></loi-permissions>
-          <loi-selection
+          <survey-loi
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
-            #loiSelection
-          ></loi-selection>
+            #surveyLoi
+          ></survey-loi>
           <task-details
             *ngSwitchCase="SetupPhase.DEFINE_TASKS"
             #taskDetails

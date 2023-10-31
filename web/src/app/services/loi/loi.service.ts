@@ -15,7 +15,7 @@
  */
 
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {switchMap} from 'rxjs/operators';
+import {filter, map, switchMap} from 'rxjs/operators';
 import {firstValueFrom, Observable, of, ReplaySubject} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -77,6 +77,18 @@ export class LocationOfInterestService {
 
   getLocationsOfInterest$(): Observable<List<LocationOfInterest>> {
     return this.lois$;
+  }
+
+  getLoisWithLabels$(): Observable<List<LocationOfInterest>> {
+    return this.lois$.pipe(
+      map(lois => LocationOfInterestService.getLoisWithNames(lois))
+    );
+  }
+
+  getLoisByJobId$(jobId: string): Observable<List<LocationOfInterest>> {
+    return this.getLoisWithLabels$().pipe(
+      map(lois => lois.filter(loi => loi.jobId === jobId))
+    );
   }
 
   static getAnonymousDisplayName(loi: LocationOfInterest): string {
