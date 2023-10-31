@@ -149,7 +149,7 @@ export class TasksEditorComponent {
     this.formArray.push(formGroup);
   }
 
-  onDeleteTask(index: number) {
+  onTaskDelete(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Warning',
@@ -164,7 +164,7 @@ export class TasksEditorComponent {
       });
   }
 
-  onDuplicateTask(index: number) {
+  onTaskDuplicate(index: number) {
     this.dialogService
       .openConfirmationDialog(
         'Duplicate task',

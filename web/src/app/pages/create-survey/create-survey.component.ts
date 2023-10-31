@@ -33,7 +33,6 @@ import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
-import {SurveyReviewComponent} from './survey-review/survey-review.component';
 
 @Component({
   selector: 'create-survey',

@@ -32,7 +32,7 @@ export class SurveyDetailsComponent {
   @Input() description = '';
   @Output() canContinue: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  ngOnChange(): void {
+  ngOnInit(): void {
     this.formGroup = new FormBuilder().group({
       [this.titleControlKey]: [this.title, Validators.required],
       [this.descriptionControlKey]: this.description,

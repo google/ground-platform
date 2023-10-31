@@ -30,7 +30,7 @@ export class JobDetailsComponent {
   @Input() name = '';
   @Output() canContinue: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  ngOnChange(): void {
+  ngOnInit(): void {
     this.formGroup = new FormBuilder().group({
       [this.nameControlKey]: [this.name, Validators.required],
     });
