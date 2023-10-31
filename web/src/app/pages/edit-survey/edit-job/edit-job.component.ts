@@ -22,6 +22,7 @@ import {Subscription, firstValueFrom, map} from 'rxjs';
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
+import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 
 @Component({
   selector: 'edit-job',
@@ -87,6 +88,9 @@ export class EditJobComponent {
   onChangeSection(section: 'tasks' | 'lois') {
     this.section = section;
   }
+
+  @ViewChild('tasksEditor')
+  tasksEditor?: TasksEditorComponent;
 
   ngOnDestroy() {
     this.subscription.unsubscribe();

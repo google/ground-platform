@@ -37,8 +37,8 @@
   </div>
 
   <div [ngSwitch]="section">
-    <tasks-editor [tasks]="tasks" *ngSwitchCase="'tasks'"></tasks-editor>
+    <tasks-editor *ngSwitchCase="'tasks'" [tasks]="tasks" #tasksEditor></tasks-editor>
 
-    <loi-selection #loiSelection *ngSwitchCase="'lois'"></loi-selection>
+    <loi-selection *ngSwitchCase="'lois'" #loiSelection></loi-selection>
   </div>
 </div>
