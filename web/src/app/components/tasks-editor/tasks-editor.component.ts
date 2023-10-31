@@ -88,7 +88,7 @@ export class TasksEditorComponent {
     private dialogService: DialogService
   ) {}
 
-  ngOnChanges(): void {
+  private initForm() {
     const formBuilder = new FormBuilder();
 
     if (this.tasks) {
@@ -118,16 +118,24 @@ export class TasksEditorComponent {
         ),
       });
     } else {
-      const formBuilder = new FormBuilder();
-
       this.formGroup = formBuilder.group({
         tasks: formBuilder.array([]),
       });
     }
 
-    this.formGroup.statusChanges.subscribe(() => {
-      this.onChange?.emit(this.formGroup?.valid);
+    this.formGroup.statusChanges.subscribe(status => {
+      this.canContinueService.setCanContinue(this.formGroup.valid);
     });
+
+    this.canContinueService.setCanContinue(this.formGroup.valid);
+  }
+
+  ngOnInit(): void {
+    this.initForm();
+  }
+
+  ngOnChanges(): void {
+    this.initForm();
   }
 
   get formArray() {

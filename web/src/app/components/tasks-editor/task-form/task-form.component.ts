@@ -183,11 +183,11 @@ export class TaskFormComponent {
     return this.formGroup.get('options')! as FormArray;
   }
 
-  onDeleteTask(): void {
+  onTaskDelete(): void {
     this.delete.emit(this.index);
   }
 
-  onDuplicateTask(): void {
+  onTaskDuplicate(): void {
     this.duplicate.emit(this.index);
   }
 
