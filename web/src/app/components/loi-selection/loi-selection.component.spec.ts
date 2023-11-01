@@ -20,15 +20,10 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {List, Map} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
 import {LoiSelectionComponent} from './loi-selection.component';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
@@ -36,13 +31,11 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 describe('LoiSelectionFormComponent', () => {
+  let component: LoiSelectionComponent;
   let fixture: ComponentFixture<LoiSelectionComponent>;
-  let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
 
   let dataStoreService: jasmine.SpyObj<DataStoreService>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
-  let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
-  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
   const poiId1 = 'poi001';
   const poiId2 = 'poi002';
@@ -77,20 +70,6 @@ describe('LoiSelectionFormComponent', () => {
       ['deleteLocationOfInterest']
     );
     matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
-    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
-      'LocationOfInterestService',
-      ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
-    );
-    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'canManageSurvey',
-      'getActiveSurvey$',
-    ]);
-    mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
-      List<LocationOfInterest>([poi1, poi2])
-    );
-    loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
-    surveyServiceSpy.canManageSurvey.and.returnValue(true);
 
     TestBed.configureTestingModule({
       imports: [GoogleMapsModule],
@@ -104,32 +83,17 @@ describe('LoiSelectionFormComponent', () => {
           provide: MatDialog,
           useValue: matDialogSpy,
         },
-        {
-          provide: LocationOfInterestService,
-          useValue: loiServiceSpy,
-        },
-        {
-          provide: SurveyService,
-          useValue: surveyServiceSpy,
-        },
       ],
     }).compileComponents();
+
     fixture = TestBed.createComponent(LoiSelectionComponent);
+    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
+      List([poi1, poi2])
+    );
+    fixture.componentInstance.survey = survey;
+    fixture.componentInstance.canImport = true;
+    component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  it('loads h1 header when standalone page', () => {
-    expect(
-      fixture.debugElement.nativeElement.querySelector('h1').textContent
-    ).toBe('Where should data be collected?');
-  });
-
-  it('loads h2 header when not standalone page', () => {
-    fixture.componentInstance.isStandalonePage = false;
-    fixture.detectChanges();
-    expect(
-      fixture.debugElement.nativeElement.querySelector('h2').textContent
-    ).toBe('Where should data be collected?');
   });
 
   it('loads map component', () => {
@@ -145,6 +109,20 @@ describe('LoiSelectionFormComponent', () => {
       loiList.querySelectorAll('.loi-list-item')
     ).map((element: Element) => element.textContent);
     expect(loiListValues).toEqual(['Unnamed point', 'Unnamed point']);
+  });
+
+  it('shows updated list of LOIs', () => {
+    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
+      List([{...poi1, properties: Map({name: 'Test 1'})}, poi2])
+    );
+    fixture.detectChanges();
+
+    const loiList: HTMLElement =
+      fixture.debugElement.nativeElement.querySelector('.loi-list');
+    const loiListValues = Array.from(
+      loiList.querySelectorAll('.loi-list-item')
+    ).map((element: Element) => element.textContent);
+    expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
   });
 
   describe('when the import button is clicked', () => {
@@ -182,7 +160,7 @@ describe('LoiSelectionFormComponent', () => {
     });
 
     it('does not show when there are no LOIs', () => {
-      mockLois$.next(List([]));
+      fixture.componentInstance.lois = List([]);
       fixture.detectChanges();
 
       const clearAllButton =

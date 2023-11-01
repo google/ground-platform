@@ -15,12 +15,13 @@
  */
 
 import {NgModule} from '@angular/core';
-import {SurveyReviewComponent} from './survey-review.component';
-import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
+import {SurveyLoiComponent} from './survey-loi.component';
+import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
+import {CommonModule} from '@angular/common';
 
 @NgModule({
-  declarations: [SurveyReviewComponent],
-  imports: [ShareSurveyModule],
-  exports: [SurveyReviewComponent],
+  declarations: [SurveyLoiComponent],
+  imports: [LoiSelectionModule, CommonModule],
+  exports: [SurveyLoiComponent],
 })
-export class SurveyReviewModule {}
+export class SurveyLoiModule {}

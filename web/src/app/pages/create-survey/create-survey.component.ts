@@ -23,7 +23,7 @@ import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/sur
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
-import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
+
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {filter, first, firstValueFrom} from 'rxjs';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -33,7 +33,7 @@ import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
-import {SurveyReviewComponent} from './survey-review/survey-review.component';
+import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 
 @Component({
   selector: 'create-survey',
@@ -297,8 +297,8 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
-  @ViewChild('loiSelection')
-  loiSelection?: LoiSelectionComponent;
+  @ViewChild('surveyLoi')
+  surveyLoi?: SurveyLoiComponent;
 
   @ViewChild('taskDetails')
   taskDetails?: TaskDetailsComponent;
