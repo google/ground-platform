@@ -129,7 +129,7 @@ export class CreateSurveyComponent implements OnInit {
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([
     [SetupPhase.SURVEY_DETAILS, 'Create survey'],
     [SetupPhase.JOB_DETAILS, 'Add a job'],
-    [SetupPhase.DEFINE_LOI_PERMISSIONS, 'Data collection approach'],
+    [SetupPhase.DEFINE_LOI_PERMISSIONS, 'Data collection strategy'],
     [SetupPhase.DEFINE_LOIS, 'Import data collection sites'],
     [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
     [SetupPhase.REVIEW, 'Review and share survey'],
