@@ -46,7 +46,10 @@ export async function exportCsvHandler(
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push('id');
+  // Feature ID column conforms to desktop GIS defaults:
+  //   "FID" is default used by ArcGIS but is case-insensitive.
+  //   "fid" is default used by QGIS and is case-sensitive.
+  headers.push('fid');
   // 'latitude', 'longitutde', and 'geometry' are default column names used 
   // by Earth Engine when importing tables from CSV data.
   headers.push('latitude');
@@ -94,7 +97,7 @@ export async function exportCsvHandler(
     const submissions = submissionsByLocationOfInterest[loiId] || [{}];
     submissions.forEach(submission => {
       const row = [];
-      row.push(getId(loi));
+      row.push(loi.get('id') || '');
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
@@ -128,17 +131,6 @@ function getGeometry(geoJsonObject: any) {
     return null;
   }
   return geoJsonObject.geometry;
-}
-
-function getId(
-  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
-) {
-  const properties = loi.get('properties') || {};
-  return (
-    loi.get('id') ||
-    properties['id'] ||
-    ''
-  );
 }
 
 /**
