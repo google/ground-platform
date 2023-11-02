@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
-import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-
-import {HeaderModule} from 'app/components/header/header.module';
+import {CommonModule} from '@angular/common';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
-import {LoiPermissionsModule} from 'app/pages/create-survey/loi-permissions/loi-permissions.module';
-import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
-import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-details.module';
-
 import {JobDetailsModule} from './job-details/job-details.module';
 import {SurveyDetailsModule} from './survey-details/survey-details.module';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {TaskDetailsModule} from 'app/pages/create-survey/task-details/task-details.module';
+import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {HeaderModule} from 'app/components/header/header.module';
+import {LoiPermissionsModule} from 'app/pages/create-survey/loi-permissions/loi-permissions.module';
+import {SurveyLoiModule} from './survey-loi/survey-loi.module';
 import {SurveyReviewModule} from './survey-review/survey-review.module';
 
 @NgModule({
   declarations: [CreateSurveyComponent],
   imports: [
     JobDetailsModule,
-    LoiSelectionModule,
     LoiPermissionsModule,
     TaskDetailsModule,
     SurveyDetailsModule,
+    SurveyLoiModule,
     SurveyReviewModule,
     CommonModule,
     MatButtonModule,

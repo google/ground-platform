@@ -443,7 +443,7 @@ describe('CreateSurveyComponent', () => {
         });
 
         it('navigates to the LOI selection component', () => {
-          expect(component.loiSelection).toBeDefined();
+          expect(component.surveyLoi).toBeDefined();
           expect(component.loiPermissions).toBeUndefined();
         });
       });
@@ -495,7 +495,7 @@ describe('CreateSurveyComponent', () => {
         });
 
         it('navigates to the LOI selection component', () => {
-          expect(component.loiSelection).toBeDefined();
+          expect(component.surveyLoi).toBeDefined();
           expect(component.loiPermissions).toBeUndefined();
         });
       });

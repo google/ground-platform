@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import {DragDropModule} from '@angular/cdk/drag-drop';
-import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
+import {TaskInputModule} from 'app/pages/create-survey/task-details/task-input/task-input.module';
+import {AddTaskButtonModule} from 'app/pages/create-survey/task-details/add-task-button/add-task-button.module';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-
-import {LoiSelectionModule} from 'app/pages/create-survey/loi-selection/loi-selection.module';
-import {AddTaskButtonModule} from 'app/pages/create-survey/task-details/add-task-button/add-task-button.module';
-import {TaskInputModule} from 'app/pages/create-survey/task-details/task-input/task-input.module';
-import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 
 @NgModule({
   declarations: [EditJobComponent],

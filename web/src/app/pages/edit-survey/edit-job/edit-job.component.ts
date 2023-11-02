@@ -15,13 +15,7 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Component, ViewChild} from '@angular/core';
-import {ActivatedRoute, Params} from '@angular/router';
-import {List} from 'immutable';
-import {Subscription, firstValueFrom, map} from 'rxjs';
-
 import {Task} from 'app/models/task/task.model';
-import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
 import {
   TaskGroup,
   taskGroupToTypes,
@@ -30,6 +24,13 @@ import {DialogService} from 'app/services/dialog/dialog.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
+import {List} from 'immutable';
+import {Subscription, firstValueFrom, map} from 'rxjs';
+import {Component, ViewChild} from '@angular/core';
+import {ActivatedRoute, Params} from '@angular/router';
+import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 
 @Component({
   selector: 'edit-job',
@@ -42,8 +43,10 @@ export class EditJobComponent {
   surveyId?: string;
   jobId?: string;
   section: 'tasks' | 'lois' = 'tasks';
+  lois!: List<LocationOfInterest>;
 
   tasks?: List<Task>;
+
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
@@ -59,7 +62,8 @@ export class EditJobComponent {
     private route: ActivatedRoute,
     private navigationService: NavigationService,
     private dialogService: DialogService,
-    private surveyService: SurveyService,
+    private loiService: LocationOfInterestService,
+    public surveyService: SurveyService,
     private taskService: TaskService
   ) {
     this.subscription.add(
@@ -95,6 +99,10 @@ export class EditJobComponent {
             .sortBy(task => task.index)
         )
       )
+    );
+
+    this.lois = await firstValueFrom(
+      this.loiService.getLoisByJobId$(this.jobId!)
     );
   }
 

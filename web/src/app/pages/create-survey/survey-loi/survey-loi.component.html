@@ -14,8 +14,14 @@
   limitations under the License.
 -->
 
-<h1 class="title">Review survey</h1>
+<h1 class="title">Where should data be collected?</h1>
 
-<h2 class="description">Is your survey ready? Share it with collectors.</h2>
-
-<share-survey></share-survey>
+<div *ngIf="lois$ | async as lois">
+  <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
+    <loi-selection
+      [canImport]="surveyService.canManageSurvey()"
+      [lois]="lois"
+      [survey]="survey">
+    </loi-selection>
+  </div>
+</div>

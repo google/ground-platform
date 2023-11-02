@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {filter, first, firstValueFrom} from 'rxjs';
-
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {JobService} from 'app/services/job/job.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
+import {Survey} from 'app/models/survey.model';
+import {Job} from 'app/models/job.model';
+
+import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {filter, first, firstValueFrom} from 'rxjs';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {TaskService} from 'app/services/task/task.service';
 import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
-import {LoiSelectionComponent} from 'app/pages/create-survey/loi-selection/loi-selection.component';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
-import {JobService} from 'app/services/job/job.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
-
-import {SurveyReviewComponent} from './survey-review/survey-review.component';
+import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 
 @Component({
   selector: 'create-survey',
@@ -299,8 +297,8 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
-  @ViewChild('loiSelection')
-  loiSelection?: LoiSelectionComponent;
+  @ViewChild('surveyLoi')
+  surveyLoi?: SurveyLoiComponent;
 
   @ViewChild('taskDetails')
   taskDetails?: TaskDetailsComponent;
