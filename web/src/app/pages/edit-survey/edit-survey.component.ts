@@ -16,7 +16,7 @@
 
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Component, OnInit} from '@angular/core';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Survey} from 'app/models/survey.model';
 import {Job} from 'app/models/job.model';
@@ -28,7 +28,6 @@ import {
   JobDialogComponent,
 } from './job-dialog/job-dialog.component';
 import {JobService} from 'app/services/job/job.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {Subscription, filter, startWith} from 'rxjs';
 
 @Component({
@@ -47,9 +46,8 @@ export class EditSurveyComponent implements OnInit {
 
   constructor(
     public dialog: MatDialog,
-    private surveyService: SurveyService,
+    private tempSurveyService: TempSurveyService,
     private jobService: JobService,
-    private dataStoreService: DataStoreService,
     private navigationService: NavigationService,
     private route: ActivatedRoute,
     private router: Router
@@ -59,18 +57,17 @@ export class EditSurveyComponent implements OnInit {
 
   ngOnInit(): void {
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(surveyId => {
+      this.navigationService.getSurveyId$().subscribe(async surveyId => {
         if (surveyId) {
           this.surveyId = surveyId;
-          this.surveyService.activateSurvey(surveyId);
+          await this.tempSurveyService.init(surveyId);
+          this.tempSurveyService
+            .getTempSurvey$()
+            .subscribe(survey => (this.survey = survey));
         }
       })
     );
-    this.subscription.add(
-      this.surveyService
-        .getActiveSurvey$()
-        .subscribe(survey => (this.survey = survey))
-    );
+
     this.subscription.add(
       this.router.events
         .pipe(
@@ -110,8 +107,7 @@ export class EditSurveyComponent implements OnInit {
 
   async duplicateJob(job: Job): Promise<void> {
     const newJob = this.jobService.createNewJob();
-    await this.jobService.addOrUpdateJob(
-      this.surveyId!,
+    this.tempSurveyService.addOrUpdateJob(
       job.copyWith({id: newJob.id, name: 'Copy of ' + job.name})
     );
   }
@@ -132,13 +128,12 @@ export class EditSurveyComponent implements OnInit {
       switch (result.dialogType) {
         case DialogType.AddJob:
         case DialogType.RenameJob:
-          await this.jobService.addOrUpdateJob(
-            this.surveyId!,
+          this.tempSurveyService.addOrUpdateJob(
             job.copyWith({name: result.jobName})
           );
           break;
         case DialogType.DeleteJob:
-          await this.dataStoreService.deleteJob(this.surveyId!, job.id);
+          this.tempSurveyService.deleteJob(job);
           break;
         default:
           break;

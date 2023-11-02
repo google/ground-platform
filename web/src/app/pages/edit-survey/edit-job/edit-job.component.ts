@@ -31,6 +31,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
 
 @Component({
   selector: 'edit-job',
@@ -64,6 +65,7 @@ export class EditJobComponent {
     private dialogService: DialogService,
     private loiService: LocationOfInterestService,
     public surveyService: SurveyService,
+    public tempSurveyService: TempSurveyService,
     private taskService: TaskService
   ) {
     this.subscription.add(
@@ -90,16 +92,11 @@ export class EditJobComponent {
   private async onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.tasks = await firstValueFrom(
-      this.surveyService.getActiveSurvey$().pipe(
-        map(survey =>
-          survey
-            .getJob(this.jobId!)
-            ?.tasks?.toList()
-            .sortBy(task => task.index)
-        )
-      )
-    );
+    this.tasks = this.tempSurveyService
+      .getTempSurvey()
+      .getJob(this.jobId!)
+      ?.tasks?.toList()
+      .sortBy(task => task.index);
 
     this.lois = await firstValueFrom(
       this.loiService.getLoisByJobId$(this.jobId!)
