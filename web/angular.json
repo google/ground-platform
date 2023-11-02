@@ -153,18 +153,6 @@
             "lintFilePatterns": ["**/*.spec.ts", "**/*.ts"]
           }
         },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "web:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "web:serve:production"
-            }
-          }
-        },
         "deploy": {
           "builder": "@angular/fire:deploy",
           "options": {}

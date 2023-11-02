@@ -15,6 +15,7 @@
  */
 
 import {List} from 'immutable';
+
 import {Option} from 'app/models/task/option.model';
 
 export class Result {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {firstValueFrom} from 'rxjs';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Injectable} from '@angular/core';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {firstValueFrom} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

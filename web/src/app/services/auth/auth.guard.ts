@@ -19,12 +19,13 @@ import {
   CanActivate,
   RouterStateSnapshot,
 } from '@angular/router';
-import {AuthService} from 'app/services/auth/auth.service';
 import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import {environment} from 'environments/environment';
+
 import {User} from 'app/models/user.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {environment} from 'environments/environment';
 
 @Injectable({
   providedIn: 'root',

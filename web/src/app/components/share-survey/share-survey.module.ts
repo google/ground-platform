@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
+import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
 import {ShareListModule} from 'app/components/share-list/share-list.module';
-import {MatCardModule} from '@angular/material/card';
+
 import {ShareSurveyComponent} from './share-survey.component';
 
 @NgModule({

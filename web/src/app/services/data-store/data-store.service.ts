@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-import {getStorage, getDownloadURL, ref} from 'firebase/storage';
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {DocumentData, FieldPath} from '@angular/fire/firestore';
-import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {firstValueFrom, Observable, of} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {map} from 'rxjs/operators';
-import {User} from 'app/models/user.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Job} from 'app/models/job.model';
-import {List, Map} from 'immutable';
-import {Submission} from 'app/models/submission/submission.model';
-import {Role} from 'app/models/role.model';
-import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
-import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
 import {deleteField, serverTimestamp} from 'firebase/firestore';
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {List, Map} from 'immutable';
+import {Observable, firstValueFrom, of} from 'rxjs';
+import {map} from 'rxjs/operators';
+
+import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
+import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
+import {Role} from 'app/models/role.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
+import {User} from 'app/models/user.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 

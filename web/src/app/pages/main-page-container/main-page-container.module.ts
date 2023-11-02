@@ -15,11 +15,12 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {MainPageContainerComponent} from './main-page-container.component';
-import {MainPageModule} from './main-page/main-page.module';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
 import {NgModule} from '@angular/core';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
 import {RouterModule} from '@angular/router';
+
+import {MainPageModule} from './main-page/main-page.module';
+import {MainPageContainerComponent} from './main-page-container.component';
 
 @NgModule({
   entryComponents: [],

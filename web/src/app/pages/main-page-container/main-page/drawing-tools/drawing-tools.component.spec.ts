@@ -16,13 +16,20 @@
 
 import {
   ComponentFixture,
+  TestBed,
   fakeAsync,
   flush,
-  TestBed,
   tick,
   waitForAsync,
 } from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
@@ -30,14 +37,9 @@ import {
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
+
 import {DrawingToolsComponent} from './drawing-tools.component';
 import {DrawingToolsModule} from './drawing-tools.module';
-import {Map} from 'immutable';
-import {AuthService} from 'app/services/auth/auth.service';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {By} from '@angular/platform-browser';
 
 describe('DrawingToolsComponent', () => {
   let fixture: ComponentFixture<DrawingToolsComponent>;

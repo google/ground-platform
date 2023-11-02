@@ -15,7 +15,7 @@
  */
 
 import {Component, Input, OnChanges} from '@angular/core';
-import {FormGroup, FormBuilder} from '@angular/forms';
+import {FormBuilder, FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'survey-details',

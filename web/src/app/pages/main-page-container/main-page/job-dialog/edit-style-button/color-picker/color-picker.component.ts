@@ -17,20 +17,19 @@
 import {
   Component,
   ElementRef,
-  OnInit,
-  Inject,
-  Output,
   EventEmitter,
+  Inject,
+  OnInit,
+  Output,
 } from '@angular/core';
 import {
-  MatLegacyDialogRef as MatDialogRef,
   MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-} from '@angular/material/legacy-dialog';
-import {
   MatLegacyDialog as MatDialog,
   MatLegacyDialogConfig as MatDialogConfig,
+  MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
 import {ColorEvent} from 'ngx-color';
+
 import {Job} from 'app/models/job.model';
 
 @Component({

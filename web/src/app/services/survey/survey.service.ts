@@ -15,17 +15,17 @@
  */
 
 import {Injectable} from '@angular/core';
-import {firstValueFrom, Observable, ReplaySubject} from 'rxjs';
-import {switchMap, shareReplay} from 'rxjs/operators';
-import {Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {AuthService} from 'app/services/auth/auth.service';
-import {Role} from 'app/models/role.model';
 import {List, Map} from 'immutable';
-import {of} from 'rxjs';
-import {environment} from 'environments/environment';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
+import {shareReplay, switchMap} from 'rxjs/operators';
+
 import {AclEntry} from 'app/models/acl-entry.model';
+import {Role} from 'app/models/role.model';
+import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {environment} from 'environments/environment';
 
 @Injectable({
   providedIn: 'root',

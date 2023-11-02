@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {hash, is, List} from 'immutable';
+import {List, hash, is} from 'immutable';
+
 import {Geometry, GeometryType} from './geometry';
 import {LinearRing} from './linear-ring';
 

@@ -15,26 +15,27 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {
-  MultipleChoice,
-  Cardinality,
-} from 'app/models/task/multiple-choice.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Option} from 'app/models/task/option.model';
 import {List, Map} from 'immutable';
+
 import {AuditInfo} from 'app/models/audit-info.model';
-import {Result} from 'app/models/submission/result.model';
-import {Role} from 'app/models/role.model';
-import {User} from 'app/models/user.model';
+import {Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
+import {Role} from 'app/models/role.model';
+import {Result} from 'app/models/submission/result.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
+import {
+  Cardinality,
+  MultipleChoice,
+} from 'app/models/task/multiple-choice.model';
+import {Option} from 'app/models/task/option.model';
 import {
   MultipleChoiceResponseCondition,
   NewUnplannedLocationOfInterestCondition,
   TaskCondition,
 } from 'app/models/task/task-condition.model';
+import {Task, TaskType} from 'app/models/task/task.model';
+import {User} from 'app/models/user.model';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],

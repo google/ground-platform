@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {LoiPermissionsComponent} from './loi-permissions.component';
-import {MatButtonModule} from '@angular/material/button';
 import {ReactiveFormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
-import {CommonModule} from '@angular/common';
-import {MatCardModule} from '@angular/material/card';
+
+import {LoiPermissionsComponent} from './loi-permissions.component';
 
 @NgModule({
   declarations: [LoiPermissionsComponent],

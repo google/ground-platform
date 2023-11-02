@@ -17,8 +17,9 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
-import {SurveyService} from 'app/services/survey/survey.service';
+
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'ground-title-dialog',

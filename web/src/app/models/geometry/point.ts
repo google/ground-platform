@@ -15,6 +15,7 @@
  */
 
 import {hash, is} from 'immutable';
+
 import {Coordinate} from './coordinate';
 import {Geometry, GeometryType} from './geometry';
 
