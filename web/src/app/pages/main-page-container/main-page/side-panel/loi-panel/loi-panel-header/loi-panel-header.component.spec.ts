@@ -17,25 +17,26 @@ limitations under the License.
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 import {Router} from '@angular/router';
+import {List, Map} from 'immutable';
 import {BehaviorSubject, NEVER, of} from 'rxjs';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {LinearRing} from 'app/models/geometry/linear-ring';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+import {Point} from 'app/models/geometry/point';
+import {Polygon} from 'app/models/geometry/polygon';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {Point} from 'app/models/geometry/point';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {List, Map} from 'immutable';
-import {Polygon} from 'app/models/geometry/polygon';
-import {LinearRing} from 'app/models/geometry/linear-ring';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {LocationOfInterestPanelHeaderComponent} from 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/loi-panel-header.component';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 type LoiPanelHeaderFixture =
   ComponentFixture<LocationOfInterestPanelHeaderComponent>;

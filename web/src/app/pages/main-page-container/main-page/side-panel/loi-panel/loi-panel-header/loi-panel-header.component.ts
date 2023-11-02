@@ -17,21 +17,23 @@
 import {
   Component,
   Input,
-  OnInit,
-  OnDestroy,
   NgZone,
   OnChanges,
+  OnDestroy,
+  OnInit,
 } from '@angular/core';
-import {Job} from 'app/models/job.model';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {Subscription} from 'rxjs';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Map} from 'immutable';
+import {Subscription} from 'rxjs';
+
 import {GeometryType} from 'app/models/geometry/geometry';
+import {Job} from 'app/models/job.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+
 @Component({
   selector: 'ground-loi-panel-header',
   templateUrl: './loi-panel-header.component.html',

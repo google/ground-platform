@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Component, OnInit} from '@angular/core';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-import {environment} from 'environments/environment';
 import {MatDialog} from '@angular/material/dialog';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {Subscription, filter, startWith} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {JobService} from 'app/services/job/job.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {environment} from 'environments/environment';
+
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from './job-dialog/job-dialog.component';
-import {JobService} from 'app/services/job/job.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Subscription, filter, startWith} from 'rxjs';
 
 @Component({
   selector: 'edit-survey',

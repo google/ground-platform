@@ -16,10 +16,11 @@
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {Component, Input} from '@angular/core';
+import {List} from 'immutable';
+
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {TaskService} from 'app/services/task/task.service';
-import {List} from 'immutable';
 
 export enum TaskGroup {
   QUESTION = 1,

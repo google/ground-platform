@@ -14,42 +14,44 @@
  * limitations under the License.
  */
 
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {HarnessLoader} from '@angular/cdk/testing';
 import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
+import {CdkTreeModule} from '@angular/cdk/tree';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
+import {MatTreeModule} from '@angular/material/tree';
 import {
   MatTreeHarness,
   MatTreeNodeHarness,
 } from '@angular/material/tree/testing';
-import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {JobListItemComponent} from './job-list-item.component';
-import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {of, Subject} from 'rxjs';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {Router} from '@angular/router';
-import {MatTreeModule} from '@angular/material/tree';
-import {CdkTreeModule} from '@angular/cdk/tree';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {AuditInfo} from 'app/models/audit-info.model';
-import {Submission} from 'app/models/submission/submission.model';
 import {List, Map} from 'immutable';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {Subject, of} from 'rxjs';
+
+import {AuditInfo} from 'app/models/audit-info.model';
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {Point} from 'app/models/geometry/point';
+import {Job} from 'app/models/job.model';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {Point} from 'app/models/geometry/point';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Job} from 'app/models/job.model';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {JobListItemComponent} from './job-list-item.component';
 const authState = {
   displayName: null,
   isAnonymous: true,

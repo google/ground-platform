@@ -15,25 +15,27 @@
  */
 
 import {NgModule} from '@angular/core';
-import {Routes, RouterModule} from '@angular/router';
-import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
-import {AuthGuard} from 'app/services/auth/auth.guard';
+import {RouterModule, Routes} from '@angular/router';
+
 import {SignInPageComponent} from 'app/components/sign-in-page/sign-in-page.component';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyListComponent} from 'app/components/survey-list/survey-list.component';
-import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {SignInPageModule} from 'app/components/sign-in-page/sign-in-page.module';
+import {SurveyListComponent} from 'app/components/survey-list/survey-list.component';
 import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
-import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
-import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
-import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
-import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
+import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
+import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
+import {AuthGuard} from 'app/services/auth/auth.guard';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
+import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
+import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
+import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
+import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
+import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
-import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
 
 const routes: Routes = [
   {

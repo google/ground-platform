@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {
   MatLegacyDialogModule as MatDialogModule,
   MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
-import {TitleDialogComponent} from './title-dialog.component';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {SurveyService} from 'app/services/survey/survey.service';
+
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {TitleDialogComponent} from './title-dialog.component';
 
 describe('TitleDialogComponent', () => {
   let component: TitleDialogComponent;

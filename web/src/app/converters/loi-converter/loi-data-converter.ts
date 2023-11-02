@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 import {DocumentData} from '@angular/fire/firestore';
+import {GeoPoint} from 'firebase/firestore';
+import {Map} from 'immutable';
+
+import {GEOMETRY_TYPES, toGeometry} from 'app/converters/geometry-converter';
+import {Geometry} from 'app/models/geometry/geometry';
+import {Point} from 'app/models/geometry/point';
 import {
-  LocationOfInterest,
-  GeoJsonLocationOfInterest,
   AreaOfInterest,
   GenericLocationOfInterest,
+  GeoJsonLocationOfInterest,
+  LocationOfInterest,
 } from 'app/models/loi.model';
-import {Map} from 'immutable';
-import {GeoPoint} from 'firebase/firestore';
-import {Geometry} from 'app/models/geometry/geometry';
-import {toGeometry, GEOMETRY_TYPES} from 'app/converters/geometry-converter';
-import {Point} from 'app/models/geometry/point';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an

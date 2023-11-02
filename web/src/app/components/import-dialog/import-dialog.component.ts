@@ -15,12 +15,13 @@
  */
 
 import {Component, Inject, NgZone} from '@angular/core';
-import {DataImportService} from 'app/services/data-import/data-import.service';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {
   MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
   MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
+
+import {DataImportService} from 'app/services/data-import/data-import.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
 @Component({
@@ -65,11 +66,9 @@ export class ImportDialogComponent {
         this.jobId,
         files[0] as File
       );
-      this.notificationService.success(
-        `Successfully imported ${response.count} lois`
-      );
+      this.notificationService.success(`${response.count} sites imported`);
     } catch (err) {
-      this.notificationService.error('Importing lois failed');
+      this.notificationService.error('Importing data collection sites failed');
     }
     this.isImporting = false;
     this.ngZone.run(() => {

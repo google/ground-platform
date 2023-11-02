@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {TaskDetailsComponent} from './task-details.component';
-import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
-import {TaskInputModule} from './task-input/task-input.module';
-import {CommonModule} from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+
+import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
+import {TaskDetailsComponent} from './task-details.component';
+import {TaskInputModule} from './task-input/task-input.module';
 
 @NgModule({
   declarations: [TaskDetailsComponent],

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {Map} from 'immutable';
+
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Job} from 'app/models/job.model';
+
 import {Result} from './result.model';
-import {Map} from 'immutable';
 
 export class Submission {
   constructor(

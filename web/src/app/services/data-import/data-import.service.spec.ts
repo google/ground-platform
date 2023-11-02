@@ -15,9 +15,10 @@
  */
 
 import {TestBed} from '@angular/core/testing';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 
 import {DataImportService} from 'app/services/data-import/data-import.service';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+
 import {HttpClientService} from '../http-client/http-client.service';
 
 describe('DataImportService', () => {

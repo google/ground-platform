@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {convertToParamMap, ParamMap, Params} from '@angular/router';
+import {ParamMap, Params, convertToParamMap} from '@angular/router';
 import {ReplaySubject} from 'rxjs';
 
 /**
