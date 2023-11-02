@@ -4,6 +4,7 @@
 !.eslintrc.json
 !.prettierrc.js
 !.github/
+**/firebase-config.js
 **/dist/
 **/firebase-debug.log
 **/firebase-init.html
