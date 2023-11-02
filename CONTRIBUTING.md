@@ -108,24 +108,12 @@ Alternatively, you can test and deploy against a real Firebase project:
 
 2. Create a web app under "Project Overview > Add app > Web" or choose an existing web one.
 
-3. Scroll down to the code snippet under "SDK setup and configuration" and select "Config". Copy the code into `web/src/environments/.firebase-config.ts`, prepending the keyword `export` to the snippet, for example:
-
-   ```javascript
-   export const firebaseConfig = {
-     apiKey: 'soMeReallYlOngApIkeyWouLdGoHere123',
-     authDomain: 'my-app.firebaseapp.com',
-     databaseURL: 'https://my-app.firebaseio.com',
-     projectId: 'my-app',
-     storageBucket: 'my-app.appspot.com',
-     messagingSenderId: '12345678',
-     appId: '1:12345678:web:abc123etcetc',
-   };
-   ```
+3. Scroll down to the code snippet under "SDK setup and configuration" and select "Config". Copy and paste the code snippet into a new file in `web/keys/<project-id>/firebase-config.js`.
 
 4. Build and deploy all the things dev Firebase:
 
     ```shell
-    npm run deploy:dev <project-id>
+    npm run deploy:dev --project=<project-id>
     ```
 
 Once complete, the web app will be available at dev project's Firebase Hosting URL.
@@ -133,7 +121,7 @@ Once complete, the web app will be available at dev project's Firebase Hosting U
 The web app may also be develop locally against the dev Firebase server with:
 
 ```shell
-cd web && npm run start:dev
+cd web && npm run start:dev --project=<project-id>
 ```
 
 The web app will be accessible at http://localhost:4200. The app will be rebuilt and reloaded changes are saved.
