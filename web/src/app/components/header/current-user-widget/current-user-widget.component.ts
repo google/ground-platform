@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {AuthService} from 'app/services/auth/auth.service';
 import {Component, ElementRef} from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+
 import {AccountPopupComponent} from 'app/components/header/current-user-widget/account-popup/account-popup.component';
+import {AuthService} from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-current-user-widget',

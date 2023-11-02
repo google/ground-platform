@@ -15,12 +15,10 @@
  */
 
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MatInputModule} from '@angular/material/input';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {SurveyReviewComponent} from './survey-review.component';
+
 import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
+
+import {SurveyReviewComponent} from './survey-review.component';
 
 @NgModule({
   declarations: [SurveyReviewComponent],

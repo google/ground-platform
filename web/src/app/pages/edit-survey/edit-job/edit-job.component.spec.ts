@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
-import {from, of} from 'rxjs';
 import {MatDialogModule} from '@angular/material/dialog';
+import {By} from '@angular/platform-browser';
+import {ActivatedRoute} from '@angular/router';
+import {Map} from 'immutable';
+import {from, of} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Role} from 'app/models/role.model';
+import {Survey} from 'app/models/survey.model';
+import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {Survey} from 'app/models/survey.model';
-import {Role} from 'app/models/role.model';
-import {Job} from 'app/models/job.model';
-import {Map} from 'immutable';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {By} from '@angular/platform-browser';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('EditJobComponent', () => {
   let component: EditJobComponent;
@@ -52,6 +53,7 @@ describe('EditJobComponent', () => {
           provide: SurveyService,
           useValue: {
             getActiveSurvey$: () => of(survey),
+            canManageSurvey: () => true,
           },
         },
         {
@@ -82,7 +84,6 @@ describe('EditJobComponent', () => {
     const loiButton = fixture.debugElement.query(
       By.css('.section-selector button:nth-child(2)')
     ).nativeElement as HTMLElement;
-    console.log(loiButton);
     loiButton.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.loiSelection).toBeDefined();

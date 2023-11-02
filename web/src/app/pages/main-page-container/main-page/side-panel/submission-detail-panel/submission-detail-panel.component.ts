@@ -15,6 +15,7 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core'; // First, import Input
+
 import {Submission} from 'app/models/submission/submission.model';
 
 @Component({

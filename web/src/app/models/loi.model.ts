@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
 import {GeoPoint} from 'firebase/firestore';
+import {Map} from 'immutable';
+
 import {Geometry} from './geometry/geometry';
 
 export abstract class LocationOfInterest {

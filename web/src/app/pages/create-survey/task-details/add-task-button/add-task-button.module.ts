@@ -15,8 +15,9 @@
  */
 
 import {NgModule} from '@angular/core';
-import {AddTaskButtonComponent} from './add-task-button.component';
 import {MatIconModule} from '@angular/material/icon';
+
+import {AddTaskButtonComponent} from './add-task-button.component';
 
 @NgModule({
   declarations: [AddTaskButtonComponent],

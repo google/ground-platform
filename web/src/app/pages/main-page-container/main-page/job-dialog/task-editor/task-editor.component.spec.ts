@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {TaskEditorComponent} from './task-editor.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {BrowserModule} from '@angular/platform-browser';
-import {JobService} from 'app/services/job/job.service';
-import {MatIconModule} from '@angular/material/icon';
-import {MatSelectModule} from '@angular/material/select';
-import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {Router} from '@angular/router';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
+import {MatSelectModule} from '@angular/material/select';
+import {BrowserModule} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {Router} from '@angular/router';
+
+import {JobService} from 'app/services/job/job.service';
+
+import {TaskEditorComponent} from './task-editor.component';
 
 describe('TaskFieldEditorComponent', () => {
   let component: TaskEditorComponent;

@@ -15,16 +15,18 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {TaskDetailsComponent} from './task-details.component';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {Map} from 'immutable';
+import {of} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Role} from 'app/models/role.model';
+import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
-import {Map} from 'immutable';
-import {of} from 'rxjs';
+
+import {TaskDetailsComponent} from './task-details.component';
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;

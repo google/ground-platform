@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {AuthService} from 'app/services/auth/auth.service';
-import {NEVER} from 'rxjs';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
+import {NEVER} from 'rxjs';
+
+import {AuthService} from 'app/services/auth/auth.service';
+
 import {SignInPageComponent} from './sign-in-page.component';
 
 describe('SignInPageComponent', () => {

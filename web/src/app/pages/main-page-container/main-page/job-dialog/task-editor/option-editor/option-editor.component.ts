@@ -16,19 +16,19 @@
 
 import {
   Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  ViewChild,
   ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  ViewChild,
 } from '@angular/core';
 import {
-  FormGroup,
-  FormBuilder,
-  Validators,
   AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
 } from '@angular/forms';
 
 @Component({

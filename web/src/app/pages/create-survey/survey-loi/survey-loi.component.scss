@@ -1,6 +1,5 @@
 /**
- * @license
- * Copyright 2019 The Ground Authors.
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,14 +14,16 @@
  * limitations under the License.
  */
 
-import {browser, by, element} from 'protractor';
+.title {
+  margin-top: 45px;
+}
 
-export class AppPage {
-  navigateTo() {
-    browser.get(browser.baseUrl);
-  }
+.description {
+  margin-bottom: 45px;
+}
 
-  getTitleText() {
-    return element(by.css('ground-root span')).getText() as Promise<string>;
-  }
+.input {
+  display: block;
+  width: 100%;
+  max-width: 600px;
 }

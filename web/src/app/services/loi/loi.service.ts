@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {switchMap} from 'rxjs/operators';
-import {firstValueFrom, Observable, of, ReplaySubject} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {Injectable} from '@angular/core';
+import {Map as ImmutableMap, List} from 'immutable';
+import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
+import {filter, map, switchMap} from 'rxjs/operators';
+
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {GeometryType} from 'app/models/geometry/geometry';
+import {Point} from 'app/models/geometry/point';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {List, Map as ImmutableMap} from 'immutable';
-import {Point} from 'app/models/geometry/point';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {GeometryType} from 'app/models/geometry/geometry';
+import {Survey} from 'app/models/survey.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
@@ -77,6 +78,18 @@ export class LocationOfInterestService {
 
   getLocationsOfInterest$(): Observable<List<LocationOfInterest>> {
     return this.lois$;
+  }
+
+  getLoisWithLabels$(): Observable<List<LocationOfInterest>> {
+    return this.lois$.pipe(
+      map(lois => LocationOfInterestService.getLoisWithNames(lois))
+    );
+  }
+
+  getLoisByJobId$(jobId: string): Observable<List<LocationOfInterest>> {
+    return this.getLoisWithLabels$().pipe(
+      map(lois => lois.filter(loi => loi.jobId === jobId))
+    );
   }
 
   static getAnonymousDisplayName(loi: LocationOfInterest): string {

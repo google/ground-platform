@@ -15,6 +15,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 
 describe('SurveyDetailsComponent', () => {

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {EditStyleButtonComponent} from './edit-style-button.component';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+
+import {EditStyleButtonComponent} from './edit-style-button.component';
 
 describe('EditStyleButtonComponent', () => {
   let component: EditStyleButtonComponent;

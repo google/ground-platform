@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {
   ComponentFixture,
   TestBed,
-  waitForAsync,
-  tick,
   fakeAsync,
+  tick,
+  waitForAsync,
 } from '@angular/core/testing';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {By} from '@angular/platform-browser';
+import {ActivatedRoute} from '@angular/router';
+import {RouterTestingModule} from '@angular/router/testing';
+import {Map} from 'immutable';
+import {Subject, of} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Subject, of} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {Map} from 'immutable';
-import {By} from '@angular/platform-browser';
-import {RouterTestingModule} from '@angular/router/testing';
-import {Job} from 'app/models/job.model';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {JobService} from 'app/services/job/job.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {ActivatedRouteStub} from 'testing/activated-route-stub';
+
 import {
   DialogData,
   DialogType,
