@@ -46,14 +46,15 @@ export async function exportCsvHandler(
     .sort((a, b) => a.index - b.index);
 
   const headers = [];
-  headers.push('loi_id');
-  headers.push('loi_name');
+  headers.push('id');
+  // 'latitude', 'longitutde', and 'geometry' are default column names used 
+  // by Earth Engine when importing tables from CSV data.
   headers.push('latitude');
   headers.push('longitude');
   headers.push('geometry');
   elements.forEach(element => {
     const labelMap = element['label'] || {};
-    const label = Object.values(labelMap)[0] || 'Unnamed step';
+    const label = Object.values(labelMap)[0] || 'Unnamed task';
     headers.push(label);
   });
 
@@ -94,7 +95,6 @@ export async function exportCsvHandler(
     submissions.forEach(submission => {
       const row = [];
       row.push(getId(loi));
-      row.push(getLabel(loi));
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
@@ -136,21 +136,11 @@ function getId(
   const properties = loi.get('properties') || {};
   return (
     loi.get('id') ||
-    properties['ID'] ||
     properties['id'] ||
-    properties['id_prod'] ||
     ''
   );
 }
 
-function getLabel(
-  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
-) {
-  const properties = loi.get('properties') || {};
-  return (
-    properties['caption'] || properties['label'] || properties['title'] || ''
-  );
-}
 /**
  * Returns the string representation of a specific task element result.
  */
