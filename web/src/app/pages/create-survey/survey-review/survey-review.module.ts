@@ -15,8 +15,10 @@
  */
 
 import {NgModule} from '@angular/core';
-import {SurveyReviewComponent} from './survey-review.component';
+
 import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
+
+import {SurveyReviewComponent} from './survey-review.component';
 
 @NgModule({
   declarations: [SurveyReviewComponent],

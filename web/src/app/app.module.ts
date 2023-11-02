@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
-import {
-  AngularFirestoreModule,
-  USE_EMULATOR as USE_FIRESTORE_EMULATOR,
-  SETTINGS as FIRESTORE_SETTINGS,
-} from '@angular/fire/compat/firestore';
-import {USE_EMULATOR as USE_DATABASE_EMULATOR} from '@angular/fire/compat/database';
-import {USE_EMULATOR as USE_FUNCTIONS_EMULATOR} from '@angular/fire/compat/functions';
-import {AppRoutingModule} from 'app/routing.module';
-import {AppComponent} from 'app/app.component';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
-import {environment} from 'environments/environment';
-import {GoogleAuthProvider} from 'firebase/auth';
 import {HttpClientModule} from '@angular/common/http';
-import {firebaseui, FirebaseUIModule} from 'firebaseui-angular';
+import {NgModule} from '@angular/core';
 import {AngularFireModule} from '@angular/fire/compat';
 import {AngularFireAuthModule} from '@angular/fire/compat/auth';
-import {AngularFireFunctionsModule} from '@angular/fire/compat/functions';
+import {USE_EMULATOR as USE_DATABASE_EMULATOR} from '@angular/fire/compat/database';
+import {
+  AngularFirestoreModule,
+  SETTINGS as FIRESTORE_SETTINGS,
+  USE_EMULATOR as USE_FIRESTORE_EMULATOR,
+} from '@angular/fire/compat/firestore';
+import {
+  AngularFireFunctionsModule,
+  USE_EMULATOR as USE_FUNCTIONS_EMULATOR,
+} from '@angular/fire/compat/functions';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {GoogleAuthProvider} from 'firebase/auth';
+import {FirebaseUIModule, firebaseui} from 'firebaseui-angular';
+
+import {AppComponent} from 'app/app.component';
+import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
+import {AppRoutingModule} from 'app/routing.module';
+import {environment} from 'environments/environment';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting

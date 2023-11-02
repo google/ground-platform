@@ -14,41 +14,43 @@
  * limitations under the License.
  */
 
+import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  SimpleChanges,
-  OnDestroy,
-  ViewChildren,
-  QueryList,
-  HostListener,
-  ElementRef,
-  ViewChild,
   ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  QueryList,
+  SimpleChanges,
+  ViewChild,
+  ViewChildren,
 } from '@angular/core';
 import {
-  FormGroup,
-  FormBuilder,
-  Validators,
-  FormControl,
   AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
   ValidationErrors,
+  Validators,
 } from '@angular/forms';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {TaskType} from 'app/models/task/task.model';
-import {Option} from 'app/models/task/option.model';
 import {List} from 'immutable';
+import {Subscription, firstValueFrom} from 'rxjs';
+
 import {
-  MultipleChoice,
   Cardinality,
+  MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Option} from 'app/models/task/option.model';
+import {TaskType} from 'app/models/task/task.model';
+import {DialogService} from 'app/services/dialog/dialog.service';
 import {JobService} from 'app/services/job/job.service';
-import {firstValueFrom, Subscription} from 'rxjs';
+
 import {OptionEditorComponent} from './option-editor/option-editor.component';
 
 export interface TaskTypeSelectOption {

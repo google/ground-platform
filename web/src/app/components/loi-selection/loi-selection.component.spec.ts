@@ -18,17 +18,19 @@
 // import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {List, Map} from 'immutable';
+
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
-import {GenericLocationOfInterest} from 'app/models/loi.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {List, Map} from 'immutable';
-import {LoiSelectionComponent} from './loi-selection.component';
 import {Job} from 'app/models/job.model';
+import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+
+import {LoiSelectionComponent} from './loi-selection.component';
 
 describe('LoiSelectionFormComponent', () => {
   let component: LoiSelectionComponent;

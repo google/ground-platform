@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ErrorComponent} from 'app/pages/error/error.component';
-import {HeaderModule} from 'app/components/header/header.module';
+import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
+
+import {HeaderModule} from 'app/components/header/header.module';
+import {ErrorComponent} from 'app/pages/error/error.component';
 
 @NgModule({
   declarations: [ErrorComponent],

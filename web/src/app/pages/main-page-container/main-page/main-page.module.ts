@@ -15,19 +15,20 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {JobDialogModule} from './job-dialog/job-dialog.module';
+import {NgModule} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
+import {MatSidenavModule} from '@angular/material/sidenav';
+
 import {DrawingToolsModule} from './drawing-tools/drawing-tools.module';
+import {JobDialogModule} from './job-dialog/job-dialog.module';
 import {MainPageComponent} from './main-page.component';
 import {MapModule} from './map/map.module';
-import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {MatSidenavModule} from '@angular/material/sidenav';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
-import {NgModule} from '@angular/core';
+import {SecondarySidePanelModule} from './secondary-side-panel/secondary-side-panel.module';
 import {SidePanelModule} from './side-panel/side-panel.module';
 import {SurveyHeaderModule} from './survey-header/survey-header.module';
-import {MatIconModule} from '@angular/material/icon';
-import {SecondarySidePanelModule} from './secondary-side-panel/secondary-side-panel.module';
 
 @NgModule({
   declarations: [MainPageComponent],

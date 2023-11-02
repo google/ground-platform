@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {waitForAsync, ComponentFixture, TestBed} from '@angular/core/testing';
-
-import {DataImportService} from 'app/services/data-import/data-import.service';
-import {FileUploadModule} from '@iplab/ngx-file-upload';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ReactiveFormsModule} from '@angular/forms';
 import {
   MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
   MatLegacyDialogModule as MatDialogModule,
   MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
-import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
-import {NEVER} from 'rxjs';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {ReactiveFormsModule} from '@angular/forms';
 import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {FileUploadModule} from '@iplab/ngx-file-upload';
+import {NEVER} from 'rxjs';
+
+import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {DataImportService} from 'app/services/data-import/data-import.service';
 
 describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;

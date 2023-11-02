@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {environment} from 'environments/environment';
 import {Injectable} from '@angular/core';
+
+import {environment} from 'environments/environment';
+
 import {HttpClientService} from '../http-client/http-client.service';
 
 const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;

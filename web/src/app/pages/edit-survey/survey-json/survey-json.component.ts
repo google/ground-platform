@@ -15,6 +15,7 @@
  */
 
 import {Component} from '@angular/core';
+
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 

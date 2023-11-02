@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestPanelComponent} from './loi-panel.component';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {Router} from '@angular/router';
+import {List, Map} from 'immutable';
 import {of} from 'rxjs';
-import {Map, List} from 'immutable';
+
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {Point} from 'app/models/geometry/point';
+import {Job} from 'app/models/job.model';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {Job} from 'app/models/job.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {Router} from '@angular/router';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {Point} from 'app/models/geometry/point';
-import {Coordinate} from 'app/models/geometry/coordinate';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {LocationOfInterestPanelComponent} from './loi-panel.component';
 
 const mockSurvey = new Survey(
   'survey001',

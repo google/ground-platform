@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {SurveyLoiComponent} from './survey-loi.component';
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
 import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+
+import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
+
+import {SurveyLoiComponent} from './survey-loi.component';
 
 @NgModule({
   declarations: [SurveyLoiComponent],

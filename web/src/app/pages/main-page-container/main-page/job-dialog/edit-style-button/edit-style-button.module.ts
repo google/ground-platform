@@ -15,10 +15,11 @@
  */
 
 import {NgModule} from '@angular/core';
-import {EditStyleButtonComponent} from './edit-style-button.component';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+
+import {EditStyleButtonComponent} from './edit-style-button.component';
 
 @NgModule({
   declarations: [EditStyleButtonComponent],

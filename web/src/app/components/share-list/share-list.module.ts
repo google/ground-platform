@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {ShareListComponent} from './share-list.component';
+import {NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
-import {ReactiveFormsModule, FormsModule} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatSelectModule} from '@angular/material/select';
+
+import {ShareListComponent} from './share-list.component';
 
 @NgModule({
   declarations: [ShareListComponent],

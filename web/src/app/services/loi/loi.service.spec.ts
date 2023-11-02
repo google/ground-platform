@@ -15,16 +15,17 @@
  */
 
 import {TestBed} from '@angular/core/testing';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {Subject, of} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Map as ImmutableMap, List} from 'immutable';
-import {GenericLocationOfInterest} from 'app/models/loi.model';
-import {Point} from 'app/models/geometry/point';
+import {Subject, of} from 'rxjs';
+
 import {Coordinate} from 'app/models/geometry/coordinate';
+import {Point} from 'app/models/geometry/point';
+import {GenericLocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();

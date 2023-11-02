@@ -15,23 +15,25 @@
  */
 
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {Component, Input, OnInit, OnDestroy} from '@angular/core';
-import {DialogService} from 'app/services/dialog/dialog.service';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {List} from 'immutable';
+import {Subscription} from 'rxjs';
+
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Job} from 'app/models/job.model';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {DialogService} from 'app/services/dialog/dialog.service';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {environment} from 'environments/environment';
-import {Subscription} from 'rxjs';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {environment} from 'environments/environment';
+
 import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {List} from 'immutable';
-import {AuthService} from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-job-list-item',
