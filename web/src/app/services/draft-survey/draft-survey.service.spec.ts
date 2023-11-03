@@ -17,12 +17,15 @@
 import {TestBed} from '@angular/core/testing';
 
 import {DraftSurveyService} from './draft-survey.service';
+import {DataStoreService} from '../data-store/data-store.service';
 
 describe('DraftSurveyService', () => {
   let service: DraftSurveyService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{provide: DataStoreService, useValue: {}}],
+    });
     service = TestBed.inject(DraftSurveyService);
   });
 
