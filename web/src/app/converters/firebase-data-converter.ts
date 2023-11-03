@@ -22,7 +22,7 @@ import {Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Result} from 'app/models/submission/result.model';
-import {SubmissionData} from 'app/models/submission/submission.model';
+import {Submission, SubmissionData} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {
   Cardinality,
@@ -390,11 +390,7 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toSubmission(
-    job: Job,
-    id: string,
-    data: DocumentData
-  ): SubmissionData {
+  static toSubmission(job: Job, id: string, data: DocumentData): Submission {
     if (job.tasks === undefined) {
       throw Error('Job must contain at least once task');
     }
@@ -404,7 +400,7 @@ export class FirebaseDataConverter {
     // Support submissions that have results or responses fields instead of data
     // before model change.
     const submissionData = data.data ?? data.results ?? data.responses;
-    return new SubmissionData(
+    return new Submission(
       id,
       data.loiId,
       job,
@@ -422,7 +418,7 @@ export class FirebaseDataConverter {
     );
   }
 
-  static submissionToJS(submission: SubmissionData): {} {
+  static submissionToJS(submission: Submission): {} {
     return {
       loiId: submission.loiId,
       jobId: submission.job?.id,
@@ -447,7 +443,7 @@ export class FirebaseDataConverter {
     );
   }
 
-  private static dataToJS(data: Map<string, Result>): {} {
+  private static dataToJS(data: SubmissionData): {} {
     return data.entrySeq().reduce(
       (obj: {}, [taskId, result]) => ({
         ...obj,

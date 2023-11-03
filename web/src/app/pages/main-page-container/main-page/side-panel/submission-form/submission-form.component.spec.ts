@@ -40,7 +40,7 @@ import {
   LocationOfInterest,
 } from 'app/models/loi.model';
 import {Result} from 'app/models/submission/result.model';
-import {SubmissionData} from 'app/models/submission/submission.model';
+import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {
   Cardinality,
@@ -123,7 +123,7 @@ class MockModel {
     isAuthenticated: false,
   };
 
-  static submission001 = new SubmissionData(
+  static submission001 = new Submission(
     'submission001',
     MockModel.loi001.id,
     MockModel.job001,
@@ -155,7 +155,7 @@ class MockLocationOfInterestService {
 
 class MockSubmissionService {
   getSelectedSubmission$() {
-    return of<SubmissionData>(MockModel.submission001);
+    return of<Submission>(MockModel.submission001);
   }
 }
 

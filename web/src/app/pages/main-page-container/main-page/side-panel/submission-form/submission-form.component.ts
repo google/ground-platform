@@ -24,7 +24,10 @@ import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Job} from 'app/models/job.model';
 import {Result} from 'app/models/submission/result.model';
-import {SubmissionData} from 'app/models/submission/submission.model';
+import {
+  Submission,
+  SubmissionData,
+} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
@@ -51,7 +54,7 @@ export class SubmissionFormComponent {
   readonly jobListItemActionsType = JobListItemActionsType;
   readonly job$: Observable<Job>;
   surveyId?: string;
-  submission?: SubmissionData;
+  submission?: Submission;
   submissionForm?: FormGroup;
   submissionTasks?: List<Task>;
 
@@ -69,7 +72,7 @@ export class SubmissionFormComponent {
     });
     submissionService
       .getSelectedSubmission$()
-      .subscribe((submission?: SubmissionData | LoadingState) =>
+      .subscribe((submission?: Submission | LoadingState) =>
         this.onSelectSubmission(submission)
       );
     this.job$ = surveyService
@@ -100,7 +103,7 @@ export class SubmissionFormComponent {
           /*clientTime=*/ new Date(),
           /*serverTime=*/ this.dataStoreService.getServerTimestamp()
         );
-        const updatedData: Map<string, Result> = this.extractData();
+        const updatedData: SubmissionData = this.extractData();
         const updatedSubmission = this.submission!.withDataAndLastModified(
           updatedData,
           lastModified
@@ -117,7 +120,7 @@ export class SubmissionFormComponent {
       });
   }
 
-  private onSelectSubmission(submission?: SubmissionData | LoadingState) {
+  private onSelectSubmission(submission?: Submission | LoadingState) {
     if (submission === LoadingState.NOT_LOADED && this.submissionForm?.dirty) {
       if (
         confirm(
@@ -129,7 +132,7 @@ export class SubmissionFormComponent {
         this.submissionForm = undefined;
       }
     }
-    if (submission instanceof SubmissionData) {
+    if (submission instanceof Submission) {
       this.submission = submission;
       this.submissionTasks = submission!
         .job!.tasks!.toOrderedMap()
@@ -150,7 +153,7 @@ export class SubmissionFormComponent {
     this.navigationService.clearSubmissionId();
   }
 
-  private convertSubmissionToFormGroup(submission: SubmissionData): FormGroup {
+  private convertSubmissionToFormGroup(submission: Submission): FormGroup {
     const group: {[taskId: string]: FormControl} = {};
     for (const [taskId, task] of submission.job!.tasks!) {
       const result = submission!.data?.get(taskId);
@@ -171,7 +174,7 @@ export class SubmissionFormComponent {
     return this.formBuilder.group(group);
   }
 
-  private extractData(): Map<string, Result> {
+  private extractData(): SubmissionData {
     return Map<string, Result>(
       this.submissionTasks!.map(task => [
         task.id,

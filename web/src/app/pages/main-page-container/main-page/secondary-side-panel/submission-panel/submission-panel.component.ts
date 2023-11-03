@@ -68,7 +68,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   getTaskSubmissionResult(taskId: string): Result | undefined {
-    return this.submission?.results.get(taskId);
+    return this.submission?.data.get(taskId);
   }
 
   getTask(taskId: string): Task | undefined {
