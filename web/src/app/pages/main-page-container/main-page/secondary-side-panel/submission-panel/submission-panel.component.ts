@@ -60,7 +60,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   editSubmission() {
-    // TODO(amysorto): implement this feature in a follow up PR
+    // TODO(#1280): Add support for editing submission in submission details panel
   }
 
   getTaskType(taskId: string): TaskType | undefined {

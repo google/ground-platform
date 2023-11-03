@@ -29,7 +29,7 @@ limitations under the License.
     {{submission?.lastModified?.clientTime | date: 'longDate' }} • 
     {{submission?.lastModified?.clientTime | date: 'shortTime' }}
   </div>
-  <div *ngIf="tasks !== undefined" class="submission-tasks-container">
+  <div *ngIf="tasks" class="submission-tasks-container">
     <div *ngFor="let task of tasks!.keys(); let i = index">
       <mat-divider *ngIf="i > 0"></mat-divider>
       <div class="submission-task">
@@ -45,16 +45,13 @@ limitations under the License.
           <div *ngIf="getTaskSubmissionResult(task) !== undefined">
             <div [ngSwitch]="getTaskType(task)" >
               <div *ngSwitchCase="taskType.MULTIPLE_CHOICE">
-                <!-- TODO(amysorto): TODO(amysorto): Implement multiple choice question
-                  support in follow up PR -->
+                <!-- TODO(#1278): Add support for multiple choice tasks for
+                  submission detail panel -->
               </div>
               <div *ngSwitchCase="taskType.PHOTO">
                 <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
               </div>
-              <!-- TODO(amysorto): Implement special handling for DRAW_AREA, DROP_PIN,
-                CAPTURE_LOCATION type submission results since it involves the map 
-                in follow up PR -->
-              <!-- TEXT, NUMBER, DATE, TIME, DATE_TIME type submission results -->
+              <!-- TODO(#1279): Add support for map related tasks for submission detail panel -->
               <div *ngSwitchDefault>
                 {{getTaskSubmissionResult(task)!.value.toString()}}
               </div>
