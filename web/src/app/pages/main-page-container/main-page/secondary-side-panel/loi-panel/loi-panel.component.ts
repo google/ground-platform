@@ -19,7 +19,7 @@ import {List} from 'immutable';
 import {Subscription, switchMap} from 'rxjs';
 
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionData} from 'app/models/submission/submission.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -37,7 +37,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   loi!: LocationOfInterest;
   name!: string | null;
   icon!: string;
-  submissions!: List<Submission>;
+  submissions!: List<SubmissionData>;
 
   constructor(
     private loiService: LocationOfInterestService,

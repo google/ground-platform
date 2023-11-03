@@ -21,28 +21,28 @@ import {Job} from 'app/models/job.model';
 
 import {Result} from './result.model';
 
-export class Submission {
+export class SubmissionData {
   constructor(
     readonly id: string,
     readonly loiId: string,
     readonly job: Job | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
-    readonly results: Map<string, Result>
+    readonly data: Map<string, Result>
   ) {}
 
-  // Returns copy of Submission with results and lastModified replaced.
-  withResultsAndLastModified(
-    results: Map<string, Result>,
+  // Returns copy of Submission with data and lastModified replaced.
+  withDataAndLastModified(
+    data: Map<string, Result>,
     lastModified: AuditInfo
-  ): Submission {
-    return new Submission(
+  ): SubmissionData {
+    return new SubmissionData(
       this.id,
       this.loiId,
       this.job,
       this.created,
       lastModified,
-      results
+      data
     );
   }
 }

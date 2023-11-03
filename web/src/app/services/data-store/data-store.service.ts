@@ -29,7 +29,7 @@ import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
-import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionData} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
@@ -243,7 +243,7 @@ export class DataStoreService {
       .delete();
   }
 
-  updateSubmission(surveyId: string, submission: Submission) {
+  updateSubmission(surveyId: string, submission: SubmissionData) {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
       .doc(submission.id)
@@ -327,7 +327,7 @@ export class DataStoreService {
   submissions$(
     survey: Survey,
     loi: LocationOfInterest
-  ): Observable<List<Submission>> {
+  ): Observable<List<SubmissionData>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
         ref.where('loiId', '==', loi.id)

@@ -20,7 +20,7 @@ import {Observable, Subscription, combineLatest} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {Job} from 'app/models/job.model';
-import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionData} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -39,7 +39,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   surveyId?: string;
   submissionId?: string;
-  readonly submissions$: Observable<List<Submission>>;
+  readonly submissions$: Observable<List<SubmissionData>>;
   readonly taskTypes = TaskType;
   subscription: Subscription = new Subscription();
   photoUrls: Map<string, string>;
@@ -73,11 +73,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         this.getTasks(submission).forEach(task => {
           if (
             task.type === TaskType.PHOTO &&
-            (submission.results?.get(task.id)?.value as string)
+            (submission.data?.get(task.id)?.value as string)
           ) {
             this.fillPhotoURL(
               task.id,
-              submission.results?.get(task.id)?.value as string
+              submission.data?.get(task.id)?.value as string
             );
           }
         });
@@ -114,12 +114,12 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  getTasks(submission: Submission): List<Task> {
+  getTasks(submission: SubmissionData): List<Task> {
     return List(submission.job?.tasks?.valueSeq() || []);
   }
 
-  getOptions(task: Task, submission: Submission): List<Option> {
-    const result = submission.results?.get(task.id);
+  getOptions(task: Task, submission: SubmissionData): List<Option> {
+    const result = submission.data?.get(task.id);
     if (result && result instanceof List<Option>) {
       return result.value as List<Option>;
     } else {
@@ -127,7 +127,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     }
   }
 
-  onEditSubmissionClick(submission: Submission) {
+  onEditSubmissionClick(submission: SubmissionData) {
     this.navigationService.editSubmission(
       this.navigationService.getLocationOfInterestId()!,
       submission.id

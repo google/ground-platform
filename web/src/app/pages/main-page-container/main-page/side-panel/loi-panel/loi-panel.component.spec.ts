@@ -28,7 +28,7 @@ import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionData} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -61,7 +61,7 @@ const mockLocationOfInterest = new GenericLocationOfInterest(
   Map()
 );
 
-const mockSubmissions = List<Submission>([]);
+const mockSubmissions = List<SubmissionData>([]);
 
 class MockSurveyService {
   getActiveSurvey$() {
@@ -77,7 +77,7 @@ class MockLocationOfInterestService {
 
 class MockSubmissionService {
   submissions$() {
-    return of<List<Submission>>(mockSubmissions);
+    return of<List<SubmissionData>>(mockSubmissions);
   }
 }
 

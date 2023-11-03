@@ -28,7 +28,7 @@ import {switchMap} from 'rxjs/operators';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Result} from 'app/models/submission/result.model';
-import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionData} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -45,9 +45,9 @@ export class SubmissionService {
   // TODO: Move selected submission into side panel component where it is
   // used.
   private selectedSubmissionId$ = new ReplaySubject<string>(1);
-  private selectedSubmission$ = new BehaviorSubject<Submission | LoadingState>(
-    LoadingState.NOT_LOADED
-  );
+  private selectedSubmission$ = new BehaviorSubject<
+    SubmissionData | LoadingState
+  >(LoadingState.NOT_LOADED);
   private subscription = new Subscription();
 
   constructor(
@@ -94,7 +94,7 @@ export class SubmissionService {
     user: User,
     survey: Survey,
     loi: LocationOfInterest
-  ): Submission | LoadingState {
+  ): SubmissionData | LoadingState {
     if (!user) {
       throw Error('Login required to create new submission.');
     }
@@ -108,7 +108,7 @@ export class SubmissionService {
       new Date(),
       this.dataStore.getServerTimestamp()
     );
-    return new Submission(
+    return new SubmissionData(
       newSubmissionId,
       loi.id,
       job,
@@ -121,7 +121,7 @@ export class SubmissionService {
   submissions$(
     survey: Survey,
     loi: LocationOfInterest
-  ): Observable<List<Submission>> {
+  ): Observable<List<SubmissionData>> {
     return this.dataStore.submissions$(survey, loi);
   }
 
@@ -134,7 +134,7 @@ export class SubmissionService {
     this.selectedSubmission$.next(LoadingState.NOT_LOADED);
   }
 
-  getSelectedSubmission$(): BehaviorSubject<Submission | LoadingState> {
+  getSelectedSubmission$(): BehaviorSubject<SubmissionData | LoadingState> {
     return this.selectedSubmission$;
   }
 

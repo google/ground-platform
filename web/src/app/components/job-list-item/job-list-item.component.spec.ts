@@ -42,7 +42,7 @@ import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
+import {SubmissionData} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -71,7 +71,7 @@ describe('JobListItemComponent', () => {
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let lois$: Subject<List<LocationOfInterest>>;
-  let submissions$: Subject<List<Submission>>;
+  let submissions$: Subject<List<SubmissionData>>;
   let surveyId$: Subject<string | null>;
   let locationOfInterestId$: Subject<string | null>;
 
@@ -117,17 +117,17 @@ describe('JobListItemComponent', () => {
   function createSubmissions(
     loi: LocationOfInterest,
     count: number
-  ): List<Submission> {
-    const submissions: Submission[] = [];
+  ): List<SubmissionData> {
+    const submissions: SubmissionData[] = [];
     for (let i = 0; i < count; i++) {
       submissions.push(
-        new Submission(
+        new SubmissionData(
           'submission' + i,
           loi.id,
           job,
           new AuditInfo(user, new Date(), new Date()),
           new AuditInfo(user, new Date(), new Date()),
-          /* results= */ Map()
+          /* data= */ Map()
         )
       );
     }
@@ -156,7 +156,7 @@ describe('JobListItemComponent', () => {
     );
 
     lois$ = new Subject<List<LocationOfInterest>>();
-    submissions$ = new Subject<List<Submission>>();
+    submissions$ = new Subject<List<SubmissionData>>();
     surveyId$ = new Subject<string | null>();
     locationOfInterestId$ = new Subject<string | null>();
 

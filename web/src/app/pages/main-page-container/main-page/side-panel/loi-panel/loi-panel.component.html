@@ -67,7 +67,7 @@ limitations under the License.
             class="task-result"
             *ngIf="task.type == taskTypes.TEXT || task.type == taskTypes.NUMBER"
           >
-            {{ submission.results.get(task.id)?.value }}
+            {{ submission.data.get(task.id)?.value }}
           </div>
           <div
             class="task-result"
