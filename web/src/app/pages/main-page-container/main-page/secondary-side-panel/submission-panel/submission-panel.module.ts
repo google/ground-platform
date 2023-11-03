@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,21 @@
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
-import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
 import {BrowserModule} from '@angular/platform-browser';
 
-import {JobListModule} from './job-list/job-list.module';
-import {LocationOfInterestListModule} from './loi-list/loi-list.module';
-import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
-import {SidePanelComponent} from './side-panel.component';
-import {SubmissionFormModule} from './submission-form/submission-form.module';
+import {SubmissionPanelComponent} from './submission-panel.component';
 
 @NgModule({
   imports: [
     BrowserModule,
-    LocationOfInterestPanelModule,
-    MatButtonModule,
     MatCardModule,
-    MatDividerModule,
+    MatListModule,
     MatIconModule,
-    JobListModule,
-    SubmissionFormModule,
-    LocationOfInterestListModule,
+    MatButtonModule,
   ],
-  exports: [SidePanelComponent],
-  declarations: [SidePanelComponent],
+  exports: [SubmissionPanelComponent],
+  declarations: [SubmissionPanelComponent],
 })
-export class SidePanelModule {}
+export class SubmissionPanelModule {}

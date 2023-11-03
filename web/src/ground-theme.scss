@@ -41,7 +41,6 @@
 @use 'app/pages/main-page-container/main-page/map/_map.component-theme' as map;
 @use 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/_loi-panel-header.component-theme' as loi-panel-header;
 @use 'app/pages/main-page-container/main-page/side-panel/loi-panel/_loi-panel.component-theme' as loi-panel;
-@use 'app/pages/main-page-container/main-page/side-panel/submission-detail-panel/_submission-detail-panel.component-theme' as submission-detail-panel;
 @use 'app/pages/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
 @use 'app/pages/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
 @use 'app/pages/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
@@ -122,7 +121,6 @@ $foreground: map-get($theme, foreground);
 @include map.theme($theme);
 @include loi-panel-header.theme($theme);
 @include loi-panel.theme($theme);
-@include submission-detail-panel.theme($theme);
 @include submission-form.theme($theme);
 @include survey-header.theme($theme);
 @include title-dialog.theme($theme);

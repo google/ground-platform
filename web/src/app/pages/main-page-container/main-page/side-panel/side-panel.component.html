@@ -15,17 +15,14 @@ limitations under the License.
 -->
 <div [ngSwitch]="sideNavMode$ | async">
   <div *ngSwitchCase="sideNavMode.SUBMISSION">
-    <ground-submission-form></ground-submission-form>
-  </div>
-
-  <div *ngSwitchCase="sideNavMode.LOI">
-    <ground-loi-panel></ground-loi-panel>
+    <ground-job-list></ground-job-list>
   </div>
 
   <div *ngSwitchCase="sideNavMode.JOB_LIST">
     <ground-job-list></ground-job-list>
   </div>
 
+  <!-- TODO(#1281): Remove unused code from side panel -->
   <div *ngSwitchCase="sideNavMode.LOI_LIST">
     <ground-loi-list></ground-loi-list>
   </div>

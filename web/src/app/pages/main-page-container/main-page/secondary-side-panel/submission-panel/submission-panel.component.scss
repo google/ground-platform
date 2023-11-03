@@ -14,17 +14,44 @@
  * limitations under the License.
  */
 
-.loi-panel {
-  .header {
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 500;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
+.submission-title, .submission-title-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    :first-child {
-      flex: 1;
-    }
-  }
+.submission-title-text {
+  font-size: 24px;
+}
+
+.submission-subtitle { 
+  padding-left: 48px;
+  font-size: 12px;
+  color: #424940;
+}
+
+.submission-tasks-container {
+  padding: 0 24px;
+}
+
+.submission-task {
+  padding: 20px 0;
+}
+
+.submission-question {
+  color: #727970;
+  font-size: 12px;
+}
+
+.submission-response {
+  font-size: 16px;
+}
+
+.submission-no-response {
+  color: #727970;
+}
+
+.submission-img {
+  border-radius: 4px;
+  width: 100%;
 }
