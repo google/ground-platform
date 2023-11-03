@@ -37,41 +37,26 @@ limitations under the License.
         <div class="submission-question">
           {{getTask(task)!.label}}
         </div>
+        <!-- Response -->
         <div class="submission-response">
           <div *ngIf="getTaskSubmissionResult(task) === undefined" class="submission-no-response">
             Skipped
           </div>
           <div *ngIf="getTaskSubmissionResult(task) !== undefined">
             <div [ngSwitch]="getTaskType(task)" >
-              <div *ngSwitchCase="taskType.TEXT">
-                {{getTaskSubmissionResult(task)!.value}}
-              </div>
               <div *ngSwitchCase="taskType.MULTIPLE_CHOICE">
-                <!-- TODO(amysorto): implement this -->
+                <!-- TODO(amysorto): TODO(amysorto): Implement multiple choice question
+                  support in follow up PR -->
               </div>
               <div *ngSwitchCase="taskType.PHOTO">
                 <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
               </div>
-              <div *ngSwitchCase="taskType.NUMBER">
-                <!-- TODO(amysorto): implement this -->
-              </div>
-              <div *ngSwitchCase="taskType.DATE">
-                <!-- TODO(amysorto): implement this -->
-              </div>
-              <div *ngSwitchCase="taskType.TIME">
-                <!-- TODO(amysorto): implement this -->
-              </div>
-              <div *ngSwitchCase="taskType.DATE_TIME">
-                <!-- TODO(amysorto): implement this -->
-              </div>
-              <div *ngSwitchCase="taskType.DRAW_AREA">
-                <!-- TODO(amysorto): implement this -->
-              </div>
-              <div *ngSwitchCase="taskType.DROP_PIN">
-                <!-- TODO(amysorto): implement this -->
-              </div>
-              <div *ngSwitchCase="taskType.CAPTURE_LOCATION">
-                <!-- TODO(amysorto): implement this -->
+              <!-- TODO(amysorto): Implement special handling for DRAW_AREA, DROP_PIN,
+                CAPTURE_LOCATION type submission results since it involves the map 
+                in follow up PR -->
+              <!-- TEXT, NUMBER, DATE, TIME, DATE_TIME type submission results -->
+              <div *ngSwitchDefault>
+                {{getTaskSubmissionResult(task)!.value.toString()}}
               </div>
             </div>
           </div>
