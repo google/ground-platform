@@ -21,6 +21,16 @@ import {geojsonToWKT} from '@terraformer/wkt';
 import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 
+// TODO(#1277): Use a central model
+type Task = {
+  readonly id: string,
+  readonly type: string,
+  readonly label: string,
+  readonly required: boolean,
+  readonly index: number,
+  readonly multipleChoice?: any,
+}
+
 // TODO: Refactor into meaningful pieces.
 export async function exportCsvHandler(
   req: functions.Request,
@@ -39,11 +49,7 @@ export async function exportCsvHandler(
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
   const tasks = job['tasks'] || {};
-  const task = (Object.values(tasks)[0] as any) || {};
-  const elementMap = task['elements'] || {};
-  const elements = Object.keys(elementMap)
-    .map(elementId => ({id: elementId, ...elementMap[elementId]}))
-    .sort((a, b) => a.index - b.index);
+  const taskList = Object.values(tasks) as Task[] || {};
 
   const headers = [];
   headers.push('loi_id');
@@ -51,11 +57,7 @@ export async function exportCsvHandler(
   headers.push('latitude');
   headers.push('longitude');
   headers.push('geometry');
-  elements.forEach(element => {
-    const labelMap = element['label'] || {};
-    const label = Object.values(labelMap)[0] || 'Unnamed step';
-    headers.push(label);
-  });
+  taskList.forEach(task => headers.push(task.label));
 
   res.type('text/csv');
   res.setHeader(
@@ -98,9 +100,9 @@ export async function exportCsvHandler(
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
-      const results = submission['results'] || {};
-      elements
-        .map(element => getValue(element, results))
+      const responses = submission['responses'] || {};
+      taskList
+        .map(task => getValue(task, responses))
         .forEach(value => row.push(value));
       csvStream.write(row);
     });
@@ -154,14 +156,18 @@ function getLabel(
 /**
  * Returns the string representation of a specific task element result.
  */
-function getValue(element: any, results: any) {
-  const result = results[element.id] || '';
+function getValue(task: Task, responses: any) {
+  const result = responses[task.id] || '';
+  // console.log(
+  //   // 'Array.isArray(result)', Array.isArray(result),
+  //   // 'task.multipleChoice[options]', task.multipleChoice['options']
+  // )
   if (
-    element.type === 'multiple_choice' &&
+    task.type === 'multiple_choice' &&
     Array.isArray(result) &&
-    element.options
+    task.multipleChoice['options']
   ) {
-    return result.map(id => getMultipleChoiceValues(id, element)).join(', ');
+    return result.map(id => getMultipleChoiceValues(id, task)).join(', ');
   } else {
     return result;
   }
@@ -171,8 +177,9 @@ function getValue(element: any, results: any) {
  * Returns the code associated with a specified multiple choice option, or if
  * the code is not defined, returns the label in English.
  */
-function getMultipleChoiceValues(id: any, element: any) {
-  const options = element.options || {};
+function getMultipleChoiceValues(id: any, task: Task) {
+  console.log('id', id, 'task', task)
+  const options = task.multipleChoice['options'] || {};
   const option = options[id] || {};
   const label = option.label || {};
   // TODO: i18n.
