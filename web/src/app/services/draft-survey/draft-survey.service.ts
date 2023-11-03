@@ -96,10 +96,14 @@ export class DraftSurveyService {
       currentSurvey.description
     );
 
-    this.originalSurvey.jobs.forEach(job => {
-      if (!currentSurvey.jobs.get(job.id))
-        this.dataStoreService.deleteJob(currentSurvey.id, job.id);
-      else this.dataStoreService.addOrUpdateJob(currentSurvey.id, job);
+    currentSurvey.jobs.forEach(job => {
+      this.dataStoreService.addOrUpdateJob(currentSurvey.id, job);
     });
+
+    this.originalSurvey.jobs
+      .filter(job => !currentSurvey.jobs.get(job.id))
+      .forEach(job => {
+        this.dataStoreService.deleteJob(currentSurvey.id, job.id);
+      });
   }
 }
