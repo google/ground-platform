@@ -61,13 +61,7 @@ export class TempSurveyService {
     }
 
     this.tempSurvey$$.next(
-      new Survey(
-        currentSurvey.id,
-        currentSurvey.title,
-        currentSurvey.description,
-        currentSurvey.jobs.set(job.id, job),
-        currentSurvey.acl
-      )
+      currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
     );
   }
 
@@ -95,13 +89,7 @@ export class TempSurveyService {
       });
 
       this.tempSurvey$$.next(
-        new Survey(
-          currentSurvey.id,
-          currentSurvey.title,
-          currentSurvey.description,
-          currentSurvey.jobs.set(job.id, job),
-          currentSurvey.acl
-        )
+        currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
       );
     }
   }
