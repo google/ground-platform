@@ -15,11 +15,12 @@
  */
 
 import {Component, Input} from '@angular/core';
+import {List} from 'immutable';
+import {Observable, map} from 'rxjs';
+
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {List} from 'immutable';
-import {Observable, map} from 'rxjs';
 
 @Component({
   selector: 'survey-loi',

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {SecondarySidePanelComponent} from './secondary-side-panel.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
+import {BrowserModule} from '@angular/platform-browser';
+
 import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
+import {SecondarySidePanelComponent} from './secondary-side-panel.component';
 
 @NgModule({
   imports: [

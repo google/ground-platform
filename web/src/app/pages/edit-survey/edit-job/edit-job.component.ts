@@ -25,7 +25,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {List} from 'immutable';
-import {Subscription, firstValueFrom, map} from 'rxjs';
+import {Subscription, firstValueFrom} from 'rxjs';
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';

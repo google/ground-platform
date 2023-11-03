@@ -17,37 +17,39 @@
 import {
   ComponentFixture,
   TestBed,
-  waitForAsync,
-  tick,
   fakeAsync,
+  tick,
+  waitForAsync,
 } from '@angular/core/testing';
-import {MapComponent} from './map.component';
+import {GoogleMapsModule} from '@angular/google-maps';
 import {
   MatLegacyDialog as MatDialog,
   MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {Survey} from 'app/models/survey.model';
-import {
-  LocationOfInterest,
-  GenericLocationOfInterest,
-} from 'app/models/loi.model';
-import {Map, List} from 'immutable';
-import {Job} from 'app/models/job.model';
+import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
-import {GoogleMapsModule} from '@angular/google-maps';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {LinearRing} from 'app/models/geometry/linear-ring';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+import {Point} from 'app/models/geometry/point';
+import {Polygon} from 'app/models/geometry/polygon';
+import {Job} from 'app/models/job.model';
+import {
+  GenericLocationOfInterest,
+  LocationOfInterest,
+} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {Point} from 'app/models/geometry/point';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Polygon} from 'app/models/geometry/polygon';
-import {LinearRing} from 'app/models/geometry/linear-ring';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {MapComponent} from './map.component';
 
 function polygonShellCoordsToPolygon(coordinates: number[][]): Polygon {
   const coordinateInstances = coordinates.map(

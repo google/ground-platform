@@ -15,39 +15,41 @@
  */
 
 import {
+  AfterViewInit,
+  ChangeDetectorRef,
   Component,
   Input,
-  AfterViewInit,
-  ViewChild,
-  OnDestroy,
   NgZone,
-  ChangeDetectorRef,
+  OnDestroy,
+  ViewChild,
 } from '@angular/core';
-import {Survey} from 'app/models/survey.model';
+import {GoogleMap} from '@angular/google-maps';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {Map as ImmutableMap, List} from 'immutable';
+import {Observable, Subscription, combineLatest} from 'rxjs';
+
+import {Coordinate} from 'app/models/geometry/coordinate';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
+import {Polygon} from 'app/models/geometry/polygon';
 import {
-  LocationOfInterest,
   GenericLocationOfInterest,
+  LocationOfInterest,
 } from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {combineLatest, Observable, Subscription} from 'rxjs';
-import {List, Map as ImmutableMap} from 'immutable';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {GoogleMap} from '@angular/google-maps';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {SurveyService} from 'app/services/survey/survey.service';
+
 import {
   LocationOfInterestData,
   SelectLocationOfInterestDialogComponent,
 } from './select-loi-dialog/select-loi-dialog.component';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Polygon} from 'app/models/geometry/polygon';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 // To make ESLint happy:
 /*global google*/

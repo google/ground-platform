@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
+import {CommonModule} from '@angular/common';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
   fakeAsync,
   waitForAsync,
 } from '@angular/core/testing';
-import {SurveyLoiComponent} from './survey-loi.component';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {List} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
-import {CommonModule} from '@angular/common';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {AuthService} from 'app/services/auth/auth.service';
-import {Survey} from 'app/models/survey.model';
-import {Map} from 'immutable';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {List, Map} from 'immutable';
+import {BehaviorSubject, of} from 'rxjs';
+
+import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
 import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {SurveyLoiComponent} from './survey-loi.component';
 
 describe('SurveyLoiComponent', () => {
   let fixture: ComponentFixture<SurveyLoiComponent>;

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {User} from './user.model';
 import {FieldValue} from 'firebase/firestore';
+
+import {User} from './user.model';
 
 export class AuditInfo {
   constructor(

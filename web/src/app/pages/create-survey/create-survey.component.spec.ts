@@ -14,41 +14,42 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {
   ComponentFixture,
   TestBed,
-  waitForAsync,
-  tick,
   fakeAsync,
   flush,
+  tick,
+  waitForAsync,
 } from '@angular/core/testing';
+import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {By} from '@angular/platform-browser';
+import {ActivatedRoute} from '@angular/router';
+import Immutable, {Map} from 'immutable';
+import {Observable, Subject} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
   SetupPhase,
 } from 'app/pages/create-survey/create-survey.component';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {JobService} from 'app/services/job/job.service';
-import {Observable, Subject} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-import {Map} from 'immutable';
-import {By} from '@angular/platform-browser';
-import {SurveyReviewComponent} from './survey-review/survey-review.component';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {LocationOfInterest} from 'app/models/loi.model';
-import Immutable from 'immutable';
-import {TaskService} from 'app/services/task/task.service';
 import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {JobService} from 'app/services/job/job.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
+import {ActivatedRouteStub} from 'testing/activated-route-stub';
+
+import {SurveyReviewComponent} from './survey-review/survey-review.component';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;

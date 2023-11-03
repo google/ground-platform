@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {Subscription, switchMap} from 'rxjs';
-import {Submission} from 'app/models/submission/submission.model';
 import {List} from 'immutable';
+import {Subscription, switchMap} from 'rxjs';
+
+import {LocationOfInterest} from 'app/models/loi.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 import {getLoiIcon} from 'app/utils/utils';
 
 @Component({

@@ -15,14 +15,15 @@
  */
 
 import {Injectable} from '@angular/core';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Job} from 'app/models/job.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {Option} from 'app/models/task/option.model';
-import {MultipleChoice} from 'app/models/task/multiple-choice.model';
 import {List, Map} from 'immutable';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {firstValueFrom} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {MultipleChoice} from 'app/models/task/multiple-choice.model';
+import {Option} from 'app/models/task/option.model';
+import {Task, TaskType} from 'app/models/task/task.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',

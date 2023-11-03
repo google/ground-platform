@@ -15,11 +15,12 @@
  */
 
 import {Component} from '@angular/core';
+import {Observable} from 'rxjs';
+
 import {
   NavigationService,
   SideNavMode,
 } from 'app/services/navigation/navigation.service';
-import {Observable} from 'rxjs';
 
 @Component({
   selector: 'ground-side-panel',

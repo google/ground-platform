@@ -15,21 +15,23 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {ShareDialogComponent} from './share-dialog.component';
-import {
-  MatLegacyDialogRef as MatDialogRef,
-  MatLegacyDialogModule as MatDialogModule,
-} from '@angular/material/legacy-dialog';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {
+  MatLegacyDialogModule as MatDialogModule,
+  MatLegacyDialogRef as MatDialogRef,
+} from '@angular/material/legacy-dialog';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatSelectModule} from '@angular/material/select';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {of} from 'rxjs';
 import {Map} from 'immutable';
+import {of} from 'rxjs';
+
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {ShareDialogComponent} from './share-dialog.component';
 
 describe('ShareDialogComponent', () => {
   let component: ShareDialogComponent;

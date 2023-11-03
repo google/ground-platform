@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
-import {MainPageComponent} from './main-page.component';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {LoadingState} from 'app/services/loading-state.model';
-import {NEVER, of} from 'rxjs';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NEVER, of} from 'rxjs';
+
 import {AuthService} from 'app/services/auth/auth.service';
+import {LoadingState} from 'app/services/loading-state.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {ActivatedRouteStub} from 'testing/activated-route-stub';
+
+import {MainPageComponent} from './main-page.component';
 
 @Component({selector: 'ground-map', template: ''})
 class MapComponent {}
