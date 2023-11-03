@@ -39,7 +39,7 @@ export class HeaderComponent {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.navigationService.getSurveyId$().subscribe(surveyId => {
+    this.navigationService.getSurveyId$()?.subscribe(surveyId => {
       if (surveyId) this.surveyId = surveyId;
     });
     if (this.navigationService.isSurveyPage(this.surveyId)) {
