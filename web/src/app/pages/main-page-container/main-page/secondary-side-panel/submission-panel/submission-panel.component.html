@@ -50,7 +50,7 @@ limitations under the License.
                 <!-- TODO(amysorto): implement this -->
               </div>
               <div *ngSwitchCase="taskType.PHOTO">
-                <!-- TODO(amysorto): implement this -->
+                <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
               </div>
               <div *ngSwitchCase="taskType.NUMBER">
                 <!-- TODO(amysorto): implement this -->

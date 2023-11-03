@@ -22,4 +22,5 @@
   height: 100%;
   z-index: 1;
   background-color: white;
+  overflow-y: auto;
 }
