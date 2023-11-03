@@ -5,6 +5,7 @@ import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {List} from 'immutable';
 import {Job} from 'app/models/job.model';
+import { Task } from 'app/models/task/task.model';
 
 @Injectable({
   providedIn: 'root',
@@ -71,5 +72,27 @@ export class TempSurveyService {
         currentSurvey.acl
       )
     );
+  }
+
+  addOrUpdateTasks(
+    jobId: string,
+    tasks: List<Task>
+  ): void {
+    const currentSurvey = this.tempSurvey$$.getValue();
+    const currentJob = currentSurvey.jobs.get(jobId)
+
+    if (currentJob) {
+      const job = currentJob?.copyWith({tasks: this.dataStore.convertTasksListToMap(tasks)})
+
+      this.tempSurvey$$.next(
+        new Survey(
+          currentSurvey.id,
+          currentSurvey.title,
+          currentSurvey.description,
+          currentSurvey.jobs.set(job.id, job),
+          currentSurvey.acl
+        )
+      );
+    }
   }
 }

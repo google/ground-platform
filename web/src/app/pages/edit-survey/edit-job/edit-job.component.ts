@@ -137,7 +137,7 @@ export class EditJobComponent {
     }
 
     this.tasks = this.tasks.set(index, event);
-    this.taskService.addOrUpdateTasks(this.surveyId!, this.jobId!, this.tasks);
+    this.tempSurveyService.addOrUpdateTasks(this.jobId!, this.tasks);
   }
 
   onDeleteTask(index: number) {
