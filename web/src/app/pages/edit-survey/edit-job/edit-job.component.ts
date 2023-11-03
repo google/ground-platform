@@ -28,7 +28,6 @@ import {
   taskGroupToTypes,
 } from 'app/pages/create-survey/task-details/task-details.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -64,7 +63,6 @@ export class EditJobComponent {
     private route: ActivatedRoute,
     private navigationService: NavigationService,
     private dialogService: DialogService,
-    private loiService: LocationOfInterestService,
     public surveyService: SurveyService,
     public tempSurveyService: TempSurveyService,
     private taskService: TaskService

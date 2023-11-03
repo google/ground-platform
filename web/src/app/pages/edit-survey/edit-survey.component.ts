@@ -21,6 +21,7 @@ import {Subscription, filter, startWith} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
+import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -31,8 +32,6 @@ import {
   DialogType,
   JobDialogComponent,
 } from './job-dialog/job-dialog.component';
-
-import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
 
 @Component({
   selector: 'edit-survey',
@@ -51,8 +50,8 @@ export class EditSurveyComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     private surveyService: SurveyService,
-    private tempSurveyService: TempSurveyService,
     private jobService: JobService,
+    private tempSurveyService: TempSurveyService,
     private navigationService: NavigationService,
     private route: ActivatedRoute,
     private router: Router
