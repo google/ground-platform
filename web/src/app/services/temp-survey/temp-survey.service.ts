@@ -1,12 +1,13 @@
 import {Injectable} from '@angular/core';
-import {Survey} from 'app/models/survey.model';
-import {DataStoreService} from '../data-store/data-store.service';
-import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {List} from 'immutable';
 import {Job} from 'app/models/job.model';
-import { Task } from 'app/models/task/task.model';
-import { LocationOfInterestService } from '../loi/loi.service';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
+import {Task} from 'app/models/task/task.model';
+import {List} from 'immutable';
+import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
+
+import {DataStoreService} from '../data-store/data-store.service';
+import {LocationOfInterestService} from '../loi/loi.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,19 +16,18 @@ export class TempSurveyService {
   private tempSurvey$$!: BehaviorSubject<Survey>;
   private tempLois$$!: BehaviorSubject<List<LocationOfInterest>>;
 
-  private tempSurvey!: Survey;
-  private tempLois!: List<LocationOfInterest>;
-
-  constructor(private dataStore: DataStoreService) {}
+  constructor(private dataStoreService: DataStoreService) {}
 
   async init(id: string) {
-    this.tempSurvey = await firstValueFrom(this.dataStore.loadSurvey$(id));
-    this.tempSurvey$$ = new BehaviorSubject<Survey>(this.tempSurvey);
-
-    this.tempLois = await firstValueFrom(this.dataStore.lois$({id} as Survey));
-    this.tempLois$$ = new BehaviorSubject<List<LocationOfInterest>>(
-      this.tempLois
+    const tempSurvey = await firstValueFrom(
+      this.dataStoreService.loadSurvey$(id)
     );
+    this.tempSurvey$$ = new BehaviorSubject<Survey>(tempSurvey);
+
+    const tempLois = await firstValueFrom(
+      this.dataStoreService.lois$({id} as Survey)
+    );
+    this.tempLois$$ = new BehaviorSubject<List<LocationOfInterest>>(tempLois);
   }
 
   getTempSurvey(): Survey {
@@ -85,15 +85,14 @@ export class TempSurveyService {
     );
   }
 
-  addOrUpdateTasks(
-    jobId: string,
-    tasks: List<Task>
-  ): void {
+  addOrUpdateTasks(jobId: string, tasks: List<Task>): void {
     const currentSurvey = this.tempSurvey$$.getValue();
-    const currentJob = currentSurvey.jobs.get(jobId)
+    const currentJob = currentSurvey.jobs.get(jobId);
 
     if (currentJob) {
-      const job = currentJob?.copyWith({tasks: this.dataStore.convertTasksListToMap(tasks)})
+      const job = currentJob?.copyWith({
+        tasks: this.dataStoreService.convertTasksListToMap(tasks),
+      });
 
       this.tempSurvey$$.next(
         new Survey(
