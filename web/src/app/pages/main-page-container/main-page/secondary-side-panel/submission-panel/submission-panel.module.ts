@@ -14,28 +14,23 @@
  * limitations under the License.
  */
 
+import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
+import {SubmissionPanelComponent} from './submission-panel.component';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
-import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
-import {BrowserModule} from '@angular/platform-browser';
-
-import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
-import {SecondarySidePanelComponent} from './secondary-side-panel.component';
-import {SubmissionPanelModule} from './submission-panel/submission-panel.module';
+import {MatListModule} from '@angular/material/list';
 
 @NgModule({
   imports: [
     BrowserModule,
-    MatButtonModule,
     MatCardModule,
-    MatDividerModule,
+    MatListModule,
     MatIconModule,
-    LocationOfInterestPanelModule,
-    SubmissionPanelModule,
+    MatButtonModule,
   ],
-  exports: [SecondarySidePanelComponent],
-  declarations: [SecondarySidePanelComponent],
+  exports: [SubmissionPanelComponent],
+  declarations: [SubmissionPanelComponent],
 })
-export class SecondarySidePanelModule {}
+export class SubmissionPanelModule {}

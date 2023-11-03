@@ -15,9 +15,10 @@ limitations under the License.
 -->
 <div [ngSwitch]="sideNavMode$ | async">
   <div *ngSwitchCase="sideNavMode.SUBMISSION">
-    <ground-submission-form></ground-submission-form>
+    <ground-job-list></ground-job-list>
   </div>
 
+  <!-- TODO: is this used? -->
   <div *ngSwitchCase="sideNavMode.LOI">
     <ground-loi-panel></ground-loi-panel>
   </div>
@@ -26,6 +27,7 @@ limitations under the License.
     <ground-job-list></ground-job-list>
   </div>
 
+  <!-- TODO: is this used? -->
   <div *ngSwitchCase="sideNavMode.LOI_LIST">
     <ground-loi-list></ground-loi-list>
   </div>

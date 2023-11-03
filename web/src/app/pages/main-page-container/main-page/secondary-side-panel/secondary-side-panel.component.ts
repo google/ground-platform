@@ -15,8 +15,12 @@
  */
 
 import {Component} from '@angular/core';
+import {
+  NavigationService,
+  SideNavMode
+} from 'app/services/navigation/navigation.service';
+import {Observable} from 'rxjs';
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-secondary-side-panel',
@@ -24,11 +28,17 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
+  readonly sideNavMode = SideNavMode;
+  readonly sideNavMode$: Observable<SideNavMode>;
   locationOfInterestId = '';
+  submissionId = '';
 
   constructor(private navigationService: NavigationService) {
     this.navigationService
       .getLocationOfInterestId$()
       .subscribe(id => (this.locationOfInterestId = id || ''));
+    this.navigationService.getSubmissionId$()
+      .subscribe(id => (this.submissionId = id || ''));
+    this.sideNavMode$ = navigationService.getSideNavMode$();
   }
 }

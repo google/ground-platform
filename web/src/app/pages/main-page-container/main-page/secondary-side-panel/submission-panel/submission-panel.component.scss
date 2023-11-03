@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-.secondary-side-panel {
-  width: 380px;
-  padding: 24px;
-  position: absolute;
-  top: 0;
-  height: 100%;
-  z-index: 1;
-  background-color: white;
+.submission-title, .submission-title-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.submission-title-text {
+  font-size: 24px;
+}
+
+.submission-subtitle { 
+  padding-left: 48px;
+  font-size: 12px;
+  color: #424940;
+}
+
+.submission-tasks-container {
+  padding-left: 48px;
 }

@@ -40,7 +40,7 @@ import {SubmissionFormModule} from './submission-form/submission-form.module';
     SubmissionFormModule,
     LocationOfInterestListModule,
   ],
-  exports: [SidePanelComponent, SubmissionDetailPanelComponent],
-  declarations: [SidePanelComponent, SubmissionDetailPanelComponent],
+  exports: [SidePanelComponent],
+  declarations: [SidePanelComponent],
 })
 export class SidePanelModule {}
