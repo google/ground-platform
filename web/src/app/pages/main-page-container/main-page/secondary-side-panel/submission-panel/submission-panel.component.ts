@@ -15,13 +15,14 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {Subscription} from 'rxjs';
 import {Map} from 'immutable';
+import {Subscription} from 'rxjs';
+
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
 
 @Component({
   selector: 'submission-panel',
@@ -33,7 +34,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   @Input() submissionId!: string;
   submission: Submission | null = null;
-  tasks:  Map<string, Task> | undefined;
+  tasks: Map<string, Task> | undefined;
 
   public taskType = TaskType;
 
@@ -45,13 +46,13 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.submissionService.selectSubmission(this.submissionId);
     this.subscription.add(
-      this.submissionService.getSelectedSubmission$()
-      .subscribe(submission => {
+      this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
           this.submission = submission;
           this.tasks = submission.job?.tasks;
         }
-      }));
+      })
+    );
   }
 
   navigateToSubmissionList() {

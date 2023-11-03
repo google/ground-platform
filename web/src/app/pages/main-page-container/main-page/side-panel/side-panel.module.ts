@@ -25,7 +25,6 @@ import {JobListModule} from './job-list/job-list.module';
 import {LocationOfInterestListModule} from './loi-list/loi-list.module';
 import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
 import {SidePanelComponent} from './side-panel.component';
-import {SubmissionDetailPanelComponent} from './submission-detail-panel/submission-detail-panel.component';
 import {SubmissionFormModule} from './submission-form/submission-form.module';
 
 @NgModule({
