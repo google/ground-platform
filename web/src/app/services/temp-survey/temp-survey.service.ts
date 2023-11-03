@@ -23,27 +23,19 @@ import {List} from 'immutable';
 import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
 
 import {DataStoreService} from '../data-store/data-store.service';
-import {LocationOfInterestService} from '../loi/loi.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TempSurveyService {
   private tempSurvey$$!: BehaviorSubject<Survey>;
-  private tempLois$$!: BehaviorSubject<List<LocationOfInterest>>;
 
   constructor(private dataStoreService: DataStoreService) {}
 
   async init(id: string) {
-    const tempSurvey = await firstValueFrom(
-      this.dataStoreService.loadSurvey$(id)
+    this.tempSurvey$$ = new BehaviorSubject<Survey>(
+      await firstValueFrom(this.dataStoreService.loadSurvey$(id))
     );
-    this.tempSurvey$$ = new BehaviorSubject<Survey>(tempSurvey);
-
-    const tempLois = await firstValueFrom(
-      this.dataStoreService.lois$({id} as Survey)
-    );
-    this.tempLois$$ = new BehaviorSubject<List<LocationOfInterest>>(tempLois);
   }
 
   getTempSurvey(): Survey {
@@ -52,20 +44,6 @@ export class TempSurveyService {
 
   getTempSurvey$(): Observable<Survey> {
     return this.tempSurvey$$.asObservable();
-  }
-
-  getTempLois(): List<LocationOfInterest> {
-    return this.tempLois$$.getValue();
-  }
-
-  getTempLoisByJobId(jobId: string): List<LocationOfInterest> {
-    const lois = this.getTempLois().filter(loi => loi.jobId === jobId);
-
-    return LocationOfInterestService.getLoisWithNames(lois);
-  }
-
-  getTempLois$(): Observable<List<LocationOfInterest>> {
-    return this.tempLois$$.asObservable();
   }
 
   addOrUpdateJob(job: Job): void {

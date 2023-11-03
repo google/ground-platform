@@ -17,9 +17,6 @@
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {List} from 'immutable';
-import {Subscription} from 'rxjs';
-
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Task} from 'app/models/task/task.model';
@@ -28,10 +25,13 @@ import {
   taskGroupToTypes,
 } from 'app/pages/create-survey/task-details/task-details.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
+import {List} from 'immutable';
+import {Subscription, firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'edit-job',
@@ -63,6 +63,7 @@ export class EditJobComponent {
     private route: ActivatedRoute,
     private navigationService: NavigationService,
     private dialogService: DialogService,
+    private loiService: LocationOfInterestService,
     public surveyService: SurveyService,
     public tempSurveyService: TempSurveyService,
     private taskService: TaskService
@@ -97,7 +98,9 @@ export class EditJobComponent {
       ?.tasks?.toList()
       .sortBy(task => task.index);
 
-    this.lois = this.tempSurveyService.getTempLoisByJobId(this.jobId!)
+    this.lois = await firstValueFrom(
+      this.loiService.getLoisByJobId$(this.jobId!)
+    );
   }
 
   getIndex(index: number) {
