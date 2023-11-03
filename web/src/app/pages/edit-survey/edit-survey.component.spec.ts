@@ -25,6 +25,9 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
+import {Map} from 'immutable';
+import {BehaviorSubject, Subject, of} from 'rxjs';
+
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
@@ -33,8 +36,6 @@ import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service
 import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Map} from 'immutable';
-import {BehaviorSubject, Subject, of} from 'rxjs';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 
 import {

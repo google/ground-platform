@@ -15,11 +15,12 @@
  */
 
 import {Injectable} from '@angular/core';
+import {List} from 'immutable';
+import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
+
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
-import {List} from 'immutable';
-import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
 
 import {DataStoreService} from '../data-store/data-store.service';
 
