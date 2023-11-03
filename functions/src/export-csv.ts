@@ -162,6 +162,7 @@ function getValue(task: Task, responses: any) {
   //   // 'Array.isArray(result)', Array.isArray(result),
   //   // 'task.multipleChoice[options]', task.multipleChoice['options']
   // )
+
   if (
     task.type === 'multiple_choice' &&
     Array.isArray(result) &&
