@@ -104,6 +104,15 @@ describe('LoiSelectionFormComponent', () => {
     ).toBeDefined();
   });
 
+  it('shows import button when there are no LOIs', () => {
+    fixture.componentInstance.lois = List();
+    fixture.detectChanges();
+
+    const componentElement = fixture.debugElement.nativeElement;
+    expect(componentElement.querySelectorAll('.loi-list-item').length).toBe(0);
+    expect(componentElement.querySelector('.import-lois-button')).toBeDefined();
+  });
+
   it('shows list of LOIs', () => {
     const loiList: HTMLElement =
       fixture.debugElement.nativeElement.querySelector('.loi-list');
