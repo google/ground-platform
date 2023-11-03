@@ -6,6 +6,7 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {List} from 'immutable';
 import {Job} from 'app/models/job.model';
 import { Task } from 'app/models/task/task.model';
+import { LocationOfInterestService } from '../loi/loi.service';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +36,16 @@ export class TempSurveyService {
 
   getTempSurvey$(): Observable<Survey> {
     return this.tempSurvey$$.asObservable();
+  }
+
+  getTempLois(): List<LocationOfInterest> {
+    return this.tempLois$$.getValue();
+  }
+
+  getTempLoisByJobId(jobId: string): List<LocationOfInterest> {
+    const lois = this.getTempLois().filter(loi => loi.jobId === jobId);
+
+    return LocationOfInterestService.getLoisWithNames(lois);
   }
 
   getTempLois$(): Observable<List<LocationOfInterest>> {

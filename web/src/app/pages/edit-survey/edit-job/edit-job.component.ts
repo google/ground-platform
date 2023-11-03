@@ -98,9 +98,7 @@ export class EditJobComponent {
       ?.tasks?.toList()
       .sortBy(task => task.index);
 
-    this.lois = await firstValueFrom(
-      this.loiService.getLoisByJobId$(this.jobId!)
-    );
+    this.lois = this.tempSurveyService.getTempLoisByJobId(this.jobId!)
   }
 
   getIndex(index: number) {
