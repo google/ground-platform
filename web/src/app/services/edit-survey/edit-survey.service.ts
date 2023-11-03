@@ -26,7 +26,7 @@ import {DataStoreService} from '../data-store/data-store.service';
 @Injectable({
   providedIn: 'root',
 })
-export class TempSurveyService {
+export class EditSurveyService {
   private editSurvey$!: BehaviorSubject<Survey>;
 
   constructor(private dataStoreService: DataStoreService) {}
@@ -80,5 +80,10 @@ export class TempSurveyService {
         currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
       );
     }
+  }
+
+  updateSurvey(): void {
+    this.dataStoreService.addOrUpdateJob;
+    console.log(this.getTempSurvey());
   }
 }

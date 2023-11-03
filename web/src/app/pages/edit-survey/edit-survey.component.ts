@@ -17,15 +17,14 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {Subscription, filter, startWith} from 'rxjs';
-
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
-import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
+import {EditSurveyService} from 'app/services/edit-survey/edit-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
+import {Subscription, filter, startWith} from 'rxjs';
 
 import {
   DialogData,
@@ -51,7 +50,7 @@ export class EditSurveyComponent implements OnInit {
     public dialog: MatDialog,
     private surveyService: SurveyService,
     private jobService: JobService,
-    private tempSurveyService: TempSurveyService,
+    private editSurveyService: EditSurveyService,
     private navigationService: NavigationService,
     private route: ActivatedRoute,
     private router: Router
@@ -65,8 +64,8 @@ export class EditSurveyComponent implements OnInit {
         if (surveyId) {
           this.surveyId = surveyId;
           this.surveyService.activateSurvey(surveyId);
-          await this.tempSurveyService.init(surveyId);
-          this.tempSurveyService
+          await this.editSurveyService.init(surveyId);
+          this.editSurveyService
             .getTempSurvey$()
             .subscribe(survey => (this.survey = survey));
         }
@@ -112,7 +111,7 @@ export class EditSurveyComponent implements OnInit {
 
   async duplicateJob(job: Job): Promise<void> {
     const newJob = this.jobService.createNewJob();
-    this.tempSurveyService.addOrUpdateJob(
+    this.editSurveyService.addOrUpdateJob(
       job.copyWith({id: newJob.id, name: 'Copy of ' + job.name})
     );
   }
@@ -133,12 +132,12 @@ export class EditSurveyComponent implements OnInit {
       switch (result.dialogType) {
         case DialogType.AddJob:
         case DialogType.RenameJob:
-          this.tempSurveyService.addOrUpdateJob(
+          this.editSurveyService.addOrUpdateJob(
             job.copyWith({name: result.jobName})
           );
           break;
         case DialogType.DeleteJob:
-          this.tempSurveyService.deleteJob(job);
+          this.editSurveyService.deleteJob(job);
           break;
         default:
           break;

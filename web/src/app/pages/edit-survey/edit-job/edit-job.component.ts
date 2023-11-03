@@ -25,11 +25,11 @@ import {
   taskGroupToTypes,
 } from 'app/pages/create-survey/task-details/task-details.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {EditSurveyService} from 'app/services/edit-survey/edit-survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
-import {TempSurveyService} from 'app/services/temp-survey/temp-survey.service';
 import {List} from 'immutable';
 import {Subscription, firstValueFrom} from 'rxjs';
 
@@ -65,7 +65,7 @@ export class EditJobComponent {
     private dialogService: DialogService,
     private loiService: LocationOfInterestService,
     public surveyService: SurveyService,
-    public tempSurveyService: TempSurveyService,
+    public editSurveyService: EditSurveyService,
     private taskService: TaskService
   ) {
     this.subscription.add(
@@ -92,7 +92,7 @@ export class EditJobComponent {
   private async onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.tasks = this.tempSurveyService
+    this.tasks = this.editSurveyService
       .getTempSurvey()
       .getJob(this.jobId!)
       ?.tasks?.toList()
@@ -137,7 +137,7 @@ export class EditJobComponent {
     }
 
     this.tasks = this.tasks.set(index, event);
-    this.tempSurveyService.addOrUpdateTasks(this.jobId!, this.tasks);
+    this.editSurveyService.addOrUpdateTasks(this.jobId!, this.tasks);
   }
 
   onDeleteTask(index: number) {
