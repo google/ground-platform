@@ -16,7 +16,6 @@
 
 import {Injectable} from '@angular/core';
 import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {List} from 'immutable';
@@ -28,53 +27,48 @@ import {DataStoreService} from '../data-store/data-store.service';
   providedIn: 'root',
 })
 export class TempSurveyService {
-  private tempSurvey$$!: BehaviorSubject<Survey>;
+  private editSurvey$!: BehaviorSubject<Survey>;
 
   constructor(private dataStoreService: DataStoreService) {}
 
   async init(id: string) {
-    this.tempSurvey$$ = new BehaviorSubject<Survey>(
+    this.editSurvey$ = new BehaviorSubject<Survey>(
       await firstValueFrom(this.dataStoreService.loadSurvey$(id))
     );
   }
 
   getTempSurvey(): Survey {
-    return this.tempSurvey$$.getValue();
+    return this.editSurvey$.getValue();
   }
 
   getTempSurvey$(): Observable<Survey> {
-    return this.tempSurvey$$.asObservable();
+    return this.editSurvey$.asObservable();
   }
 
   addOrUpdateJob(job: Job): void {
-    const currentSurvey = this.tempSurvey$$.getValue();
+    const currentSurvey = this.editSurvey$.getValue();
 
     if (job.index === -1) {
       const index = currentSurvey.jobs.size;
       job = job.copyWith({index});
     }
 
-    this.tempSurvey$$.next(
+    this.editSurvey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
     );
   }
 
   deleteJob(job: Job): void {
-    const currentSurvey = this.tempSurvey$$.getValue();
+    const currentSurvey = this.editSurvey$.getValue();
 
-    this.tempSurvey$$.next(
-      new Survey(
-        currentSurvey.id,
-        currentSurvey.title,
-        currentSurvey.description,
-        currentSurvey.jobs.remove(job.id),
-        currentSurvey.acl
-      )
+    this.editSurvey$.next(
+      currentSurvey.copyWith({jobs: currentSurvey.jobs.remove(job.id)})
     );
   }
 
   addOrUpdateTasks(jobId: string, tasks: List<Task>): void {
-    const currentSurvey = this.tempSurvey$$.getValue();
+    const currentSurvey = this.editSurvey$.getValue();
+
     const currentJob = currentSurvey.jobs.get(jobId);
 
     if (currentJob) {
@@ -82,7 +76,7 @@ export class TempSurveyService {
         tasks: this.dataStoreService.convertTasksListToMap(tasks),
       });
 
-      this.tempSurvey$$.next(
+      this.editSurvey$.next(
         currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
       );
     }
