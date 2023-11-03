@@ -290,7 +290,7 @@ export class NavigationService {
 
   isEditSurveyPage(surveyId: string): boolean {
     return this.router.isActive(
-      `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
       {
         matrixParams: 'ignored',
         queryParams: 'ignored',
