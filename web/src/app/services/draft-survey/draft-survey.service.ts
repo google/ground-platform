@@ -26,48 +26,52 @@ import {DataStoreService} from '../data-store/data-store.service';
 @Injectable({
   providedIn: 'root',
 })
-export class EditSurveyService {
-  private editSurvey$!: BehaviorSubject<Survey>;
+export class DraftSurveyService {
+  private draftSurvey$!: BehaviorSubject<Survey>;
+
+  private originalSurvey!: Survey;
 
   constructor(private dataStoreService: DataStoreService) {}
 
   async init(id: string) {
-    this.editSurvey$ = new BehaviorSubject<Survey>(
-      await firstValueFrom(this.dataStoreService.loadSurvey$(id))
+    this.originalSurvey = await firstValueFrom(
+      this.dataStoreService.loadSurvey$(id)
     );
+
+    this.draftSurvey$ = new BehaviorSubject<Survey>(this.originalSurvey);
   }
 
   getTempSurvey(): Survey {
-    return this.editSurvey$.getValue();
+    return this.draftSurvey$.getValue();
   }
 
   getTempSurvey$(): Observable<Survey> {
-    return this.editSurvey$.asObservable();
+    return this.draftSurvey$.asObservable();
   }
 
   addOrUpdateJob(job: Job): void {
-    const currentSurvey = this.editSurvey$.getValue();
+    const currentSurvey = this.draftSurvey$.getValue();
 
     if (job.index === -1) {
       const index = currentSurvey.jobs.size;
       job = job.copyWith({index});
     }
 
-    this.editSurvey$.next(
+    this.draftSurvey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
     );
   }
 
   deleteJob(job: Job): void {
-    const currentSurvey = this.editSurvey$.getValue();
+    const currentSurvey = this.draftSurvey$.getValue();
 
-    this.editSurvey$.next(
+    this.draftSurvey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.remove(job.id)})
     );
   }
 
   addOrUpdateTasks(jobId: string, tasks: List<Task>): void {
-    const currentSurvey = this.editSurvey$.getValue();
+    const currentSurvey = this.draftSurvey$.getValue();
 
     const currentJob = currentSurvey.jobs.get(jobId);
 
@@ -76,14 +80,25 @@ export class EditSurveyService {
         tasks: this.dataStoreService.convertTasksListToMap(tasks),
       });
 
-      this.editSurvey$.next(
+      this.draftSurvey$.next(
         currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
       );
     }
   }
 
   updateSurvey(): void {
-    this.dataStoreService.addOrUpdateJob;
-    console.log(this.getTempSurvey());
+    const currentSurvey = this.draftSurvey$.getValue();
+
+    this.dataStoreService.updateSurveyTitleAndDescription(
+      currentSurvey.id,
+      currentSurvey.title,
+      currentSurvey.description
+    );
+
+    this.originalSurvey.jobs.forEach(job => {
+      if (!currentSurvey.jobs.get(job.id))
+        this.dataStoreService.deleteJob(currentSurvey.id, job.id);
+      else this.dataStoreService.addOrUpdateJob(currentSurvey.id, job);
+    });
   }
 }

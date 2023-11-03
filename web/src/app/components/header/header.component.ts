@@ -15,7 +15,7 @@
  */
 
 import {Component} from '@angular/core';
-
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 export enum HeaderState {
@@ -33,7 +33,10 @@ export class HeaderComponent {
   surveyId = '';
   state = HeaderState.DEFAULT;
 
-  constructor(public navigationService: NavigationService) {}
+  constructor(
+    public navigationService: NavigationService,
+    public draftSurveyService: DraftSurveyService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     this.navigationService.getSurveyId$().subscribe(surveyId => {
@@ -56,6 +59,7 @@ export class HeaderComponent {
   }
 
   onFinishEditSurveyClick() {
+    this.draftSurveyService.updateSurvey();
     this.navigationService.selectSurvey(this.surveyId);
     this.state = HeaderState.MAP_VIEW;
   }

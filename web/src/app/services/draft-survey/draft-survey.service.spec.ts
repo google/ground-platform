@@ -16,14 +16,14 @@
 
 import {TestBed} from '@angular/core/testing';
 
-import {EditSurveyService} from './edit-survey.service';
+import {DraftSurveyService} from './draft-survey.service';
 
-describe('EditSurveyService', () => {
-  let service: EditSurveyService;
+describe('DraftSurveyService', () => {
+  let service: DraftSurveyService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(EditSurveyService);
+    service = TestBed.inject(DraftSurveyService);
   });
 
   it('should be created', () => {

@@ -25,7 +25,7 @@ import {
   taskGroupToTypes,
 } from 'app/pages/create-survey/task-details/task-details.component';
 import {DialogService} from 'app/services/dialog/dialog.service';
-import {EditSurveyService} from 'app/services/edit-survey/edit-survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -65,7 +65,7 @@ export class EditJobComponent {
     private dialogService: DialogService,
     private loiService: LocationOfInterestService,
     public surveyService: SurveyService,
-    public editSurveyService: EditSurveyService,
+    public draftSurveyService: DraftSurveyService,
     private taskService: TaskService
   ) {
     this.subscription.add(
@@ -92,7 +92,7 @@ export class EditJobComponent {
   private async onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.tasks = this.editSurveyService
+    this.tasks = this.draftSurveyService
       .getTempSurvey()
       .getJob(this.jobId!)
       ?.tasks?.toList()
@@ -137,7 +137,7 @@ export class EditJobComponent {
     }
 
     this.tasks = this.tasks.set(index, event);
-    this.editSurveyService.addOrUpdateTasks(this.jobId!, this.tasks);
+    this.draftSurveyService.addOrUpdateTasks(this.jobId!, this.tasks);
   }
 
   onDeleteTask(index: number) {

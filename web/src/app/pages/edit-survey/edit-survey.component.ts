@@ -19,7 +19,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
-import {EditSurveyService} from 'app/services/edit-survey/edit-survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -50,7 +50,7 @@ export class EditSurveyComponent implements OnInit {
     public dialog: MatDialog,
     private surveyService: SurveyService,
     private jobService: JobService,
-    private editSurveyService: EditSurveyService,
+    private draftSurveyService: DraftSurveyService,
     private navigationService: NavigationService,
     private route: ActivatedRoute,
     private router: Router
@@ -64,8 +64,8 @@ export class EditSurveyComponent implements OnInit {
         if (surveyId) {
           this.surveyId = surveyId;
           this.surveyService.activateSurvey(surveyId);
-          await this.editSurveyService.init(surveyId);
-          this.editSurveyService
+          await this.draftSurveyService.init(surveyId);
+          this.draftSurveyService
             .getTempSurvey$()
             .subscribe(survey => (this.survey = survey));
         }
@@ -111,7 +111,7 @@ export class EditSurveyComponent implements OnInit {
 
   async duplicateJob(job: Job): Promise<void> {
     const newJob = this.jobService.createNewJob();
-    this.editSurveyService.addOrUpdateJob(
+    this.draftSurveyService.addOrUpdateJob(
       job.copyWith({id: newJob.id, name: 'Copy of ' + job.name})
     );
   }
@@ -132,12 +132,12 @@ export class EditSurveyComponent implements OnInit {
       switch (result.dialogType) {
         case DialogType.AddJob:
         case DialogType.RenameJob:
-          this.editSurveyService.addOrUpdateJob(
+          this.draftSurveyService.addOrUpdateJob(
             job.copyWith({name: result.jobName})
           );
           break;
         case DialogType.DeleteJob:
-          this.editSurveyService.deleteJob(job);
+          this.draftSurveyService.deleteJob(job);
           break;
         default:
           break;
