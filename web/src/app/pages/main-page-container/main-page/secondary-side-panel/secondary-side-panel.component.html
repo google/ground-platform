@@ -14,6 +14,13 @@
   limitations under the License.
 -->
 
-<div *ngIf="locationOfInterestId" class="secondary-side-panel">
-  <ground-loi-panel *ngIf="locationOfInterestId"></ground-loi-panel>
+<div [ngSwitch]="sideNavMode$ | async">
+  <div *ngIf="locationOfInterestId || submissionId" class="secondary-side-panel">
+    <div *ngSwitchCase="sideNavMode.SUBMISSION">
+      <submission-panel *ngIf="submissionId" [submissionId]="submissionId" class="secondary-side-panel-content"></submission-panel>
+    </div>
+    <div *ngSwitchCase="sideNavMode.JOB_LIST">
+      <ground-loi-panel *ngIf="locationOfInterestId" class="secondary-side-panel-content"></ground-loi-panel>
+    </div>
+  </div>
 </div>
