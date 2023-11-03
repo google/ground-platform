@@ -19,6 +19,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {Subscription} from 'rxjs';
 import {Map} from 'immutable';
+import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
@@ -65,8 +66,12 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     return this.tasks?.get(taskId)?.type;
   }
 
-  getTaskLabel(taskId: string) {
-    return this.submission?.job?.tasks?.get(taskId)?.label;
+  getTaskSubmissionResult(taskId: string): Result | undefined {
+    return this.submission?.results.get(taskId);
+  }
+
+  getTask(taskId: string): Task | undefined {
+    return this.tasks?.get(taskId);
   }
 
   ngOnDestroy(): void {

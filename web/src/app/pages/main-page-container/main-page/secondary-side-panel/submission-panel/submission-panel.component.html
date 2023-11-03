@@ -30,37 +30,51 @@ limitations under the License.
     {{submission?.lastModified?.clientTime | date: 'shortTime' }}
   </div>
   <div *ngIf="tasks !== undefined" class="submission-tasks-container">
-    <div *ngFor="let task of tasks!.keys()">
-      <div [ngSwitch]="getTaskType(task)">
-        <div *ngSwitchCase="taskType.TEXT">
-          <!-- TODO(amysorto): implement this -->
+    <div *ngFor="let task of tasks!.keys(); let i = index">
+      <mat-divider *ngIf="i > 0"></mat-divider>
+      <div class="submission-task">
+        <!-- Question -->
+        <div class="submission-question">
+          {{getTask(task)!.label}}
         </div>
-        <div *ngSwitchCase="taskType.MULTIPLE_CHOICE">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.PHOTO">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.NUMBER">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.DATE">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.TIME">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.DATE_TIME">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.DRAW_AREA">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.DROP_PIN">
-          <!-- TODO(amysorto): implement this -->
-        </div>
-        <div *ngSwitchCase="taskType.CAPTURE_LOCATION">
-          <!-- TODO(amysorto): implement this -->
+        <div class="submission-response">
+          <div *ngIf="getTaskSubmissionResult(task) === undefined" class="submission-no-response">
+            Skipped
+          </div>
+          <div *ngIf="getTaskSubmissionResult(task) !== undefined">
+            <div [ngSwitch]="getTaskType(task)" >
+              <div *ngSwitchCase="taskType.TEXT">
+                {{getTaskSubmissionResult(task)!.value}}
+              </div>
+              <div *ngSwitchCase="taskType.MULTIPLE_CHOICE">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.PHOTO">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.NUMBER">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.DATE">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.TIME">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.DATE_TIME">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.DRAW_AREA">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.DROP_PIN">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+              <div *ngSwitchCase="taskType.CAPTURE_LOCATION">
+                <!-- TODO(amysorto): implement this -->
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

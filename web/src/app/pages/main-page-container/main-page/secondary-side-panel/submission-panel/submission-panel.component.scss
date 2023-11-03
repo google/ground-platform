@@ -31,5 +31,22 @@
 }
 
 .submission-tasks-container {
-  padding-left: 48px;
+  padding: 0 24px;
+}
+
+.submission-task {
+  padding: 20px 0;
+}
+
+.submission-question {
+  color: #727970;
+  font-size: 12px;
+}
+
+.submission-response {
+  font-size: 16px;
+}
+
+.submission-no-response {
+  color: #727970;
 }
