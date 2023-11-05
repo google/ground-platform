@@ -23,6 +23,7 @@ import {BrowserModule} from '@angular/platform-browser';
 
 import {LocationOfInterestPanelModule} from './loi-panel/loi-panel.module';
 import {SecondarySidePanelComponent} from './secondary-side-panel.component';
+import {SubmissionPanelModule} from './submission-panel/submission-panel.module';
 
 @NgModule({
   imports: [
@@ -32,6 +33,7 @@ import {SecondarySidePanelComponent} from './secondary-side-panel.component';
     MatDividerModule,
     MatIconModule,
     LocationOfInterestPanelModule,
+    SubmissionPanelModule,
   ],
   exports: [SecondarySidePanelComponent],
   declarations: [SecondarySidePanelComponent],

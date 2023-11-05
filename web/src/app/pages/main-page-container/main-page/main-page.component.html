@@ -24,12 +24,6 @@
 
     <mat-sidenav-content class="mat-sidenav-content">
       <ground-secondary-side-panel></ground-secondary-side-panel>
-
-      <submission-detail-panel *ngIf="showSubmissionPanel"
-        [submission]="selectedSubmission"
-        (closePanel)="closeSelectedSubmissionDetailPanel()">
-      </submission-detail-panel>
-
       <ground-map
         [shouldEnableDrawingTools]="shouldEnableDrawingTools"
       ></ground-map>

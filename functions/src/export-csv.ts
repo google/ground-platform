@@ -52,8 +52,12 @@ export async function exportCsvHandler(
   const taskList = Object.values(tasks) as Task[] || {};
 
   const headers = [];
-  headers.push('loi_id');
-  headers.push('loi_name');
+  // Feature ID column conforms to desktop GIS defaults:
+  //   "FID" is default used by ArcGIS but is case-insensitive.
+  //   "fid" is default used by QGIS and is case-sensitive.
+  headers.push('fid');
+  // 'latitude', 'longitutde', and 'geometry' are default column names used 
+  // by Earth Engine when importing tables from CSV data.
   headers.push('latitude');
   headers.push('longitude');
   headers.push('geometry');
@@ -95,8 +99,7 @@ export async function exportCsvHandler(
     const submissions = submissionsByLocationOfInterest[loiId] || [{}];
     submissions.forEach(submission => {
       const row = [];
-      row.push(getId(loi));
-      row.push(getLabel(loi));
+      row.push(loi.get('id') || '');
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
@@ -132,27 +135,6 @@ function getGeometry(geoJsonObject: any) {
   return geoJsonObject.geometry;
 }
 
-function getId(
-  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
-) {
-  const properties = loi.get('properties') || {};
-  return (
-    loi.get('id') ||
-    properties['ID'] ||
-    properties['id'] ||
-    properties['id_prod'] ||
-    ''
-  );
-}
-
-function getLabel(
-  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>
-) {
-  const properties = loi.get('properties') || {};
-  return (
-    properties['caption'] || properties['label'] || properties['title'] || ''
-  );
-}
 /**
  * Returns the string representation of a specific task element result.
  */

@@ -118,8 +118,7 @@ function invertAndFlatten(obj: any) {
  * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
-  id: ['id', 'key'],
-  caption: ['caption', 'name', 'label'],
+  id: ['fid'],
   lat: ['lat', 'latitude', 'y'],
   lng: ['lng', 'lon', 'long', 'lng', 'x'],
 });
@@ -142,6 +141,7 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];
     if (loiKey) {
+      // Handle column differently if column name is recognized as having special significance.
       data[loiKey] = value;
     } else {
       properties[columnName] = value;
