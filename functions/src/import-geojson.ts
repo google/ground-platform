@@ -120,9 +120,11 @@ export async function importGeoJsonHandler(
  */
 function geoJsonToLoi(geoJsonLoi: any, jobId: string) {
   // TODO: Add created/modified metadata.
+  const { id, geometry, properties } = geoJsonLoi;
   return {
     jobId,
-    geometry: geoJsonLoi.geometry,
-    properties: geoJsonLoi.properties,
+    customId: id,
+    geometry,
+    properties
   };
 }
