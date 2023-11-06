@@ -44,11 +44,13 @@
             #surveyDetails
             [title]="survey.title"
             [description]="survey.description"
+            (onValidationChange)="onValidationChange($event)"
           ></survey-details>
           <job-details
             *ngSwitchCase="SetupPhase.JOB_DETAILS"
             #jobDetails
             [name]="job()?.name ?? ''"
+            (onValidationChange)="onValidationChange($event)"
           ></job-details>
           <loi-permissions
             *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
@@ -88,6 +90,7 @@
         (click)="continue()"
         mat-flat-button
         color="primary"
+        [disabled]="!canContinue"
       >
         Continue
       </button>

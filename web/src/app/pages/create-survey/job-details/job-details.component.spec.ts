@@ -31,7 +31,7 @@ describe('JobDetailsComponent', () => {
     component = fixture.componentInstance;
     component.name = jobName;
     fixture.detectChanges();
-    component.ngOnChanges();
+    component.ngOnInit();
   });
 
   it('loads job name to form', () => {

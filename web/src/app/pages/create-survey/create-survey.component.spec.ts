@@ -301,6 +301,7 @@ describe('CreateSurveyComponent', () => {
         surveyDetailsComponent.formGroup.controls[
           surveyDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
+        fixture.detectChanges();
         clickContinueButton(fixture);
         flush();
 
@@ -332,6 +333,7 @@ describe('CreateSurveyComponent', () => {
         jobDetailsComponent.formGroup.controls[
           jobDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
+        fixture.detectChanges();
         clickContinueButton(fixture);
         flush();
 
@@ -363,6 +365,7 @@ describe('CreateSurveyComponent', () => {
         jobDetailsComponent.formGroup.controls[
           jobDetailsComponent.nameControlKey
         ].setValue(name);
+        fixture.detectChanges();
         clickContinueButton(fixture);
         flush();
 
