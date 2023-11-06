@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {filter, first, firstValueFrom} from 'rxjs';
 
@@ -59,10 +59,15 @@ export class CreateSurveyComponent implements OnInit {
     private taskService: TaskService,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
+    private cdr: ChangeDetectorRef,
     route: ActivatedRoute
   ) {
     navigationService.init(route);
     this.onLoiPermissionsChange(LoiPermissionsOption.SURVEY_ORGANIZERS);
+  }
+
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges();
   }
 
   async ngOnInit(): Promise<void> {

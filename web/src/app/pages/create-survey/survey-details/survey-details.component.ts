@@ -39,7 +39,7 @@ export class SurveyDetailsComponent implements OnInit {
     });
 
     this.formGroup.statusChanges.subscribe(_ => {
-      this.onValidationChange?.emit(this.formGroup?.valid);
+      this.onValidationChange.emit(this.formGroup?.valid);
     });
   }
 
