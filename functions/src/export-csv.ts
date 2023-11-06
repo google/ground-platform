@@ -17,8 +17,8 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {db} from '@/common/context';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { db } from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 
 // TODO(#1277): Use a central model
@@ -29,6 +29,7 @@ type Task = {
   readonly required: boolean,
   readonly index: number,
   readonly multipleChoice?: any,
+  readonly options?: any,
 }
 
 // TODO: Refactor into meaningful pieces.
@@ -48,8 +49,8 @@ export async function exportCsvHandler(
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
-  const tasks = job['tasks'] || {};
-  const taskList = Object.values(tasks) as Task[] || {};
+  const tasksObject = job['tasks'] as { [id: string]: Task } || {};
+  const tasks = new Map(Object.entries(tasksObject));
 
   const headers = [];
   // Feature ID column conforms to desktop GIS defaults:
@@ -61,7 +62,7 @@ export async function exportCsvHandler(
   headers.push('latitude');
   headers.push('longitude');
   headers.push('geometry');
-  taskList.forEach(task => headers.push(task.label));
+  tasks.forEach(task => headers.push(task.label));
 
   res.type('text/csv');
   res.setHeader(
@@ -85,7 +86,7 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
+  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
@@ -104,9 +105,7 @@ export async function exportCsvHandler(
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
       const responses = submission['responses'] || {};
-      taskList
-        .map(task => getValue(task, responses))
-        .forEach(value => row.push(value));
+      tasks.forEach((task, taskId) => row.push(getValue(taskId, task, responses)));
       csvStream.write(row);
     });
   });
@@ -138,17 +137,13 @@ function getGeometry(geoJsonObject: any) {
 /**
  * Returns the string representation of a specific task element result.
  */
-function getValue(task: Task, responses: any) {
-  const result = responses[task.id] || '';
-  // console.log(
-  //   // 'Array.isArray(result)', Array.isArray(result),
-  //   // 'task.multipleChoice[options]', task.multipleChoice['options']
-  // )
+function getValue(taskId: string, task: Task, responses: any) {
+  const result = responses[taskId] || '';
 
   if (
     task.type === 'multiple_choice' &&
     Array.isArray(result) &&
-    task.multipleChoice['options']
+    task.options
   ) {
     return result.map(id => getMultipleChoiceValues(id, task)).join(', ');
   } else {
@@ -161,12 +156,11 @@ function getValue(task: Task, responses: any) {
  * the code is not defined, returns the label in English.
  */
 function getMultipleChoiceValues(id: any, task: Task) {
-  console.log('id', id, 'task', task)
-  const options = task.multipleChoice['options'] || {};
+  const options = task.options || {};
   const option = options[id] || {};
   const label = option.label || {};
   // TODO: i18n.
-  return option.code || label['en'] || '';
+  return option.code || label || '';
 }
 
 /**
