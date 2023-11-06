@@ -14,37 +14,40 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges} from '@angular/core';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
   selector: 'survey-details',
   templateUrl: './survey-details.component.html',
   styleUrls: ['./survey-details.component.scss'],
 })
-export class SurveyDetailsComponent implements OnChanges {
+export class SurveyDetailsComponent implements OnInit {
   readonly titleControlKey = 'title';
   readonly descriptionControlKey = 'description';
-  formGroup: FormGroup;
+  formGroup!: FormGroup;
 
-  @Input()
-  title = '';
-
-  @Input()
-  description = '';
+  @Input() title = '';
+  @Input() description = '';
+  @Output() onValidationChange: EventEmitter<boolean> =
+    new EventEmitter<boolean>();
 
   constructor() {
     this.formGroup = new FormBuilder().group({
-      [this.titleControlKey]: '',
+      [this.titleControlKey]: ['', Validators.required],
       [this.descriptionControlKey]: '',
+    });
+
+    this.formGroup.statusChanges.subscribe(_ => {
+      this.onValidationChange.emit(this.formGroup?.valid);
     });
   }
 
-  ngOnChanges(): void {
-    this.formGroup = new FormBuilder().group({
-      [this.titleControlKey]: this.title,
-      [this.descriptionControlKey]: this.description,
-    });
+  ngOnInit(): void {
+    this.formGroup.controls[this.titleControlKey].setValue(this.title);
+    this.formGroup.controls[this.descriptionControlKey].setValue(
+      this.description
+    );
   }
 
   toTitleAndDescription(): [string, string] {
