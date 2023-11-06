@@ -21,7 +21,7 @@ import { geojsonToWKT } from '@terraformer/wkt';
 import { db } from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 
-// TODO(#1277): Use a central model
+// TODO(#1277): Use a shared model with web
 type Task = {
   readonly id: string,
   readonly type: string,
