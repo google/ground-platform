@@ -87,23 +87,25 @@ export class DraftSurveyService {
     }
   }
 
-  updateSurvey(): void {
+  async updateSurvey(): Promise<void> {
     const currentSurvey = this.survey$.getValue();
 
-    this.dataStoreService.updateSurveyTitleAndDescription(
+    await this.dataStoreService.updateSurveyTitleAndDescription(
       currentSurvey.id,
       currentSurvey.title,
       currentSurvey.description
     );
 
-    currentSurvey.jobs.forEach(job => {
-      this.dataStoreService.addOrUpdateJob(currentSurvey.id, job);
-    });
+    await Promise.all(
+      currentSurvey.jobs.map(job =>
+        this.dataStoreService.addOrUpdateJob(currentSurvey.id, job)
+      )
+    );
 
-    this.originalSurvey.jobs
-      .filter(job => !currentSurvey.jobs.get(job.id))
-      .forEach(job => {
-        this.dataStoreService.deleteJob(currentSurvey.id, job.id);
-      });
+    await Promise.all(
+      this.originalSurvey.jobs
+        .filter(job => !currentSurvey.jobs.get(job.id))
+        .map(job => this.dataStoreService.deleteJob(currentSurvey.id, job.id))
+    );
   }
 }

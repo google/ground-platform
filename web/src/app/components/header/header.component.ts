@@ -59,8 +59,8 @@ export class HeaderComponent {
     this.state = HeaderState.EDIT_SURVEY;
   }
 
-  onFinishEditSurveyClick() {
-    this.draftSurveyService.updateSurvey();
+  async onFinishEditSurveyClick() {
+    await this.draftSurveyService.updateSurvey();
     this.navigationService.selectSurvey(this.surveyId);
     this.state = HeaderState.MAP_VIEW;
   }
