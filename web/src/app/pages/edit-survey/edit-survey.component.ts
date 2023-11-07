@@ -67,7 +67,7 @@ export class EditSurveyComponent implements OnInit {
           this.surveyService.activateSurvey(surveyId);
           await this.draftSurveyService.init(surveyId);
           this.draftSurveyService
-            .getTempSurvey$()
+            .getSurvey$()
             .subscribe(survey => (this.survey = survey));
         }
       })

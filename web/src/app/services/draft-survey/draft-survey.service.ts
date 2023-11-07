@@ -28,7 +28,7 @@ import {DataStoreService} from '../data-store/data-store.service';
   providedIn: 'root',
 })
 export class DraftSurveyService {
-  private draftSurvey$!: BehaviorSubject<Survey>;
+  private survey$!: BehaviorSubject<Survey>;
 
   private originalSurvey!: Survey;
 
@@ -39,40 +39,40 @@ export class DraftSurveyService {
       this.dataStoreService.loadSurvey$(id)
     );
 
-    this.draftSurvey$ = new BehaviorSubject<Survey>(this.originalSurvey);
+    this.survey$ = new BehaviorSubject<Survey>(this.originalSurvey);
   }
 
-  getTempSurvey(): Survey {
-    return this.draftSurvey$.getValue();
+  getSurvey(): Survey {
+    return this.survey$.getValue();
   }
 
-  getTempSurvey$(): Observable<Survey> {
-    return this.draftSurvey$.asObservable();
+  getSurvey$(): Observable<Survey> {
+    return this.survey$.asObservable();
   }
 
   addOrUpdateJob(job: Job): void {
-    const currentSurvey = this.draftSurvey$.getValue();
+    const currentSurvey = this.survey$.getValue();
 
     if (job.index === -1) {
       const index = currentSurvey.jobs.size;
       job = job.copyWith({index});
     }
 
-    this.draftSurvey$.next(
+    this.survey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
     );
   }
 
   deleteJob(job: Job): void {
-    const currentSurvey = this.draftSurvey$.getValue();
+    const currentSurvey = this.survey$.getValue();
 
-    this.draftSurvey$.next(
+    this.survey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.remove(job.id)})
     );
   }
 
   addOrUpdateTasks(jobId: string, tasks: List<Task>): void {
-    const currentSurvey = this.draftSurvey$.getValue();
+    const currentSurvey = this.survey$.getValue();
 
     const currentJob = currentSurvey.jobs.get(jobId);
 
@@ -81,14 +81,14 @@ export class DraftSurveyService {
         tasks: this.dataStoreService.convertTasksListToMap(tasks),
       });
 
-      this.draftSurvey$.next(
+      this.survey$.next(
         currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
       );
     }
   }
 
   updateSurvey(): void {
-    const currentSurvey = this.draftSurvey$.getValue();
+    const currentSurvey = this.survey$.getValue();
 
     this.dataStoreService.updateSurveyTitleAndDescription(
       currentSurvey.id,

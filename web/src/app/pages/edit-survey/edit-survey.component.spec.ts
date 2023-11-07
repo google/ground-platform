@@ -108,9 +108,9 @@ describe('EditSurveyComponent', () => {
 
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
-      ['init', 'getTempSurvey$', 'addOrUpdateJob', 'deleteJob']
+      ['init', 'getSurvey$', 'addOrUpdateJob', 'deleteJob']
     );
-    draftSurveyServiceSpy.getTempSurvey$.and.returnValue(
+    draftSurveyServiceSpy.getSurvey$.and.returnValue(
       new BehaviorSubject<Survey>(survey)
     );
 

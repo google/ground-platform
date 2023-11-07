@@ -94,7 +94,7 @@ export class EditJobComponent {
     this.jobId = params['id'];
 
     this.tasks = this.draftSurveyService
-      .getTempSurvey()
+      .getSurvey()
       .getJob(this.jobId!)
       ?.tasks?.toList()
       .sortBy(task => task.index);
