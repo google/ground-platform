@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {JobListComponent} from './job-list.component';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {Survey} from 'app/models/survey.model';
-import {of} from 'rxjs';
-import {Map} from 'immutable';
-import {Job} from 'app/models/job.model';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {Router} from '@angular/router';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {Map} from 'immutable';
+import {of} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {JobListComponent} from './job-list.component';
 
 const mockSurvey = new Survey(
   'survey001',

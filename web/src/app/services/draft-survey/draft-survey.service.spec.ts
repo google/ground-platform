@@ -1,6 +1,5 @@
 /**
- * @license
- * Copyright 2019 The Ground Authors.
+ * Copyright 2023 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -15,14 +14,22 @@
  * limitations under the License.
  */
 
-import {browser, by, element} from 'protractor';
+import {TestBed} from '@angular/core/testing';
 
-export class AppPage {
-  navigateTo() {
-    browser.get(browser.baseUrl);
-  }
+import {DraftSurveyService} from './draft-survey.service';
+import {DataStoreService} from '../data-store/data-store.service';
 
-  getTitleText() {
-    return element(by.css('ground-root span')).getText() as Promise<string>;
-  }
-}
+describe('DraftSurveyService', () => {
+  let service: DraftSurveyService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{provide: DataStoreService, useValue: {}}],
+    });
+    service = TestBed.inject(DraftSurveyService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});

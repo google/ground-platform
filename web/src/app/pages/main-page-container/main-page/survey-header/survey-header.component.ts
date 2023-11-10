@@ -16,10 +16,11 @@
 
 import {Component, OnDestroy} from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {Subscription} from 'rxjs';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'ground-survey-header',

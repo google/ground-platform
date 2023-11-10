@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+
 import {UserAvatarComponent} from './user-avatar.component';
 
 @NgModule({

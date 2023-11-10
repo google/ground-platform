@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
 import {CommonModule} from '@angular/common';
-import {HeaderModule} from 'app/components/header/header.module';
-import {FirebaseUIModule} from 'firebaseui-angular';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatCardModule} from '@angular/material/card';
 import {NgModule} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {BrowserModule} from '@angular/platform-browser';
+import {FirebaseUIModule} from 'firebaseui-angular';
+
+import {HeaderModule} from 'app/components/header/header.module';
+
 import {SignInPageComponent} from './sign-in-page.component';
 
 @NgModule({

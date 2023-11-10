@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-import {ActivatedRoute} from '@angular/router';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {
   ComponentFixture,
   TestBed,
-  waitForAsync,
-  tick,
   fakeAsync,
+  tick,
+  waitForAsync,
 } from '@angular/core/testing';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {By} from '@angular/platform-browser';
+import {ActivatedRoute} from '@angular/router';
+import {RouterTestingModule} from '@angular/router/testing';
+import {Map} from 'immutable';
+import {BehaviorSubject, Subject, of} from 'rxjs';
+
+import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Subject, of} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {Map} from 'immutable';
-import {By} from '@angular/platform-browser';
-import {RouterTestingModule} from '@angular/router/testing';
-import {Job} from 'app/models/job.model';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {JobService} from 'app/services/job/job.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {ActivatedRouteStub} from 'testing/activated-route-stub';
+
 import {
   DialogData,
   DialogType,
@@ -48,6 +51,7 @@ describe('EditSurveyComponent', () => {
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
+  let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let dataStoreServiceSpy: jasmine.SpyObj<DataStoreService>;
   let dialogRefSpy: jasmine.SpyObj<
@@ -102,15 +106,24 @@ describe('EditSurveyComponent', () => {
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
 
+    draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
+      'DraftSurveyService',
+      ['init', 'getSurvey$', 'addOrUpdateJob', 'deleteJob']
+    );
+    draftSurveyServiceSpy.getSurvey$.and.returnValue(
+      new BehaviorSubject<Survey>(survey)
+    );
+
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
-      'addOrUpdateJob',
       'createNewJob',
     ]);
     jobServiceSpy.createNewJob.and.returnValue(newJob);
+
     dataStoreServiceSpy = jasmine.createSpyObj<DataStoreService>(
       'DataStoreService',
-      ['deleteJob']
+      ['loadSurvey$']
     );
+    dataStoreServiceSpy.loadSurvey$.and.returnValue(activeSurvey$);
 
     dialogRefSpy = jasmine.createSpyObj<
       MatDialogRef<JobDialogComponent, DialogData>
@@ -124,6 +137,7 @@ describe('EditSurveyComponent', () => {
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
         {provide: JobService, useValue: jobServiceSpy},
         {provide: DataStoreService, useValue: dataStoreServiceSpy},
         {provide: ActivatedRoute, useValue: route},
@@ -211,8 +225,7 @@ describe('EditSurveyComponent', () => {
 
         addButton.click();
 
-        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          surveyId,
+        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           newJob.copyWith({name: newJobName})
         );
       });
@@ -231,8 +244,7 @@ describe('EditSurveyComponent', () => {
         menuButton.click();
         renameButton.click();
 
-        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          surveyId,
+        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           job1.copyWith({name: newJobName})
         );
       });
@@ -247,8 +259,7 @@ describe('EditSurveyComponent', () => {
         menuButton.click();
         duplicateButton.click();
 
-        expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          surveyId,
+        expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           job1.copyWith({id: newJob.id, name: 'Copy of ' + job1.name})
         );
       });
@@ -266,10 +277,7 @@ describe('EditSurveyComponent', () => {
         menuButton.click();
         deleteButton.click();
 
-        expect(dataStoreServiceSpy.deleteJob).toHaveBeenCalledOnceWith(
-          surveyId,
-          job1.id
-        );
+        expect(draftSurveyServiceSpy.deleteJob).toHaveBeenCalledOnceWith(job1);
       });
     });
   });

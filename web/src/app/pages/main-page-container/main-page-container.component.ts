@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {Observable, Subscription} from 'rxjs';
+
 import {Survey} from 'app/models/survey.model';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Component, OnInit, OnDestroy} from '@angular/core';
 
 @Component({
   selector: 'ground-main-page-container',

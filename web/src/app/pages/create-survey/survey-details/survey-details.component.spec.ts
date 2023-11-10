@@ -15,6 +15,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 
 describe('SurveyDetailsComponent', () => {
@@ -30,7 +31,7 @@ describe('SurveyDetailsComponent', () => {
     component.title = title;
     component.description = description;
     fixture.detectChanges();
-    component.ngOnChanges();
+    component.ngOnInit();
   });
 
   it('loads title and description to form', () => {

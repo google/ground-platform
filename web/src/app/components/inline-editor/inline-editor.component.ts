@@ -16,11 +16,11 @@
 
 import {
   Component,
+  ElementRef,
+  EventEmitter,
   Input,
   Output,
-  EventEmitter,
   ViewChild,
-  ElementRef,
 } from '@angular/core';
 
 @Component({

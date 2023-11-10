@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {Option} from 'app/models/task/option.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {switchMap} from 'rxjs/operators';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {List} from 'immutable';
-import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import {List} from 'immutable';
+import {Observable, Subscription, combineLatest} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
+
 import {Job} from 'app/models/job.model';
+import {Submission} from 'app/models/submission/submission.model';
+import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 // TODO: Rename "LocationOfInterestDetailsComponent".
 @Component({
@@ -72,11 +73,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         this.getTasks(submission).forEach(task => {
           if (
             task.type === TaskType.PHOTO &&
-            (submission.results?.get(task.id)?.value as string)
+            (submission.data?.get(task.id)?.value as string)
           ) {
             this.fillPhotoURL(
               task.id,
-              submission.results?.get(task.id)?.value as string
+              submission.data?.get(task.id)?.value as string
             );
           }
         });
@@ -118,7 +119,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   getOptions(task: Task, submission: Submission): List<Option> {
-    const result = submission.results?.get(task.id);
+    const result = submission.data?.get(task.id);
     if (result && result instanceof List<Option>) {
       return result.value as List<Option>;
     } else {

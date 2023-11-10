@@ -15,6 +15,7 @@
  */
 
 import {List} from 'immutable';
+
 import {Copiable} from '../copiable';
 
 export abstract class TaskCondition extends Copiable {}

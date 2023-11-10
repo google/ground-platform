@@ -19,13 +19,15 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  Output,
   OnInit,
+  Output,
 } from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {ColorPickerComponent} from './color-picker/color-picker.component';
+
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+
+import {ColorPickerComponent} from './color-picker/color-picker.component';
 
 @Component({
   selector: 'ground-edit-style-button',

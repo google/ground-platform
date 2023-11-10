@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {Component} from '@angular/core';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
-import {TaskEditorModule} from './task-editor/task-editor.module';
-import {JobDialogComponent} from './job-dialog.component';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
 import {
   MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-  MatLegacyDialogRef as MatDialogRef,
   MatLegacyDialogModule as MatDialogModule,
+  MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
-import {Router} from '@angular/router';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
-import {MatIconModule} from '@angular/material/icon';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {AuthService} from 'app/services/auth/auth.service';
+import {Router} from '@angular/router';
 import {NEVER} from 'rxjs';
+
+import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
+import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+
+import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
+import {JobDialogComponent} from './job-dialog.component';
+import {TaskEditorModule} from './task-editor/task-editor.module';
 
 @Component({selector: 'mat-dialog-content', template: ''})
 class MatDialogContent {}

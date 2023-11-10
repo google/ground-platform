@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {MapComponent} from './map.component';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {BrowserModule} from '@angular/platform-browser';
+
+import {MapComponent} from './map.component';
 import {SelectLocationOfInterestDialogModule} from './select-loi-dialog/select-loi-dialog.module';
 
 @NgModule({

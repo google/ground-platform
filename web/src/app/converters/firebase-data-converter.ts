@@ -15,26 +15,30 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {
-  MultipleChoice,
-  Cardinality,
-} from 'app/models/task/multiple-choice.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Option} from 'app/models/task/option.model';
 import {List, Map} from 'immutable';
+
 import {AuditInfo} from 'app/models/audit-info.model';
-import {Result} from 'app/models/submission/result.model';
-import {Role} from 'app/models/role.model';
-import {User} from 'app/models/user.model';
+import {Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
+import {Role} from 'app/models/role.model';
+import {Result} from 'app/models/submission/result.model';
+import {
+  Submission,
+  SubmissionData,
+} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
+import {
+  Cardinality,
+  MultipleChoice,
+} from 'app/models/task/multiple-choice.model';
+import {Option} from 'app/models/task/option.model';
 import {
   MultipleChoiceResponseCondition,
   NewUnplannedLocationOfInterestCondition,
   TaskCondition,
 } from 'app/models/task/task-condition.model';
+import {Task, TaskType} from 'app/models/task/task.model';
+import {User} from 'app/models/user.model';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -379,7 +383,7 @@ export class FirebaseDataConverter {
    * {
    *   loiId: 'loi123'
    *   taskId: 'task001',
-   *   results: {
+   *   data: {
    *     'task001': 'Result text',    // For 'text_field' tasks.
    *     'task002': ['A', 'B'],       // For 'multiple_choice' tasks.
    *      // ...
@@ -396,6 +400,10 @@ export class FirebaseDataConverter {
     if (data === undefined) {
       throw Error(`Submission ${id} does not have document data.`);
     }
+    // TODO(#1288): Clean up remaining references to old responses field
+    // Support submissions that have results or responses fields instead of data
+    // before model change.
+    const submissionData = data.data ?? data.results ?? data.responses;
     return new Submission(
       id,
       data.loiId,
@@ -403,11 +411,11 @@ export class FirebaseDataConverter {
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
       Map<string, Result>(
-        keys(data.results).map((taskId: string) => [
+        keys(submissionData).map((taskId: string) => [
           taskId as string,
           FirebaseDataConverter.toResult(
             job.tasks!.get(taskId)!,
-            data.results[taskId]
+            submissionData[taskId]
           ),
         ])
       )
@@ -422,7 +430,7 @@ export class FirebaseDataConverter {
       lastModified: FirebaseDataConverter.auditInfoToJs(
         submission.lastModified
       ),
-      results: FirebaseDataConverter.resultsToJS(submission.results),
+      data: FirebaseDataConverter.dataToJS(submission.data),
     };
   }
 
@@ -439,8 +447,8 @@ export class FirebaseDataConverter {
     );
   }
 
-  private static resultsToJS(results: Map<string, Result>): {} {
-    return results.entrySeq().reduce(
+  private static dataToJS(data: SubmissionData): {} {
+    return data.entrySeq().reduce(
       (obj: {}, [taskId, result]) => ({
         ...obj,
         [taskId]: FirebaseDataConverter.resultToJS(result),

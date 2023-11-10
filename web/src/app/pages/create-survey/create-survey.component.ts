@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {JobService} from 'app/services/job/job.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
-import {Survey} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
-
-import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {filter, first, firstValueFrom} from 'rxjs';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
+
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {TaskService} from 'app/services/task/task.service';
+import {Survey} from 'app/models/survey.model';
+import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {
   LoiPermissionsComponent,
   LoiPermissionsOption,
 } from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
+import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {JobService} from 'app/services/job/job.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
+
 import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 
 @Component({
@@ -43,6 +44,7 @@ import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 export class CreateSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
+  canContinue = true;
   loiPermissionsOption!: LoiPermissionsOption;
   skipLoiSelection = false;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
@@ -57,10 +59,15 @@ export class CreateSurveyComponent implements OnInit {
     private taskService: TaskService,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
+    private cdr: ChangeDetectorRef,
     route: ActivatedRoute
   ) {
     navigationService.init(route);
     this.onLoiPermissionsChange(LoiPermissionsOption.SURVEY_ORGANIZERS);
+  }
+
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges();
   }
 
   async ngOnInit(): Promise<void> {
@@ -91,6 +98,10 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = this.getSetupPhase(survey, lois);
         this.survey = survey;
       });
+  }
+
+  onValidationChange(valid: boolean) {
+    this.canContinue = valid;
   }
 
   private isSetupFinished(survey: Survey): boolean {

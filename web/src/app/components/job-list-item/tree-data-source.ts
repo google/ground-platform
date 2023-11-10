@@ -16,16 +16,17 @@
 
 import {
   CollectionViewer,
-  SelectionChange,
   DataSource,
+  SelectionChange,
 } from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
+import {List} from 'immutable';
+import {BehaviorSubject, Observable, Subscription, merge} from 'rxjs';
+import {map, shareReplay} from 'rxjs/operators';
+
+import {GeometryType} from 'app/models/geometry/geometry';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {BehaviorSubject, merge, Subscription, Observable} from 'rxjs';
-import {map, shareReplay} from 'rxjs/operators';
-import {List} from 'immutable';
-import {GeometryType} from 'app/models/geometry/geometry';
 import {getLoiIcon} from 'app/utils/utils';
 
 /** Flat node with with information on name, level, and if it is expandable.

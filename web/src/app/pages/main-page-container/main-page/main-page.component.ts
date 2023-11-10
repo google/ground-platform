@@ -15,19 +15,20 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {JobDialogComponent} from './job-dialog/job-dialog.component';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Observable, Subscription} from 'rxjs';
-import {Survey} from 'app/models/survey.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
 import {take} from 'rxjs/operators';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+
+import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
+
+import {JobDialogComponent} from './job-dialog/job-dialog.component';
 import {TitleDialogComponent} from './title-dialog/title-dialog.component';
-import {Submission} from 'app/models/submission/submission.model';
 
 /**
  * Root component for main application page showing map, jobs list, and
@@ -44,7 +45,6 @@ export class MainPageComponent implements OnInit {
   subscription: Subscription = new Subscription();
   shouldEnableDrawingTools = false;
   showSubmissionPanel: Boolean = false;
-  selectedSubmission!: Submission;
   constructor(
     private navigationService: NavigationService,
     private surveyService: SurveyService,
@@ -91,27 +91,10 @@ export class MainPageComponent implements OnInit {
         }
       })
     );
-    // Show selected submission details when expanded
-    this.subscription.add(
-      this.submissionService.getSelectedSubmission$().subscribe(submission => {
-        if (submission instanceof Submission) {
-          this.selectedSubmission = submission;
-          this.openSelectedSubmissionDetailPanel();
-        }
-      })
-    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
-  }
-
-  openSelectedSubmissionDetailPanel() {
-    this.showSubmissionPanel = true;
-  }
-
-  closeSelectedSubmissionDetailPanel() {
-    this.showSubmissionPanel = false;
   }
 
   private showTitleDialog() {

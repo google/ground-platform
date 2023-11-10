@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import {HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {
   ActivatedRoute,
-  Router,
-  NavigationExtras,
   IsActiveMatchOptions,
+  NavigationExtras,
+  Router,
 } from '@angular/router';
-import {HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -290,7 +290,7 @@ export class NavigationService {
 
   isEditSurveyPage(surveyId: string): boolean {
     return this.router.isActive(
-      `${NavigationService.SURVEYS_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
       {
         matrixParams: 'ignored',
         queryParams: 'ignored',

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Injectable} from '@angular/core';
 import {
   MatLegacyDialog as MatDialog,
   MatLegacyDialogRef as MatDialogRef,
 } from '@angular/material/legacy-dialog';
+
+import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 
 @Injectable({
   providedIn: 'root',

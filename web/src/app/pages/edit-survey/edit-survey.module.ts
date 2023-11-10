@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
-import {HeaderModule} from 'app/components/header/header.module';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
+import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {RouterModule} from '@angular/router';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatDialogModule} from '@angular/material/dialog';
+
+import {HeaderModule} from 'app/components/header/header.module';
+import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
+
 import {SurveyHeaderModule} from '../main-page-container/main-page/survey-header/survey-header.module';
 
 @NgModule({

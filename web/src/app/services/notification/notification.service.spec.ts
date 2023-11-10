@@ -15,8 +15,9 @@
  */
 
 import {TestBed} from '@angular/core/testing';
-import {NotificationService} from 'app/services/notification/notification.service';
 import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+
+import {NotificationService} from 'app/services/notification/notification.service';
 
 describe('NotificationService', () => {
   let matSnackBar: jasmine.SpyObj<MatSnackBar>;

@@ -15,27 +15,30 @@
  */
 
 import {Component} from '@angular/core';
-import {TaskType, Task} from 'app/models/task/task.model';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {List, Map} from 'immutable';
+import {Observable} from 'rxjs';
+import {first, map, switchMap} from 'rxjs/operators';
+
+import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
+import {AuditInfo} from 'app/models/audit-info.model';
+import {Job} from 'app/models/job.model';
+import {Result} from 'app/models/submission/result.model';
+import {
+  Submission,
+  SubmissionData,
+} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Result} from 'app/models/submission/result.model';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {FormGroup, FormBuilder, FormControl, Validators} from '@angular/forms';
-import {List, Map} from 'immutable';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Survey} from 'app/models/survey.model';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {LoadingState} from 'app/services/loading-state.model';
-import {Observable} from 'rxjs';
-import {first} from 'rxjs/operators';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {switchMap, map} from 'rxjs/operators';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {AuthService} from 'app/services/auth/auth.service';
-import {AuditInfo} from 'app/models/audit-info.model';
-import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LoadingState} from 'app/services/loading-state.model';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 // To make ESLint happy:
 /*global alert*/
@@ -100,9 +103,9 @@ export class SubmissionFormComponent {
           /*clientTime=*/ new Date(),
           /*serverTime=*/ this.dataStoreService.getServerTimestamp()
         );
-        const updatedResults: Map<string, Result> = this.extractResults();
-        const updatedSubmission = this.submission!.withResultsAndLastModified(
-          updatedResults,
+        const updatedData: SubmissionData = this.extractData();
+        const updatedSubmission = this.submission!.withDataAndLastModified(
+          updatedData,
           lastModified
         );
         this.dataStoreService
@@ -153,7 +156,7 @@ export class SubmissionFormComponent {
   private convertSubmissionToFormGroup(submission: Submission): FormGroup {
     const group: {[taskId: string]: FormControl} = {};
     for (const [taskId, task] of submission.job!.tasks!) {
-      const result = submission!.results?.get(taskId);
+      const result = submission!.data?.get(taskId);
       switch (task.type) {
         case TaskType.TEXT:
           this.addControlsForTextTask(group, task, result);
@@ -171,23 +174,23 @@ export class SubmissionFormComponent {
     return this.formBuilder.group(group);
   }
 
-  private extractResults(): Map<string, Result> {
+  private extractData(): SubmissionData {
     return Map<string, Result>(
       this.submissionTasks!.map(task => [
         task.id,
-        this.extractResultForTask(task),
+        this.extractDataForTask(task),
       ])
     );
   }
 
-  private extractResultForTask(task: Task) {
+  private extractDataForTask(task: Task) {
     switch (task.type) {
       case TaskType.TEXT:
-        return this.extractResultForTextTask(task);
+        return this.extractDataForTextTask(task);
       case TaskType.NUMBER:
-        return this.extractResultForNumberTask(task);
+        return this.extractDataForNumberTask(task);
       case TaskType.MULTIPLE_CHOICE:
-        return this.extractResultForMultipleChoiceTask(task);
+        return this.extractDataForMultipleChoiceTask(task);
       default:
         console.warn(`Unsupported task type ${task.type}`);
         return new Result('');
@@ -216,11 +219,11 @@ export class SubmissionFormComponent {
       : new FormControl(value);
   }
 
-  private extractResultForTextTask(task: Task): Result {
+  private extractDataForTextTask(task: Task): Result {
     return new Result(this.submissionForm?.value[task.id]);
   }
 
-  private extractResultForNumberTask(task: Task): Result {
+  private extractDataForNumberTask(task: Task): Result {
     return new Result(this.submissionForm?.value[task.id]);
   }
 
@@ -244,12 +247,12 @@ export class SubmissionFormComponent {
     }
   }
 
-  private extractResultForMultipleChoiceTask(task: Task): Result {
+  private extractDataForMultipleChoiceTask(task: Task): Result {
     switch (task.multipleChoice?.cardinality) {
       case Cardinality.SELECT_ONE:
-        return this.extractResultForSelectOneTask(task);
+        return this.extractDataForSelectOneTask(task);
       case Cardinality.SELECT_MULTIPLE:
-        return this.extractResultForSelectMultipleTask(task);
+        return this.extractDataForSelectMultipleTask(task);
       default:
         throw Error(
           `Unimplemented Result extraction for Task with
@@ -271,7 +274,7 @@ export class SubmissionFormComponent {
       : new FormControl(selectedOptionId);
   }
 
-  private extractResultForSelectOneTask(task: Task): Result {
+  private extractDataForSelectOneTask(task: Task): Result {
     const selectedOption: Option = task.getMultipleChoiceOption(
       this.submissionForm?.value[task.id]
     );
@@ -289,7 +292,7 @@ export class SubmissionFormComponent {
     }
   }
 
-  private extractResultForSelectMultipleTask(task: Task): Result {
+  private extractDataForSelectMultipleTask(task: Task): Result {
     const selectedOptions: List<Option> = task.multipleChoice!.options!.filter(
       (option: Option) => this.submissionForm?.value[option.id]
     );

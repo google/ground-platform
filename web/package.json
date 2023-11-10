@@ -3,11 +3,12 @@
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf node_modules dist coverage *.log",
-    "start:dev": "ng serve -c dev",
-    "start:prod": "ng serve -c prod",
+    "start:dev": "npm run build:dev --project=$npm_config_project && ng serve -c dev",
+    "start:prod": "npm run build:prod --project=$npm_config_project && ng serve -c prod",
     "build": "npm install && ng build -c",
-    "build:dev": "npm run build dev",
-    "build:prod": "npm run build production",
+    "update-web-keys": "npm run --prefix scripts update-web-keys",
+    "build:dev": "npm run update-web-keys $npm_config_project && npm run build dev",
+    "build:prod": "npm run update-web-keys $npm_config_project && npm run build production",
     "build:local": "npm run build local",
     "watch:local": "npm run build local -- --watch",
     "pretest": "./pretest.sh",
@@ -16,10 +17,9 @@
     "test-with-coverage": "npm run pretest && npm run test:headless -- --code-coverage && npm run posttest",
     "lint": "ng lint",
     "lint:fix": "npm run lint -- --fix",
-    "e2e": "ng e2e",
     "posttest": "./posttest.sh && npm run lint",
     "login": "npx firebase login",
-    "deploy:dev": "npm run build:dev && npm run login && npx firebase deploy --only hosting --project"
+    "deploy:dev": "npm run build:dev --project=$npm_config_project && npm run login && npx firebase deploy --only hosting --project $npm_config_project"
   },
   "private": true,
   "dependencies": {
@@ -66,6 +66,8 @@
     "@types/webpack-env": "^1.15.3",
     "codelyzer": "^6.0.2",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-tools": "11.23.1",
     "fuzzy": "^0.1.3",
@@ -85,7 +87,6 @@
     "karma-jasmine-matchers": "5.0.0",
     "prettier": "^2.8.1",
     "prettier-eslint": "^15.0.1",
-    "protractor": "~7.0.0",
     "puppeteer": "^3.3.0",
     "ts-node": "^8.10.2",
     "typescript": "^4.9.0"
