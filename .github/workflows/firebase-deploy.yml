@@ -30,10 +30,10 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Create .firebase-config.ts
+      - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
         env:
-          FILE_NAME: "web/src/environments/.firebase-config.ts"
+          FILE_NAME: "keys/gnd-dev/firebase-config.ts"
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Build using development configuration
