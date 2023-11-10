@@ -16,10 +16,11 @@
 
 import {Map} from 'immutable';
 
+import {Copiable} from './copiable';
 import {Job} from './job.model';
 import {Role} from './role.model';
 
-export class Survey {
+export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
     '',
@@ -39,7 +40,9 @@ export class Survey {
     readonly description: string,
     readonly jobs: Map<string, Job>,
     readonly acl: Map<string, Role>
-  ) {}
+  ) {
+    super();
+  }
 
   getJob(jobId: string): Job | undefined {
     return this.jobs.get(jobId);

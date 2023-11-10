@@ -25,7 +25,7 @@ import {
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
-import Immutable, {Map} from 'immutable';
+import {List, Map} from 'immutable';
 import {Observable, Subject} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -58,7 +58,7 @@ describe('CreateSurveyComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
-  let lois: Immutable.List<LocationOfInterest>;
+  let lois: List<LocationOfInterest>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
@@ -157,7 +157,7 @@ describe('CreateSurveyComponent', () => {
       'LocationOfInterestService',
       ['getLocationsOfInterest$']
     );
-    lois = Immutable.List();
+    lois = List();
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(
       new Observable(observer => {
         observer.next(lois);
@@ -301,6 +301,7 @@ describe('CreateSurveyComponent', () => {
         surveyDetailsComponent.formGroup.controls[
           surveyDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
+        fixture.detectChanges();
         clickContinueButton(fixture);
         flush();
 
@@ -332,6 +333,7 @@ describe('CreateSurveyComponent', () => {
         jobDetailsComponent.formGroup.controls[
           jobDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
+        fixture.detectChanges();
         clickContinueButton(fixture);
         flush();
 
@@ -363,6 +365,7 @@ describe('CreateSurveyComponent', () => {
         jobDetailsComponent.formGroup.controls[
           jobDetailsComponent.nameControlKey
         ].setValue(name);
+        fixture.detectChanges();
         clickContinueButton(fixture);
         flush();
 

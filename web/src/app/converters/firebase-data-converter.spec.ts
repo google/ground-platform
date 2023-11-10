@@ -50,7 +50,7 @@ class MockFirebaseData {
     },
     loiId: 'loi001',
     jobId: 'job001',
-    results: {
+    data: {
       task001: 'text result',
       task002: ['option001', 'option002'],
       task003: 123,

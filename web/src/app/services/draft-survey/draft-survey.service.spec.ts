@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-.loi-panel {
-  .header {
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 500;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
+import {TestBed} from '@angular/core/testing';
 
-    :first-child {
-      flex: 1;
-    }
-  }
-}
+import {DraftSurveyService} from './draft-survey.service';
+import {DataStoreService} from '../data-store/data-store.service';
+
+describe('DraftSurveyService', () => {
+  let service: DraftSurveyService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [{provide: DataStoreService, useValue: {}}],
+    });
+    service = TestBed.inject(DraftSurveyService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});

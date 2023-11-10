@@ -1,0 +1,64 @@
+<!--
+Copyright 2023 The Ground Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<div>
+  <div class="submission-title">
+    <div class="submission-title-left">
+      <button mat-icon-button (click)="navigateToSubmissionList()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="submission-title-text">{{submission?.created?.user?.displayName}}</div>
+    </div>
+    <button mat-icon-button (click)="editSubmission()">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </div>
+  <div class="submission-subtitle">
+    {{submission?.lastModified?.clientTime | date: 'longDate' }} • 
+    {{submission?.lastModified?.clientTime | date: 'shortTime' }}
+  </div>
+  <div *ngIf="tasks" class="submission-tasks-container">
+    <div *ngFor="let task of tasks!.keys(); let i = index">
+      <mat-divider *ngIf="i > 0"></mat-divider>
+      <div class="submission-task">
+        <!-- Question -->
+        <div class="submission-question">
+          {{getTask(task)!.label}}
+        </div>
+        <!-- Response -->
+        <div class="submission-response">
+          <div *ngIf="getTaskSubmissionResult(task) === undefined" class="submission-no-response">
+            Skipped
+          </div>
+          <div *ngIf="getTaskSubmissionResult(task) !== undefined">
+            <div [ngSwitch]="getTaskType(task)" >
+              <div *ngSwitchCase="taskType.MULTIPLE_CHOICE">
+                <!-- TODO(#1278): Add support for multiple choice tasks for
+                  submission detail panel -->
+              </div>
+              <div *ngSwitchCase="taskType.PHOTO">
+                <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
+              </div>
+              <!-- TODO(#1279): Add support for map related tasks for submission detail panel -->
+              <div *ngSwitchDefault>
+                {{getTaskSubmissionResult(task)!.value.toString()}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

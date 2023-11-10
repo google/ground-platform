@@ -16,10 +16,11 @@
 
 .secondary-side-panel {
   width: 380px;
-  padding: 8px;
+  padding: 24px;
   position: absolute;
   top: 0;
   height: 100%;
   z-index: 1;
   background-color: white;
+  overflow-y: auto;
 }

@@ -17,9 +17,20 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {db} from '@/common/context';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { db } from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
+
+// TODO(#1277): Use a shared model with web
+type Task = {
+  readonly id: string,
+  readonly type: string,
+  readonly label: string,
+  readonly required: boolean,
+  readonly index: number,
+  readonly multipleChoice?: any,
+  readonly options?: any,
+}
 
 // TODO: Refactor into meaningful pieces.
 export async function exportCsvHandler(
@@ -38,12 +49,8 @@ export async function exportCsvHandler(
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
-  const tasks = job['tasks'] || {};
-  const task = (Object.values(tasks)[0] as any) || {};
-  const elementMap = task['elements'] || {};
-  const elements = Object.keys(elementMap)
-    .map(elementId => ({id: elementId, ...elementMap[elementId]}))
-    .sort((a, b) => a.index - b.index);
+  const tasksObject = job['tasks'] as { [id: string]: Task } || {};
+  const tasks = new Map(Object.entries(tasksObject));
 
   const headers = [];
   // Feature ID column conforms to desktop GIS defaults:
@@ -55,11 +62,7 @@ export async function exportCsvHandler(
   headers.push('latitude');
   headers.push('longitude');
   headers.push('geometry');
-  elements.forEach(element => {
-    const labelMap = element['label'] || {};
-    const label = Object.values(labelMap)[0] || 'Unnamed task';
-    headers.push(label);
-  });
+  tasks.forEach(task => headers.push(task.label));
 
   res.type('text/csv');
   res.setHeader(
@@ -83,7 +86,7 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
+  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
@@ -101,10 +104,9 @@ export async function exportCsvHandler(
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
-      const results = submission['results'] || {};
-      elements
-        .map(element => getValue(element, results))
-        .forEach(value => row.push(value));
+      // TODO(#1288): Clean up remaining references to old responses field
+      const data = submission['data'] || submission['responses'] || submission['results'] || {};
+      tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
       csvStream.write(row);
     });
   });
@@ -136,14 +138,14 @@ function getGeometry(geoJsonObject: any) {
 /**
  * Returns the string representation of a specific task element result.
  */
-function getValue(element: any, results: any) {
-  const result = results[element.id] || '';
+function getValue(taskId: string, task: Task, data: any) {
+  const result = data[taskId] || '';
   if (
-    element.type === 'multiple_choice' &&
+    task.type === 'multiple_choice' &&
     Array.isArray(result) &&
-    element.options
+    task.options
   ) {
-    return result.map(id => getMultipleChoiceValues(id, element)).join(', ');
+    return result.map(id => getMultipleChoiceValues(id, task)).join(', ');
   } else {
     return result;
   }
@@ -153,12 +155,12 @@ function getValue(element: any, results: any) {
  * Returns the code associated with a specified multiple choice option, or if
  * the code is not defined, returns the label in English.
  */
-function getMultipleChoiceValues(id: any, element: any) {
-  const options = element.options || {};
+function getMultipleChoiceValues(id: any, task: Task) {
+  const options = task.options || {};
   const option = options[id] || {};
   const label = option.label || {};
   // TODO: i18n.
-  return option.code || label['en'] || '';
+  return option.code || label || '';
 }
 
 /**

@@ -21,6 +21,8 @@ import {Job} from 'app/models/job.model';
 
 import {Result} from './result.model';
 
+export type SubmissionData = Map<string, Result>;
+
 export class Submission {
   constructor(
     readonly id: string,
@@ -28,12 +30,12 @@ export class Submission {
     readonly job: Job | null,
     readonly created: AuditInfo,
     readonly lastModified: AuditInfo,
-    readonly results: Map<string, Result>
+    readonly data: SubmissionData
   ) {}
 
-  // Returns copy of Submission with results and lastModified replaced.
-  withResultsAndLastModified(
-    results: Map<string, Result>,
+  // Returns copy of Submission with data and lastModified replaced.
+  withDataAndLastModified(
+    data: SubmissionData,
     lastModified: AuditInfo
   ): Submission {
     return new Submission(
@@ -42,7 +44,7 @@ export class Submission {
       this.job,
       this.created,
       lastModified,
-      results
+      data
     );
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {filter, first, firstValueFrom} from 'rxjs';
 
@@ -44,6 +44,7 @@ import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 export class CreateSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
+  canContinue = true;
   loiPermissionsOption!: LoiPermissionsOption;
   skipLoiSelection = false;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
@@ -58,10 +59,15 @@ export class CreateSurveyComponent implements OnInit {
     private taskService: TaskService,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
+    private cdr: ChangeDetectorRef,
     route: ActivatedRoute
   ) {
     navigationService.init(route);
     this.onLoiPermissionsChange(LoiPermissionsOption.SURVEY_ORGANIZERS);
+  }
+
+  ngAfterViewChecked(): void {
+    this.cdr.detectChanges();
   }
 
   async ngOnInit(): Promise<void> {
@@ -92,6 +98,10 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = this.getSetupPhase(survey, lois);
         this.survey = survey;
       });
+  }
+
+  onValidationChange(valid: boolean) {
+    this.canContinue = valid;
   }
 
   private isSetupFinished(survey: Survey): boolean {

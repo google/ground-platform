@@ -17,6 +17,8 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
 
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+
 import {HeaderComponent} from './header.component';
 
 describe('HeaderComponent', () => {
@@ -26,7 +28,10 @@ describe('HeaderComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [HeaderComponent],
-      providers: [{provide: Router, useValue: {}}],
+      providers: [
+        {provide: Router, useValue: {}},
+        {provide: DraftSurveyService, useValue: {}},
+      ],
     }).compileComponents();
   });
 
