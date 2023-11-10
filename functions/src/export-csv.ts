@@ -104,7 +104,8 @@ export async function exportCsvHandler(
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
-      const data = submission['data'] || {};
+      // TODO(#1288): Clean up remaining references to old responses field
+      const data = submission['data'] || submission['responses'] || submission['results'] || {};
       tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
       csvStream.write(row);
     });

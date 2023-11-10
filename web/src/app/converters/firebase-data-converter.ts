@@ -400,6 +400,7 @@ export class FirebaseDataConverter {
     if (data === undefined) {
       throw Error(`Submission ${id} does not have document data.`);
     }
+    // TODO(#1288): Clean up remaining references to old responses field
     // Support submissions that have results or responses fields instead of data
     // before model change.
     const submissionData = data.data ?? data.results ?? data.responses;
