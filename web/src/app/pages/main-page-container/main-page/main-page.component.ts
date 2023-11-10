@@ -19,7 +19,6 @@ import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Observable, Subscription} from 'rxjs';
 import {take} from 'rxjs/operators';
 
-import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';

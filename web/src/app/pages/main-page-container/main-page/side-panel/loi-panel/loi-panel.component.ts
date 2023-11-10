@@ -73,11 +73,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
         this.getTasks(submission).forEach(task => {
           if (
             task.type === TaskType.PHOTO &&
-            (submission.results?.get(task.id)?.value as string)
+            (submission.data?.get(task.id)?.value as string)
           ) {
             this.fillPhotoURL(
               task.id,
-              submission.results?.get(task.id)?.value as string
+              submission.data?.get(task.id)?.value as string
             );
           }
         });
@@ -119,7 +119,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   getOptions(task: Task, submission: Submission): List<Option> {
-    const result = submission.results?.get(task.id);
+    const result = submission.data?.get(task.id);
     if (result && result instanceof List<Option>) {
       return result.value as List<Option>;
     } else {

@@ -127,7 +127,7 @@ describe('JobListItemComponent', () => {
           job,
           new AuditInfo(user, new Date(), new Date()),
           new AuditInfo(user, new Date(), new Date()),
-          /* results= */ Map()
+          /* data= */ Map()
         )
       );
     }

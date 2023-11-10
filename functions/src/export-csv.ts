@@ -104,8 +104,9 @@ export async function exportCsvHandler(
       row.push(location['_latitude'] || '');
       row.push(location['_longitude'] || '');
       row.push(toWkt(loi.get('geoJson')) || '');
-      const responses = submission['responses'] || {};
-      tasks.forEach((task, taskId) => row.push(getValue(taskId, task, responses)));
+      // TODO(#1288): Clean up remaining references to old responses field
+      const data = submission['data'] || submission['responses'] || submission['results'] || {};
+      tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
       csvStream.write(row);
     });
   });
@@ -137,9 +138,8 @@ function getGeometry(geoJsonObject: any) {
 /**
  * Returns the string representation of a specific task element result.
  */
-function getValue(taskId: string, task: Task, responses: any) {
-  const result = responses[taskId] || '';
-
+function getValue(taskId: string, task: Task, data: any) {
+  const result = data[taskId] || '';
   if (
     task.type === 'multiple_choice' &&
     Array.isArray(result) &&
