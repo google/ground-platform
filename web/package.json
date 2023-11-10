@@ -19,7 +19,7 @@
     "lint:fix": "npm run lint -- --fix",
     "posttest": "./posttest.sh && npm run lint",
     "login": "npx firebase login",
-    "deploy:dev": "npm run build:dev && npm run login && npx firebase deploy --only hosting --project $npm_config_project"
+    "deploy:dev": "npm run build:dev --project=$npm_config_project && npm run login && npx firebase deploy --only hosting --project $npm_config_project"
   },
   "private": true,
   "dependencies": {
