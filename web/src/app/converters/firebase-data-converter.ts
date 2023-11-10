@@ -22,7 +22,10 @@ import {Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Result} from 'app/models/submission/result.model';
-import {Submission, SubmissionData} from 'app/models/submission/submission.model';
+import {
+  Submission,
+  SubmissionData,
+} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {
   Cardinality,
