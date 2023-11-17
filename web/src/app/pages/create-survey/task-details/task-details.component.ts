@@ -15,9 +15,10 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {List} from 'immutable';
 
+import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -58,8 +59,10 @@ export const taskTypeToGroup = new Map([
 })
 export class TaskDetailsComponent {
   @Input() label?: string;
+  @Output() onValidationChange: EventEmitter<boolean> =
+    new EventEmitter<boolean>();
 
-  tasks: List<Task>;
+  tasks: List<Task> = List([]);
 
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
@@ -68,6 +71,9 @@ export class TaskDetailsComponent {
     TaskGroup.DRAW_AREA,
     TaskGroup.CAPTURE_LOCATION,
   ];
+
+  @ViewChild('tasksEditor')
+  tasksEditor?: TasksEditorComponent;
 
   constructor(
     private taskService: TaskService,
@@ -79,91 +85,17 @@ export class TaskDetailsComponent {
     this.tasks = List<Task>();
   }
 
-  onTaskAdd(group: TaskGroup) {
-    const types = taskGroupToTypes.get(group);
-    const type = types?.first();
-    if (type) {
-      const task = this.taskService.createTask(
-        type,
-        '',
-        false,
-        this.tasks.size
-      );
-      this.tasks = this.tasks.push(task);
-    }
-  }
-
-  onTaskUpdate(event: Task, index: number) {
-    const taskId = this.tasks.get(index)?.id;
-    const task = new Task(
-      taskId || '',
-      event.type,
-      event.label,
-      event.required,
-      index,
-      event.multipleChoice
-    );
-    this.tasks = this.tasks.set(index, task);
-  }
-
-  onTaskDelete(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to delete this question? Any associated data ' +
-          'will be lost. This cannot be undone.'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          this.tasks = this.tasks.splice(index, 1);
-        }
-      });
-  }
-
-  onDuplicateTask(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Duplicate task',
-        'Are you sure you wish to duplicate this task?'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          const taskToDuplicate = this.tasks.get(index);
-          if (taskToDuplicate) {
-            const task = this.taskService.createTask(
-              taskToDuplicate?.type,
-              taskToDuplicate?.label,
-              taskToDuplicate?.required,
-              this.tasks.size,
-              taskToDuplicate?.multipleChoice
-            );
-            this.tasks = this.tasks.push(task);
-          }
-        }
-      });
-  }
-
   getIndex(index: number) {
     return index;
   }
 
   toTasks(): List<Task> {
+    this.tasks = this.tasksEditor?.toTasks() || List([]);
+
     return this.tasks;
   }
 
-  drop(event: CdkDragDrop<string[]>): void {
-    const {previousIndex, currentIndex} = event;
-    this.tasks = this.tasks
-      .update(
-        previousIndex,
-        task => task?.copyWith({index: currentIndex}) as Task
-      )
-      .update(
-        currentIndex,
-        task => task?.copyWith({index: previousIndex}) as Task
-      )
-      .sortBy(task => task.index);
+  onTasksChange(valid: boolean): void {
+    this.onValidationChange.emit(valid);
   }
 }

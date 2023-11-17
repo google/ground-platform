@@ -13,6 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <div class="edit-job">
   <div class="section-selector">
     <button
@@ -36,38 +37,8 @@
     </button>
   </div>
 
-  <!-- TODO: Refactor into EditTasks and EditLois. -->
+  <!-- TODO: Refactor into EditLois. -->
   <div [ngSwitch]="section">
-    <div id="task-details" *ngSwitchCase="'tasks'">
-      <div id="tasks-added" cdkDropList (cdkDropListDropped)="drop($event)">
-        <task-input
-          *ngFor="let task of tasks; let i = index; trackBy: getIndex"
-          (update)="onUpdateTask($event, i)"
-          (delete)="onDeleteTask(i)"
-          (duplicate)="onDuplicateTask(i)"
-          [label]="task.label"
-          [required]="task.required"
-          [taskType]="task.type"
-          [cardinality]="task.multipleChoice?.cardinality"
-          [multipleChoice]="task.multipleChoice"
-          [taskCount]="tasks!.size"
-          [taskIndex]="i"
-        >
-        </task-input>
-      </div>
-  
-      <div id="tasks-help-text">Select task to add</div>
-  
-      <div id="add-task-buttons-list">
-        <add-task-button
-          *ngFor="let taskGroup of addableTaskGroups"
-          [taskGroup]="taskGroup"
-          (click)="onAddTask(taskGroup)"
-        >
-        </add-task-button>
-      </div>
-    </div>
-
     <div *ngSwitchCase="'lois'">
       <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
         <loi-selection
@@ -77,6 +48,10 @@
           [survey]="survey">
         </loi-selection>
       </div>
+    </div>
+
+    <div *ngSwitchCase="'tasks'">
+      <tasks-editor #tasksEditor [tasks]="tasks" (onClickOutside)="onTasksChange($event)"></tasks-editor>
     </div>
   </div>
 </div>

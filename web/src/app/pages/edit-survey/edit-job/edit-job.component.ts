@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {List} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
-
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
+import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Task} from 'app/models/task/task.model';
-import {
-  TaskGroup,
-  taskGroupToTypes,
-} from 'app/pages/create-survey/task-details/task-details.component';
-import {DialogService} from 'app/services/dialog/dialog.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
+import {List} from 'immutable';
+import {Subscription, firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'edit-job',
@@ -49,13 +42,8 @@ export class EditJobComponent {
 
   tasks?: List<Task>;
 
-  addableTaskGroups: Array<TaskGroup> = [
-    TaskGroup.QUESTION,
-    TaskGroup.PHOTO,
-    TaskGroup.DROP_PIN,
-    TaskGroup.DRAW_AREA,
-    TaskGroup.CAPTURE_LOCATION,
-  ];
+  @ViewChild('tasksEditor')
+  tasksEditor?: TasksEditorComponent;
 
   @ViewChild('loiSelection')
   loiSelection?: LoiSelectionComponent;
@@ -63,11 +51,9 @@ export class EditJobComponent {
   constructor(
     private route: ActivatedRoute,
     private navigationService: NavigationService,
-    private dialogService: DialogService,
     private loiService: LocationOfInterestService,
     public surveyService: SurveyService,
-    public draftSurveyService: DraftSurveyService,
-    private taskService: TaskService
+    public draftSurveyService: DraftSurveyService
   ) {
     this.subscription.add(
       this.navigationService
@@ -112,85 +98,12 @@ export class EditJobComponent {
     this.section = section;
   }
 
-  onAddTask(group: TaskGroup) {
-    const types = taskGroupToTypes.get(group);
+  onTasksChange(valid: boolean): void {
+    if (this.jobId && valid) {
+      this.tasks = this.tasksEditor?.toTasks() || List([]);
 
-    const type = types?.first();
-
-    if (type && this.tasks) {
-      const task = this.taskService.createTask(
-        type,
-        '',
-        false,
-        this.tasks.size
-      );
-
-      this.tasks = this.tasks.push(task);
+      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks);
     }
-
-    // No need to call addOrUpdateTasks because ngOnChange emits an update once
-    // the task-input component is created.
-  }
-
-  onUpdateTask(event: Task, index: number) {
-    if (!this.tasks) {
-      throw Error('tasks list is is empty');
-    }
-
-    this.tasks = this.tasks.set(index, event);
-    this.draftSurveyService.addOrUpdateTasks(this.jobId!, this.tasks);
-  }
-
-  onDeleteTask(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you wish to delete this question? Any associated data ' +
-          'will be lost. This cannot be undone.'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          this.tasks = this.tasks!.splice(index, 1);
-        }
-      });
-  }
-
-  drop(event: CdkDragDrop<string[]>): void {
-    const {previousIndex, currentIndex} = event;
-    this.tasks = this.tasks!.update(
-      previousIndex,
-      task => task?.copyWith({index: currentIndex}) as Task
-    )
-      .update(
-        currentIndex,
-        task => task?.copyWith({index: previousIndex}) as Task
-      )
-      .sortBy(task => task.index);
-  }
-
-  onDuplicateTask(index: number) {
-    this.dialogService
-      .openConfirmationDialog(
-        'Duplicate task',
-        'Are you sure you wish to duplicate this task?'
-      )
-      .afterClosed()
-      .subscribe(dialogResult => {
-        if (dialogResult) {
-          const taskToDuplicate = this.tasks!.get(index);
-          if (taskToDuplicate) {
-            const task = this.taskService.createTask(
-              taskToDuplicate?.type,
-              taskToDuplicate?.label,
-              taskToDuplicate?.required,
-              this.tasks!.size,
-              taskToDuplicate?.multipleChoice
-            );
-            this.tasks = this.tasks!.push(task);
-          }
-        }
-      });
   }
 
   ngOnDestroy() {
