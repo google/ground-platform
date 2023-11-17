@@ -16,6 +16,9 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
+import {List} from 'immutable';
+import {Subscription, firstValueFrom} from 'rxjs';
+
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -24,8 +27,6 @@ import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {List} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
 
 @Component({
   selector: 'edit-job',
