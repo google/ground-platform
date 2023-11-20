@@ -17,13 +17,12 @@
 import {Component} from '@angular/core';
 import {MatIconRegistry} from '@angular/material/icon';
 import {DomSanitizer} from '@angular/platform-browser';
-import {List} from 'immutable';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators/map';
-
 import {Job} from 'app/models/job.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {List} from 'immutable';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/internal/operators/map';
 
 // TODO: Make custom svgs match the color of the job icon
 const POINT_ICON = `
@@ -76,9 +75,5 @@ export class JobListComponent {
           List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
-  }
-
-  onAddJob() {
-    this.navigationService.customizeJob(NavigationService.JOB_ID_NEW);
   }
 }
