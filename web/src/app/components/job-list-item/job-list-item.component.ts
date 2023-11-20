@@ -18,6 +18,9 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {List} from 'immutable';
+import {Subscription} from 'rxjs';
+
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -29,8 +32,6 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
-import {List} from 'immutable';
-import {Subscription} from 'rxjs';
 
 import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
 
