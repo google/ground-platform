@@ -367,11 +367,8 @@ export class FirebaseDataConverter {
   }
 
   private static optionToJS(option: Option): {} {
-    const {label, ...optionDoc} = option;
-    return {
-      label,
-      ...optionDoc,
-    };
+    const {id, ...optionDoc} = option;
+    return optionDoc;
   }
 
   /**
