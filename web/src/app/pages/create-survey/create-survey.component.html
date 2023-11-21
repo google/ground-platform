@@ -66,6 +66,7 @@
             *ngSwitchCase="SetupPhase.DEFINE_TASKS"
             #taskDetails
             [label]="job()?.name ?? ''"
+            (onValidationChange)="onValidationChange($event)"
           ></task-details>
           <survey-review
             *ngSwitchCase="SetupPhase.REVIEW"

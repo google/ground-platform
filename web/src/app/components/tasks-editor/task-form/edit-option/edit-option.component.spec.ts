@@ -16,7 +16,7 @@
 
 import {CommonModule} from '@angular/common';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
@@ -48,6 +48,11 @@ describe('EditOptionComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(EditOptionComponent);
     component = fixture.componentInstance;
+    component.formGroup = new FormBuilder().group({
+      id: '',
+      label: '',
+      code: '',
+    });
     fixture.detectChanges();
   });
 

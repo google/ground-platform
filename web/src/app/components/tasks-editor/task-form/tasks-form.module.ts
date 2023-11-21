@@ -28,28 +28,25 @@ import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/mater
 import {MatMenuModule} from '@angular/material/menu';
 
 import {EditOptionModule} from './edit-option/edit-option.module';
-import {TaskInputComponent} from './task-input.component';
-// import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {TaskFormComponent} from './task-form.component';
 
 @NgModule({
-  declarations: [TaskInputComponent],
+  declarations: [TaskFormComponent],
   imports: [
-    MatIconModule,
-    CommonModule,
-    MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
-    MatInputModule,
-    MatSelectModule,
+    MatButtonModule,
     MatIconModule,
     MatSlideToggleModule,
-    MatButtonModule,
-    MatMenuModule,
-    DragDropModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatDividerModule,
+    MatMenuModule,
+    CommonModule,
     EditOptionModule,
-    // MatDialogModule,
+    DragDropModule,
   ],
-  exports: [TaskInputComponent],
+  exports: [TaskFormComponent],
 })
-export class TaskInputModule {}
+export class TaskFormModule {}
