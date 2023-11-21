@@ -33,18 +33,39 @@
   width: 300px;
 }
 
-.mat-list-base .mat-list-item {
-  height: 56px;
+.mat-nav-list {
+  padding: 12px;
+
+  .mat-list-item {
+    height: 56px;
+    font-size: 14px;
+    border-radius: 32px;
+
+    &:hover, &:focus, &.is-active {
+      background: rgba(31, 31, 31, 0.08);
+    }
+
+    &.job-list-item {
+      .icon {
+        margin-right: 12px;
+      }
+
+      .name {
+        flex: 1;
+      }
+    }
+  }
 }
 
 .button-icon {
-  margin: 0 12px;
+  margin-right: 12px;
 }
 
 .job-label-and-add-button {
   align-items: flex-end;
   display: flex;
   justify-content: space-between;
+  padding-top: 8px;
 }
 
 .job-label {
@@ -53,12 +74,11 @@
 }
 
 .card {
-  padding: 24px;
+  padding: 16px 24px;
   background-color: #fcfdf7;
   border-radius: 18px;
   flex-grow: 1;
-  margin: 12px 24px 24px 12px;
-  padding: 16px 24px;
+  margin: 0px 24px 24px 0px;
 
   .content {
     text-align: left;

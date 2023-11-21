@@ -33,14 +33,24 @@
         <span>Dashboard</span>
       </a>
 
-      <a mat-list-item id="survey-button" [routerLink]="['./survey']">
+      <a
+        mat-list-item
+        id="survey-button"
+        [routerLink]="['./survey']"
+        [routerLinkActive]="['is-active']"
+      >
         <mat-icon class="material-symbols-outlined button-icon">
           settings
         </mat-icon>
         <span>Survey settings</span>
       </a>
 
-      <a mat-list-item id="share-button" [routerLink]="['./share']">
+      <a
+        mat-list-item
+        id="share-button"
+        [routerLink]="['./share']"
+        [routerLinkActive]="['is-active']"
+      >
         <mat-icon class="material-symbols-outlined button-icon">group</mat-icon>
         <span>Sharing</span>
       </a>
@@ -50,6 +60,7 @@
         mat-list-item
         id="survey-json"
         [routerLink]="['./json']"
+        [routerLinkActive]="['is-active']"
       >
         <mat-icon class="material-symbols-outlined button-icon">code</mat-icon>
         <span>JSON</span>
@@ -69,11 +80,16 @@
 
       <a
         *ngFor="let job of jobs(); index as i"
-        id="job-{{ i }}"
         mat-list-item
+        id="job-{{ i }}"
+        class="job-list-item"
         [routerLink]="jobRouterLink(job.id)"
+        [routerLinkActive]="['is-active']"
       >
-        <span matLine>{{ job.name }}</span>
+        <mat-icon class="icon" [ngStyle]="{ color: job.color }">label</mat-icon>
+
+        <span class="name">{{ job.name }}</span>
+
         <button
           mat-icon-button
           id="menu-button-{{ i }}"
