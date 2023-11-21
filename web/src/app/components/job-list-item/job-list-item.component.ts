@@ -111,35 +111,8 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  onCustomizeJob() {
-    if (this.job?.id) {
-      this.navigationService.customizeJob(this.job?.id);
-    }
-  }
-
   onGoBackClick() {
     this.navigationService.clearLocationOfInterestId();
-  }
-
-  onDeleteJob() {
-    this.dialogService
-      .openConfirmationDialog(
-        'Warning',
-        'Are you sure you want to delete this job? Data collection sites, ' +
-          'task definitions, and any associated data will be lost. This ' +
-          'cannot be undone.'
-      )
-      .afterClosed()
-      .subscribe(async dialogResult => {
-        if (dialogResult) {
-          await this.deleteJob();
-        }
-      });
-  }
-
-  async deleteJob() {
-    await this.dataStoreService.deleteJob(this.surveyId!, this.job!.id);
-    this.onClose();
   }
 
   onClose() {
