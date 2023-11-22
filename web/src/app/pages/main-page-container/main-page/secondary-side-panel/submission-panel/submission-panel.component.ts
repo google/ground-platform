@@ -15,11 +15,12 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs';
 
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
+import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -73,6 +74,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   getTask(taskId: string): Task | undefined {
     return this.tasks?.get(taskId);
+  }
+
+  getTaskMultipleChoiceSelections(taskId: string): List<Option> {
+    return this.getTaskSubmissionResult(taskId)!.value as List<Option>;
   }
 
   ngOnDestroy(): void {
