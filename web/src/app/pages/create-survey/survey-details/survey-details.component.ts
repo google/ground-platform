@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
@@ -31,8 +39,9 @@ export class SurveyDetailsComponent implements OnInit {
   @Input() description = '';
   @Output() onValidationChange: EventEmitter<boolean> =
     new EventEmitter<boolean>();
+  @Output() onClickOutside: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  constructor() {
+  constructor(private elementRef: ElementRef) {
     this.formGroup = new FormBuilder().group({
       [this.titleControlKey]: ['', Validators.required],
       [this.descriptionControlKey]: '',
@@ -55,5 +64,12 @@ export class SurveyDetailsComponent implements OnInit {
       this.formGroup.controls[this.titleControlKey].value,
       this.formGroup.controls[this.descriptionControlKey].value,
     ];
+  }
+
+  @HostListener('document:mousedown', ['$event'])
+  captureClick(event: any) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.onClickOutside.emit(this.formGroup?.valid);
+    }
   }
 }
