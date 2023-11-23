@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
+import {List} from 'immutable';
 import {firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -25,6 +25,15 @@ import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+const defaultColors = List([
+  '#F37C22',
+  '#D13135',
+  '#7A279F',
+  '#2278CF',
+  '#3C8D40',
+  '#F9BF40',
+]);
+
 @Injectable({
   providedIn: 'root',
 })
@@ -33,6 +42,13 @@ export class JobService {
     private dataStoreService: DataStoreService,
     private surveyService: SurveyService
   ) {}
+
+  getNextColor(colors: List<string>, index?: number): string {
+    return (
+      defaultColors.filter(color => !colors.includes(color)).get(0) ||
+      defaultColors.get(index || 0 % defaultColors.size)!
+    );
+  }
 
   /**
    * Creates and returns a new job with a generated unique identifier.

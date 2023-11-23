@@ -17,6 +17,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {List} from 'immutable';
 import {Subscription, filter, startWith} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -134,7 +135,14 @@ export class EditSurveyComponent implements OnInit {
         case DialogType.AddJob:
         case DialogType.RenameJob:
           this.draftSurveyService.addOrUpdateJob(
-            job.copyWith({name: result.jobName})
+            job.copyWith({
+              name: result.jobName,
+              color: this.jobService.getNextColor(
+                this.survey?.jobs.toList().map((job: Job) => job.color || '') ||
+                  List([]),
+                job.index
+              ),
+            })
           );
           break;
         case DialogType.DeleteJob:
