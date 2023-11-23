@@ -80,7 +80,9 @@ export class EditSurveyComponent implements OnInit {
           startWith(this.router)
         )
         .subscribe(event => {
-          if (event.url.endsWith('share')) this.sectionTitle = 'Sharing';
+          if (event.url.endsWith('survey'))
+            this.sectionTitle = 'Survey settings';
+          else if (event.url.endsWith('share')) this.sectionTitle = 'Sharing';
           else this.sectionTitle = '';
         })
     );
