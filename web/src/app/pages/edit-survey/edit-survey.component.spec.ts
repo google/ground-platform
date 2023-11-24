@@ -262,7 +262,11 @@ describe('EditSurveyComponent', () => {
         duplicateButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          job1.copyWith({id: newJob.id, name: 'Copy of ' + job1.name})
+          job1.copyWith({
+            id: newJob.id,
+            name: 'Copy of ' + job1.name,
+            color: undefined,
+          })
         );
       });
 
