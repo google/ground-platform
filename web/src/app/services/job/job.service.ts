@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import {firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -25,29 +25,34 @@ import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
-const defaultColors = List([
-  '#F37C22',
-  '#D13135',
-  '#7A279F',
-  '#2278CF',
-  '#3C8D40',
-  '#F9BF40',
-]);
-
 @Injectable({
   providedIn: 'root',
 })
 export class JobService {
+  defaultColors = List([
+    '#F37C22',
+    '#D13135',
+    '#7A279F',
+    '#2278CF',
+    '#3C8D40',
+    '#F9BF40',
+  ]);
+
   constructor(
     private dataStoreService: DataStoreService,
     private surveyService: SurveyService
   ) {}
 
-  getNextColor(colors: List<string>, index?: number): string {
-    return (
-      defaultColors.filter(color => !colors.includes(color)).get(0) ||
-      defaultColors.get(index || 0 % defaultColors.size)!
-    );
+  /**
+   * Returns the first available color (based on lists difference) or undefined.
+   */
+  getNextColor(jobs?: Map<string, Job>): string | undefined {
+    const alreadyUsedcolors =
+      jobs?.toList().map((job: Job) => job.color || '') || List([]);
+
+    return this.defaultColors
+      .filter(color => !alreadyUsedcolors.includes(color))
+      .first();
   }
 
   /**
