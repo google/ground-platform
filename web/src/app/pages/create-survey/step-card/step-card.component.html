@@ -14,22 +14,6 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup">
-  <mat-form-field class="input" appearance="fill">
-    <mat-label> Title </mat-label>
-    <input
-      matInput
-      [formControlName]="titleControlKey"
-      placeholder="Survey title"
-    />
-  </mat-form-field>
-
-  <mat-form-field class="input" appearance="fill">
-    <mat-label> Description </mat-label>
-    <input
-      matInput
-      [formControlName]="descriptionControlKey"
-      placeholder="Survey description"
-    />
-  </mat-form-field>
-</form>
+<h1 class="title">{{ title }}</h1>
+<h2 class="description">{{ description }}</h2>
+<ng-content></ng-content>

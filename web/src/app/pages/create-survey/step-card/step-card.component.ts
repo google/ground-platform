@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-.input {
-  display: block;
-  width: 100%;
-  max-width: 600px;
+import {Component, Input, OnInit} from '@angular/core';
+
+@Component({
+  selector: 'ground-step-card',
+  templateUrl: './step-card.component.html',
+  styleUrls: ['./step-card.component.scss'],
+})
+export class StepCardComponent implements OnInit {
+  @Input() title = '';
+  @Input() subtitle = '';
+  @Input() description = '';
+
+  constructor() {}
+
+  ngOnInit(): void {}
 }

@@ -30,7 +30,7 @@
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
 @use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
-@use 'app/pages/create-survey/survey-details/_survey-details.component-theme' as survey-details;
+@use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
 @use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
 @use 'app/pages/create-survey/loi-permissions/_loi-permissions.component-theme' as loi-permissions;
 @use 'app/pages/create-survey/task-details/task-details.component-theme' as task-details;
@@ -110,7 +110,7 @@ $foreground: map-get($theme, foreground);
 @include survey-list.theme($theme);
 @include user-avatar.theme($theme);
 @include create-survey.theme($theme);
-@include survey-details.theme($theme);
+@include step-card.theme($theme);
 @include job-details.theme($theme);
 @include loi-permissions.theme($theme);
 @include task-details.theme($theme);
