@@ -243,6 +243,10 @@ export class TasksEditorComponent {
     );
   }
 
+  trackByFn(index: number) {
+    return index;
+  }
+
   @HostListener('document:mousedown', ['$event'])
   captureClick(event: MouseEvent) {
     if (!this.elementRef.nativeElement.contains(event.target)) {
