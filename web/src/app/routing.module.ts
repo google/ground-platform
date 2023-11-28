@@ -29,7 +29,7 @@ import {AuthGuard} from 'app/services/auth/auth.guard';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
-import {SurveyDetailsComponent} from './pages/create-survey/survey-details/survey-details.component';
+import {EditDetailsComponent} from './pages/edit-survey/edit-details/edit-details.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
 import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
@@ -74,7 +74,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {path: 'job/:id', component: EditJobComponent},
-      {path: 'survey', component: SurveyDetailsComponent},
+      {path: 'survey', component: EditDetailsComponent},
       {path: 'share', component: ShareSurveyComponent},
       {path: 'json', component: SurveyJsonComponent},
     ],

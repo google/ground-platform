@@ -77,8 +77,4 @@ export class JobListComponent {
         )
       );
   }
-
-  onAddJob() {
-    this.navigationService.customizeJob(NavigationService.JOB_ID_NEW);
-  }
 }

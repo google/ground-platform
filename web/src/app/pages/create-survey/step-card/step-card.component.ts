@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
-
-import {TaskGroup} from '../task-details.component';
-import {Tasks} from '../task-input/task-input.component';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
-  selector: 'add-task-button',
-  templateUrl: './add-task-button.component.html',
-  styleUrls: ['./add-task-button.component.scss'],
+  selector: 'ground-step-card',
+  templateUrl: './step-card.component.html',
+  styleUrls: ['./step-card.component.scss'],
 })
-export class AddTaskButtonComponent {
-  @Input() taskGroup?: TaskGroup;
+export class StepCardComponent implements OnInit {
+  @Input() title = '';
+  @Input() subtitle = '';
+  @Input() description = '';
 
-  text = '';
-  icon = 'question_mark';
+  constructor() {}
 
-  ngOnInit(): void {
-    const {icon, label} = Tasks[this.taskGroup ?? TaskGroup.QUESTION];
-
-    this.text = label;
-
-    this.icon = icon;
-  }
+  ngOnInit(): void {}
 }

@@ -16,22 +16,13 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
 
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
-import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
-import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
+import {SurveyDetailsModule} from 'app/pages/create-survey/survey-details/survey-details.module';
+import {EditDetailsComponent} from 'app/pages/edit-survey/edit-details/edit-details.component';
 
 @NgModule({
-  declarations: [EditJobComponent],
-  imports: [
-    CommonModule,
-    LoiSelectionModule,
-    MatButtonModule,
-    MatIconModule,
-    TasksEditorModule,
-  ],
-  exports: [EditJobComponent],
+  declarations: [EditDetailsComponent],
+  imports: [CommonModule, SurveyDetailsModule],
+  exports: [EditDetailsComponent],
 })
-export class EditJobModule {}
+export class EditDetailsModule {}

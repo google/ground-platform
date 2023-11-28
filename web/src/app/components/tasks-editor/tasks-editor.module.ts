@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
-import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
-import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
+import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
+import {TaskFormModule} from './task-form/tasks-form.module';
+import {TasksEditorComponent} from './tasks-editor.component';
 
 @NgModule({
-  declarations: [EditJobComponent],
+  declarations: [TasksEditorComponent],
   imports: [
     CommonModule,
-    LoiSelectionModule,
-    MatButtonModule,
-    MatIconModule,
-    TasksEditorModule,
+    DragDropModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TaskFormModule,
+    AddTaskButtonModule,
   ],
-  exports: [EditJobComponent],
+  exports: [TasksEditorComponent],
 })
-export class EditJobModule {}
+export class TasksEditorModule {}

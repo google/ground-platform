@@ -14,22 +14,9 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup">
-  <mat-form-field class="input" appearance="fill">
-    <mat-label> Title </mat-label>
-    <input
-      matInput
-      [formControlName]="titleControlKey"
-      placeholder="Survey title"
-    />
-  </mat-form-field>
-
-  <mat-form-field class="input" appearance="fill">
-    <mat-label> Description </mat-label>
-    <input
-      matInput
-      [formControlName]="descriptionControlKey"
-      placeholder="Survey description"
-    />
-  </mat-form-field>
-</form>
+<survey-details
+  #surveyDetails
+  [title]="survey?.title"
+  [description]="survey?.description"
+  (onClickOutside)="onDetailsChange($event)"
+></survey-details>

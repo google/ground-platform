@@ -56,14 +56,6 @@ limitations under the License.
           <mat-menu #jobMenu="matMenu">
             <button
               mat-menu-item
-              (click)="onCustomizeJob()"
-              *ngIf="surveyService.canManageSurvey()"
-            >
-              <mat-icon>edit</mat-icon>
-              <span>Customize job</span>
-            </button>
-            <button
-              mat-menu-item
               (click)="onImportLocationsOfInterest()"
               *ngIf="surveyService.canManageSurvey()"
             >
@@ -76,10 +68,6 @@ limitations under the License.
                 <span>Download submissions</span>
               </button>
             </a>
-            <button mat-menu-item (click)="onDeleteJob()">
-              <mat-icon>delete_forever</mat-icon>
-              <span>Delete job</span>
-            </button>
           </mat-menu>
         </div>
         <div *ngSwitchCase="jobListItemActionsType.BACK">

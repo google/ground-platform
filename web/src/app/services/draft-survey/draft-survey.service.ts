@@ -87,6 +87,12 @@ export class DraftSurveyService {
     }
   }
 
+  updateTitleAndDescription(title: string, description: string): void {
+    const currentSurvey = this.survey$.getValue();
+
+    this.survey$.next(currentSurvey.copyWith({title, description}));
+  }
+
   async updateSurvey(): Promise<void> {
     const currentSurvey = this.survey$.getValue();
 

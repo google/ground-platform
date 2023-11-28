@@ -23,15 +23,4 @@ limitations under the License.
     *ngFor="let entry of jobs"
     [job]="entry"
   ></ground-job-list-item>
-  <div *ngIf="surveyService.canManageSurvey()">
-    <button
-      mat-stroked-button
-      color="primary"
-      class="add-job-btn"
-      (click)="onAddJob()"
-    >
-      <mat-icon class="add-job-icon">add</mat-icon>
-      Add job
-    </button>
-  </div>
 </mat-list>

@@ -1,12 +1,9 @@
 <!--
   Copyright 2023 The Ground Authors.
-
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
-
       https://www.apache.org/licenses/LICENSE-2.0
-
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,22 +11,28 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup">
-  <mat-form-field class="input" appearance="fill">
-    <mat-label> Title </mat-label>
-    <input
-      matInput
-      [formControlName]="titleControlKey"
-      placeholder="Survey title"
-    />
-  </mat-form-field>
+<div id="tasks-added"
+  *ngIf="formArray"
+  cdkDropList
+  (cdkDropListDropped)="onTaskDrop($event)"
+>
+  <task-form
+    *ngFor="let formGroup of formArray.controls; let i = index;"
+    [formGroup]="formGroup"
+    [index]="i"
+    (delete)="onTaskDelete(i)"
+    (duplicate)="onTaskDuplicate(i)"
+  >
+  </task-form>
+</div>
 
-  <mat-form-field class="input" appearance="fill">
-    <mat-label> Description </mat-label>
-    <input
-      matInput
-      [formControlName]="descriptionControlKey"
-      placeholder="Survey description"
-    />
-  </mat-form-field>
-</form>
+<div id="tasks-help-text">Select task to add</div>
+
+<div id="add-task-buttons-list">
+  <add-task-button
+    *ngFor="let taskGroup of addableTaskGroups"
+    [taskGroup]="taskGroup"
+    (click)="onTaskAdd(taskGroup)"
+  >
+  </add-task-button>
+</div>
