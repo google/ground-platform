@@ -17,7 +17,7 @@
   (cdkDropListDropped)="onTaskDrop($event)"
 >
   <task-form
-    *ngFor="let formGroup of formArray.controls; let i = index; trackBy: trackByFn"
+    *ngFor="let formGroup of formArray.controls; let i = index;"
     [formGroup]="formGroup"
     [index]="i"
     (delete)="onTaskDelete(i)"

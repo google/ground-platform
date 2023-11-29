@@ -243,11 +243,7 @@ export class TasksEditorComponent {
     );
   }
 
-  trackByFn(index: number) {
-    return index;
-  }
-
-  @HostListener('document:mousedown', ['$event'])
+  @HostListener('document:click', ['$event'])
   captureClick(event: MouseEvent) {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.onClickOutside.emit(this.formGroup?.valid);
