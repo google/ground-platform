@@ -89,7 +89,7 @@
     </mat-form-field>
   </div>
 
-  <div *ngIf="typeControl.value === TaskType.MULTIPLE_CHOICE" cdkDropList (cdkDropListDropped)="drop($event)">
+  <div *ngIf="typeControl.value === TaskType.MULTIPLE_CHOICE" cdkDropList (cdkDropListDropped)="onDropOption($event)">
     <ground-edit-option
       *ngFor="let formGroup of optionsControl.controls; let i = index;"
       [formGroup]="formGroup"

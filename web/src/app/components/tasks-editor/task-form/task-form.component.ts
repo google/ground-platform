@@ -241,7 +241,7 @@ export class TaskFormComponent {
     });
   }
 
-  drop(event: CdkDragDrop<string[]>): void {
+  onDropOption(event: CdkDragDrop<string[]>): void {
     moveItemInFormArray(
       this.optionsControl,
       event.previousIndex,
