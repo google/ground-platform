@@ -15,14 +15,7 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -95,8 +88,7 @@ export class TasksEditorComponent {
 
   constructor(
     private dataStoreService: DataStoreService,
-    private dialogService: DialogService,
-    private elementRef: ElementRef
+    private dialogService: DialogService
   ) {}
 
   private initForm() {
@@ -243,10 +235,7 @@ export class TasksEditorComponent {
     );
   }
 
-  @HostListener('document:click', ['$event'])
-  captureClick(event: MouseEvent) {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.onClickOutside.emit(this.formGroup?.valid);
-    }
+  ngOnDestroy() {
+    this.onClickOutside.emit(this.formGroup?.valid);
   }
 }
