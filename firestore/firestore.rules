@@ -112,7 +112,7 @@
     }
 
     // Apply survey-level ACLs and passlist to survey documents.
-    match /survey/{surveyId} {
+    match /surveys/{surveyId} {
       allow read: if canViewSurvey(surveyId, email());
       allow read, write: if canManageSurvey(surveyId, email());
       allow create, read, write: if canAccess(email());
@@ -124,13 +124,13 @@
     }
 
     // Apply survey-level ACLs and passlist to LOI documents.
-    match /survey/{surveyId}/lois/{loiId} {
+    match /surveys/{surveyId}/lois/{loiId} {
       allow read: if canViewSurvey(surveyId, email());
       allow create, write: if canManageSurvey(surveyId, email()) || isOwner(resource, email());
     }
 
     // Apply survey-level ACLs and passlist to submission documents.
-    match /survey/{surveyId}/submissions/{submissionId} {
+    match /surveys/{surveyId}/submissions/{submissionId} {
       allow read: if canViewSurvey(surveyId, email());
       allow create, write: if canManageSurvey(surveyId, email()) || isOwner(resource, email());
     }
