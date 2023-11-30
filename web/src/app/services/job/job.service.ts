@@ -31,6 +31,7 @@ enum JobDefaultColors {
   YELLOW = '#F9BF40',
   PURPLE = '#7A279F',
   RED = '#D13135',
+  GREEN = '#3C8D40',
 }
 
 @Injectable({
