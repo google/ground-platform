@@ -244,7 +244,7 @@ export class TasksEditorComponent {
   }
 
   @HostListener('document:mousedown', ['$event'])
-  captureClick(event: any) {
+  captureClick(event: MouseEvent) {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.onClickOutside.emit(this.formGroup?.valid);
     }

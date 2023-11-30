@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-.input {
-  display: block;
-  width: 100%;
-  max-width: 600px;
-}
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+
+import {StepCardComponent} from 'app/pages/create-survey/step-card/step-card.component';
+
+@NgModule({
+  declarations: [StepCardComponent],
+  imports: [CommonModule],
+  exports: [StepCardComponent],
+})
+export class StepCardModule {}

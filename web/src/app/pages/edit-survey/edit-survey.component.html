@@ -26,11 +26,11 @@
   </div>
   <div *ngIf="survey" class="container">
     <mat-nav-list class="left-menu">
-      <a mat-list-item id="dashboard-button" (click)="surveyId && selectSurvey(surveyId)">
+      <a mat-list-item (click)="surveyId && selectSurvey(surveyId)">
         <mat-icon class="material-symbols-outlined button-icon">
           home
         </mat-icon>
-        <span>Dashboard</span>
+        <span>Home</span>
       </a>
 
       <a
@@ -40,9 +40,9 @@
         [routerLinkActive]="['is-active']"
       >
         <mat-icon class="material-symbols-outlined button-icon">
-          settings
+          assignment
         </mat-icon>
-        <span>Survey settings</span>
+        <span>Survey details</span>
       </a>
 
       <a
