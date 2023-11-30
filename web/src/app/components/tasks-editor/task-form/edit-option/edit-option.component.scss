@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-:host {
-  display: flex;
-}
+// :host {
+//   display: flex;
+//   background-color: green;
+//   margin-bottom: 30px;
+// }
 
 .dot {
   align-self: center;
@@ -36,15 +38,36 @@
   visibility: visible;
 }
 
-.task-option {
-  width: 300px;
-}
-
 .code-option {
   margin-left: 16px;
   width: 100px;
 }
 
-.option-content {
+.card .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background: purple;
+}
+
+.mdc-text-field {
+  background: purple;
+}
+
+.option-input {
   display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+
+  .radio-icon {
+    margin-right: 12px;
+  }
+
+  .task-option {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    max-height: 48px;
+  }
+
+  .delete-button-container {
+    width: 48px;
+  }
 }

@@ -130,6 +130,10 @@ export class TaskFormComponent {
 
   taskGroup!: TaskGroup;
 
+  taskTypeOption?: TaskTypeOption;
+
+  hasOtherOption?: boolean = false;
+
   TaskGroup = TaskGroup;
 
   TaskType = TaskType;
@@ -159,21 +163,33 @@ export class TaskFormComponent {
   }
 
   ngOnInit(): void {
-    this.taskGroup =
-      taskTypeToGroup.get(this.typeControl.value) ?? TaskGroup.QUESTION;
+    const type = this.typeControl.value;
+    const cardinality = this.cardinalityControl.value;
+
+    this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
+    this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
+    this.hasOtherOption = !!this.optionsControl.controls.some(
+      group => group.get('code')?.value === 'OTHER'
+    );
   }
 
   ngOnChanges(): void {
-    this.taskGroup =
-      taskTypeToGroup.get(this.typeControl.value) ?? TaskGroup.QUESTION;
-  }
+    const type = this.typeControl.value;
+    const cardinality = this.cardinalityControl.value;
 
-  get typeControl(): AbstractControl {
-    return this.formGroup.get('type')!;
+    this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
+    this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
+    this.hasOtherOption = !!this.optionsControl.controls.some(
+      group => group.get('code')?.value === 'OTHER'
+    );
   }
 
   get labelControl(): AbstractControl {
     return this.formGroup.get('label')!;
+  }
+
+  get typeControl(): AbstractControl {
+    return this.formGroup.get('type')!;
   }
 
   get cardinalityControl(): AbstractControl {
@@ -192,27 +208,28 @@ export class TaskFormComponent {
     this.duplicate.emit(this.index);
   }
 
-  getTaskTypeOption(type: TaskType): TaskTypeOption | undefined {
-    return TaskTypeOptions.find(option => option.type === type);
+  getTaskTypeOption(
+    type: TaskType,
+    cardinality?: Cardinality
+  ): TaskTypeOption | undefined {
+    return TaskTypeOptions.find(
+      taskTypeOption =>
+        taskTypeOption.type === type &&
+        (!cardinality || taskTypeOption.cardinality === cardinality)
+    );
   }
 
-  onTaskTypeSelect(type: TaskType): void {
-    const taskTypeOption = this.getTaskTypeOption(type)!;
+  onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
+    this.taskTypeOption = taskTypeOption;
 
-    this.typeControl.setValue(taskTypeOption.type);
-    this.cardinalityControl.setValue(taskTypeOption.cardinality);
+    const {type, cardinality} = this.taskTypeOption;
 
-    while (this.optionsControl.length !== 0) this.optionsControl.removeAt(0);
+    this.typeControl.setValue(type);
+    this.cardinalityControl.setValue(cardinality);
 
-    if (this.cardinalityControl.value && this.optionsControl.length === 0) {
-      const formGroup = new FormBuilder().group({
-        id: this.dataStoreService.generateId(),
-        label: '',
-        code: '',
-      });
+    if (!cardinality) this.optionsControl.clear({emitEvent: false});
 
-      this.optionsControl.push(formGroup);
-    }
+    if (cardinality && this.optionsControl.length === 0) this.onAddOption();
   }
 
   onAddOption(): void {
@@ -220,6 +237,16 @@ export class TaskFormComponent {
       id: this.dataStoreService.generateId(),
       label: '',
       code: '',
+    });
+    this.optionsControl.push(formGroup);
+  }
+
+  onAddOther(): void {
+    this.hasOtherOption = true;
+    const formGroup = new FormBuilder().group({
+      id: this.dataStoreService.generateId(),
+      label: {value: 'Other...', disabled: true},
+      code: 'OTHER',
     });
 
     this.optionsControl.push(formGroup);
@@ -236,6 +263,8 @@ export class TaskFormComponent {
         .afterClosed()
     ).then(dialogResult => {
       if (dialogResult) {
+        const group = this.optionsControl.at(index);
+        if (group.get('code')?.value === 'OTHER') this.hasOtherOption = false;
         this.optionsControl.removeAt(index);
       }
     });

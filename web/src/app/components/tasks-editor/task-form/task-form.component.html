@@ -69,18 +69,18 @@
 
     <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
-        formControlName="type"
         class="task-type-select"
+        [value]="taskTypeOption"
         (selectionChange)="onTaskTypeSelect($event.value)"
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-task-type">{{ getTaskTypeOption(typeControl.value).icon }}</mat-icon>
+          <mat-icon class="icon-task-type">{{ taskTypeOption?.icon }}</mat-icon>
 
-          <span> {{ getTaskTypeOption(typeControl.value).label }}</span>
+          <span>{{ taskTypeOption?.label }}</span>
         </mat-select-trigger>
 
-        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption.type">
+        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions;" [value]="taskTypeOption">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
 
           <span>{{ taskTypeOption.label }}</span>
@@ -91,9 +91,10 @@
 
   <div *ngIf="typeControl.value === TaskType.MULTIPLE_CHOICE" cdkDropList (cdkDropListDropped)="onDropOption($event)">
     <ground-edit-option
-      *ngFor="let formGroup of optionsControl.controls; let i = index;"
+      *ngFor="let formGroup of optionsControl.controls; let i = index; trackBy i;"
       [formGroup]="formGroup"
       [index]="i"
+      [type]="cardinalityControl.value"
       (delete)="onDeleteOption(i)"
     >
     </ground-edit-option>
@@ -107,5 +108,18 @@
     >
       Add option
     </button>
+
+    <span *ngIf="!hasOtherOption">
+      or
+      <button
+        mat-button
+        type="button"
+        (click)="onAddOther()"
+        color="primary"
+        class="add-option"
+      >
+        Add other
+      </button>
+    </span>
   </div>
 </form>

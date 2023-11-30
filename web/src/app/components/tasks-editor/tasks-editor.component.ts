@@ -107,7 +107,10 @@ export class TasksEditorComponent {
               task.multipleChoice?.options.toArray().map(option =>
                 formBuilder.group({
                   id: option.id,
-                  label: option.label,
+                  label: {
+                    value: option.label,
+                    disabled: option.code === 'OTHER',
+                  },
                   code: option.code,
                 })
               ) || []
