@@ -25,18 +25,19 @@ import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+enum JobDefaultColors {
+  ORANGE = '#F37C22',
+  BLUE = '#2278CF',
+  YELLOW = '#F9BF40',
+  PURPLE = '#7A279F',
+  RED = '#D13135',
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class JobService {
-  defaultColors = List([
-    '#F37C22',
-    '#D13135',
-    '#7A279F',
-    '#2278CF',
-    '#3C8D40',
-    '#F9BF40',
-  ]);
+  defaultColors = List(['#F37C22', '#2278CF', '#F9BF40', '#7A279F', '#D13135']);
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -50,9 +51,9 @@ export class JobService {
     const alreadyUsedcolors =
       jobs?.toList().map((job: Job) => job.color || '') || List([]);
 
-    return this.defaultColors
-      .filter(color => !alreadyUsedcolors.includes(color))
-      .first();
+    return Object.values(JobDefaultColors).find(
+      color => !alreadyUsedcolors.includes(color)
+    );
   }
 
   /**
