@@ -79,7 +79,7 @@
       </div>
 
       <a
-        *ngFor="let job of jobs(); index as i; trackBy: index"
+        *ngFor="let job of jobs(); index as i"
         mat-list-item
         id="job-{{ i }}"
         class="job-list-item"

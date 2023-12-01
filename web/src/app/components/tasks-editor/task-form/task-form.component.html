@@ -80,7 +80,7 @@
           <span>{{ taskTypeOption?.label }}</span>
         </mat-select-trigger>
 
-        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions;" [value]="taskTypeOption">
+        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
 
           <span>{{ taskTypeOption.label }}</span>
@@ -91,7 +91,7 @@
 
   <div *ngIf="typeControl.value === TaskType.MULTIPLE_CHOICE" cdkDropList (cdkDropListDropped)="onDropOption($event)">
     <ground-edit-option
-      *ngFor="let formGroup of optionsControl.controls; let i = index; trackBy i;"
+      *ngFor="let formGroup of optionsControl.controls; let i = index;"
       [formGroup]="formGroup"
       [index]="i"
       [type]="cardinalityControl.value"

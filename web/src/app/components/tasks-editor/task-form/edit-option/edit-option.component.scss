@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-// :host {
-//   display: flex;
-//   background-color: green;
-//   margin-bottom: 30px;
-// }
+:host {
+  display: flex;
+}
 
 .dot {
   align-self: center;
@@ -41,14 +39,6 @@
 .code-option {
   margin-left: 16px;
   width: 100px;
-}
-
-.card .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-  background: purple;
-}
-
-.mdc-text-field {
-  background: purple;
 }
 
 .option-input {

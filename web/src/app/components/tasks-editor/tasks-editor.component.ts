@@ -79,6 +79,8 @@ export const taskTypeToGroup = new Map([
 export class TasksEditorComponent {
   formGroup!: FormGroup;
 
+  selected = false;
+
   @Input() label?: string;
   @Input() tasks?: List<Task>;
   @Output() onValidationChange: EventEmitter<boolean> =
@@ -95,11 +97,11 @@ export class TasksEditorComponent {
 
   constructor(
     private dataStoreService: DataStoreService,
-    private elementRef: ElementRef,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private elementRef: ElementRef
   ) {}
 
-  private initForm(): void {
+  private initForm() {
     const formBuilder = new FormBuilder();
 
     this.formGroup = formBuilder.group({
@@ -246,8 +248,10 @@ export class TasksEditorComponent {
     );
   }
 
-  @HostListener('mouseleave', ['$event'])
-  onBlur(event: MouseEvent) {
-    this.onClickOutside.emit(this.formGroup?.valid);
+  @HostListener('document:mousedown', ['$event'])
+  captureClick(event: MouseEvent) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.onClickOutside.emit(this.formGroup?.valid);
+    }
   }
 }
