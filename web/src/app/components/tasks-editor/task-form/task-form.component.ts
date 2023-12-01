@@ -162,7 +162,7 @@ export class TaskFormComponent {
     this.selected = false;
   }
 
-  ngOnInit(): void {
+  private initForm(): void {
     const type = this.typeControl.value;
     const cardinality = this.cardinalityControl.value;
 
@@ -173,15 +173,12 @@ export class TaskFormComponent {
     );
   }
 
-  ngOnChanges(): void {
-    const type = this.typeControl.value;
-    const cardinality = this.cardinalityControl.value;
+  ngOnInit(): void {
+    this.initForm();
+  }
 
-    this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
-    this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
-    this.hasOtherOption = !!this.optionsControl.controls.some(
-      group => group.get('code')?.value === 'OTHER'
-    );
+  ngOnChanges(): void {
+    this.initForm();
   }
 
   get labelControl(): AbstractControl {
