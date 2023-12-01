@@ -79,8 +79,6 @@ export const taskTypeToGroup = new Map([
 export class TasksEditorComponent {
   formGroup!: FormGroup;
 
-  selected = false;
-
   @Input() label?: string;
   @Input() tasks?: List<Task>;
   @Output() onValidationChange: EventEmitter<boolean> =
