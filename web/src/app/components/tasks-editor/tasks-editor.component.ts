@@ -19,7 +19,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   Output,
 } from '@angular/core';
@@ -81,9 +80,9 @@ export class TasksEditorComponent {
 
   @Input() label?: string;
   @Input() tasks?: List<Task>;
-  @Output() onValidationChange: EventEmitter<boolean> =
+  @Output() onValidationChanges: EventEmitter<boolean> =
     new EventEmitter<boolean>();
-  @Output() onClickOutside: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() onValueChanges: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
@@ -99,7 +98,7 @@ export class TasksEditorComponent {
     private elementRef: ElementRef
   ) {}
 
-  private initForm() {
+  ngOnInit(): void {
     const formBuilder = new FormBuilder();
 
     this.formGroup = formBuilder.group({
@@ -126,16 +125,12 @@ export class TasksEditorComponent {
     });
 
     this.formGroup.statusChanges.subscribe(_ => {
-      this.onValidationChange.emit(this.formGroup?.valid);
+      this.onValidationChanges.emit(this.formGroup?.valid);
     });
-  }
 
-  ngOnInit(): void {
-    this.initForm();
-  }
-
-  ngOnChanges(): void {
-    this.initForm();
+    this.formGroup.valueChanges.subscribe(_ => {
+      this.onValueChanges.emit(this.formGroup?.valid);
+    });
   }
 
   get formArray() {
@@ -241,12 +236,5 @@ export class TasksEditorComponent {
         } as Task;
       })
     );
-  }
-
-  @HostListener('document:mousedown', ['$event'])
-  captureClick(event: MouseEvent) {
-    if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.onClickOutside.emit(this.formGroup?.valid);
-    }
   }
 }
