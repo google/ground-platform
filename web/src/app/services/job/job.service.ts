@@ -38,8 +38,6 @@ enum JobDefaultColors {
   providedIn: 'root',
 })
 export class JobService {
-  defaultColors = List(['#F37C22', '#2278CF', '#F9BF40', '#7A279F', '#D13135']);
-
   constructor(
     private dataStoreService: DataStoreService,
     private surveyService: SurveyService
