@@ -98,7 +98,7 @@
         color="primary"
         [disabled]="!canContinue"
       >
-        Continue
+        {{ setupPhase === SetupPhase.REVIEW ? 'Go to survey' : 'Continue' }}
       </button>
     </div>
   </div>
