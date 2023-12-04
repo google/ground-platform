@@ -132,6 +132,8 @@ export class TaskFormComponent {
 
   taskGroup!: TaskGroup;
 
+  taskTypeOption?: TaskTypeOption;
+
   TaskGroup = TaskGroup;
 
   TaskType = TaskType;
@@ -162,15 +164,13 @@ export class TaskFormComponent {
   }
 
   ngOnInit(): void {
-    this.taskGroup =
-      taskTypeToGroup.get(this.typeControl.value) ?? TaskGroup.QUESTION;
+    const type = this.typeControl.value;
+    const cardinality = this.cardinalityControl.value;
+
+    this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
+    this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
 
     if (this.hasOtherOptionControl?.value) this.onAddOtherOption();
-  }
-
-  ngOnChanges(): void {
-    this.taskGroup =
-      taskTypeToGroup.get(this.typeControl.value) ?? TaskGroup.QUESTION;
   }
 
   get typeControl(): AbstractControl {
@@ -201,27 +201,28 @@ export class TaskFormComponent {
     this.duplicate.emit(this.index);
   }
 
-  getTaskTypeOption(type: TaskType): TaskTypeOption | undefined {
-    return TaskTypeOptions.find(option => option.type === type);
+  getTaskTypeOption(
+    type: TaskType,
+    cardinality?: Cardinality
+  ): TaskTypeOption | undefined {
+    return TaskTypeOptions.find(
+      taskTypeOption =>
+        taskTypeOption.type === type &&
+        (!cardinality || taskTypeOption.cardinality === cardinality)
+    );
   }
 
-  onTaskTypeSelect(type: TaskType): void {
-    const taskTypeOption = this.getTaskTypeOption(type)!;
+  onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
+    this.taskTypeOption = taskTypeOption;
 
-    this.typeControl.setValue(taskTypeOption.type);
-    this.cardinalityControl.setValue(taskTypeOption.cardinality);
+    const {type, cardinality} = this.taskTypeOption;
 
-    while (this.optionsControl.length !== 0) this.optionsControl.removeAt(0);
+    this.typeControl.setValue(type);
+    this.cardinalityControl.setValue(cardinality);
 
-    if (this.cardinalityControl.value && this.optionsControl.length === 0) {
-      const formGroup = new FormBuilder().group({
-        id: this.dataStoreService.generateId(),
-        label: '',
-        code: '',
-      });
+    if (!cardinality) this.optionsControl.clear({emitEvent: false});
 
-      this.optionsControl.push(formGroup);
-    }
+    if (cardinality && this.optionsControl.length === 0) this.onAddOption();
   }
 
   onAddOption(): void {

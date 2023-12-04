@@ -69,18 +69,18 @@
 
     <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
-        formControlName="type"
         class="task-type-select"
+        [value]="taskTypeOption"
         (selectionChange)="onTaskTypeSelect($event.value)"
         (openedChange)="onTaskFocus()"
       >
         <mat-select-trigger>
-          <mat-icon class="icon-task-type">{{ getTaskTypeOption(typeControl.value).icon }}</mat-icon>
+          <mat-icon class="icon-task-type">{{ taskTypeOption.icon }}</mat-icon>
 
-          <span> {{ getTaskTypeOption(typeControl.value).label }}</span>
+          <span>{{ taskTypeOption.label }}</span>
         </mat-select-trigger>
 
-        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption.type">
+        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
 
           <span>{{ taskTypeOption.label }}</span>

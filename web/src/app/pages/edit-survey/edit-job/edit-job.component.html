@@ -51,7 +51,7 @@
     </div>
 
     <div *ngSwitchCase="'tasks'">
-      <tasks-editor #tasksEditor [tasks]="tasks" (onClickOutside)="onTasksChange($event)"></tasks-editor>
+      <tasks-editor #tasksEditor [tasks]="tasks" (onValueChanges)="onTasksChange($event)"></tasks-editor>
     </div>
   </div>
 </div>
