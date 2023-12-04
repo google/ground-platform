@@ -15,13 +15,7 @@
  */
 
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -94,8 +88,7 @@ export class TasksEditorComponent {
 
   constructor(
     private dataStoreService: DataStoreService,
-    private dialogService: DialogService,
-    private elementRef: ElementRef
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
