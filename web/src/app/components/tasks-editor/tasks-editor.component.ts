@@ -183,6 +183,7 @@ export class TasksEditorComponent {
             cardinality: formGroupToDuplicate.get('cardinality')?.value,
             options: (formGroupToDuplicate.get('options') as FormArray)
               .controls,
+            hasOtherOption: formGroupToDuplicate.get('hasOtherOption')?.value,
           });
 
           this.formArray.push(formGroup);
