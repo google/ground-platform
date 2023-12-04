@@ -92,7 +92,7 @@ export class TasksEditorComponent {
     private formBuilder: FormBuilder
   ) {}
 
-  private initForm() {
+  ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
         this.tasks?.toArray().map(task =>
