@@ -96,30 +96,30 @@ export class TasksEditorComponent {
   constructor(
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private formBuilder: FormBuilder
   ) {}
 
   private initForm() {
-    const formBuilder = new FormBuilder();
-
-    this.formGroup = formBuilder.group({
-      tasks: formBuilder.array(
+    this.formGroup = this.formBuilder.group({
+      tasks: this.formBuilder.array(
         this.tasks?.toArray().map(task =>
-          formBuilder.group({
+          this.formBuilder.group({
             id: task.id,
             type: task.type,
             required: task.required,
             label: [task.label, Validators.required],
             cardinality: task.multipleChoice?.cardinality,
-            options: formBuilder.array(
+            options: this.formBuilder.array(
               task.multipleChoice?.options.toArray().map(option =>
-                formBuilder.group({
+                this.formBuilder.group({
                   id: option.id,
                   label: option.label,
                   code: option.code,
                 })
               ) || []
             ),
+            hasOtherOption: task.multipleChoice?.hasOtherOption,
           })
         ) || []
       ),
@@ -145,13 +145,14 @@ export class TasksEditorComponent {
   onTaskAdd(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
 
-    const formGroup = new FormBuilder().group({
+    const formGroup = this.formBuilder.group({
       id: this.dataStoreService.generateId(),
       type: types?.first(),
       required: false,
       label: ['', Validators.required],
       cardinality: null,
-      options: new FormBuilder().array([]),
+      options: this.formBuilder.array([]),
+      hasOtherOption: false,
     });
 
     this.formArray.push(formGroup);
@@ -183,7 +184,7 @@ export class TasksEditorComponent {
         if (dialogResult) {
           const formGroupToDuplicate = this.formArray.controls[index];
 
-          const formGroup = new FormBuilder().group({
+          const formGroup = this.formBuilder.group({
             id: this.dataStoreService.generateId(),
             type: formGroupToDuplicate.get('type')?.value,
             required: formGroupToDuplicate.get('required')?.value,
@@ -226,6 +227,8 @@ export class TasksEditorComponent {
           )
         );
 
+        const hasOtherOption = !!task.get('hasOtherOption')?.value;
+
         return {
           id: task.get('id')?.value as string,
           type: task.get('type')?.value as TaskType,
@@ -236,6 +239,7 @@ export class TasksEditorComponent {
             ? ({
                 cardinality,
                 options,
+                hasOtherOption,
               } as MultipleChoice)
             : undefined,
         } as Task;

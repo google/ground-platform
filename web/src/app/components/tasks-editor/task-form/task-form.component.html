@@ -94,7 +94,17 @@
       *ngFor="let formGroup of optionsControl.controls; let i = index;"
       [formGroup]="formGroup"
       [index]="i"
+      [type]="cardinalityControl.value"
       (delete)="onDeleteOption(i)"
+    >
+    </ground-edit-option>
+
+    <ground-edit-option
+      *ngIf="hasOtherOptionControl?.value"
+      [formGroup]="otherOption"
+      [index]="-1"
+      [type]="cardinalityControl.value"
+      (delete)="onDeleteOtherOption()"
     >
     </ground-edit-option>
 
@@ -107,5 +117,18 @@
     >
       Add option
     </button>
+
+    <span *ngIf="!hasOtherOptionControl.value">
+      or
+      <button
+        mat-button
+        type="button"
+        (click)="onAddOtherOption()"
+        color="primary"
+        class="add-option"
+      >
+        Add other
+      </button>
+    </span>
   </div>
 </form>

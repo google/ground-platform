@@ -14,26 +14,31 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup">
-  <div class="option-content" cdkDrag>
-    <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
+<form [formGroup]="formGroup" class="edit-option" cdkDrag>
+  <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
 
-    <mat-form-field class="task-option">
-      <mat-label>Option</mat-label>
-      <input
-        #optionInput
-        matInput
-        formControlName="label"
-        autocomplete="off"
-        (blur)="onLabelBlur()"
-      />
-      <mat-error *ngIf="labelControl.touched && labelControl.invalid">
-        <ng-container *ngIf="labelControl.getError('required')">
-          Option is required
-        </ng-container>
-      </mat-error>
-    </mat-form-field>
+  <mat-icon class="option-icon material-symbols-outlined">
+    {{ type === Cardinality.SELECT_ONE ? 'radio_button_unchecked' : 'check_box_outline_blank'}}
+  </mat-icon>
 
+  <mat-form-field class="label-option">
+    <input
+      #optionInput
+      matInput
+      formControlName="label"
+      autocomplete="off"
+      (blur)="onLabelBlur()"
+      required
+    />
+
+    <mat-error *ngIf="labelControl.touched && labelControl.invalid">
+      <ng-container *ngIf="labelControl.getError('required')">
+        Option is required
+      </ng-container>
+    </mat-error>
+  </mat-form-field>
+
+  <div class="delete-button-container">
     <button
       *ngIf="index"
       tabindex="-1"

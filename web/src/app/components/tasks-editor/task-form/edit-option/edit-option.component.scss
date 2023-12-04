@@ -36,15 +36,28 @@
   visibility: visible;
 }
 
-.task-option {
-  width: 300px;
-}
-
-.code-option {
-  margin-left: 16px;
-  width: 100px;
-}
-
-.option-content {
+.edit-option {
+  width: 100%;
   display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .option-icon {
+    margin-right: 12px;
+  }
+
+  .code-option {
+    margin-left: 16px;
+    width: 100px;
+  }
+
+  .label-option {
+    flex: 1;
+    display: flex;
+    // flex-direction: row;
+  }
+
+  .delete-button-container {
+    width: 48px;
+  }
 }

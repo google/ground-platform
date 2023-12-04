@@ -17,6 +17,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {AbstractControl, FormGroup} from '@angular/forms';
 
+import {Cardinality} from 'app/models/task/multiple-choice.model';
+
 @Component({
   selector: 'ground-edit-option',
   templateUrl: './edit-option.component.html',
@@ -25,9 +27,12 @@ import {AbstractControl, FormGroup} from '@angular/forms';
 export class EditOptionComponent {
   @Input() formGroup!: FormGroup;
   @Input() index!: number;
+  @Input() type: Cardinality = Cardinality.SELECT_ONE;
 
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
+
+  Cardinality = Cardinality;
 
   onDeleteOption(index: number): void {
     this.delete.emit(index);

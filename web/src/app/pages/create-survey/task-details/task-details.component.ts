@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {List} from 'immutable';
 
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {Task, TaskType} from 'app/models/task/task.model';
-import {DialogService} from 'app/services/dialog/dialog.service';
 import {TaskService} from 'app/services/task/task.service';
 
 export enum TaskGroup {
@@ -75,10 +73,7 @@ export class TaskDetailsComponent {
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
 
-  constructor(
-    private taskService: TaskService,
-    private dialogService: DialogService
-  ) {
+  constructor(private taskService: TaskService) {
     this.taskService.getTasks$().subscribe(tasks => {
       this.tasks = tasks;
     });

@@ -221,7 +221,8 @@ export class FirebaseDataConverter {
               keys(data.options).map((id: string) =>
                 FirebaseDataConverter.toOption(id, data.options[id])
               )
-            )
+            ),
+            data.hasOtherOption || false
           ),
         FirebaseDataConverter.toCondition(data.condition)
       );
@@ -276,6 +277,7 @@ export class FirebaseDataConverter {
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
         ),
+        hasOtherOption: multipleChoice.hasOtherOption,
         // convert list of options to map of optionId: option.
         options:
           multipleChoice?.options?.reduce(

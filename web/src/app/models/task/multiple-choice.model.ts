@@ -41,7 +41,8 @@ export enum Cardinality {
 export class MultipleChoice {
   constructor(
     readonly cardinality: Cardinality,
-    readonly options: List<Option>
+    readonly options: List<Option>,
+    readonly hasOtherOption?: boolean
   ) {
     this.options = this.options.sortBy(option => option.index);
   }
