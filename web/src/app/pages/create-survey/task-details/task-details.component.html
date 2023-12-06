@@ -14,16 +14,10 @@
   limitations under the License.
 -->
 
-<div id="task-details">
-  <h1>
-    <div *ngIf="label">Job: {{ label }}</div>
-    What data should be collected?
-  </h1>
+<tasks-editor
+  *ngIf="!isLoading"
+  #tasksEditor
+  [tasks]="tasks"
+  (onValidationChanges)="onTasksChange($event)"
+></tasks-editor>
 
-  <h2>
-    Data collectors will be prompted to complete the tasks you define here for
-    each data collection site.
-  </h2>
-
-  <tasks-editor #tasksEditor [tasks]="tasks" (onValidationChanges)="onTasksChange($event)"></tasks-editor>
-</div>
