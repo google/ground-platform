@@ -150,6 +150,7 @@ describe('CreateSurveyComponent', () => {
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'addOrUpdateJob',
       'createNewJob',
+      'getNextColor',
     ]);
     jobServiceSpy.createNewJob.and.returnValue(newJob);
 
