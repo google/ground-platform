@@ -18,6 +18,7 @@ import {DocumentData, Timestamp} from '@angular/fire/firestore';
 import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
@@ -39,6 +40,10 @@ import {
 } from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+
+import {toGeometry} from './geometry-converter';
+import {Point} from '../models/geometry/point';
+import {Polygon} from '../models/geometry/polygon';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -474,6 +479,21 @@ export class FirebaseDataConverter {
     }
     if (resultValue instanceof Timestamp) {
       return new Result(resultValue.toDate());
+    }
+
+    // TODO(#1329): Surface additional information for capture location tasks
+    // Capture locations have additional information, and the geometry object is a field within it
+    if ('geometry' in resultValue) {
+      resultValue = resultValue.geometry as List<string>;
+    }
+
+    const geometry = toGeometry(resultValue);
+    if (
+      geometry instanceof Point ||
+      geometry instanceof Polygon ||
+      geometry instanceof MultiPolygon
+    ) {
+      return new Result(geometry);
     }
     throw Error(`Unknown value type ${typeof resultValue}`);
   }

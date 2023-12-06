@@ -16,8 +16,21 @@
 
 import {List} from 'immutable';
 
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Option} from 'app/models/task/option.model';
 
+import {Point} from '../geometry/point';
+import {Polygon} from '../geometry/polygon';
+
 export class Result {
-  constructor(readonly value: number | string | List<Option> | Date) {}
+  constructor(
+    readonly value:
+      | number
+      | string
+      | List<Option>
+      | Date
+      | Point
+      | Polygon
+      | MultiPolygon
+  ) {}
 }
