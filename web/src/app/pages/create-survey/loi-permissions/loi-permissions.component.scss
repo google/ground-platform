@@ -30,5 +30,8 @@
 .loi-permissions-option {
   border-radius: 18px;
   width: 31%;
-  padding: 8px;
+
+  &.selected {
+    border-color: #006E2C;
+  }
 }
