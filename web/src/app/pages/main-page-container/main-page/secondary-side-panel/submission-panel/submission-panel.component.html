@@ -53,6 +53,8 @@ limitations under the License.
                 <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
               </div>
               <!-- TODO(#1279): Add support for map related tasks for submission detail panel -->
+              <div *ngSwitchCase="taskType.POINT || taskType.CAPTURE_LOCATION"></div>
+              <div *ngSwitchCase="taskType.DRAW_AREA"></div>
               <div *ngSwitchDefault>
                 {{getTaskSubmissionResult(task)!.value.toString()}}
               </div>
