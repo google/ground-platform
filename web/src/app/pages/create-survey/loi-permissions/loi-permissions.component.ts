@@ -36,6 +36,8 @@ interface OptionCardConfig {
   value: LoiPermissionsOption;
   label: string;
   description: string;
+  image_selected: string;
+  image_unselected: string;
 }
 
 @Component({
@@ -53,22 +55,28 @@ export class LoiPermissionsComponent implements OnInit, OnChanges {
 
   loiPermissionsOptions: OptionCardConfig[] = [
     {
-      value: LoiPermissionsOption.SURVEY_ORGANIZERS,
+      value: LoiPermissionsOption.PREDEFINED,
       label: 'Predefined',
       description:
         'Data collectors gather data exclusively about preloaded data collection sites.',
+      image_selected: 'survey-org-color.png',
+      image_unselected: 'survey-org-bw.png',
     },
     {
-      value: LoiPermissionsOption.DATA_COLLECTORS,
+      value: LoiPermissionsOption.AD_HOC,
       label: 'Ad hoc',
       description:
         'Data collectors map and collect data about new sites as they go.',
+      image_selected: 'data-collectors-color.png',
+      image_unselected: 'data-collectors-bw.png',
     },
     {
-      value: LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS,
+      value: LoiPermissionsOption.BOTH,
       label: 'Mixed',
       description:
         'Data collectors gather data about preloaded sites, but can also add new sites as needed.',
+      image_selected: 'both-color.png',
+      image_unselected: 'both-bw.png',
     },
   ];
 
