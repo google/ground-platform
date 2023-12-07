@@ -14,6 +14,13 @@
   limitations under the License.
 -->
 
-<h1 class="title">{{ title }}</h1>
-<h2 class="description">{{ description }}</h2>
-<ng-content></ng-content>
+<div class="step-card">
+  <h1 class="title">
+    <div *ngIf="jobName">Job: {{ jobName }}</div>
+    {{ title }}
+  </h1>
+
+  <h2 class="description">{{ description }}</h2>
+
+  <ng-content></ng-content>
+</div>

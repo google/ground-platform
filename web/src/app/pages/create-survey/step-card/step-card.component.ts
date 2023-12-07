@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'ground-step-card',
   templateUrl: './step-card.component.html',
   styleUrls: ['./step-card.component.scss'],
 })
-export class StepCardComponent implements OnInit {
+export class StepCardComponent {
+  @Input() jobName = '';
   @Input() title = '';
   @Input() subtitle = '';
   @Input() description = '';
 
   constructor() {}
-
-  ngOnInit(): void {}
 }

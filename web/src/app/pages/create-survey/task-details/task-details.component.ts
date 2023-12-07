@@ -14,70 +14,38 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {List} from 'immutable';
+import {Subscription} from 'rxjs';
 
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
-import {Task, TaskType} from 'app/models/task/task.model';
+import {Task} from 'app/models/task/task.model';
 import {TaskService} from 'app/services/task/task.service';
-
-export enum TaskGroup {
-  QUESTION = 1,
-  PHOTO = 2,
-  DROP_PIN = 3,
-  DRAW_AREA = 4,
-  CAPTURE_LOCATION = 5,
-}
-
-export const taskGroupToTypes = new Map([
-  [
-    TaskGroup.QUESTION,
-    List([TaskType.TEXT, TaskType.DATE, TaskType.MULTIPLE_CHOICE]),
-  ],
-  [TaskGroup.PHOTO, List([TaskType.PHOTO])],
-  [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
-  [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
-  [TaskGroup.CAPTURE_LOCATION, List([TaskType.CAPTURE_LOCATION])],
-]);
-
-export const taskTypeToGroup = new Map([
-  [TaskType.TEXT, TaskGroup.QUESTION],
-  [TaskType.DATE, TaskGroup.QUESTION],
-  [TaskType.MULTIPLE_CHOICE, TaskGroup.QUESTION],
-  [TaskType.PHOTO, TaskGroup.PHOTO],
-  [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
-  [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
-  [TaskType.CAPTURE_LOCATION, TaskGroup.CAPTURE_LOCATION],
-]);
 
 @Component({
   selector: 'task-details',
   templateUrl: './task-details.component.html',
-  styleUrls: ['./task-details.component.scss'],
 })
 export class TaskDetailsComponent {
-  @Input() label?: string;
   @Output() onValidationChange: EventEmitter<boolean> =
     new EventEmitter<boolean>();
 
   tasks: List<Task> = List([]);
 
-  addableTaskGroups: Array<TaskGroup> = [
-    TaskGroup.QUESTION,
-    TaskGroup.PHOTO,
-    TaskGroup.DROP_PIN,
-    TaskGroup.DRAW_AREA,
-    TaskGroup.CAPTURE_LOCATION,
-  ];
+  isLoading = true;
+
+  private subscription = new Subscription();
 
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
 
   constructor(private taskService: TaskService) {
-    this.taskService.getTasks$().subscribe(tasks => {
-      this.tasks = tasks;
-    });
-    this.tasks = List<Task>();
+    this.subscription.add(
+      this.taskService.getTasks$().subscribe(tasks => {
+        this.tasks = tasks;
+        this.isLoading = false;
+      })
+    );
   }
 
   getIndex(index: number) {
@@ -92,5 +60,9 @@ export class TaskDetailsComponent {
 
   onTasksChange(valid: boolean): void {
     this.onValidationChange.emit(valid);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
