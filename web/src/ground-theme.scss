@@ -33,7 +33,6 @@
 @use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
 @use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
 @use 'app/pages/create-survey/loi-permissions/_loi-permissions.component-theme' as loi-permissions;
-@use 'app/pages/create-survey/task-details/task-details.component-theme' as task-details;
 @use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/option-editor/_option-editor.component-theme' as option-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
@@ -113,7 +112,6 @@ $foreground: map-get($theme, foreground);
 @include step-card.theme($theme);
 @include job-details.theme($theme);
 @include loi-permissions.theme($theme);
-@include task-details.theme($theme);
 @include drawing-tools.theme($theme);
 @include option-editor.theme($theme);
 @include task-editor.theme($theme);
