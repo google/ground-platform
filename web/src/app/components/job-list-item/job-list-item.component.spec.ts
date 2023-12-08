@@ -251,7 +251,7 @@ describe('JobListItemComponent', () => {
     const loiId = lois.first()!.id;
 
     const selectLoiButton = await loader.getHarness(
-      MatButtonHarness.with({selector: '#select-loi'})
+      MatButtonHarness.with({selector: '.loi-tree-node'})
     );
     await selectLoiButton.click();
 
