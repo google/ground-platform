@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18"
+          node-version: "18.x"
 
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
