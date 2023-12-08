@@ -55,7 +55,7 @@ export class LoiPermissionsComponent implements OnInit, OnChanges {
 
   loiPermissionsOptions: OptionCardConfig[] = [
     {
-      value: LoiPermissionsOption.PREDEFINED,
+      value: LoiPermissionsOption.SURVEY_ORGANIZERS,
       label: 'Predefined',
       description:
         'Data collectors gather data exclusively about preloaded data collection sites.',
@@ -63,7 +63,7 @@ export class LoiPermissionsComponent implements OnInit, OnChanges {
       image_unselected: 'survey-org-bw.png',
     },
     {
-      value: LoiPermissionsOption.AD_HOC,
+      value: LoiPermissionsOption.DATA_COLLECTORS,
       label: 'Ad hoc',
       description:
         'Data collectors map and collect data about new sites as they go.',
@@ -71,7 +71,7 @@ export class LoiPermissionsComponent implements OnInit, OnChanges {
       image_unselected: 'data-collectors-bw.png',
     },
     {
-      value: LoiPermissionsOption.BOTH,
+      value: LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS,
       label: 'Mixed',
       description:
         'Data collectors gather data about preloaded sites, but can also add new sites as needed.',
