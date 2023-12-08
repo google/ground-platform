@@ -26,7 +26,6 @@
   display: block;
   margin: 0px auto;
   cursor: move;
-  align-self: center;
   margin-right: 5px !important;
   visibility: hidden;
 }
@@ -47,4 +46,5 @@
 
 .option-content {
   display: flex;
+  align-items: baseline;
 }
