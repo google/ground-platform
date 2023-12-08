@@ -67,12 +67,17 @@
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
             #surveyLoi
           ></survey-loi>
-          <task-details
+          <ground-step-card
             *ngSwitchCase="SetupPhase.DEFINE_TASKS"
-            #taskDetails
-            [label]="job()?.name ?? ''"
-            (onValidationChange)="onValidationChange($event)"
-          ></task-details>
+            [jobName]="job()?.name ?? ''"
+            title="What data should be collected?"
+            description="Data collectors will be prompted to complete the tasks you define here for each data collection site."
+          >
+            <task-details
+              #taskDetails
+              (onValidationChange)="onValidationChange($event)"
+            ></task-details>
+          </ground-step-card>
           <survey-review
             *ngSwitchCase="SetupPhase.REVIEW"
             #surveyReview

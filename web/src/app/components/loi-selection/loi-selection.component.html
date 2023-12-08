@@ -19,16 +19,18 @@
     <div class="loi-panel">
       <ng-container *ngIf="canImport">
         <button
-          mat-stroked-button
-          color="primary"
+          mat-flat-button
           class="import-lois-button"
           (click)="onImportLois(survey)"
         >
           <mat-icon class="import-lois-icon">input</mat-icon>
-          Import LOIs
+          Import
         </button>
       </ng-container>
-
+      <div *ngIf="lois.size === 0" class="no-lois-image-container">
+        <img src="../../../assets/img/forest.svg">
+        <p>No locations imported</p>
+      </div>
       <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
           <p matLine>{{ loi.name }}</p>

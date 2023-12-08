@@ -35,13 +35,14 @@
   border-radius: 18px;
   display: flex;
   margin-top: 24px;
-  min-height: 450px;
   width: 880px;
 }
 
 .picture {
-  height: 450px;
-  width: 330px;
+  height: 377px;
+  width: 277px;
+  border-top-left-radius: 18px; 
+  border-bottom-left-radius: 18px; 
 }
 
 .create-survey-content {
@@ -50,7 +51,7 @@
 }
 
 .progress-bar-title {
-  margin: 14px 0 8px;
+  margin: 0 0 8px;
 }
 
 .button-section {
@@ -62,4 +63,6 @@
 
 .continue-button {
   border-radius: 100px;
+  height: 40px;
+  --mdc-filled-button-container-color: #006E2C;
 }

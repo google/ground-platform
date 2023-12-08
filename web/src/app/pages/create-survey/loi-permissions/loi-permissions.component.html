@@ -30,6 +30,7 @@
       *ngFor="let option of loiPermissionsOptions"
       (click)="optionCardClicked(option.value)"
     >
+      <img mat-card-image src="{{option.imagePath}}">
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
           {{ option.label }}

@@ -272,7 +272,13 @@ export class CreateSurveyComponent implements OnInit {
     } else {
       job = this.jobService.createNewJob();
     }
-    await this.jobService.addOrUpdateJob(this.surveyId!, job.copyWith({name}));
+    await this.jobService.addOrUpdateJob(
+      this.surveyId!,
+      job.copyWith({
+        name,
+        color: job.color || this.jobService.getNextColor(this.survey?.jobs),
+      })
+    );
   }
 
   // TODO: Move LOI permissions saving to job service.
