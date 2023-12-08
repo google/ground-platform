@@ -46,8 +46,8 @@ jobs:
           channelId: live
           projectId: gnd-dev
 
-      - name:  Deploy to Firebase functions
-        uses: w9jds/firebase-action@master
+      - name: Deploy to Firebase functions
+        uses: docker://w9jds/firebase-action:master
         with:
             args: deploy --only functions --project gnd-dev
         env:
