@@ -26,6 +26,9 @@
   position: relative;
 
   .loi-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: absolute;
     background: var(--ground-sys-light-surface, #F9FAF4);
     top: 60px;
@@ -46,4 +49,18 @@
     height: 500px;
     width: 100%;
   }
+}
+
+button.import-lois-button {
+  --mdc-filled-button-container-color: #FFDDAB;
+  --mdc-filled-button-container-shape: 24px;
+  width: 132px;
+  height: 40px;
+}
+
+.no-lois-image-container {
+  padding-top: 40px;
+  font-size: 11px;
+  color: #727970;
+  text-align: center;
 }
