@@ -15,7 +15,7 @@
  */
 
 .title {
-  margin-top: 45px;
+  margin-top: 30px;
 }
 
 .description {
@@ -30,5 +30,12 @@
 .loi-permissions-option {
   border-radius: 18px;
   width: 31%;
-  padding: 8px;
+  outline: 2px solid #E2E3DD;
+  .mat-mdc-card-content {
+    padding: 24px;
+  }
+}
+
+.loi-permissions-option:has(.mat-radio-checked) {
+  outline: 2px solid #006E2C;
 }

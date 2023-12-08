@@ -54,6 +54,7 @@ export class Datastore {
 
   constructor(db: firestore.Firestore) {
     this.db_ = db;
+    db.settings({ ignoreUndefinedProperties: true });
   }
 
   /**
