@@ -22,6 +22,7 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {Job} from 'app/models/job.model';
 
 @Component({
   selector: 'loi-selection',
@@ -32,6 +33,7 @@ export class LoiSelectionComponent {
   @Input() canImport!: boolean;
   @Input() lois!: List<LocationOfInterest>;
   @Input() survey!: Survey;
+  @Input() jobId?: string;
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -39,12 +41,12 @@ export class LoiSelectionComponent {
   ) {}
 
   onImportLois(survey: Survey) {
-    const [job] = survey.jobs.values();
-    if (!survey.id || !job.id) {
+    const jobId = this.jobId ?? survey.jobs.first()?.id;
+    if (!survey.id || !jobId) {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
-      data: {surveyId: survey.id, jobId: job.id},
+      data: {surveyId: survey.id, jobId},
       width: '350px',
       maxHeight: '800px',
     });
