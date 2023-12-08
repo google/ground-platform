@@ -4,15 +4,32 @@
 @mixin color($theme) {
   $color-config: mat.get-color-config($theme);
   $background: map.get($color-config, background);
+  $foreground: map.get($color-config, foreground);
+
+  .expandable-node-start {
+    color: #424940;
+  }
 
   .tree-node-selected {
     background-color: map.get($background, selected-button);
+    #select-loi {
+      color: map.get($foreground, base);
+    }
   }
+
   .mat-tree {
     background-color: #edeee9; /* M3/sys/light/surface-container */
 
     .mat-mdc-unelevated-button {
       background-color: #edeee9; /* M3/sys/light/surface-container */
+    }
+
+    .loi-tree-node{
+      color: #424940;
+      &:hover {
+        color: map.get($foreground, base);
+        background-color: map.get($background, hover);
+      }
     }
   }
 }
