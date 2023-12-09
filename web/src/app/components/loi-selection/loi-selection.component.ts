@@ -22,7 +22,6 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {Job} from 'app/models/job.model';
 
 @Component({
   selector: 'loi-selection',
