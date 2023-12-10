@@ -52,11 +52,6 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
     type: TaskType.TEXT,
   },
   {
-    icon: 'access_time',
-    label: 'Date/Time',
-    type: TaskType.DATE_TIME,
-  },
-  {
     icon: 'radio_button_checked',
     label: 'Select One',
     type: TaskType.MULTIPLE_CHOICE,
@@ -67,6 +62,21 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
     label: 'Select multiple',
     type: TaskType.MULTIPLE_CHOICE,
     cardinality: Cardinality.SELECT_MULTIPLE,
+  },
+  {
+    icon: 'tag',
+    label: 'Number',
+    type: TaskType.NUMBER,
+  },
+  {
+    icon: 'calendar_today',
+    label: 'Date',
+    type: TaskType.DATE,
+  },
+  {
+    icon: 'access_time',
+    label: 'Time',
+    type: TaskType.DATE_TIME,
   },
 ];
 

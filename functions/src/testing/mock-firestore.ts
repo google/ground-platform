@@ -34,6 +34,7 @@ export class TestDocumentSnapshot {
 
 export function installMockFirestore() {
     const firestoreMock: admin.firestore.Firestore = {
+        settings: () => {},
         doc: jasmine.createSpy('doc'),
         collection: jasmine.createSpy('collection')
     } as any;

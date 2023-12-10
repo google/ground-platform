@@ -35,15 +35,16 @@
     min-width: 24px
   }
 
-  .code-option {
-    margin-left: 16px;
-    width: 100px;
+  .drag-icon {
+    display: block;
+    margin: 0px auto;
+    cursor: move;
+    margin-right: 5px !important;
+    visibility: hidden;
   }
 
   .label-option {
     flex: 1;
-
-
   }
 
   .delete-button-container {

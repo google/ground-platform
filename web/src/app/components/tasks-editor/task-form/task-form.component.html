@@ -76,13 +76,11 @@
       >
         <mat-select-trigger>
           <mat-icon class="icon-task-type">{{ taskTypeOption.icon }}</mat-icon>
-
           <span>{{ taskTypeOption.label }}</span>
         </mat-select-trigger>
 
-        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption">
+        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption" class="icon-task-type-option">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
-
           <span>{{ taskTypeOption.label }}</span>
         </mat-option>
       </mat-select>
