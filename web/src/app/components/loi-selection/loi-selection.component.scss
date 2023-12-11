@@ -45,6 +45,18 @@
     }
   }
 
+  .loi-permissions {
+    position: absolute;
+    background: var(--ground-sys-light-surface, #F9FAF4);
+    bottom: 30px;
+    left: 30%;
+    padding: 12px;
+    border-radius: 8px;
+    width: 40%;
+    z-index: 1;
+    text-align: center;
+  }
+
   .loi-map {
     height: 500px;
     width: 100%;
