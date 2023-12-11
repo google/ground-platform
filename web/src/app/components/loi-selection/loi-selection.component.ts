@@ -35,7 +35,7 @@ export class LoiSelectionComponent {
   @Input() dataCollectorsCanAddLois!: boolean;
   @Input() lois!: List<LocationOfInterest>;
   @Input() survey!: Survey;
-  @Input() jobId!: string;
+  @Input() jobId?: string;
 
   job?: Job;
 
@@ -47,15 +47,18 @@ export class LoiSelectionComponent {
   ) {}
 
   ngOnInit() {
-    this.job = this.survey.jobs.get(this.jobId) || this.survey.jobs.first();
+    this.job = this.jobId
+      ? this.survey.jobs.get(this.jobId)
+      : this.survey.jobs.first();
   }
 
   onImportLois() {
-    if (!this.job?.id) {
+    const jobId = this.jobId ?? this.survey.jobs.first()?.id;
+    if (!this.survey.id || !jobId) {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
-      data: {surveyId: this.survey.id, jobId: this.job.id},
+      data: {surveyId: this.survey.id, jobId},
       width: '350px',
       maxHeight: '800px',
     });
