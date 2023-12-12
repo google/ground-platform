@@ -95,25 +95,7 @@ export class TasksEditorComponent {
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
-        this.tasks?.toArray().map(task =>
-          this.formBuilder.group({
-            id: task.id,
-            type: task.type,
-            required: task.required,
-            label: [task.label, Validators.required],
-            cardinality: task.multipleChoice?.cardinality,
-            options: this.formBuilder.array(
-              task.multipleChoice?.options.toArray().map(option =>
-                this.formBuilder.group({
-                  id: option.id,
-                  label: option.label,
-                  code: option.code,
-                })
-              ) || []
-            ),
-            hasOtherOption: task.multipleChoice?.hasOtherOption,
-          })
-        ) || []
+        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || []
       ),
     });
 
@@ -170,23 +152,29 @@ export class TasksEditorComponent {
       .afterClosed()
       .subscribe(dialogResult => {
         if (dialogResult) {
-          const formGroupToDuplicate = this.formArray.controls[index];
+          const task = this.toTask(index);
 
-          const formGroup = this.formBuilder.group({
-            id: this.dataStoreService.generateId(),
-            type: formGroupToDuplicate.get('type')?.value,
-            required: formGroupToDuplicate.get('required')?.value,
-            label: [
-              formGroupToDuplicate.get('label')?.value,
-              Validators.required,
-            ],
-            cardinality: formGroupToDuplicate.get('cardinality')?.value,
-            options: (formGroupToDuplicate.get('options') as FormArray)
-              .controls,
-            hasOtherOption: formGroupToDuplicate.get('hasOtherOption')?.value,
-          });
+          const duplicatedTask = new Task(
+            this.dataStoreService.generateId(),
+            task.type,
+            task.label,
+            task.required,
+            this.formArray.controls.length + 1,
+            task.multipleChoice
+              ? ({
+                  ...task.multipleChoice,
+                  options: task.multipleChoice.options?.map(option => ({
+                    ...option,
+                    id: this.dataStoreService.generateId(),
+                  })),
+                } as MultipleChoice)
+              : undefined,
+            task.condition
+          );
 
-          this.formArray.push(formGroup);
+          const control = this.toControl(duplicatedTask);
+
+          this.formArray.push(control);
         }
       });
   }
@@ -199,40 +187,60 @@ export class TasksEditorComponent {
     );
   }
 
-  toTasks(): List<Task> {
-    return List(
-      this.formArray.controls.map((task: AbstractControl, i: number) => {
-        const cardinality = task.get('cardinality')?.value as Cardinality;
+  toControl(task: Task): FormGroup {
+    return this.formBuilder.group({
+      id: task.id,
+      type: task.type,
+      required: task.required,
+      label: [task.label, Validators.required],
+      cardinality: task.multipleChoice?.cardinality,
+      options: this.formBuilder.array(
+        task.multipleChoice?.options.toArray().map(option =>
+          this.formBuilder.group({
+            id: option.id,
+            label: option.label,
+            code: option.code,
+          })
+        ) || []
+      ),
+      hasOtherOption: task.multipleChoice?.hasOtherOption,
+    });
+  }
 
-        const options = List(
-          (task.get('options') as FormArray).controls.map(
-            (option: AbstractControl, k: number) =>
-              ({
-                id: option.get('id')?.value as string,
-                label: option.get('label')?.value as string,
-                code: option.get('code')?.value as string,
-                index: k,
-              } as Option)
-          )
-        );
+  toTask(index: number): Task {
+    const task = this.formArray.controls[index];
 
-        const hasOtherOption = !!task.get('hasOtherOption')?.value;
+    const cardinality = task.get('cardinality')?.value as Cardinality;
 
-        return {
-          id: task.get('id')?.value as string,
-          type: task.get('type')?.value as TaskType,
-          required: task.get('required')?.value as boolean,
-          label: task.get('label')?.value as string,
-          index: i,
-          multipleChoice: cardinality
-            ? ({
-                cardinality,
-                options,
-                hasOtherOption,
-              } as MultipleChoice)
-            : undefined,
-        } as Task;
-      })
+    const options = List(
+      (task.get('options') as FormArray).controls.map(
+        (option: AbstractControl, k: number) =>
+          ({
+            id: option.get('id')?.value as string,
+            label: option.get('label')?.value as string,
+            code: option.get('code')?.value as string,
+            index: k,
+          } as Option)
+      )
     );
+
+    return {
+      id: task.get('id')?.value as string,
+      type: task.get('type')?.value as TaskType,
+      required: task.get('required')?.value as boolean,
+      label: task.get('label')?.value as string,
+      index,
+      multipleChoice: cardinality
+        ? ({
+            cardinality,
+            hasOtherOption: task.get('hasOtherOption')?.value as boolean,
+            options,
+          } as MultipleChoice)
+        : undefined,
+    } as Task;
+  }
+
+  toTasks(): List<Task> {
+    return List(this.formArray.controls.map((_, i: number) => this.toTask(i)));
   }
 }
