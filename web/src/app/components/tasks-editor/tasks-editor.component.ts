@@ -115,13 +115,14 @@ export class TasksEditorComponent {
   onTaskAdd(group: TaskGroup) {
     const types = taskGroupToTypes.get(group);
 
-    const formGroup = new FormBuilder().group({
+    const formGroup = this.formBuilder.group({
       id: this.dataStoreService.generateId(),
       type: types?.first(),
       required: false,
       label: ['', Validators.required],
       cardinality: null,
-      options: new FormBuilder().array([]),
+      options: this.formBuilder.array([]),
+      hasOtherOption: false,
     });
 
     this.formArray.push(formGroup);
@@ -202,6 +203,7 @@ export class TasksEditorComponent {
           })
         ) || []
       ),
+      hasOtherOption: task.multipleChoice?.hasOtherOption,
     });
   }
 
@@ -231,6 +233,7 @@ export class TasksEditorComponent {
       multipleChoice: cardinality
         ? ({
             cardinality,
+            hasOtherOption: task.get('hasOtherOption')?.value as boolean,
             options,
           } as MultipleChoice)
         : undefined,

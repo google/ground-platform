@@ -5,12 +5,10 @@
   $color-config: mat.get-color-config($theme);
   $foreground: map.get($color-config, foreground);
 
-  .dot {
-    color: map.get($foreground, icon);
-  }
-
-  .drag-icon {
-    color: map.get($foreground, icon);
+  .edit-option {
+    .drag-icon {
+      color: map.get($foreground, icon);
+    }
   }
 }
 
