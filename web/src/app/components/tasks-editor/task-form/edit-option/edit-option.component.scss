@@ -14,37 +14,35 @@
  * limitations under the License.
  */
 
-:host {
+.edit-option {
+  width: 50%;
   display: flex;
-}
+  align-items: center;
+  margin-bottom: 16px;
 
-.dot {
-  align-self: center;
-}
+  .option-icon {
+    margin-right: 12px;
+    min-width: 24px
+  }
 
-.drag-icon {
-  display: block;
-  margin: 0px auto;
-  cursor: move;
-  align-self: center;
-  margin-right: 5px !important;
-  visibility: hidden;
-}
+  .drag-icon {
+    display: block;
+    margin: 0px auto;
+    cursor: move;
+    margin-right: 5px !important;
+    visibility: hidden;
+  }
 
-:host:hover .drag-icon,
-:host:focus-within .drag-icon {
-  visibility: visible;
-}
+  .label-option {
+    flex: 1;
+  }
 
-.task-option {
-  width: 300px;
-}
+  .delete-button-container {
+    width: 48px;
+  }
 
-.code-option {
-  margin-left: 16px;
-  width: 100px;
-}
-
-.option-content {
-  display: flex;
+  &:hover .drag-icon,
+  &:focus-within .drag-icon {
+    visibility: visible;
+  }
 }

@@ -30,8 +30,9 @@
 .loi-permissions-option {
   border-radius: 18px;
   width: 31%;
+  outline: 2px solid #E2E3DD;
+}
 
-  &.selected {
-    border-color: #006E2C;
-  }
+.loi-permissions-option:has(.mat-radio-checked) {
+  outline: 2px solid #006E2C;
 }

@@ -76,13 +76,11 @@
       >
         <mat-select-trigger>
           <mat-icon class="icon-task-type">{{ taskTypeOption.icon }}</mat-icon>
-
           <span>{{ taskTypeOption.label }}</span>
         </mat-select-trigger>
 
-        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption">
+        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption" class="icon-task-type-option">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
-
           <span>{{ taskTypeOption.label }}</span>
         </mat-option>
       </mat-select>
@@ -94,7 +92,17 @@
       *ngFor="let formGroup of optionsControl.controls; let i = index;"
       [formGroup]="formGroup"
       [index]="i"
+      [type]="cardinalityControl.value"
       (delete)="onDeleteOption(i)"
+    >
+    </ground-edit-option>
+
+    <ground-edit-option
+      *ngIf="hasOtherOptionControl?.value"
+      [formGroup]="otherOption"
+      [index]="-1"
+      [type]="cardinalityControl.value"
+      (delete)="onDeleteOtherOption()"
     >
     </ground-edit-option>
 
@@ -107,5 +115,18 @@
     >
       Add option
     </button>
+
+    <span *ngIf="!hasOtherOptionControl.value">
+      or
+      <button
+        mat-button
+        type="button"
+        (click)="onAddOtherOption()"
+        color="primary"
+        class="add-option"
+      >
+        Add other
+      </button>
+    </span>
   </div>
 </form>

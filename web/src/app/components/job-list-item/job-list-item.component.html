@@ -20,11 +20,16 @@ limitations under the License.
       *matTreeNodeDef="let node"
       matTreeNodePadding
       [class.tree-node-selected]="isSelectedLoi(node)"
+      class="loi-tree-node"
+      role="button"
+      tabindex="0"
+      mat-button
+      (click)="selectLoi(node)"
     >
-      <mat-icon svgIcon={{node.iconName}} class={{node.jobId}}></mat-icon>
-      <button mat-button id="select-loi" (click)="selectLoi(node)">
+      <mat-icon svgIcon={{node.iconName}} class={{node.jobId}} [ngStyle]="{ color: node.iconColor }"></mat-icon>
+      <div id="select-loi">
         {{ node.name }}
-      </button>
+      </div>
     </mat-tree-node>
     <!-- Tree node for jobs -->
     <mat-tree-node

@@ -29,7 +29,6 @@
       appearance="outlined"
       class="loi-permissions-option"
       *ngFor="let option of loiPermissionsOptions"
-      [ngClass]="{selected: formGroup.controls.loiPermissionsOption.value === option.value}"
       (click)="optionCardClicked(option.value)"
     >
       <img mat-card-image src="/assets/img/data_collection_strategy/{{formGroup.controls.loiPermissionsOption.value === option.value ? option.image_selected : option.image_unselected}}" alt="data-collectors" />

@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: "18.x"
 
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
@@ -46,8 +46,8 @@ jobs:
           channelId: live
           projectId: gnd-dev
 
-      - name:  Deploy to Firebase functions
-        uses: w9jds/firebase-action@master
+      - name: Deploy to Firebase functions
+        uses: docker://w9jds/firebase-action:master
         with:
             args: deploy --only functions --project gnd-dev
         env:

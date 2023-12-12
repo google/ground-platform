@@ -145,13 +145,29 @@ describe('LoiSelectionFormComponent', () => {
       );
     });
 
-    it('opens the import dialog with survey and job data', () => {
-      importButton.click();
+    describe('when no job ID is passed in as input', () => {
+      it('opens the import dialog with survey and ID of first job', () => {
+        importButton.click();
 
-      expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-        data: {surveyId: survey.id, jobId: job.id},
-        width: '350px',
-        maxHeight: '800px',
+        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
+          data: {surveyId: survey.id, jobId: job.id},
+          width: '350px',
+          maxHeight: '800px',
+        });
+      });
+    });
+
+    describe('when job ID is passed in as input', () => {
+      it('opens the import dialog with survey and inputted job ID', () => {
+        fixture.componentInstance.jobId = 'some-job!';
+        fixture.detectChanges();
+        importButton.click();
+
+        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
+          data: {surveyId: survey.id, jobId: 'some-job!'},
+          width: '350px',
+          maxHeight: '800px',
+        });
       });
     });
   });
