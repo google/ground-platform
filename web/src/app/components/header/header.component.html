@@ -13,6 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <div class="header">
   <div>
     <ng-content select="[beginning]"></ng-content>
@@ -22,20 +23,30 @@
   </div>
 
   <div>
-    <button *ngIf="state === 2" mat-icon-button (click)="onEditSurveyClick()">
+    <button
+      mat-icon-button
+      [matMenuTriggerFor]="surveyMenu"
+      *ngIf="state === 2"
+    >
       <mat-icon>settings</mat-icon>
     </button>
+
+    <mat-menu #surveyMenu="matMenu">
+      <a class="download" (click)="onEditSurveyClick()">
+        <button mat-menu-item>Edit survey</button>
+      </a>
+    </mat-menu>
+
     <button
+      mat-flat-button
       class="finish-edit-button"
       *ngIf="state === 3"
-      mat-flat-button
       (click)="onFinishEditSurveyClick()"
     >
-      <mat-icon>
-        done
-      </mat-icon>
+      <mat-icon>done</mat-icon>
       Publish changes
     </button>
+
     <ground-current-user-widget></ground-current-user-widget>
   </div>
 </div>
