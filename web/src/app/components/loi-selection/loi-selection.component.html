@@ -47,6 +47,15 @@
       </button>
     </div>
 
+    <div class="loi-permissions">
+      Allow data collectors to add new sites
+      <mat-slide-toggle
+        [checked]="job?.strategy !== DataCollectionStrategy.PREDEFINED"
+        (change)="toggleDataCollectorsCanAddLois($event)"
+        color="primary"
+      ></mat-slide-toggle>
+    </div>
+
     <div class="loi-map">
       <ground-map></ground-map>
     </div>

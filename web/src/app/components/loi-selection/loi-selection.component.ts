@@ -16,9 +16,11 @@
 
 import {Component, Input} from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {List} from 'immutable';
 
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -30,22 +32,33 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 })
 export class LoiSelectionComponent {
   @Input() canImport!: boolean;
+  @Input() dataCollectorsCanAddLois!: boolean;
   @Input() lois!: List<LocationOfInterest>;
   @Input() survey!: Survey;
   @Input() jobId?: string;
+
+  job?: Job;
+
+  DataCollectionStrategy = DataCollectionStrategy;
 
   constructor(
     private dataStoreService: DataStoreService,
     private importDialog: MatDialog
   ) {}
 
-  onImportLois(survey: Survey) {
-    const jobId = this.jobId ?? survey.jobs.first()?.id;
-    if (!survey.id || !jobId) {
+  ngOnInit() {
+    this.job = this.jobId
+      ? this.survey.jobs.get(this.jobId)
+      : this.survey.jobs.first();
+  }
+
+  onImportLois() {
+    const jobId = this.jobId ?? this.survey.jobs.first()?.id;
+    if (!this.survey.id || !jobId) {
       return;
     }
     this.importDialog.open(ImportDialogComponent, {
-      data: {surveyId: survey.id, jobId},
+      data: {surveyId: this.survey.id, jobId},
       width: '350px',
       maxHeight: '800px',
     });
@@ -54,6 +67,17 @@ export class LoiSelectionComponent {
   clearLois(surveyId: string, lois: List<LocationOfInterest>) {
     for (const loi of lois) {
       this.dataStoreService.deleteLocationOfInterest(surveyId, loi.id);
+    }
+  }
+
+  toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {
+    if (this.job?.id) {
+      this.dataStoreService.addOrUpdateJob(this.survey.id, {
+        ...this.job,
+        strategy: event.checked
+          ? DataCollectionStrategy.AD_HOC
+          : DataCollectionStrategy.PREDEFINED,
+      } as Job);
     }
   }
 }
