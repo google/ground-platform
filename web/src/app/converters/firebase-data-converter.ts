@@ -19,7 +19,7 @@ import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Result} from 'app/models/submission/result.model';
@@ -140,14 +140,16 @@ export class FirebaseDataConverter {
       data.defaultStyle?.color || data.color,
       data.name,
       this.toTasks(data),
-      data.dataCollectorsCanAdd || []
+      data.dataCollectorsCanAdd || [],
+      data.strategy || DataCollectionStrategy.PREDEFINED
     );
   }
 
   static jobToJS(job: Job): {} {
-    const {name, tasks, color, dataCollectorsCanAdd, ...jobDoc} = job;
+    const {name, tasks, color, dataCollectorsCanAdd, strategy, ...jobDoc} = job;
     return {
       dataCollectorsCanAdd,
+      strategy,
       name,
       tasks: this.tasksToJS(tasks),
       defaultStyle: {color},

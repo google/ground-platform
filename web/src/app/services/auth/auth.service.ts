@@ -23,7 +23,7 @@ import {Observable, firstValueFrom, from} from 'rxjs';
 import {map, shareReplay, switchMap} from 'rxjs/operators';
 
 import {AclEntry} from 'app/models/acl-entry.model';
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
@@ -143,7 +143,7 @@ export class AuthService {
     return (
       this.isManager(userRole) ||
       (this.isContributor(userRole) &&
-        (job.dataCollectorsCanAdd?.includes('points') ?? false))
+        job.strategy !== DataCollectionStrategy.PREDEFINED)
     );
   }
 
