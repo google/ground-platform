@@ -15,6 +15,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
 
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
@@ -27,6 +28,7 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MatMenuModule],
       declarations: [HeaderComponent],
       providers: [
         {provide: Router, useValue: {}},
