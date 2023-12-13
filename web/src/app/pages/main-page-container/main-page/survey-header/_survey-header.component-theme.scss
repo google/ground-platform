@@ -5,8 +5,24 @@
   $color-config: mat.get-color-config($theme);
   $foreground: map.get($color-config, foreground);
 
-  .header-divider {
-    border-left: 1px solid map.get($foreground, divider);
+  div[left] {
+    .header-divider {
+      border-left: 1px solid map.get($foreground, divider);
+    }
+
+    .survey-title {
+      color: #424940;
+    }
+  }
+}
+
+@mixin typography($theme) {
+  $typography-config: mat.get-typography-config($theme);
+
+  div[left] {
+    .survey-title {
+      font-size: 16px;
+    }
   }
 }
 
@@ -14,5 +30,10 @@
   $color-config: mat.get-color-config($theme);
   @if $color-config != null {
     @include color($theme);
+  }
+
+  $typography-config: mat.get-typography-config($theme);
+  @if $typography-config != null {
+    @include typography($theme);
   }
 }

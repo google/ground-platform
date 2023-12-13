@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-.header-divider {
-  display: inline-block;
-  width: 1px;
-  height: 30px;
-  margin-left: 24px;
-  margin-right: 18px;
-  vertical-align: middle;
-}
+div[left] {
+  display: flex;
+  align-items: center;
 
-ground-inline-edit-title {
-  margin-top: 15px;
-}
-
-/* Relative top used to push title input field in line with flex row. */
-.inline-editor {
-  position: relative;
-  top: 2px;
+  .header-divider {
+    height: 32px;
+    margin: 0 24px;
+  }
 }
