@@ -36,19 +36,5 @@ jobs:
           FILE_NAME: "web/keys/gnd-dev/firebase-config.js"
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
-      - name: Build using development configuration
-        run: npm run build:dev --project=gnd-dev
-
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}"
-          channelId: live
-          projectId: gnd-dev
-
-      - name: Deploy to Firebase functions
-        uses: docker://w9jds/firebase-action:master
-        with:
-            args: deploy --only functions --project gnd-dev
-        env:
-            FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      - name: Build and deploy using development configuration
+        run: npm run deploy:dev --project=gnd-dev
