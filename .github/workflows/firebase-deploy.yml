@@ -22,7 +22,7 @@ jobs:
     if: github.repository_owner == 'google'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Check out repository
         uses: actions/checkout@v1
 
       - name: Setup Node.js
@@ -36,12 +36,12 @@ jobs:
           FILE_NAME: "web/keys/gnd-dev/firebase-config.js"
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
-      - name: Build using development configuration
+      - name: Build Ground
         run: npm run build:dev --project=gnd-dev
 
-      - name: Deploy
+      - name: Deploy to Firebase
         uses: docker://w9jds/firebase-action:master
         with:
             args: deploy --project gnd-dev
         env:
-            FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+            GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}
