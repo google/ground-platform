@@ -40,6 +40,7 @@ export class EditJobComponent {
   jobId?: string;
   section: 'tasks' | 'lois' = 'tasks';
   lois!: List<LocationOfInterest>;
+  isLoading = true;
 
   tasks?: List<Task>;
 
@@ -78,6 +79,8 @@ export class EditJobComponent {
   }
 
   private async onJobIdChange(params: Params) {
+    this.isLoading = true;
+
     this.jobId = params['id'];
 
     this.tasks = this.draftSurveyService
@@ -89,6 +92,8 @@ export class EditJobComponent {
     this.lois = await firstValueFrom(
       this.loiService.getLoisByJobId$(this.jobId!)
     );
+
+    this.isLoading = false;
   }
 
   getIndex(index: number) {
