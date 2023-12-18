@@ -95,9 +95,10 @@ export class TasksEditorComponent {
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
-        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || []
+        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || [],
+        Validators.required
       ),
-    });
+    }) as FormGroup;
 
     this.formGroup.statusChanges.subscribe(_ => {
       this.onValidationChanges.emit(this.formGroup?.valid);
@@ -106,6 +107,8 @@ export class TasksEditorComponent {
     this.formGroup.valueChanges.subscribe(_ => {
       this.onValueChanges.emit(this.formGroup?.valid);
     });
+
+    this.onValidationChanges.emit(this.formGroup?.valid);
   }
 
   get formArray() {
