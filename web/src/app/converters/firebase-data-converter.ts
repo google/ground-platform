@@ -19,7 +19,7 @@ import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Result} from 'app/models/submission/result.model';
@@ -50,6 +50,7 @@ const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.DATE, 'date'],
   [TaskType.MULTIPLE_CHOICE, 'multiple_choice'],
   [TaskType.DATE_TIME, 'date_time'],
+  [TaskType.NUMBER, 'number'],
   [TaskType.PHOTO, 'photo'],
   [TaskType.DROP_PIN, 'drop_pin'],
   [TaskType.DRAW_AREA, 'draw_area'],
@@ -139,14 +140,16 @@ export class FirebaseDataConverter {
       data.defaultStyle?.color || data.color,
       data.name,
       this.toTasks(data),
-      data.dataCollectorsCanAdd || []
+      data.dataCollectorsCanAdd || [],
+      data.strategy || DataCollectionStrategy.PREDEFINED
     );
   }
 
   static jobToJS(job: Job): {} {
-    const {name, tasks, color, dataCollectorsCanAdd, ...jobDoc} = job;
+    const {name, tasks, color, dataCollectorsCanAdd, strategy, ...jobDoc} = job;
     return {
       dataCollectorsCanAdd,
+      strategy,
       name,
       tasks: this.tasksToJS(tasks),
       defaultStyle: {color},
@@ -227,7 +230,8 @@ export class FirebaseDataConverter {
               keys(data.options).map((id: string) =>
                 FirebaseDataConverter.toOption(id, data.options[id])
               )
-            )
+            ),
+            data.hasOtherOption || false
           ),
         FirebaseDataConverter.toCondition(data.condition)
       );
@@ -282,6 +286,7 @@ export class FirebaseDataConverter {
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality
         ),
+        hasOtherOption: multipleChoice.hasOtherOption,
         // convert list of options to map of optionId: option.
         options:
           multipleChoice?.options?.reduce(

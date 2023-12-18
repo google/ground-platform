@@ -18,9 +18,25 @@
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
-    <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+    <div *ngIf="GeometryTasks.includes(taskGroup)">
+      <mat-select [(value)]="taskGroup" (selectionChange)="onTaskGroupSelect($event.value)">
+        <mat-select-trigger style="display: flex; align-items: center; gap: 12px;">
+          <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+          <div>{{ Tasks[taskGroup].label }}</div>
+        </mat-select-trigger>
+        <mat-option *ngFor="let geometryTaskGroup of GeometryTasks" [value]="geometryTaskGroup">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <mat-icon>{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
+            <div>{{ Tasks[geometryTaskGroup].label }}</div>
+          </div>
+        </mat-option>
+      </mat-select>
+    </div>
 
-    <div>{{ Tasks[taskGroup].label }}</div>
+    <div *ngIf="!GeometryTasks.includes(taskGroup)" style="display: flex; align-items: center; gap: 12px;">
+      <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+      <div>{{ Tasks[taskGroup].label }}</div>
+    </div>
 
     <div class="toolbar-right">
       <div>
@@ -76,13 +92,11 @@
       >
         <mat-select-trigger>
           <mat-icon class="icon-task-type">{{ taskTypeOption.icon }}</mat-icon>
-
           <span>{{ taskTypeOption.label }}</span>
         </mat-select-trigger>
 
-        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption">
+        <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption" class="icon-task-type-option">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
-
           <span>{{ taskTypeOption.label }}</span>
         </mat-option>
       </mat-select>
@@ -94,7 +108,17 @@
       *ngFor="let formGroup of optionsControl.controls; let i = index;"
       [formGroup]="formGroup"
       [index]="i"
+      [type]="cardinalityControl.value"
       (delete)="onDeleteOption(i)"
+    >
+    </ground-edit-option>
+
+    <ground-edit-option
+      *ngIf="hasOtherOptionControl?.value"
+      [formGroup]="otherOption"
+      [index]="-1"
+      [type]="cardinalityControl.value"
+      (delete)="onDeleteOtherOption()"
     >
     </ground-edit-option>
 
@@ -107,5 +131,18 @@
     >
       Add option
     </button>
+
+    <span *ngIf="!hasOtherOptionControl.value">
+      or
+      <button
+        mat-button
+        type="button"
+        (click)="onAddOtherOption()"
+        color="primary"
+        class="add-option"
+      >
+        Add other
+      </button>
+    </span>
   </div>
 </form>

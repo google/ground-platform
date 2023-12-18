@@ -18,7 +18,7 @@ import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {filter, first, firstValueFrom} from 'rxjs';
 
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
@@ -293,10 +293,21 @@ export class CreateSurveyComponent implements OnInit {
       ? ['points', 'polygons']
       : [];
 
+    let strategy = DataCollectionStrategy.PREDEFINED;
+    switch (this.loiPermissionsOption) {
+      case LoiPermissionsOption.DATA_COLLECTORS:
+        strategy = DataCollectionStrategy.AD_HOC;
+        break;
+      case LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS:
+        strategy = DataCollectionStrategy.MIXED;
+        break;
+    }
+
     const job = this.getFirstJob();
+
     await this.jobService.addOrUpdateJob(
       this.surveyId!,
-      job.copyWith({dataCollectorsCanAdd})
+      job.copyWith({dataCollectorsCanAdd, strategy})
     );
   }
 

@@ -40,18 +40,25 @@
   <!-- TODO: Refactor into EditLois. -->
   <div [ngSwitch]="section">
     <div *ngSwitchCase="'lois'">
-      <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
-        <loi-selection
-          #loiSelection
-          [canImport]="surveyService.canManageSurvey()"
-          [lois]="lois"
-          [survey]="survey">
-        </loi-selection>
-      </div>
+      <loi-selection
+        *ngIf="surveyService.getActiveSurvey$() | async as survey"
+        #loiSelection
+        [canImport]="surveyService.canManageSurvey()"
+        [lois]="lois"
+        [survey]="survey"
+        [jobId]="jobId"
+      >
+      </loi-selection>
     </div>
 
     <div *ngSwitchCase="'tasks'">
-      <tasks-editor #tasksEditor [tasks]="tasks" (onValueChanges)="onTasksChange($event)"></tasks-editor>
+      <tasks-editor
+        *ngIf="!isLoading"
+        #tasksEditor
+        [tasks]="tasks"
+        (onValueChanges)="onTasksChange($event)"
+      >
+      </tasks-editor>
     </div>
   </div>
 </div>

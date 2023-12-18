@@ -28,6 +28,7 @@ import {
   FormBuilder,
   FormGroup,
 } from '@angular/forms';
+import {List} from 'immutable';
 import {firstValueFrom} from 'rxjs';
 
 import {Cardinality} from 'app/models/task/multiple-choice.model';
@@ -36,7 +37,11 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {moveItemInFormArray} from 'app/utils/utils';
 
-import {TaskGroup, taskTypeToGroup} from '../tasks-editor.component';
+import {
+  TaskGroup,
+  taskGroupToTypes,
+  taskTypeToGroup,
+} from '../tasks-editor.component';
 
 export interface TaskTypeOption {
   icon: string;
@@ -52,11 +57,6 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
     type: TaskType.TEXT,
   },
   {
-    icon: 'access_time',
-    label: 'Date/Time',
-    type: TaskType.DATE_TIME,
-  },
-  {
     icon: 'radio_button_checked',
     label: 'Select One',
     type: TaskType.MULTIPLE_CHOICE,
@@ -68,6 +68,21 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
     type: TaskType.MULTIPLE_CHOICE,
     cardinality: Cardinality.SELECT_MULTIPLE,
   },
+  {
+    icon: 'tag',
+    label: 'Number',
+    type: TaskType.NUMBER,
+  },
+  {
+    icon: 'calendar_today',
+    label: 'Date',
+    type: TaskType.DATE,
+  },
+  {
+    icon: 'access_time',
+    label: 'Time',
+    type: TaskType.DATE_TIME,
+  },
 ];
 
 export const Tasks: {
@@ -76,6 +91,7 @@ export const Tasks: {
     label: string;
     placeholder: string;
     requiredMessage: string;
+    isGeometry?: boolean;
   };
 } = {
   [TaskGroup.QUESTION]: {
@@ -95,20 +111,29 @@ export const Tasks: {
     label: 'Drop a pin',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
+    isGeometry: true,
   },
   [TaskGroup.DRAW_AREA]: {
     icon: 'draw',
     label: 'Draw an area',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
+    isGeometry: true,
   },
   [TaskGroup.CAPTURE_LOCATION]: {
     icon: 'share_location',
     label: 'Capture location',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
+    isGeometry: true,
   },
 };
+
+export const GeometryTasks = List([
+  TaskGroup.DROP_PIN,
+  TaskGroup.DRAW_AREA,
+  TaskGroup.CAPTURE_LOCATION,
+]);
 
 @Component({
   selector: 'task-form',
@@ -128,6 +153,8 @@ export class TaskFormComponent {
   /** Set to true when question gets focus, false when it loses focus. */
   selected: boolean;
 
+  otherOption?: FormGroup;
+
   taskGroup!: TaskGroup;
 
   taskTypeOption?: TaskTypeOption;
@@ -140,9 +167,12 @@ export class TaskFormComponent {
 
   Tasks = Tasks;
 
+  GeometryTasks = GeometryTasks;
+
   constructor(
     private dataStoreService: DataStoreService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private formBuilder: FormBuilder
   ) {
     this.expanded = false;
     this.selected = false;
@@ -166,6 +196,8 @@ export class TaskFormComponent {
 
     this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
     this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
+
+    if (this.hasOtherOptionControl?.value) this.onAddOtherOption();
   }
 
   get typeControl(): AbstractControl {
@@ -182,6 +214,10 @@ export class TaskFormComponent {
 
   get optionsControl(): FormArray {
     return this.formGroup.get('options')! as FormArray;
+  }
+
+  get hasOtherOptionControl(): AbstractControl {
+    return this.formGroup.get('hasOtherOption')!;
   }
 
   onTaskDelete(): void {
@@ -216,8 +252,14 @@ export class TaskFormComponent {
     if (cardinality && this.optionsControl.length === 0) this.onAddOption();
   }
 
+  onTaskGroupSelect(taskGroup: TaskGroup): void {
+    const taskType = taskGroupToTypes.get(taskGroup)?.first();
+
+    this.typeControl.setValue(taskType);
+  }
+
   onAddOption(): void {
-    const formGroup = new FormBuilder().group({
+    const formGroup = this.formBuilder.group({
       id: this.dataStoreService.generateId(),
       label: '',
       code: '',
@@ -240,6 +282,18 @@ export class TaskFormComponent {
         this.optionsControl.removeAt(index);
       }
     });
+  }
+
+  onAddOtherOption(): void {
+    this.otherOption = this.formBuilder.group({
+      label: {value: 'Other...', disabled: true},
+    });
+
+    this.hasOtherOptionControl.setValue(true);
+  }
+
+  onDeleteOtherOption(): void {
+    this.hasOtherOptionControl.setValue(false);
   }
 
   drop(event: CdkDragDrop<string[]>): void {

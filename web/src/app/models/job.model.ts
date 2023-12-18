@@ -19,6 +19,12 @@ import {Map} from 'immutable';
 import {Copiable} from './copiable';
 import {Task} from './task/task.model';
 
+export enum DataCollectionStrategy {
+  PREDEFINED = 'PREDEFINED',
+  AD_HOC = 'AD_HOC',
+  MIXED = 'MIXED',
+}
+
 export class Job extends Copiable {
   constructor(
     readonly id: string,
@@ -26,7 +32,8 @@ export class Job extends Copiable {
     readonly color?: string,
     readonly name?: string,
     readonly tasks?: Map<string, Task>,
-    readonly dataCollectorsCanAdd?: string[]
+    readonly dataCollectorsCanAdd?: string[],
+    readonly strategy?: DataCollectionStrategy
   ) {
     super();
   }

@@ -6,7 +6,7 @@
   $foreground: map.get($color-config, foreground);
 
   .ground-title {
-    color: map.get($foreground, secondary-text);
+    color: #1A1C19;
   }
 
   .header .finish-edit-button {
@@ -21,9 +21,9 @@
   // TODO(amysorto): add font-size & font-weight once typography levels defined
 
   .ground-title {
-    font-family: mat.font-family($typography-config);
-    font-size: 14pt;
-    font-weight: 300;
+    font-family: 'Urbanist';
+    font-size: 22px;
+    font-weight: 400;
   }
 }
 

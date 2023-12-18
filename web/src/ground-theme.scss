@@ -28,6 +28,7 @@
 @use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
+@use 'app/components/tasks-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
 @use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
 @use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
@@ -75,7 +76,7 @@ $warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
 
 // TODO(amysorto): add typography levels
 $typography: mat.define-typography-config(
-  $font-family: 'Google Sans,Roboto,Arial,sans-serif',
+  $font-family: 'Manrope,Arial,sans-serif',
 );
 
 $theme: mat.define-light-theme((
@@ -107,6 +108,7 @@ $foreground: map-get($theme, foreground);
 @include share-survey.theme($theme);
 @include sign-in-page.theme($theme);
 @include survey-list.theme($theme);
+@include edit-option.theme($theme);
 @include user-avatar.theme($theme);
 @include create-survey.theme($theme);
 @include step-card.theme($theme);

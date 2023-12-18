@@ -30,7 +30,7 @@ import {
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
@@ -180,7 +180,8 @@ export class JobDialogComponent implements OnDestroy {
       this.color,
       this.jobName.trim(),
       tasks,
-      allowedLoiTypes
+      allowedLoiTypes,
+      DataCollectionStrategy.PREDEFINED
     );
     this.addOrUpdateJob(this.surveyId, job);
   }

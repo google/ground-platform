@@ -28,7 +28,7 @@ import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
 import {Observable, Subject} from 'rxjs';
 
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
@@ -439,10 +439,11 @@ describe('CreateSurveyComponent', () => {
 
         it('calls addOrUpdateJob with an empty array for dataCollectorsCanAdd', () => {
           const dataCollectorsCanAdd: string[] = [];
+          const strategy = DataCollectionStrategy.PREDEFINED;
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
-            job.copyWith({dataCollectorsCanAdd})
+            job.copyWith({dataCollectorsCanAdd, strategy})
           );
         });
 
@@ -465,10 +466,11 @@ describe('CreateSurveyComponent', () => {
 
         it('calls addOrUpdateJob with a filled array for dataCollectorsCanAdd', () => {
           const dataCollectorsCanAdd = ['points', 'polygons'];
+          const strategy = DataCollectionStrategy.AD_HOC;
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
-            job.copyWith({dataCollectorsCanAdd})
+            job.copyWith({dataCollectorsCanAdd, strategy})
           );
         });
 
@@ -491,10 +493,11 @@ describe('CreateSurveyComponent', () => {
 
         it('calls addOrUpdateJob with filled array for dataCollectorsCanAdd', () => {
           const dataCollectorsCanAdd = ['points', 'polygons'];
+          const strategy = DataCollectionStrategy.MIXED;
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
-            job.copyWith({dataCollectorsCanAdd})
+            job.copyWith({dataCollectorsCanAdd, strategy})
           );
         });
 
