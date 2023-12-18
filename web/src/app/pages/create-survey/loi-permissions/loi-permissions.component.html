@@ -30,11 +30,15 @@
       *ngFor="let option of loiPermissionsOptions"
       (click)="optionCardClicked(option.value)"
     >
-      <img mat-card-image src="{{option.imagePath}}">
+      <img mat-card-image src="/assets/img/data_collection_strategy/{{formGroup.controls.loiPermissionsOption.value === option.value ? option.image_selected : option.image_unselected}}" alt="data-collectors" />
+
       <mat-card-content>
-        <mat-radio-button class="option-radio-button" [value]="option.value">
-          {{ option.label }}
-        </mat-radio-button>
+        <p>
+          <mat-radio-button class="option-radio-button" [value]="option.value">
+            {{ option.label }}
+          </mat-radio-button>
+        </p>
+
         <p class="option-description">{{ option.description }}</p>
       </mat-card-content>
     </mat-card>
