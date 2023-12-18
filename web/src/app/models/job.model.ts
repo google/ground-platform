@@ -22,7 +22,7 @@ import {Task} from './task/task.model';
 export enum DataCollectionStrategy {
   PREDEFINED = 'PREDEFINED',
   AD_HOC = 'AD_HOC',
-  BOTH = 'BOTH',
+  MIXED = 'MIXED',
 }
 
 export class Job extends Copiable {

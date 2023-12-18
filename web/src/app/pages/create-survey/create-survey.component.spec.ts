@@ -493,7 +493,7 @@ describe('CreateSurveyComponent', () => {
 
         it('calls addOrUpdateJob with filled array for dataCollectorsCanAdd', () => {
           const dataCollectorsCanAdd = ['points', 'polygons'];
-          const strategy = DataCollectionStrategy.BOTH;
+          const strategy = DataCollectionStrategy.MIXED;
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
