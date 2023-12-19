@@ -153,6 +153,8 @@ export class TaskFormComponent {
   /** Set to true when question gets focus, false when it loses focus. */
   selected: boolean;
 
+  addLoiTask?: boolean;
+
   otherOption?: FormGroup;
 
   taskGroup!: TaskGroup;
@@ -218,6 +220,10 @@ export class TaskFormComponent {
 
   get hasOtherOptionControl(): AbstractControl {
     return this.formGroup.get('hasOtherOption')!;
+  }
+
+  get addLoiTaskControl(): AbstractControl {
+    return this.formGroup.get('addLoiTask')!;
   }
 
   onTaskDelete(): void {

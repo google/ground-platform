@@ -216,6 +216,7 @@ export class TasksEditorComponent {
         ) || []
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
+      addLoiTask: task.addLoiTask,
     });
   }
 

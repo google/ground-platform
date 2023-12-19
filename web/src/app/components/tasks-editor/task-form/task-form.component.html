@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}" cdkDrag>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded, 'loi-task': addLoiTaskControl.value}" cdkDrag>
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
