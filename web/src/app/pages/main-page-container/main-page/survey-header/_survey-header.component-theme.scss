@@ -5,7 +5,7 @@
   $color-config: mat.get-color-config($theme);
   $foreground: map.get($color-config, foreground);
 
-  // TODO(amysorto): find corresponding color in palette
+  // TODO(#1365): find corresponding color in palette
   $on-surface-variant: #424940;
 
   div[left] {
