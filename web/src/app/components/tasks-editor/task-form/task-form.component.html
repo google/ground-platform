@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded, 'loi-task': addLoiTaskControl.value}" cdkDrag>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded, 'loi-task': addLoiTask}" cdkDrag>
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
@@ -50,11 +50,11 @@
       </button>
 
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="onTaskDuplicate()">
+        <button mat-menu-item *ngIf="!addLoiTask" (click)="onTaskDuplicate()">
           <span>Duplicate</span>
         </button>
 
-        <mat-divider></mat-divider>
+        <mat-divider *ngIf="!addLoiTask"></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">
           <span>Delete</span>

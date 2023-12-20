@@ -198,6 +198,9 @@ export class TaskFormComponent {
 
     this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
     this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
+    this.addLoiTask = this.addLoiTaskControl.value;
+
+    if (this.addLoiTask) this.formGroup.get('required')?.disable();
 
     if (this.hasOtherOptionControl?.value) this.onAddOtherOption();
   }
