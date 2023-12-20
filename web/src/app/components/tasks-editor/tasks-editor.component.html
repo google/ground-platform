@@ -16,14 +16,23 @@
   cdkDropList
   (cdkDropListDropped)="onTaskDrop($event)"
 >
-  <task-form
+
+  <div
     *ngFor="let formGroup of formArray.controls; let i = index;"
-    [formGroup]="formGroup"
-    [index]="i"
-    (delete)="onTaskDelete(i)"
-    (duplicate)="onTaskDuplicate(i)"
+    [ngClass]="{'loi-task': formGroup.get('addLoiTask').value}"
   >
-  </task-form>
+    <label *ngIf="formGroup.get('addLoiTask').value">When adding a new collection sites...</label>
+
+    <task-form
+      [formGroup]="formGroup"
+      [index]="i"
+      (delete)="onTaskDelete(i)"
+      (duplicate)="onTaskDuplicate(i)"
+    >
+    </task-form>
+  </div>
+
+
 </div>
 
 <div id="tasks-help-text">Select task to add</div>

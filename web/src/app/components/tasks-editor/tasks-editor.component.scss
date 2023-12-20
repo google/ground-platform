@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+.loi-task {
+  padding: 16px;
+  background: #DDE5D9;
+  border-radius: 8px;
+  border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+
+  label {
+    color: #424940;
+  }
+}
+
 #tasks-help-text {
   padding-top: 3ch;
   padding-bottom: 2ch;
