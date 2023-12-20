@@ -20,8 +20,9 @@
     </button>
   </div>
 
-  <span left>
-    <span class="header-divider"></span>
-    <inline-editor [data]="title" [placeholder]="'Untitled survey'" (focusOut)="updateSurveyTitle($event)" class="inline-editor"></inline-editor>
-  </span>
+  <div left>
+    <div class="header-divider"></div>
+
+    <div class="survey-title">{{ title ?? 'Untitled survey' }}</div>
+  </div>
 </ground-header>
