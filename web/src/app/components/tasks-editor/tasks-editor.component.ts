@@ -135,6 +135,7 @@ export class TasksEditorComponent {
       cardinality: null,
       options: this.formBuilder.array([]),
       hasOtherOption: false,
+      addLoiTask: false,
     });
 
     this.formArray.push(formGroup);
