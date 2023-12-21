@@ -135,6 +135,7 @@ export class TasksEditorComponent {
       cardinality: null,
       options: this.formBuilder.array([]),
       hasOtherOption: false,
+      addLoiTask: false,
     });
 
     this.formArray.push(formGroup);
@@ -216,6 +217,7 @@ export class TasksEditorComponent {
         ) || []
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
+      addLoiTask: task.addLoiTask,
     });
   }
 
@@ -249,6 +251,7 @@ export class TasksEditorComponent {
             options,
           } as MultipleChoice)
         : undefined,
+      addLoiTask: task.get('addLoiTask')?.value as boolean,
     } as Task;
   }
 

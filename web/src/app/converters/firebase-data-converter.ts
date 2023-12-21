@@ -233,7 +233,8 @@ export class FirebaseDataConverter {
             ),
             data.hasOtherOption || false
           ),
-        FirebaseDataConverter.toCondition(data.condition)
+        FirebaseDataConverter.toCondition(data.condition),
+        data.addLoiTask
       );
     } catch (e) {
       console.error(e);
@@ -270,18 +271,17 @@ export class FirebaseDataConverter {
   }
 
   private static taskToJS(task: Task): {} {
-    const {type, label, multipleChoice, condition, ...taskDoc} = task;
+    const {type, multipleChoice, condition, ...taskDoc} = task;
+
     if (multipleChoice === undefined) {
       return {
         type: FirebaseDataConverter.taskTypeToString(type),
-        label,
         condition: FirebaseDataConverter.taskConditionToJS(condition),
         ...taskDoc,
       };
     } else {
       return {
         type: FirebaseDataConverter.taskTypeToString(type),
-        label,
         condition: FirebaseDataConverter.taskConditionToJS(condition),
         cardinality: FirebaseDataConverter.cardinalityToString(
           multipleChoice.cardinality

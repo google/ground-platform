@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {List} from 'immutable';
@@ -36,6 +36,8 @@ export class LoiSelectionComponent {
   @Input() lois!: List<LocationOfInterest>;
   @Input() survey!: Survey;
   @Input() jobId?: string;
+  @Output() updateStrategy: EventEmitter<DataCollectionStrategy> =
+    new EventEmitter<DataCollectionStrategy>();
 
   job?: Job;
 
@@ -71,13 +73,10 @@ export class LoiSelectionComponent {
   }
 
   toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {
-    if (this.job?.id) {
-      this.dataStoreService.addOrUpdateJob(this.survey.id, {
-        ...this.job,
-        strategy: event.checked
-          ? DataCollectionStrategy.AD_HOC
-          : DataCollectionStrategy.PREDEFINED,
-      } as Job);
-    }
+    this.updateStrategy.emit(
+      event.checked
+        ? DataCollectionStrategy.AD_HOC
+        : DataCollectionStrategy.PREDEFINED
+    );
   }
 }

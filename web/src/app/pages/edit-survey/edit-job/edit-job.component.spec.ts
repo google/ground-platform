@@ -27,6 +27,7 @@ import {Survey} from 'app/models/survey.model';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -54,6 +55,12 @@ describe('EditJobComponent', () => {
           useValue: {
             getActiveSurvey$: () => of(survey),
             canManageSurvey: () => true,
+          },
+        },
+        {
+          provide: DraftSurveyService,
+          useValue: {
+            getSurvey$: () => of(survey),
           },
         },
         {
