@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-.loi-task {
-  padding: 16px;
-  background: #DDE5D9;
-  border-radius: 8px;
-  border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+.tasks-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
-  label {
-    color: #424940;
+  .task-container {
+    &.loi-task-container {
+      padding: 16px;
+      background: #DDE5D9;
+      border-radius: 8px;
+      border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+
+      .loi-task-label {
+        color: #424940;
+        margin-bottom: 16px;
+      }
+    }
   }
 }
 
