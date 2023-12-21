@@ -486,6 +486,8 @@ export class DataStoreService {
    * Add a loiTask as first element, reindex the others.
    */
   addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
+    if (tasks.find(task => !!task.addLoiTask)) return tasks;
+
     const loiTask = new Task(
       this.generateId(),
       TaskType.CAPTURE_LOCATION,
@@ -514,21 +516,7 @@ export class DataStoreService {
   removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
     const loiTask = tasks.first();
 
-    let newTasks = tasks;
-
-    if (loiTask?.addLoiTask) {
-      newTasks = newTasks.map(
-        (task: Task) =>
-          ({
-            ...task,
-            index: task.index - 1,
-          } as Task)
-      );
-
-      newTasks = newTasks.remove(loiTask.id);
-    }
-
-    return newTasks;
+    return loiTask?.addLoiTask ? tasks.remove(loiTask.id) : tasks;
   }
 
   /**
