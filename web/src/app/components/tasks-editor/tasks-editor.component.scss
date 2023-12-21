@@ -19,12 +19,13 @@
   flex-direction: column;
   gap: 16px;
 
+   // TODO(#1365): replace literal color values with theming/variables
   .task-container {
     &.loi-task-container {
       padding: 16px;
       background: #DDE5D9;
       border-radius: 8px;
-      border: 1px solid var(--ground-sys-light-surface-variant, #DDE5D9);
+      border: 1px solid #DDE5D9;
 
       .loi-task-label {
         color: #424940;
