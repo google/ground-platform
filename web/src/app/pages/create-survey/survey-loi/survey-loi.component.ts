@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
-import {List} from 'immutable';
-import {Observable, map} from 'rxjs';
+import {Component} from '@angular/core';
+import {List, Map} from 'immutable';
+import {Observable} from 'rxjs';
 
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
+import {Task} from 'app/models/task/task.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
 
 @Component({
   selector: 'survey-loi',
@@ -30,12 +35,36 @@ import {SurveyService} from 'app/services/survey/survey.service';
 export class SurveyLoiComponent {
   lois$!: Observable<List<LocationOfInterest>>;
 
+  job?: Job;
+
   constructor(
+    readonly dataStoreService: DataStoreService,
+    readonly taskService: TaskService,
     readonly loiService: LocationOfInterestService,
     readonly surveyService: SurveyService
   ) {}
 
   ngOnInit() {
     this.lois$ = this.loiService.getLoisWithLabels$();
+
+    this.job = this.surveyService.getActiveSurvey().jobs.first();
+
+    this.onStrategyChange(this.job?.strategy);
+  }
+
+  onStrategyChange(strategy?: DataCollectionStrategy) {
+    if (this.job) {
+      const tasks =
+        strategy === DataCollectionStrategy.AD_HOC
+          ? this.taskService.addLoiTask(this.job?.tasks || Map<string, Task>())
+          : this.taskService.removeLoiTask(
+              this.job?.tasks || Map<string, Task>()
+            );
+
+      this.dataStoreService.addOrUpdateJob(
+        this.surveyService.getActiveSurvey().id,
+        this.job.copyWith({tasks, strategy})
+      );
+    }
   }
 }
