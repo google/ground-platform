@@ -84,7 +84,7 @@ export class TaskService {
    * Add a loiTask as first element, reindex the others.
    */
   addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    if (tasks.find(task => !!task.addLoiTask)) return tasks;
+    if (tasks.some(task => task.addLoiTask === true)) return tasks;
 
     const loiTask = new Task(
       this.dataStoreService.generateId(),
