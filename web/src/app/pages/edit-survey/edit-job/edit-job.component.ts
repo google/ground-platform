@@ -127,8 +127,6 @@ export class EditJobComponent {
 
         this.draftSurveyService.addOrUpdateJob(job.copyWith({tasks, strategy}));
 
-        console.log('onStrategyChange', tasks.toArray());
-
         this.tasks = tasks?.toList().sortBy(task => task.index);
       }
     }

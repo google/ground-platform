@@ -108,7 +108,7 @@ export class TaskService {
    * Remove the first element of the list if is loiTask, reindex the others.
    */
   removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    const loiTask = tasks.find(task => !!task.addLoiTask);
+    const loiTask = tasks.find(task => task.addLoiTask === true);
 
     return loiTask ? tasks.remove(loiTask.id) : tasks;
   }
