@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import {Observable, switchMap} from 'rxjs';
 
 import {MultipleChoice} from 'app/models/task/multiple-choice.model';
@@ -78,5 +78,38 @@ export class TaskService {
     tasks: List<Task>
   ): Promise<void> {
     return this.dataStoreService.addOrUpdateTasks(surveyId, jobId, tasks);
+  }
+
+  /**
+   * Add a loiTask as first element, reindex the others.
+   */
+  addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
+    if (tasks.find(task => !!task.addLoiTask)) return tasks;
+
+    const loiTask = new Task(
+      this.dataStoreService.generateId(),
+      TaskType.CAPTURE_LOCATION,
+      '',
+      true,
+      0,
+      undefined,
+      undefined,
+      true
+    );
+
+    const newTasks = tasks.map((task: Task) =>
+      task.copyWith({index: task.index + 1})
+    );
+
+    return newTasks.set(loiTask.id, loiTask);
+  }
+
+  /**
+   * Remove the first element of the list if is loiTask, reindex the others.
+   */
+  removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
+    const loiTask = tasks.find(task => !!task.addLoiTask);
+
+    return loiTask ? tasks.remove(loiTask.id) : tasks;
   }
 }

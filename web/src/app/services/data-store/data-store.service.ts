@@ -20,18 +20,18 @@ import {DocumentData, FieldPath} from '@angular/fire/firestore';
 import {deleteField, serverTimestamp} from 'firebase/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, firstValueFrom, of} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
-import {Task, TaskType} from 'app/models/task/task.model';
+import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
@@ -172,19 +172,11 @@ export class DataStoreService {
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
-    const tasks =
-      job.strategy === DataCollectionStrategy.AD_HOC
-        ? this.addLoiTask(job.tasks || Map<string, Task>())
-        : this.removeLoiTask(job.tasks || Map<string, Task>());
-
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS({
-          ...job,
-          tasks,
-        } as Job),
+        [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
       });
   }
 
@@ -480,43 +472,6 @@ export class DataStoreService {
           this.convertTasksListToMap(tasks)
         ),
       });
-  }
-
-  /**
-   * Add a loiTask as first element, reindex the others.
-   */
-  addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    if (tasks.find(task => !!task.addLoiTask)) return tasks;
-
-    const loiTask = new Task(
-      this.generateId(),
-      TaskType.CAPTURE_LOCATION,
-      '',
-      true,
-      0,
-      undefined,
-      undefined,
-      true
-    );
-
-    const newTasks = tasks.map(
-      (task: Task) =>
-        ({
-          ...task,
-          index: task.index + 1,
-        } as Task)
-    );
-
-    return newTasks.set(loiTask.id, loiTask);
-  }
-
-  /**
-   * Remove the first element of the list if is loiTask, reindex the others.
-   */
-  removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    const loiTask = tasks.first();
-
-    return loiTask?.addLoiTask ? tasks.remove(loiTask.id) : tasks;
   }
 
   /**

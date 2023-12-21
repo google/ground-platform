@@ -17,11 +17,12 @@
 <h1 class="title">Where should data be collected?</h1>
 
 <div *ngIf="lois$ | async as lois">
-  <div *ngIf="surveyService.getActiveSurvey$() | async as survey">
-    <loi-selection
-      [canImport]="surveyService.canManageSurvey()"
-      [lois]="lois"
-      [survey]="survey">
-    </loi-selection>
-  </div>
+  <loi-selection
+    *ngIf="surveyService.getActiveSurvey$() | async as survey"
+    [canImport]="surveyService.canManageSurvey()"
+    [lois]="lois"
+    [survey]="survey"
+    (updateStrategy)="onStrategyChange($event)"
+  >
+  </loi-selection>
 </div>
