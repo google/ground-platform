@@ -23,6 +23,7 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -38,30 +39,34 @@ export class SurveyLoiComponent {
   job?: Job;
 
   constructor(
-    readonly dataStoreService: DataStoreService,
+    readonly jobService: JobService,
     readonly taskService: TaskService,
     readonly loiService: LocationOfInterestService,
     readonly surveyService: SurveyService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.lois$ = this.loiService.getLoisWithLabels$();
 
     this.job = this.surveyService.getActiveSurvey().jobs.first();
 
-    this.onStrategyChange(this.job?.strategy);
+    await this.onStrategyChange(
+      this.job?.strategy || DataCollectionStrategy.PREDEFINED
+    );
   }
 
-  onStrategyChange(strategy?: DataCollectionStrategy) {
+  async onStrategyChange(strategy: DataCollectionStrategy) {
     if (this.job) {
-      const tasks =
-        strategy === DataCollectionStrategy.AD_HOC
-          ? this.taskService.addLoiTask(this.job?.tasks || Map<string, Task>())
-          : this.taskService.removeLoiTask(
-              this.job?.tasks || Map<string, Task>()
-            );
+      const tasks = [
+        DataCollectionStrategy.AD_HOC,
+        DataCollectionStrategy.MIXED,
+      ].includes(strategy)
+        ? this.taskService.addLoiTask(this.job?.tasks || Map<string, Task>())
+        : this.taskService.removeLoiTask(
+            this.job?.tasks || Map<string, Task>()
+          );
 
-      this.dataStoreService.addOrUpdateJob(
+      await this.jobService.addOrUpdateJob(
         this.surveyService.getActiveSurvey().id,
         this.job.copyWith({tasks, strategy})
       );
