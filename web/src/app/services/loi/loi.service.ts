@@ -29,6 +29,8 @@ import {
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {Polygon} from 'app/models/geometry/polygon';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 @Injectable({
   providedIn: 'root',
@@ -132,6 +134,37 @@ export class LocationOfInterestService {
       return loiName;
     }
     return null;
+  }
+
+  static getLatLngBoundsFromLois(
+    lois: LocationOfInterest[]
+  ): google.maps.LatLngBounds | null {
+    if (!lois.length) return null;
+
+    const data = new google.maps.Data();
+    const bounds = new google.maps.LatLngBounds();
+
+    for (let loi of lois) {
+      if (loi.geometry instanceof Point) {
+        const {coord} = loi.geometry;
+        bounds.extend(new google.maps.LatLng(coord.y, coord.x));
+      } else if (loi.geometry instanceof Polygon) {
+        const {points} = loi.geometry.shell;
+        for (let coord of points) {
+          bounds.extend(new google.maps.LatLng(coord.y, coord.x));
+        }
+      } else if (loi.geometry instanceof MultiPolygon) {
+        const {polygons} = loi.geometry;
+        for (let polygon of polygons) {
+          const {points} = polygon.shell;
+          for (let coord of points) {
+            bounds.extend(new google.maps.LatLng(coord.y, coord.x));
+          }
+        }
+      }
+    }
+
+    return bounds;
   }
 
   selectLocationOfInterest(loiId: string) {

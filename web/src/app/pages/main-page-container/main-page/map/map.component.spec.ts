@@ -50,13 +50,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {MapComponent} from './map.component';
-
-function polygonShellCoordsToPolygon(coordinates: number[][]): Polygon {
-  const coordinateInstances = coordinates.map(
-    ([longitude, latitude]) => new Coordinate(longitude, latitude)
-  );
-  return new Polygon(new LinearRing(List(coordinateInstances)), List());
-}
+import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
 describe('MapComponent', () => {
   let component: MapComponent;
@@ -288,33 +282,48 @@ describe('MapComponent', () => {
     expect(polygon2.getMap()).toEqual(component.map.googleMap!);
   }));
 
-  it('should update lois when backend lois update', fakeAsync(() => {
-    mockLois$.next(List<LocationOfInterest>([poi1, poi3, polygonLoi1]));
-    tick();
+  describe('when backend LOIs update', () => {
+    it('should update lois when backend lois update', fakeAsync(() => {
+      mockLois$.next(List<LocationOfInterest>([poi1, poi3, polygonLoi1]));
+      tick();
 
-    expect(component.markers.size).toEqual(2);
-    const marker1 = component.markers.get(poiId1)!;
-    assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
-    assertMarkerIcon(marker1, jobColor1, 30);
-    expect(marker1.getMap()).toEqual(component.map.googleMap!);
-    const marker2 = component.markers.get(poiId3)!;
-    assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
-    assertMarkerIcon(marker2, jobColor2, 30);
-    expect(marker2.getMap()).toEqual(component.map.googleMap!);
-    expect(component.polygons.size).toEqual(1);
-    const [polygon] = component.polygons.get(polygonLoiId1)!;
-    assertPolygonPaths(polygon, [
-      [
-        new google.maps.LatLng(0, 0),
-        new google.maps.LatLng(0, 10),
-        new google.maps.LatLng(10, 10),
-        new google.maps.LatLng(10, 0),
-        new google.maps.LatLng(0, 0),
-      ],
-    ]);
-    assertPolygonStyle(polygon, jobColor1, 3);
-    expect(polygon.getMap()).toEqual(component.map.googleMap!);
-  }));
+      expect(component.markers.size).toEqual(2);
+      const marker1 = component.markers.get(poiId1)!;
+      assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
+      assertMarkerIcon(marker1, jobColor1, 30);
+      expect(marker1.getMap()).toEqual(component.map.googleMap!);
+      const marker2 = component.markers.get(poiId3)!;
+      assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
+      assertMarkerIcon(marker2, jobColor2, 30);
+      expect(marker2.getMap()).toEqual(component.map.googleMap!);
+      expect(component.polygons.size).toEqual(1);
+      const [polygon] = component.polygons.get(polygonLoiId1)!;
+      assertPolygonPaths(polygon, [
+        [
+          new google.maps.LatLng(0, 0),
+          new google.maps.LatLng(0, 10),
+          new google.maps.LatLng(10, 10),
+          new google.maps.LatLng(10, 0),
+          new google.maps.LatLng(0, 0),
+        ],
+      ]);
+      assertPolygonStyle(polygon, jobColor1, 3);
+      expect(polygon.getMap()).toEqual(component.map.googleMap!);
+    }));
+
+    it('should fit the map to the new LOI bounds', fakeAsync(() => {
+      spyOn(component.map, 'fitBounds');
+      mockLois$.next(List<LocationOfInterest>([poi1, poi3, polygonLoi1]));
+      tick();
+
+      expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
+        new google.maps.LatLngBounds(
+          new google.maps.LatLng(0, 0),
+          new google.maps.LatLng(78.9, 78.9)
+        )
+      );
+    }));
+  });
 
   it('should select loi when marker is clicked', () => {
     const marker1 = component.markers.get(poiId1)!;
