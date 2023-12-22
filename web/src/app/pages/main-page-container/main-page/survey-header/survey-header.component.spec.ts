@@ -20,7 +20,6 @@ import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy
 import {Router} from '@angular/router';
 import {NEVER} from 'rxjs';
 
-import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {SurveyHeaderComponent} from './survey-header.component';
@@ -31,7 +30,7 @@ describe('SurveyHeaderComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [InlineEditorModule, MatIconModule, MatDialogModule],
+      imports: [MatIconModule, MatDialogModule],
       declarations: [SurveyHeaderComponent],
       providers: [
         {

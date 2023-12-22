@@ -16,17 +16,19 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import {Subscription, firstValueFrom} from 'rxjs';
 
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Task} from 'app/models/task/task.model';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
 
 @Component({
   selector: 'edit-job',
@@ -40,6 +42,7 @@ export class EditJobComponent {
   jobId?: string;
   section: 'tasks' | 'lois' = 'tasks';
   lois!: List<LocationOfInterest>;
+  isLoading = true;
 
   tasks?: List<Task>;
 
@@ -53,6 +56,7 @@ export class EditJobComponent {
     private route: ActivatedRoute,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
+    private taskService: TaskService,
     public surveyService: SurveyService,
     public draftSurveyService: DraftSurveyService
   ) {
@@ -78,6 +82,8 @@ export class EditJobComponent {
   }
 
   private async onJobIdChange(params: Params) {
+    this.isLoading = true;
+
     this.jobId = params['id'];
 
     this.tasks = this.draftSurveyService
@@ -89,6 +95,8 @@ export class EditJobComponent {
     this.lois = await firstValueFrom(
       this.loiService.getLoisByJobId$(this.jobId!)
     );
+
+    this.isLoading = false;
   }
 
   getIndex(index: number) {
@@ -100,10 +108,29 @@ export class EditJobComponent {
   }
 
   onTasksChange(valid: boolean): void {
-    if (this.jobId && valid) {
-      this.tasks = this.tasksEditor?.toTasks() || List([]);
+    if (this.jobId && this.tasksEditor && valid) {
+      this.tasks = this.tasksEditor.toTasks();
 
       this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks);
+    }
+  }
+
+  onStrategyChange(strategy: DataCollectionStrategy) {
+    if (this.jobId) {
+      const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+      if (job) {
+        const tasks = [
+          DataCollectionStrategy.AD_HOC,
+          DataCollectionStrategy.MIXED,
+        ].includes(strategy)
+          ? this.taskService.addLoiTask(job?.tasks || Map<string, Task>())
+          : this.taskService.removeLoiTask(job?.tasks || Map<string, Task>());
+
+        this.draftSurveyService.addOrUpdateJob(job.copyWith({tasks, strategy}));
+
+        this.tasks = tasks?.toList().sortBy(task => task.index);
+      }
     }
   }
 

@@ -20,7 +20,7 @@ import {DocumentData, FieldPath} from '@angular/fire/firestore';
 import {deleteField, serverTimestamp} from 'firebase/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, firstValueFrom, of} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';

@@ -46,7 +46,14 @@ export enum TaskGroup {
 export const taskGroupToTypes = new Map([
   [
     TaskGroup.QUESTION,
-    List([TaskType.TEXT, TaskType.DATE, TaskType.MULTIPLE_CHOICE]),
+    List([
+      TaskType.TEXT,
+      TaskType.MULTIPLE_CHOICE,
+      TaskType.NUMBER,
+      TaskType.DATE,
+      TaskType.TIME,
+      TaskType.DATE_TIME,
+    ]),
   ],
   [TaskGroup.PHOTO, List([TaskType.PHOTO])],
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
@@ -56,8 +63,11 @@ export const taskGroupToTypes = new Map([
 
 export const taskTypeToGroup = new Map([
   [TaskType.TEXT, TaskGroup.QUESTION],
-  [TaskType.DATE, TaskGroup.QUESTION],
   [TaskType.MULTIPLE_CHOICE, TaskGroup.QUESTION],
+  [TaskType.NUMBER, TaskGroup.QUESTION],
+  [TaskType.DATE, TaskGroup.QUESTION],
+  [TaskType.TIME, TaskGroup.QUESTION],
+  [TaskType.DATE_TIME, TaskGroup.QUESTION],
   [TaskType.PHOTO, TaskGroup.PHOTO],
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
   [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
@@ -72,7 +82,6 @@ export const taskTypeToGroup = new Map([
 export class TasksEditorComponent {
   formGroup!: FormGroup;
 
-  @Input() label?: string;
   @Input() tasks?: List<Task>;
   @Output() onValidationChanges: EventEmitter<boolean> =
     new EventEmitter<boolean>();
@@ -95,9 +104,10 @@ export class TasksEditorComponent {
   ngOnInit(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
-        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || []
+        this.tasks?.toArray().map((task: Task) => this.toControl(task)) || [],
+        Validators.required
       ),
-    });
+    }) as FormGroup;
 
     this.formGroup.statusChanges.subscribe(_ => {
       this.onValidationChanges.emit(this.formGroup?.valid);
@@ -106,6 +116,8 @@ export class TasksEditorComponent {
     this.formGroup.valueChanges.subscribe(_ => {
       this.onValueChanges.emit(this.formGroup?.valid);
     });
+
+    this.onValidationChanges.emit(this.formGroup?.valid);
   }
 
   get formArray() {
@@ -123,6 +135,7 @@ export class TasksEditorComponent {
       cardinality: null,
       options: this.formBuilder.array([]),
       hasOtherOption: false,
+      addLoiTask: false,
     });
 
     this.formArray.push(formGroup);
@@ -204,6 +217,7 @@ export class TasksEditorComponent {
         ) || []
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
+      addLoiTask: task.addLoiTask,
     });
   }
 
@@ -237,6 +251,7 @@ export class TasksEditorComponent {
             options,
           } as MultipleChoice)
         : undefined,
+      addLoiTask: task.get('addLoiTask')?.value as boolean,
     } as Task;
   }
 

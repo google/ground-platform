@@ -49,9 +49,9 @@ describe('SurveyLoiComponent', () => {
     ])
   );
 
-  const mockSurvey$ = of(
-    new Survey('id1', 'title1', 'description1', Map(), Map())
-  );
+  const mockSurvey = new Survey('id1', 'title1', 'description1', Map(), Map());
+
+  const mockSurvey$ = of(mockSurvey);
 
   beforeEach(waitForAsync(() => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
@@ -60,12 +60,14 @@ describe('SurveyLoiComponent', () => {
     );
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
+      'getActiveSurvey',
       'getActiveSurvey$',
       'canManageSurvey',
     ]);
 
     loiServiceSpy.getLoisWithLabels$.and.returnValue(mockLois$);
     surveyServiceSpy.canManageSurvey.and.returnValue(true);
+    surveyServiceSpy.getActiveSurvey.and.returnValue(mockSurvey);
     surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
 
     TestBed.configureTestingModule({

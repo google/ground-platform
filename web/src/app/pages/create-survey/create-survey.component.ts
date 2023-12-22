@@ -182,6 +182,7 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.DEFINE_LOI_PERMISSIONS;
         break;
       case SetupPhase.DEFINE_TASKS:
+        this.canContinue = true;
         this.setupPhase = this.skipLoiSelection
           ? SetupPhase.DEFINE_LOI_PERMISSIONS
           : SetupPhase.DEFINE_LOIS;
@@ -299,7 +300,7 @@ export class CreateSurveyComponent implements OnInit {
         strategy = DataCollectionStrategy.AD_HOC;
         break;
       case LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS:
-        strategy = DataCollectionStrategy.BOTH;
+        strategy = DataCollectionStrategy.MIXED;
         break;
     }
 

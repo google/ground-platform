@@ -28,6 +28,7 @@ import {
   FormBuilder,
   FormGroup,
 } from '@angular/forms';
+import {List} from 'immutable';
 import {firstValueFrom} from 'rxjs';
 
 import {Cardinality} from 'app/models/task/multiple-choice.model';
@@ -36,7 +37,11 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {moveItemInFormArray} from 'app/utils/utils';
 
-import {TaskGroup, taskTypeToGroup} from '../tasks-editor.component';
+import {
+  TaskGroup,
+  taskGroupToTypes,
+  taskTypeToGroup,
+} from '../tasks-editor.component';
 
 export interface TaskTypeOption {
   icon: string;
@@ -86,6 +91,7 @@ export const Tasks: {
     label: string;
     placeholder: string;
     requiredMessage: string;
+    isGeometry?: boolean;
   };
 } = {
   [TaskGroup.QUESTION]: {
@@ -105,20 +111,29 @@ export const Tasks: {
     label: 'Drop a pin',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
+    isGeometry: true,
   },
   [TaskGroup.DRAW_AREA]: {
     icon: 'draw',
     label: 'Draw an area',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
+    isGeometry: true,
   },
   [TaskGroup.CAPTURE_LOCATION]: {
     icon: 'share_location',
     label: 'Capture location',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
+    isGeometry: true,
   },
 };
+
+export const GeometryTasks = List([
+  TaskGroup.DROP_PIN,
+  TaskGroup.DRAW_AREA,
+  TaskGroup.CAPTURE_LOCATION,
+]);
 
 @Component({
   selector: 'task-form',
@@ -138,6 +153,8 @@ export class TaskFormComponent {
   /** Set to true when question gets focus, false when it loses focus. */
   selected: boolean;
 
+  addLoiTask?: boolean;
+
   otherOption?: FormGroup;
 
   taskGroup!: TaskGroup;
@@ -151,6 +168,8 @@ export class TaskFormComponent {
   TaskTypeOptions = TaskTypeOptions;
 
   Tasks = Tasks;
+
+  GeometryTasks = GeometryTasks;
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -179,6 +198,9 @@ export class TaskFormComponent {
 
     this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
     this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
+    this.addLoiTask = this.addLoiTaskControl.value;
+
+    if (this.addLoiTask) this.formGroup.get('required')?.disable();
 
     if (this.hasOtherOptionControl?.value) this.onAddOtherOption();
   }
@@ -201,6 +223,10 @@ export class TaskFormComponent {
 
   get hasOtherOptionControl(): AbstractControl {
     return this.formGroup.get('hasOtherOption')!;
+  }
+
+  get addLoiTaskControl(): AbstractControl {
+    return this.formGroup.get('addLoiTask')!;
   }
 
   onTaskDelete(): void {
@@ -233,6 +259,12 @@ export class TaskFormComponent {
     if (!cardinality) this.optionsControl.clear({emitEvent: false});
 
     if (cardinality && this.optionsControl.length === 0) this.onAddOption();
+  }
+
+  onTaskGroupSelect(taskGroup: TaskGroup): void {
+    const taskType = taskGroupToTypes.get(taskGroup)?.first();
+
+    this.typeControl.setValue(taskType);
   }
 
   onAddOption(): void {

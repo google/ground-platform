@@ -14,13 +14,29 @@
   limitations under the License.
 -->
 
-<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected' : expanded}" cdkDrag>
+<form [formGroup]="formGroup" class="task-input" [ngClass]="{'selected': expanded}" cdkDrag>
   <mat-icon class="drag-icon" cdkDragHandle>drag_handle</mat-icon>
 
   <div class="task-toolbar">
-    <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+    <div *ngIf="GeometryTasks.includes(taskGroup)">
+      <mat-select [(value)]="taskGroup" (selectionChange)="onTaskGroupSelect($event.value)">
+        <mat-select-trigger style="display: flex; align-items: center; gap: 12px;">
+          <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+          <div>{{ Tasks[taskGroup].label }}</div>
+        </mat-select-trigger>
+        <mat-option *ngFor="let geometryTaskGroup of GeometryTasks" [value]="geometryTaskGroup">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <mat-icon>{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
+            <div>{{ Tasks[geometryTaskGroup].label }}</div>
+          </div>
+        </mat-option>
+      </mat-select>
+    </div>
 
-    <div>{{ Tasks[taskGroup].label }}</div>
+    <div *ngIf="!GeometryTasks.includes(taskGroup)" style="display: flex; align-items: center; gap: 12px;">
+      <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+      <div>{{ Tasks[taskGroup].label }}</div>
+    </div>
 
     <div class="toolbar-right">
       <div>
@@ -34,11 +50,11 @@
       </button>
 
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="onTaskDuplicate()">
+        <button mat-menu-item *ngIf="!addLoiTask" (click)="onTaskDuplicate()">
           <span>Duplicate</span>
         </button>
 
-        <mat-divider></mat-divider>
+        <mat-divider *ngIf="!addLoiTask"></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">
           <span>Delete</span>
