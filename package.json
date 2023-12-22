@@ -25,7 +25,7 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
-    "firebase-tools": "13.0.2"
+    "firebase-tools": "11.23.1"
   },
   "engines": {
     "node": "16"
