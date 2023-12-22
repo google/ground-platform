@@ -30,10 +30,8 @@ import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
-import {LinearRing} from 'app/models/geometry/linear-ring';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
-import {Polygon} from 'app/models/geometry/polygon';
 import {Job} from 'app/models/job.model';
 import {
   GenericLocationOfInterest,
@@ -48,9 +46,9 @@ import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
 import {MapComponent} from './map.component';
-import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
 describe('MapComponent', () => {
   let component: MapComponent;

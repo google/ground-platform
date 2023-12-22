@@ -17,11 +17,13 @@
 import {Injectable} from '@angular/core';
 import {Map as ImmutableMap, List} from 'immutable';
 import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
-import {filter, map, switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {GeometryType} from 'app/models/geometry/geometry';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
+import {Polygon} from 'app/models/geometry/polygon';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
@@ -29,8 +31,6 @@ import {
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Polygon} from 'app/models/geometry/polygon';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 @Injectable({
   providedIn: 'root',
@@ -144,20 +144,20 @@ export class LocationOfInterestService {
     const data = new google.maps.Data();
     const bounds = new google.maps.LatLngBounds();
 
-    for (let loi of lois) {
+    for (const loi of lois) {
       if (loi.geometry instanceof Point) {
         const {coord} = loi.geometry;
         bounds.extend(new google.maps.LatLng(coord.y, coord.x));
       } else if (loi.geometry instanceof Polygon) {
         const {points} = loi.geometry.shell;
-        for (let coord of points) {
+        for (const coord of points) {
           bounds.extend(new google.maps.LatLng(coord.y, coord.x));
         }
       } else if (loi.geometry instanceof MultiPolygon) {
         const {polygons} = loi.geometry;
-        for (let polygon of polygons) {
+        for (const polygon of polygons) {
           const {points} = polygon.shell;
-          for (let coord of points) {
+          for (const coord of points) {
             bounds.extend(new google.maps.LatLng(coord.y, coord.x));
           }
         }

@@ -19,6 +19,7 @@ import {Map as ImmutableMap, List, Map} from 'immutable';
 import {Subject, of} from 'rxjs';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
+import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
@@ -27,7 +28,6 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {polygonShellCoordsToPolygon} from 'testing/helpers';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
