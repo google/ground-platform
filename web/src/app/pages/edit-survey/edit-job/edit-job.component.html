@@ -41,12 +41,13 @@
   <div [ngSwitch]="section">
     <div *ngSwitchCase="'lois'">
       <loi-selection
-        *ngIf="surveyService.getActiveSurvey$() | async as survey"
+        *ngIf="draftSurveyService.getSurvey$() | async as survey"
         #loiSelection
         [canImport]="surveyService.canManageSurvey()"
         [lois]="lois"
         [survey]="survey"
         [jobId]="jobId"
+        (updateStrategy)="onStrategyChange($event)"
       >
       </loi-selection>
     </div>
