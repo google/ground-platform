@@ -36,4 +36,10 @@ export class Point implements Geometry {
   hashCode(): number {
     return hash(this);
   }
+
+  extendBounds(bounds: google.maps.LatLngBounds) {
+    const {y, x} = this.coord;
+    bounds.extend(new google.maps.LatLng(y, x));
+    return bounds;
+  }
 }

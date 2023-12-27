@@ -17,7 +17,7 @@
 import {Injectable} from '@angular/core';
 import {Map as ImmutableMap, List} from 'immutable';
 import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
-import {filter, map, switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {GeometryType} from 'app/models/geometry/geometry';
@@ -132,6 +132,20 @@ export class LocationOfInterestService {
       return loiName;
     }
     return null;
+  }
+
+  static getLatLngBoundsFromLois(
+    lois: LocationOfInterest[]
+  ): google.maps.LatLngBounds | null {
+    if (!lois.length) return null;
+
+    const bounds = new google.maps.LatLngBounds();
+
+    for (const loi of lois) {
+      loi.geometry?.extendBounds(bounds);
+    }
+
+    return bounds;
   }
 
   selectLocationOfInterest(loiId: string) {
