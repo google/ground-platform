@@ -134,7 +134,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private hasTask(survey: Survey): boolean {
-    return survey.jobs.values().next().value.tasks.size > 0;
+    return survey.jobs.valueSeq().some(job => (job.tasks?.size || 0) > 0);
   }
 
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([

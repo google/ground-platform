@@ -49,11 +49,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
     path: `${NavigationService.SURVEYS_SEGMENT}`,
     component: SurveyListComponent,
     canActivate: [AuthGuard],
@@ -78,6 +73,11 @@ const routes: Routes = [
       {path: 'share', component: ShareSurveyComponent},
       {path: 'json', component: SurveyJsonComponent},
     ],
+  },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: NavigationService.ERROR,

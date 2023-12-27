@@ -42,4 +42,9 @@ export class Polygon implements Geometry {
   hashCode(): number {
     return hash(this);
   }
+
+  extendBounds(bounds: google.maps.LatLngBounds) {
+    this.shell.extendBounds(bounds);
+    return bounds;
+  }
 }

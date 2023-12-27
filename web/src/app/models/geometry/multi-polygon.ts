@@ -40,4 +40,11 @@ export class MultiPolygon implements Geometry {
   hashCode(): number {
     return hash(this);
   }
+
+  extendBounds(bounds: google.maps.LatLngBounds) {
+    for (const polygon of this.polygons) {
+      polygon.extendBounds(bounds);
+    }
+    return bounds;
+  }
 }

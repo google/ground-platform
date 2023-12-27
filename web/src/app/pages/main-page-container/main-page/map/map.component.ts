@@ -198,6 +198,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ): void {
     this.removeDeletedLocationsOfInterest(lois);
     this.addNewLocationsOfInterest(survey, lois);
+    this.fitMapToLocationsOfInterest(lois);
     this.selectLocationOfInterest(locationOfInterestId);
   }
 
@@ -285,6 +286,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.polygons.set(loi.id, polygons);
       }
     });
+  }
+
+  private fitMapToLocationsOfInterest(lois: List<LocationOfInterest>) {
+    const bounds = LocationOfInterestService.getLatLngBoundsFromLois(
+      lois.toArray()
+    );
+    if (bounds) {
+      this.map.fitBounds(bounds);
+    }
   }
 
   private addPointOfInterestToMap({
