@@ -51,6 +51,10 @@ export class ShareDialogComponent {
     role: new FormControl(Role.DATA_COLLECTOR),
   });
 
+  get emailControl(): AbstractControl {
+    return this.addUserForm.get('email')!;
+  }
+
   roles = Role;
 
   /** List of ACL entries. Each entry consists of an email and a Role. */

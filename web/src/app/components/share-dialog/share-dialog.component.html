@@ -20,6 +20,14 @@
   <mat-form-field class="email-input">
     <mat-label>Email address</mat-label>
     <input matInput formControlName="email" autocomplete="off" />
+    <mat-error *ngIf="emailControl.touched && emailControl.invalid">
+      <ng-container *ngIf="emailControl.getError('email')">
+        Invalid email format
+      </ng-container>
+      <ng-container *ngIf="emailControl.getError('forbiddenName')">
+        Email address already added
+      </ng-container>
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
     <mat-select formControlName="role">
