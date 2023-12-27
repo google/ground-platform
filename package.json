@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -rf node_modules && npm run clean --prefix functions && npm run clean --prefix web",
     "postinstall": "npm install --prefix functions && npm install --prefix web",
-    "build:local": "npm run build --prefix functions && npm run build:local --prefix web",
+    "build:local": "npm install && npm run build --prefix functions && npm run build:local --prefix web",
     "build:dev": "npm run build --prefix functions && npm run build:dev --prefix web --project=$npm_config_project",
     "build:prod": "npm run build --prefix functions && npm run build:prod --prefix web --project=$npm_config_project",
     "watch:local": "npm run build:local && npm run watch --prefix functions & npm run watch:local --prefix web",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
-    "firebase-tools": "13.0.2"
+    "firebase-tools": "11.23.1"
   },
   "engines": {
     "node": "16"
