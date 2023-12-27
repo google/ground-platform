@@ -83,6 +83,6 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   }
 
   private hasTask(survey: Survey): boolean {
-    return survey.jobs.values().next().value.tasks.size > 0;
+    return survey.jobs.valueSeq().some(job => (job.tasks?.size || 0) > 0);
   }
 }
