@@ -68,7 +68,8 @@ export class Task extends Copiable {
      * When collecting data, this task will be shown only when the condition is
      * `null` or when it evaluates to `true`.
      */
-    readonly condition?: TaskCondition
+    readonly condition?: TaskCondition,
+    readonly addLoiTask?: boolean
   ) {
     super();
   }

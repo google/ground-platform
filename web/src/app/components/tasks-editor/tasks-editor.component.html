@@ -11,19 +11,29 @@
   limitations under the License.
 -->
 
-<div id="tasks-added"
+<div class="tasks-editor"
   *ngIf="formArray"
   cdkDropList
   (cdkDropListDropped)="onTaskDrop($event)"
 >
-  <task-form
+
+  <div
+    class="task-container"
     *ngFor="let formGroup of formArray.controls; let i = index;"
-    [formGroup]="formGroup"
-    [index]="i"
-    (delete)="onTaskDelete(i)"
-    (duplicate)="onTaskDuplicate(i)"
+    [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value}"
   >
-  </task-form>
+    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">When adding a new collection sites...</div>
+
+    <task-form
+      [formGroup]="formGroup"
+      [index]="i"
+      (delete)="onTaskDelete(i)"
+      (duplicate)="onTaskDuplicate(i)"
+    >
+    </task-form>
+  </div>
+
+
 </div>
 
 <div id="tasks-help-text">Select task to add</div>

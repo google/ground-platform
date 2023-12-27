@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
-import {List} from 'immutable';
-import {Observable, map} from 'rxjs';
+import {Component} from '@angular/core';
+import {List, Map} from 'immutable';
+import {Observable} from 'rxjs';
 
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey} from 'app/models/survey.model';
+import {Task} from 'app/models/task/task.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {TaskService} from 'app/services/task/task.service';
 
 @Component({
   selector: 'survey-loi',
@@ -30,12 +36,40 @@ import {SurveyService} from 'app/services/survey/survey.service';
 export class SurveyLoiComponent {
   lois$!: Observable<List<LocationOfInterest>>;
 
+  job?: Job;
+
   constructor(
+    readonly jobService: JobService,
+    readonly taskService: TaskService,
     readonly loiService: LocationOfInterestService,
     readonly surveyService: SurveyService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.lois$ = this.loiService.getLoisWithLabels$();
+
+    this.job = this.surveyService.getActiveSurvey().jobs.first();
+
+    await this.onStrategyChange(
+      this.job?.strategy || DataCollectionStrategy.PREDEFINED
+    );
+  }
+
+  async onStrategyChange(strategy: DataCollectionStrategy) {
+    if (this.job) {
+      const tasks = [
+        DataCollectionStrategy.AD_HOC,
+        DataCollectionStrategy.MIXED,
+      ].includes(strategy)
+        ? this.taskService.addLoiTask(this.job?.tasks || Map<string, Task>())
+        : this.taskService.removeLoiTask(
+            this.job?.tasks || Map<string, Task>()
+          );
+
+      await this.jobService.addOrUpdateJob(
+        this.surveyService.getActiveSurvey().id,
+        this.job.copyWith({tasks, strategy})
+      );
+    }
   }
 }
