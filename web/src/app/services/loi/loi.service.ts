@@ -21,9 +21,7 @@ import {map, switchMap} from 'rxjs/operators';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {GeometryType} from 'app/models/geometry/geometry';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
-import {Polygon} from 'app/models/geometry/polygon';
 import {
   GenericLocationOfInterest,
   LocationOfInterest,
@@ -141,27 +139,10 @@ export class LocationOfInterestService {
   ): google.maps.LatLngBounds | null {
     if (!lois.length) return null;
 
-    const data = new google.maps.Data();
     const bounds = new google.maps.LatLngBounds();
 
     for (const loi of lois) {
-      if (loi.geometry instanceof Point) {
-        const {coord} = loi.geometry;
-        bounds.extend(new google.maps.LatLng(coord.y, coord.x));
-      } else if (loi.geometry instanceof Polygon) {
-        const {points} = loi.geometry.shell;
-        for (const coord of points) {
-          bounds.extend(new google.maps.LatLng(coord.y, coord.x));
-        }
-      } else if (loi.geometry instanceof MultiPolygon) {
-        const {polygons} = loi.geometry;
-        for (const polygon of polygons) {
-          const {points} = polygon.shell;
-          for (const coord of points) {
-            bounds.extend(new google.maps.LatLng(coord.y, coord.x));
-          }
-        }
-      }
+      loi.geometry?.extendBounds(bounds);
     }
 
     return bounds;
