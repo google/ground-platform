@@ -308,7 +308,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     geometry: Point;
     color: string | undefined;
   }): google.maps.Marker {
-    const {x: latitude, y: longitude} = geometry.coord;
+    const {y: latitude, x: longitude} = geometry.coord;
     const icon = {
       url: this.groundPinService.getPinImageSource(color),
       scaledSize: {
