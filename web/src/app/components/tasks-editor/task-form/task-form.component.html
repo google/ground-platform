@@ -20,21 +20,21 @@
   <div class="task-toolbar">
     <div *ngIf="GeometryTasks.includes(taskGroup)">
       <mat-select [(value)]="taskGroup" (selectionChange)="onTaskGroupSelect($event.value)">
-        <mat-select-trigger style="display: flex; align-items: center; gap: 12px;">
-          <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+        <mat-select-trigger class="task-label">
+          <mat-icon fontSet="material-icons-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
           <div>{{ Tasks[taskGroup].label }}</div>
         </mat-select-trigger>
         <mat-option *ngFor="let geometryTaskGroup of GeometryTasks" [value]="geometryTaskGroup">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <mat-icon>{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
+          <div class="task-label">
+            <mat-icon fontSet="material-icons-outlined">{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
             <div>{{ Tasks[geometryTaskGroup].label }}</div>
           </div>
         </mat-option>
       </mat-select>
     </div>
 
-    <div *ngIf="!GeometryTasks.includes(taskGroup)" style="display: flex; align-items: center; gap: 12px;">
-      <mat-icon>{{ Tasks[taskGroup].icon }}</mat-icon>
+    <div *ngIf="!GeometryTasks.includes(taskGroup)" class="task-label">
+      <mat-icon fontSet="material-icons-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
       <div>{{ Tasks[taskGroup].label }}</div>
     </div>
 
