@@ -45,6 +45,12 @@
     height: 32px;
     margin-bottom: 16px;
 
+    .task-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .toolbar-right {
       display: flex;
       align-items: center;
