@@ -227,11 +227,11 @@ describe('MapComponent', () => {
   it('should render markers on map', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
-    assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
+    assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));
     assertMarkerIcon(marker1, jobColor1, 30);
     expect(marker1.getMap()).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId2)!;
-    assertMarkerLatLng(marker2, new google.maps.LatLng(12.3, 45.6));
+    assertMarkerLatLng(marker2, new google.maps.LatLng(45.6, 12.3));
     assertMarkerIcon(marker2, jobColor2, 30);
     expect(marker2.getMap()).toEqual(component.map.googleMap!);
   });
@@ -287,7 +287,7 @@ describe('MapComponent', () => {
 
       expect(component.markers.size).toEqual(2);
       const marker1 = component.markers.get(poiId1)!;
-      assertMarkerLatLng(marker1, new google.maps.LatLng(1.23, 4.56));
+      assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));
       assertMarkerIcon(marker1, jobColor1, 30);
       expect(marker1.getMap()).toEqual(component.map.googleMap!);
       const marker2 = component.markers.get(poiId3)!;
