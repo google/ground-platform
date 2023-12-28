@@ -21,6 +21,8 @@
  */
 export interface Geometry {
   geometryType: GeometryType;
+
+  extendBounds: (bounds: google.maps.LatLngBounds) => google.maps.LatLngBounds;
 }
 
 /**

@@ -43,4 +43,11 @@ export class LineString implements Geometry {
   hashCode(): number {
     return hash(this);
   }
+
+  extendBounds(bounds: google.maps.LatLngBounds) {
+    for (const {y, x} of this.points) {
+      bounds.extend(new google.maps.LatLng(y, x));
+    }
+    return bounds;
+  }
 }
