@@ -38,6 +38,16 @@
     </mat-menu>
 
     <button
+      mat-button
+      class="cancel-edit-button"
+      color="primary"
+      *ngIf="state === 3"
+      (click)="onCancelEditSurveyClick()"
+    >
+      Cancel
+    </button>
+
+    <button
       mat-flat-button
       class="finish-edit-button"
       *ngIf="state === 3"

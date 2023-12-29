@@ -58,6 +58,10 @@ export class HeaderComponent {
     this.navigationService.navigateToEditSurvey(this.surveyId);
   }
 
+  onCancelEditSurveyClick() {
+    this.navigationService.selectSurvey(this.surveyId);
+  }
+
   async onFinishEditSurveyClick() {
     await this.draftSurveyService.updateSurvey();
   }
