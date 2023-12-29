@@ -18,5 +18,5 @@
   #surveyDetails
   [title]="survey?.title"
   [description]="survey?.description"
-  (onClickOutside)="onDetailsChange($event)"
+  (onValueChanges)="onDetailChanges($event)"
 ></survey-details>

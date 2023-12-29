@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs';
 
 import {Survey} from 'app/models/survey.model';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-edit-details',
@@ -35,11 +33,9 @@ export class EditDetailsComponent implements OnInit {
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
 
-  constructor(
-    private route: ActivatedRoute,
-    private navigationService: NavigationService,
-    public draftSurveyService: DraftSurveyService
-  ) {
+  constructor(public draftSurveyService: DraftSurveyService) {}
+
+  ngOnInit() {
     this.subscription.add(
       this.draftSurveyService
         .getSurvey$()
@@ -47,11 +43,9 @@ export class EditDetailsComponent implements OnInit {
     );
   }
 
-  async ngOnInit(): Promise<void> {}
-
-  onDetailsChange(valid: boolean): void {
-    if (valid) {
-      const [title, description] = this.surveyDetails!.toTitleAndDescription();
+  onDetailChanges(_: boolean): void {
+    if (this.surveyDetails) {
+      const [title, description] = this.surveyDetails.toTitleAndDescription();
 
       this.draftSurveyService.updateTitleAndDescription(title, description);
     }
