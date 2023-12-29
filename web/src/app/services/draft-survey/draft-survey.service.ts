@@ -32,9 +32,13 @@ export class DraftSurveyService {
 
   private originalSurvey!: Survey;
 
+  dirty = false;
+
   constructor(private dataStoreService: DataStoreService) {}
 
   async init(id: string) {
+    this.dirty = false;
+
     this.originalSurvey = await firstValueFrom(
       this.dataStoreService.loadSurvey$(id)
     );
@@ -61,6 +65,8 @@ export class DraftSurveyService {
     this.survey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
     );
+
+    this.dirty = true;
   }
 
   deleteJob(job: Job): void {
@@ -69,6 +75,8 @@ export class DraftSurveyService {
     this.survey$.next(
       currentSurvey.copyWith({jobs: currentSurvey.jobs.remove(job.id)})
     );
+
+    this.dirty = true;
   }
 
   addOrUpdateTasks(jobId: string, tasks: List<Task>): void {
@@ -85,12 +93,16 @@ export class DraftSurveyService {
         currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
       );
     }
+
+    this.dirty = true;
   }
 
   updateTitleAndDescription(title: string, description: string): void {
     const currentSurvey = this.survey$.getValue();
 
     this.survey$.next(currentSurvey.copyWith({title, description}));
+
+    this.dirty = true;
   }
 
   async updateSurvey(): Promise<void> {
@@ -113,5 +125,7 @@ export class DraftSurveyService {
         .filter(job => !currentSurvey.jobs.get(job.id))
         .map(job => this.dataStoreService.deleteJob(currentSurvey.id, job.id))
     );
+
+    this.dirty = false;
   }
 }

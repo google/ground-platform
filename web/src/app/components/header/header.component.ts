@@ -56,12 +56,17 @@ export class HeaderComponent {
 
   onEditSurveyClick() {
     this.navigationService.navigateToEditSurvey(this.surveyId);
-    this.state = HeaderState.EDIT_SURVEY;
+  }
+
+  onCancelEditSurveyClick() {
+    this.navigationService.selectSurvey(this.surveyId);
   }
 
   async onFinishEditSurveyClick() {
     await this.draftSurveyService.updateSurvey();
-    this.navigationService.selectSurvey(this.surveyId);
-    this.state = HeaderState.MAP_VIEW;
+  }
+
+  isDraftSurveyDirty() {
+    return this.draftSurveyService.dirty;
   }
 }
