@@ -515,15 +515,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         }
       }
     }
-    if (candidatePolygons.length === 1) {
-      this.zone.run(() => {
-        this.navigationService.selectLocationOfInterest(
-          candidatePolygons[0].get('id')
-        );
-      });
-      return;
-    }
-    this.openSelectLocationOfInterestDialog(candidatePolygons);
+\
+    const lois = candidatePolygons.map(p => this.getLoiById(p.get('id')));
+    return LocationOfInterest.getSmallest(lois);
+    // this.openSelectLocationOfInterestDialog(candidatePolygons);
   }
 
   private openSelectLocationOfInterestDialog(

@@ -27,6 +27,10 @@ export abstract class LocationOfInterest {
   abstract readonly geometry?: Geometry;
   // TODO: Make non-null, init to empty by default.
   abstract readonly properties?: Map<string, string | number>;
+
+  static getSmallest(lois: Collection<LocationOfInterest>): LocationOfInterest? {
+    return loi.filter(loi => loi.geometry !is Point).sort(loi => loi.geometry.getArea).firstOrNull()
+  }
 }
 
 // TODO: Delete me in favor of single LOI type.

@@ -47,4 +47,8 @@ export class MultiPolygon implements Geometry {
     }
     return bounds;
   }
+
+  getArea(): Number {
+    return this.polygons.map(p -> p.getArea()).sum();
+  }
 }

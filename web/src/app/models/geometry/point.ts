@@ -42,4 +42,8 @@ export class Point implements Geometry {
     bounds.extend(new google.maps.LatLng(y, x));
     return bounds;
   }
+
+  getArea(): float {
+    return 0;
+  }
 }
