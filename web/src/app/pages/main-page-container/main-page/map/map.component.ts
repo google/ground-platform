@@ -24,7 +24,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import {GoogleMap} from '@angular/google-maps';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Map as ImmutableMap, List} from 'immutable';
 import {Observable, Subscription, combineLatest} from 'rxjs';
 
@@ -45,11 +44,6 @@ import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-
-import {
-  LocationOfInterestData,
-  SelectLocationOfInterestDialogComponent,
-} from './select-loi-dialog/select-loi-dialog.component';
 
 // To make ESLint happy:
 /*global google*/
@@ -111,8 +105,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
     private zone: NgZone,
-    private changeDetectorRef: ChangeDetectorRef,
-    private dialog: MatDialog
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.lois$ = this.loiService.getLocationsOfInterest$();
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
@@ -505,6 +498,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.disableMapClicks) {
       return;
     }
+
     const candidatePolygons: google.maps.Polygon[] = [];
     for (const loiPolygons of this.polygons.values()) {
       for (const polygon of loiPolygons) {
@@ -515,49 +509,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         }
       }
     }
-    if (candidatePolygons.length === 1) {
-      this.zone.run(() => {
-        this.navigationService.selectLocationOfInterest(
-          candidatePolygons[0].get('id')
-        );
-      });
-      return;
-    }
-    this.openSelectLocationOfInterestDialog(candidatePolygons);
-  }
 
-  private openSelectLocationOfInterestDialog(
-    candidatePolygons: google.maps.Polygon[]
-  ) {
-    // TODO: Account for case where polygons in multipolygon overlap.
+    const candidatePolygonsByArea = candidatePolygons.sort(
+      (a: google.maps.Polygon, b: google.maps.Polygon) =>
+        google.maps.geometry.spherical.computeArea(a.getPath()) <
+        google.maps.geometry.spherical.computeArea(b.getPath())
+          ? -1
+          : 1
+    );
+
     this.zone.run(() => {
-      const dialogRef = this.dialog.open(
-        SelectLocationOfInterestDialogComponent,
-        {
-          width: '500px',
-          data: {
-            clickedLocationsOfInterest: candidatePolygons.map(
-              this.polygonToLocationOfInterestData
-            ),
-          },
-        }
+      this.navigationService.selectLocationOfInterest(
+        candidatePolygonsByArea[0].get('id')
       );
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.navigationService.selectLocationOfInterest(result);
-        }
-      });
     });
-  }
-
-  private polygonToLocationOfInterestData(
-    polygon: google.maps.Polygon
-  ): LocationOfInterestData {
-    return {
-      loiId: polygon.get('id'),
-      color: polygon.get('color'),
-      jobName: polygon.get('jobName'),
-    };
   }
 
   onSaveRepositionClick() {
