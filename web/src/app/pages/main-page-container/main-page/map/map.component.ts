@@ -62,6 +62,7 @@ const enlargedPolygonStrokeWeight = 6;
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   lois$: Observable<List<LocationOfInterest>>;
+  lois: List<LocationOfInterest> = List([]);
   activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
@@ -117,13 +118,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
-      ]).subscribe(([survey, lois, locationOfInterestId]) =>
+      ]).subscribe(([survey, lois, locationOfInterestId]) => {
+        this.lois = lois;
+
         this.onSurveyAndLocationsOfInterestUpdate(
           survey,
           lois,
           locationOfInterestId
-        )
-      )
+        );
+      })
     );
 
     if (this.shouldEnableDrawingTools) {
@@ -510,18 +513,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    const candidatePolygonsByArea = candidatePolygons.sort(
-      (a: google.maps.Polygon, b: google.maps.Polygon) =>
-        google.maps.geometry.spherical.computeArea(a.getPath()) <
-        google.maps.geometry.spherical.computeArea(b.getPath())
-          ? -1
-          : 1
+    const candidateLois = List(
+      candidatePolygons.map(p => this.lois.find(loi => loi.id === p.get('id')))
     );
 
+    const loi = LocationOfInterest.getSmallest(candidateLois);
+
     this.zone.run(() => {
-      this.navigationService.selectLocationOfInterest(
-        candidatePolygonsByArea[0].get('id')
-      );
+      if (loi) this.navigationService.selectLocationOfInterest(loi.id);
     });
   }
 

@@ -47,4 +47,8 @@ export class Polygon implements Geometry {
     this.shell.extendBounds(bounds);
     return bounds;
   }
+
+  getArea(): number {
+    return this.shell.getArea();
+  }
 }
