@@ -28,9 +28,7 @@ export abstract class LocationOfInterest {
   // TODO: Make non-null, init to empty by default.
   abstract readonly properties?: Map<string, string | number>;
 
-  static getSmallest(
-    lois: List<LocationOfInterest | undefined>
-  ): LocationOfInterest | undefined {
+  static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
     return lois
       .filter(loi => loi && loi.geometry?.geometryType !== GeometryType.POINT)
       .sort((a, b) =>

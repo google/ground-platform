@@ -49,6 +49,8 @@ export class Polygon implements Geometry {
   }
 
   getArea(): number {
-    return this.shell.getArea();
+    return google.maps.geometry.spherical.computeArea(
+      this.shell.points.map(({x, y}) => new google.maps.LatLng(y, x)).toArray()
+    );
   }
 }

@@ -497,27 +497,36 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return polygon;
   }
 
+  private getIntersectingPolygons(
+    latLng: google.maps.LatLng
+  ): List<google.maps.Polygon> {
+    return ImmutableMap(this.polygons)
+      .toList()
+      .flatMap((polygons: google.maps.Polygon[]) =>
+        polygons.filter(p =>
+          google.maps.geometry.poly.containsLocation(latLng, p)
+        )
+      );
+  }
+
+  private getLoisById(ids: List<string>): List<LocationOfInterest> {
+    return ids.map(id => this.lois.find(loi => loi.id === id)!);
+  }
+
   private onPolygonClick(event: google.maps.PolyMouseEvent) {
     if (this.disableMapClicks) {
       return;
     }
 
-    const candidatePolygons: google.maps.Polygon[] = [];
-    for (const loiPolygons of this.polygons.values()) {
-      for (const polygon of loiPolygons) {
-        if (
-          google.maps.geometry.poly.containsLocation(event.latLng!, polygon)
-        ) {
-          candidatePolygons.push(polygon);
-        }
-      }
-    }
+    const candidatePolygonsIds = this.getIntersectingPolygons(
+      event.latLng!
+    ).map(p => p.get('id'));
 
-    const candidateLois = List(
-      candidatePolygons.map(p => this.lois.find(loi => loi.id === p.get('id')))
-    );
+    const candidateLois = this.getLoisById(candidatePolygonsIds);
 
-    const loi = LocationOfInterest.getSmallest(candidateLois);
+    const loi = LocationOfInterest.getSmallestByArea(candidateLois);
+
+    console.log(candidatePolygonsIds, candidateLois, loi);
 
     this.zone.run(() => {
       if (loi) this.navigationService.selectLocationOfInterest(loi.id);

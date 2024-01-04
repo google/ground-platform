@@ -52,8 +52,6 @@ export class LineString implements Geometry {
   }
 
   getArea(): number {
-    return google.maps.geometry.spherical.computeArea(
-      this.points.map(({x, y}) => new google.maps.LatLng(y, x)).toArray()
-    );
+    return 0;
   }
 }
