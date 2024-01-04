@@ -94,6 +94,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   newLatLng?: google.maps.LatLng;
   markerToReposition?: google.maps.Marker;
   disableMapClicks = false;
+  lastFitSurveyId = '';
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -194,7 +195,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ): void {
     this.removeDeletedLocationsOfInterest(lois);
     this.addNewLocationsOfInterest(survey, lois);
-    this.fitMapToLocationsOfInterest(lois);
+    if (this.lastFitSurveyId !== survey.id) {
+      this.fitMapToLocationsOfInterest(lois);
+      this.lastFitSurveyId = survey.id;
+    }
     this.selectLocationOfInterest(locationOfInterestId);
   }
 
