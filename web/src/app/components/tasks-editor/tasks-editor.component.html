@@ -22,7 +22,7 @@
     *ngFor="let formGroup of formArray.controls; let i = index;"
     [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value}"
   >
-    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">When adding a new collection sites...</div>
+    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">When adding a new collection site...</div>
 
     <task-form
       [formGroup]="formGroup"
