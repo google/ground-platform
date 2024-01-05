@@ -30,9 +30,8 @@ export abstract class LocationOfInterest {
 
   static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
     return lois
-      .filter(loi => loi && loi.geometry?.geometryType !== GeometryType.POINT)
       .sort((a, b) =>
-        (a?.geometry?.getArea() || 0) < (b?.geometry?.getArea() || 0) ? -1 : 1
+        (a.geometry?.getArea() || 0) < (b.geometry?.getArea() || 0) ? -1 : 1
       )
       .first();
   }

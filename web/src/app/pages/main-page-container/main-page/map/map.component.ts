@@ -530,8 +530,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     const loi = LocationOfInterest.getSmallestByArea(candidateLois);
 
-    console.log(candidatePolygonsIds, candidateLois, loi);
-
     this.zone.run(() => {
       if (loi) this.navigationService.selectLocationOfInterest(loi.id);
     });
