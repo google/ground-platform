@@ -121,6 +121,7 @@ export class EditSurveyComponent implements OnInit {
         id: newJob.id,
         name: 'Copy of ' + job.name,
         color: this.jobService.getNextColor(this.survey?.jobs),
+        index: -1,
       })
     );
   }
