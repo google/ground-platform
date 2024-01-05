@@ -22,10 +22,6 @@ import {
   waitForAsync,
 } from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
-import {
-  MatLegacyDialog as MatDialog,
-  MatLegacyDialogRef as MatDialogRef,
-} from '@angular/material/legacy-dialog';
 import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
 
@@ -58,9 +54,6 @@ describe('MapComponent', () => {
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  let mockDialogAfterClosed$: BehaviorSubject<string>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<unknown, unknown>>;
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
 
@@ -184,15 +177,6 @@ describe('MapComponent', () => {
       of<string | null>(null)
     );
 
-    mockDialogAfterClosed$ = new BehaviorSubject<string>('');
-    dialogRefSpy = jasmine.createSpyObj<MatDialogRef<unknown, unknown>>(
-      'MatDialogRef',
-      ['afterClosed']
-    );
-    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
-    dialogSpy.open.and.returnValue(dialogRefSpy);
-    dialogRefSpy.afterClosed.and.returnValue(mockDialogAfterClosed$);
-
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
     drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
       'DrawingToolsService',
@@ -205,7 +189,6 @@ describe('MapComponent', () => {
       imports: [GoogleMapsModule],
       declarations: [MapComponent],
       providers: [
-        {provide: MatDialog, useValue: dialogSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
         {
           provide: LocationOfInterestService,
@@ -223,6 +206,19 @@ describe('MapComponent', () => {
     component.shouldEnableDrawingTools = true;
     fixture.detectChanges();
   });
+
+  it('should fit the map when survey changed', fakeAsync(() => {
+    spyOn(component.map, 'fitBounds');
+    component.lastFitSurveyId = '0';
+    component.ngAfterViewInit();
+
+    expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
+      new google.maps.LatLngBounds(
+        new google.maps.LatLng(0, 0),
+        new google.maps.LatLng(45.6, 12.3)
+      )
+    );
+  }));
 
   it('should render markers on map', () => {
     expect(component.markers.size).toEqual(2);
@@ -307,19 +303,6 @@ describe('MapComponent', () => {
       ]);
       assertPolygonStyle(polygon, jobColor1, 3);
       expect(polygon.getMap()).toEqual(component.map.googleMap!);
-    }));
-
-    it('should fit the map to the new LOI bounds', fakeAsync(() => {
-      spyOn(component.map, 'fitBounds');
-      mockLois$.next(List<LocationOfInterest>([poi1, poi3, polygonLoi1]));
-      tick();
-
-      expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
-        new google.maps.LatLngBounds(
-          new google.maps.LatLng(0, 0),
-          new google.maps.LatLng(78.9, 78.9)
-        )
-      );
     }));
   });
 
@@ -555,14 +538,11 @@ describe('MapComponent', () => {
     google.maps.event.trigger(polygon, 'click', {
       latLng: new google.maps.LatLng(2, 2),
     });
-    mockDialogAfterClosed$.next(multipolygonLoiId1);
     tick();
 
-    expect(dialogSpy.open).toHaveBeenCalledTimes(1);
-    expect(dialogRefSpy.afterClosed).toHaveBeenCalledTimes(1);
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(multipolygonLoiId1);
+    ).toHaveBeenCalledOnceWith(polygonLoiId1);
   }));
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {

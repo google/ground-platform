@@ -24,7 +24,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import {GoogleMap} from '@angular/google-maps';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Map as ImmutableMap, List} from 'immutable';
 import {Observable, Subscription, combineLatest} from 'rxjs';
 
@@ -46,11 +45,6 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
-import {
-  LocationOfInterestData,
-  SelectLocationOfInterestDialogComponent,
-} from './select-loi-dialog/select-loi-dialog.component';
-
 // To make ESLint happy:
 /*global google*/
 
@@ -68,6 +62,7 @@ const enlargedPolygonStrokeWeight = 6;
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   lois$: Observable<List<LocationOfInterest>>;
+  lois: List<LocationOfInterest> = List([]);
   activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
@@ -99,6 +94,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   newLatLng?: google.maps.LatLng;
   markerToReposition?: google.maps.Marker;
   disableMapClicks = false;
+  lastFitSurveyId = '';
 
   @ViewChild(GoogleMap) map!: GoogleMap;
 
@@ -111,8 +107,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
     private zone: NgZone,
-    private changeDetectorRef: ChangeDetectorRef,
-    private dialog: MatDialog
+    private changeDetectorRef: ChangeDetectorRef
   ) {
     this.lois$ = this.loiService.getLocationsOfInterest$();
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
@@ -124,13 +119,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
-      ]).subscribe(([survey, lois, locationOfInterestId]) =>
+      ]).subscribe(([survey, lois, locationOfInterestId]) => {
+        this.lois = lois;
+
         this.onSurveyAndLocationsOfInterestUpdate(
           survey,
           lois,
           locationOfInterestId
-        )
-      )
+        );
+      })
     );
 
     if (this.shouldEnableDrawingTools) {
@@ -198,7 +195,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ): void {
     this.removeDeletedLocationsOfInterest(lois);
     this.addNewLocationsOfInterest(survey, lois);
-    this.fitMapToLocationsOfInterest(lois);
+    if (this.lastFitSurveyId !== survey.id) {
+      this.fitMapToLocationsOfInterest(lois);
+      this.lastFitSurveyId = survey.id;
+    }
     this.selectLocationOfInterest(locationOfInterestId);
   }
 
@@ -501,63 +501,38 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return polygon;
   }
 
+  private getIntersectingPolygons(
+    latLng: google.maps.LatLng
+  ): List<google.maps.Polygon> {
+    return ImmutableMap(this.polygons)
+      .toList()
+      .flatMap((polygons: google.maps.Polygon[]) =>
+        polygons.filter(p =>
+          google.maps.geometry.poly.containsLocation(latLng, p)
+        )
+      );
+  }
+
+  private getLoisById(ids: List<string>): List<LocationOfInterest> {
+    return ids.map(id => this.lois.find(loi => loi.id === id)!);
+  }
+
   private onPolygonClick(event: google.maps.PolyMouseEvent) {
     if (this.disableMapClicks) {
       return;
     }
-    const candidatePolygons: google.maps.Polygon[] = [];
-    for (const loiPolygons of this.polygons.values()) {
-      for (const polygon of loiPolygons) {
-        if (
-          google.maps.geometry.poly.containsLocation(event.latLng!, polygon)
-        ) {
-          candidatePolygons.push(polygon);
-        }
-      }
-    }
-    if (candidatePolygons.length === 1) {
-      this.zone.run(() => {
-        this.navigationService.selectLocationOfInterest(
-          candidatePolygons[0].get('id')
-        );
-      });
-      return;
-    }
-    this.openSelectLocationOfInterestDialog(candidatePolygons);
-  }
 
-  private openSelectLocationOfInterestDialog(
-    candidatePolygons: google.maps.Polygon[]
-  ) {
-    // TODO: Account for case where polygons in multipolygon overlap.
+    const candidatePolygonsIds = this.getIntersectingPolygons(
+      event.latLng!
+    ).map(p => p.get('id'));
+
+    const candidateLois = this.getLoisById(candidatePolygonsIds);
+
+    const loi = LocationOfInterest.getSmallestByArea(candidateLois);
+
     this.zone.run(() => {
-      const dialogRef = this.dialog.open(
-        SelectLocationOfInterestDialogComponent,
-        {
-          width: '500px',
-          data: {
-            clickedLocationsOfInterest: candidatePolygons.map(
-              this.polygonToLocationOfInterestData
-            ),
-          },
-        }
-      );
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.navigationService.selectLocationOfInterest(result);
-        }
-      });
+      if (loi) this.navigationService.selectLocationOfInterest(loi.id);
     });
-  }
-
-  private polygonToLocationOfInterestData(
-    polygon: google.maps.Polygon
-  ): LocationOfInterestData {
-    return {
-      loiId: polygon.get('id'),
-      color: polygon.get('color'),
-      jobName: polygon.get('jobName'),
-    };
   }
 
   onSaveRepositionClick() {

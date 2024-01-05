@@ -15,9 +15,9 @@
  */
 
 import {GeoPoint} from 'firebase/firestore';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 
-import {Geometry} from './geometry/geometry';
+import {Geometry, GeometryType} from './geometry/geometry';
 
 export abstract class LocationOfInterest {
   abstract readonly id: string;
@@ -27,6 +27,14 @@ export abstract class LocationOfInterest {
   abstract readonly geometry?: Geometry;
   // TODO: Make non-null, init to empty by default.
   abstract readonly properties?: Map<string, string | number>;
+
+  static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
+    return lois
+      .sort((a, b) =>
+        (a.geometry?.getArea() || 0) < (b.geometry?.getArea() || 0) ? -1 : 1
+      )
+      .first();
+  }
 }
 
 // TODO: Delete me in favor of single LOI type.
