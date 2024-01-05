@@ -57,14 +57,7 @@ export class SurveyLoiComponent {
 
   async onStrategyChange(strategy: DataCollectionStrategy) {
     if (this.job) {
-      const tasks = [
-        DataCollectionStrategy.AD_HOC,
-        DataCollectionStrategy.MIXED,
-      ].includes(strategy)
-        ? this.taskService.addLoiTask(this.job?.tasks || Map<string, Task>())
-        : this.taskService.removeLoiTask(
-            this.job?.tasks || Map<string, Task>()
-          );
+      const tasks = this.taskService.updateLoiTasks(this.job?.tasks, strategy);
 
       await this.jobService.addOrUpdateJob(
         this.surveyService.getActiveSurvey().id,
