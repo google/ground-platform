@@ -207,6 +207,19 @@ describe('MapComponent', () => {
     fixture.detectChanges();
   });
 
+  it('should fit the map when survey changed', fakeAsync(() => {
+    spyOn(component.map, 'fitBounds');
+    component.lastFitSurveyId = '0';
+    component.ngAfterViewInit();
+
+    expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
+      new google.maps.LatLngBounds(
+        new google.maps.LatLng(0, 0),
+        new google.maps.LatLng(45.6, 12.3)
+      )
+    );
+  }));
+
   it('should render markers on map', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
@@ -290,19 +303,6 @@ describe('MapComponent', () => {
       ]);
       assertPolygonStyle(polygon, jobColor1, 3);
       expect(polygon.getMap()).toEqual(component.map.googleMap!);
-    }));
-
-    it('should fit the map to the new LOI bounds', fakeAsync(() => {
-      spyOn(component.map, 'fitBounds');
-      mockLois$.next(List<LocationOfInterest>([poi1, poi3, polygonLoi1]));
-      tick();
-
-      expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
-        new google.maps.LatLngBounds(
-          new google.maps.LatLng(0, 0),
-          new google.maps.LatLng(78.9, 78.9)
-        )
-      );
     }));
   });
 
