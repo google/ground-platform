@@ -120,12 +120,7 @@ export class EditJobComponent {
       const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
       if (job) {
-        const tasks = [
-          DataCollectionStrategy.AD_HOC,
-          DataCollectionStrategy.MIXED,
-        ].includes(strategy)
-          ? this.taskService.addLoiTask(job?.tasks || Map<string, Task>())
-          : this.taskService.removeLoiTask(job?.tasks || Map<string, Task>());
+        const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
 
         this.draftSurveyService.addOrUpdateJob(job.copyWith({tasks, strategy}));
 
