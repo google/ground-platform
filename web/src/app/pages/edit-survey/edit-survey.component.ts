@@ -91,9 +91,9 @@ export class EditSurveyComponent implements OnInit {
   jobs(): Job[] {
     return (
       this.survey?.jobs
-        .toIndexedSeq()
-        .toArray()
-        .sort(({index: id1}, {index: id2}) => (id1 < id2 ? -1 : 1)) || []
+        .valueSeq()
+        .sort(({index: index1}, {index: index2}) => (index1 < index2 ? -1 : 1))
+        .toArray() || []
     );
   }
 
