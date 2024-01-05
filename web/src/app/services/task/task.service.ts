@@ -117,7 +117,7 @@ export class TaskService {
   updateLoiTasks(
     tasks: Map<string, Task> | undefined,
     strategy: DataCollectionStrategy
-  ) {
+  ): Map<string, Task> {
     return [
       DataCollectionStrategy.AD_HOC,
       DataCollectionStrategy.MIXED,
