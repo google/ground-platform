@@ -15,7 +15,13 @@
  */
 
 import {Component} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
 
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
@@ -35,8 +41,9 @@ export class HeaderComponent {
   state = HeaderState.DEFAULT;
 
   constructor(
-    public navigationService: NavigationService,
-    public draftSurveyService: DraftSurveyService
+    public dialog: MatDialog,
+    public draftSurveyService: DraftSurveyService,
+    public navigationService: NavigationService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -59,7 +66,26 @@ export class HeaderComponent {
   }
 
   onCancelEditSurveyClick() {
-    this.navigationService.selectSurvey(this.surveyId);
+    if (!this.draftSurveyService.dirty)
+      this.navigationService.selectSurvey(this.surveyId);
+    else {
+      const dialogRef = this.dialog.open(JobDialogComponent, {
+        data: {dialogType: DialogType.UndoJobs},
+      });
+
+      dialogRef.afterClosed().subscribe(async (result: DialogData) => {
+        if (!result) {
+          return;
+        }
+        switch (result.dialogType) {
+          case DialogType.UndoJobs:
+            this.navigationService.selectSurvey(this.surveyId);
+            break;
+          default:
+            break;
+        }
+      });
+    }
   }
 
   async onFinishEditSurveyClick() {
