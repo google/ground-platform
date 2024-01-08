@@ -15,6 +15,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatDialog} from '@angular/material/dialog';
 import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
 
@@ -33,6 +34,7 @@ describe('HeaderComponent', () => {
       providers: [
         {provide: Router, useValue: {}},
         {provide: DraftSurveyService, useValue: {}},
+        {provide: MatDialog, useValue: {}},
       ],
     }).compileComponents();
   });

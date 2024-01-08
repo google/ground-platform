@@ -66,26 +66,19 @@ export class HeaderComponent {
   }
 
   onCancelEditSurveyClick() {
-    if (!this.draftSurveyService.dirty)
+    if (!this.draftSurveyService.dirty) {
       this.navigationService.selectSurvey(this.surveyId);
-    else {
-      const dialogRef = this.dialog.open(JobDialogComponent, {
-        data: {dialogType: DialogType.UndoJobs},
-      });
-
-      dialogRef.afterClosed().subscribe(async (result: DialogData) => {
-        if (!result) {
-          return;
-        }
-        switch (result.dialogType) {
-          case DialogType.UndoJobs:
-            this.navigationService.selectSurvey(this.surveyId);
-            break;
-          default:
-            break;
-        }
-      });
+      return;
     }
+
+    const dialogRef = this.dialog.open(JobDialogComponent, {
+      data: {dialogType: DialogType.UndoJobs},
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: DialogData) => {
+      if (result?.dialogType === DialogType.UndoJobs)
+        this.navigationService.selectSurvey(this.surveyId);
+    });
   }
 
   async onFinishEditSurveyClick() {
