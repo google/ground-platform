@@ -58,7 +58,8 @@ export class DraftSurveyService {
     const currentSurvey = this.survey$.getValue();
 
     if (job.index === -1) {
-      const index = currentSurvey.jobs.size;
+      const index =
+        Math.max(...currentSurvey.jobs.valueSeq().map(j => j.index), 0) + 1;
       job = job.copyWith({index});
     }
 
