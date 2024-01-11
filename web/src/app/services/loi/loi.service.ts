@@ -15,6 +15,10 @@
  */
 
 import {Injectable} from '@angular/core';
+import {Map as ImmutableMap, List} from 'immutable';
+import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
+import {map, switchMap} from 'rxjs/operators';
+
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {GeometryType} from 'app/models/geometry/geometry';
 import {Point} from 'app/models/geometry/point';
@@ -25,9 +29,6 @@ import {
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',

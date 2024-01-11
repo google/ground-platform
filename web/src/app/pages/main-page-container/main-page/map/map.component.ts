@@ -24,6 +24,9 @@ import {
   ViewChild,
 } from '@angular/core';
 import {GoogleMap} from '@angular/google-maps';
+import {Map as ImmutableMap, List} from 'immutable';
+import {Observable, Subscription, combineLatest} from 'rxjs';
+
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
@@ -41,8 +44,6 @@ import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, Subscription, combineLatest} from 'rxjs';
 
 // To make ESLint happy:
 /*global google*/
