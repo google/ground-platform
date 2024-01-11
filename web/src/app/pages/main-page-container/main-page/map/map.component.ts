@@ -24,9 +24,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import {GoogleMap} from '@angular/google-maps';
-import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, Subscription, combineLatest} from 'rxjs';
-
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
@@ -44,6 +41,8 @@ import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {Map as ImmutableMap, List} from 'immutable';
+import {Observable, Subscription, combineLatest} from 'rxjs';
 
 // To make ESLint happy:
 /*global google*/
@@ -62,7 +61,7 @@ const enlargedPolygonStrokeWeight = 6;
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   lois$: Observable<List<LocationOfInterest>>;
-  lois: List<LocationOfInterest> = List([]);
+  loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
   activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
@@ -120,13 +119,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
       ]).subscribe(([survey, lois, locationOfInterestId]) => {
-        this.lois = lois;
+        const loisMap = ImmutableMap(lois.map(loi => [loi.id, loi]));
+        const loiIdsToRemove = this.loisMap
+          .filter(
+            (value, key) =>
+              !(
+                loisMap.has(key) &&
+                this.isLocationOfInterestEqual(loisMap.get(key)!, value)
+              )
+          )
+          .keySeq()
+          .toList();
+        const loisToAdd = loisMap
+          .filter(
+            (value, key) =>
+              !(
+                this.loisMap.has(key) &&
+                this.isLocationOfInterestEqual(this.loisMap.get(key)!, value)
+              )
+          )
+          .toList();
+        this.loisMap = loisMap;
 
-        this.onSurveyAndLocationsOfInterestUpdate(
-          survey,
-          lois,
-          locationOfInterestId
-        );
+        this.removeDeletedLocationsOfInterest(loiIdsToRemove);
+        this.addNewLocationsOfInterest(survey, loisToAdd);
+        if (this.lastFitSurveyId !== survey.id) {
+          this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
+          this.lastFitSurveyId = survey.id;
+        }
+        this.selectLocationOfInterest(locationOfInterestId);
       })
     );
 
@@ -188,44 +209,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private onSurveyAndLocationsOfInterestUpdate(
-    survey: Survey,
-    lois: List<LocationOfInterest>,
-    locationOfInterestId: string | null
-  ): void {
-    this.removeDeletedLocationsOfInterest(lois);
-    this.addNewLocationsOfInterest(survey, lois);
-    if (this.lastFitSurveyId !== survey.id) {
-      this.fitMapToLocationsOfInterest(lois);
-      this.lastFitSurveyId = survey.id;
-    }
-    this.selectLocationOfInterest(locationOfInterestId);
+  // TODO(daoyu): override equals function in LocationOfInterest after making it concrete and removing all its inherent classes
+  private isLocationOfInterestEqual(
+    a: LocationOfInterest,
+    b: LocationOfInterest
+  ): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
   }
 
   /**
    * Remove deleted lois to map. The LOIs that were displayed on
    * the map but not in the `newLocationsOfInterest` are considered as deleted.
    */
-  private removeDeletedLocationsOfInterest(
-    newLocationsOfInterest: List<LocationOfInterest>
-  ) {
-    const newLoiIds: List<string> = newLocationsOfInterest.map(f => f.id);
-    this.removeDeletedMarkers(newLoiIds);
-    this.removeDeletedPolygons(newLoiIds);
+  private removeDeletedLocationsOfInterest(idsToRemove: List<string>) {
+    this.removeDeletedMarkers(idsToRemove);
+    this.removeDeletedPolygons(idsToRemove);
   }
 
-  private removeDeletedMarkers(newLoiIds: List<string>) {
+  private removeDeletedMarkers(idsToRemove: List<string>) {
     for (const id of this.markers.keys()) {
-      if (!newLoiIds.contains(id)) {
+      if (idsToRemove.includes(id)) {
         this.markers.get(id)!.setMap(null);
         this.markers.delete(id);
       }
     }
   }
 
-  private removeDeletedPolygons(newLoiIds: List<string>) {
+  private removeDeletedPolygons(idsToRemove: List<string>) {
     for (const id of this.polygons.keys()) {
-      if (!newLoiIds.contains(id)) {
+      if (idsToRemove.includes(id)) {
         for (const polygon of this.polygons.get(id)!) {
           polygon.setMap(null);
         }
@@ -240,19 +252,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    */
   private addNewLocationsOfInterest(
     survey: Survey,
-    lois: List<LocationOfInterest>
+    loisToAdd: List<LocationOfInterest>
   ) {
-    const existingLocationOfInterestIds = Array.from(
-      this.markers.keys()
-    ).concat(Array.from(this.polygons.keys()));
-
-    lois.forEach(loi => {
+    loisToAdd.forEach(loi => {
       if (!survey.getJob(loi.jobId)) {
         // Ignore lois whose job has been removed.
         console.debug(`Ignoring loi ${loi.id} with missing job ${loi.jobId}`);
-        return;
-      }
-      if (existingLocationOfInterestIds.includes(loi.id)) {
         return;
       }
       const color = survey.jobs.get(loi.jobId)?.color;
@@ -514,7 +519,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private getLoisById(ids: List<string>): List<LocationOfInterest> {
-    return ids.map(id => this.lois.find(loi => loi.id === id)!);
+    return ids.map(id => this.loisMap.get(id)!);
   }
 
   private onPolygonClick(event: google.maps.PolyMouseEvent) {

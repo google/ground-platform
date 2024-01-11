@@ -17,12 +17,6 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {DocumentData, FieldPath} from '@angular/fire/firestore';
-import {deleteField, serverTimestamp} from 'firebase/firestore';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
-import {List, Map} from 'immutable';
-import {Observable, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
-
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
 import {Job} from 'app/models/job.model';
@@ -33,6 +27,11 @@ import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+import {deleteField, serverTimestamp} from 'firebase/firestore';
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {List, Map} from 'immutable';
+import {Observable, firstValueFrom} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -100,7 +99,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns the raw survey object from the db. Used for debbuging only.
+   * Returns the raw survey object from the db. Used for debugging only.
    */
   async loadRawSurvey(id: string) {
     return (
@@ -111,7 +110,7 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the raw survey object in the db. Used for debbuging only.
+   * Updates the raw survey object in the db. Used for debugging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
     await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
