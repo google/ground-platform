@@ -16,8 +16,8 @@
  */
 
 import * as functions from 'firebase-functions';
-import { firestore } from 'firebase-admin';
-import { GeoPoint } from 'firebase-admin/firestore';
+import {firestore} from 'firebase-admin';
+import {GeoPoint} from 'firebase-admin/firestore';
 
 /**
  * Returns path to survey colection. This is a function for consistency with other path functions.
@@ -37,24 +37,27 @@ export const lois = (surveyId: string) => survey(surveyId) + '/lois';
 /**
  * Returns the path of the LOI doc with the specified id.
  */
-export const loi = (surveyId: string, loiId: string) => lois(surveyId) + '/' + loiId;
+export const loi = (surveyId: string, loiId: string) =>
+  lois(surveyId) + '/' + loiId;
 
 /**
  * Returns the path of the submissions collection in the survey with the specified id.
  */
-export const submissions = (surveyId: string) => survey(surveyId) + '/submissions';
+export const submissions = (surveyId: string) =>
+  survey(surveyId) + '/submissions';
 
 /**
  * Returns the path of the submission doc with the specified id.
  */
-export const submission = (surveyId: string, submissionId: string) => submissions(surveyId) + '/' + submissionId;
+export const submission = (surveyId: string, submissionId: string) =>
+  submissions(surveyId) + '/' + submissionId;
 
 export class Datastore {
   private db_: firestore.Firestore;
 
   constructor(db: firestore.Firestore) {
     this.db_ = db;
-    db.settings({ ignoreUndefinedProperties: true });
+    db.settings({ignoreUndefinedProperties: true});
   }
 
   /**
@@ -127,16 +130,19 @@ export class Datastore {
     await docRef.collection('lois').add(loiDoc);
   }
 
-  async countSubmissionsForLoi(surveyId: string, loiId: string): Promise<number> {
+  async countSubmissionsForLoi(
+    surveyId: string,
+    loiId: string
+  ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    const submissionsForLoiQuery = submissionsRef.where("loiId", "==", loiId);
+    const submissionsForLoiQuery = submissionsRef.where('loiId', '==', loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({ submissionCount: count });
+    await loiRef.update({submissionCount: count});
   }
 
   static toFirestoreMap(geometry: any) {
@@ -164,6 +170,30 @@ export class Datastore {
       );
     }
     return value;
+  }
+
+  static fromFirestoreMap(value: any) {
+    if (value instanceof GeoPoint) {
+      // Note: GeoJSON coordinates are in lng-lat order.
+      return [value.longitude, value.latitude];
+    }
+
+    if (typeof value !== 'object') {
+      return value;
+    }
+
+    const result = new Array<any>(value.length);
+
+    Object.entries(value).map(([i, nestedValue]) => {
+      const index = Number.parseInt(i);
+      if (!Number.isInteger(index)) {
+        return value;
+      }
+
+      result[index] = Datastore.fromFirestoreMap(nestedValue);
+    });
+
+    return result;
   }
 
   /**
