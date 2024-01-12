@@ -85,7 +85,13 @@ export class HeaderComponent {
     await this.draftSurveyService.updateSurvey();
   }
 
-  isDraftSurveyDirty() {
-    return this.draftSurveyService.dirty;
+  isDraftSurveyDirtyAndValid() {
+    return (
+      this.draftSurveyService.dirty &&
+      this.draftSurveyService.valid.reduce(
+        (accumulator, currentValue) => accumulator && currentValue,
+        true
+      )
+    );
   }
 }

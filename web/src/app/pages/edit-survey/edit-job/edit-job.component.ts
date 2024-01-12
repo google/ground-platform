@@ -108,10 +108,10 @@ export class EditJobComponent {
   }
 
   onTasksChange(valid: boolean): void {
-    if (this.jobId && this.tasksEditor && valid) {
+    if (this.jobId && this.tasksEditor) {
       this.tasks = this.tasksEditor.toTasks();
 
-      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks);
+      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks, valid);
     }
   }
 

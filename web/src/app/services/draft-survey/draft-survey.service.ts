@@ -15,7 +15,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -33,11 +33,13 @@ export class DraftSurveyService {
   private originalSurvey!: Survey;
 
   dirty = false;
+  valid = Map<string, boolean>();
 
   constructor(private dataStoreService: DataStoreService) {}
 
   async init(id: string) {
     this.dirty = false;
+    this.valid = Map<string, boolean>();
 
     this.originalSurvey = await firstValueFrom(
       this.dataStoreService.loadSurvey$(id)
@@ -54,13 +56,16 @@ export class DraftSurveyService {
     return this.survey$.asObservable();
   }
 
-  addOrUpdateJob(job: Job): void {
+  addOrUpdateJob(job: Job, duplicate?: boolean): void {
     const currentSurvey = this.survey$.getValue();
 
     if (job.index === -1) {
       const index =
         Math.max(...currentSurvey.jobs.valueSeq().map(j => j.index), 0) + 1;
+
       job = job.copyWith({index});
+
+      if (!duplicate) this.valid = this.valid.set(job.id, false);
     }
 
     this.survey$.next(
@@ -80,30 +85,36 @@ export class DraftSurveyService {
     this.dirty = true;
   }
 
-  addOrUpdateTasks(jobId: string, tasks: List<Task>): void {
+  addOrUpdateTasks(jobId: string, tasks: List<Task>, valid: boolean): void {
     const currentSurvey = this.survey$.getValue();
 
-    const currentJob = currentSurvey.jobs.get(jobId);
+    const currentJob = currentSurvey.jobs.get(jobId)!;
 
-    if (currentJob) {
-      const job = currentJob?.copyWith({
-        tasks: this.dataStoreService.convertTasksListToMap(tasks),
-      });
+    const job = currentJob?.copyWith({
+      tasks: this.dataStoreService.convertTasksListToMap(tasks),
+    });
 
-      this.survey$.next(
-        currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
-      );
-    }
+    this.survey$.next(
+      currentSurvey.copyWith({jobs: currentSurvey.jobs.set(job.id, job)})
+    );
 
     this.dirty = true;
+
+    this.valid = this.valid.set(currentJob.id, valid);
   }
 
-  updateTitleAndDescription(title: string, description: string): void {
+  updateTitleAndDescription(
+    title: string,
+    description: string,
+    valid: boolean
+  ): void {
     const currentSurvey = this.survey$.getValue();
 
     this.survey$.next(currentSurvey.copyWith({title, description}));
 
     this.dirty = true;
+
+    this.valid = this.valid.set(currentSurvey.id, valid);
   }
 
   async updateSurvey(): Promise<void> {
