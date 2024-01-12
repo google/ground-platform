@@ -18,6 +18,7 @@ import {Injectable} from '@angular/core';
 import {List, Map} from 'immutable';
 import {Observable, switchMap} from 'rxjs';
 
+import {DataCollectionStrategy} from 'app/models/job.model';
 import {MultipleChoice} from 'app/models/task/multiple-choice.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -105,11 +106,23 @@ export class TaskService {
   }
 
   /**
-   * Remove the first element of the list if is loiTask, reindex the others.
+   * Remove the first element of the list if is loiTask.
    */
   removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
     const loiTask = tasks.find(task => task.addLoiTask === true);
 
     return loiTask ? tasks.remove(loiTask.id) : tasks;
+  }
+
+  updateLoiTasks(
+    tasks: Map<string, Task> | undefined,
+    strategy: DataCollectionStrategy
+  ): Map<string, Task> {
+    return [
+      DataCollectionStrategy.AD_HOC,
+      DataCollectionStrategy.MIXED,
+    ].includes(strategy)
+      ? this.addLoiTask(tasks || Map<string, Task>())
+      : this.removeLoiTask(tasks || Map<string, Task>());
   }
 }

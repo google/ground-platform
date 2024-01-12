@@ -89,10 +89,7 @@ export class EditSurveyComponent implements OnInit {
   }
 
   jobs(): Job[] {
-    // TODO: sort by id or remove sort call when task editor is fixed
-    return Array.from(this.survey?.jobs.values() ?? []).sort(
-      ({id: id1}, {id: id2}) => id1.localeCompare(id2)
-    );
+    return this.survey!.getJobsSorted();
   }
 
   addJob(): void {
@@ -119,6 +116,7 @@ export class EditSurveyComponent implements OnInit {
         id: newJob.id,
         name: 'Copy of ' + job.name,
         color: this.jobService.getNextColor(this.survey?.jobs),
+        index: -1,
       })
     );
   }
