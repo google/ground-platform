@@ -54,22 +54,31 @@
           <job-details
             *ngSwitchCase="SetupPhase.JOB_DETAILS"
             #jobDetails
-            [name]="job()?.name ?? ''"
+            [name]="jobName()"
             (onValidationChange)="onValidationChange($event)"
           ></job-details>
-          <loi-permissions
+          <ground-step-card
             *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
-            #loiPermissions
-            [defaultSelection]="loiPermissionsOption"
-            (select)="onLoiPermissionsChange($event)"
-          ></loi-permissions>
-          <survey-loi
+            [jobName]="jobName()"
+            title="How are data collection sites defined?"
+            description="Are data collection sites defined by you in advance, defined by data collectors as they go, or both?"
+          >
+            <loi-permissions
+              #loiPermissions
+              [defaultSelection]="loiPermissionsOption"
+              (select)="onLoiPermissionsChange($event)"
+            ></loi-permissions>
+          </ground-step-card>
+          <ground-step-card
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
-            #surveyLoi
-          ></survey-loi>
+            [jobName]="jobName()"
+            title="Where should data be collected?"
+          >
+            <survey-loi #surveyLoi></survey-loi>
+          </ground-step-card>
           <ground-step-card
             *ngSwitchCase="SetupPhase.DEFINE_TASKS"
-            [jobName]="job()?.name ?? ''"
+            [jobName]="jobName()"
             title="What data should be collected?"
             description="Data collectors will be prompted to complete the tasks you define here for each data collection site."
           >
