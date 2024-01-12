@@ -25,7 +25,6 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -60,7 +59,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private dialogService: DialogService,
     private importDialog: MatDialog,
-    private dataStoreService: DataStoreService,
     private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,

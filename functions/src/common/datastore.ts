@@ -16,8 +16,8 @@
  */
 
 import * as functions from 'firebase-functions';
-import {firestore} from 'firebase-admin';
-import {GeoPoint} from 'firebase-admin/firestore';
+import { firestore } from 'firebase-admin';
+import { GeoPoint } from 'firebase-admin/firestore';
 
 /**
  * 
@@ -65,7 +65,7 @@ export class Datastore {
 
   constructor(db: firestore.Firestore) {
     this.db_ = db;
-    db.settings({ignoreUndefinedProperties: true});
+    db.settings({ ignoreUndefinedProperties: true });
   }
 
   /**
@@ -73,14 +73,14 @@ export class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   async mergeUserProfile(user: functions.auth.UserRecord) {
-    const {uid, email, displayName, photoURL} = user;
+    const { uid, email, displayName, photoURL } = user;
     await this.db_.doc(`users/${uid}`).set(
       {
         email,
         displayName,
         photoURL: photoURL && Datastore.trimPhotoURLSizeSuffix(photoURL),
       },
-      {merge: true}
+      { merge: true }
     );
   }
 
@@ -150,7 +150,7 @@ export class Datastore {
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({submissionCount: count});
+    await loiRef.update({ submissionCount: count });
   }
 
   static toFirestoreMap(geometry: any) {
@@ -180,6 +180,16 @@ export class Datastore {
     return value;
   }
 
+  /**
+   * 
+   * @param geoJsonGeometry pseudo GeoJSON geometry object, should have the following fields:
+   * {
+   *    type: string
+   *    geometry: any (note that this is expected to be a map rather than a list of lists because of how we store data in Firestore)
+   * }
+   *
+   * @returns GeoJSON geometry object (with geometry as list of lists)
+   */
   static fromFirestoreMap(geoJsonGeometry: any): any {
     const geometryObject = geoJsonGeometry as pseudoGeoJsonGeometry;
     if (!geometryObject) {
@@ -187,9 +197,9 @@ export class Datastore {
     }
 
     geometryObject.coordinates = this.fromFirestoreValue(geometryObject.coordinates);
-    
+
     return geometryObject;
-  } 
+  }
 
   static fromFirestoreValue(coordinates: any) {
     if (coordinates instanceof GeoPoint) {

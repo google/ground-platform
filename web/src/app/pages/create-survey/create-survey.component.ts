@@ -306,9 +306,11 @@ export class CreateSurveyComponent implements OnInit {
 
     const job = this.getFirstJob();
 
+    const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
+
     await this.jobService.addOrUpdateJob(
       this.surveyId!,
-      job.copyWith({dataCollectorsCanAdd, strategy})
+      job.copyWith({dataCollectorsCanAdd, tasks, strategy})
     );
   }
 
