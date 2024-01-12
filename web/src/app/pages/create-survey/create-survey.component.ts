@@ -167,6 +167,10 @@ export class CreateSurveyComponent implements OnInit {
     return undefined;
   }
 
+  jobName(): string {
+    return this.job()?.name ?? '';
+  }
+
   back(): void {
     switch (this.setupPhase) {
       case SetupPhase.SURVEY_DETAILS:

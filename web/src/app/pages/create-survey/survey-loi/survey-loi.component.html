@@ -13,9 +13,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
-<h1 class="title">Where should data be collected?</h1>
-
 <div *ngIf="lois$ | async as lois">
   <loi-selection
     *ngIf="surveyService.getActiveSurvey$() | async as survey"
