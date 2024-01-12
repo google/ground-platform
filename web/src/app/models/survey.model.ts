@@ -57,4 +57,13 @@ export class Survey extends Copiable {
       !this.acl.size
     );
   }
+
+  getJobsSorted(): Job[] {
+    return (
+      this.jobs
+        .valueSeq()
+        .sort(({index: index1}, {index: index2}) => (index1 < index2 ? -1 : 1))
+        .toArray() || []
+    );
+  }
 }

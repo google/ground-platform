@@ -31,6 +31,9 @@
       This job and all of its associated data will be deleted. This operation
       can’t be undone. Are you sure?
     </p>
+    <p *ngSwitchCase="DialogType.UndoJobs">
+      If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?
+    </p>
   </div>
 </div>
 <div mat-dialog-actions>

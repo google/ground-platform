@@ -24,6 +24,7 @@ import {
 } from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
 
@@ -79,6 +80,7 @@ describe('SurveyLoiComponent', () => {
         {provide: AuthService, useValue: {}},
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: MatDialog, useValue: {}},
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

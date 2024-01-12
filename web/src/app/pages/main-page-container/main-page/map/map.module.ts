@@ -17,20 +17,12 @@
 import {NgModule} from '@angular/core';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {MapComponent} from './map.component';
-import {SelectLocationOfInterestDialogModule} from './select-loi-dialog/select-loi-dialog.module';
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    GoogleMapsModule,
-    MatButtonModule,
-    MatDialogModule,
-    SelectLocationOfInterestDialogModule,
-  ],
+  imports: [BrowserModule, GoogleMapsModule, MatButtonModule],
   exports: [MapComponent],
   declarations: [MapComponent],
 })

@@ -50,4 +50,8 @@ export class LineString implements Geometry {
     }
     return bounds;
   }
+
+  getArea(): number {
+    return 0;
+  }
 }

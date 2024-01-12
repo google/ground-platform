@@ -48,19 +48,19 @@ export class LoiSelectionComponent {
     private importDialog: MatDialog
   ) {}
 
-  ngOnInit() {
+  ngOnChanges() {
     this.job = this.jobId
-      ? this.survey.jobs.get(this.jobId)
-      : this.survey.jobs.first();
+      ? this.survey.getJob(this.jobId)
+      : this.survey.jobs.toList().first();
   }
 
   onImportLois() {
-    const jobId = this.jobId ?? this.survey.jobs.first()?.id;
-    if (!this.survey.id || !jobId) {
+    if (!this.survey.id || !this.job?.id) {
       return;
     }
+
     this.importDialog.open(ImportDialogComponent, {
-      data: {surveyId: this.survey.id, jobId},
+      data: {surveyId: this.survey.id, jobId: this.job.id},
       width: '350px',
       maxHeight: '800px',
     });

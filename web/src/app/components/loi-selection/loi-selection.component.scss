@@ -47,14 +47,15 @@
 
   .loi-permissions {
     position: absolute;
-    background: var(--ground-sys-light-surface, #F9FAF4);
-    bottom: 30px;
-    left: 30%;
-    padding: 12px;
-    border-radius: 8px;
-    width: 40%;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    background: var(--ground-sys-light-inverse-on-surface, #F0F1EB);
+    padding: 8px 12px 8px 8px;
+    border-radius: 40px;
+    display: flex;
+    gap: 12px;
     z-index: 1;
-    text-align: center;
   }
 
   .loi-map {

@@ -21,7 +21,7 @@
         <button
           mat-flat-button
           class="import-lois-button"
-          (click)="onImportLois(survey)"
+          (click)="onImportLois()"
         >
           <mat-icon class="import-lois-icon">input</mat-icon>
           Import
@@ -48,12 +48,12 @@
     </div>
 
     <div class="loi-permissions">
-      Allow data collectors to add new sites
       <mat-slide-toggle
         [checked]="job?.strategy !== DataCollectionStrategy.PREDEFINED"
         (change)="toggleDataCollectorsCanAddLois($event)"
         color="primary"
       ></mat-slide-toggle>
+      <div>Allow data collectors to add new sites</div>
     </div>
 
     <div class="loi-map">

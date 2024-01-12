@@ -55,13 +55,15 @@ describe('LoiSelectionFormComponent', () => {
     new Point(new Coordinate(12.3, 45.6)),
     Map()
   );
-  const job = new Job(jobId1, /* index */ 0);
+  const job1 = new Job(jobId1, /* index */ 0);
+  const job2 = new Job(jobId2, /* index */ 1);
   const survey = new Survey(
     'survey1',
     'title1',
     'description1',
     /* jobs= */ Map({
-      [jobId1]: job,
+      [jobId1]: job1,
+      [jobId2]: job2,
     }),
     /* acl= */ Map()
   );
@@ -143,6 +145,7 @@ describe('LoiSelectionFormComponent', () => {
       importButton = fixture.debugElement.nativeElement.querySelector(
         '.import-lois-button'
       );
+      fixture.componentInstance.ngOnChanges();
     });
 
     describe('when no job ID is passed in as input', () => {
@@ -150,7 +153,7 @@ describe('LoiSelectionFormComponent', () => {
         importButton.click();
 
         expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: job.id},
+          data: {surveyId: survey.id, jobId: jobId1},
           width: '350px',
           maxHeight: '800px',
         });
@@ -159,12 +162,13 @@ describe('LoiSelectionFormComponent', () => {
 
     describe('when job ID is passed in as input', () => {
       it('opens the import dialog with survey and inputted job ID', () => {
-        fixture.componentInstance.jobId = 'some-job!';
+        fixture.componentInstance.jobId = jobId2;
         fixture.detectChanges();
+        fixture.componentInstance.ngOnChanges();
         importButton.click();
 
         expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: 'some-job!'},
+          data: {surveyId: survey.id, jobId: jobId2},
           width: '350px',
           maxHeight: '800px',
         });

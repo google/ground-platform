@@ -36,5 +36,7 @@ export class Job extends Copiable {
     readonly strategy?: DataCollectionStrategy
   ) {
     super();
+
+    if (!strategy) this.strategy = DataCollectionStrategy.PREDEFINED;
   }
 }
