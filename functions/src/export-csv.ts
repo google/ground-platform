@@ -17,10 +17,10 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import { geojsonToWKT } from '@terraformer/wkt';
-import { db } from '@/common/context';
+import {geojsonToWKT} from '@terraformer/wkt';
+import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
-import { Datastore } from './common/datastore';
+import {Datastore} from './common/datastore';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -50,7 +50,7 @@ export async function exportCsvHandler(
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
-  const tasksObject = (job['tasks'] as { [id: string]: Task }) || {};
+  const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
   const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
 
@@ -85,7 +85,7 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
+  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
@@ -102,6 +102,7 @@ export async function exportCsvHandler(
       row.push(loi.get('properties').id || '');
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
+      // Header: One column for each loi property (merged over all properties across all LOIs)
       row.push(...extractLoiProperties(loi, allLoiProperties))
       // TODO(#1288): Clean up remaining references to old responses field
       const data =
