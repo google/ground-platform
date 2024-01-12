@@ -20,6 +20,14 @@ import {firestore} from 'firebase-admin';
 import {GeoPoint} from 'firebase-admin/firestore';
 
 /**
+ * 
+ */
+type pseudoGeoJsonGeometry = {
+  type: string
+  coordinates: any
+}
+
+/**
  * Returns path to survey colection. This is a function for consistency with other path functions.
  */
 export const surveys = () => 'surveys';
@@ -172,25 +180,35 @@ export class Datastore {
     return value;
   }
 
-  static fromFirestoreMap(value: any) {
-    if (value instanceof GeoPoint) {
+  static fromFirestoreMap(geoJsonGeometry: any): any {
+    const geometryObject = geoJsonGeometry as pseudoGeoJsonGeometry;
+    if (!geometryObject) {
+      throw new Error(`${geoJsonGeometry} is not of type pseudoGeoJsonGeometry`);
+    }
+
+    geometryObject.coordinates = this.fromFirestoreValue(geometryObject.coordinates);
+    
+    return geometryObject;
+  } 
+
+  static fromFirestoreValue(coordinates: any) {
+    if (coordinates instanceof GeoPoint) {
       // Note: GeoJSON coordinates are in lng-lat order.
-      return [value.longitude, value.latitude];
+      return [coordinates.longitude, coordinates.latitude];
     }
 
-    if (typeof value !== 'object') {
-      return value;
+    if (typeof coordinates !== 'object') {
+      return coordinates;
     }
+    const result = new Array<any>(coordinates.length);
 
-    const result = new Array<any>(value.length);
-
-    Object.entries(value).map(([i, nestedValue]) => {
+    Object.entries(coordinates).map(([i, nestedValue]) => {
       const index = Number.parseInt(i);
       if (!Number.isInteger(index)) {
-        return value;
+        return coordinates;
       }
 
-      result[index] = Datastore.fromFirestoreMap(nestedValue);
+      result[index] = this.fromFirestoreValue(nestedValue);
     });
 
     return result;

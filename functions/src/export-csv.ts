@@ -106,7 +106,7 @@ export async function exportCsvHandler(
         submission['responses'] ||
         submission['results'] ||
         {};
-      // Header: loop over survey
+      // Header: One column for each task
       tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
       csvStream.write(row);
     });
@@ -114,16 +114,21 @@ export async function exportCsvHandler(
   csvStream.end();
 }
 
+/**
+ * Returns the WKT string converted from the given geometry object
+ *
+ * @param geometryObject - the GeoJSON geometry object extracted from the LOI. This should have format:
+ *   {
+ *      coordinates: any[],
+ *      type: string
+ *   }
+ * @returns The WKT string version of the object 
+ * https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AnalyzingData/Geospatial/Spatial_Definitions/WellknownTextWKT.htm
+ *
+ * @beta
+ */
 function toWkt(geometryObject: any): string {
-  // Make sure that the coordinates field is no longer using the Firestore format
-  if (!geometryObject.coordinates) {
-    return '';
-  }
-  geometryObject.coordinates = Datastore.fromFirestoreMap(
-    geometryObject.coordinates
-  );
-
-  return geojsonToWKT(geometryObject);
+  return geojsonToWKT(Datastore.fromFirestoreMap(geometryObject));
 }
 
 /**
