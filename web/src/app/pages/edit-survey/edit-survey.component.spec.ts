@@ -266,7 +266,8 @@ describe('EditSurveyComponent', () => {
             id: newJob.id,
             name: 'Copy of ' + job1.name,
             color: undefined,
-          })
+          }),
+          true
         );
       });
 

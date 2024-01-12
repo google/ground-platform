@@ -72,8 +72,6 @@
         matInput
         formControlName="label"
         autocomplete="off"
-        (focus)="onTaskFocus()"
-        (blur)="onLabelBlur()"
       />
 
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">

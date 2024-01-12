@@ -51,7 +51,7 @@
       mat-flat-button
       class="finish-edit-button"
       *ngIf="state === 3"
-      [disabled]="!isDraftSurveyDirty()"
+      [disabled]="!isDraftSurveyDirtyAndValid()"
       (click)="onFinishEditSurveyClick()"
     >
       Publish changes
