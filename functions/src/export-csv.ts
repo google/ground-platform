@@ -17,10 +17,10 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {db} from '@/common/context';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { db } from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
-import {Datastore} from './common/datastore';
+import { Datastore } from './common/datastore';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -50,8 +50,9 @@ export async function exportCsvHandler(
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
-  const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
+  const tasksObject = (job['tasks'] as { [id: string]: Task }) || {};
   const tasks = new Map(Object.entries(tasksObject));
+  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
 
   const headers = [];
   // Feature ID column conforms to desktop GIS defaults:
@@ -59,6 +60,8 @@ export async function exportCsvHandler(
   //   "fid" is default used by QGIS and is case-sensitive.
   headers.push('fid');
   headers.push('geometry');
+  const allLoiProperties = getAllPropertiesName(lois);
+  headers.push(...allLoiProperties);
   tasks.forEach(task => headers.push(task.label));
 
   res.type('text/csv');
@@ -76,14 +79,13 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
   const submissions = await db.fetchSubmissionsByJobId(survey.id, jobId);
 
   // Index submissions by LOI id in memory. This consumes more
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
+  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
@@ -100,6 +102,7 @@ export async function exportCsvHandler(
       row.push(loi.get('properties').id || '');
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
+      row.push(...extractLoiProperties(loi, allLoiProperties))
       // TODO(#1288): Clean up remaining references to old responses field
       const data =
         submission['data'] ||
@@ -166,4 +169,32 @@ function getFileName(jobName: string) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.csv`;
+}
+
+function getAllPropertiesName(
+  lois: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>): string[] {
+  let properties: string[] = [];
+  lois.forEach((loi) => {
+    Object.keys(loi.get('properties')).forEach((prop) => {
+      // We don't push 'id' because it's added initially in the first column of the CSV file.
+      if (!properties.includes(prop) && prop !== 'id') {
+        properties.push(prop);
+      }
+    })
+  })
+
+  return properties
+}
+
+function extractLoiProperties(
+  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
+  allLoiProperties: string[]): string[] {
+    let res: string[] = [];
+    if (!loi.get('properties')) {
+      throw Error(`${loi.data} does not have a 'properties' field`)
+    }
+
+    // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
+    allLoiProperties.forEach((prop)=> res.push(loi.get('properties')[prop] || ''))
+    return res
 }
