@@ -17,20 +17,21 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import { geojsonToWKT } from '@terraformer/wkt';
-import { db } from '@/common/context';
+import {geojsonToWKT} from '@terraformer/wkt';
+import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
+import {Datastore} from './common/datastore';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
-  readonly id: string,
-  readonly type: string,
-  readonly label: string,
-  readonly required: boolean,
-  readonly index: number,
-  readonly multipleChoice?: any,
-  readonly options?: any,
-}
+  readonly id: string;
+  readonly type: string;
+  readonly label: string;
+  readonly required: boolean;
+  readonly index: number;
+  readonly multipleChoice?: any;
+  readonly options?: any;
+};
 
 // TODO: Refactor into meaningful pieces.
 export async function exportCsvHandler(
@@ -49,7 +50,7 @@ export async function exportCsvHandler(
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
-  const tasksObject = job['tasks'] as { [id: string]: Task } || {};
+  const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
 
   const headers = [];
@@ -57,10 +58,6 @@ export async function exportCsvHandler(
   //   "FID" is default used by ArcGIS but is case-insensitive.
   //   "fid" is default used by QGIS and is case-sensitive.
   headers.push('fid');
-  // 'latitude', 'longitutde', and 'geometry' are default column names used 
-  // by Earth Engine when importing tables from CSV data.
-  headers.push('latitude');
-  headers.push('longitude');
   headers.push('geometry');
   tasks.forEach(task => headers.push(task.label));
 
@@ -86,7 +83,7 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
+  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
@@ -96,16 +93,20 @@ export async function exportCsvHandler(
 
   lois.forEach(loi => {
     const loiId = loi.id;
-    const location = loi.get('location') || {};
     const submissions = submissionsByLocationOfInterest[loiId] || [{}];
     submissions.forEach(submission => {
       const row = [];
-      row.push(loi.get('id') || '');
-      row.push(location['_latitude'] || '');
-      row.push(location['_longitude'] || '');
-      row.push(toWkt(loi.get('geoJson')) || '');
+      // Header: fid
+      row.push(loi.get('properties').id || '');
+      // Header: geometry
+      row.push(toWkt(loi.get('geometry')) || '');
       // TODO(#1288): Clean up remaining references to old responses field
-      const data = submission['data'] || submission['responses'] || submission['results'] || {};
+      const data =
+        submission['data'] ||
+        submission['responses'] ||
+        submission['results'] ||
+        {};
+      // Header: One column for each task
       tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
       csvStream.write(row);
     });
@@ -113,26 +114,21 @@ export async function exportCsvHandler(
   csvStream.end();
 }
 
-function toWkt(geoJsonString: string) {
-  const geoJsonObject = parseGeoJson(geoJsonString);
-  const geometry = getGeometry(geoJsonObject);
-  return geometry ? geojsonToWKT(geometry) : '';
-}
-
-function parseGeoJson(jsonString: string) {
-  try {
-    // Note: Returns null when jsonString is null.
-    return JSON.parse(jsonString);
-  } catch (e) {
-    return null;
-  }
-}
-
-function getGeometry(geoJsonObject: any) {
-  if (!geoJsonObject || typeof geoJsonObject !== 'object') {
-    return null;
-  }
-  return geoJsonObject.geometry;
+/**
+ * Returns the WKT string converted from the given geometry object
+ *
+ * @param geometryObject - the GeoJSON geometry object extracted from the LOI. This should have format:
+ *   {
+ *      coordinates: any[],
+ *      type: string
+ *   }
+ * @returns The WKT string version of the object 
+ * https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AnalyzingData/Geospatial/Spatial_Definitions/WellknownTextWKT.htm
+ *
+ * @beta
+ */
+function toWkt(geometryObject: any): string {
+  return geojsonToWKT(Datastore.fromFirestoreMap(geometryObject));
 }
 
 /**
