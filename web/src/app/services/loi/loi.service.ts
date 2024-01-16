@@ -65,13 +65,10 @@ export class LocationOfInterestService {
 
     this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
       switchMap(loiId =>
-        surveyService
-          .getActiveSurvey$()
-          .pipe(
-            switchMap(survey =>
-              this.dataStore.loadLocationOfInterest$(survey.id, loiId)
-            )
-          )
+        surveyService.getActiveSurvey$().pipe(
+          switchMap(survey => dataStore.lois$(survey)),
+          map(lois => lois.find(loi => loi.id === loiId)!)
+        )
       )
     );
   }
