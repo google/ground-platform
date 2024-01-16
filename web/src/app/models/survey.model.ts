@@ -66,4 +66,12 @@ export class Survey extends Copiable {
         .toArray() || []
     );
   }
+
+  getPreviousJob(job: Job): Job | undefined {
+    const jobs = this.getJobsSorted();
+
+    const index = jobs.findIndex(j => j.id === job.id);
+
+    return jobs[index - 1];
+  }
 }
