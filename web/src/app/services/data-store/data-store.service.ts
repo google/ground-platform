@@ -251,37 +251,6 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the LOI with the specified
-   * uuid.
-   *
-   * @param surveyId the id of the survey in which requested LOI is.
-   * @param loiId the id of the requested LOI.
-   */
-  loadLocationOfInterest$(
-    surveyId: string,
-    loiId: string
-  ): Observable<LocationOfInterest> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-      .doc(loiId)
-      .get()
-      .pipe(
-        // Fail with error if LOI could not be loaded.
-        map(doc => {
-          const loi = LoiDataConverter.toLocationOfInterest(
-            doc.id,
-            doc.data()! as DocumentData
-          );
-          if (loi instanceof Error) {
-            throw loi;
-          }
-
-          return loi;
-        })
-      );
-  }
-
-  /**
    * Returns a stream containing the user with the specified id. Remote changes
    * to the user will cause a new value to be emitted.
    *
