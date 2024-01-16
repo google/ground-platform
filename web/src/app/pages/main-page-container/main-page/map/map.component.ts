@@ -210,7 +210,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  // TODO(daoyu): override equals function in LocationOfInterest after making it concrete and removing all its inherent classes
+  // TODO(#1445): override equals function in LocationOfInterest after making it concrete and removing all its inherent classes
   private isLocationOfInterestEqual(
     a: LocationOfInterest,
     b: LocationOfInterest
