@@ -27,7 +27,7 @@
   <div *ngIf="survey" class="container">
     <mat-nav-list class="left-menu">
       <a mat-list-item (click)="surveyId && selectSurvey(surveyId)">
-        <mat-icon fontSet="material-icons-outlined" class="button-icon">
+        <mat-icon class="material-symbols-outlined button-icon">
           home
         </mat-icon>
         <span>Home</span>
@@ -39,7 +39,7 @@
         [routerLink]="['./survey']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon fontSet="material-icons-outlined" class="button-icon">
+        <mat-icon class="material-symbols-outlined button-icon">
           assignment
         </mat-icon>
         <span>Survey details</span>
@@ -51,7 +51,7 @@
         [routerLink]="['./share']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon fontSet="material-icons-outlined" class="button-icon">
+        <mat-icon class="material-symbols-outlined button-icon">
           group
         </mat-icon>
         <span>Sharing</span>
@@ -64,7 +64,7 @@
         [routerLink]="['./json']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon fontSet="material-icons-outlined" class="button-icon">
+        <mat-icon class="material-symbols-outlined button-icon">
           code
         </mat-icon>
         <span>JSON</span>
@@ -77,7 +77,7 @@
           id="add-button"
           (click)="addJob()"
         >
-          <mat-icon fontSet="material-icons-outlined">add</mat-icon>
+          <mat-icon class="material-symbols-outlined">add</mat-icon>
         </button>
       </div>
 
