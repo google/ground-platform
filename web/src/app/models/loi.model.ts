@@ -23,9 +23,9 @@ export abstract class LocationOfInterest {
   abstract readonly id: string;
   abstract readonly jobId: string;
   abstract readonly name?: string;
-  // TODO: Make non-null once other subtypes are removed.
+  // TODO(#1444): Make non-null once other subtypes are removed.
   abstract readonly geometry?: Geometry;
-  // TODO: Make non-null, init to empty by default.
+  // TODO(#1444): Make non-null, init to empty by default.
   abstract readonly properties?: Map<string, string | number>;
 
   static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
@@ -37,18 +37,18 @@ export abstract class LocationOfInterest {
   }
 }
 
-// TODO: Delete me in favor of single LOI type.
+// TODO(#1444): Delete me in favor of single LOI type.
 export class PointOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
     readonly jobId: string,
-    // TODO: User custom type instead of exposing types from data job.
+    // TODO(#1444): User custom type instead of exposing types from data job.
     readonly location: GeoPoint,
     readonly properties?: Map<string, string | number>
   ) {}
 }
 
-// TODO: Delete me in favor of single LOI type.
+// TODO(#1444): Delete me in favor of single LOI type.
 export class GeoJsonLocationOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
@@ -58,7 +58,7 @@ export class GeoJsonLocationOfInterest implements LocationOfInterest {
   ) {}
 }
 
-// TODO: Delete me in favor of single LOI type.
+// TODO(#1444): Delete me in favor of single LOI type.
 export class AreaOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,
@@ -68,7 +68,7 @@ export class AreaOfInterest implements LocationOfInterest {
   ) {}
 }
 
-// TODO: Merge into LocationOfInterest and make concrete.
+// TODO(#1444): Merge into LocationOfInterest and make concrete.
 export class GenericLocationOfInterest implements LocationOfInterest {
   constructor(
     readonly id: string,

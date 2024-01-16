@@ -100,7 +100,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns the raw survey object from the db. Used for debbuging only.
+   * Returns the raw survey object from the db. Used for debugging only.
    */
   async loadRawSurvey(id: string) {
     return (
@@ -111,7 +111,7 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the raw survey object in the db. Used for debbuging only.
+   * Updates the raw survey object in the db. Used for debugging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
     await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
@@ -248,37 +248,6 @@ export class DataStoreService {
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
       .doc(submission.id)
       .set(FirebaseDataConverter.submissionToJS(submission));
-  }
-
-  /**
-   * Returns an Observable that loads and emits the LOI with the specified
-   * uuid.
-   *
-   * @param surveyId the id of the survey in which requested LOI is.
-   * @param loiId the id of the requested LOI.
-   */
-  loadLocationOfInterest$(
-    surveyId: string,
-    loiId: string
-  ): Observable<LocationOfInterest> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-      .doc(loiId)
-      .get()
-      .pipe(
-        // Fail with error if LOI could not be loaded.
-        map(doc => {
-          const loi = LoiDataConverter.toLocationOfInterest(
-            doc.id,
-            doc.data()! as DocumentData
-          );
-          if (loi instanceof Error) {
-            throw loi;
-          }
-
-          return loi;
-        })
-      );
   }
 
   /**
