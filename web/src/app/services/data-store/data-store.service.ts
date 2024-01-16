@@ -100,7 +100,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns the raw survey object from the db. Used for debbuging only.
+   * Returns the raw survey object from the db. Used for debugging only.
    */
   async loadRawSurvey(id: string) {
     return (
@@ -111,7 +111,7 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the raw survey object in the db. Used for debbuging only.
+   * Updates the raw survey object in the db. Used for debugging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
     await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
