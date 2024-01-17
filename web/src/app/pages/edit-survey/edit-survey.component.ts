@@ -121,6 +121,11 @@ export class EditSurveyComponent implements OnInit {
       }),
       true
     );
+
+    this.navigationService.navigateToEditJob(
+      this.draftSurveyService.getSurvey().id,
+      newJob.id
+    );
   }
 
   deleteJob(job: Job): void {
@@ -149,9 +154,21 @@ export class EditSurveyComponent implements OnInit {
                 job.color || this.jobService.getNextColor(this.survey?.jobs),
             })
           );
+
+          this.navigationService.navigateToEditJob(this.surveyId!, job.id);
           break;
         case DialogType.DeleteJob:
-          this.draftSurveyService.deleteJob(job);
+          {
+            const previousJob = this.survey?.getPreviousJob(job);
+
+            this.draftSurveyService.deleteJob(job);
+            previousJob
+              ? this.navigationService.navigateToEditJob(
+                  this.draftSurveyService.getSurvey().id,
+                  previousJob.id
+                )
+              : this.navigationService.navigateToEditSurvey(this.surveyId!);
+          }
           break;
         default:
           break;

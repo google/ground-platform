@@ -256,6 +256,15 @@ export class NavigationService {
   }
 
   /**
+   * Navigate to the URL with new survey id.
+   */
+  navigateToEditJob(surveyId: string, jobId: string) {
+    this.router.navigateByUrl(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}/${NavigationService.JOB_SEGMENT}/${jobId}`
+    );
+  }
+
+  /**
    * Navigate to the URL for signin.
    */
   signIn() {
