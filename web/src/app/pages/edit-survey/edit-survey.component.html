@@ -51,7 +51,9 @@
         [routerLink]="['./share']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon">group</mat-icon>
+        <mat-icon class="material-symbols-outlined button-icon">
+          group
+        </mat-icon>
         <span>Sharing</span>
       </a>
 
@@ -62,7 +64,9 @@
         [routerLink]="['./json']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon">code</mat-icon>
+        <mat-icon class="material-symbols-outlined button-icon">
+          code
+        </mat-icon>
         <span>JSON</span>
       </a>
 
@@ -71,10 +75,9 @@
         <button
           mat-icon-button
           id="add-button"
-          class="material-symbols-outlined button-icon"
           (click)="addJob()"
         >
-          <mat-icon>add</mat-icon>
+          <mat-icon class="material-symbols-outlined">add</mat-icon>
         </button>
       </div>
 
