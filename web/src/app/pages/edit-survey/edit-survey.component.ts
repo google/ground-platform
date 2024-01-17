@@ -134,6 +134,9 @@ export class EditSurveyComponent implements OnInit {
 
   openDialog(dialogType: DialogType, job: Job): void {
     const dialogRef = this.dialog.open(JobDialogComponent, {
+      autoFocus: [DialogType.AddJob, DialogType.RenameJob].includes(dialogType)
+        ? `#${JobDialogComponent.JOB_NAME_FIELD_ID}`
+        : 'first-tabbable',
       data: {dialogType, jobName: job.name ?? ''},
     });
 

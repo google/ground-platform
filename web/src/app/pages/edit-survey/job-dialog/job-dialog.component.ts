@@ -35,6 +35,7 @@ export interface DialogData {
   styleUrls: ['./job-dialog.component.scss'],
 })
 export class JobDialogComponent {
+  public static readonly JOB_NAME_FIELD_ID = 'job-name';
   readonly DialogType = DialogType;
 
   constructor(
@@ -70,6 +71,10 @@ export class JobDialogComponent {
       default:
         return '';
     }
+  }
+
+  get jobNameFieldId() {
+    return JobDialogComponent.JOB_NAME_FIELD_ID;
   }
 
   onCancelClick(): void {
