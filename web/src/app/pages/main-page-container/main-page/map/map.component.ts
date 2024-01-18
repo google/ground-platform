@@ -299,7 +299,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       lois.toArray()
     );
     if (bounds) {
-      this.map.fitBounds(bounds);
+      this.map.googleMap?.fitBounds(bounds);
     }
   }
 
@@ -390,7 +390,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     this.map.panTo(position);
     if (this.map.getZoom()! < zoomedInLevel) {
-      this.map.zoom = zoomedInLevel;
+      this.map.googleMap?.setZoom(zoomedInLevel);
     }
   }
 
