@@ -299,7 +299,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       lois.toArray()
     );
     if (bounds) {
-      this.map.googleMap?.fitBounds(bounds);
+      this.map.fitBounds(bounds);
     }
   }
 
