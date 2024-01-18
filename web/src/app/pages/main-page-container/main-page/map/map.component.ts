@@ -440,15 +440,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private selectMarker(locationOfInterestId: string | null) {
-    const marker = locationOfInterestId
-      ? this.markers.get(locationOfInterestId)
-      : undefined;
-    if (marker) {
-      this.setIconSize(marker, enlargedIconScale);
-      if (this.shouldEnableDrawingTools) {
-        marker.setDraggable(true);
+    if (locationOfInterestId) {
+      const marker = this.markers.get(locationOfInterestId);
+
+      if (marker) {
+        this.setIconSize(marker, enlargedIconScale);
+        if (this.shouldEnableDrawingTools) {
+          marker.setDraggable(true);
+        }
+        this.panAndZoom(marker?.getPosition());
       }
-      this.panAndZoom(marker?.getPosition());
     }
   }
 
@@ -466,22 +467,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private selectPolygons(locationOfInterestId: string | null) {
-    const polygons = locationOfInterestId
-      ? this.polygons.get(locationOfInterestId)
-      : undefined;
+    if (locationOfInterestId) {
+      const polygons = this.polygons.get(locationOfInterestId);
 
-    const bounds = new google.maps.LatLngBounds();
+      polygons?.forEach(polygon =>
+        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
+      );
 
-    polygons?.forEach(polygon => {
-      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
-
-      polygon.getPath().forEach(path => {
-        const point = new google.maps.LatLng(path.lat(), path.lng());
-        bounds.extend(point);
-      });
-
-      this.map.googleMap?.fitBounds(bounds);
-    });
+      this.fitMapToLocationsOfInterest(
+        this.getLoisByIds(List([locationOfInterestId]))
+      );
+    }
   }
 
   private unselectPolygons() {
@@ -542,7 +538,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       );
   }
 
-  private getLoisById(ids: List<string>): List<LocationOfInterest> {
+  private getLoisByIds(ids: List<string>): List<LocationOfInterest> {
     return ids.map(id => this.loisMap.get(id)!);
   }
 
@@ -555,7 +551,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       event.latLng!
     ).map(p => p.get('id'));
 
-    const candidateLois = this.getLoisById(candidatePolygonsIds);
+    const candidateLois = this.getLoisByIds(candidatePolygonsIds);
 
     const loi = LocationOfInterest.getSmallestByArea(candidateLois);
 
