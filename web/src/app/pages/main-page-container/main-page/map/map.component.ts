@@ -453,13 +453,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private unselectMarker() {
-    const selectedMarker = this.selectedLocationOfInterestId
-      ? this.markers.get(this.selectedLocationOfInterestId)
-      : undefined;
+    if (this.selectedLocationOfInterestId) {
+      const selectedMarker = this.markers.get(
+        this.selectedLocationOfInterestId
+      );
 
-    if (selectedMarker) {
-      this.setIconSize(selectedMarker, normalIconScale);
-      selectedMarker.setDraggable(false);
+      if (selectedMarker) {
+        this.setIconSize(selectedMarker, normalIconScale);
+        selectedMarker.setDraggable(false);
+      }
     }
   }
 
@@ -483,16 +485,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private unselectPolygons() {
-    const selectedPolygons = this.selectedLocationOfInterestId
-      ? this.polygons.get(this.selectedLocationOfInterestId)
-      : undefined;
-
-    if (selectedPolygons) {
-      selectedPolygons.forEach(polygon =>
-        polygon.setOptions({
-          strokeWeight: normalPolygonStrokeWeight,
-        })
+    if (this.selectedLocationOfInterestId) {
+      const selectedPolygons = this.polygons.get(
+        this.selectedLocationOfInterestId
       );
+
+      if (selectedPolygons) {
+        selectedPolygons.forEach(polygon =>
+          polygon.setOptions({
+            strokeWeight: normalPolygonStrokeWeight,
+          })
+        );
+      }
     }
   }
 
