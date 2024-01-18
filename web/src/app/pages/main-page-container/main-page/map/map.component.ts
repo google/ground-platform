@@ -420,29 +420,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (locationOfInterestId === this.selectedLocationOfInterestId) {
       return;
     }
+    this.unselectMarker();
     this.selectMarker(locationOfInterestId);
+    this.unselectPolygons();
     this.selectPolygons(locationOfInterestId);
     this.selectedLocationOfInterestId = locationOfInterestId;
-  }
-
-  private selectMarker(locationOfInterestId: string | null) {
-    const marker = locationOfInterestId
-      ? this.markers.get(locationOfInterestId)
-      : undefined;
-    if (marker) {
-      this.setIconSize(marker, enlargedIconScale);
-      if (this.shouldEnableDrawingTools) {
-        marker.setDraggable(true);
-      }
-    }
-    const selectedMarker = this.selectedLocationOfInterestId
-      ? this.markers.get(this.selectedLocationOfInterestId)
-      : undefined;
-    if (selectedMarker) {
-      this.setIconSize(selectedMarker, normalIconScale);
-      selectedMarker.setDraggable(false);
-    }
-    this.panAndZoom(marker?.getPosition());
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {
@@ -457,23 +439,60 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.setIcon(newIcon);
   }
 
+  private selectMarker(locationOfInterestId: string | null) {
+    const marker = locationOfInterestId
+      ? this.markers.get(locationOfInterestId)
+      : undefined;
+    if (marker) {
+      this.setIconSize(marker, enlargedIconScale);
+      if (this.shouldEnableDrawingTools) {
+        marker.setDraggable(true);
+      }
+      this.panAndZoom(marker?.getPosition());
+    }
+  }
+
+  private unselectMarker() {
+    const selectedMarker = this.selectedLocationOfInterestId
+      ? this.markers.get(this.selectedLocationOfInterestId)
+      : undefined;
+
+    if (selectedMarker) {
+      this.setIconSize(selectedMarker, normalIconScale);
+      selectedMarker.setDraggable(false);
+    }
+  }
+
   private selectPolygons(locationOfInterestId: string | null) {
     const polygons = locationOfInterestId
       ? this.polygons.get(locationOfInterestId)
       : undefined;
-    if (polygons) {
-      for (const polygon of polygons) {
-        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
-      }
-    }
+
+    const bounds = new google.maps.LatLngBounds();
+
+    polygons?.forEach(polygon => {
+      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
+
+      polygon.getPath().forEach(path => {
+        const point = new google.maps.LatLng(path.lat(), path.lng());
+        bounds.extend(point);
+      });
+
+      this.map.googleMap?.fitBounds(bounds);
+    });
+  }
+
+  private unselectPolygons() {
     const selectedPolygons = this.selectedLocationOfInterestId
       ? this.polygons.get(this.selectedLocationOfInterestId)
       : undefined;
+
     if (selectedPolygons) {
-      for (const polygon of selectedPolygons)
+      selectedPolygons.forEach(polygon =>
         polygon.setOptions({
           strokeWeight: normalPolygonStrokeWeight,
-        });
+        })
+      );
     }
   }
 
