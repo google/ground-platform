@@ -39,4 +39,13 @@ export class Job extends Copiable {
 
     if (!strategy) this.strategy = DataCollectionStrategy.PREDEFINED;
   }
+
+  getTasksSorted(): Task[] | undefined {
+    return (
+      this.tasks
+        ?.valueSeq()
+        .sort(({index: index1}, {index: index2}) => (index1 < index2 ? -1 : 1))
+        .toArray() || []
+    );
+  }
 }
