@@ -440,60 +440,57 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private selectMarker(locationOfInterestId: string | null) {
-    if (locationOfInterestId) {
-      const marker = this.markers.get(locationOfInterestId);
+    if (!locationOfInterestId) return;
 
-      if (marker) {
-        this.setIconSize(marker, enlargedIconScale);
-        if (this.shouldEnableDrawingTools) {
-          marker.setDraggable(true);
-        }
-        this.panAndZoom(marker?.getPosition());
-      }
-    }
+    const marker = this.markers.get(locationOfInterestId);
+
+    if (!marker) return;
+
+    this.setIconSize(marker, enlargedIconScale);
+
+    marker.setDraggable(this.shouldEnableDrawingTools);
+
+    this.panAndZoom(marker.getPosition());
   }
 
   private unselectMarker() {
-    if (this.selectedLocationOfInterestId) {
-      const selectedMarker = this.markers.get(
-        this.selectedLocationOfInterestId
-      );
+    if (!this.selectedLocationOfInterestId) return;
 
-      if (selectedMarker) {
-        this.setIconSize(selectedMarker, normalIconScale);
-        selectedMarker.setDraggable(false);
-      }
-    }
+    const selectedMarker = this.markers.get(this.selectedLocationOfInterestId);
+
+    if (!selectedMarker) return;
+
+    this.setIconSize(selectedMarker, normalIconScale);
+
+    selectedMarker.setDraggable(false);
   }
 
   private selectPolygons(locationOfInterestId: string | null) {
-    if (locationOfInterestId) {
-      const polygons = this.polygons.get(locationOfInterestId);
+    if (!locationOfInterestId) return;
 
-      polygons?.forEach(polygon =>
-        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
-      );
+    const polygons = this.polygons.get(locationOfInterestId);
 
-      this.fitMapToLocationsOfInterest(
-        this.getLoisByIds(List([locationOfInterestId]))
-      );
-    }
+    polygons?.forEach(polygon =>
+      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
+    );
+
+    this.fitMapToLocationsOfInterest(
+      this.getLoisByIds(List([locationOfInterestId]))
+    );
   }
 
   private unselectPolygons() {
-    if (this.selectedLocationOfInterestId) {
-      const selectedPolygons = this.polygons.get(
-        this.selectedLocationOfInterestId
-      );
+    if (!this.selectedLocationOfInterestId) return;
 
-      if (selectedPolygons) {
-        selectedPolygons.forEach(polygon =>
-          polygon.setOptions({
-            strokeWeight: normalPolygonStrokeWeight,
-          })
-        );
-      }
-    }
+    const selectedPolygons = this.polygons.get(
+      this.selectedLocationOfInterestId
+    );
+
+    selectedPolygons?.forEach(polygon =>
+      polygon.setOptions({
+        strokeWeight: normalPolygonStrokeWeight,
+      })
+    );
   }
 
   private addPolygonToMap(
