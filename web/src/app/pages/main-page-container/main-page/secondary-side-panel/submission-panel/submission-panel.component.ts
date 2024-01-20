@@ -35,7 +35,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   @Input() submissionId!: string;
   submission: Submission | null = null;
-  tasks: Task[] | undefined;
+  tasks: List<Task> | undefined;
 
   public taskType = TaskType;
 

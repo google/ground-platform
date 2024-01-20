@@ -17,6 +17,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {List} from 'immutable';
 import {Subscription, filter, startWith} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -88,7 +89,7 @@ export class EditSurveyComponent implements OnInit {
     );
   }
 
-  jobs(): Job[] {
+  jobs(): List<Job> {
     return this.survey!.getJobsSorted();
   }
 
