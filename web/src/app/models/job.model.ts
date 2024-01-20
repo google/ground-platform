@@ -40,7 +40,7 @@ export class Job extends Copiable {
     if (!strategy) this.strategy = DataCollectionStrategy.PREDEFINED;
   }
 
-  getTasksSorted(): List<Task> | undefined {
-    return this.tasks?.sortBy(task => task.index).toList();
+  getTasksSorted(): List<Task> {
+    return this.tasks?.sortBy(task => task.index).toList() || List();
   }
 }
