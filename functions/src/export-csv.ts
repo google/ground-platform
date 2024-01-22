@@ -64,6 +64,8 @@ export async function exportCsvHandler(
   const allLoiProperties = getPropertyNames(lois);
   headers.push(...allLoiProperties);
   tasks.forEach(task => headers.push(task.label));
+  headers.push('contributor_username');
+  headers.push('contributor_email');
 
   res.type('text/csv');
   res.setHeader(
@@ -100,7 +102,7 @@ export async function exportCsvHandler(
     submissions.forEach(submission => {
       const row = [];
       // Header: fid
-      row.push(loi.get('properties').id || '');
+      row.push(loi.get('properties')?.id || '');
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
       // Header: One column for each loi property (merged over all properties across all LOIs)
@@ -113,6 +115,12 @@ export async function exportCsvHandler(
         {};
       // Header: One column for each task
       tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
+      // Header: contributor_username, contributor_email
+      const contributor = submission['lastModified']
+        ? submission['lastModified']['user']
+        : [];
+      row.push(contributor['displayName'] || '');
+      row.push(contributor['email'] || '');
       csvStream.write(row);
     });
   });
@@ -179,7 +187,7 @@ function getPropertyNames(
   return new Set(
     lois.docs
       .map(loi =>
-        Object.keys(loi.get('properties'))
+        Object.keys(loi.get('properties') || {})
           // Don't retrieve ID because we already store it in a separate column
           .filter(prop => prop !== 'id')
       )
@@ -197,6 +205,6 @@ function getPropertiesByName(
 
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
   return List.of(...allLoiProperties).map(
-    prop => loi.get('properties')[prop] || ''
+    prop => (loi.get('properties') || {})[prop] || ''
   );
 }
