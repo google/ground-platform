@@ -199,10 +199,6 @@ function getPropertiesByName(
   loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
   allLoiProperties: Set<string>
 ): List<string> {
-  if (!loi.get('properties')) {
-    return List.of();
-  }
-
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
   return List.of(...allLoiProperties).map(
     prop => (loi.get('properties') || {})[prop] || ''
