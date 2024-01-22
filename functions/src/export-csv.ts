@@ -21,6 +21,7 @@ import {geojsonToWKT} from '@terraformer/wkt';
 import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
+import {List} from 'immutable';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -60,7 +61,7 @@ export async function exportCsvHandler(
   //   "fid" is default used by QGIS and is case-sensitive.
   headers.push('fid');
   headers.push('geometry');
-  const allLoiProperties = getAllPropertiesName(lois);
+  const allLoiProperties = getPropertyNames(lois);
   headers.push(...allLoiProperties);
   tasks.forEach(task => headers.push(task.label));
 
@@ -103,7 +104,7 @@ export async function exportCsvHandler(
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
       // Header: One column for each loi property (merged over all properties across all LOIs)
-      row.push(...extractLoiProperties(loi, allLoiProperties))
+      row.push(...getPropertiesByName(loi, allLoiProperties));
       // TODO(#1288): Clean up remaining references to old responses field
       const data =
         submission['data'] ||
@@ -126,7 +127,7 @@ export async function exportCsvHandler(
  *      coordinates: any[],
  *      type: string
  *   }
- * @returns The WKT string version of the object 
+ * @returns The WKT string version of the object
  * https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AnalyzingData/Geospatial/Spatial_Definitions/WellknownTextWKT.htm
  *
  * @beta
@@ -172,30 +173,30 @@ function getFileName(jobName: string) {
   return `${fileBase}.csv`;
 }
 
-function getAllPropertiesName(
-  lois: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>): string[] {
-  let properties: string[] = [];
-  lois.forEach((loi) => {
-    Object.keys(loi.get('properties')).forEach((prop) => {
-      // We don't push 'id' because it's added initially in the first column of the CSV file.
-      if (!properties.includes(prop) && prop !== 'id') {
-        properties.push(prop);
-      }
-    })
-  })
-
-  return properties
+function getPropertyNames(
+  lois: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
+): Set<string> {
+  return new Set(
+    lois.docs
+      .map(loi =>
+        Object.keys(loi.get('properties'))
+          // Don't retrieve ID because we already store it in a separate column
+          .filter(prop => prop !== 'id')
+      )
+      .flat()
+  );
 }
 
-function extractLoiProperties(
+function getPropertiesByName(
   loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
-  allLoiProperties: string[]): string[] {
-    let res: string[] = [];
-    if (!loi.get('properties')) {
-      throw Error(`${loi.data} does not have a 'properties' field`)
-    }
+  allLoiProperties: Set<string>
+): List<string> {
+  if (!loi.get('properties')) {
+    return List.of();
+  }
 
-    // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-    allLoiProperties.forEach((prop)=> res.push(loi.get('properties')[prop] || ''))
-    return res
+  // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
+  return List.of(...allLoiProperties).map(
+    prop => loi.get('properties')[prop] || ''
+  );
 }
