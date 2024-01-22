@@ -62,7 +62,7 @@ const enlargedPolygonStrokeWeight = 6;
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   lois$: Observable<List<LocationOfInterest>>;
-  lois: List<LocationOfInterest> = List([]);
+  loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
   activeSurvey$: Observable<Survey>;
   private initialMapOptions: google.maps.MapOptions = {
     center: new google.maps.LatLng(40.767716, -73.971714),
@@ -120,13 +120,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
       ]).subscribe(([survey, lois, locationOfInterestId]) => {
-        this.lois = lois;
+        const loisMap = ImmutableMap(lois.map(loi => [loi.id, loi]));
+        const loiIdsToRemove = this.loisMap
+          .filter(
+            (value, key) =>
+              !(
+                loisMap.has(key) &&
+                this.isLocationOfInterestEqual(loisMap.get(key)!, value)
+              )
+          )
+          .keySeq()
+          .toList();
+        const loisToAdd = loisMap
+          .filter(
+            (value, key) =>
+              !(
+                this.loisMap.has(key) &&
+                this.isLocationOfInterestEqual(this.loisMap.get(key)!, value)
+              )
+          )
+          .toList();
+        this.loisMap = loisMap;
 
-        this.onSurveyAndLocationsOfInterestUpdate(
-          survey,
-          lois,
-          locationOfInterestId
-        );
+        this.removeDeletedLocationsOfInterest(loiIdsToRemove);
+        this.addNewLocationsOfInterest(survey, loisToAdd);
+        if (this.lastFitSurveyId !== survey.id) {
+          this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
+          this.lastFitSurveyId = survey.id;
+        }
+        this.selectLocationOfInterest(locationOfInterestId);
       })
     );
 
@@ -188,44 +210,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private onSurveyAndLocationsOfInterestUpdate(
-    survey: Survey,
-    lois: List<LocationOfInterest>,
-    locationOfInterestId: string | null
-  ): void {
-    this.removeDeletedLocationsOfInterest(lois);
-    this.addNewLocationsOfInterest(survey, lois);
-    if (this.lastFitSurveyId !== survey.id) {
-      this.fitMapToLocationsOfInterest(lois);
-      this.lastFitSurveyId = survey.id;
-    }
-    this.selectLocationOfInterest(locationOfInterestId);
+  // TODO(#1445): override equals function in LocationOfInterest after making it concrete and removing all its inherent classes
+  private isLocationOfInterestEqual(
+    a: LocationOfInterest,
+    b: LocationOfInterest
+  ): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
   }
 
   /**
    * Remove deleted lois to map. The LOIs that were displayed on
    * the map but not in the `newLocationsOfInterest` are considered as deleted.
    */
-  private removeDeletedLocationsOfInterest(
-    newLocationsOfInterest: List<LocationOfInterest>
-  ) {
-    const newLoiIds: List<string> = newLocationsOfInterest.map(f => f.id);
-    this.removeDeletedMarkers(newLoiIds);
-    this.removeDeletedPolygons(newLoiIds);
+  private removeDeletedLocationsOfInterest(idsToRemove: List<string>) {
+    this.removeDeletedMarkers(idsToRemove);
+    this.removeDeletedPolygons(idsToRemove);
   }
 
-  private removeDeletedMarkers(newLoiIds: List<string>) {
+  private removeDeletedMarkers(idsToRemove: List<string>) {
     for (const id of this.markers.keys()) {
-      if (!newLoiIds.contains(id)) {
+      if (idsToRemove.includes(id)) {
         this.markers.get(id)!.setMap(null);
         this.markers.delete(id);
       }
     }
   }
 
-  private removeDeletedPolygons(newLoiIds: List<string>) {
+  private removeDeletedPolygons(idsToRemove: List<string>) {
     for (const id of this.polygons.keys()) {
-      if (!newLoiIds.contains(id)) {
+      if (idsToRemove.includes(id)) {
         for (const polygon of this.polygons.get(id)!) {
           polygon.setMap(null);
         }
@@ -240,19 +253,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    */
   private addNewLocationsOfInterest(
     survey: Survey,
-    lois: List<LocationOfInterest>
+    loisToAdd: List<LocationOfInterest>
   ) {
-    const existingLocationOfInterestIds = Array.from(
-      this.markers.keys()
-    ).concat(Array.from(this.polygons.keys()));
-
-    lois.forEach(loi => {
+    loisToAdd.forEach(loi => {
       if (!survey.getJob(loi.jobId)) {
         // Ignore lois whose job has been removed.
         console.debug(`Ignoring loi ${loi.id} with missing job ${loi.jobId}`);
-        return;
-      }
-      if (existingLocationOfInterestIds.includes(loi.id)) {
         return;
       }
       const color = survey.jobs.get(loi.jobId)?.color;
@@ -384,7 +390,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     this.map.panTo(position);
     if (this.map.getZoom()! < zoomedInLevel) {
-      this.map.zoom = zoomedInLevel;
+      this.map.googleMap?.setZoom(zoomedInLevel);
     }
   }
 
@@ -414,29 +420,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (locationOfInterestId === this.selectedLocationOfInterestId) {
       return;
     }
+    this.unselectMarker();
     this.selectMarker(locationOfInterestId);
+    this.unselectPolygons();
     this.selectPolygons(locationOfInterestId);
     this.selectedLocationOfInterestId = locationOfInterestId;
-  }
-
-  private selectMarker(locationOfInterestId: string | null) {
-    const marker = locationOfInterestId
-      ? this.markers.get(locationOfInterestId)
-      : undefined;
-    if (marker) {
-      this.setIconSize(marker, enlargedIconScale);
-      if (this.shouldEnableDrawingTools) {
-        marker.setDraggable(true);
-      }
-    }
-    const selectedMarker = this.selectedLocationOfInterestId
-      ? this.markers.get(this.selectedLocationOfInterestId)
-      : undefined;
-    if (selectedMarker) {
-      this.setIconSize(selectedMarker, normalIconScale);
-      selectedMarker.setDraggable(false);
-    }
-    this.panAndZoom(marker?.getPosition());
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {
@@ -451,24 +439,58 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.setIcon(newIcon);
   }
 
+  private selectMarker(locationOfInterestId: string | null) {
+    if (!locationOfInterestId) return;
+
+    const marker = this.markers.get(locationOfInterestId);
+
+    if (!marker) return;
+
+    this.setIconSize(marker, enlargedIconScale);
+
+    marker.setDraggable(this.shouldEnableDrawingTools);
+
+    this.panAndZoom(marker.getPosition());
+  }
+
+  private unselectMarker() {
+    if (!this.selectedLocationOfInterestId) return;
+
+    const selectedMarker = this.markers.get(this.selectedLocationOfInterestId);
+
+    if (!selectedMarker) return;
+
+    this.setIconSize(selectedMarker, normalIconScale);
+
+    selectedMarker.setDraggable(false);
+  }
+
   private selectPolygons(locationOfInterestId: string | null) {
-    const polygons = locationOfInterestId
-      ? this.polygons.get(locationOfInterestId)
-      : undefined;
-    if (polygons) {
-      for (const polygon of polygons) {
-        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
-      }
-    }
-    const selectedPolygons = this.selectedLocationOfInterestId
-      ? this.polygons.get(this.selectedLocationOfInterestId)
-      : undefined;
-    if (selectedPolygons) {
-      for (const polygon of selectedPolygons)
-        polygon.setOptions({
-          strokeWeight: normalPolygonStrokeWeight,
-        });
-    }
+    if (!locationOfInterestId) return;
+
+    const polygons = this.polygons.get(locationOfInterestId);
+
+    polygons?.forEach(polygon =>
+      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
+    );
+
+    this.fitMapToLocationsOfInterest(
+      this.getLoisByIds(List([locationOfInterestId]))
+    );
+  }
+
+  private unselectPolygons() {
+    if (!this.selectedLocationOfInterestId) return;
+
+    const selectedPolygons = this.polygons.get(
+      this.selectedLocationOfInterestId
+    );
+
+    selectedPolygons?.forEach(polygon =>
+      polygon.setOptions({
+        strokeWeight: normalPolygonStrokeWeight,
+      })
+    );
   }
 
   private addPolygonToMap(
@@ -513,8 +535,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       );
   }
 
-  private getLoisById(ids: List<string>): List<LocationOfInterest> {
-    return ids.map(id => this.lois.find(loi => loi.id === id)!);
+  private getLoisByIds(ids: List<string>): List<LocationOfInterest> {
+    return ids.map(id => this.loisMap.get(id)!);
   }
 
   private onPolygonClick(event: google.maps.PolyMouseEvent) {
@@ -526,7 +548,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       event.latLng!
     ).map(p => p.get('id'));
 
-    const candidateLois = this.getLoisById(candidatePolygonsIds);
+    const candidateLois = this.getLoisByIds(candidatePolygonsIds);
 
     const loi = LocationOfInterest.getSmallestByArea(candidateLois);
 

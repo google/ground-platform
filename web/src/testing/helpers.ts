@@ -23,7 +23,7 @@ import {Polygon} from 'app/models/geometry/polygon';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function deepEqualityTester(a: any, b: any): boolean | undefined {
   // `is()` doesn't do deep equals on arrays or dictionaries, so we let Jasmine
-  // handle these instead. Jasmine will still pass indiviudal elements back to
+  // handle these instead. Jasmine will still pass individual elements back to
   // this tester.
   if (
     Array.isArray(a) ||
