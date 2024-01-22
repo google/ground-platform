@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {Copiable} from './copiable';
 import {Job} from './job.model';
@@ -58,13 +58,8 @@ export class Survey extends Copiable {
     );
   }
 
-  getJobsSorted(): Job[] {
-    return (
-      this.jobs
-        .valueSeq()
-        .sort(({index: index1}, {index: index2}) => (index1 < index2 ? -1 : 1))
-        .toArray() || []
-    );
+  getJobsSorted(): List<Job> {
+    return this.jobs.sortBy(job => job.index).toList();
   }
 
   getPreviousJob(job: Job): Job | undefined {
@@ -72,6 +67,6 @@ export class Survey extends Copiable {
 
     const index = jobs.findIndex(j => j.id === job.id);
 
-    return jobs[index - 1];
+    return jobs.get(index - 1);
   }
 }

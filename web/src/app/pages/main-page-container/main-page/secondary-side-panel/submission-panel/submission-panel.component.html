@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 <div>
   <div class="submission-title">
     <div class="submission-title-left">
@@ -30,20 +31,18 @@ limitations under the License.
     {{submission?.lastModified?.clientTime | date: 'shortTime' }}
   </div>
   <div *ngIf="tasks" class="submission-tasks-container">
-    <div *ngFor="let task of tasks!.keys(); let i = index">
+    <div *ngFor="let task of tasks; let i = index">
       <mat-divider *ngIf="i > 0"></mat-divider>
       <div class="submission-task">
         <!-- Question -->
-        <div class="submission-question">
-          {{getTask(task)!.label}}
-        </div>
+        <div class="submission-question">{{task.label}}</div>
         <!-- Response -->
         <div class="submission-response">
           <div *ngIf="getTaskSubmissionResult(task) === undefined" class="submission-no-response">
             Skipped
           </div>
           <div *ngIf="getTaskSubmissionResult(task) !== undefined">
-            <div [ngSwitch]="getTaskType(task)" >
+            <div [ngSwitch]="task.type" >
               <div *ngSwitchCase="taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
                 <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task)">
                   {{option.label}}
@@ -53,7 +52,7 @@ limitations under the License.
                 <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
               </div>
               <!-- TODO(#1279): Add support for map related tasks for submission detail panel -->
-              <div *ngSwitchCase="taskType.POINT || taskType.CAPTURE_LOCATION"></div>
+              <div *ngSwitchCase="taskType.DROP_PIN || taskType.CAPTURE_LOCATION"></div>
               <div *ngSwitchCase="taskType.DRAW_AREA"></div>
               <div *ngSwitchDefault>
                 {{getTaskSubmissionResult(task)!.value.toString()}}
