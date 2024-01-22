@@ -59,18 +59,9 @@ limitations under the License.
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #jobMenu="matMenu">
-            <button
-              mat-menu-item
-              (click)="onImportLocationsOfInterest()"
-              *ngIf="surveyService.canManageSurvey()"
-            >
-              <mat-icon>cloud_upload</mat-icon>
-              <span>Import data collection sites</span>
-            </button>
             <a class="download" (click)="onDownloadCsvClick()" target="_blank">
               <button mat-menu-item>
-                <mat-icon>cloud_download</mat-icon>
-                <span>Download job data</span>
+                <span>Download data</span>
               </button>
             </a>
           </mat-menu>

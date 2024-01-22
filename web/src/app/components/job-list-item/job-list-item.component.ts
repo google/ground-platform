@@ -16,16 +16,13 @@
 
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {AuthService} from 'app/services/auth/auth.service';
-import {DialogService} from 'app/services/dialog/dialog.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -57,8 +54,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private dialogService: DialogService,
-    private importDialog: MatDialog,
     private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
@@ -115,17 +110,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
 
   onClose() {
     return this.navigationService.selectSurvey(this.surveyId!);
-  }
-
-  onImportLocationsOfInterest() {
-    if (!this.surveyId || !this.job?.id) {
-      return;
-    }
-    this.importDialog.open(ImportDialogComponent, {
-      data: {surveyId: this.surveyId, jobId: this.job?.id},
-      width: '350px',
-      maxHeight: '800px',
-    });
   }
 
   async onDownloadCsvClick() {
