@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {Copiable} from './copiable';
 import {Task} from './task/task.model';
@@ -38,5 +38,9 @@ export class Job extends Copiable {
     super();
 
     if (!strategy) this.strategy = DataCollectionStrategy.PREDEFINED;
+  }
+
+  getTasksSorted(): List<Task> {
+    return this.tasks?.sortBy(task => task.index).toList() || List();
   }
 }
