@@ -108,10 +108,6 @@ export class EditJobComponent {
     this.isLoading = false;
   }
 
-  getIndex(index: number) {
-    return index;
-  }
-
   onChangeSection(section: EditJobSection) {
     this.section = section;
   }
