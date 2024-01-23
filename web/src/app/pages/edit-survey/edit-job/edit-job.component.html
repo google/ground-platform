@@ -18,28 +18,28 @@
   <div class="section-selector">
     <button
       mat-flat-button
-      [color]="section === 'tasks' ? 'primary' : 'basic'"
+      [color]="section === EditJobSection.TASKS ? 'primary' : 'basic'"
       aria-label="tasks"
-      (click)="onChangeSection('tasks')"
+      (click)="onChangeSection(EditJobSection.TASKS)"
     >
-      <mat-icon>{{ section === 'tasks' ? 'checked_small' : 'list' }}</mat-icon>
+      <mat-icon>{{ section === EditJobSection.TASKS ? 'checked_small' : 'list' }}</mat-icon>
       <span>Tasks</span>
     </button>
 
     <button
       mat-flat-button
-      [color]="section === 'lois' ? 'primary' : 'basic'"
+      [color]="section === EditJobSection.LOIS ? 'primary' : 'basic'"
       aria-label="lois"
-      (click)="onChangeSection('lois')"
+      (click)="onChangeSection(EditJobSection.LOIS)"
     >
-      <mat-icon>{{ section === 'lois' ? 'checked_small' : 'place' }}</mat-icon>
+      <mat-icon>{{ section === EditJobSection.LOIS ? 'checked_small' : 'place' }}</mat-icon>
       <span>Sites</span>
     </button>
   </div>
 
   <!-- TODO: Refactor into EditLois. -->
   <div [ngSwitch]="section">
-    <div *ngSwitchCase="'lois'">
+    <div *ngSwitchCase="EditJobSection.LOIS">
       <loi-selection
         *ngIf="draftSurveyService.getSurvey$() | async as survey"
         #loiSelection
@@ -52,7 +52,7 @@
       </loi-selection>
     </div>
 
-    <div *ngSwitchCase="'tasks'">
+    <div *ngSwitchCase="EditJobSection.TASKS">
       <tasks-editor
         *ngIf="!isLoading"
         #tasksEditor

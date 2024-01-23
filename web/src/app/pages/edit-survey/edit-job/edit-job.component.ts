@@ -30,6 +30,11 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 
+enum EditJobSection {
+  TASKS,
+  LOIS,
+}
+
 @Component({
   selector: 'edit-job',
   templateUrl: './edit-job.component.html',
@@ -40,11 +45,15 @@ export class EditJobComponent {
 
   surveyId?: string;
   jobId?: string;
-  section: 'tasks' | 'lois' = 'tasks';
-  lois!: List<LocationOfInterest>;
-  isLoading = true;
+
+  section: EditJobSection = EditJobSection.TASKS;
 
   tasks?: List<Task>;
+  lois!: List<LocationOfInterest>;
+
+  isLoading = true;
+
+  EditJobSection = EditJobSection;
 
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
@@ -103,7 +112,7 @@ export class EditJobComponent {
     return index;
   }
 
-  onChangeSection(section: 'tasks' | 'lois') {
+  onChangeSection(section: EditJobSection) {
     this.section = section;
   }
 
