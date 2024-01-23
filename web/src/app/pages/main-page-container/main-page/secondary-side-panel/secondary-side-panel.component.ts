@@ -15,7 +15,8 @@
  */
 
 import {Component} from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
+import {ActivatedRoute} from '@angular/router';
+import {Observable, Subscription, firstValueFrom} from 'rxjs';
 
 import {
   NavigationService,
@@ -32,20 +33,21 @@ export class SecondarySidePanelComponent {
 
   readonly sideNavMode = SideNavMode;
   readonly sideNavMode$: Observable<SideNavMode>;
+
   locationOfInterestId = '';
   submissionId = '';
 
-  constructor(private navigationService: NavigationService) {
+  constructor(
+    private route: ActivatedRoute,
+    private navigationService: NavigationService
+  ) {
     this.subscription.add(
-      this.navigationService
-        .getLocationOfInterestId$()
-        .subscribe(id => (this.locationOfInterestId = id || ''))
-    );
+      this.route.fragment.subscribe(() => {
+        this.locationOfInterestId =
+          this.navigationService.getLocationOfInterestId() || '';
 
-    this.subscription.add(
-      this.navigationService
-        .getSubmissionId$()
-        .subscribe(id => (this.submissionId = id || ''))
+        this.submissionId = this.navigationService.getSubmissionId() || '';
+      })
     );
 
     this.sideNavMode$ = navigationService.getSideNavMode$();
