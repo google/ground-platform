@@ -264,7 +264,7 @@ describe('EditSurveyComponent', () => {
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           job1.copyWith({
             id: newJob.id,
-            name: 'Copy of ' + job1.name,
+            name: `Copy of ${job1.name}`,
             color: undefined,
           }),
           true
