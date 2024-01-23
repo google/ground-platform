@@ -42,6 +42,7 @@ enum EditJobSection {
 })
 export class EditJobComponent {
   subscription: Subscription = new Subscription();
+  loisSubscription: Subscription = new Subscription();
 
   surveyId?: string;
   jobId?: string;
@@ -101,8 +102,10 @@ export class EditJobComponent {
       ?.tasks?.toList()
       .sortBy(task => task.index);
 
-    this.lois = await firstValueFrom(
-      this.loiService.getLoisByJobId$(this.jobId!)
+    this.loisSubscription.add(
+      this.loiService
+        .getLoisByJobId$(this.jobId!)
+        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
     );
 
     this.isLoading = false;
@@ -136,5 +139,7 @@ export class EditJobComponent {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+
+    this.loisSubscription.unsubscribe();
   }
 }
