@@ -21,6 +21,7 @@ import {geojsonToWKT} from '@terraformer/wkt';
 import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
+import {List} from 'immutable';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -52,6 +53,7 @@ export async function exportCsvHandler(
   const jobName = job.name && (job.name['en'] as string);
   const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
+  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
 
   const headers = [];
   // Feature ID column conforms to desktop GIS defaults:
@@ -59,6 +61,8 @@ export async function exportCsvHandler(
   //   "fid" is default used by QGIS and is case-sensitive.
   headers.push('fid');
   headers.push('geometry');
+  const allLoiProperties = getPropertyNames(lois);
+  headers.push(...allLoiProperties);
   tasks.forEach(task => headers.push(task.label));
 
   res.type('text/csv');
@@ -76,7 +80,6 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
   const submissions = await db.fetchSubmissionsByJobId(survey.id, jobId);
 
   // Index submissions by LOI id in memory. This consumes more
@@ -100,6 +103,8 @@ export async function exportCsvHandler(
       row.push(loi.get('properties').id || '');
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
+      // Header: One column for each loi property (merged over all properties across all LOIs)
+      row.push(...getPropertiesByName(loi, allLoiProperties));
       // TODO(#1288): Clean up remaining references to old responses field
       const data =
         submission['data'] ||
@@ -122,7 +127,7 @@ export async function exportCsvHandler(
  *      coordinates: any[],
  *      type: string
  *   }
- * @returns The WKT string version of the object 
+ * @returns The WKT string version of the object
  * https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AnalyzingData/Geospatial/Spatial_Definitions/WellknownTextWKT.htm
  *
  * @beta
@@ -166,4 +171,32 @@ function getFileName(jobName: string) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.csv`;
+}
+
+function getPropertyNames(
+  lois: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
+): Set<string> {
+  return new Set(
+    lois.docs
+      .map(loi =>
+        Object.keys(loi.get('properties'))
+          // Don't retrieve ID because we already store it in a separate column
+          .filter(prop => prop !== 'id')
+      )
+      .flat()
+  );
+}
+
+function getPropertiesByName(
+  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
+  allLoiProperties: Set<string>
+): List<string> {
+  if (!loi.get('properties')) {
+    return List.of();
+  }
+
+  // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
+  return List.of(...allLoiProperties).map(
+    prop => loi.get('properties')[prop] || ''
+  );
 }

@@ -390,7 +390,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     this.map.panTo(position);
     if (this.map.getZoom()! < zoomedInLevel) {
-      this.map.zoom = zoomedInLevel;
+      this.map.googleMap?.setZoom(zoomedInLevel);
     }
   }
 
@@ -420,29 +420,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (locationOfInterestId === this.selectedLocationOfInterestId) {
       return;
     }
+    this.unselectMarker();
     this.selectMarker(locationOfInterestId);
+    this.unselectPolygons();
     this.selectPolygons(locationOfInterestId);
     this.selectedLocationOfInterestId = locationOfInterestId;
-  }
-
-  private selectMarker(locationOfInterestId: string | null) {
-    const marker = locationOfInterestId
-      ? this.markers.get(locationOfInterestId)
-      : undefined;
-    if (marker) {
-      this.setIconSize(marker, enlargedIconScale);
-      if (this.shouldEnableDrawingTools) {
-        marker.setDraggable(true);
-      }
-    }
-    const selectedMarker = this.selectedLocationOfInterestId
-      ? this.markers.get(this.selectedLocationOfInterestId)
-      : undefined;
-    if (selectedMarker) {
-      this.setIconSize(selectedMarker, normalIconScale);
-      selectedMarker.setDraggable(false);
-    }
-    this.panAndZoom(marker?.getPosition());
   }
 
   private setIconSize(marker: google.maps.Marker, size: number) {
@@ -457,24 +439,58 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     marker.setIcon(newIcon);
   }
 
+  private selectMarker(locationOfInterestId: string | null) {
+    if (!locationOfInterestId) return;
+
+    const marker = this.markers.get(locationOfInterestId);
+
+    if (!marker) return;
+
+    this.setIconSize(marker, enlargedIconScale);
+
+    marker.setDraggable(this.shouldEnableDrawingTools);
+
+    this.panAndZoom(marker.getPosition());
+  }
+
+  private unselectMarker() {
+    if (!this.selectedLocationOfInterestId) return;
+
+    const selectedMarker = this.markers.get(this.selectedLocationOfInterestId);
+
+    if (!selectedMarker) return;
+
+    this.setIconSize(selectedMarker, normalIconScale);
+
+    selectedMarker.setDraggable(false);
+  }
+
   private selectPolygons(locationOfInterestId: string | null) {
-    const polygons = locationOfInterestId
-      ? this.polygons.get(locationOfInterestId)
-      : undefined;
-    if (polygons) {
-      for (const polygon of polygons) {
-        polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
-      }
-    }
-    const selectedPolygons = this.selectedLocationOfInterestId
-      ? this.polygons.get(this.selectedLocationOfInterestId)
-      : undefined;
-    if (selectedPolygons) {
-      for (const polygon of selectedPolygons)
-        polygon.setOptions({
-          strokeWeight: normalPolygonStrokeWeight,
-        });
-    }
+    if (!locationOfInterestId) return;
+
+    const polygons = this.polygons.get(locationOfInterestId);
+
+    polygons?.forEach(polygon =>
+      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
+    );
+
+    this.fitMapToLocationsOfInterest(
+      this.getLoisByIds(List([locationOfInterestId]))
+    );
+  }
+
+  private unselectPolygons() {
+    if (!this.selectedLocationOfInterestId) return;
+
+    const selectedPolygons = this.polygons.get(
+      this.selectedLocationOfInterestId
+    );
+
+    selectedPolygons?.forEach(polygon =>
+      polygon.setOptions({
+        strokeWeight: normalPolygonStrokeWeight,
+      })
+    );
   }
 
   private addPolygonToMap(
@@ -519,7 +535,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       );
   }
 
-  private getLoisById(ids: List<string>): List<LocationOfInterest> {
+  private getLoisByIds(ids: List<string>): List<LocationOfInterest> {
     return ids.map(id => this.loisMap.get(id)!);
   }
 
@@ -532,7 +548,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       event.latLng!
     ).map(p => p.get('id'));
 
-    const candidateLois = this.getLoisById(candidatePolygonsIds);
+    const candidateLois = this.getLoisByIds(candidatePolygonsIds);
 
     const loi = LocationOfInterest.getSmallestByArea(candidateLois);
 
