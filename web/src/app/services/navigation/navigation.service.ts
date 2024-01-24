@@ -172,8 +172,9 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
-  showSubmissionDetail(submissionId: string) {
+  showSubmissionDetail(jobId: string, submissionId: string) {
     const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = jobId;
     newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }

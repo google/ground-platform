@@ -15,7 +15,8 @@
  */
 
 import {Component} from '@angular/core';
-import {Observable} from 'rxjs';
+import {ActivatedRoute} from '@angular/router';
+import {Observable, Subscription, firstValueFrom} from 'rxjs';
 
 import {
   NavigationService,
@@ -28,18 +29,31 @@ import {
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
+  subscription: Subscription = new Subscription();
+
   readonly sideNavMode = SideNavMode;
   readonly sideNavMode$: Observable<SideNavMode>;
+
   locationOfInterestId = '';
   submissionId = '';
 
-  constructor(private navigationService: NavigationService) {
-    this.navigationService
-      .getLocationOfInterestId$()
-      .subscribe(id => (this.locationOfInterestId = id || ''));
-    this.navigationService
-      .getSubmissionId$()
-      .subscribe(id => (this.submissionId = id || ''));
+  constructor(
+    private route: ActivatedRoute,
+    private navigationService: NavigationService
+  ) {
+    this.subscription.add(
+      this.route.fragment.subscribe(() => {
+        this.locationOfInterestId =
+          this.navigationService.getLocationOfInterestId() || '';
+
+        this.submissionId = this.navigationService.getSubmissionId() || '';
+      })
+    );
+
     this.sideNavMode$ = navigationService.getSideNavMode$();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
