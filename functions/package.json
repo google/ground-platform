@@ -51,7 +51,7 @@
     "eslint-plugin-absolute-imports": "^0.0.3",
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-functions-test": "^3.1.0",
-    "firebase-tools": "11.23.1",
+    "firebase-tools": "^13.0.3",
     "gts": "^3.1.1",
     "jasmine": "^5.1.0",
     "prettier": "^2.8.1",
