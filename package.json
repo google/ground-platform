@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Ground hosted components",
   "scripts": {
-    "clean": "rm -rf node_modules && npm run clean --prefix functions && npm run clean --prefix web",
+    "clean": "shx rm -rf node_modules && npm run clean --prefix functions && npm run clean --prefix web",
     "build": "npm install && npm run build --prefix functions && npm run build:$npm_config_variant --prefix web",
     "build:local": "npm run build --project=$npm_config_project --variant=local",
     "build:dev": "npm run build --project=$npm_config_project --variant=dev",
@@ -27,6 +27,7 @@
   "homepage": "https://groundplatform.org",
   "devDependencies": {
     "firebase-tools": "^12.9.1",
+    "shx": "^0.3.4"
   },
   "engines": {
     "node": "18"

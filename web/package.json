@@ -2,7 +2,7 @@
   "name": "ground",
   "version": "0.0.1",
   "scripts": {
-    "clean": "rm -rf node_modules dist coverage *.log",
+    "clean": "shx rm -rf node_modules dist coverage *.log",
     "start:dev": "npm run build:dev --project=$npm_config_project && ng serve -c dev",
     "start:prod": "npm run build:prod --project=$npm_config_project && ng serve -c prod",
     "build": "npm install && ng build -c",
@@ -88,6 +88,7 @@
     "prettier": "^2.8.1",
     "prettier-eslint": "^15.0.1",
     "puppeteer": "^3.3.0",
+    "shx": "^0.3.4",
     "ts-node": "^8.10.2",
     "typescript": "^4.9.0"
   }
