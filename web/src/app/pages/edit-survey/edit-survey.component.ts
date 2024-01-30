@@ -116,7 +116,7 @@ export class EditSurveyComponent implements OnInit {
     this.draftSurveyService.addOrUpdateJob(
       job.copyWith({
         id: newJob.id,
-        name: 'Copy of ' + job.name,
+        name: `Copy of ${job.name}`,
         color: this.jobService.getNextColor(this.survey?.jobs),
         index: -1,
       }),
