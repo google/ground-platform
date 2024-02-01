@@ -116,8 +116,8 @@ export async function exportCsvHandler(
       // Header: One column for each task
       tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
       // Header: contributor_username, contributor_email
-      const contributor = submission['lastModified']
-        ? submission['lastModified']['user']
+      const contributor = submission['created']
+        ? submission['created']['user']
         : [];
       row.push(contributor['displayName'] || '');
       row.push(contributor['email'] || '');
