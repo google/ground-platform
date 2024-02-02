@@ -21,6 +21,8 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
@@ -33,14 +35,18 @@ import {
   GenericLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
+import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
@@ -54,6 +60,7 @@ describe('MapComponent', () => {
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
+  let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
 
@@ -174,6 +181,7 @@ describe('MapComponent', () => {
         'getSubmissionId$',
         'selectLocationOfInterest',
         'clearLocationOfInterestId',
+        'showSubmissionDetailWithHighlightedTask',
       ]
     );
     mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
@@ -182,6 +190,14 @@ describe('MapComponent', () => {
     );
     navigationServiceSpy.getSubmissionId$.and.returnValue(
       of<string | null>(null)
+    );
+
+    submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
+      'SubmissionService',
+      ['getSelectedSubmission$']
+    );
+    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
+      new BehaviorSubject<Submission | LoadingState>(LoadingState.LOADING)
     );
 
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
@@ -202,7 +218,20 @@ describe('MapComponent', () => {
           useValue: loiServiceSpy,
         },
         {provide: NavigationService, useValue: navigationServiceSpy},
+        {provide: SubmissionService, useValue: submissionServiceSpy},
         {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
+        {provide: AuthService, useValue: {}},
+        {
+          provide: AngularFireAuth,
+          useValue: {
+            authState: of({
+              displayName: null,
+              isAnonymous: true,
+              uid: '',
+            }),
+          },
+        },
+        {provide: AngularFirestore, useValue: {}},
       ],
     }).compileComponents();
   }));
