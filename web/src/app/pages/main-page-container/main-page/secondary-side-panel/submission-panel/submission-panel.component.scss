@@ -31,11 +31,11 @@
 }
 
 .submission-tasks-container {
-  padding: 0 24px;
+  padding: 0 8px;
 }
 
 .submission-task {
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .submission-question {
@@ -45,6 +45,7 @@
 
 .submission-response {
   font-size: 16px;
+  padding-top: 8px;
 }
 
 .submission-no-response {
@@ -59,4 +60,8 @@
 .submission-response-multiple-choice {
   display: flex;
   flex-direction: column;
+
+  ::ng-deep .mat-mdc-checkbox-disabled label {
+    color: inherit;
+  }
 }

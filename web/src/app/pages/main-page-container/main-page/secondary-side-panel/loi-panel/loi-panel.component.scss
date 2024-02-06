@@ -26,6 +26,21 @@
     :first-child {
       flex: 1;
     }
+
+    .mat-icon {
+      padding-right: 8px;
+    }
+  }
+
+  .mdc-list-item--with-leading-icon .mdc-list-item__start {
+    margin-left: 0;
+    margin-right: 16px;
+    margin-top: 24px;
+  }
+
+  .submission-item {
+    display: flex;
+    align-items: center;
   }
 
   .no-lois-container {

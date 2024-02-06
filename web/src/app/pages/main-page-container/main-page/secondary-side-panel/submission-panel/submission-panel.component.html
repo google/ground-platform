@@ -22,9 +22,6 @@ limitations under the License.
       </button>
       <div class="submission-title-text">{{submission?.created?.user?.displayName}}</div>
     </div>
-    <button mat-icon-button (click)="editSubmission()">
-      <mat-icon>more_vert</mat-icon>
-    </button>
   </div>
   <div class="submission-subtitle">
     {{submission?.lastModified?.clientTime | date: 'longDate' }} • 
