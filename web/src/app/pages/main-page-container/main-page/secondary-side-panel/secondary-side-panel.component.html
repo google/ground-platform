@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<div [ngSwitch]="sideNavMode$ | async">
+<div [ngSwitch]="sideNavMode$ | async" class="secondary-side-panel-container">
   <div *ngIf="locationOfInterestId || submissionId" class="secondary-side-panel">
     <div *ngSwitchCase="sideNavMode.SUBMISSION">
       <submission-panel *ngIf="submissionId" [submissionId]="submissionId" class="secondary-side-panel-content"></submission-panel>

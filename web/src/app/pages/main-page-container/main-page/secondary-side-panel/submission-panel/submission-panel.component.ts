@@ -60,10 +60,6 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     this.navigationService.selectLocationOfInterest(this.submission!.loiId);
   }
 
-  editSubmission() {
-    // TODO(#1280): Add support for editing submission in submission details panel
-  }
-
   getTaskSubmissionResult({id: taskId}: Task): Result | undefined {
     return this.submission?.data.get(taskId);
   }
