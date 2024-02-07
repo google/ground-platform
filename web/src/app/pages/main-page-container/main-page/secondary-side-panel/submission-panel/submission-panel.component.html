@@ -39,21 +39,30 @@ limitations under the License.
             Skipped
           </div>
           <div *ngIf="getTaskSubmissionResult(task) !== undefined">
-            <div [ngSwitch]="task.type" >
-              <div *ngSwitchCase="taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
-                <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task)">
-                  {{option.label}}
-                </mat-checkbox>
+            <!-- Multiple choice task types -->
+            <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
+              <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task)">
+                {{option.label}}
+              </mat-checkbox>
+            </div>
+            <!-- Photo task types -->
+            <div *ngIf="task.type === taskType.PHOTO">
+              <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
+            </div>
+            <!-- Geometry task types -->
+            <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
+              <div class="submission-response-geometry" [ngClass]="{'selected-submission-response-geometry': task.id === selectedTaskId}">
+                <div class="submission-response-geometry-number" [ngStyle]="{ 'background-color': this.submission?.job.color ?? 'black' }">
+                  {{i}}
+                </div>
+                <div class="submission-response-geometry-label">
+                  {{task.id}}
+                </div>
               </div>
-              <div *ngSwitchCase="taskType.PHOTO">
-                <img src="{{getTaskSubmissionResult(task)!.value}}" class="submission-img"/>
-              </div>
-              <!-- TODO(#1279): Add support for map related tasks for submission detail panel -->
-              <div *ngSwitchCase="taskType.DROP_PIN || taskType.CAPTURE_LOCATION"></div>
-              <div *ngSwitchCase="taskType.DRAW_AREA"></div>
-              <div *ngSwitchDefault>
-                {{getTaskSubmissionResult(task)!.value.toString()}}
-              </div>
+            </div>
+            <!-- Remaining task types -->
+            <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE || task.type === taskType.TIME || task.type === taskType.DATE_TIME">
+              {{getTaskSubmissionResult(task)!.value.toString()}}
             </div>
           </div>
         </div>

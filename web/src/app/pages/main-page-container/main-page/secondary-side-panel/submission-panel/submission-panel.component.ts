@@ -15,7 +15,7 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {List, Map} from 'immutable';
+import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
 import {Result} from 'app/models/submission/result.model';
@@ -36,6 +36,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   @Input() submissionId!: string;
   submission: Submission | null = null;
   tasks?: List<Task>;
+  selectedTaskId: string | null = null;
 
   public taskType = TaskType;
 
@@ -52,6 +53,11 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
           this.submission = submission;
           this.tasks = submission.job?.getTasksSorted();
         }
+      })
+    );
+    this.subscription.add(
+      this.navigationService.getTaskId$().subscribe(taskId => {
+        this.selectedTaskId = taskId;
       })
     );
   }
