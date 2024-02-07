@@ -183,7 +183,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             this.addSubmissionResultsOnMap();
           }
         }
-        this.cancelReposition()
+        this.cancelReposition();
       })
     );
   }
