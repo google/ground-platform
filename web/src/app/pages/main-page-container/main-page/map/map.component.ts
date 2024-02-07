@@ -173,28 +173,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       combineLatest([
         this.navigationService.getLocationOfInterestId$(),
         this.navigationService.getSubmissionId$(),
-      ]).subscribe(() => this.cancelReposition())
-    );
-
-    this.subscription.add(
-      this.submissionService.getSelectedSubmission$().subscribe(submission => {
+        this.submissionService.getSelectedSubmission$(),
+      ]).subscribe(([, submissionId, submission]) => {
+        this.showSubmissionGeometry = !!submissionId;
         if (submission instanceof Submission) {
           this.submission = submission;
-          if (this.showSubmissionGeometry === true) {
-            this.removeSubmissionResultsOnMap();
+          this.removeSubmissionResultsOnMap();
+          if (this.showSubmissionGeometry) {
             this.addSubmissionResultsOnMap();
           }
         }
-      })
-    );
-
-    this.subscription.add(
-      this.navigationService.getSubmissionId$().subscribe(id => {
-        this.showSubmissionGeometry = id ? true : false;
-        this.removeSubmissionResultsOnMap();
-        if (this.showSubmissionGeometry === true) {
-          this.addSubmissionResultsOnMap();
-        }
+        this.cancelReposition()
       })
     );
   }
@@ -204,6 +193,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    */
   addSubmissionResultsOnMap() {
     this.submission?.job?.tasks?.forEach(task => {
+      // TODO(#1477): Add geometry annotations in map as well
       if (
         task.type === TaskType.DRAW_AREA ||
         task.type === TaskType.DROP_PIN ||
