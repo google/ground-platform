@@ -13,12 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div [ngSwitch]="sideNavMode$ | async">
-  <div *ngSwitchCase="sideNavMode.SUBMISSION">
-    <ground-job-list></ground-job-list>
-  </div>
 
-  <div *ngSwitchCase="sideNavMode.JOB_LIST">
+<div [ngSwitch]="sideNavMode$ | async">
+  <div *ngSwitchDefault>
     <ground-job-list></ground-job-list>
   </div>
 
