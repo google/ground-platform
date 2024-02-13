@@ -51,7 +51,9 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
           this.submission = submission;
-          this.tasks = submission.job?.getTasksSorted();
+          this.tasks = submission.job
+            ?.getTasksSorted()
+            .filter(task => !task.addLoiTask);
         }
       })
     );
