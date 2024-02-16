@@ -13,7 +13,9 @@
     "logs": "npx firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm install && tsc",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "schema": "node ./schemas/transform.js",
+    "clean:schema": "rm -f schemas/*.d.ts"
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",

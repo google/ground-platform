@@ -17,11 +17,12 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {db} from '@/common/context';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { db } from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
-import {Datastore} from './common/datastore';
-import {List} from 'immutable';
+import { Datastore } from './common/datastore';
+import { List } from 'immutable';
+import { compileFromFile } from 'json-schema-to-typescript'
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -48,10 +49,12 @@ export async function exportCsvHandler(
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
+  await compileFromFile('person.json');
+
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
   const jobName = job.name && (job.name['en'] as string);
-  const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
+  const tasksObject = (job['tasks'] as { [id: string]: Task }) || {};
   const tasks = new Map(Object.entries(tasksObject));
   const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
 
@@ -86,7 +89,7 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
+  const submissionsByLocationOfInterest: { [name: string]: any[] } = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
     const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
