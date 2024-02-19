@@ -23,9 +23,9 @@ import { importCsvHandler } from '@/import-csv';
 import { sessionLoginHandler } from '@/session-login';
 import { importGeoJsonHandler } from '@/import-geojson';
 import { exportCsvHandler } from '@/export-csv';
-import { surveyPathTemplate, loiPathTemplate, onWriteSurveyHandler } from '@/on-write-survey';
 import { onCall } from 'firebase-functions/v2/https';
 import { onWriteSubmissionHandler, submissionPathTemplate } from '@/on-write-submission';
+import {surveyPathTemplate, onWriteSurveyHandler} from '@/on-write-survey';
 import {loiPathTemplate, onWriteLoiHandler} from '@/on-write-loi';
 
 export const profile = {
