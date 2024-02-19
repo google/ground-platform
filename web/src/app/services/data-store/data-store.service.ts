@@ -272,7 +272,7 @@ export class DataStoreService {
           List(
             array
               .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
-              .filter(this.filterConversionErrorAndLogError<LocationOfInterest>)
+              .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
               .map(loi => loi as LocationOfInterest)
           )
         )
@@ -306,7 +306,7 @@ export class DataStoreService {
                   obj
                 )
               )
-              .filter(this.filterConversionErrorAndLogError<Submission>)
+              .filter(DataStoreService.filterAndLogError<Submission>)
               .map(submission => submission as Submission)
           )
         )
@@ -452,7 +452,7 @@ export class DataStoreService {
     return tasksMap;
   }
 
-  private filterConversionErrorAndLogError<T>(entityOrError: T | Error) {
+  public static filterAndLogError<T>(entityOrError: T | Error) {
     if (entityOrError instanceof Error) {
       console.error(entityOrError);
       return false;

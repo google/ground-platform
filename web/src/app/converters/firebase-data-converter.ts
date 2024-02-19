@@ -40,6 +40,7 @@ import {
 } from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {toGeometry} from './geometry-converter';
 import {Point} from '../models/geometry/point';
@@ -465,6 +466,14 @@ export class FirebaseDataConverter {
     );
   }
 
+  /**
+   * Extracts and converts from the raw Firebase object to a map of {@link Result}s keyed by task id.
+   * In case of error when converting from raw data to {@link Result}, logs the error and then ignores
+   * that one {@link Result}.
+   *
+   * @param job the job related to this submission data.
+   * @param data the source data in a dictionary keyed by string.
+   */
   private static toResults(job: Job, data: DocumentData): Map<string, Result> {
     const submissionData = data.data ?? data.results ?? data.responses;
     return Map<string, Result>(
@@ -476,13 +485,11 @@ export class FirebaseDataConverter {
             submissionData[taskId]
           ),
         ])
-        .filter(([_, resultOrError]) => {
-          if (resultOrError instanceof Error) {
-            console.error(resultOrError);
-            return false;
-          }
-          return true;
-        })
+        .filter(([_, resultOrError]) =>
+          DataStoreService.filterAndLogError<Result>(
+            resultOrError as Result | Error
+          )
+        )
         .map(([k, v]) => [k, v] as [string, Result])
     );
   }
