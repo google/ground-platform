@@ -86,7 +86,13 @@ export class SubmissionService {
             )
           )
         )
-        .subscribe(o => this.selectedSubmission$.next(o))
+        .subscribe(o => {
+          if (o instanceof Error) {
+            console.error(o);
+            return;
+          }
+          this.selectedSubmission$.next(o as Submission | LoadingState);
+        })
     );
   }
 

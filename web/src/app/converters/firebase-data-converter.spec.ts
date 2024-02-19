@@ -19,6 +19,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {Submission} from 'app/models/submission/submission.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -142,7 +143,7 @@ describe('FirebaseDataConverter', () => {
           MockModel.job001,
           'submission001',
           MockFirebaseData.submission001
-        )
+        ) as Submission
       )
     ).toEqual(MockFirebaseData.submission001);
   });

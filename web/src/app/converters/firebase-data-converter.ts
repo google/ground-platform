@@ -401,12 +401,20 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toSubmission(job: Job, id: string, data: DocumentData): Submission {
+  static toSubmission(
+    job: Job,
+    id: string,
+    data: DocumentData
+  ): Submission | Error {
     if (job.tasks === undefined) {
-      throw Error('Job must contain at least once task');
+      return Error(
+        'Error converting to submission: job must contain at least once task'
+      );
     }
     if (data === undefined) {
-      throw Error(`Submission ${id} does not have document data.`);
+      return Error(
+        `Error converting to submission: submission ${id} does not have document data.`
+      );
     }
     // TODO(#1288): Clean up remaining references to old responses field
     // Support submissions that have results or responses fields instead of data
@@ -418,15 +426,7 @@ export class FirebaseDataConverter {
       job,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
-      Map<string, Result>(
-        keys(submissionData).map((taskId: string) => [
-          taskId as string,
-          FirebaseDataConverter.toResult(
-            job.tasks!.get(taskId)!,
-            submissionData[taskId]
-          ),
-        ])
-      )
+      FirebaseDataConverter.toResults(job, data)
     );
   }
 
@@ -465,10 +465,32 @@ export class FirebaseDataConverter {
     );
   }
 
+  private static toResults(job: Job, data: DocumentData): Map<string, Result> {
+    const submissionData = data.data ?? data.results ?? data.responses;
+    return Map<string, Result>(
+      keys(submissionData)
+        .map((taskId: string) => [
+          taskId as string,
+          FirebaseDataConverter.toResult(
+            job.tasks!.get(taskId)!,
+            submissionData[taskId]
+          ),
+        ])
+        .filter(([_, resultOrError]) => {
+          if (resultOrError instanceof Error) {
+            console.error(resultOrError);
+            return false;
+          }
+          return true;
+        })
+        .map(([k, v]) => [k, v] as [string, Result])
+    );
+  }
+
   private static toResult(
     task: Task,
     resultValue: number | string | List<string>
-  ): Result {
+  ): Result | Error {
     if (typeof resultValue === 'string') {
       return new Result(resultValue as string);
     }
@@ -500,7 +522,9 @@ export class FirebaseDataConverter {
     ) {
       return new Result(geometry);
     }
-    throw Error(`Unknown value type ${typeof resultValue}`);
+    return Error(
+      `Error converting to Result: unknown value type ${typeof resultValue}`
+    );
   }
 
   private static resultToJS(result: Result): {} {
