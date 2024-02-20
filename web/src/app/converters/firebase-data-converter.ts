@@ -40,6 +40,7 @@ import {
 } from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {toGeometry} from './geometry-converter';
 import {Point} from '../models/geometry/point';
@@ -401,12 +402,20 @@ export class FirebaseDataConverter {
    * }
    * </code></pre>
    */
-  static toSubmission(job: Job, id: string, data: DocumentData): Submission {
-    if (job.tasks === undefined) {
-      throw Error('Job must contain at least once task');
+  static toSubmission(
+    job: Job,
+    id: string,
+    data: DocumentData
+  ): Submission | Error {
+    if (!job.tasks) {
+      return Error(
+        'Error converting to submission: job must contain at least once task'
+      );
     }
-    if (data === undefined) {
-      throw Error(`Submission ${id} does not have document data.`);
+    if (!data) {
+      return Error(
+        `Error converting to submission: submission ${id} does not have document data.`
+      );
     }
     // TODO(#1288): Clean up remaining references to old responses field
     // Support submissions that have results or responses fields instead of data
@@ -418,15 +427,7 @@ export class FirebaseDataConverter {
       job,
       FirebaseDataConverter.toAuditInfo(data.created),
       FirebaseDataConverter.toAuditInfo(data.lastModified),
-      Map<string, Result>(
-        keys(submissionData).map((taskId: string) => [
-          taskId as string,
-          FirebaseDataConverter.toResult(
-            job.tasks!.get(taskId)!,
-            submissionData[taskId]
-          ),
-        ])
-      )
+      FirebaseDataConverter.toResults(job, data)
     );
   }
 
@@ -465,10 +466,38 @@ export class FirebaseDataConverter {
     );
   }
 
+  /**
+   * Extracts and converts from the raw Firebase object to a map of {@link Result}s keyed by task id.
+   * In case of error when converting from raw data to {@link Result}, logs the error and then ignores
+   * that one {@link Result}.
+   *
+   * @param job the job related to this submission data, {@link job.tasks} must not be null or undefined.
+   * @param data the source data in a dictionary keyed by string.
+   */
+  private static toResults(job: Job, data: DocumentData): Map<string, Result> {
+    const submissionData = data.data ?? data.results ?? data.responses;
+    return Map<string, Result>(
+      keys(submissionData)
+        .map((taskId: string) => [
+          taskId as string,
+          FirebaseDataConverter.toResult(
+            job.tasks!.get(taskId)!,
+            submissionData[taskId]
+          ),
+        ])
+        .filter(([_, resultOrError]) =>
+          DataStoreService.filterAndLogError<Result>(
+            resultOrError as Result | Error
+          )
+        )
+        .map(([k, v]) => [k, v] as [string, Result])
+    );
+  }
+
   private static toResult(
     task: Task,
     resultValue: number | string | List<string>
-  ): Result {
+  ): Result | Error {
     if (typeof resultValue === 'string') {
       return new Result(resultValue as string);
     }
@@ -500,7 +529,9 @@ export class FirebaseDataConverter {
     ) {
       return new Result(geometry);
     }
-    throw Error(`Unknown value type ${typeof resultValue}`);
+    return Error(
+      `Error converting to Result: unknown value type ${typeof resultValue}`
+    );
   }
 
   private static resultToJS(result: Result): {} {
