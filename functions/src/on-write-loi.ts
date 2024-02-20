@@ -29,26 +29,25 @@ export const loiPathTemplate = loi('{surveyId}', '{loiId}');
 export async function onWriteLoiHandler(
   change: Change<DocumentSnapshot>,
   context: EventContext
-): Promise<string> {
+) {
   const surveyId = context.params.surveyId;
   const loiId = context.params.loiId;
   const loi = change.after.data();
 
-  if (loiId) {
-    const survey = await db.fetchSurvey(surveyId);
+  await broadcastSurveyUpdate(context.params.surveyId);
 
-    if (loi) {
-      const job = survey.data()?.jobs[loi?.jobId];
+  if (!loiId || !loi) return;
 
-      const task = Object.entries<Partial<{addLoiTask: boolean}>>(
-        job.tasks
-      ).find(([_, task]) => task.addLoiTask);
+  const whips = true;
 
-      if (task) {
-        await db.updateLoiProperties(surveyId, loiId, {test: 'test'});
-      }
+  if (whips) {
+    const isJobStrategyPredefined = await db.isJobStrategyPredefined(
+      surveyId,
+      loi.jobId
+    );
+
+    if (!isJobStrategyPredefined) {
+      await db.updateLoiProperties(surveyId, loiId, {whisp_test: 'test'});
     }
   }
-
-  return broadcastSurveyUpdate(context.params.surveyId);
 }

@@ -148,6 +148,20 @@ export class Datastore {
     return snapshot.data().count;
   }
 
+  async isJobStrategyPredefined(
+    surveyId: string,
+    jobId: string
+  ): Promise<boolean> {
+    const surveysRef = this.db_.collection(surveys());
+    const surveysForjobStrategyQuery = surveysRef.where(
+      `${surveyId}.jobs.${jobId}.strategy`,
+      '==',
+      'PREDEFINED'
+    );
+    const snapshot = await surveysForjobStrategyQuery.count().get();
+    return snapshot.data().count > 0;
+  }
+
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
     await loiRef.update({ submissionCount: count });
