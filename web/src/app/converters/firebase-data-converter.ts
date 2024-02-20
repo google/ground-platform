@@ -407,12 +407,12 @@ export class FirebaseDataConverter {
     id: string,
     data: DocumentData
   ): Submission | Error {
-    if (job.tasks === undefined) {
+    if (!job.tasks) {
       return Error(
         'Error converting to submission: job must contain at least once task'
       );
     }
-    if (data === undefined) {
+    if (!data) {
       return Error(
         `Error converting to submission: submission ${id} does not have document data.`
       );
@@ -471,7 +471,7 @@ export class FirebaseDataConverter {
    * In case of error when converting from raw data to {@link Result}, logs the error and then ignores
    * that one {@link Result}.
    *
-   * @param job the job related to this submission data.
+   * @param job the job related to this submission data, {@link job.tasks} must not be null or undefined.
    * @param data the source data in a dictionary keyed by string.
    */
   private static toResults(job: Job, data: DocumentData): Map<string, Result> {
