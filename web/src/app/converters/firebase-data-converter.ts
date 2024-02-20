@@ -271,7 +271,7 @@ export class FirebaseDataConverter {
   }
 
   private static taskToJS(task: Task): {} {
-    const {type, multipleChoice, condition, ...taskDoc} = task;
+    const {type, multipleChoice, condition, id, ...taskDoc} = task;
 
     if (multipleChoice === undefined) {
       return {
