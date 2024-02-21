@@ -5,15 +5,46 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
+export type Geometry = Point | Polygon | MultiPolygon;
+
 export interface LocationOfInterest {
   jobId: string;
   customId?: string;
-  geometry: {
-    [k: string]: unknown;
-  };
+  geometry: Geometry;
   properties?: {
-    [k: string]: unknown;
+    [k: string]: number | string;
   };
   submissionCount?: number;
   [k: string]: unknown;
+}
+export interface Point {
+  type: "Point";
+  coordinates: GeoPoint;
+}
+export interface GeoPoint {
+  latitude: number;
+  longitude: number;
+}
+export interface Polygon {
+  type: "Polygon";
+  coordinates: PolygonCoordinates;
+}
+export interface PolygonCoordinates {
+  [k: string]: LinearRing;
+}
+export interface LinearRing {
+  [k: string]: GeoPoint1;
+}
+export interface GeoPoint1 {
+  latitude: number;
+  longitude: number;
+}
+export interface MultiPolygon {
+  type: "MultiPolygon";
+  coordinates: {
+    [k: string]: PolygonCoordinates1;
+  };
+}
+export interface PolygonCoordinates1 {
+  [k: string]: LinearRing;
 }

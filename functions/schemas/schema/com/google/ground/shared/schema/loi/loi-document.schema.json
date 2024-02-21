@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loi-document.schema.json",
+  "title": "Location of Interest",
+  "type": "object",
+  "properties": {
+    "jobId": {
+      "type": "string"
+    },
+    "customId": {
+      "type": "string"
+    },
+    "geometry": {
+      "$ref": "./schemas/schema/com/google/ground/shared/schema/geometry/geometry.schema.json"
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "string"
+        ]
+      }
+    },
+    "submissionCount": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "jobId",
+    "geometry"
+  ]
+}
