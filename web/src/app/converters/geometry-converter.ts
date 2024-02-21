@@ -57,7 +57,7 @@ export const GEOMETRY_TYPES = Map([
 
 export function toGeometry(geometry?: any): Geometry | Error {
   if (!geometry) {
-    return new Error('Missing geometry');
+    return new Error('Error converting to Geometry: missing geometry');
   }
   try {
     switch (geometry.type) {
@@ -68,10 +68,14 @@ export function toGeometry(geometry?: any): Geometry | Error {
       case GEOMETRY_TYPES.get(GeometryType.MULTI_POLYGON):
         return toMultiPolygon(geometry.coordinates);
       default:
-        return Error(`Unsupported geometry type ${geometry.type}`);
+        return Error(
+          `Error converting to Geometry: unsupported geometry type ${geometry.type}`
+        );
     }
   } catch (e) {
-    return e instanceof Error ? e : new Error(JSON.stringify(e));
+    return e instanceof Error
+      ? e
+      : new Error(`Error converting to Geometry: ${JSON.stringify(e)}`);
   }
 }
 
@@ -88,7 +92,7 @@ function toPolygon(coordinatesMap?: any): Polygon {
   const rings: List<List<any>> =
     indexedMapToList(coordinatesMap).map(indexedMapToList);
   if (rings.isEmpty()) {
-    throw new Error('Empty coordinates map');
+    throw new Error('Error converting to Geometry: empty coordinates map');
   }
   // First ring is the polygon's outer shell.
   const shell = toLinearRing(rings.first());
@@ -105,14 +109,22 @@ function toPolygon(coordinatesMap?: any): Polygon {
 function toMultiPolygon(coordinatesMap?: any): MultiPolygon {
   const polygons = indexedMapToList(coordinatesMap);
   if (polygons.isEmpty()) {
-    throw new Error(`Empty multi-polygon ${stringify(coordinatesMap)}`);
+    throw new Error(
+      `Error converting to Geometry: empty multi-polygon ${stringify(
+        coordinatesMap
+      )}`
+    );
   }
   return new MultiPolygon(polygons.map(toPolygon));
 }
 
 function toCoordinate(coordinates?: any): Coordinate {
   if (!(coordinates && coordinates instanceof GeoPoint)) {
-    throw new Error(`Expected GeoPoint, got ${stringify(coordinates)}`);
+    throw new Error(
+      `Error converting to Geometry: expected GeoPoint, got ${stringify(
+        coordinates
+      )}`
+    );
   }
   return new Coordinate(coordinates.longitude, coordinates.latitude);
 }
@@ -141,7 +153,9 @@ function indexedMapToList(map?: any): List<any> {
     typeof map !== 'object' ||
     Object.values(map).some(v => v === null)
   ) {
-    throw new Error(`Invalid indexed map ${stringify(map)}`);
+    throw new Error(
+      `Error converting to Geometry: invalid indexed map ${stringify(map)}`
+    );
   }
 
   // Convert keys to numbers and sort by index.
@@ -151,7 +165,11 @@ function indexedMapToList(map?: any): List<any> {
 
   // Verify keys correspond 1:1 to array indices (i.e., 0 to array.length-1).
   if (entries.map(e => e[0]).some((key, idx) => key !== idx)) {
-    throw new Error(`Non-sequential indices in ${stringify(entries)}`);
+    throw new Error(
+      `Error converting to Geometry: non-sequential indices in ${stringify(
+        entries
+      )}`
+    );
   }
 
   // Entries are already sorted by sequential indices, so we can now extract
