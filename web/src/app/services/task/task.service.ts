@@ -39,6 +39,8 @@ export type TaskUpdate = {
 export class TaskService {
   private tasks$: Observable<List<Task>>;
 
+  private addLoiTaskId = '_addLoi';
+
   constructor(
     private dataStoreService: DataStoreService,
     private surveyService: SurveyService
@@ -85,10 +87,10 @@ export class TaskService {
    * Add a loiTask as first element, reindex the others.
    */
   addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    if (tasks.some(task => task.addLoiTask === true)) return tasks;
+    if (tasks.get(this.addLoiTaskId)) return tasks;
 
     const loiTask = new Task(
-      this.dataStoreService.generateId(),
+      this.addLoiTaskId,
       TaskType.CAPTURE_LOCATION,
       '',
       true,
@@ -109,9 +111,9 @@ export class TaskService {
    * Remove the first element of the list if is loiTask.
    */
   removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    const loiTask = tasks.find(task => task.addLoiTask === true);
-
-    return loiTask ? tasks.remove(loiTask.id) : tasks;
+    return tasks.get(this.addLoiTaskId)
+      ? tasks.remove(this.addLoiTaskId)
+      : tasks;
   }
 
   updateLoiTasks(
