@@ -70,7 +70,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   onSelectSubmission(submissionId: string) {
-    this.navigationService.showSubmissionDetail(submissionId);
+    this.navigationService.showSubmissionDetail(this.loi.id, submissionId);
   }
 
   onClosePanel() {

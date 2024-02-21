@@ -33,6 +33,7 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {SurveyLoiComponent} from './survey-loi.component';
@@ -42,6 +43,7 @@ describe('SurveyLoiComponent', () => {
   let component: SurveyLoiComponent;
 
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
+  let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
   const mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
@@ -60,6 +62,11 @@ describe('SurveyLoiComponent', () => {
       ['getLocationsOfInterest$', 'getLoisWithLabels$']
     );
 
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      ['getLocationOfInterestId$', 'getSubmissionId$']
+    );
+
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'getActiveSurvey',
       'getActiveSurvey$',
@@ -67,6 +74,11 @@ describe('SurveyLoiComponent', () => {
     ]);
 
     loiServiceSpy.getLoisWithLabels$.and.returnValue(mockLois$);
+
+    navigationServiceSpy.getSubmissionId$.and.returnValue(
+      of<string | null>(null)
+    );
+
     surveyServiceSpy.canManageSurvey.and.returnValue(true);
     surveyServiceSpy.getActiveSurvey.and.returnValue(mockSurvey);
     surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
@@ -79,6 +91,7 @@ describe('SurveyLoiComponent', () => {
         {provide: AngularFireAuth, useValue: {}},
         {provide: AuthService, useValue: {}},
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
+        {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
         {provide: MatDialog, useValue: {}},
       ],

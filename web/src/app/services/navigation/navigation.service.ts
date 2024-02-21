@@ -37,6 +37,7 @@ export class NavigationService {
   private static readonly LOI_ID_FRAGMENT_PARAM = 'f';
   private static readonly LOI_JOB_ID_FRAGMENT_PARAM = 'fl';
   private static readonly SUBMISSION_ID_FRAGMENT_PARAM = 'o';
+  private static readonly TASK_ID_FRAGMENT_PARAM = 't';
   static readonly JOB_ID_NEW = 'new';
   static readonly SUBMISSION_ID_NEW = 'new';
   static readonly SURVEY_ID_NEW = 'new';
@@ -68,6 +69,7 @@ export class NavigationService {
   private jobId$?: Observable<string | null>;
   private loiId$?: Observable<string | null>;
   private submissionId$?: Observable<string | null>;
+  private taskId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
 
   constructor(private router: Router) {}
@@ -95,6 +97,9 @@ export class NavigationService {
     this.submissionId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM))
     );
+    this.taskId$ = fragmentParams$.pipe(
+      map(params => params.get(NavigationService.TASK_ID_FRAGMENT_PARAM))
+    );
     this.sideNavMode$ = fragmentParams$.pipe(
       map(params => NavigationService.fragmentParamsToSideNavMode(params))
     );
@@ -114,6 +119,10 @@ export class NavigationService {
 
   getSubmissionId$(): Observable<string | null> {
     return this.submissionId$!;
+  }
+
+  getTaskId$(): Observable<string | null> {
+    return this.taskId$!;
   }
 
   getSideNavMode$(): Observable<SideNavMode> {
@@ -172,9 +181,20 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
-  showSubmissionDetail(submissionId: string) {
+  showSubmissionDetail(jobId: string, submissionId: string) {
     const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = jobId;
     newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+  }
+
+  showSubmissionDetailWithHighlightedTask(taskId: string) {
+    const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] =
+      this.getLocationOfInterestId()!;
+    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] =
+      this.getSubmissionId()!;
+    newParam[NavigationService.TASK_ID_FRAGMENT_PARAM] = taskId;
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 

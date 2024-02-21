@@ -4,6 +4,11 @@
 @mixin color($theme) {
   $color-config: mat.get-color-config($theme);
   $foreground: map.get($color-config, foreground);
+
+  .secondary-side-panel {
+    background-color: #F9FAF4;
+    color: #1A1C19;
+  }
 }
 
 @mixin typography($theme) {
