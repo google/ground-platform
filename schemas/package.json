@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "build": "mkdir -p dist/generated && npx json2ts --no-declareExternallyReferenced --no-bannerComment -i 'src/*.schema.json' -o dist/tmp/ && cat dist/tmp/*.schema.d.ts > dist/generated/schema.d.ts"
+    "build": "mkdir -p dist/generated && npx json2ts --no-declareExternallyReferenced --no-bannerComment --cwd=src -i 'src/*.schema.json' -o dist/tmp/ && cat dist/tmp/*.schema.d.ts > dist/generated/schema.d.ts"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^13.1.2"
