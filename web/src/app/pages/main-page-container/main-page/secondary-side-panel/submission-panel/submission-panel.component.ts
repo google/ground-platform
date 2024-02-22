@@ -57,17 +57,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
           this.tasks = submission.job
             ?.getTasksSorted()
             .filter(task => !task.addLoiTask);
-          // Get image URL upon initialization to not send firebase requests multiple times
-          this.tasks?.forEach(task => {
-            if (task.type === this.taskType.PHOTO) {
-              const submissionImage = this.getTaskSubmissionResult(task)!
-                .value as string;
-              const imageRef = ref(this.storage, submissionImage);
-              getDownloadURL(imageRef).then(url => {
-                this.firebaseURLs.set(submissionImage, url);
-              });
-            }
-          });
+          // Get image URL upon initialization to not send Firebase requests multiple times
+          this.getFirebaseImageURLs();
         }
       })
     );
@@ -76,6 +67,19 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
         this.selectedTaskId = taskId;
       })
     );
+  }
+
+  getFirebaseImageURLs() {
+    this.tasks?.forEach(task => {
+      if (task.type === this.taskType.PHOTO) {
+        const submissionImage = this.getTaskSubmissionResult(task)!
+          .value as string;
+        const imageRef = ref(this.storage, submissionImage);
+        getDownloadURL(imageRef).then(url => {
+          this.firebaseURLs.set(submissionImage, url);
+        });
+      }
+    });
   }
 
   navigateToSubmissionList() {
