@@ -49,7 +49,7 @@ export class LoiDataConverter {
   ): LocationOfInterest | Error {
     try {
       if (!data.jobId) {
-        throw new Error('missing job id');
+        return new Error('Error converting to LOI: missing job id');
       }
       const properties = Map<string, string | number>(
         keys(data.properties).map((property: string) => [
@@ -59,7 +59,7 @@ export class LoiDataConverter {
       );
       const result = toGeometry(data.geometry);
       if (result instanceof Error) {
-        throw result;
+        return result;
       }
 
       return new GenericLocationOfInterest(
@@ -70,7 +70,7 @@ export class LoiDataConverter {
       );
     } catch (err) {
       return new Error(
-        `invalid LOI in remote data store; data: ${data}, error message: ${err}`
+        `Error converting to LOI: invalid LOI in remote data store; data: ${data}, error message: ${err}`
       );
     }
   }

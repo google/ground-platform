@@ -23,7 +23,7 @@ import {
   Subscription,
   of,
 } from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {filter, switchMap} from 'rxjs/operators';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -84,9 +84,12 @@ export class SubmissionService {
                 )
               )
             )
-          )
+          ),
+          filter(DataStoreService.filterAndLogError<Submission | LoadingState>)
         )
-        .subscribe(o => this.selectedSubmission$.next(o))
+        .subscribe(o =>
+          this.selectedSubmission$.next(o as Submission | LoadingState)
+        )
     );
   }
 
