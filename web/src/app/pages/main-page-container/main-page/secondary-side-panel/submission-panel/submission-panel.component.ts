@@ -15,7 +15,7 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {getStorage, ref, getDownloadURL} from "firebase/storage";
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
@@ -41,7 +41,6 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   storage = getStorage();
   firebaseURLs = new Map<string, string>();
 
-
   public taskType = TaskType;
 
   constructor(
@@ -61,9 +60,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
           // Get image URL upon initialization to not send firebase requests multiple times
           this.tasks?.forEach(task => {
             if (task.type === this.taskType.PHOTO) {
-              const submissionImage = this.getTaskSubmissionResult(task)!.value as string;
+              const submissionImage = this.getTaskSubmissionResult(task)!
+                .value as string;
               const imageRef = ref(this.storage, submissionImage);
-              getDownloadURL(imageRef).then((url) => {
+              getDownloadURL(imageRef).then(url => {
                 this.firebaseURLs.set(submissionImage, url);
               });
             }
