@@ -13,7 +13,7 @@
     "logs": "npx firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm install && tsc",
-    "watch": "tsc --watch"
+    "watch": "npm run build && tsc --watch"
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
