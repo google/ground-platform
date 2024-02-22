@@ -1,0 +1,21 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "loi-document.schema.json"
+      },
+      {
+        "$ref": "geometry.schema.json"
+      },
+      {
+        "$ref": "point.schema.json"
+      },
+      {
+        "$ref": "polygon.schema.json"
+      },
+      {
+        "$ref": "multi-polygon.schema.json"
+      }      
+    ]
+  }
