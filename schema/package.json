@@ -9,7 +9,7 @@
     "prebuild": "npm run generate",
     "build": "tsc dist/generated/schema.d.ts"
   },
-  "files" [
+  "files": [
     "dist/generated/schema.d.ts"
   ],
   "devDependencies": {
