@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "linear-ring.schema.json",
-  "title": "LinearRing",
+  "$id": "linear-ring-data.schema.json",
+  "title": "LinearRingData",
   "type": "object",
   "$comment": "Numerically indexed object, workaround to represent nested arrays in Firestore.",
   "additionalProperties": {
     "$comment": "TODO(#2249): Replace indexed objects with wrapped arrays.",
-    "$ref": "geo-point.schema.json"
+    "$ref": "geo-point-data.schema.json"
   }
 }

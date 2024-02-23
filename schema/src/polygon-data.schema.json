@@ -1,17 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "point.schema.json",
-  "title": "Point",
+  "$id": "polygon-data.schema.json",
+  "title": "PolygonData",
+  "type": "object",
   "required": [
     "type",
     "coordinates"
   ],
   "properties": {
     "type": {
-      "const": "Point"
+      "const": "Polygon"
     },
     "coordinates": {
-      "$ref": "geo-point.schema.json"
+      "$ref": "polygon-coordinates-data.schema.json"
     }
   },
   "additionalProperties": false

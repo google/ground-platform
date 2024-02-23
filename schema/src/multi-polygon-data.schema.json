@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "multi-polygon.schema.json",
-  "title": "MultiPolygon",
+  "$id": "multi-polygon-data.schema.json",
+  "title": "MultiPolygonData",
   "type": "object",
   "required": [
     "type",
@@ -16,7 +16,7 @@
       "$comment": "Numerically indexed object, workaround to represent nested arrays in Firestore.",
       "additionalProperties": {
         "$comment": "TODO(#2249): Replace indexed objects with wrapped arrays.",
-        "$ref": "polygon-coordinates.schema.json"
+        "$ref": "polygon-coordinates-data.schema.json"
       }
     }
   },

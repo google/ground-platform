@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "loi-document.schema.json",
-  "title": "Location of Interest",
+  "$id": "loi-document-data.schema.json",
+  "title": "LoiDocument",
   "type": "object",
   "required": [
     "jobId",
@@ -15,7 +15,7 @@
       "type": "string"
     },
     "geometry": {
-      "$ref": "geometry.schema.json"
+      "$ref": "geometry-data.schema.json"
     },
     "properties": {
       "type": "object",
