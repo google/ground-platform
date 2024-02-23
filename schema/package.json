@@ -9,6 +9,9 @@
     "prebuild": "npm run generate",
     "build": "tsc dist/generated/schema.d.ts"
   },
+  "files:" [
+    "dist/generated/schema.d.ts"
+  ],
   "devDependencies": {
     "json-schema-to-typescript": "^13.1.2",
     "typescript": "^4.9.0"
