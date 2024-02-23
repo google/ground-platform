@@ -5,7 +5,7 @@
   "type": "object",
   "$comment": "Numerically indexed object, workaround to represent nested arrays in Firestore.",
   "additionalProperties": {
-    "$comment": "TODO(#2249): Replace with wrapped array.",
+    "$comment": "TODO(#2249): Replace indexed objects with wrapped arrays.",
     "$ref": "geo-point.schema.json"
   }
 }
