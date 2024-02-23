@@ -24,6 +24,7 @@ import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import {HamburgerService} from 'app/services/hamburger/hamburger.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -58,7 +59,8 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
     private authService: AuthService,
-    readonly surveyService: SurveyService
+    readonly surveyService: SurveyService,
+    private hamburgerService: HamburgerService
   ) {
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
       groundPinService.getPinImageSource()
@@ -145,6 +147,10 @@ export class JobListItemComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  isSidePanelExpanded() {
+    return this.hamburgerService.getSidePanelExpanded();
   }
 }
 

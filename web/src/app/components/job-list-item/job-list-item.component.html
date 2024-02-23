@@ -16,44 +16,32 @@ limitations under the License.
 <div class="job-list-item-container">
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Tree node for lois -->
-    <mat-tree-node
-      *matTreeNodeDef="let node"
-      matTreeNodePadding
-      [class.tree-node-selected]="isSelectedLoi(node)"
-      class="loi-tree-node"
-      role="button"
-      tabindex="0"
-      mat-button
-      (click)="selectLoi(node)"
-    >
-      <mat-icon svgIcon={{node.iconName}} class={{node.jobId}} [ngStyle]="{ color: node.iconColor }"></mat-icon>
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [class.tree-node-selected]="isSelectedLoi(node)"
+      class="loi-tree-node" role="button" tabindex="0" mat-button (click)="selectLoi(node)">
+      <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }}" [ngStyle]="{color: node.iconColor}"></mat-icon>
       <div id="select-loi">
         {{ node.name }}
       </div>
     </mat-tree-node>
     <!-- Tree node for jobs -->
-    <mat-tree-node
-      [class.tree-node-selected]="isSelectedLoi(node)"
-      *matTreeNodeDef="let node; when: hasChild"
-      matTreeNodePadding
-      class="expandable-node"
-    >
+    <mat-tree-node [class.tree-node-selected]="isSelectedLoi(node)" *matTreeNodeDef="let node; when: hasChild"
+      matTreeNodePadding class="expandable-node">
       <div class="expandable-node-start">
-        <button
-          mat-icon-button
-          [attr.aria-label]="'Toggle ' + node.item"
-          matTreeNodeToggle
-        >
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle
+          *ngIf="isSidePanelExpanded()">
           <mat-icon class="mat-icon-rtl-mirror">
             {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
         </button>
-        <mat-icon class="job-icon" [ngStyle]="{ color: node.iconColor }">
-          {{node.iconName}}
+        <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}"
+          [style.padding-left]="isSidePanelExpanded() ? '0' : '16px'">
+          {{ node.iconName }}
         </mat-icon>
-        {{ node.name }}
+        <div *ngIf="isSidePanelExpanded()">
+          {{ node.name }}
+        </div>
       </div>
-      <div [ngSwitch]="actionsType">
+      <div [ngSwitch]="actionsType" *ngIf="isSidePanelExpanded()">
         <div *ngSwitchCase="jobListItemActionsType.MENU">
           <button mat-icon-button [matMenuTriggerFor]="jobMenu">
             <mat-icon>more_vert</mat-icon>
