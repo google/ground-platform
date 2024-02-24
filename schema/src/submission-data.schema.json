@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "submission-data.schema.json",
+  "title": "SubmissionData",
+  "type": "object",
+  "additionalProperties": {
+    "oneOf": [
+      {
+        "type": "string"
+      },
+      {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      {
+        "type": "number"
+      },  
+      {
+        "$ref": "coordinates-data.schema.json"
+      }
+    ]
+  }
+}

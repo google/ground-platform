@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "submission-document.schema.json",
+  "title": "SubmissionDocument",
+  "type": "object",
+  "required": [
+    "jobId",
+    "loiId"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string"
+    },
+    "loiId": {
+      "type": "string"
+    },
+    "results": {
+      "$ref": "submission-data.schema.json",
+      "x-kt-type": "SubmissionData"
+    }
+  },
+  "created": {
+    "$ref": "audit-info-data.schema.json"
+  },
+  "updated": {
+    "$ref": "audit-info-data.schema.json"
+  },
+  "additionalProperties": false
+}

@@ -8,10 +8,11 @@
   ],
   "properties": {
     "type": {
-      "const": "Point"
+      "const": "Point",
+      "default": "Point"
     },
     "coordinates": {
-      "$ref": "geo-point-data.schema.json"
+      "$ref": "coordinates-data.schema.json"
     }
   },
   "additionalProperties": false

@@ -9,14 +9,16 @@
   ],
   "properties": {
     "type": {
-      "const": "MultiPolygon"
+      "const": "MultiPolygon",
+      "default": "MultiPolygon"
     },
     "coordinates": {
-      "type": "object",
-      "$comment": "Numerically indexed object, workaround to represent nested arrays in Firestore.",
-      "additionalProperties": {
-        "$comment": "TODO(#2249): Replace indexed objects with wrapped arrays.",
-        "$ref": "polygon-coordinates-data.schema.json"
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "linear-ring-data.schema.json"
+        }
       }
     }
   },

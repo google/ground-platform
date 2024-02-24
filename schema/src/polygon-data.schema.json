@@ -9,10 +9,14 @@
   ],
   "properties": {
     "type": {
-      "const": "Polygon"
+      "const": "Polygon",
+      "default": "Polygon"
     },
     "coordinates": {
-      "$ref": "polygon-coordinates-data.schema.json"
+      "type": "array",
+      "items": {
+        "$ref": "linear-ring-data.schema.json"
+      }
     }
   },
   "additionalProperties": false
