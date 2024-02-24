@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "audit-info-data.schema.json",
-  "title": "AuditInfoData",
+  "$id": "audit-info-object.json",
+  "title": "AuditInfoObject",
   "type": "object",
   "required": [
     "type",

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "point-object.json",
+  "title": "PointObject",
+  "required": [
+    "type",
+    "coordinates"
+  ],
+  "properties": {
+    "type": {
+      "const": "Point",
+      "default": "Point"
+    },
+    "coordinates": {
+      "$ref": "coordinates-object.json"
+    }
+  },
+  "additionalProperties": false
+}

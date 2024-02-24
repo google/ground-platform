@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coordinates-object.json",
+  "$comment": "A pair of web mercator coordinates.",
+  "title": "CoordinatesObject",
+  "type": "object",
+  "required": ["x", "y"],
+  "properties": {
+    "x": {
+      "type": "number"
+    },
+    "y": {
+      "type": "number"
+    }
+  },
+  "additionalProperties": false
+}

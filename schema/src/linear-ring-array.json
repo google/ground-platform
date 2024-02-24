@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "linear-ring-array.json",
+  "title": "LinearRingArray",
+  "type": "array",
+  "items": {
+    "$ref": "coordinates-object.json"
+  },
+  "minItems": 3
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "submission-data.schema.json",
-  "title": "SubmissionData",
+  "$id": "submission-data-object.json",
+  "title": "SubmissionDataObject",
   "type": "object",
   "additionalProperties": {
     "oneOf": [
@@ -18,7 +18,7 @@
         "type": "number"
       },  
       {
-        "$ref": "coordinates-data.schema.json"
+        "$ref": "coordinates-object.json"
       }
     ]
   }

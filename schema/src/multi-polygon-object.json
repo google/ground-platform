@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "multi-polygon-data.schema.json",
-  "title": "MultiPolygonData",
+  "$id": "multi-polygon-object.json",
+  "title": "MultiPolygonObject",
   "type": "object",
   "required": [
     "type",
@@ -15,11 +15,9 @@
     "coordinates": {
       "type": "array",
       "items": {
-        "type": "array",
-        "items": {
-          "$ref": "linear-ring-data.schema.json"
-        }
-      }
+        "$ref": "polygon-coordinates-object.json"
+      },
+      "minItems": 1
     }
   },
   "additionalProperties": false

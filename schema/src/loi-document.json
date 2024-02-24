@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "loi-document.schema.json",
+  "$id": "loi-document.json",
   "title": "LoiDocument",
   "type": "object",
   "required": [
@@ -15,7 +15,7 @@
       "type": "string"
     },
     "geometry": {
-      "$ref": "geometry-data.schema.json"
+      "$ref": "geometry-object.json"
     },
     "properties": {
       "type": "object",

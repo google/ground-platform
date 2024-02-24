@@ -1,0 +1,11 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "polygon-coordinates-array.json",
+    "title": "PolygonCoordinatesArray",
+    "type": "array",
+    "items": {
+        "$comment": "Element 0 represents a polygon shell, remaining elements represent holes.",
+        "$ref": "linear-ring-object.json"
+    },
+    "minItems": 1
+}

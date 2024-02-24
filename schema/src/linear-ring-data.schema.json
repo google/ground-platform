@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "linear-ring-data.schema.json",
-  "title": "LinearRingData",
-  "type": "array",
-  "items": {
-    "$ref": "coordinates-data.schema.json"
-  }
-}
