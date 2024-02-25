@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "point-data.schema.json",
+  "title": "PointData",
+  "required": [
+    "type",
+    "coordinates"
+  ],
+  "properties": {
+    "type": {
+      "const": "Point"
+    },
+    "coordinates": {
+      "$ref": "geo-point-data.schema.json"
+    }
+  },
+  "additionalProperties": false
+}
