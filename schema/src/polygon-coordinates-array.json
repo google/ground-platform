@@ -5,7 +5,11 @@
     "type": "array",
     "items": {
         "$comment": "Element 0 represents a polygon shell, remaining elements represent holes.",
-        "$ref": "linear-ring-array.json"
+        "type": "array",
+        "items": {
+            "$ref": "geo-point-object.json"
+        },
+        "minItems": 3
     },
     "minItems": 1
 }
