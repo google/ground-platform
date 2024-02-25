@@ -4,7 +4,7 @@
   "title": "LinearRingArray",
   "type": "array",
   "items": {
-    "$ref": "coordinates-object.json"
+    "$ref": "geo-point-object.json"
   },
   "minItems": 3
 }

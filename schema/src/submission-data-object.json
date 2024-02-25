@@ -18,7 +18,7 @@
         "type": "number"
       },  
       {
-        "$ref": "coordinates-object.json"
+        "$ref": "geo-point-object.json"
       }
     ]
   }

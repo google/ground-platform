@@ -12,7 +12,7 @@
       "default": "Point"
     },
     "coordinates": {
-      "$ref": "coordinates-object.json"
+      "$ref": "geo-point-object.json"
     }
   },
   "additionalProperties": false
