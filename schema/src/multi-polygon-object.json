@@ -15,7 +15,7 @@
     "coordinates": {
       "type": "array",
       "items": {
-        "$ref": "polygon-coordinates-object.json"
+        "$ref": "polygon-coordinates-array.json"
       },
       "minItems": 1
     }

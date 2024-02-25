@@ -5,7 +5,7 @@
     "type": "array",
     "items": {
         "$comment": "Element 0 represents a polygon shell, remaining elements represent holes.",
-        "$ref": "linear-ring-object.json"
+        "$ref": "linear-ring-array.json"
     },
     "minItems": 1
 }
