@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "polygon-data.schema.json",
-  "title": "PolygonData",
+  "$id": "polygon-object.json",
+  "title": "PolygonObject",
   "type": "object",
   "required": [
     "type",
@@ -9,10 +9,11 @@
   ],
   "properties": {
     "type": {
-      "const": "Polygon"
+      "const": "Polygon",
+      "default": "Polygon"
     },
     "coordinates": {
-      "$ref": "polygon-coordinates-data.schema.json"
+      "$ref": "polygon-coordinates-array.json"
     }
   },
   "additionalProperties": false

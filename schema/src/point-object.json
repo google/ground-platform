@@ -1,17 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "point-data.schema.json",
-  "title": "PointData",
+  "$id": "point-object.json",
+  "title": "PointObject",
   "required": [
     "type",
     "coordinates"
   ],
   "properties": {
     "type": {
-      "const": "Point"
+      "const": "Point",
+      "default": "Point"
     },
     "coordinates": {
-      "$ref": "geo-point-data.schema.json"
+      "$ref": "geo-point-object.json"
     }
   },
   "additionalProperties": false
