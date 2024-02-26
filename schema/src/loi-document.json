@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "loi-document.json",
+  "title": "LoiDocument",
+  "type": "object",
+  "required": [
+    "jobId",
+    "geometry"
+  ],
+  "properties": {
+    "jobId": {
+      "type": "string"
+    },
+    "customId": {
+      "type": "string"
+    },
+    "geometry": {
+      "$ref": "geometry-object.json"
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "number",
+          "string"
+        ]
+      }
+    },
+    "submissionCount": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false
+}
