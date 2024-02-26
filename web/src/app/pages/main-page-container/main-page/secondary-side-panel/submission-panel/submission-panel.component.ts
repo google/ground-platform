@@ -15,6 +15,7 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
@@ -37,6 +38,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
+  storage = getStorage();
+  firebaseURLs = new Map<string, string>();
 
   public taskType = TaskType;
 
@@ -54,6 +57,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
           this.tasks = submission.job
             ?.getTasksSorted()
             .filter(task => !task.addLoiTask);
+          // Get image URL upon initialization to not send Firebase requests multiple times
+          this.getFirebaseImageURLs();
         }
       })
     );
@@ -62,6 +67,19 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
         this.selectedTaskId = taskId;
       })
     );
+  }
+
+  getFirebaseImageURLs() {
+    this.tasks?.forEach(task => {
+      if (task.type === this.taskType.PHOTO) {
+        const submissionImage = this.getTaskSubmissionResult(task)!
+          .value as string;
+        const imageRef = ref(this.storage, submissionImage);
+        getDownloadURL(imageRef).then(url => {
+          this.firebaseURLs.set(submissionImage, url);
+        });
+      }
+    });
   }
 
   navigateToSubmissionList() {
