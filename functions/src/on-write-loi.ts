@@ -38,16 +38,27 @@ export async function onWriteLoiHandler(
 
   if (!loiId || !loi) return;
 
-  const whips = true;
+  const whisp = true;
 
-  if (whips) {
-    const isJobStrategyPredefined = await db.isJobStrategyPredefined(
-      surveyId,
-      loi.jobId
-    );
+  if (whisp) {
+    const hasAddLoiTask = await db.hasAddLoiTask(surveyId, loi.jobId);
 
-    if (!isJobStrategyPredefined) {
-      await db.updateLoiProperties(surveyId, loiId, {whisp_test: 'test'});
+    if (hasAddLoiTask) {
+      const properties = getWhispIntegrationProperties();
+
+      console.log(properties);
+
+      await db.updateLoiProperties(surveyId, loiId, properties);
     }
   }
+
+  const loiPropertyGenerators = await db.fetchLoiPropertyGenerators();
+
+  loiPropertyGenerators.docs.forEach(loiPropertyGenerator => {
+    console.log(loiPropertyGenerator.data());
+  });
 }
+
+const getWhispIntegrationProperties = () => {
+  return {whisp_test: 'test'};
+};

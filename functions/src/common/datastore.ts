@@ -30,6 +30,16 @@ type pseudoGeoJsonGeometry = {
 /**
  * Returns path to survey colection. This is a function for consistency with other path functions.
  */
+export const config = () => 'config';
+
+/**
+ * Returns the path of integrations doc.
+ */
+export const integrations = () => config() + '/integrations';
+
+/**
+ * Returns path to survey colection. This is a function for consistency with other path functions.
+ */
 export const surveys = () => 'surveys';
 
 /**
@@ -99,6 +109,10 @@ export class Datastore {
     return this.db_.collection(path).get();
   }
 
+  fetchLoiPropertyGenerators() {
+    return this.db_.collection(integrations() + '/loiPropertyGenerators').get();
+  }
+
   fetchSurvey(surveyId: string) {
     return this.db_.doc(survey(surveyId)).get();
   }
@@ -148,16 +162,11 @@ export class Datastore {
     return snapshot.data().count;
   }
 
-  async isJobStrategyPredefined(
-    surveyId: string,
-    jobId: string
-  ): Promise<boolean> {
+  async hasAddLoiTask(surveyId: string, jobId: string): Promise<boolean> {
     const surveysRef = this.db_.collection(surveys());
-    const surveysForjobStrategyQuery = surveysRef.where(
-      `${surveyId}.jobs.${jobId}.strategy`,
-      '==',
-      'PREDEFINED'
-    );
+    const surveysForjobStrategyQuery = surveysRef
+      .where(firestore.FieldPath.documentId(), '==', surveyId)
+      .where(`jobs.${jobId}.tasks.$addLoi.addLoiTask`, '==', true);
     const snapshot = await surveysForjobStrategyQuery.count().get();
     return snapshot.data().count > 0;
   }
