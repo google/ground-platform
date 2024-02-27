@@ -1,0 +1,54 @@
+/**
+ * Copyright 2024 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    /**
+     * Returns email address for the requesting user.
+     */
+    function email() {
+      return request.auth.token.email;
+    }
+
+    /**
+     * Returns the regular expression for users allowed access.
+     */
+    function passRegexp() {
+      return firestore.get(/databases/(default)/documents/passlist/regexp).data.regexp
+    }
+
+    /**
+     * Returns true iff the specified email is in the pass list.
+     */
+    function isInPassList(email) {
+      return firestore.exists(/databases/(default)/documents/passlist/$(email))
+    }
+
+    /**
+     * Returns true iff the user's email is in the implicit regex or
+     * explicit passlist.
+     */
+    function canAccess(email) {
+      return email.matches(passRegexp()) || isInPassList(email);
+    }
+    
+    match /offline-imagery/{allPaths=**} {
+      // All authenticated users can read.
+      allow read: if canAccess(email());
+    }
+  }
+}
