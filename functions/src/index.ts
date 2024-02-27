@@ -27,6 +27,7 @@ import { onCall } from 'firebase-functions/v2/https';
 import { onWriteSubmissionHandler, submissionPathTemplate } from '@/on-write-submission';
 import {surveyPathTemplate, onWriteSurveyHandler} from '@/on-write-survey';
 import {loiPathTemplate, onWriteLoiHandler} from '@/on-write-loi';
+import {onCreateLoiHandler} from '@/on-create-loi';
 
 export const profile = {
   refresh: onCall((request) => handleProfileRefresh(request))
@@ -40,11 +41,15 @@ export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const onWriteSurvey = functions.firestore
   .document(surveyPathTemplate)
-.onWrite(onWriteSurveyHandler);
+  .onWrite(onWriteSurveyHandler);
 
 export const onWriteLoi = functions.firestore
   .document(loiPathTemplate)
   .onWrite(onWriteLoiHandler);
+
+export const onCreateLoi = functions.firestore
+  .document(loiPathTemplate)
+  .onCreate(onCreateLoiHandler);
 
 export const onWriteSubmission = functions.firestore
   .document(submissionPathTemplate)
