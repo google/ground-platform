@@ -71,4 +71,8 @@ export class SurveyHeaderComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
+
+  onClickSidePanelButtonEvent() {
+    this.navigationService.onClickSidePanelButton();
+  }
 }
