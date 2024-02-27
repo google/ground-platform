@@ -3,14 +3,15 @@
   "version": "0.0.1",
   "description": "Defines how Ground documents are structured in Firestore.",
   "scripts": {
-    "pregenerate": "rm -rf dist/generated dist/tmp && mkdir -p dist/generated",
-    "generate": "json2ts --no-declareExternallyReferenced --no-bannerComment --cwd=src -i 'src/*.json' -o dist/tmp/",
-    "postgenerate": "cat dist/tmp/*.d.ts > dist/generated/schema.d.ts",
+    "clean": "rm -rf node_modules dist",
+    "pregenerate": "rm -rf dist && mkdir -p dist/generated",
+    "generate": "npm install && json2ts --no-declareExternallyReferenced --no-bannerComment --cwd=src -i 'src/*.json' -o dist/tmp/",
+    "postgenerate": "cat dist/tmp/*.d.ts > dist/generated/index.d.ts",
     "prebuild": "npm run generate",
-    "build": "tsc dist/generated/schema.d.ts"
+    "build": "tsc dist/generated/index.d.ts"
   },
   "files": [
-    "dist/generated/schema.d.ts"
+    "dist/generated/index.d.ts"
   ],
   "devDependencies": {
     "json-schema-to-typescript": "^13.1.2",
