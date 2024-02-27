@@ -100,7 +100,7 @@ describe('SurveyListComponent', () => {
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['navigateToCreateSurvey', 'selectSurvey']
+      ['navigateToCreateSurvey', 'selectSurvey', 'getSidePanelExpanded']
     );
 
     TestBed.configureTestingModule({

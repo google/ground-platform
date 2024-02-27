@@ -64,7 +64,7 @@ describe('SurveyLoiComponent', () => {
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['getLocationOfInterestId$', 'getSubmissionId$']
+      ['getLocationOfInterestId$', 'getSubmissionId$', 'getSidePanelExpanded']
     );
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [

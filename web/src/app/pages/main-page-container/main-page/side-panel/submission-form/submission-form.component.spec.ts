@@ -171,6 +171,7 @@ describe('SubmissionFormComponent', () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getLocationOfInterestId$: () => NEVER,
+      getSidePanelExpanded: () => false,
     };
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({
