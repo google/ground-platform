@@ -50,6 +50,8 @@ export class NavigationService {
   static readonly JOB_SEGMENT = 'job';
   static readonly ERROR = 'error';
 
+  private sidePanelExpanded = true;
+
   // TODO: remove this logic once the new side panel replaces the old one
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
     if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
@@ -327,6 +329,14 @@ export class NavigationService {
         fragment: 'ignored',
       } as IsActiveMatchOptions
     );
+  }
+
+  getSidePanelExpanded(): boolean {
+    return this.sidePanelExpanded;
+  }
+
+  hamburgerEvent() {
+    this.sidePanelExpanded = !this.sidePanelExpanded;
   }
 }
 

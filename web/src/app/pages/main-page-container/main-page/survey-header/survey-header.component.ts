@@ -19,7 +19,6 @@ import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Subscription} from 'rxjs';
 
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
-import {HamburgerService} from 'app/services/hamburger/hamburger.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -36,7 +35,6 @@ export class SurveyHeaderComponent implements OnDestroy {
   constructor(
     public navigationService: NavigationService,
     public surveyService: SurveyService,
-    public hamburgerService: HamburgerService,
     private dialog: MatDialog
   ) {
     this.title = '';
@@ -75,6 +73,6 @@ export class SurveyHeaderComponent implements OnDestroy {
   }
 
   onHamburgerEvent() {
-    this.hamburgerService.hamburgerEvent();
+    this.navigationService.hamburgerEvent();
   }
 }
