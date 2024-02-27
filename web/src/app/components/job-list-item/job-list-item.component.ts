@@ -150,6 +150,10 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   isSidePanelExpanded() {
     return this.navigationService.getSidePanelExpanded();
   }
+
+  testFunction() {
+    console.log('test');
+  }
 }
 
 export enum JobListItemActionsType {
