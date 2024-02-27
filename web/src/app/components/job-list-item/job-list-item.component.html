@@ -28,8 +28,7 @@ limitations under the License.
     <mat-tree-node [class.tree-node-selected]="isSelectedLoi(node)" *matTreeNodeDef="let node; when: hasChild"
       matTreeNodePadding class="expandable-node">
       <div class="expandable-node-start">
-        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item"
-          (click)="isSidePanelExpanded() ? treeControl.toggle(node): ''" *ngIf="isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
           <mat-icon class="mat-icon-rtl-mirror">
             {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
@@ -40,7 +39,7 @@ limitations under the License.
           (click)="isSidePanelExpanded() ? '' : treeControl.toggle(node)">
           {{ node.iconName }}
         </mat-icon>
-        <div *ngIf=" isSidePanelExpanded()">
+        <div *ngIf="isSidePanelExpanded()">
           {{ node.name }}
         </div>
       </div>

@@ -128,6 +128,7 @@ describe('CreateSurveyComponent', () => {
         'navigateToSurveyList',
         'navigateToCreateSurvey',
         'navigateToEditSurvey',
+        'getSidePanelExpanded',
       ]
     );
     surveyId$ = new Subject<string | null>();
