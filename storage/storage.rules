@@ -50,5 +50,10 @@ service firebase.storage {
       // All authenticated users can read.
       allow read: if canAccess(email());
     }
+    
+    match /user-media/{allPaths=**} {
+      // All authenticated users can read.
+      allow create, read, write: if canAccess(email());
+    }    
   }
 }
