@@ -335,7 +335,7 @@ export class NavigationService {
     return this.sidePanelExpanded;
   }
 
-  hamburgerEvent() {
+  onClickSidePanelButton() {
     this.sidePanelExpanded = !this.sidePanelExpanded;
   }
 }

@@ -72,7 +72,7 @@ export class SurveyHeaderComponent implements OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  onHamburgerEvent() {
-    this.navigationService.hamburgerEvent();
+  onClickSidePanelButtonEvent() {
+    this.navigationService.onClickSidePanelButton();
   }
 }
