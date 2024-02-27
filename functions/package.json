@@ -38,6 +38,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@types/ground-schema": "file:../schema/dist/generated",
     "@types/busboy": "^1.5.0",
     "@types/cookie-parser": "^1.4.4",
     "@types/cors": "2.8.12",
