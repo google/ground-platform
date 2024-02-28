@@ -52,8 +52,6 @@ export class EditJobComponent {
   tasks?: List<Task>;
   lois!: List<LocationOfInterest>;
 
-  isLoading = true;
-
   EditJobSection = EditJobSection;
 
   @ViewChild('tasksEditor')
@@ -91,9 +89,7 @@ export class EditJobComponent {
     }
   }
 
-  private async onJobIdChange(params: Params) {
-    this.isLoading = true;
-
+  private onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
     this.tasks = this.draftSurveyService
@@ -107,19 +103,22 @@ export class EditJobComponent {
         .getLoisByJobId$(this.jobId!)
         .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
     );
-
-    this.isLoading = false;
   }
 
   onChangeSection(section: EditJobSection) {
+    if (this.tasksEditor && section === EditJobSection.LOIS) {
+      this.tasks = this.tasksEditor.toTasks();
+    }
     this.section = section;
   }
 
   onTasksChange(valid: boolean): void {
     if (this.jobId && this.tasksEditor) {
-      this.tasks = this.tasksEditor.toTasks();
-
-      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks, valid);
+      this.draftSurveyService.addOrUpdateTasks(
+        this.jobId,
+        this.tasksEditor.toTasks(),
+        valid
+      );
     }
   }
 

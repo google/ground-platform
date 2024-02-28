@@ -32,8 +32,6 @@ export class TaskDetailsComponent {
 
   tasks: List<Task> = List([]);
 
-  isLoading = true;
-
   private subscription = new Subscription();
 
   @ViewChild('tasksEditor')
@@ -43,7 +41,6 @@ export class TaskDetailsComponent {
     this.subscription.add(
       this.taskService.getTasks$().subscribe(tasks => {
         this.tasks = tasks;
-        this.isLoading = false;
       })
     );
   }

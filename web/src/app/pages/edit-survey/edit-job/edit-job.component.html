@@ -54,7 +54,6 @@
 
     <div *ngSwitchCase="EditJobSection.TASKS">
       <tasks-editor
-        *ngIf="!isLoading"
         #tasksEditor
         [tasks]="tasks"
         (onValueChanges)="onTasksChange($event)"
