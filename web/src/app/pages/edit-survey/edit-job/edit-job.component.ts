@@ -16,8 +16,8 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {List, Map} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
+import {List} from 'immutable';
+import {Subscription} from 'rxjs';
 
 import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
@@ -105,7 +105,7 @@ export class EditJobComponent {
     );
   }
 
-  onChangeSection(section: EditJobSection) {
+  onSectionChange(section: EditJobSection) {
     if (this.tasksEditor && section === EditJobSection.LOIS) {
       this.tasks = this.tasksEditor.toTasks();
     }
