@@ -18,7 +18,7 @@ limitations under the License.
     <!-- Tree node for lois -->
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [class.tree-node-selected]="isSelectedLoi(node)"
       class="loi-tree-node" role="button" tabindex="0" mat-button (click)="selectLoi(node)"
-      [style.padding-left]="isSidePanelExpanded() ? '40px' : '10px'">
+      [style.padding-left]="isSidePanelExpanded() ? '40px' : '16px'">
       <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }}" [ngStyle]="{color: node.iconColor}"></mat-icon>
       <div id="select-loi" *ngIf="isSidePanelExpanded()">
         {{ node.name }}
@@ -28,7 +28,8 @@ limitations under the License.
     <mat-tree-node [class.tree-node-selected]="isSelectedLoi(node)" *matTreeNodeDef="let node; when: hasChild"
       matTreeNodePadding class="expandable-node">
       <div class="expandable-node-start">
-        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle
+          *ngIf="isSidePanelExpanded()">
           <mat-icon class="mat-icon-rtl-mirror">
             {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
