@@ -15,11 +15,8 @@
  * limitations under the License.
  */
 
-import {Change, EventContext} from 'firebase-functions';
-import {
-  DocumentSnapshot,
-  QueryDocumentSnapshot,
-} from 'firebase-functions/v1/firestore';
+import {EventContext} from 'firebase-functions';
+import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
 import {db} from '@/common/context';
 // eslint-disable-next-line absolute-imports/only-absolute-imports
 import {loi} from './common/datastore';
