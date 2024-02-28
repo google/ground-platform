@@ -15,14 +15,11 @@
  */
 
 import {Component} from '@angular/core';
-import {List, Map} from 'immutable';
+import {List} from 'immutable';
 import {Observable} from 'rxjs';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
-import {Task} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SurveyService} from 'app/services/survey/survey.service';

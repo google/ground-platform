@@ -21,12 +21,12 @@
     <div *ngIf="GeometryTasks.includes(taskGroup)">
       <mat-select [(value)]="taskGroup" (selectionChange)="onTaskGroupSelect($event.value)">
         <mat-select-trigger class="task-label">
-          <mat-icon fontSet="material-icons-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
+          <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
           <div>{{ Tasks[taskGroup].label }}</div>
         </mat-select-trigger>
         <mat-option *ngFor="let geometryTaskGroup of GeometryTasks" [value]="geometryTaskGroup">
           <div class="task-label">
-            <mat-icon fontSet="material-icons-outlined">{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
+            <mat-icon class="material-symbols-outlined">{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
             <div>{{ Tasks[geometryTaskGroup].label }}</div>
           </div>
         </mat-option>
@@ -34,7 +34,7 @@
     </div>
 
     <div *ngIf="!GeometryTasks.includes(taskGroup)" class="task-label">
-      <mat-icon fontSet="material-icons-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
+      <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
       <div>{{ Tasks[taskGroup].label }}</div>
     </div>
 
@@ -72,8 +72,6 @@
         matInput
         formControlName="label"
         autocomplete="off"
-        (focus)="onTaskFocus()"
-        (blur)="onLabelBlur()"
       />
 
       <mat-error *ngIf="labelControl.touched && labelControl.invalid">

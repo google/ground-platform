@@ -28,7 +28,7 @@
       [matMenuTriggerFor]="surveyMenu"
       *ngIf="state === 2"
     >
-      <mat-icon>settings</mat-icon>
+      <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
     </button>
 
     <mat-menu #surveyMenu="matMenu">
@@ -51,7 +51,7 @@
       mat-flat-button
       class="finish-edit-button"
       *ngIf="state === 3"
-      [disabled]="!isDraftSurveyDirty()"
+      [disabled]="!isDraftSurveyDirtyAndValid()"
       (click)="onFinishEditSurveyClick()"
     >
       Publish changes

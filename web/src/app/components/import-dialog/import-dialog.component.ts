@@ -68,6 +68,7 @@ export class ImportDialogComponent {
       );
       this.notificationService.success(`${response.count} sites imported`);
     } catch (err) {
+      console.error(err);
       this.notificationService.error('Importing data collection sites failed');
     }
     this.isImporting = false;

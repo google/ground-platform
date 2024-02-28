@@ -32,6 +32,6 @@ export class SidePanelComponent {
   readonly sideNavMode$: Observable<SideNavMode>;
 
   constructor(private navigationService: NavigationService) {
-    this.sideNavMode$ = navigationService.getSideNavMode$();
+    this.sideNavMode$ = this.navigationService.getSideNavMode$();
   }
 }

@@ -38,19 +38,6 @@ describe('LoiPermissionsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('loads section header', () => {
-    expect(
-      fixture.debugElement.nativeElement.querySelector('.title').textContent
-    ).toBeNonEmptyString();
-  });
-
-  it('loads section description', () => {
-    expect(
-      fixture.debugElement.nativeElement.querySelector('.description')
-        .textContent
-    ).toBeNonEmptyString();
-  });
-
   it('sets the default data collection option to survey organizers', () => {
     expect(
       component.formGroup.controls[component.loiPermissionsControlKey].value

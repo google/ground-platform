@@ -30,6 +30,11 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 
+enum EditJobSection {
+  TASKS,
+  LOIS,
+}
+
 @Component({
   selector: 'edit-job',
   templateUrl: './edit-job.component.html',
@@ -37,14 +42,19 @@ import {TaskService} from 'app/services/task/task.service';
 })
 export class EditJobComponent {
   subscription: Subscription = new Subscription();
+  loisSubscription: Subscription = new Subscription();
 
   surveyId?: string;
   jobId?: string;
-  section: 'tasks' | 'lois' = 'tasks';
-  lois!: List<LocationOfInterest>;
-  isLoading = true;
+
+  section: EditJobSection = EditJobSection.TASKS;
 
   tasks?: List<Task>;
+  lois!: List<LocationOfInterest>;
+
+  isLoading = true;
+
+  EditJobSection = EditJobSection;
 
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
@@ -92,26 +102,24 @@ export class EditJobComponent {
       ?.tasks?.toList()
       .sortBy(task => task.index);
 
-    this.lois = await firstValueFrom(
-      this.loiService.getLoisByJobId$(this.jobId!)
+    this.loisSubscription.add(
+      this.loiService
+        .getLoisByJobId$(this.jobId!)
+        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
     );
 
     this.isLoading = false;
   }
 
-  getIndex(index: number) {
-    return index;
-  }
-
-  onChangeSection(section: 'tasks' | 'lois') {
+  onChangeSection(section: EditJobSection) {
     this.section = section;
   }
 
   onTasksChange(valid: boolean): void {
-    if (this.jobId && this.tasksEditor && valid) {
+    if (this.jobId && this.tasksEditor) {
       this.tasks = this.tasksEditor.toTasks();
 
-      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks);
+      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks, valid);
     }
   }
 
@@ -131,5 +139,7 @@ export class EditJobComponent {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+
+    this.loisSubscription.unsubscribe();
   }
 }

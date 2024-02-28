@@ -17,6 +17,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {List} from 'immutable';
 import {Subscription, filter, startWith} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
@@ -88,7 +89,7 @@ export class EditSurveyComponent implements OnInit {
     );
   }
 
-  jobs(): Job[] {
+  jobs(): List<Job> {
     return this.survey!.getJobsSorted();
   }
 
@@ -111,13 +112,20 @@ export class EditSurveyComponent implements OnInit {
 
   async duplicateJob(job: Job): Promise<void> {
     const newJob = this.jobService.createNewJob();
+
     this.draftSurveyService.addOrUpdateJob(
       job.copyWith({
         id: newJob.id,
-        name: 'Copy of ' + job.name,
+        name: `Copy of ${job.name}`,
         color: this.jobService.getNextColor(this.survey?.jobs),
         index: -1,
-      })
+      }),
+      true
+    );
+
+    this.navigationService.navigateToEditJob(
+      this.draftSurveyService.getSurvey().id,
+      newJob.id
     );
   }
 
@@ -127,6 +135,9 @@ export class EditSurveyComponent implements OnInit {
 
   openDialog(dialogType: DialogType, job: Job): void {
     const dialogRef = this.dialog.open(JobDialogComponent, {
+      autoFocus: [DialogType.AddJob, DialogType.RenameJob].includes(dialogType)
+        ? `#${JobDialogComponent.JOB_NAME_FIELD_ID}`
+        : 'first-tabbable',
       data: {dialogType, jobName: job.name ?? ''},
     });
 
@@ -144,9 +155,21 @@ export class EditSurveyComponent implements OnInit {
                 job.color || this.jobService.getNextColor(this.survey?.jobs),
             })
           );
+
+          this.navigationService.navigateToEditJob(this.surveyId!, job.id);
           break;
         case DialogType.DeleteJob:
-          this.draftSurveyService.deleteJob(job);
+          {
+            const previousJob = this.survey?.getPreviousJob(job);
+
+            this.draftSurveyService.deleteJob(job);
+            previousJob
+              ? this.navigationService.navigateToEditJob(
+                  this.draftSurveyService.getSurvey().id,
+                  previousJob.id
+                )
+              : this.navigationService.navigateToEditSurvey(this.surveyId!);
+          }
           break;
         default:
           break;

@@ -4,15 +4,6 @@
 @mixin color($theme) {
   $color-config: mat.get-color-config($theme);
   $foreground: map.get($color-config, foreground);
-
-  .sidenav-toggle {
-    // TODO(amysorto): find corresponding color in palette
-    background-color: #d6d6d2;
-  }
-
-  .mat-sidenav{
-    background: #edeee9; /* M3/sys/light/surface-container */
-  }
 }
 
 @mixin theme($theme) {

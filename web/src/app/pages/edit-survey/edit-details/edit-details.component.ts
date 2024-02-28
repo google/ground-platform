@@ -43,11 +43,15 @@ export class EditDetailsComponent implements OnInit {
     );
   }
 
-  onDetailChanges(_: boolean): void {
+  onDetailChanges(valid: boolean): void {
     if (this.surveyDetails) {
       const [title, description] = this.surveyDetails.toTitleAndDescription();
 
-      this.draftSurveyService.updateTitleAndDescription(title, description);
+      this.draftSurveyService.updateTitleAndDescription(
+        title,
+        description,
+        valid
+      );
     }
   }
 

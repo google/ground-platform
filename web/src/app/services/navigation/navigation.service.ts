@@ -37,6 +37,7 @@ export class NavigationService {
   private static readonly LOI_ID_FRAGMENT_PARAM = 'f';
   private static readonly LOI_JOB_ID_FRAGMENT_PARAM = 'fl';
   private static readonly SUBMISSION_ID_FRAGMENT_PARAM = 'o';
+  private static readonly TASK_ID_FRAGMENT_PARAM = 't';
   static readonly JOB_ID_NEW = 'new';
   static readonly SUBMISSION_ID_NEW = 'new';
   static readonly SURVEY_ID_NEW = 'new';
@@ -48,6 +49,8 @@ export class NavigationService {
   static readonly SURVEYS_EDIT = 'edit';
   static readonly JOB_SEGMENT = 'job';
   static readonly ERROR = 'error';
+
+  private sidePanelExpanded = true;
 
   // TODO: remove this logic once the new side panel replaces the old one
   private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
@@ -68,6 +71,7 @@ export class NavigationService {
   private jobId$?: Observable<string | null>;
   private loiId$?: Observable<string | null>;
   private submissionId$?: Observable<string | null>;
+  private taskId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
 
   constructor(private router: Router) {}
@@ -95,6 +99,9 @@ export class NavigationService {
     this.submissionId$ = fragmentParams$.pipe(
       map(params => params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM))
     );
+    this.taskId$ = fragmentParams$.pipe(
+      map(params => params.get(NavigationService.TASK_ID_FRAGMENT_PARAM))
+    );
     this.sideNavMode$ = fragmentParams$.pipe(
       map(params => NavigationService.fragmentParamsToSideNavMode(params))
     );
@@ -114,6 +121,10 @@ export class NavigationService {
 
   getSubmissionId$(): Observable<string | null> {
     return this.submissionId$!;
+  }
+
+  getTaskId$(): Observable<string | null> {
+    return this.taskId$!;
   }
 
   getSideNavMode$(): Observable<SideNavMode> {
@@ -172,9 +183,20 @@ export class NavigationService {
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
-  showSubmissionDetail(submissionId: string) {
+  showSubmissionDetail(jobId: string, submissionId: string) {
     const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = jobId;
     newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
+    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+  }
+
+  showSubmissionDetailWithHighlightedTask(taskId: string) {
+    const newParam: {[key: string]: string} = {};
+    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] =
+      this.getLocationOfInterestId()!;
+    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] =
+      this.getSubmissionId()!;
+    newParam[NavigationService.TASK_ID_FRAGMENT_PARAM] = taskId;
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
@@ -256,6 +278,15 @@ export class NavigationService {
   }
 
   /**
+   * Navigate to the URL with new survey id.
+   */
+  navigateToEditJob(surveyId: string, jobId: string) {
+    this.router.navigateByUrl(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}/${NavigationService.JOB_SEGMENT}/${jobId}`
+    );
+  }
+
+  /**
    * Navigate to the URL for signin.
    */
   signIn() {
@@ -298,6 +329,14 @@ export class NavigationService {
         fragment: 'ignored',
       } as IsActiveMatchOptions
     );
+  }
+
+  getSidePanelExpanded(): boolean {
+    return this.sidePanelExpanded;
+  }
+
+  onClickSidePanelButton() {
+    this.sidePanelExpanded = !this.sidePanelExpanded;
   }
 }
 

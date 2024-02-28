@@ -20,6 +20,14 @@ import { firestore } from 'firebase-admin';
 import { GeoPoint } from 'firebase-admin/firestore';
 
 /**
+ * 
+ */
+type pseudoGeoJsonGeometry = {
+  type: string
+  coordinates: any
+}
+
+/**
  * Returns path to survey colection. This is a function for consistency with other path functions.
  */
 export const surveys = () => 'surveys';
@@ -37,17 +45,20 @@ export const lois = (surveyId: string) => survey(surveyId) + '/lois';
 /**
  * Returns the path of the LOI doc with the specified id.
  */
-export const loi = (surveyId: string, loiId: string) => lois(surveyId) + '/' + loiId;
+export const loi = (surveyId: string, loiId: string) =>
+  lois(surveyId) + '/' + loiId;
 
 /**
  * Returns the path of the submissions collection in the survey with the specified id.
  */
-export const submissions = (surveyId: string) => survey(surveyId) + '/submissions';
+export const submissions = (surveyId: string) =>
+  survey(surveyId) + '/submissions';
 
 /**
  * Returns the path of the submission doc with the specified id.
  */
-export const submission = (surveyId: string, submissionId: string) => submissions(surveyId) + '/' + submissionId;
+export const submission = (surveyId: string, submissionId: string) =>
+  submissions(surveyId) + '/' + submissionId;
 
 export class Datastore {
   private db_: firestore.Firestore;
@@ -62,14 +73,14 @@ export class Datastore {
    * These attributes are merged with other existing ones if already present.
    */
   async mergeUserProfile(user: functions.auth.UserRecord) {
-    const {uid, email, displayName, photoURL} = user;
+    const { uid, email, displayName, photoURL } = user;
     await this.db_.doc(`users/${uid}`).set(
       {
         email,
         displayName,
         photoURL: photoURL && Datastore.trimPhotoURLSizeSuffix(photoURL),
       },
-      {merge: true}
+      { merge: true }
     );
   }
 
@@ -127,9 +138,12 @@ export class Datastore {
     await docRef.collection('lois').add(loiDoc);
   }
 
-  async countSubmissionsForLoi(surveyId: string, loiId: string): Promise<number> {
+  async countSubmissionsForLoi(
+    surveyId: string,
+    loiId: string
+  ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    const submissionsForLoiQuery = submissionsRef.where("loiId", "==", loiId);
+    const submissionsForLoiQuery = submissionsRef.where('loiId', '==', loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }
@@ -164,6 +178,50 @@ export class Datastore {
       );
     }
     return value;
+  }
+
+  /**
+   * 
+   * @param geoJsonGeometry pseudo GeoJSON geometry object, should have the following fields:
+   * {
+   *    type: string
+   *    geometry: any (note that this is expected to be a map rather than a list of lists because of how we store data in Firestore)
+   * }
+   *
+   * @returns GeoJSON geometry object (with geometry as list of lists)
+   */
+  static fromFirestoreMap(geoJsonGeometry: any): any {
+    const geometryObject = geoJsonGeometry as pseudoGeoJsonGeometry;
+    if (!geometryObject) {
+      throw new Error(`${geoJsonGeometry} is not of type pseudoGeoJsonGeometry`);
+    }
+
+    geometryObject.coordinates = this.fromFirestoreValue(geometryObject.coordinates);
+
+    return geometryObject;
+  }
+
+  static fromFirestoreValue(coordinates: any) {
+    if (coordinates instanceof GeoPoint) {
+      // Note: GeoJSON coordinates are in lng-lat order.
+      return [coordinates.longitude, coordinates.latitude];
+    }
+
+    if (typeof coordinates !== 'object') {
+      return coordinates;
+    }
+    const result = new Array<any>(coordinates.length);
+
+    Object.entries(coordinates).map(([i, nestedValue]) => {
+      const index = Number.parseInt(i);
+      if (!Number.isInteger(index)) {
+        return coordinates;
+      }
+
+      result[index] = this.fromFirestoreValue(nestedValue);
+    });
+
+    return result;
   }
 
   /**

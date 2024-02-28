@@ -312,8 +312,4 @@ export class TaskFormComponent {
       event.currentIndex
     );
   }
-
-  onLabelBlur(): void {
-    this.labelControl.setValue(this.labelControl.value.trim());
-  }
 }

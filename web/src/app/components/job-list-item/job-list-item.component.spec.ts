@@ -22,14 +22,10 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 import {MatTreeModule} from '@angular/material/tree';
-import {
-  MatTreeHarness,
-  MatTreeNodeHarness,
-} from '@angular/material/tree/testing';
+import {MatTreeHarness} from '@angular/material/tree/testing';
 import {Router} from '@angular/router';
 import {List, Map} from 'immutable';
 import {Subject, of} from 'rxjs';
@@ -152,7 +148,12 @@ describe('JobListItemComponent', () => {
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['getSurveyId$', 'getLocationOfInterestId$', 'selectLocationOfInterest']
+      [
+        'getSurveyId$',
+        'getLocationOfInterestId$',
+        'selectLocationOfInterest',
+        'getSidePanelExpanded',
+      ]
     );
 
     lois$ = new Subject<List<LocationOfInterest>>();
@@ -178,7 +179,6 @@ describe('JobListItemComponent', () => {
         MatIconModule,
         MatListModule,
         MatMenuModule,
-        MatDialogModule,
         MatTreeModule,
         CdkTreeModule,
       ],
