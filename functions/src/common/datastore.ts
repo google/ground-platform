@@ -18,7 +18,6 @@
 import * as functions from 'firebase-functions';
 import { firestore } from 'firebase-admin';
 import { GeoPoint } from 'firebase-admin/firestore';
-import {FieldPath} from '@google-cloud/firestore';
 
 /**
  * 
@@ -161,15 +160,6 @@ export class Datastore {
     const submissionsForLoiQuery = submissionsRef.where('loiId', '==', loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
-  }
-
-  async hasAddLoiTask(surveyId: string, jobId: string): Promise<boolean> {
-    const surveysRef = this.db_.collection(surveys());
-    const surveysForjobStrategyQuery = surveysRef
-      .where(FieldPath.documentId(), '==', surveyId)
-      .where(`jobs.${jobId}.tasks.$addLoi.addLoiTask`, '==', true);
-    const snapshot = await surveysForjobStrategyQuery.count().get();
-    return snapshot.data().count > 0;
   }
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
