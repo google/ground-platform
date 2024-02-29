@@ -99,7 +99,7 @@ export class LocationOfInterestService {
   ): List<LocationOfInterest> {
     return lois.map((loi, index) => {
       const displayName =
-        this.getLoiNameFromProperties(loi) || this.getDefaultName(loi);
+        this.getUserDefinedName(loi) || this.getDefaultName(loi);
       return {
         ...loi,
         name: displayName,
@@ -107,7 +107,7 @@ export class LocationOfInterestService {
     });
   }
 
-  static getLoiNameFromProperties(loi: LocationOfInterest): string | null {
+  static getUserDefinedName(loi: LocationOfInterest): string | null {
     const properties = loi.properties;
     let applicableProperties: string[] = [];
 

@@ -165,7 +165,7 @@ describe('JobListItemComponent', () => {
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     spyOn(
       LocationOfInterestService,
-      'getLoiNameFromProperties'
+      'getUserDefinedName'
     ).and.returnValue(null);
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.submissions$.and.returnValue(submissions$);

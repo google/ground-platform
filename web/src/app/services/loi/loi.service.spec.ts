@@ -69,17 +69,17 @@ describe('LocationOfInterestService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getLoiNameFromProperties', () => {
+  describe('getUserDefinedName', () => {
     it('should not return an inferred loi name if empty or non applicable properties', () => {
       expect(
-        LocationOfInterestService.getLoiNameFromProperties(getMockLoi())
+        LocationOfInterestService.getUserDefinedName(getMockLoi())
       ).toBe(null);
     });
 
     it('should return inferred loi name for the loi from the properties', () => {
       const properties = ImmutableMap([['id', 'loi1']]);
       expect(
-        LocationOfInterestService.getLoiNameFromProperties(
+        LocationOfInterestService.getUserDefinedName(
           getMockLoi(properties)
         )
       ).toBe('loi1');
@@ -92,7 +92,7 @@ describe('LocationOfInterestService', () => {
         ['name', 'loi 1'],
       ]);
       expect(
-        LocationOfInterestService.getLoiNameFromProperties(
+        LocationOfInterestService.getUserDefinedName(
           getMockLoi(properties)
         )
       ).toBe('loi 1');

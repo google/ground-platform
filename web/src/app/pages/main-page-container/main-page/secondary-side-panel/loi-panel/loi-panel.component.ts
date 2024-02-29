@@ -56,7 +56,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
               switchMap(loi => {
                 this.loi = loi;
                 this.name =
-                  LocationOfInterestService.getLoiNameFromProperties(loi) ??
+                  LocationOfInterestService.getUserDefinedName(loi) ??
                   LocationOfInterestService.getDefaultName(loi);
                 this.icon = getLoiIcon(loi);
 
