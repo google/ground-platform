@@ -110,8 +110,8 @@ export class Datastore {
     return this.db_.collection(path).get();
   }
 
-  fetchLoiPropertyGenerators() {
-    return this.db_.collection(integrations() + '/loiPropertyGenerators').get();
+  fetchPropertyGenerators() {
+    return this.db_.collection(integrations() + '/propertyGenerators').get();
   }
 
   fetchSurvey(surveyId: string) {

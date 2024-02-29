@@ -21,7 +21,7 @@ import {db} from '@/common/context';
 // eslint-disable-next-line absolute-imports/only-absolute-imports
 import {loi} from './common/datastore';
 // eslint-disable-next-line absolute-imports/only-absolute-imports
-// import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
+import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
 import {geojsonToWKT} from '@terraformer/wkt';
 
 /** Template for LOI write triggers capturing survey and LOI ids. */
@@ -35,39 +35,37 @@ export async function onCreateLoiHandler(
   const loiId = context.params.loiId;
   const loi = snapshot.data();
 
-  // await broadcastSurveyUpdate(context.params.surveyId);
-
   if (!loiId || !loi) return;
 
-  const hasAddLoiTask = await db.hasAddLoiTask(surveyId, loi.jobId);
+  let properties = loi.properties || {};
 
-  if (hasAddLoiTask) {
-    let properties = loi.properties || {};
+  const propertyGenerators = await db.fetchPropertyGenerators();
 
-    const loiPropertyGenerators = await db.fetchLoiPropertyGenerators();
+  await Promise.all(
+    propertyGenerators.docs.map(async propertyGeneratorDoc => {
+      const propertyGenerator = propertyGeneratorDoc.data();
 
-    await Promise.all(
-      loiPropertyGenerators.docs.map(async loiPropertyGeneratorDoc => {
-        const loiPropertyGenerator = loiPropertyGeneratorDoc.data();
+      const {url, prefix} = propertyGenerator as Partial<{
+        url: string;
+        prefix: string;
+      }>;
 
-        const {url, prefix} = loiPropertyGenerator as Partial<{
-          url: string;
-          prefix: string;
-        }>;
+      if (prefix) properties = removePrefixedKeys(properties, prefix);
 
-        const wkt = geojsonToWKT(loi.geometry || '');
+      const wkt = geojsonToWKT(loi.geometry || '');
 
-        const newProperties = await getIntegrationProperties(url || '', wkt);
+      const newProperties = await getIntegrationProperties(url || '', wkt);
 
-        properties = {
-          ...properties,
-          ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
-        };
-      })
-    );
+      properties = {
+        ...properties,
+        ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
+      };
+    })
+  );
 
-    await db.updateLoiProperties(surveyId, loiId, properties);
-  }
+  await db.updateLoiProperties(surveyId, loiId, properties);
+
+  await broadcastSurveyUpdate(context.params.surveyId);
 }
 
 const getIntegrationProperties = async (
@@ -90,3 +88,8 @@ const prefixKeys = (obj: {[key: string]: string}, prefix: string) =>
     (a, k) => ((a[`${prefix}${k}`] = obj[k]), a),
     {} as {[key: string]: string}
   );
+
+const removePrefixedKeys = (obj: {[key: string]: string}, prefix: string) =>
+  Object.keys(obj).forEach(k => {
+    if (k.startsWith(prefix)) delete obj[k];
+  });
