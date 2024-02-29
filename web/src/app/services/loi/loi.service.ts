@@ -89,7 +89,7 @@ export class LocationOfInterestService {
     );
   }
 
-  static getAnonymousDisplayName(loi: LocationOfInterest): string {
+  static getDefaultName(loi: LocationOfInterest): string {
     const geometryType = loi.geometry?.geometryType;
     return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
   }
@@ -99,7 +99,7 @@ export class LocationOfInterestService {
   ): List<LocationOfInterest> {
     return lois.map((loi, index) => {
       const displayName =
-        this.getLoiNameFromProperties(loi) || this.getAnonymousDisplayName(loi);
+        this.getLoiNameFromProperties(loi) || this.getDefaultName(loi);
       return {
         ...loi,
         name: displayName,
