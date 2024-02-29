@@ -16,7 +16,13 @@
 
 .jobs {
   margin: 0 16px;
+  width: 262px;
+
+  &.collapsed {
+    width: auto;
+  }
 }
+
 .add-job-btn {
   text-align: left;
   width: 100%;

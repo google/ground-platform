@@ -75,4 +75,8 @@ export class SurveyHeaderComponent implements OnDestroy {
   onClickSidePanelButtonEvent() {
     this.navigationService.onClickSidePanelButton();
   }
+
+  isEditSurveyPage() {
+    return this.navigationService.isEditSurveyPage(this.surveyId);
+  }
 }
