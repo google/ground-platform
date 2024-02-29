@@ -120,22 +120,12 @@ export class DraftSurveyService {
   async updateSurvey(): Promise<void> {
     const currentSurvey = this.survey$.getValue();
 
-    await this.dataStoreService.updateSurveyTitleAndDescription(
-      currentSurvey.id,
-      currentSurvey.title,
-      currentSurvey.description
-    );
-
-    await Promise.all(
-      currentSurvey.jobs.map(job =>
-        this.dataStoreService.addOrUpdateJob(currentSurvey.id, job)
-      )
-    );
-
-    await Promise.all(
+    await this.dataStoreService.updateSurvey(
+      currentSurvey,
       this.originalSurvey.jobs
+        .toList()
         .filter(job => !currentSurvey.jobs.get(job.id))
-        .map(job => this.dataStoreService.deleteJob(currentSurvey.id, job.id))
+        .map(job => job.id)
     );
 
     this.dirty = false;

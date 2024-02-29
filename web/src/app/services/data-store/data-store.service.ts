@@ -21,7 +21,7 @@ import {deleteField, serverTimestamp} from 'firebase/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, firstValueFrom} from 'rxjs';
-import {filter, map} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
@@ -138,6 +138,39 @@ export class DataStoreService {
           )
         )
       );
+  }
+
+  /**
+   * Updates the survey with new title, description and jobs, and handles deletion of associated
+   * LOIs and submissions for the jobs to be deleted. Note that LOI/submission deletion is
+   * asynchronous and might leave unreferenced data temporarily. A scheduled job should delete
+   * these unreferenced lois and submissions(TODO(#1532)).
+   *
+   * @param survey The updated Survey object containing the modified survey data.
+   * @param jobIdsToDelete List of job ids to delete. This is used to delete all the lois and
+   *  submissions that are related to the jobs to be deleted.
+   */
+
+  updateSurvey(survey: Survey, jobIdsToDelete: List<string>): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const {title, description, id} = survey;
+    const surveyJS: {[key: string]: any} = {
+      title: title,
+      description: description,
+    };
+    survey.jobs.forEach(
+      job => (surveyJS[`jobs.${job.id}`] = FirebaseDataConverter.jobToJS(job))
+    );
+    jobIdsToDelete.forEach(jobId => {
+      this.deleteAllLocationsOfInterestInJob(id, jobId);
+      this.deleteAllSubmissionsInJob(id, jobId);
+      surveyJS[`jobs.${jobId}`] = deleteField();
+    });
+
+    return this.db.firestore
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(survey.id)
+      .update(surveyJS);
   }
 
   /**
