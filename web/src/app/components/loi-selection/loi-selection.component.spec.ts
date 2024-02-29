@@ -91,7 +91,7 @@ describe('LoiSelectionFormComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoiSelectionComponent);
-    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
+    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithDisplayName(
       List([poi1, poi2])
     );
     fixture.componentInstance.survey = survey;
@@ -125,7 +125,7 @@ describe('LoiSelectionFormComponent', () => {
   });
 
   it('shows updated list of LOIs', () => {
-    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
+    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithDisplayName(
       List([{...poi1, properties: Map({name: 'Test 1'})}, poi2])
     );
     fixture.detectChanges();

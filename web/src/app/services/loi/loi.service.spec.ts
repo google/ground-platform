@@ -99,7 +99,7 @@ describe('LocationOfInterestService', () => {
     });
   });
 
-  describe('getLoisWithNames', () => {
+  describe('getLoisWithDisplayName', () => {
     const unnamedLoi1 = getMockLoi();
     const unnamedLoi2 = getMockLoi();
     const namedLoi1 = getMockLoi(ImmutableMap([['name', 'coolio']]));
@@ -107,7 +107,7 @@ describe('LocationOfInterestService', () => {
 
     it('should use LOI order in labels when they are not named', () => {
       const mockLois = List([unnamedLoi1, unnamedLoi2]);
-      const [loi1, loi2] = LocationOfInterestService.getLoisWithNames(mockLois);
+      const [loi1, loi2] = LocationOfInterestService.getLoisWithDisplayName(mockLois);
       expect(loi1).toEqual({
         ...unnamedLoi1,
         name: 'Unnamed point',
@@ -120,7 +120,7 @@ describe('LocationOfInterestService', () => {
 
     it('should use LOI names when LOIs are named', () => {
       const mockLois = List([namedLoi1, namedLoi2]);
-      const [loi1, loi2] = LocationOfInterestService.getLoisWithNames(mockLois);
+      const [loi1, loi2] = LocationOfInterestService.getLoisWithDisplayName(mockLois);
       expect(loi1).toEqual({
         ...namedLoi1,
         name: 'coolio',
@@ -134,7 +134,7 @@ describe('LocationOfInterestService', () => {
     it('should use a mix of order and names when some LOIs are named', () => {
       const mockLois = List([unnamedLoi1, namedLoi1, unnamedLoi2]);
       const [loi1, loi2, loi3] =
-        LocationOfInterestService.getLoisWithNames(mockLois);
+        LocationOfInterestService.getLoisWithDisplayName(mockLois);
       expect(loi1).toEqual({
         ...unnamedLoi1,
         name: 'Unnamed point',

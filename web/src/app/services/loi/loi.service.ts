@@ -79,7 +79,7 @@ export class LocationOfInterestService {
 
   getLoisWithLabels$(): Observable<List<LocationOfInterest>> {
     return this.lois$.pipe(
-      map(lois => LocationOfInterestService.getLoisWithNames(lois))
+      map(lois => LocationOfInterestService.getLoisWithDisplayName(lois))
     );
   }
 
@@ -94,7 +94,7 @@ export class LocationOfInterestService {
     return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
   }
 
-  static getLoisWithNames(
+  static getLoisWithDisplayName(
     lois: List<LocationOfInterest>
   ): List<LocationOfInterest> {
     return lois.map((loi, index) => {

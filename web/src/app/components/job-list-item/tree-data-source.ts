@@ -120,7 +120,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 
           // Create loi nodes for job tree
           const loiNodes: DynamicFlatNode[] = [];
-          for (const loi of LocationOfInterestService.getLoisWithNames(
+          for (const loi of LocationOfInterestService.getLoisWithDisplayName(
             jobLois
           )) {
             const loiNode = new DynamicFlatNode(
