@@ -21,6 +21,7 @@ import {ActivatedRoute} from '@angular/router';
 import {Map} from 'immutable';
 import {from, of} from 'rxjs';
 
+import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
@@ -46,7 +47,7 @@ describe('EditJobComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent],
-      imports: [MatDialogModule],
+      imports: [MatDialogModule, TasksEditorModule],
       providers: [
         {provide: DataStoreService, useValue: {generateId: () => '123'}},
         {provide: DialogService, useValue: {}},
