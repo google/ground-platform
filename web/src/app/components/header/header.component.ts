@@ -39,6 +39,8 @@ export enum HeaderState {
 export class HeaderComponent {
   surveyId = '';
   state = HeaderState.DEFAULT;
+  readonly HeaderState = HeaderState;
+  publishingChanges = false;
 
   constructor(
     public dialog: MatDialog,
@@ -82,7 +84,9 @@ export class HeaderComponent {
   }
 
   async onFinishEditSurveyClick() {
+    this.publishingChanges = true;
     await this.draftSurveyService.updateSurvey();
+    this.publishingChanges = false;
   }
 
   isDraftSurveyDirtyAndValid() {
