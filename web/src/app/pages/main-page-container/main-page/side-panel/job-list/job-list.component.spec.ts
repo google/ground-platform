@@ -76,6 +76,7 @@ describe('JobListComponent', () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getLocationOfInterestId$: () => of(''),
+      getSidePanelExpanded: () => true,
     };
     const routerSpy = createRouterSpy();
     TestBed.configureTestingModule({

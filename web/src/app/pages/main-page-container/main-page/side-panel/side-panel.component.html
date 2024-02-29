@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div [ngSwitch]="sideNavMode$ | async">
+<div [ngSwitch]="sideNavMode$ | async" class="side-panel">
   <div *ngSwitchDefault>
     <ground-job-list></ground-job-list>
   </div>

@@ -153,6 +153,7 @@ describe('JobListItemComponent', () => {
         'getLocationOfInterestId$',
         'selectLocationOfInterest',
         'getSidePanelExpanded',
+        'isEditSurveyPage',
       ]
     );
 
