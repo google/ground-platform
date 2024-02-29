@@ -15,7 +15,6 @@
 -->
 
 <tasks-editor
-  *ngIf="!isLoading"
   #tasksEditor
   [tasks]="tasks"
   (onValidationChanges)="onTasksChange($event)"
