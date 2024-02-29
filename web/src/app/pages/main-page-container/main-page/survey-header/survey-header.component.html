@@ -13,11 +13,13 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <ground-header>
   <div beginning>
-    <button mat-icon-button aria-label="More survey settings"
-    *ngIf="!isEditSurveyPage()"
-    (click)="onClickSidePanelButtonEvent()">
+    <button mat-icon-button
+      *ngIf="!isEditSurveyPage()"
+      (click)="onClickSidePanelButtonEvent()"
+    >
       <mat-icon>menu</mat-icon>
     </button>
   </div>
