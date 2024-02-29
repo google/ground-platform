@@ -41,7 +41,12 @@ describe('SurveyHeaderComponent', () => {
             canManageSurvey: () => {},
           },
         },
-        {provide: Router, useValue: {}},
+        {
+          provide: Router,
+          useValue: {
+            isActive: () => true,
+          },
+        },
       ],
     }).compileComponents();
   }));
