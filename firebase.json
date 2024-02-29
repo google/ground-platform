@@ -48,5 +48,8 @@
   "functions": {
     "source": "functions",
     "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"]
+  },
+  "storage": {
+    "rules": "storage/storage.rules"
   }
 }

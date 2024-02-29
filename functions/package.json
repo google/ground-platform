@@ -13,7 +13,7 @@
     "logs": "npx firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm install && tsc",
-    "watch": "tsc --watch"
+    "watch": "npm run build && tsc --watch"
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
@@ -38,6 +38,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@types/ground-schema": "file:../schema/dist/generated",
     "@types/busboy": "^1.5.0",
     "@types/cookie-parser": "^1.4.4",
     "@types/cors": "2.8.12",

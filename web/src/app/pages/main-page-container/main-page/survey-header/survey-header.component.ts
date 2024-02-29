@@ -71,4 +71,12 @@ export class SurveyHeaderComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
+
+  onClickSidePanelButtonEvent() {
+    this.navigationService.onClickSidePanelButton();
+  }
+
+  isEditSurveyPage() {
+    return this.navigationService.isEditSurveyPage(this.surveyId);
+  }
 }

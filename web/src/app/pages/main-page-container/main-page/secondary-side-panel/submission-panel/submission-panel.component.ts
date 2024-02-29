@@ -15,7 +15,8 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {List, Map} from 'immutable';
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
 import {Result} from 'app/models/submission/result.model';
@@ -36,6 +37,9 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   @Input() submissionId!: string;
   submission: Submission | null = null;
   tasks?: List<Task>;
+  selectedTaskId: string | null = null;
+  storage = getStorage();
+  firebaseURLs = new Map<string, string>();
 
   public taskType = TaskType;
 
@@ -50,18 +54,36 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
           this.submission = submission;
-          this.tasks = submission.job?.getTasksSorted();
+          this.tasks = submission.job
+            ?.getTasksSorted()
+            .filter(task => !task.addLoiTask);
+          // Get image URL upon initialization to not send Firebase requests multiple times
+          this.getFirebaseImageURLs();
         }
+      })
+    );
+    this.subscription.add(
+      this.navigationService.getTaskId$().subscribe(taskId => {
+        this.selectedTaskId = taskId;
       })
     );
   }
 
-  navigateToSubmissionList() {
-    this.navigationService.selectLocationOfInterest(this.submission!.loiId);
+  getFirebaseImageURLs() {
+    this.tasks?.forEach(task => {
+      if (task.type === this.taskType.PHOTO) {
+        const submissionImage = this.getTaskSubmissionResult(task)!
+          .value as string;
+        const imageRef = ref(this.storage, submissionImage);
+        getDownloadURL(imageRef).then(url => {
+          this.firebaseURLs.set(submissionImage, url);
+        });
+      }
+    });
   }
 
-  editSubmission() {
-    // TODO(#1280): Add support for editing submission in submission details panel
+  navigateToSubmissionList() {
+    this.navigationService.selectLocationOfInterest(this.submission!.loiId);
   }
 
   getTaskSubmissionResult({id: taskId}: Task): Result | undefined {

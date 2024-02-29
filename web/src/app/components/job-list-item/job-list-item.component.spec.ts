@@ -148,7 +148,13 @@ describe('JobListItemComponent', () => {
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['getSurveyId$', 'getLocationOfInterestId$', 'selectLocationOfInterest']
+      [
+        'getSurveyId$',
+        'getLocationOfInterestId$',
+        'selectLocationOfInterest',
+        'getSidePanelExpanded',
+        'isEditSurveyPage',
+      ]
     );
 
     lois$ = new Subject<List<LocationOfInterest>>();

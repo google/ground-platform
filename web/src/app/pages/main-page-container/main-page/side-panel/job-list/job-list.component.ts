@@ -57,7 +57,7 @@ export class JobListComponent {
     private iconRegistry: MatIconRegistry,
     private sanitizer: DomSanitizer,
     readonly surveyService: SurveyService,
-    private navigationService: NavigationService
+    readonly navigationService: NavigationService
   ) {
     // Add custom loi icons for job list items
     iconRegistry.addSvgIconLiteral(
@@ -76,5 +76,9 @@ export class JobListComponent {
           List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
+  }
+
+  isSidePanelExpanded() {
+    return this.navigationService.getSidePanelExpanded();
   }
 }

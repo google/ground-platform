@@ -146,6 +146,10 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
+
+  isSidePanelExpanded() {
+    return this.navigationService.getSidePanelExpanded();
+  }
 }
 
 export enum JobListItemActionsType {

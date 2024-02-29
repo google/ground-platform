@@ -20,7 +20,7 @@
       mat-flat-button
       [color]="section === EditJobSection.TASKS ? 'primary' : 'basic'"
       aria-label="tasks"
-      (click)="onChangeSection(EditJobSection.TASKS)"
+      (click)="onSectionChange(EditJobSection.TASKS)"
     >
       <mat-icon>{{ section === EditJobSection.TASKS ? 'checked_small' : 'list' }}</mat-icon>
       <span>Tasks</span>
@@ -30,7 +30,7 @@
       mat-flat-button
       [color]="section === EditJobSection.LOIS ? 'primary' : 'basic'"
       aria-label="lois"
-      (click)="onChangeSection(EditJobSection.LOIS)"
+      (click)="onSectionChange(EditJobSection.LOIS)"
     >
       <mat-icon>{{ section === EditJobSection.LOIS ? 'checked_small' : 'place' }}</mat-icon>
       <span>Sites</span>
@@ -54,7 +54,6 @@
 
     <div *ngSwitchCase="EditJobSection.TASKS">
       <tasks-editor
-        *ngIf="!isLoading"
         #tasksEditor
         [tasks]="tasks"
         (onValueChanges)="onTasksChange($event)"

@@ -31,11 +31,11 @@
 }
 
 .submission-tasks-container {
-  padding: 0 24px;
+  padding: 0 8px;
 }
 
 .submission-task {
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .submission-question {
@@ -45,6 +45,7 @@
 
 .submission-response {
   font-size: 16px;
+  padding-top: 8px;
 }
 
 .submission-no-response {
@@ -59,4 +60,37 @@
 .submission-response-multiple-choice {
   display: flex;
   flex-direction: column;
+
+  ::ng-deep .mat-mdc-checkbox-disabled label {
+    color: inherit;
+  }
+}
+
+.submission-response-geometry {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding-inline-start: 8px;
+  margin-top: 8px;
+}
+
+.selected-submission-response-geometry {
+  background-color: #e8e8e3;
+}
+
+.submission-response-geometry-number {
+  display: flex;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  justify-content: center;
+  align-items: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: white;
+}
+
+.submission-response-geometry-label {
+  padding-left: 16px;
+  font-weight: 500;
 }

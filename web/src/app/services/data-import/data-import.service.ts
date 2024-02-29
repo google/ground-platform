@@ -45,7 +45,7 @@ export class DataImportService {
     formData.set('job', jobId);
     formData.append('file', file);
     let importUrl;
-    if (file.name.endsWith('.geojson')) {
+    if (file.name.endsWith('.geojson') || file.name.endsWith('.json')) {
       importUrl = IMPORT_GEOJSON_URL;
     } else if (file.name.endsWith('.csv')) {
       importUrl = IMPORT_CSV_URL;

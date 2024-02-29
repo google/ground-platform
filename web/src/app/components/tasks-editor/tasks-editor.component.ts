@@ -101,7 +101,7 @@ export class TasksEditorComponent {
     private formBuilder: FormBuilder
   ) {}
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
         this.tasks?.toArray().map((task: Task) => this.toControl(task)) || [],
