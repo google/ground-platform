@@ -38,17 +38,6 @@ export class LocationOfInterestService {
   private selectedLocationOfInterestId$ = new ReplaySubject<string>(1);
   private selectedLocationOfInterest$: Observable<LocationOfInterest>;
 
-  // Properties in this order are used to give a LOI a name, otherwise it will
-  // be given a default name.
-  private static _inferredNamesProperties = [
-    'label',
-    'caption',
-    'name',
-    'id',
-    'code',
-    'key',
-  ];
-
   constructor(
     private dataStore: DataStoreService,
     private surveyService: SurveyService
@@ -94,41 +83,33 @@ export class LocationOfInterestService {
     return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
   }
 
+  // TODO: Move out to call site.
   static getLoisWithDisplayName(
     lois: List<LocationOfInterest>
   ): List<LocationOfInterest> {
-    return lois.map((loi, index) => {
-      const displayName =
-        this.getUserDefinedName(loi) || this.getDefaultName(loi);
+    return lois.map((loi, _) => {
       return {
         ...loi,
-        name: displayName,
+        name: LocationOfInterestService.getDisplayName(loi),
       };
     });
   }
 
-  static getUserDefinedName(loi: LocationOfInterest): string | null {
-    const properties = loi.properties;
-    let applicableProperties: string[] = [];
+  // TODO: Use in LoiPanelHeader getLocationOfInterestName
+  static getDisplayName(loi: LocationOfInterest): string {
+    const {customId, properties} = loi;
+    const name = properties?.get('name')?.toString()?.trim() || '';
+    const loiId = (customId || properties?.get('id')?.toString())?.trim() || '';
 
-    if (properties) {
-      applicableProperties = [...properties.keys()].filter(property => {
-        return this._inferredNamesProperties.includes(property);
-      });
+    if (name && loiId) {
+      return `$name ($loiId)`;
+    } else if (name) {
+      return name;
+    } else if (loiId) {
+      return `$geometryType ($loiId)`;
+    } else {
+      return LocationOfInterestService.getDefaultName(loi);
     }
-
-    if (applicableProperties.length > 0) {
-      let loiName = '';
-      this._inferredNamesProperties.every(name => {
-        if (applicableProperties.includes(name)) {
-          loiName = properties!.get(name) as string;
-          return false;
-        }
-        return true;
-      });
-      return loiName;
-    }
-    return null;
   }
 
   static getLatLngBoundsFromLois(

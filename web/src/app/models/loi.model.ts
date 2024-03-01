@@ -17,7 +17,7 @@
 import {GeoPoint} from 'firebase/firestore';
 import {List, Map} from 'immutable';
 
-import {Geometry, GeometryType} from './geometry/geometry';
+import {Geometry} from './geometry/geometry';
 
 export abstract class LocationOfInterest {
   abstract readonly id: string;
@@ -27,6 +27,7 @@ export abstract class LocationOfInterest {
   abstract readonly geometry?: Geometry;
   // TODO(#1444): Make non-null, init to empty by default.
   abstract readonly properties?: Map<string, string | number>;
+  abstract readonly customId: string;
 
   static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
     return lois
@@ -44,7 +45,8 @@ export class PointOfInterest implements LocationOfInterest {
     readonly jobId: string,
     // TODO(#1444): User custom type instead of exposing types from data job.
     readonly location: GeoPoint,
-    readonly properties?: Map<string, string | number>
+    readonly properties?: Map<string, string | number>,
+    readonly customId: string = ''
   ) {}
 }
 
@@ -54,7 +56,8 @@ export class GeoJsonLocationOfInterest implements LocationOfInterest {
     readonly id: string,
     readonly jobId: string,
     readonly geoJson: object,
-    readonly properties?: Map<string, string | number>
+    readonly properties?: Map<string, string | number>,
+    readonly customId: string = ''
   ) {}
 }
 
@@ -64,7 +67,8 @@ export class AreaOfInterest implements LocationOfInterest {
     readonly id: string,
     readonly jobId: string,
     readonly polygonVertices: GeoPoint[],
-    readonly properties?: Map<string, string | number>
+    readonly properties?: Map<string, string | number>,
+    readonly customId: string = ''
   ) {}
 }
 
@@ -74,6 +78,7 @@ export class GenericLocationOfInterest implements LocationOfInterest {
     readonly id: string,
     readonly jobId: string,
     readonly geometry: Geometry,
-    readonly properties: Map<string, string | number>
+    readonly properties: Map<string, string | number>,
+    readonly customId: string = ''
   ) {}
 }

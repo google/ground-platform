@@ -71,17 +71,15 @@ describe('LocationOfInterestService', () => {
 
   describe('getUserDefinedName', () => {
     it('should not return an inferred loi name if empty or non applicable properties', () => {
-      expect(
-        LocationOfInterestService.getUserDefinedName(getMockLoi())
-      ).toBe(null);
+      expect(LocationOfInterestService.getUserDefinedName(getMockLoi())).toBe(
+        null
+      );
     });
 
     it('should return inferred loi name for the loi from the properties', () => {
       const properties = ImmutableMap([['id', 'loi1']]);
       expect(
-        LocationOfInterestService.getUserDefinedName(
-          getMockLoi(properties)
-        )
+        LocationOfInterestService.getUserDefinedName(getMockLoi(properties))
       ).toBe('loi1');
     });
 
@@ -92,9 +90,7 @@ describe('LocationOfInterestService', () => {
         ['name', 'loi 1'],
       ]);
       expect(
-        LocationOfInterestService.getUserDefinedName(
-          getMockLoi(properties)
-        )
+        LocationOfInterestService.getUserDefinedName(getMockLoi(properties))
       ).toBe('loi 1');
     });
   });
@@ -107,7 +103,8 @@ describe('LocationOfInterestService', () => {
 
     it('should use LOI order in labels when they are not named', () => {
       const mockLois = List([unnamedLoi1, unnamedLoi2]);
-      const [loi1, loi2] = LocationOfInterestService.getLoisWithDisplayName(mockLois);
+      const [loi1, loi2] =
+        LocationOfInterestService.getLoisWithDisplayName(mockLois);
       expect(loi1).toEqual({
         ...unnamedLoi1,
         name: 'Unnamed point',
@@ -120,7 +117,8 @@ describe('LocationOfInterestService', () => {
 
     it('should use LOI names when LOIs are named', () => {
       const mockLois = List([namedLoi1, namedLoi2]);
-      const [loi1, loi2] = LocationOfInterestService.getLoisWithDisplayName(mockLois);
+      const [loi1, loi2] =
+        LocationOfInterestService.getLoisWithDisplayName(mockLois);
       expect(loi1).toEqual({
         ...namedLoi1,
         name: 'coolio',
