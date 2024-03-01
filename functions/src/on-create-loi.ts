@@ -91,7 +91,9 @@ const prefixKeys = (obj: {[key: string]: string}, prefix: string) =>
     {} as {[key: string]: string}
   );
 
-const removePrefixedKeys = (obj: {[key: string]: string}, prefix: string) =>
+const removePrefixedKeys = (obj: {[key: string]: string}, prefix: string) => {
   Object.keys(obj).forEach(k => {
     if (k.startsWith(prefix)) delete obj[k];
   });
+  return obj;
+};
