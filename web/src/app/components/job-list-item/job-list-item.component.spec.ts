@@ -163,9 +163,7 @@ describe('JobListItemComponent', () => {
     locationOfInterestId$ = new Subject<string | null>();
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
-    spyOn(LocationOfInterestService, 'getUserDefinedName').and.returnValue(
-      null
-    );
+    spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.submissions$.and.returnValue(submissions$);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);

@@ -33,13 +33,15 @@ describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
 
   const getMockLoi = (
-    properties: ImmutableMap<string, string | number> = ImmutableMap()
+    properties: ImmutableMap<string, string | number> = ImmutableMap(),
+    customId = ''
   ) => {
     return new GenericLocationOfInterest(
       'loi001',
       'job001',
       new Point(new Coordinate(0.0, 0.0)),
-      properties
+      properties,
+      customId
     );
   };
 
@@ -69,82 +71,19 @@ describe('LocationOfInterestService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getUserDefinedName', () => {
-    it('should not return an inferred loi name if empty or non applicable properties', () => {
-      expect(LocationOfInterestService.getUserDefinedName(getMockLoi())).toBe(
-        null
+  describe('getDisplayName', () => {
+    it('should return default if name and id empty', () => {
+      expect(LocationOfInterestService.getDisplayName(getMockLoi())).toBe(
+        'Unnamed point'
       );
     });
 
-    it('should return inferred loi name for the loi from the properties', () => {
-      const properties = ImmutableMap([['id', 'loi1']]);
-      expect(
-        LocationOfInterestService.getUserDefinedName(getMockLoi(properties))
-      ).toBe('loi1');
-    });
-
-    it('should return correct inferred loi name if multiple options exist from the properties', () => {
+    it('should return name and id if present', () => {
       // Two separate possible names exist, choose one with higher priority.
-      const properties = ImmutableMap([
-        ['id', 'loi1'],
-        ['name', 'loi 1'],
-      ]);
+      const properties = ImmutableMap([['name', 'Foo']]);
       expect(
-        LocationOfInterestService.getUserDefinedName(getMockLoi(properties))
-      ).toBe('loi 1');
-    });
-  });
-
-  describe('getLoisWithDisplayName', () => {
-    const unnamedLoi1 = getMockLoi();
-    const unnamedLoi2 = getMockLoi();
-    const namedLoi1 = getMockLoi(ImmutableMap([['name', 'coolio']]));
-    const namedLoi2 = getMockLoi(ImmutableMap([['name', 'juno']]));
-
-    it('should use LOI order in labels when they are not named', () => {
-      const mockLois = List([unnamedLoi1, unnamedLoi2]);
-      const [loi1, loi2] =
-        LocationOfInterestService.getLoisWithDisplayName(mockLois);
-      expect(loi1).toEqual({
-        ...unnamedLoi1,
-        name: 'Unnamed point',
-      });
-      expect(loi2).toEqual({
-        ...unnamedLoi1,
-        name: 'Unnamed point',
-      });
-    });
-
-    it('should use LOI names when LOIs are named', () => {
-      const mockLois = List([namedLoi1, namedLoi2]);
-      const [loi1, loi2] =
-        LocationOfInterestService.getLoisWithDisplayName(mockLois);
-      expect(loi1).toEqual({
-        ...namedLoi1,
-        name: 'coolio',
-      });
-      expect(loi2).toEqual({
-        ...namedLoi2,
-        name: 'juno',
-      });
-    });
-
-    it('should use a mix of order and names when some LOIs are named', () => {
-      const mockLois = List([unnamedLoi1, namedLoi1, unnamedLoi2]);
-      const [loi1, loi2, loi3] =
-        LocationOfInterestService.getLoisWithDisplayName(mockLois);
-      expect(loi1).toEqual({
-        ...unnamedLoi1,
-        name: 'Unnamed point',
-      });
-      expect(loi2).toEqual({
-        ...namedLoi1,
-        name: 'coolio',
-      });
-      expect(loi3).toEqual({
-        ...unnamedLoi2,
-        name: 'Unnamed point',
-      });
+        LocationOfInterestService.getDisplayName(getMockLoi(properties, '123'))
+      ).toBe('Foo (123)');
     });
   });
 
