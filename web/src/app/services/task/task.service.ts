@@ -85,7 +85,7 @@ export class TaskService {
    * Add a loiTask as first element, reindex the others.
    */
   addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    if (tasks.some(task => task.addLoiTask === true)) return tasks;
+    if (tasks.some(task => task.addLoiTask)) return tasks;
 
     const loiTask = new Task(
       this.dataStoreService.generateId(),
@@ -109,7 +109,7 @@ export class TaskService {
    * Remove the first element of the list if is loiTask.
    */
   removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    const loiTask = tasks.find(task => task.addLoiTask === true);
+    const loiTask = tasks.find(task => task.addLoiTask);
 
     return loiTask ? tasks.remove(loiTask.id) : tasks;
   }
