@@ -83,18 +83,6 @@ export class LocationOfInterestService {
     return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
   }
 
-  // TODO: Move out to call site.
-  static getLoisWithDisplayName(
-    lois: List<LocationOfInterest>
-  ): List<LocationOfInterest> {
-    return lois.map((loi, _) => {
-      return {
-        ...loi,
-        name: LocationOfInterestService.getDisplayName(loi),
-      };
-    });
-  }
-
   // TODO: Use in LoiPanelHeader getLocationOfInterestName
   static getDisplayName(loi: LocationOfInterest): string {
     const {customId, properties} = loi;
