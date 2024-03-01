@@ -152,28 +152,28 @@ describe('LocationOfInterestPanelHeaderComponent', () => {
   });
 
   describe('the LOI name', () => {
-    it('should be "Point" if the LOI is a point', () => {
+    it('return correct label if unnamed point with no id', () => {
       const header = getHeaderElement(fixture);
 
-      expect(header.textContent).toBe('Point');
+      expect(header.textContent).toBe('Unnamed point');
     });
 
-    it('should be "Polygon" if the LOI is a polygon', () => {
+    it('return correct label if unnamed polygon with no id', () => {
       mockSelectedLoi$.next(polygonLocationOfInterest);
       fixture.detectChanges();
 
       const header = getHeaderElement(fixture);
 
-      expect(header.textContent).toBe('Polygon');
+      expect(header.textContent).toBe('Unnamed area');
     });
 
-    it('should be "Multipolygon" if the LOI is a multipolygon', () => {
+    it('return correct label if unnamed multipolygon with no id', () => {
       mockSelectedLoi$.next(multiPolygonLocationOfInterest);
       fixture.detectChanges();
 
       const header = getHeaderElement(fixture);
 
-      expect(header.textContent).toBe('Multipolygon');
+      expect(header.textContent).toBe('Unnamed area');
     });
   });
 });
