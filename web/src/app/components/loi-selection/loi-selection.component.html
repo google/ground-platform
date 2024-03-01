@@ -33,7 +33,7 @@
       </div>
       <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
-          <p matLine>{{ loi.name }}</p>
+          <p matLine>{{ getDisplayName(loi) }}</p>
         </mat-list-item>
       </mat-list>
 

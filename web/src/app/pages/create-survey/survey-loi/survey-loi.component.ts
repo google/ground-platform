@@ -43,7 +43,7 @@ export class SurveyLoiComponent {
   ) {}
 
   async ngOnInit() {
-    this.lois$ = this.loiService.getLoisWithLabels$();
+    this.lois$ = this.loiService.getLocationsOfInterest$();
 
     this.job = this.surveyService.getActiveSurvey().jobs.first();
 
