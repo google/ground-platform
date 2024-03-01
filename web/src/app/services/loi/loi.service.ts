@@ -83,7 +83,6 @@ export class LocationOfInterestService {
     return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
   }
 
-  // TODO: Use in LoiPanelHeader getLocationOfInterestName
   static getDisplayName(loi: LocationOfInterest): string {
     const {customId, properties} = loi;
     const name = properties?.get('name')?.toString()?.trim() || '';
