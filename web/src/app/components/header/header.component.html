@@ -17,7 +17,11 @@
 <div class="header">
   <div>
     <ng-content select="[beginning]"></ng-content>
-    <img class="logo" src="/assets/img/logo.svg" (click)="onSurveysButtonClick()" />
+    <img
+      class="logo"
+      src="/assets/img/logo.svg"
+      (click)="onSurveysButtonClick()"
+    />
     <span class="ground-title">Ground</span>
     <ng-content select="[left]"></ng-content>
   </div>
@@ -26,7 +30,7 @@
     <button
       mat-icon-button
       [matMenuTriggerFor]="surveyMenu"
-      *ngIf="state === 2"
+      *ngIf="state === HeaderState.MAP_VIEW"
     >
       <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
     </button>
@@ -41,7 +45,7 @@
       mat-button
       class="cancel-edit-button"
       color="primary"
-      *ngIf="state === 3"
+      *ngIf="state === HeaderState.EDIT_SURVEY"
       (click)="onCancelEditSurveyClick()"
     >
       Cancel
@@ -50,11 +54,14 @@
     <button
       mat-flat-button
       class="finish-edit-button"
-      *ngIf="state === 3"
+      *ngIf="state === HeaderState.EDIT_SURVEY"
       [disabled]="!isDraftSurveyDirtyAndValid()"
       (click)="onFinishEditSurveyClick()"
     >
       Publish changes
+      <mat-icon *ngIf="publishingChanges"
+        ><mat-spinner diameter="18"></mat-spinner
+      ></mat-icon>
     </button>
 
     <ground-current-user-widget></ground-current-user-widget>
