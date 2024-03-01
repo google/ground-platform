@@ -24,7 +24,7 @@ import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 
 @Component({
   selector: 'loi-selection',

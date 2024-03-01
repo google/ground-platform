@@ -72,22 +72,42 @@ export class LocationOfInterestService {
     );
   }
 
+  /** A label for a given geometry type. Defaults to 'Polygon'. */
+  private static geometryTypeLabel(geometryType?: GeometryType): string {
+    switch (geometryType) {
+      case GeometryType.POINT:
+        return 'Point';
+      case GeometryType.MULTI_POLYGON:
+      case GeometryType.POLYGON:
+        return 'Area';
+      default:
+        return 'Geometry';
+    }
+  }
+
   static getDefaultName(loi: LocationOfInterest): string {
     const geometryType = loi.geometry?.geometryType;
-    return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
+    return (
+      'Unnamed ' +
+      LocationOfInterestService.geometryTypeLabel(
+        geometryType
+      ).toLocaleLowerCase()
+    );
   }
 
   static getDisplayName(loi: LocationOfInterest): string {
     const {customId, properties} = loi;
     const name = properties?.get('name')?.toString()?.trim() || '';
-    const loiId = (customId || properties?.get('id')?.toString())?.trim() || '';
-
+    const loiId = customId?.trim() || '';
     if (name && loiId) {
-      return `$name ($loiId)`;
+      return `${name} (${loiId})`;
     } else if (name) {
       return name;
     } else if (loiId) {
-      return `$geometryType ($loiId)`;
+      const geometryType = LocationOfInterestService.geometryTypeLabel(
+        loi.geometry!.geometryType
+      );
+      return `${geometryType} ${loiId}`;
     } else {
       return LocationOfInterestService.getDefaultName(loi);
     }
