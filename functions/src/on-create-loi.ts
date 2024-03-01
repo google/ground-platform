@@ -18,14 +18,9 @@
 import {EventContext} from 'firebase-functions';
 import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
 import {db} from '@/common/context';
-// eslint-disable-next-line absolute-imports/only-absolute-imports
-import {Datastore, loi} from './common/datastore';
-// eslint-disable-next-line absolute-imports/only-absolute-imports
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
+import {Datastore} from '@/common/datastore';
+import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
 import {geojsonToWKT} from '@terraformer/wkt';
-
-/** Template for LOI write triggers capturing survey and LOI ids. */
-export const loiPathTemplate = loi('{surveyId}', '{loiId}');
 
 export async function onCreateLoiHandler(
   snapshot: QueryDocumentSnapshot,

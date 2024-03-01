@@ -17,11 +17,7 @@
 
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {loi} from './common/datastore';
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
-
-/** Template for LOI write triggers capturing survey and LOI ids. */
-export const loiPathTemplate = loi('{surveyId}', '{loiId}');
+import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
 
 export async function onWriteLoiHandler(
   _: Change<DocumentSnapshot>,

@@ -17,11 +17,7 @@
 
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {survey} from './common/datastore';
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
-
-/** Template for survey write triggers capturing survey id. */
-export const surveyPathTemplate = survey('{surveyId}');
+import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
 
 export function onWriteSurveyHandler(
   _: Change<DocumentSnapshot>,
