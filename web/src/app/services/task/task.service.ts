@@ -33,8 +33,6 @@ export type TaskUpdate = {
   index: number;
 };
 
-const addLoiTaskId = '$addLoi';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -87,10 +85,10 @@ export class TaskService {
    * Add a loiTask as first element, reindex the others.
    */
   addLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    if (tasks.get(addLoiTaskId)) return tasks;
+    if (tasks.some(task => task.addLoiTask === true)) return tasks;
 
     const loiTask = new Task(
-      addLoiTaskId,
+      this.dataStoreService.generateId(),
       TaskType.CAPTURE_LOCATION,
       '',
       true,
@@ -111,7 +109,9 @@ export class TaskService {
    * Remove the first element of the list if is loiTask.
    */
   removeLoiTask(tasks: Map<string, Task>): Map<string, Task> {
-    return tasks.get(addLoiTaskId) ? tasks.remove(addLoiTaskId) : tasks;
+    const loiTask = tasks.find(task => task.addLoiTask === true);
+
+    return loiTask ? tasks.remove(loiTask.id) : tasks;
   }
 
   updateLoiTasks(
