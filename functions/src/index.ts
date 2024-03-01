@@ -24,20 +24,23 @@ import {sessionLoginHandler} from '@/session-login';
 import {importGeoJsonHandler} from '@/import-geojson';
 import {exportCsvHandler} from '@/export-csv';
 import {onCall} from 'firebase-functions/v2/https';
-import {
-  onWriteSubmissionHandler,
-  submissionPathTemplate,
-} from '@/on-write-submission';
+import {onWriteSubmissionHandler} from '@/on-write-submission';
 import {onCreateLoiHandler} from '@/on-create-loi';
 import {onWriteLoiHandler} from '@/on-write-loi';
 import {onWriteSurveyHandler} from '@/on-write-survey';
-import {loi, survey} from '@/common/datastore';
-
-/** Template for survey write triggers capturing survey id. */
-export const surveyPathTemplate = survey('{surveyId}');
+import {loi, submission, survey} from '@/common/datastore';
 
 /** Template for LOI write triggers capturing survey and LOI ids. */
 export const loiPathTemplate = loi('{surveyId}', '{loiId}');
+
+/** Template for submission write triggers capturing survey and submission ids. */
+export const submissionPathTemplate = submission(
+  '{surveyId}',
+  '{submissionId}'
+);
+
+/** Template for survey write triggers capturing survey id. */
+export const surveyPathTemplate = survey('{surveyId}');
 
 export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
