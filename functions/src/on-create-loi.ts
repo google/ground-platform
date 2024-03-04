@@ -88,6 +88,7 @@ async function fetchProperties(url: string, wkt: string): Promise<Properties> {
 
   const json = await response.json();
 
+  // Additional properties are stored into the first element of an array under the 'data' key.
   return json?.data[0] || {};
 }
 
