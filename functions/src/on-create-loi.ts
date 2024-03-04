@@ -21,6 +21,12 @@ import {Datastore} from '@/common/datastore';
 import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
 import {geojsonToWKT} from '@terraformer/wkt';
 
+type PropertyGenerator = {
+  name: string;
+  prefix: string;
+  url: string;
+};
+
 export async function onCreateLoiHandler(
   snapshot: QueryDocumentSnapshot,
   context: EventContext
@@ -39,10 +45,7 @@ export async function onCreateLoiHandler(
     propertyGenerators.docs.map(async propertyGeneratorDoc => {
       const propertyGenerator = propertyGeneratorDoc.data();
 
-      const {url, prefix} = propertyGenerator as Partial<{
-        url: string;
-        prefix: string;
-      }>;
+      const {url, prefix} = propertyGenerator as PropertyGenerator;
 
       if (prefix) properties = removePrefixedKeys(properties, prefix);
 
