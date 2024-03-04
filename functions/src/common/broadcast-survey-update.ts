@@ -16,12 +16,16 @@
 
 import * as admin from 'firebase-admin';
 
+/**
+ * Sends an empty message to clients subscribed to the specified topic.
+ * Messages are sent without a payload so that they can collapsed. Collapsible
+ * messages are more performant, and they may be replaced by newer messages if
+ * necessary. This is important when importing LOIs, which may trigger
+ * hundred of updates in a short period of time.
+ * See also: https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
+ */
 export async function broadcastSurveyUpdate(topic: string): Promise<string> {
-  // Messages are sent without a payload so that they can collapsed. Collapsible
-  // messages are more performant, and they may be replaced by newer messages if
-  // necessary. This is important when importing LOIs, which may trigger
-  // hundred of updates in a short period of time.
-  // See also: https://firebase.google.com/docs/cloud-messaging/concept-options#collapsible_and_non-collapsible_messages
   console.debug(`Sending message to ${topic}`);
+
   return admin.messaging().send({topic});
 }

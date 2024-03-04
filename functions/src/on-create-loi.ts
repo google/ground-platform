@@ -85,14 +85,20 @@ async function fetchProperties(url: string, wkt: string): Promise<Properties> {
   return json?.data[0] || {};
 }
 
-function prefixKeys(obj: Properties, prefix: string) {
+/**
+ * Returns a new object with all keys of the original object prefixed with the given value.
+ */
+function prefixKeys(obj: Properties, prefix: string): Properties {
   return Object.keys(obj).reduce(
     (a, k) => ((a[`${prefix}${k}`] = obj[k]), a),
     {} as Properties
   );
 }
 
-function removePrefixedKeys(obj: {[key: string]: string}, prefix: string) {
+/**
+ * Returns a new object containing only the keys that do not start with the specified prefix.
+ */
+function removePrefixedKeys(obj: Properties, prefix: string): Properties {
   Object.keys(obj).forEach(k => {
     if (k.startsWith(prefix)) delete obj[k];
   });
