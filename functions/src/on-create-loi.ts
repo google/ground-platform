@@ -77,7 +77,11 @@ const getIntegrationProperties = async (
     body: JSON.stringify({wkt}),
   });
 
-  return response.ok ? response.json() : {};
+  if (!response.ok) return {};
+
+  const json = await response.json();
+
+  return json?.data[0] || {};
 };
 
 const prefixKeys = (obj: {[key: string]: string}, prefix: string) =>
