@@ -57,11 +57,6 @@ describe('SurveyLoiComponent', () => {
   const mockSurvey$ = of(mockSurvey);
 
   beforeEach(waitForAsync(() => {
-    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
-      'LocationOfInterestService',
-      ['getLocationsOfInterest$', 'getLoisWithLabels$']
-    );
-
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       ['getLocationOfInterestId$', 'getSubmissionId$', 'getSidePanelExpanded']
@@ -72,8 +67,6 @@ describe('SurveyLoiComponent', () => {
       'getActiveSurvey$',
       'canManageSurvey',
     ]);
-
-    loiServiceSpy.getLoisWithLabels$.and.returnValue(mockLois$);
 
     navigationServiceSpy.getSubmissionId$.and.returnValue(
       of<string | null>(null)
@@ -104,14 +97,4 @@ describe('SurveyLoiComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
-
-  it('calls getLoisWithLabels$ on init', fakeAsync(() => {
-    expect(loiServiceSpy.getLoisWithLabels$).toHaveBeenCalled();
-  }));
-
-  it('loads loi list', fakeAsync(() => {
-    component.lois$.subscribe(value => {
-      expect(value?.size).toBe(1);
-    });
-  }));
 });
