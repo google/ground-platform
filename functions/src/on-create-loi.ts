@@ -41,30 +41,36 @@ export async function onCreateLoiHandler(
 
   const propertyGenerators = await db.fetchPropertyGenerators();
 
-  await Promise.all(
-    propertyGenerators.docs.map(async propertyGeneratorDoc => {
-      const propertyGenerator = propertyGeneratorDoc.data();
+  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(loi.geometry));
 
-      const {url, prefix} = propertyGenerator as PropertyGenerator;
-
-      if (prefix) properties = removePrefixedKeys(properties, prefix);
-
-      if (url) {
-        const wkt = geojsonToWKT(Datastore.fromFirestoreMap(loi.geometry));
-
-        const newProperties = await fetchProperties(url, wkt);
-
-        properties = {
-          ...properties,
-          ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
-        };
-      }
-    })
-  );
+  propertyGenerators.docs.forEach(async propertyGeneratorDoc => {
+    properties = await updateProperties(
+      propertyGeneratorDoc.data() as PropertyGenerator,
+      properties,
+      wkt
+    );
+  });
 
   await db.updateLoiProperties(surveyId, loiId, properties);
 
   await broadcastSurveyUpdate(context.params.surveyId);
+}
+
+async function updateProperties(
+  propertyGenerator: PropertyGenerator,
+  properties: Properties,
+  wkt: string
+): Promise<Properties> {
+  const {url, prefix} = propertyGenerator;
+
+  if (prefix) properties = removePrefixedKeys(properties, prefix);
+
+  const newProperties = await fetchProperties(url, wkt);
+
+  return {
+    ...properties,
+    ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
+  };
 }
 
 type Properties = {[key: string]: string | number};
