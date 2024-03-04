@@ -49,7 +49,7 @@ export async function onCreateLoiHandler(
       if (url) {
         const wkt = geojsonToWKT(Datastore.fromFirestoreMap(loi.geometry));
 
-        const newProperties = await getIntegrationProperties(url, wkt);
+        const newProperties = await fetchProperties(url, wkt);
 
         properties = {
           ...properties,
@@ -64,10 +64,9 @@ export async function onCreateLoiHandler(
   await broadcastSurveyUpdate(context.params.surveyId);
 }
 
-const getIntegrationProperties = async (
-  url: string,
-  wkt: string
-): Promise<{[key: string]: string}> => {
+type Properties = {[key: string]: string | number};
+
+async function fetchProperties(url: string, wkt: string): Promise<Properties> {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -81,17 +80,18 @@ const getIntegrationProperties = async (
   const json = await response.json();
 
   return json?.data[0] || {};
-};
+}
 
-const prefixKeys = (obj: {[key: string]: string}, prefix: string) =>
-  Object.keys(obj).reduce(
+function prefixKeys(obj: Properties, prefix: string) {
+  return Object.keys(obj).reduce(
     (a, k) => ((a[`${prefix}${k}`] = obj[k]), a),
-    {} as {[key: string]: string}
+    {} as Properties
   );
+}
 
-const removePrefixedKeys = (obj: {[key: string]: string}, prefix: string) => {
+function removePrefixedKeys(obj: {[key: string]: string}, prefix: string) {
   Object.keys(obj).forEach(k => {
     if (k.startsWith(prefix)) delete obj[k];
   });
   return obj;
-};
+}
