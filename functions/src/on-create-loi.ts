@@ -43,13 +43,15 @@ export async function onCreateLoiHandler(
 
   const wkt = geojsonToWKT(Datastore.fromFirestoreMap(loi.geometry));
 
-  propertyGenerators.docs.forEach(async propertyGeneratorDoc => {
-    properties = await updateProperties(
-      propertyGeneratorDoc.data() as PropertyGenerator,
-      properties,
-      wkt
-    );
-  });
+  await Promise.all(
+    propertyGenerators.docs.map(async propertyGeneratorDoc => {
+      properties = await updateProperties(
+        propertyGeneratorDoc.data() as PropertyGenerator,
+        properties,
+        wkt
+      );
+    })
+  );
 
   await db.updateLoiProperties(surveyId, loiId, properties);
 
