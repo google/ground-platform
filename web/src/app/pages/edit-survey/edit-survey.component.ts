@@ -177,10 +177,6 @@ export class EditSurveyComponent implements OnInit {
     });
   }
 
-  selectSurvey(id: string) {
-    this.navigationService.selectSurvey(id);
-  }
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
