@@ -27,7 +27,7 @@ type pseudoGeoJsonGeometry = {
 }
 
 /**
- * Returns path to survey colection. This is a function for consistency with other path functions.
+ * Returns path to config colection.
  */
 export const config = () => 'config';
 
