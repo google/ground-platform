@@ -166,6 +166,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
         loiDisplayName: node.name,
         properties: node.loi?.properties?.toObject(),
       },
+      panelClass: 'loi-properties-dialog-container',
     });
   }
 }

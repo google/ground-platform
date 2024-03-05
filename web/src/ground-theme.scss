@@ -164,3 +164,11 @@ snack-bar-container.notification {
   margin: 24px;
   width: 1024px;
 }
+
+.loi-properties-dialog-container .mat-dialog-container {
+  padding: 24px 16px;
+
+  .mat-list-item-content {
+    padding: 0px;
+  }
+}
