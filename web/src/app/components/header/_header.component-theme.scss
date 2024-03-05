@@ -9,6 +9,10 @@
     color: #1A1C19;
   }
 
+  .header .cancel-edit-button {
+    --mdc-text-button-label-text-color: #516351;
+  }
+
   .header .finish-edit-button {
     --mdc-filled-button-container-color: #39656C;
     --mdc-filled-button-label-text-color: white;
