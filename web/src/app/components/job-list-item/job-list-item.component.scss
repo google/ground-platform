@@ -45,7 +45,7 @@
   padding-right: 16px;
 }
 
-.tree-node-selected #select-loi {
+.tree-node-selected .select-loi {
   font-weight: 700;
 }
 
@@ -59,8 +59,9 @@
   }
 }
 
-#select-loi {
+.select-loi {
   padding-left: 16px;
   --mdc-typography-button-font-size: 14px;
   --mdc-typography-button-font-weight: 400;
+  flex: 1;
 }

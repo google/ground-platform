@@ -21,9 +21,22 @@ limitations under the License.
       [style.padding-left]="isSidePanelExpanded() ? '40px' : '16px'">
       <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }}" [ngStyle]="{color: node.iconColor}"
         [style.padding-left]="isSidePanelExpanded() ? '10px' : '0'"></mat-icon>
-      <div id="select-loi" *ngIf="isSidePanelExpanded()">
+      <div class="select-loi" *ngIf="isSidePanelExpanded()">
         {{ node.name }}
       </div>
+      <button
+        mat-icon-button
+        *ngIf="isSidePanelExpanded()"
+        aria-label="properties"
+        (click)="openPropertiesDialog($event, node)"
+      >
+        <mat-icon
+          class="material-symbols-outlined"
+          style="width: 24px; height: 24px; color: #737970;"
+        >
+          data_info_alert
+        </mat-icon>
+      </button>
     </mat-tree-node>
     <!-- Tree node for jobs -->
     <mat-tree-node [class.tree-node-selected]="isSelectedLoi(node)" *matTreeNodeDef="let node; when: hasChild"

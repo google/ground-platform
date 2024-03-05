@@ -12,7 +12,7 @@
 
   .tree-node-selected {
     background-color: map.get($background, selected-button);
-    #select-loi {
+    .select-loi {
       color: map.get($foreground, base);
     }
   }
