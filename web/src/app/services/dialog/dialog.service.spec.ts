@@ -16,9 +16,9 @@
 
 import {TestBed} from '@angular/core/testing';
 import {
-  MatLegacyDialog as MatDialog,
-  MatLegacyDialogModule as MatDialogModule,
-} from '@angular/material/legacy-dialog';
+  MatDialog,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';

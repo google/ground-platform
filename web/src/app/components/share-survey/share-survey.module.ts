@@ -21,7 +21,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatDialogModule} from '@angular/material/dialog';
 
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
 import {ShareListModule} from 'app/components/share-list/share-list.module';

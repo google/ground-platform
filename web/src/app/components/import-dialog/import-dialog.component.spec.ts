@@ -17,10 +17,10 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {
-  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-  MatLegacyDialogModule as MatDialogModule,
-  MatLegacyDialogRef as MatDialogRef,
-} from '@angular/material/legacy-dialog';
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {FileUploadModule} from '@iplab/ngx-file-upload';

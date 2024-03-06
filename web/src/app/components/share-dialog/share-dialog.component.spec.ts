@@ -20,9 +20,9 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {
-  MatLegacyDialogModule as MatDialogModule,
-  MatLegacyDialogRef as MatDialogRef,
-} from '@angular/material/legacy-dialog';
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatSelectModule} from '@angular/material/select';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';

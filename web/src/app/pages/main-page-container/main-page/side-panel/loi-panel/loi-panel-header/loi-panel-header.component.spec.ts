@@ -18,7 +18,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 import {Router} from '@angular/router';

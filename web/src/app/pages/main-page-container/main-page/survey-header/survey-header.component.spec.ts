@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatDialogModule} from '@angular/material/dialog';
 import {Router} from '@angular/router';
 import {NEVER} from 'rxjs';
 
