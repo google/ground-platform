@@ -32,7 +32,6 @@ export class Job extends Copiable {
     readonly color?: string,
     readonly name?: string,
     readonly tasks?: Map<string, Task>,
-    readonly dataCollectorsCanAdd?: string[],
     readonly strategy?: DataCollectionStrategy
   ) {
     super();

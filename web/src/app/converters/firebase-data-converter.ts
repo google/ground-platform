@@ -141,15 +141,13 @@ export class FirebaseDataConverter {
       data.defaultStyle?.color || data.color,
       data.name,
       this.toTasks(data),
-      data.dataCollectorsCanAdd || [],
       data.strategy || DataCollectionStrategy.PREDEFINED
     );
   }
 
   static jobToJS(job: Job): {} {
-    const {name, tasks, color, dataCollectorsCanAdd, strategy, ...jobDoc} = job;
+    const {name, tasks, color, strategy, ...jobDoc} = job;
     return {
-      dataCollectorsCanAdd,
       strategy,
       name,
       tasks: this.tasksToJS(tasks),
