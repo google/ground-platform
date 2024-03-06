@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
+.loi-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-import {LoiEditorModule} from 'app/components/loi-editor/loi-editor.module';
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
+  .loi-editor-card {
+    border: 1px solid #E2E3DD;
+    border-radius: 8px;
+    background: #FCFDF7;
+    padding: 24px;
+    display: flex;
 
-import {SurveyLoiComponent} from './survey-loi.component';
-
-@NgModule({
-  declarations: [SurveyLoiComponent],
-  imports: [CommonModule, LoiEditorModule, LoiSelectionModule],
-  exports: [SurveyLoiComponent],
-})
-export class SurveyLoiModule {}
+    button.import-lois-button {
+      --mdc-filled-button-container-color: #FFDDAB;
+      --mdc-filled-button-container-shape: 24px;
+    }
+  }
+}

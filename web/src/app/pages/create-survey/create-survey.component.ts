@@ -18,7 +18,7 @@ import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {filter, first, firstValueFrom} from 'rxjs';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
@@ -41,7 +41,6 @@ export class CreateSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
   canContinue = true;
-  loiPermissionsOption!: LoiPermissionsOption;
   skipLoiSelection = false;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
   // We should display a loading bar while we are waiting for the data to make a decision
@@ -59,7 +58,6 @@ export class CreateSurveyComponent implements OnInit {
     route: ActivatedRoute
   ) {
     navigationService.init(route);
-    this.onLoiPermissionsChange(LoiPermissionsOption.SURVEY_ORGANIZERS);
   }
 
   ngAfterViewChecked(): void {
@@ -113,7 +111,7 @@ export class CreateSurveyComponent implements OnInit {
       return SetupPhase.DEFINE_TASKS;
     }
     if (survey.jobs.size > 0) {
-      return SetupPhase.DEFINE_LOI_PERMISSIONS;
+      return SetupPhase.DEFINE_LOIS;
     }
     if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
@@ -136,7 +134,7 @@ export class CreateSurveyComponent implements OnInit {
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([
     [SetupPhase.SURVEY_DETAILS, 'Create survey'],
     [SetupPhase.JOB_DETAILS, 'Add a job'],
-    [SetupPhase.DEFINE_LOIS, 'Import data collection sites'],
+    [SetupPhase.DEFINE_LOIS, 'Data collection strategy'],
     [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
     [SetupPhase.REVIEW, 'Review and share survey'],
   ]);
@@ -220,12 +218,6 @@ export class CreateSurveyComponent implements OnInit {
     this.survey = this.surveyService.getActiveSurvey();
   }
 
-  onLoiPermissionsChange(permissionsOption: LoiPermissionsOption) {
-    this.loiPermissionsOption = permissionsOption;
-    this.skipLoiSelection =
-      permissionsOption === LoiPermissionsOption.DATA_COLLECTORS;
-  }
-
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
 
@@ -264,31 +256,6 @@ export class CreateSurveyComponent implements OnInit {
         name,
         color: job.color || this.jobService.getNextColor(this.survey?.jobs),
       })
-    );
-  }
-
-  // TODO: Move LOI permissions saving to job service.
-  private async saveLoiPermissions() {
-    if (!this.loiPermissionsOption) return;
-
-    let strategy = DataCollectionStrategy.PREDEFINED;
-
-    switch (this.loiPermissionsOption) {
-      case LoiPermissionsOption.DATA_COLLECTORS:
-        strategy = DataCollectionStrategy.AD_HOC;
-        break;
-      case LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS:
-        strategy = DataCollectionStrategy.MIXED;
-        break;
-    }
-
-    const job = this.getFirstJob();
-
-    const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
-
-    await this.jobService.addOrUpdateJob(
-      this.surveyId!,
-      job.copyWith({tasks, strategy})
     );
   }
 

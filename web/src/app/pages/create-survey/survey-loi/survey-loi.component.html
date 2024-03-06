@@ -23,4 +23,13 @@
     (updateStrategy)="onStrategyChange($event)"
   >
   </loi-selection>
+
+  <loi-editor
+    *ngIf="surveyService.getActiveSurvey$() | async as survey"
+    [canImport]="surveyService.canManageSurvey()"
+    [survey]="survey"
+    [job]="job"
+    [lois]="lois"
+    (updateStrategy)="onStrategyChange($event)"
+  />
 </div>

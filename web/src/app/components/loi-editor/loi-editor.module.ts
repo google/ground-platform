@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {MatIconModule} from '@angular/material/icon';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
-import {LoiEditorModule} from 'app/components/loi-editor/loi-editor.module';
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
-
-import {SurveyLoiComponent} from './survey-loi.component';
+import {LoiEditorComponent} from './loi-editor.component';
 
 @NgModule({
-  declarations: [SurveyLoiComponent],
-  imports: [CommonModule, LoiEditorModule, LoiSelectionModule],
-  exports: [SurveyLoiComponent],
+  declarations: [LoiEditorComponent],
+  imports: [CommonModule, MatSlideToggleModule, MatIconModule],
+  exports: [LoiEditorComponent],
 })
-export class SurveyLoiModule {}
+export class LoiEditorModule {}
