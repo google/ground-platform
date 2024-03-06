@@ -22,10 +22,6 @@ import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
-import {
-  LoiPermissionsComponent,
-  LoiPermissionsOption,
-} from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {JobService} from 'app/services/job/job.service';
@@ -140,7 +136,6 @@ export class CreateSurveyComponent implements OnInit {
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([
     [SetupPhase.SURVEY_DETAILS, 'Create survey'],
     [SetupPhase.JOB_DETAILS, 'Add a job'],
-    [SetupPhase.DEFINE_LOI_PERMISSIONS, 'Data collection strategy'],
     [SetupPhase.DEFINE_LOIS, 'Import data collection sites'],
     [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
     [SetupPhase.REVIEW, 'Review and share survey'],
@@ -179,17 +174,12 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.JOB_DETAILS:
         this.setupPhase = SetupPhase.SURVEY_DETAILS;
         break;
-      case SetupPhase.DEFINE_LOI_PERMISSIONS:
-        this.setupPhase = SetupPhase.JOB_DETAILS;
-        break;
       case SetupPhase.DEFINE_LOIS:
-        this.setupPhase = SetupPhase.DEFINE_LOI_PERMISSIONS;
+        this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
       case SetupPhase.DEFINE_TASKS:
         this.canContinue = true;
-        this.setupPhase = this.skipLoiSelection
-          ? SetupPhase.DEFINE_LOI_PERMISSIONS
-          : SetupPhase.DEFINE_LOIS;
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       case SetupPhase.REVIEW:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
@@ -212,13 +202,7 @@ export class CreateSurveyComponent implements OnInit {
       }
       case SetupPhase.JOB_DETAILS:
         await this.saveJobName();
-        this.setupPhase = SetupPhase.DEFINE_LOI_PERMISSIONS;
-        break;
-      case SetupPhase.DEFINE_LOI_PERMISSIONS:
-        await this.saveLoiPermissions();
-        this.setupPhase = this.skipLoiSelection
-          ? SetupPhase.DEFINE_TASKS
-          : SetupPhase.DEFINE_LOIS;
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       case SetupPhase.DEFINE_LOIS:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
@@ -259,9 +243,6 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('jobDetails')
   jobDetails?: JobDetailsComponent;
-
-  @ViewChild('loiPermissions')
-  loiPermissions?: LoiPermissionsComponent;
 
   private getFirstJob(): Job {
     // there should only be at most one job attached to this survey at this
@@ -335,8 +316,7 @@ export class CreateSurveyComponent implements OnInit {
 export enum SetupPhase {
   SURVEY_DETAILS,
   JOB_DETAILS,
-  DEFINE_TASKS,
-  DEFINE_LOI_PERMISSIONS,
   DEFINE_LOIS,
+  DEFINE_TASKS,
   REVIEW,
 }
