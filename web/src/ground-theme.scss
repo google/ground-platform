@@ -75,7 +75,7 @@ $primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
 $accent: mat.define-palette(mat.$amber-palette, 700, 600, 800);
 $warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
 
-// TODO(amysorto): add typography levels
+// TODO(#1135): add typography levels
 $typography: mat.define-typography-config(
   $font-family: 'Manrope,Arial,sans-serif',
 );
@@ -92,7 +92,7 @@ $theme: mat.define-light-theme((
 
 $foreground: map-get($theme, foreground);
 
-// TODO(amysorto): call themes on a component level
+// TODO(#1135): call themes on a component level
 /*TODO(mdc-migration): Remove all-legacy-component-themes once all legacy components are migrated
  */
 @include mat.all-legacy-component-themes($theme);
