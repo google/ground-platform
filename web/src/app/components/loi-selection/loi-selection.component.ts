@@ -33,7 +33,6 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 })
 export class LoiSelectionComponent {
   @Input() canImport!: boolean;
-  @Input() dataCollectorsCanAddLois!: boolean;
   @Input() lois!: List<LocationOfInterest>;
   @Input() survey!: Survey;
   @Input() jobId?: string;
@@ -56,9 +55,7 @@ export class LoiSelectionComponent {
   }
 
   onImportLois() {
-    if (!this.survey.id || !this.job?.id) {
-      return;
-    }
+    if (!this.survey.id || !this.job?.id) return;
 
     this.importDialog.open(ImportDialogComponent, {
       data: {surveyId: this.survey.id, jobId: this.job.id},
