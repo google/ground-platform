@@ -22,6 +22,7 @@
   <div class="container">
     <div class="surveys-container">
       <mat-card
+        appearance="raised"
         id="add-card"
         class="survey-card new-survey-card"
         (click)="onNewSurvey()"
@@ -40,6 +41,7 @@
       </mat-card>
 
       <mat-card
+        appearance="raised"
         *ngFor="let survey of surveys; let i = index"
         id="survey-card-{{ i }}"
         class="survey-card"

@@ -33,10 +33,11 @@
 .card {
   width: 420px;
   height: 460px;
-}
-
-.content {
-  padding: 40px;
+  border-radius: 24px;
+  
+  .content {
+    padding: 40px;
+  }
 }
 
 .buttons {
