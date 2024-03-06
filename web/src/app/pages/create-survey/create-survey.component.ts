@@ -290,15 +290,8 @@ export class CreateSurveyComponent implements OnInit {
   private async saveLoiPermissions() {
     if (!this.loiPermissionsOption) return;
 
-    const canDataCollectorsAddLois =
-      this.loiPermissionsOption === LoiPermissionsOption.DATA_COLLECTORS ||
-      this.loiPermissionsOption ===
-        LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS;
-    const dataCollectorsCanAdd = canDataCollectorsAddLois
-      ? ['points', 'polygons']
-      : [];
-
     let strategy = DataCollectionStrategy.PREDEFINED;
+
     switch (this.loiPermissionsOption) {
       case LoiPermissionsOption.DATA_COLLECTORS:
         strategy = DataCollectionStrategy.AD_HOC;
@@ -314,7 +307,7 @@ export class CreateSurveyComponent implements OnInit {
 
     await this.jobService.addOrUpdateJob(
       this.surveyId!,
-      job.copyWith({dataCollectorsCanAdd, tasks, strategy})
+      job.copyWith({tasks, strategy})
     );
   }
 
