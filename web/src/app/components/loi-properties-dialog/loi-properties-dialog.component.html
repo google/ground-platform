@@ -14,25 +14,24 @@
   limitations under the License.
 -->
 
-
-<div>
+<div class="properties-dialog">
   <div class="properties-header">
-    <div class="loi-label" style="flex: 1;">
+    <div class="loi-label">
       <mat-icon svgIcon="{{ iconName }}" [ngStyle]="{color: iconColor}"></mat-icon>
       <div>{{ loiDisplayName }}</div>
     </div>
 
-    <button mat-icon-button aria-label="close" mat-dialog-close>
+    <button mat-icon-button mat-dialog-close aria-label="close">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <mat-list class="properties-list">
-    <mat-list-item class="properties-list-item" *ngFor="let property of properties | keyvalue; let lastItem = last;">
-      <div matLine style="display: flex; justify-content: space-between; gap: 1rem;">
-        <div style="white-space: nowrap; font-size: 16px;">{{property.key}}</div>
+  <mat-list>
+    <mat-list-item class="property-list-item" *ngFor="let property of properties | keyvalue; let lastItem = last;">
+      <div matLine>
+        <div>{{property.key}}</div>
 
-        <div style="white-space: nowrap; font-size: 14px;">{{property.value}}</div>
+        <div>{{property.value}}</div>
       </div>
 
       <mat-divider *ngIf="!lastItem"></mat-divider>
