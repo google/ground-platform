@@ -20,6 +20,7 @@
     [formControlName]="loiPermissionsControlKey"
   >
     <mat-card
+      appearance="outlined"
       class="loi-permissions-option"
       *ngFor="let option of loiPermissionsOptions"
       (click)="optionCardClicked(option.value)"
