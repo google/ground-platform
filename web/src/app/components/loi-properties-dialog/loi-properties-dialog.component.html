@@ -15,26 +15,26 @@
 -->
 
 <div class="properties-dialog">
-  <div class="properties-header">
-    <div class="loi-label">
-      <mat-icon svgIcon="{{ iconName }}" [ngStyle]="{color: iconColor}"></mat-icon>
-      <div>{{ loiDisplayName }}</div>
-    </div>
+  <button class="close" mat-icon-button mat-dialog-close aria-label="close">
+    <mat-icon>close</mat-icon>
+  </button>
 
-    <button mat-icon-button mat-dialog-close aria-label="close">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
+  <h1 mat-dialog-title>
+    <mat-icon svgIcon="{{ iconName }}" [ngStyle]="{color: iconColor}"></mat-icon>
+    <div>{{ loiDisplayName }}</div>
+  </h1>
 
-  <mat-list>
-    <mat-list-item class="property-list-item" *ngFor="let property of properties | keyvalue; let lastItem = last;">
-      <div matLine>
-        <div>{{property.key}}</div>
-
-        <div>{{property.value}}</div>
-      </div>
-
-      <mat-divider *ngIf="!lastItem"></mat-divider>
-    </mat-list-item>
-  </mat-list>
+  <mat-dialog-content>
+    <mat-list>
+      <mat-list-item class="property-list-item" *ngFor="let property of properties | keyvalue; let lastItem = last;">
+        <div matLine>
+          <div>{{property.key}}</div>
+  
+          <div>{{property.value}}</div>
+        </div>
+  
+        <mat-divider *ngIf="!lastItem"></mat-divider>
+      </mat-list-item>
+    </mat-list>
+  </mat-dialog-content>
 </div>

@@ -13,13 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 <div class="job-list-item-container">
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Tree node for lois -->
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [class.tree-node-selected]="isSelectedLoi(node)"
       class="loi-tree-node" role="button" tabindex="0" mat-button (click)="selectLoi(node)"
       [style.padding-left]="isSidePanelExpanded() ? '40px' : '16px'">
-      <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }}" [ngStyle]="{color: node.iconColor}"
+      <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }} loi-icon" [ngStyle]="{color: node.iconColor}"
         [style.padding-left]="isSidePanelExpanded() ? '10px' : '0'"></mat-icon>
       <div class="select-loi" *ngIf="isSidePanelExpanded()">
         {{ node.name }}

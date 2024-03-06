@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-.properties-header {
-  display: flex;
+.properties-dialog {
+  .close {
+    float: right;
+    top: -12px;
+    right: -12px;
+  }
 
-  .loi-label {
+  h1 {
     flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-}
 
-.property-list-item {
-  ::ng-deep .mat-list-item-content {
-    padding: 0px;
-  }
-
-  .mat-line {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-
-    &:first-child {
-      white-space: nowrap;
-      font-size: 16px;
-    }
-
-    &:nth-child(1) {
-      white-space: nowrap !important;
-      font-size: 14px;
+  .property-list-item {
+    .mat-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+  
+      &:first-child {
+        white-space: nowrap;
+        font-size: 16px;
+      }
+  
+      &:nth-child(1) {
+        white-space: nowrap !important;
+        font-size: 14px;
+      }
     }
   }
 }

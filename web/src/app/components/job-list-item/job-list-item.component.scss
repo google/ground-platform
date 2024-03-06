@@ -45,6 +45,11 @@
   padding-right: 16px;
 }
 
+.loi-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .show-properties-icon {
   width: 24px;
   height: 24px;
@@ -58,11 +63,6 @@
 .loi-tree-node {
   border-radius: 24px;
   cursor: pointer;
-
-  .mat-icon {
-    width: 20px;
-    height: 20px;
-  }
 }
 
 .select-loi {
