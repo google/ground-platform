@@ -37,10 +37,6 @@ import {
   SetupPhase,
 } from 'app/pages/create-survey/create-survey.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
-import {
-  LoiPermissionsComponent,
-  LoiPermissionsOption,
-} from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -178,7 +174,6 @@ describe('CreateSurveyComponent', () => {
         CreateSurveyComponent,
         SurveyDetailsComponent,
         JobDetailsComponent,
-        LoiPermissionsComponent,
         SurveyReviewComponent,
       ],
       providers: [

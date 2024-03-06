@@ -59,18 +59,6 @@
             (onValidationChange)="onValidationChange($event)"
           ></job-details>
           <ground-step-card
-            *ngSwitchCase="SetupPhase.DEFINE_LOI_PERMISSIONS"
-            [jobName]="jobName()"
-            title="How are data collection sites defined?"
-            description="Are data collection sites defined by you in advance, defined by data collectors as they go, or both?"
-          >
-            <loi-permissions
-              #loiPermissions
-              [defaultSelection]="loiPermissionsOption"
-              (select)="onLoiPermissionsChange($event)"
-            ></loi-permissions>
-          </ground-step-card>
-          <ground-step-card
             *ngSwitchCase="SetupPhase.DEFINE_LOIS"
             [jobName]="jobName()"
             title="Where should data be collected?"
