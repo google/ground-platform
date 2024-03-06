@@ -59,8 +59,6 @@ export class JobDialogComponent implements OnDestroy {
   defaultJobColor: string;
   @ViewChildren(TaskEditorComponent)
   taskEditors?: QueryList<TaskEditorComponent>;
-  dataCollectorsCanAddPoints = true;
-  dataCollectorsCanAddPolygons = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -138,10 +136,6 @@ export class JobDialogComponent implements OnDestroy {
       this.addQuestion();
       return;
     }
-    this.dataCollectorsCanAddPoints =
-      this.job?.dataCollectorsCanAdd?.includes('points') || false;
-    this.dataCollectorsCanAddPolygons =
-      this.job?.dataCollectorsCanAdd?.includes('polygons') || false;
     if (this.job?.tasks) {
       this.tasks =
         this.job.tasks.toList().sortBy(task => task.index) || List<Task>();
@@ -166,21 +160,12 @@ export class JobDialogComponent implements OnDestroy {
         return;
       }
     }
-    const tasks = this.dataStoreService.convertTasksListToMap(this.tasks);
-    const allowedLoiTypes: string[] = [];
-    if (this.dataCollectorsCanAddPoints) {
-      allowedLoiTypes.push('points');
-    }
-    if (this.dataCollectorsCanAddPolygons) {
-      allowedLoiTypes.push('polygons');
-    }
     const job = new Job(
       this.job?.id || '',
       /* index */ this.job?.index || -1,
       this.color,
       this.jobName.trim(),
-      tasks,
-      allowedLoiTypes,
+      this.dataStoreService.convertTasksListToMap(this.tasks),
       DataCollectionStrategy.PREDEFINED
     );
     this.addOrUpdateJob(this.surveyId, job);

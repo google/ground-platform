@@ -440,13 +440,12 @@ describe('CreateSurveyComponent', () => {
         }));
 
         it('calls addOrUpdateJob with an empty array for dataCollectorsCanAdd', () => {
-          const dataCollectorsCanAdd: string[] = [];
           const strategy = DataCollectionStrategy.PREDEFINED;
           const tasks = taskServiceSpy.updateLoiTasks(job?.tasks, strategy);
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
-            job.copyWith({dataCollectorsCanAdd, tasks, strategy})
+            job.copyWith({tasks, strategy})
           );
         });
 
@@ -468,13 +467,12 @@ describe('CreateSurveyComponent', () => {
         }));
 
         it('calls addOrUpdateJob with a filled array for dataCollectorsCanAdd', () => {
-          const dataCollectorsCanAdd = ['points', 'polygons'];
           const strategy = DataCollectionStrategy.AD_HOC;
           const tasks = taskServiceSpy.updateLoiTasks(job?.tasks, strategy);
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
-            job.copyWith({dataCollectorsCanAdd, tasks, strategy})
+            job.copyWith({tasks, strategy})
           );
         });
 
@@ -496,13 +494,12 @@ describe('CreateSurveyComponent', () => {
         }));
 
         it('calls addOrUpdateJob with filled array for dataCollectorsCanAdd', () => {
-          const dataCollectorsCanAdd = ['points', 'polygons'];
           const strategy = DataCollectionStrategy.MIXED;
           const tasks = taskServiceSpy.updateLoiTasks(job?.tasks, strategy);
 
           expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
             surveyId,
-            job.copyWith({dataCollectorsCanAdd, tasks, strategy})
+            job.copyWith({tasks, strategy})
           );
         });
 

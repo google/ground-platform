@@ -57,18 +57,9 @@ export class TestData {
     color = '#ffff00',
     name = 'job',
     tasks = {} as Record<string, Task>,
-    dataCollectorsCanAdd = [] as string[],
     strategy = DataCollectionStrategy.PREDEFINED,
   }): Job {
-    return new Job(
-      id,
-      index,
-      color,
-      name,
-      Map(tasks),
-      dataCollectorsCanAdd,
-      strategy
-    );
+    return new Job(id, index, color, name, Map(tasks), strategy);
   }
 
   public static newPointOfInterest(): PointOfInterest {
