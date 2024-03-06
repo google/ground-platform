@@ -154,6 +154,10 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     return this.navigationService.getSidePanelExpanded();
   }
 
+  hasJobProperties(node: DynamicFlatNode) {
+    return node.loi?.properties?.size;
+  }
+
   openPropertiesDialog(event: Event, node: DynamicFlatNode): void {
     event.stopPropagation();
     this.dialog.open(LoiPropertiesDialogComponent, {

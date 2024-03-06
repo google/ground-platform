@@ -26,14 +26,11 @@ limitations under the License.
       </div>
       <button
         mat-icon-button
-        *ngIf="isSidePanelExpanded()"
+        *ngIf="isSidePanelExpanded() && hasJobProperties(node)"
         aria-label="properties"
         (click)="openPropertiesDialog($event, node)"
       >
-        <mat-icon
-          class="material-symbols-outlined"
-          style="width: 24px; height: 24px; color: #737970;"
-        >
+        <mat-icon class="material-symbols-outlined show-properties-icon">
           data_info_alert
         </mat-icon>
       </button>
