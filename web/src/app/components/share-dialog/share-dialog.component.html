@@ -32,7 +32,7 @@
   <mat-form-field>
     <mat-select formControlName="role">
       <mat-option
-        *ngFor="let option of ROLE_OPTIONS"
+        *ngFor="let option of roleOptions"
         [value]="option.value"
         >{{ option.label }}</mat-option
       >

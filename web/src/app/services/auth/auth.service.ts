@@ -40,6 +40,13 @@ const ANONYMOUS_USER: User = {
   isAuthenticated: false,
 };
 
+/** Roles and labels for select drop-downs. */
+export const ROLE_OPTIONS = [
+  {label: 'Data collector', value: Role.DATA_COLLECTOR},
+  {label: 'Survey organizer', value: Role.SURVEY_ORGANIZER},
+  {label: 'Viewer', value: Role.VIEWER},
+];
+
 @Injectable({
   providedIn: 'root',
 })
