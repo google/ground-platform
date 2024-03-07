@@ -15,15 +15,6 @@
 -->
 
 <div *ngIf="lois$ | async as lois">
-  <loi-selection
-    *ngIf="surveyService.getActiveSurvey$() | async as survey"
-    [canImport]="surveyService.canManageSurvey()"
-    [lois]="lois"
-    [survey]="survey"
-    (updateStrategy)="onStrategyChange($event)"
-  >
-  </loi-selection>
-
   <loi-editor
     *ngIf="surveyService.getActiveSurvey$() | async as survey"
     [canImport]="surveyService.canManageSurvey()"

@@ -18,13 +18,12 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 
 import {LoiEditorModule} from 'app/components/loi-editor/loi-editor.module';
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
 
 import {SurveyLoiComponent} from './survey-loi.component';
 
 @NgModule({
   declarations: [SurveyLoiComponent],
-  imports: [CommonModule, LoiEditorModule, LoiSelectionModule],
+  imports: [CommonModule, LoiEditorModule],
   exports: [SurveyLoiComponent],
 })
 export class SurveyLoiModule {}
