@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import {CdkTreeModule} from '@angular/cdk/tree';
+import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
-import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
-import {MatTreeModule} from '@angular/material/tree';
-import {BrowserModule} from '@angular/platform-browser';
+import {MatSelectModule} from '@angular/material/select';
 
-import {JobListItemComponent} from './job-list-item.component';
+import {LoiPropertiesDialogComponent} from './loi-properties-dialog.component';
 
 @NgModule({
+  declarations: [LoiPropertiesDialogComponent],
   imports: [
-    BrowserModule,
+    CommonModule,
     MatButtonModule,
-    MatIconModule,
     MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatListModule,
-    MatMenuModule,
-    MatSnackBarModule,
-    MatTreeModule,
-    CdkTreeModule,
+    MatSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconModule,
   ],
-  exports: [JobListItemComponent],
-  declarations: [JobListItemComponent],
 })
-export class JobListItemModule {}
+export class PropertiesDialogModule {}

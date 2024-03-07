@@ -16,6 +16,7 @@
 
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
@@ -30,6 +31,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
 
 import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
+import {LoiPropertiesDialogComponent} from '../loi-properties-dialog/loi-properties-dialog.component';
 
 @Component({
   selector: 'ground-job-list-item',
@@ -58,7 +60,8 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
     private authService: AuthService,
-    readonly surveyService: SurveyService
+    readonly surveyService: SurveyService,
+    private dialog: MatDialog
   ) {
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
       groundPinService.getPinImageSource()
@@ -149,6 +152,26 @@ export class JobListItemComponent implements OnInit, OnDestroy {
 
   isSidePanelExpanded() {
     return this.navigationService.getSidePanelExpanded();
+  }
+
+  hasJobProperties(node: DynamicFlatNode) {
+    return node.loi?.properties?.size;
+  }
+
+  openPropertiesDialog(event: Event, node: DynamicFlatNode): void {
+    event.stopPropagation();
+    this.dialog.open(LoiPropertiesDialogComponent, {
+      width: '580px',
+      height: '70%',
+      autoFocus: false,
+      data: {
+        iconColor: node.iconColor,
+        iconName: node.iconName,
+        loiDisplayName: node.name,
+        properties: node.loi?.properties?.toObject(),
+      },
+      panelClass: 'loi-properties-dialog-container',
+    });
   }
 }
 

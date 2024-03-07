@@ -22,7 +22,7 @@
 @mixin typography($theme) {
   $typography-config: mat.get-typography-config($theme);
 
-  // TODO(amysorto): add font-size & font-weight once typography levels defined
+  // TODO(#1135): add font-size & font-weight once typography levels defined
 
   .ground-title {
     font-family: 'Urbanist';
