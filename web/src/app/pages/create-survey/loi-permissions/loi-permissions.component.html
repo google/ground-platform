@@ -1,0 +1,41 @@
+<!--
+  Copyright 2023 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<form [formGroup]="formGroup">
+  <mat-radio-group
+    class="loi-permissions"
+    [id]="loiPermissionsControlKey"
+    [formControlName]="loiPermissionsControlKey"
+  >
+    <mat-card
+      appearance="outlined"
+      class="loi-permissions-option"
+      *ngFor="let option of loiPermissionsOptions"
+      (click)="optionCardClicked(option.value)"
+    >
+      <img mat-card-image src="/assets/img/data_collection_strategy/{{formGroup.controls.loiPermissionsOption.value === option.value ? option.image_selected : option.image_unselected}}" alt="data-collectors" />
+
+      <mat-card-content>
+        <p>
+          <mat-radio-button class="option-radio-button" [value]="option.value">
+            {{ option.label }}
+          </mat-radio-button>
+        </p>
+
+        <p class="option-description">{{ option.description }}</p>
+      </mat-card-content>
+    </mat-card>
+  </mat-radio-group>
+</form>

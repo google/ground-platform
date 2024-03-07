@@ -16,9 +16,9 @@ limitations under the License.
 
 <div *ngIf="loi" class="loi-panel">
   <div class="header">
-    <div>
-      <mat-icon svgIcon={{icon}}></mat-icon>
-      {{ name }}
+    <div class="header-left">
+      <mat-icon svgIcon={{icon}} [ngStyle]="{color: iconColor}"></mat-icon>
+      <div>{{ name }}</div>
     </div>
 
     <button mat-icon-button aria-label="back" (click)="onClosePanel()">
