@@ -32,6 +32,7 @@ import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {SurveyService} from 'app/services/survey/survey.service';
+import { ROLE_OPTIONS } from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -39,12 +40,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
   styleUrls: ['./share-dialog.component.scss'],
 })
 export class ShareDialogComponent {
-  /** Roles and labels for select drop-downs. */
-  readonly ROLE_OPTIONS = [
-    {label: 'Data Collector', value: Role.DATA_COLLECTOR},
-    {label: 'Survey Organizer', value: Role.SURVEY_ORGANIZER},
-    {label: 'Viewer', value: Role.VIEWER},
-  ];
+  readonly roleOptions = ROLE_OPTIONS;
 
   addUserForm = new FormGroup({
     email: new FormControl('', [Validators.email, this.notInListValidator()]),
