@@ -26,9 +26,23 @@
     display: flex;
     flex-direction: column;
 
-    .loi-editor-card-content {
+    .loi-editor-card-row {
       display: flex;
       margin: 24px;
+
+      .loi-editor-card-row-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        color: #202124;
+        font-size: 14px;
+        font-weight: 500;
+
+        div:first-child {
+          font-size: 16px;
+          font-weight: 700;
+        }
+      }
 
       .loi-editor-card-actions {
         flex: 1;
