@@ -19,14 +19,23 @@
       <div>Import areas or points of interest for which data should be collected.</div>
     </div>
 
-    <div style="flex: 1; display: flex; align-items: center; justify-content: end;">
-      <button
+    <div class="loi-editor-card-actions">
+      <button *ngIf="lois.size == 0"
         mat-flat-button
         class="import-lois-button"
-        (click)="onImportLois()"
+        (click)="importLois()"
       >
         <mat-icon class="import-lois-icon">input</mat-icon>
         Import
+      </button>
+
+      <button *ngIf="lois.size > 0"
+        mat-button
+        class="clear-all-lois"
+        (click)="clearLois(survey.id, lois)"
+        color="primary"
+      >
+        Clear all
       </button>
     </div>
 
@@ -42,7 +51,7 @@ xxx
       <div>Allow data collectors to add and collect data about new locations as they go.</div>
     </div>
 
-    <div style="flex: 1; display: flex; align-items: center; justify-content: end;">
+    <div class="loi-editor-card-actions">
       <mat-slide-toggle
         [checked]="job?.strategy !== DataCollectionStrategy.PREDEFINED"
         (change)="toggleDataCollectorsCanAddLois($event)"

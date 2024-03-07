@@ -26,6 +26,13 @@
     padding: 24px;
     display: flex;
 
+    .loi-editor-card-actions {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: end;
+    }
+
     button.import-lois-button {
       --mdc-filled-button-container-color: #FFDDAB;
       --mdc-filled-button-container-shape: 24px;
