@@ -55,16 +55,13 @@ export async function exportCsvHandler(
   const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
 
   const headers = [];
-  // Feature ID column conforms to desktop GIS defaults:
-  //   "FID" is default used by ArcGIS but is case-insensitive.
-  //   "fid" is default used by QGIS and is case-sensitive.
-  headers.push('fid');
+  headers.push('system:index');
   headers.push('geometry');
   const allLoiProperties = getPropertyNames(lois);
   headers.push(...allLoiProperties);
-  tasks.forEach(task => headers.push(task.label));
-  headers.push('contributor_username');
-  headers.push('contributor_email');
+  tasks.forEach(task => headers.push('data:' + task.label));
+  headers.push('data:contributor_username');
+  headers.push('data:contributor_email');
 
   res.type('text/csv');
   res.setHeader(
@@ -100,7 +97,7 @@ export async function exportCsvHandler(
     const submissions = submissionsByLocationOfInterest[loiId] || [{}];
     submissions.forEach(submission => {
       const row = [];
-      // Header: fid
+      // Header: system:index
       row.push(loi.get('properties')?.id || '');
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
