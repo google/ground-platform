@@ -63,7 +63,7 @@
 
       <div class="loi-editor-card-actions">
         <mat-slide-toggle
-          [checked]="job?.strategy !== DataCollectionStrategy.PREDEFINED"
+          [checked]="job?.strategy === DataCollectionStrategy.MIXED"
           (change)="toggleDataCollectorsCanAddLois($event)"
           color="primary"
         >

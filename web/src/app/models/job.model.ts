@@ -21,7 +21,6 @@ import {Task} from './task/task.model';
 
 export enum DataCollectionStrategy {
   PREDEFINED = 'PREDEFINED',
-  AD_HOC = 'AD_HOC',
   MIXED = 'MIXED',
 }
 

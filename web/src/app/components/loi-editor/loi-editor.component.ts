@@ -66,7 +66,7 @@ export class LoiEditorComponent {
   toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {
     this.updateStrategy.emit(
       event.checked
-        ? DataCollectionStrategy.AD_HOC
+        ? DataCollectionStrategy.MIXED
         : DataCollectionStrategy.PREDEFINED
     );
   }

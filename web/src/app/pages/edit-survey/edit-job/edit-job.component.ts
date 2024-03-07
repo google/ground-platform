@@ -48,6 +48,7 @@ export class EditJobComponent {
 
   section: EditJobSection = EditJobSection.TASKS;
 
+  job?: Job;
   tasks?: List<Task>;
   lois!: List<LocationOfInterest>;
 
@@ -88,11 +89,9 @@ export class EditJobComponent {
   private onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.tasks = this.draftSurveyService
-      .getSurvey()
-      .getJob(this.jobId!)
-      ?.tasks?.toList()
-      .sortBy(task => task.index);
+    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+    this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
 
     this.loisSubscription.add(
       this.loiService
@@ -119,16 +118,16 @@ export class EditJobComponent {
   }
 
   onStrategyChange(strategy: DataCollectionStrategy) {
-    if (this.jobId) {
-      const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    if (this.job) {
+      const tasks = this.taskService.updateLoiTasks(this.job?.tasks, strategy);
 
-      if (job) {
-        const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
+      this.draftSurveyService.addOrUpdateJob(
+        this.job.copyWith({tasks, strategy})
+      );
 
-        this.draftSurveyService.addOrUpdateJob(job.copyWith({tasks, strategy}));
+      this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
-        this.tasks = tasks?.toList().sortBy(task => task.index);
-      }
+      this.tasks = tasks?.toList().sortBy(task => task.index);
     }
   }
 
