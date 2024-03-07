@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2018 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +25,16 @@ type pseudoGeoJsonGeometry = {
   type: string
   coordinates: any
 }
+
+/**
+ * Returns path to config colection.
+ */
+export const config = () => 'config';
+
+/**
+ * Returns the path of integrations doc.
+ */
+export const integrations = () => config() + '/integrations';
 
 /**
  * Returns path to survey colection. This is a function for consistency with other path functions.
@@ -99,6 +108,10 @@ export class Datastore {
     return this.db_.collection(path).get();
   }
 
+  fetchPropertyGenerators() {
+    return this.db_.collection(integrations() + '/propertyGenerators').get();
+  }
+
   fetchSurvey(surveyId: string) {
     return this.db_.doc(survey(surveyId)).get();
   }
@@ -151,6 +164,15 @@ export class Datastore {
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
     await loiRef.update({ submissionCount: count });
+  }
+
+  async updateLoiProperties(
+    surveyId: string,
+    loiId: string,
+    properties: {[key: string]: string}
+  ) {
+    const loiRef = this.db_.doc(loi(surveyId, loiId));
+    await loiRef.update({properties});
   }
 
   static toFirestoreMap(geometry: any) {
