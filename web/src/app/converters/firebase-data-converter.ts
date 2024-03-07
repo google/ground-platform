@@ -141,8 +141,14 @@ export class FirebaseDataConverter {
       data.defaultStyle?.color || data.color,
       data.name,
       this.toTasks(data),
-      data.strategy || DataCollectionStrategy.PREDEFINED
+      this.toStrategy(data.strategy)
     );
+  }
+
+  static toStrategy(strategy: string): DataCollectionStrategy {
+    if (!strategy) return DataCollectionStrategy.PREDEFINED;
+    if (strategy === 'AD_HOC') return DataCollectionStrategy.MIXED;
+    return strategy as DataCollectionStrategy;
   }
 
   static jobToJS(job: Job): {} {
