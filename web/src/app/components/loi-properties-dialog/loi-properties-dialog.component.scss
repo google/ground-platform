@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-.body-container {
-  background-image: url(/assets/img/happy-land.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  width: 100vw;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo {
-  width: 64px;
-  height: 64px;
-}
-
-.card {
-  width: 420px;
-  height: 460px;
-  border-radius: 24px;
-  
-  .content {
-    padding: 40px;
+.properties-dialog {
+  .close {
+    float: right;
+    top: -12px;
+    right: -12px;
   }
-}
 
-.buttons {
-  margin-top: 48px;
-}
+  h1 {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-.firebaseui-container {
-  max-width: 240px;
+  .property-list-item {
+    .mat-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+  
+      &:first-child {
+        white-space: nowrap;
+        font-size: 16px;
+      }
+  
+      &:nth-child(1) {
+        white-space: nowrap !important;
+        font-size: 14px;
+      }
+    }
+  }
 }

@@ -12,7 +12,7 @@
 
   .tree-node-selected {
     background-color: map.get($background, selected-button);
-    #select-loi {
+    .select-loi {
       color: map.get($foreground, base);
     }
   }
@@ -37,7 +37,7 @@
 @mixin typography($theme) {
   $typography-config: mat.get-typography-config($theme);
 
-  // TODO(amysorto): use typography-config once typography levels defined
+  // TODO(#1135): use typography-config once typography levels defined
 
   .download {
     text-decoration: none;

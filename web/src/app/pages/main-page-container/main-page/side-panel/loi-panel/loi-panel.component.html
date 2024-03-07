@@ -34,7 +34,7 @@ limitations under the License.
 </div>
 <div *ngIf="submissions$ | async as submissions">
   <ng-container *ngIf="submissions.size; else noSubmissions">
-    <mat-card class="submission card" *ngFor="let submission of submissions">
+    <mat-card appearance="outlined" class="submission card" *ngFor="let submission of submissions">
       <mat-card-header>
         <mat-card-title>
           {{ submission.created.user.displayName }}
