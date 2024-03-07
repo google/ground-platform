@@ -46,14 +46,15 @@
         [job]="job"
         [lois]="lois"
         (updateStrategy)="onStrategyChange($event)"
+        #loiEditor
       />
     </div>
 
     <div *ngSwitchCase="EditJobSection.TASKS">
       <tasks-editor
-        #tasksEditor
         [tasks]="tasks"
         (onValueChanges)="onTasksChange($event)"
+        #tasksEditor
       >
       </tasks-editor>
     </div>

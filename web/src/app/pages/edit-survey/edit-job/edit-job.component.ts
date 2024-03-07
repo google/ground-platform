@@ -19,6 +19,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
+import {LoiEditorComponent} from 'app/components/loi-editor/loi-editor.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -56,6 +57,9 @@ export class EditJobComponent {
 
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
+
+  @ViewChild('loiEditor')
+  loiEditor?: LoiEditorComponent;
 
   constructor(
     private route: ActivatedRoute,

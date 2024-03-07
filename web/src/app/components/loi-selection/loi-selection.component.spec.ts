@@ -28,11 +28,10 @@ import {Job} from 'app/models/job.model';
 import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
 
 import {LoiSelectionComponent} from './loi-selection.component';
 
-describe('LoiSelectionFormComponent', () => {
+describe('LoiSelectionComponent', () => {
   let component: LoiSelectionComponent;
   let fixture: ComponentFixture<LoiSelectionComponent>;
 
@@ -93,7 +92,6 @@ describe('LoiSelectionFormComponent', () => {
     fixture = TestBed.createComponent(LoiSelectionComponent);
     fixture.componentInstance.lois = List([poi1, poi2]);
     fixture.componentInstance.survey = survey;
-    fixture.componentInstance.canImport = true;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -135,67 +133,5 @@ describe('LoiSelectionFormComponent', () => {
       loiList.querySelectorAll('.loi-list-item')
     ).map((element: Element) => element.textContent);
     expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
-  });
-
-  describe('when the import button is clicked', () => {
-    let importButton: HTMLElement;
-
-    beforeEach(() => {
-      importButton = fixture.debugElement.nativeElement.querySelector(
-        '.import-lois-button'
-      );
-      fixture.componentInstance.ngOnChanges();
-    });
-
-    describe('when no job ID is passed in as input', () => {
-      it('opens the import dialog with survey and ID of first job', () => {
-        importButton.click();
-
-        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: jobId1},
-          width: '350px',
-          maxHeight: '800px',
-        });
-      });
-    });
-
-    describe('when job ID is passed in as input', () => {
-      it('opens the import dialog with survey and inputted job ID', () => {
-        fixture.componentInstance.jobId = jobId2;
-        fixture.detectChanges();
-        fixture.componentInstance.ngOnChanges();
-        importButton.click();
-
-        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: jobId2},
-          width: '350px',
-          maxHeight: '800px',
-        });
-      });
-    });
-  });
-
-  describe('the "Clear all" button', () => {
-    it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
-      const clearAllButton =
-        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
-      const loiList = fixture.debugElement.nativeElement
-        .querySelector('.loi-list')
-        .querySelectorAll('.loi-list-item');
-      clearAllButton.click();
-
-      expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
-        loiList.length
-      );
-    });
-
-    it('does not show when there are no LOIs', () => {
-      fixture.componentInstance.lois = List([]);
-      fixture.detectChanges();
-
-      const clearAllButton =
-        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
-      expect(clearAllButton).toBe(null);
-    });
   });
 });
