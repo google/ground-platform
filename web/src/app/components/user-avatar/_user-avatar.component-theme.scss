@@ -14,7 +14,7 @@
 @mixin typography($theme) {
   $typography-config: mat.get-typography-config($theme);
 
-  // TODO(amysorto): use typography-config once typography levels defined
+  // TODO(#1135): use typography-config once typography levels defined
 
   .user-default-thumb {
     font-size: 1em;

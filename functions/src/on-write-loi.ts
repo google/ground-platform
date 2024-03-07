@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import {Datastore} from '@/common/datastore';
-import {initializeApp} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
+import {Change, EventContext} from 'firebase-functions';
+import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
+import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
 
-initializeApp();
+export async function onWriteLoiHandler(
+  _: Change<DocumentSnapshot>,
+  context: EventContext
+) {
+  const surveyId = context.params.surveyId;
 
-export const db = new Datastore(getFirestore());
+  return broadcastSurveyUpdate(surveyId);
+}

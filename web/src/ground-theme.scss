@@ -23,6 +23,7 @@
 @use 'app/components/import-dialog/_import-dialog.component-theme' as import-dialog;
 @use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
 @use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
+@use 'app/components/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
 @use 'app/components/loi-selection/loi-selection.component-theme' as loi-selection;
 @use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
 @use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
@@ -74,7 +75,7 @@ $primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
 $accent: mat.define-palette(mat.$amber-palette, 700, 600, 800);
 $warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
 
-// TODO(amysorto): add typography levels
+// TODO(#1135): add typography levels
 $typography: mat.define-typography-config(
   $font-family: 'Manrope,Arial,sans-serif',
 );
@@ -91,7 +92,7 @@ $theme: mat.define-light-theme((
 
 $foreground: map-get($theme, foreground);
 
-// TODO(amysorto): call themes on a component level
+// TODO(#1135): call themes on a component level
 /*TODO(mdc-migration): Remove all-legacy-component-themes once all legacy components are migrated
  */
 @include mat.all-legacy-component-themes($theme);
@@ -103,6 +104,7 @@ $foreground: map-get($theme, foreground);
 @include import-dialog.theme($theme);
 @include inline-editor.theme($theme);
 @include job-list-item.theme($theme);
+@include loi-properties-dialog.theme($theme);
 @include loi-selection.theme($theme);
 @include share-dialog.theme($theme);
 @include share-survey.theme($theme);

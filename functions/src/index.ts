@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2018 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +16,33 @@
 
 import 'module-alias/register';
 import * as functions from 'firebase-functions';
-import { onHttpsRequest } from "./handlers";
-import { handleProfileRefresh } from '@/profile-refresh';
-import { importCsvHandler } from '@/import-csv';
-import { sessionLoginHandler } from '@/session-login';
-import { importGeoJsonHandler } from '@/import-geojson';
-import { exportCsvHandler } from '@/export-csv';
-import { surveyPathTemplate, loiPathTemplate, onWriteSurveyHandler } from '@/on-write-survey';
-import { onCall } from 'firebase-functions/v2/https';
-import { onWriteSubmissionHandler, submissionPathTemplate } from '@/on-write-submission';
+import {onHttpsRequest} from '@/handlers';
+import {handleProfileRefresh} from '@/profile-refresh';
+import {importCsvHandler} from '@/import-csv';
+import {sessionLoginHandler} from '@/session-login';
+import {importGeoJsonHandler} from '@/import-geojson';
+import {exportCsvHandler} from '@/export-csv';
+import {onCall} from 'firebase-functions/v2/https';
+import {onWriteSubmissionHandler} from '@/on-write-submission';
+import {onCreateLoiHandler} from '@/on-create-loi';
+import {onWriteLoiHandler} from '@/on-write-loi';
+import {onWriteSurveyHandler} from '@/on-write-survey';
+import {loi, submission, survey} from '@/common/datastore';
+
+/** Template for LOI write triggers capturing survey and LOI ids. */
+export const loiPathTemplate = loi('{surveyId}', '{loiId}');
+
+/** Template for submission write triggers capturing survey and submission ids. */
+export const submissionPathTemplate = submission(
+  '{surveyId}',
+  '{submissionId}'
+);
+
+/** Template for survey write triggers capturing survey id. */
+export const surveyPathTemplate = survey('{surveyId}');
 
 export const profile = {
-  refresh: onCall((request) => handleProfileRefresh(request))
+  refresh: onCall(request => handleProfileRefresh(request)),
 };
 
 export const importCsv = onHttpsRequest(importCsvHandler);
@@ -39,11 +53,15 @@ export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const onWriteSurvey = functions.firestore
   .document(surveyPathTemplate)
-.onWrite(onWriteSurveyHandler);
+  .onWrite(onWriteSurveyHandler);
 
 export const onWriteLoi = functions.firestore
   .document(loiPathTemplate)
-  .onWrite(onWriteSurveyHandler);
+  .onWrite(onWriteLoiHandler);
+
+export const onCreateLoi = functions.firestore
+  .document(loiPathTemplate)
+  .onCreate(onCreateLoiHandler);
 
 export const onWriteSubmission = functions.firestore
   .document(submissionPathTemplate)

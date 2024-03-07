@@ -5,7 +5,7 @@
   $color-config: mat.get-color-config($theme);
   $primary: map.get($color-config, primary);
 
-  // TODO(amysorto): find corresponding color in palette
+  // TODO(#1135): find corresponding color in palette
   $dialog-color: #188038;
 
   .reposition-confirm-dialog {
@@ -18,7 +18,7 @@
 
   .dialog-button {
     background: $dialog-color;
-    // TODO(amysorto): find corresponding color in palette
+    // TODO(#1135): find corresponding color in palette
     border: 1px solid rgba(255, 255, 255, 0.4);
   }
 }
@@ -26,7 +26,7 @@
 @mixin typography($theme) {
   $typography-config: mat.get-typography-config($theme);
 
-  // TODO(amysorto): use typography-config once typography levels defined
+  // TODO(#1135): use typography-config once typography levels defined
 
   .dialog-text {
     font-family: mat.font-family($typography-config);
