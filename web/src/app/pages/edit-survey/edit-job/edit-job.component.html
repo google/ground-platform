@@ -37,19 +37,16 @@
     </button>
   </div>
 
-  <!-- TODO: Refactor into EditLois. -->
   <div [ngSwitch]="section">
     <div *ngSwitchCase="EditJobSection.LOIS">
-      <loi-selection
+      <loi-editor
         *ngIf="draftSurveyService.getSurvey$() | async as survey"
-        #loiSelection
         [canImport]="surveyService.canManageSurvey()"
-        [lois]="lois"
         [survey]="survey"
-        [jobId]="jobId"
+        [job]="job"
+        [lois]="lois"
         (updateStrategy)="onStrategyChange($event)"
-      >
-      </loi-selection>
+      />
     </div>
 
     <div *ngSwitchCase="EditJobSection.TASKS">
