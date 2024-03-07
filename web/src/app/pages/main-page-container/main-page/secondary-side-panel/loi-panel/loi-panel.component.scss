@@ -21,14 +21,17 @@
     font-weight: 500;
     margin-bottom: 16px;
     display: flex;
-    align-items: center;
-
-    :first-child {
-      flex: 1;
-    }
+    justify-content: space-between;
 
     .mat-icon {
       padding-right: 8px;
+      min-height: 32px;
+      min-width: 24px;
+    }
+
+    .header-left {
+      display: flex;
+      margin-top: 8px;
     }
   }
 

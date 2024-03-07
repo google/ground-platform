@@ -37,6 +37,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   loi!: LocationOfInterest;
   name!: string | null;
   icon!: string;
+  iconColor!: string;
   submissions!: List<Submission>;
 
   constructor(
@@ -54,6 +55,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
           switchMap(survey =>
             this.loiService.getSelectedLocationOfInterest$().pipe(
               switchMap(loi => {
+                this.iconColor = survey.getJob(loi.jobId)!.color!;
                 this.loi = loi;
                 this.name = LocationOfInterestService.getDisplayName(loi);
                 this.icon = getLoiIcon(loi);
