@@ -123,6 +123,7 @@ function geoJsonToLoi(geoJsonLoi: any, jobId: string) {
   return {
     jobId,
     customId: id,
+    predefined: true,
     geometry,
     properties
   };

@@ -152,6 +152,7 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
   if (isNaN(lat) || isNaN(lng)) {
     return null;
   }
+  loi['predefined'] = true;
   loi['geometry'] = {
     type: 'Point',
     coordinates: new GeoPoint(lat, lng),
