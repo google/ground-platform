@@ -23,19 +23,24 @@
     border: 1px solid #E2E3DD;
     border-radius: 8px;
     background: #FCFDF7;
-    padding: 24px;
     display: flex;
+    flex-direction: column;
 
-    .loi-editor-card-actions {
-      flex: 1;
+    .loi-editor-card-content {
       display: flex;
-      align-items: center;
-      justify-content: end;
-    }
+      margin: 24px;
 
-    button.import-lois-button {
-      --mdc-filled-button-container-color: #FFDDAB;
-      --mdc-filled-button-container-shape: 24px;
+      .loi-editor-card-actions {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: end;
+      }
+  
+      button.import-lois-button {
+        --mdc-filled-button-container-color: #FFDDAB;
+        --mdc-filled-button-container-shape: 24px;
+      }
     }
   }
 }
