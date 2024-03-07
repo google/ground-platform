@@ -19,7 +19,6 @@ import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 
 import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
 
@@ -31,7 +30,6 @@ import {LoiSelectionComponent} from './loi-selection.component';
     CommonModule,
     MatButtonModule,
     MatListModule,
-    MatSlideToggleModule,
     MapModule,
     MatIconModule,
   ],
