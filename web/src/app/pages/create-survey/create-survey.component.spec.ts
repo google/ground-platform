@@ -455,7 +455,7 @@ describe('CreateSurveyComponent', () => {
         });
       });
 
-      describe('when "Data Collectors" is selected', () => {
+      describe('when "Data collectors" is selected', () => {
         beforeEach(fakeAsync(() => {
           const loiPermissions = component.loiPermissions!;
           loiPermissions.formGroup.controls[
