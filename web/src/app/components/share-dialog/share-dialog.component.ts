@@ -31,8 +31,8 @@ import {take} from 'rxjs/operators';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
+import {ROLE_OPTIONS} from 'app/services/auth/auth.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import { ROLE_OPTIONS } from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-share-dialog',
