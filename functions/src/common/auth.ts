@@ -15,6 +15,7 @@
  */
 
 import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
+import {DocumentSnapshot} from 'firebase-admin/firestore';
 import {https, Response} from 'firebase-functions/v1';
 
 // This is the only cookie not stripped by Firebase CDN.
@@ -56,4 +57,9 @@ export async function setSessionCookie(req: https.Request, res: Response): Promi
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
   const cookie = await getAuth().createSessionCookie(token!!, { expiresIn });
   res.cookie(SESSION_COOKIE_NAME, cookie, { maxAge: expiresIn, httpOnly: true, secure: true });
+}
+
+export function canView(user:DecodedIdToken, survey: DocumentSnapshot): boolean {
+  const acl = survey.get('acl')
+  return !!user.email && !!acl?.[user.email];
 }
