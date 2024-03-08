@@ -16,13 +16,13 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
+import {canView} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
+import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
-import { DecodedIdToken } from 'firebase-admin/auth';
-import { canView } from './common/auth';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
