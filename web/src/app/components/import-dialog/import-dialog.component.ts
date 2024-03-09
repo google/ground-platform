@@ -59,6 +59,10 @@ export class ImportDialogComponent {
       console.error('File missing');
       return;
     }
+    if (files.length > 1) {
+      console.error('Too many files to import, you can only do 1 at the time.');
+      return;
+    }
     try {
       this.isImporting = true;
       const response = await this.dataImportService.importLocationsOfInterest(

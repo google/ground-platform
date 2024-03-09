@@ -20,7 +20,7 @@ import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
-import { DecodedIdToken } from 'firebase-admin/auth';
+import {DecodedIdToken} from 'firebase-admin/auth';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -146,10 +146,11 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
       properties[columnName] = value;
     }
   }
-  const {latStr, lngStr, ...loi} = data;
+  const {lat: latStr, lng: lngStr, ...loi} = data;
   const lat = Number.parseFloat(latStr);
   const lng = Number.parseFloat(lngStr);
   if (isNaN(lat) || isNaN(lng)) {
+    console.error('unable to parse latitude and/or longitude values');
     return null;
   }
   loi['predefined'] = true;
