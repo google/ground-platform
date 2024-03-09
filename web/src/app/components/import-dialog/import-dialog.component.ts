@@ -60,7 +60,7 @@ export class ImportDialogComponent {
       return;
     }
     if (files.length > 1) {
-      console.error('Too many files to import, you can only do 1 at the time.');
+      console.error('Invalid request. Only one file may be imported at the time');
       return;
     }
     try {
