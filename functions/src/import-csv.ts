@@ -20,7 +20,8 @@ import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
-import { DecodedIdToken } from 'firebase-admin/auth';
+import {DecodedIdToken} from 'firebase-admin/auth';
+import {canImport} from './common/auth';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -29,7 +30,7 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 export async function importCsvHandler(
   req: https.Request,
   res: Response<any>,
-  idToken: DecodedIdToken
+  user: DecodedIdToken
 ) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== 'POST') {
@@ -52,15 +53,23 @@ export async function importCsvHandler(
   });
 
   // This code will process each file uploaded.
-  busboy.on('file', (_key, file, _) => {
+  busboy.on('file', async (_key, file, _) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       res.status(HttpStatus.BAD_REQUEST).end();
       return;
     }
 
-    // TODO(#941): Verify user is OWNER or SURVEY_ORGANIZER of the survey.
-
+    const survey = await db.fetchSurvey(surveyId);
+    if (!survey.exists) {
+      res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+      return;
+    }
+    if (!canImport(user, survey)) {
+      res.status(HttpStatus.FORBIDDEN).send('Permission denied');
+      return;
+    }
+  
     console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
