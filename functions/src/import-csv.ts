@@ -117,7 +117,7 @@ function invertAndFlatten(obj: any) {
  * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
-  id: ['fid'],
+  id: ['system:index'],
   lat: ['lat', 'latitude', 'y'],
   lng: ['lng', 'lon', 'long', 'lng', 'x'],
 });
