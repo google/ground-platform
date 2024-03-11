@@ -19,6 +19,8 @@ import * as HttpStatus from 'http-status-codes';
 import {db} from '@/common/context';
 import * as Busboy from 'busboy';
 import * as JSONStream from 'jsonstream-ts';
+import {canImport} from './common/auth';
+import {DecodedIdToken} from 'firebase-admin/auth';
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
@@ -26,7 +28,8 @@ import * as JSONStream from 'jsonstream-ts';
  */
 export async function importGeoJsonHandler(
   req: functions.https.Request,
-  res: functions.Response<any>
+  res: functions.Response<any>,
+  user: DecodedIdToken
 ) {
   if (req.method !== 'POST') {
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
@@ -49,7 +52,7 @@ export async function importGeoJsonHandler(
   });
 
   // This code will process each file uploaded.
-  busboy.on('file', (_field, file, _filename) => {
+  busboy.on('file', async (_field, file, _filename) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       res
@@ -57,6 +60,16 @@ export async function importGeoJsonHandler(
         .end(JSON.stringify({error: 'Invalid request'}));
       return;
     }
+    const survey = await db.fetchSurvey(surveyId);
+    if (!survey.exists) {
+      res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+      return;
+    }
+    if (!canImport(user, survey)) {
+      res.status(HttpStatus.FORBIDDEN).send('Permission denied');
+      return;
+    }
+      
     console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.

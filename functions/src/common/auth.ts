@@ -59,7 +59,16 @@ export async function setSessionCookie(req: https.Request, res: Response): Promi
   res.cookie(SESSION_COOKIE_NAME, cookie, { maxAge: expiresIn, httpOnly: true, secure: true });
 }
 
-export function canView(user:DecodedIdToken, survey: DocumentSnapshot): boolean {
+function getRole(user:DecodedIdToken, survey: DocumentSnapshot): string | null {
   const acl = survey.get('acl')
-  return !!user.email && !!acl?.[user.email];
+  return user.email ? acl?.[user.email] : null;
+}
+
+export function canExport(user:DecodedIdToken, survey: DocumentSnapshot): boolean {
+  return !!getRole(user, survey);
+}
+
+export function canImport(user:DecodedIdToken, survey: DocumentSnapshot): boolean {
+  const role = getRole(user, survey);
+  return role == 'OWNER' || role == 'DATA_COLLECTOR';
 }
