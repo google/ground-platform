@@ -16,10 +16,12 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
+import {canView} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
+import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
 
 // TODO(#1277): Use a shared model with web
@@ -36,13 +38,18 @@ type Task = {
 // TODO: Refactor into meaningful pieces.
 export async function exportCsvHandler(
   req: functions.Request,
-  res: functions.Response<any>
+  res: functions.Response<any>,
+  user: DecodedIdToken
 ) {
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
   const survey = await db.fetchSurvey(surveyId);
   if (!survey.exists) {
     res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+    return;
+  }
+  if (!canView(user, survey)) {
+    res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
@@ -55,16 +62,13 @@ export async function exportCsvHandler(
   const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
 
   const headers = [];
-  // Feature ID column conforms to desktop GIS defaults:
-  //   "FID" is default used by ArcGIS but is case-insensitive.
-  //   "fid" is default used by QGIS and is case-sensitive.
-  headers.push('fid');
+  headers.push('system:index');
   headers.push('geometry');
   const allLoiProperties = getPropertyNames(lois);
   headers.push(...allLoiProperties);
-  tasks.forEach(task => headers.push(task.label));
-  headers.push('contributor_username');
-  headers.push('contributor_email');
+  tasks.forEach(task => headers.push('data:' + task.label));
+  headers.push('data:contributor_username');
+  headers.push('data:contributor_email');
 
   res.type('text/csv');
   res.setHeader(
@@ -100,7 +104,7 @@ export async function exportCsvHandler(
     const submissions = submissionsByLocationOfInterest[loiId] || [{}];
     submissions.forEach(submission => {
       const row = [];
-      // Header: fid
+      // Header: system:index
       row.push(loi.get('properties')?.id || '');
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
