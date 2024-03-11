@@ -23,7 +23,7 @@
     }
 
     /**
-     * Returns email address for the requesting user.
+     * Returns the email address of the requesting user.
      */
     function getEmail() {
       return request.auth.token.email;
@@ -37,15 +37,15 @@
     }
 
     /**
-     * Returns the regular expression for users allowed access.
+     * Returns the regular expression matching emails granted access.
      */
     function getPassRegexp() {
       return get(/databases/$(database)/documents/passlist/regexp).data.regexp
     }
 
     /**
-     * Returns true iff the user's email is in the implicit regex or
-     * explicit passlist.
+     * Returns true iff the user's email matches the passlist regex or
+     * is explicitly listed in the passlist.
      */
     function inPasslist(email) {
       return email.matches(getPassRegexp()) || exists(/databases/$(database)/documents/passlist/$(email));
@@ -60,7 +60,7 @@
     }
 
     /**
-     * Returns true iff the suer with the given email has one of the specified
+     * Returns true iff the user with the given email has one of the specified
      * roles in the given survey.
      */
     function isOneOf(survey, email, roles) {
@@ -69,7 +69,7 @@
 
     /**
      * Returns true iff the user with the given email can manage the specified
-     * survey (i.e., modify the survey document).
+     * survey (modify the survey document, edit user data, etc.).
      */
     function canManageSurvey(survey, email) {
       return inPasslist(email) && isOneOf(survey, email, ['OWNER', 'SURVEY_ORGANIZER']);
