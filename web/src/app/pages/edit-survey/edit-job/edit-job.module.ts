@@ -19,7 +19,7 @@ import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 
-import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
+import {LoiEditorModule} from 'app/components/loi-editor/loi-editor.module';
 import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 
@@ -27,9 +27,9 @@ import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.componen
   declarations: [EditJobComponent],
   imports: [
     CommonModule,
-    LoiSelectionModule,
     MatButtonModule,
     MatIconModule,
+    LoiEditorModule,
     TasksEditorModule,
   ],
   exports: [EditJobComponent],
