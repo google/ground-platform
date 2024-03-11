@@ -1,0 +1,77 @@
+<!--
+  Copyright 2024 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div class="loi-editor">
+  <div class="loi-editor-card" *ngIf="canImport">
+    <div class="loi-editor-card-row">
+      <div class="loi-editor-card-row-content">
+        <div>Predefined sample sites</div>
+  
+        <div>Import areas or points of interest for which data should be collected.</div>
+      </div>
+
+      <div
+        *ngIf="canImport"
+        class="loi-editor-card-actions"
+      >
+        <button *ngIf="lois.size == 0"
+          mat-flat-button
+          class="import-lois-button"
+          (click)="importLois()"
+        >
+          <mat-icon class="import-lois-icon">input</mat-icon>
+          Import
+        </button>
+
+        <button *ngIf="lois.size > 0"
+          mat-button
+          class="clear-all-lois"
+          (click)="clearLois(survey.id, lois)"
+          color="primary"
+        >
+          Clear all
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="lois.size > 0">
+      <loi-selection
+        [lois]="lois"
+        [survey]="survey"
+      >
+      </loi-selection>
+    </div>
+  </div>
+
+  <div class="loi-editor-card">
+    <div class="loi-editor-card-row">
+      <div class="loi-editor-card-row-content">
+        <div>Free-form data collection</div>
+  
+        <div>Allow data collectors to add and collect data about new locations as they go.</div>
+      </div>
+
+      <div class="loi-editor-card-actions">
+        <mat-slide-toggle
+          [checked]="job?.strategy === DataCollectionStrategy.MIXED"
+          (change)="toggleDataCollectorsCanAddLois($event)"
+          color="primary"
+        >
+        </mat-slide-toggle>
+      </div>
+    </div>
+  </div>
+</div>

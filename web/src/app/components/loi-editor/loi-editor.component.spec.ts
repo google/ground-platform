@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-// import {ActivatedRoute} from '@angular/router';
-// import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import {CommonModule} from '@angular/common';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {List, Map} from 'immutable';
 
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
@@ -29,11 +31,11 @@ import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
-import {LoiSelectionComponent} from './loi-selection.component';
+import {LoiEditorComponent} from './loi-editor.component';
 
-describe('LoiSelectionComponent', () => {
-  let component: LoiSelectionComponent;
-  let fixture: ComponentFixture<LoiSelectionComponent>;
+describe('LoiEditorComponent', () => {
+  let component: LoiEditorComponent;
+  let fixture: ComponentFixture<LoiEditorComponent>;
 
   let dataStoreService: jasmine.SpyObj<DataStoreService>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
@@ -76,7 +78,7 @@ describe('LoiSelectionComponent', () => {
 
     TestBed.configureTestingModule({
       imports: [GoogleMapsModule],
-      declarations: [LoiSelectionComponent],
+      declarations: [LoiEditorComponent],
       providers: [
         {
           provide: DataStoreService,
@@ -89,49 +91,67 @@ describe('LoiSelectionComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LoiSelectionComponent);
+    fixture = TestBed.createComponent(LoiEditorComponent);
     fixture.componentInstance.lois = List([poi1, poi2]);
     fixture.componentInstance.survey = survey;
+    fixture.componentInstance.canImport = true;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('loads map component', () => {
-    expect(
-      fixture.debugElement.nativeElement.querySelector('ground-map')
-    ).toBeDefined();
+  describe('when the import button is clicked', () => {
+    let importButton: HTMLElement;
+
+    beforeEach(() => {
+      fixture.componentInstance.lois = List([]);
+      fixture.detectChanges();
+
+      importButton = fixture.debugElement.nativeElement.querySelector(
+        '.import-lois-button'
+      );
+    });
+
+    describe('when job is passed in as input', () => {
+      it('opens the import dialog with survey and inputted job', () => {
+        fixture.componentInstance.job = job2;
+        fixture.detectChanges();
+
+        importButton.click();
+
+        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
+          data: {surveyId: survey.id, jobId: jobId2},
+          width: '350px',
+          maxHeight: '800px',
+        });
+      });
+    });
   });
 
-  it('shows import button when there are no LOIs', () => {
-    fixture.componentInstance.lois = List();
-    fixture.detectChanges();
+  describe('the "Clear all" button', () => {
+    it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
+      fixture.componentInstance.lois = List([poi1, poi2]);
+      fixture.detectChanges();
 
-    const componentElement = fixture.debugElement.nativeElement;
-    expect(componentElement.querySelectorAll('.loi-list-item').length).toBe(0);
-    expect(componentElement.querySelector('.import-lois-button')).toBeDefined();
-  });
+      console.log(666, fixture.componentInstance.lois.size);
 
-  it('shows list of LOIs', () => {
-    const loiList: HTMLElement =
-      fixture.debugElement.nativeElement.querySelector('.loi-list');
-    const loiListValues = Array.from(
-      loiList.querySelectorAll('.loi-list-item')
-    ).map((element: Element) => element.textContent);
-    expect(loiListValues).toEqual(['Unnamed point', 'Unnamed point']);
-  });
+      const clearAllButton =
+        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
 
-  it('shows updated list of LOIs', () => {
-    fixture.componentInstance.lois = List([
-      {...poi1, properties: Map({name: 'Test 1'})},
-      poi2,
-    ]);
-    fixture.detectChanges();
+      clearAllButton.click();
 
-    const loiList: HTMLElement =
-      fixture.debugElement.nativeElement.querySelector('.loi-list');
-    const loiListValues = Array.from(
-      loiList.querySelectorAll('.loi-list-item')
-    ).map((element: Element) => element.textContent);
-    expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
+      expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
+        fixture.componentInstance.lois.size
+      );
+    });
+
+    it('does not show when there are no LOIs', () => {
+      fixture.componentInstance.lois = List([]);
+      fixture.detectChanges();
+
+      const clearAllButton =
+        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
+
+      expect(clearAllButton).toBe(null);
+    });
   });
 });

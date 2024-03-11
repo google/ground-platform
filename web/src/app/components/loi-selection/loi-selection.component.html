@@ -17,43 +17,16 @@
 <div id="loi-selection">
   <div class="loi-container">
     <div class="loi-panel">
-      <ng-container *ngIf="canImport">
-        <button
-          mat-flat-button
-          class="import-lois-button"
-          (click)="onImportLois()"
-        >
-          <mat-icon class="import-lois-icon">input</mat-icon>
-          Import
-        </button>
-      </ng-container>
       <div *ngIf="lois.size === 0" class="no-lois-image-container">
         <img src="../../../assets/img/forest.svg">
         <p>No locations imported</p>
       </div>
+
       <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
           <p matLine>{{ getDisplayName(loi) }}</p>
         </mat-list-item>
       </mat-list>
-
-      <button *ngIf="lois.size > 0"
-        class="clear-all-lois"
-        (click)="clearLois(survey.id, lois)"
-        mat-button
-        color="primary"
-      >
-        Clear all
-      </button>
-    </div>
-
-    <div class="loi-permissions">
-      <mat-slide-toggle
-        [checked]="job?.strategy !== DataCollectionStrategy.PREDEFINED"
-        (change)="toggleDataCollectorsCanAddLois($event)"
-        color="primary"
-      ></mat-slide-toggle>
-      <div>Allow data collectors to add new sites</div>
     </div>
 
     <div class="loi-map">

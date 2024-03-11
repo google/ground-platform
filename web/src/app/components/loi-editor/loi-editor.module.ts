@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,22 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
+import {MatIconModule} from '@angular/material/icon';
+import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 
-import {LoiPermissionsComponent} from './loi-permissions.component';
+import {LoiEditorComponent} from './loi-editor.component';
+import {LoiSelectionModule} from '../loi-selection/loi-selection.module';
 
 @NgModule({
-  declarations: [LoiPermissionsComponent],
+  declarations: [LoiEditorComponent],
   imports: [
     CommonModule,
     MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatRadioModule,
-    ReactiveFormsModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    LoiSelectionModule,
   ],
-  exports: [LoiPermissionsComponent],
+  exports: [LoiEditorComponent],
 })
-export class LoiPermissionsModule {}
+export class LoiEditorModule {}
