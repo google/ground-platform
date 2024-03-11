@@ -18,6 +18,9 @@
  service cloud.firestore {
   match /databases/{database}/documents {
 
+    /**
+     * Fetches and returns the survey with the specified id.
+     */
     function getSurvey(surveyId) {
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
