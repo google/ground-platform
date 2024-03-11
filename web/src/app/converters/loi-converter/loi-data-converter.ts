@@ -67,7 +67,8 @@ export class LoiDataConverter {
         data.jobId,
         result as Geometry,
         properties,
-        data.customId
+        data.customId,
+        data.predefined
       );
     } catch (err) {
       return new Error(

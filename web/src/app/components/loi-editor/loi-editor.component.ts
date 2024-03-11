@@ -40,12 +40,18 @@ export class LoiEditorComponent {
   @Output() updateStrategy: EventEmitter<DataCollectionStrategy> =
     new EventEmitter<DataCollectionStrategy>();
 
+  predefinedLois = List<LocationOfInterest>([]);
+
   DataCollectionStrategy = DataCollectionStrategy;
 
   constructor(
     private dataStoreService: DataStoreService,
     private importDialog: MatDialog
   ) {}
+
+  ngOnChanges() {
+    this.predefinedLois = this.lois.filter(loi => loi.predefined !== false);
+  }
 
   importLois() {
     if (!this.survey.id || !this.job?.id) return;

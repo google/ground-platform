@@ -19,7 +19,7 @@
     <div class="loi-editor-card-row">
       <div class="loi-editor-card-row-content">
         <div>Predefined sample sites</div>
-  
+
         <div>Import areas or points of interest for which data should be collected.</div>
       </div>
 
@@ -27,29 +27,29 @@
         *ngIf="canImport"
         class="loi-editor-card-actions"
       >
-        <button *ngIf="lois.size == 0"
+        <button *ngIf="predefinedLois.size == 0"
           mat-flat-button
           class="import-lois-button"
           (click)="importLois()"
         >
-          <mat-icon class="import-lois-icon">input</mat-icon>
+          <mat-icon class="material-symbols-outlined">input</mat-icon>
           Import
         </button>
 
-        <button *ngIf="lois.size > 0"
-          mat-button
+        <button *ngIf="predefinedLois.size > 0"
+          mat-flat-button
           class="clear-all-lois"
           (click)="clearLois(survey.id, lois)"
-          color="primary"
         >
+          <mat-icon class="material-symbols-outlined">delete</mat-icon>
           Clear all
         </button>
       </div>
     </div>
 
-    <div *ngIf="lois.size > 0">
+    <div *ngIf="predefinedLois.size > 0">
       <loi-selection
-        [lois]="lois"
+        [lois]="predefinedLois"
         [survey]="survey"
       >
       </loi-selection>
@@ -60,7 +60,7 @@
     <div class="loi-editor-card-row">
       <div class="loi-editor-card-row-content">
         <div>Free-form data collection</div>
-  
+
         <div>Allow data collectors to add and collect data about new locations as they go.</div>
       </div>
 
