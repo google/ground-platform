@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {canView} from './common/auth';
+import {canExport} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {db} from '@/common/context';
 import * as HttpStatus from 'http-status-codes';
@@ -48,7 +48,7 @@ export async function exportCsvHandler(
     res.status(HttpStatus.NOT_FOUND).send('Survey not found');
     return;
   }
-  if (!canView(user, survey)) {
+  if (!canExport(user, survey)) {
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
