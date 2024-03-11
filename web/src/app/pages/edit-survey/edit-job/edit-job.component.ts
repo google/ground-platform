@@ -19,7 +19,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
+import {LoiEditorComponent} from 'app/components/loi-editor/loi-editor.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -49,6 +49,7 @@ export class EditJobComponent {
 
   section: EditJobSection = EditJobSection.TASKS;
 
+  job?: Job;
   tasks?: List<Task>;
   lois!: List<LocationOfInterest>;
 
@@ -57,8 +58,8 @@ export class EditJobComponent {
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
 
-  @ViewChild('loiSelection')
-  loiSelection?: LoiSelectionComponent;
+  @ViewChild('loiEditor')
+  loiEditor?: LoiEditorComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -92,11 +93,9 @@ export class EditJobComponent {
   private onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.tasks = this.draftSurveyService
-      .getSurvey()
-      .getJob(this.jobId!)
-      ?.tasks?.toList()
-      .sortBy(task => task.index);
+    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+    this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
 
     this.loisSubscription.add(
       this.loiService
@@ -123,16 +122,16 @@ export class EditJobComponent {
   }
 
   onStrategyChange(strategy: DataCollectionStrategy) {
-    if (this.jobId) {
-      const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    if (this.job) {
+      const tasks = this.taskService.updateLoiTasks(this.job?.tasks, strategy);
 
-      if (job) {
-        const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
+      this.draftSurveyService.addOrUpdateJob(
+        this.job.copyWith({tasks, strategy})
+      );
 
-        this.draftSurveyService.addOrUpdateJob(job.copyWith({tasks, strategy}));
+      this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
-        this.tasks = tasks?.toList().sortBy(task => task.index);
-      }
+      this.tasks = tasks?.toList().sortBy(task => task.index);
     }
   }
 

@@ -88,12 +88,12 @@ describe('EditJobComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('displays the loi selection component', () => {
+  it('displays the loi editor component', () => {
     const loiButton = fixture.debugElement.query(
       By.css('.section-selector button:nth-child(2)')
     ).nativeElement as HTMLElement;
     loiButton.click();
     fixture.detectChanges();
-    expect(fixture.componentInstance.loiSelection).toBeDefined();
+    expect(fixture.componentInstance.loiEditor).toBeDefined();
   });
 });

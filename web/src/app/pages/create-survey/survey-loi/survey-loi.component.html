@@ -13,13 +13,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <div *ngIf="lois$ | async as lois">
-  <loi-selection
+  <loi-editor
     *ngIf="surveyService.getActiveSurvey$() | async as survey"
     [canImport]="surveyService.canManageSurvey()"
-    [lois]="lois"
     [survey]="survey"
+    [job]="job"
+    [lois]="lois"
     (updateStrategy)="onStrategyChange($event)"
-  >
-  </loi-selection>
+  />
 </div>
