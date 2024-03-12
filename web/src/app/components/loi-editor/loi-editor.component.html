@@ -24,7 +24,7 @@
       </div>
 
       <div
-        *ngIf="canImport"
+        *ngIf="canImport && lois"
         class="loi-editor-card-actions"
       >
         <button *ngIf="lois.size == 0"
@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <div *ngIf="lois.size > 0">
+    <div *ngIf="lois && lois.size > 0">
       <loi-selection
         [lois]="lois"
         [survey]="survey"

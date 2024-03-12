@@ -15,7 +15,7 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {List} from 'immutable';
 
@@ -48,8 +48,6 @@ export class LoiEditorComponent {
   ) {}
 
   importLois() {
-    if (!this.survey.id || !this.job?.id) return;
-
     this.dialog.open(ImportDialogComponent, {
       data: {surveyId: this.survey.id, jobId: this.job.id},
       width: '350px',
