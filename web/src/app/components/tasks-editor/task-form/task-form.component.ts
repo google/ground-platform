@@ -28,9 +28,11 @@ import {
   FormBuilder,
   FormGroup,
 } from '@angular/forms';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {List} from 'immutable';
-import {firstValueFrom} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 
+import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -281,8 +283,10 @@ export class TaskFormComponent {
     this.optionsControl.push(formGroup);
   }
 
-  onDeleteOption(index: number) {
-    firstValueFrom(
+  openDeleteDialogOption(): Promise<
+    Observable<MatDialogRef<ConfirmationDialogComponent, boolean>>
+  > {
+    return firstValueFrom(
       this.dialogService
         .openConfirmationDialog(
           'Warning',
@@ -290,7 +294,11 @@ export class TaskFormComponent {
             'Any associated data will be lost. This cannot be undone.'
         )
         .afterClosed()
-    ).then(dialogResult => {
+    );
+  }
+
+  onDeleteOption(index: number) {
+    this.openDeleteDialogOption().then(dialogResult => {
       if (dialogResult) {
         this.optionsControl.removeAt(index);
       }
@@ -306,7 +314,11 @@ export class TaskFormComponent {
   }
 
   onDeleteOtherOption(): void {
-    this.hasOtherOptionControl.setValue(false);
+    this.openDeleteDialogOption().then(dialogResult => {
+      if (dialogResult) {
+        this.hasOtherOptionControl.setValue(false);
+      }
+    });
   }
 
   drop(event: CdkDragDrop<string[]>): void {
