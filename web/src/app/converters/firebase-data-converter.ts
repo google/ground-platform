@@ -482,13 +482,19 @@ export class FirebaseDataConverter {
     const submissionData = data.data ?? data.results ?? data.responses;
     return Map<string, Result>(
       keys(submissionData)
-        .map((taskId: string) => [
-          taskId as string,
-          FirebaseDataConverter.toResult(
-            job.tasks!.get(taskId)!,
-            submissionData[taskId]
-          ),
-        ])
+        .map((taskId: string) => {
+          const task = job.tasks!.get(taskId);
+
+          if (!task)
+            return [
+              Error(`Error converting to Result: missing task ${taskId}`),
+            ];
+
+          return [
+            taskId as string,
+            FirebaseDataConverter.toResult(task, submissionData[taskId]),
+          ];
+        })
         .filter(([_, resultOrError]) =>
           DataStoreService.filterAndLogError<Result>(
             resultOrError as Result | Error
@@ -533,6 +539,7 @@ export class FirebaseDataConverter {
     ) {
       return new Result(geometry);
     }
+
     return Error(
       `Error converting to Result: unknown value type ${typeof resultValue}`
     );
