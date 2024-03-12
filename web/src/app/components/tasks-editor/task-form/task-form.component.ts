@@ -135,10 +135,7 @@ export const GeometryTasks = List([
   TaskGroup.CAPTURE_LOCATION,
 ]);
 
-const AddLoiTaskGroups = List([
-  TaskGroup.DROP_PIN,
-  TaskGroup.DRAW_AREA
-]);
+const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 @Component({
   selector: 'task-form',
