@@ -16,8 +16,8 @@
 
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
 
 import {EditStyleButtonComponent} from './edit-style-button.component';
 

@@ -152,8 +152,8 @@ export class DataStoreService {
    */
 
   updateSurvey(survey: Survey, jobIdsToDelete: List<string>): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const {title, description, id} = survey;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const surveyJS: {[key: string]: any} = {
       title: title,
       description: description,

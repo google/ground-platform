@@ -15,8 +15,8 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatIconModule} from '@angular/material/icon';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
 import {Router} from '@angular/router';
 import {NEVER} from 'rxjs';
 
