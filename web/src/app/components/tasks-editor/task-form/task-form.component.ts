@@ -129,10 +129,7 @@ export const Tasks: {
   },
 };
 
-export const GeometryTasks = List([
-  TaskGroup.DROP_PIN,
-  TaskGroup.DRAW_AREA
-]);
+export const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 @Component({
   selector: 'task-form',
