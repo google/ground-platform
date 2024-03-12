@@ -25,6 +25,7 @@ import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
+import { Point } from 'app/models/geometry/point';
 
 @Component({
   selector: 'submission-panel',
@@ -94,6 +95,14 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   getTaskMultipleChoiceSelections(task: Task): List<Option> {
     return this.getTaskSubmissionResult(task)!.value as List<Option>;
+  }
+
+  getCaptureLocationCoord(task: Task): string {
+    // x represents longitude, y represents latitude
+    const {x, y} = (this.getTaskSubmissionResult(task)!.value as Point).coord;
+    const long = Math.abs(x).toString() + (x > 0 ? "° E" : "° W");
+    const lat = Math.abs(y).toString() + (y > 0 ? "° N" : "° S");
+    return lat + ", " + long;
   }
 
   ngOnDestroy(): void {

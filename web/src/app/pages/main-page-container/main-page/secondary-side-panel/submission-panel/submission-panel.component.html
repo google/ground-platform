@@ -60,6 +60,9 @@ limitations under the License.
                 </div>
               </div>
             </div>
+            <div *ngIf="task.type === taskType.CAPTURE_LOCATION" >
+              {{getCaptureLocationCoord(task)}}
+            </div>
             <!-- Remaining task types -->
             <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE || task.type === taskType.TIME || task.type === taskType.DATE_TIME">
               {{getTaskSubmissionResult(task)!.value.toString()}}
