@@ -18,6 +18,9 @@
  service cloud.firestore {
   match /databases/{database}/documents {
 
+    /**
+     * Fetches and returns the survey with the specified id.
+     */
     function getSurvey(surveyId) {
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
@@ -44,11 +47,18 @@
     }
 
     /**
+     * Returns true iff the user's email is explicitly listed in the passlist.
+     */
+    function inPasslist(email) {
+      return exists(/databases/$(database)/documents/passlist/$(email));
+    }
+
+    /**
      * Returns true iff the user's email matches the passlist regex or
      * is explicitly listed in the passlist.
      */
-    function inPasslist(email) {
-      return email.matches(getPassRegexp()) || exists(/databases/$(database)/documents/passlist/$(email));
+    function canAccess(email) {
+      return request.auth != null && (email.matches(getPassRegexp()) || inPasslist(email));
     }
 
     /**
@@ -56,7 +66,7 @@
      * survey.
      */
     function canViewSurvey(surveyId, email) {
-      return inPasslist(email) && getRole(surveyId, email) != null;
+      return canAccess(email) && getRole(surveyId, email) != null;
     }
 
     /**
@@ -72,7 +82,7 @@
      * survey (modify the survey document, edit user data, etc.).
      */
     function canManageSurvey(survey, email) {
-      return inPasslist(email) && isOneOf(survey, email, ['OWNER', 'SURVEY_ORGANIZER']);
+      return canAccess(email) && isOneOf(survey, email, ['OWNER', 'SURVEY_ORGANIZER']);
     }
 
     /**
@@ -81,13 +91,13 @@
      * submissions).
      */
     function canCollectData(survey, email) {
-      return inPasslist(email) && isOneOf(surveyId, email, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
+      return canAccess(email) && isOneOf(surveyId, email, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
     }
 
     /**
-     * Returns true iff the user with the provided email is the owner of the specified resource.
+     * Returns true iff the user with the provided email created the specified resource.
      */
-    function isOwner(resource, email) {
+    function isCreator(resource, email) {
       // TODO(#1154): Make `owner` its own field and stop assuming `creator==owner`.
       return resource.data.created.user.email == email;     
     }
@@ -99,33 +109,34 @@
 
     // All users need to be able to read the passlist for rules to work.
     match /passlist/{email} {
-      allow read;
+      // TODO(#1602): Replace "regexp" with simple pattern matching.
+      allow read: if request.auth != null && email in ['regexp', getEmail()];
     }
 
-    // Apply survey-level ACLs and passlist to survey documents.
+    // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
       allow read: if canViewSurvey(resource.data, getEmail());
       allow write: if canManageSurvey(resource.data, getEmail());
-      allow create: if inPasslist(getEmail());
+      allow create: if canAccess(getEmail());
     }
 
     // Allow passlisted users to access Terms of Service and other config.
     match /config/{id} {
-      allow read: if inPasslist(getEmail());
+      allow read: if canAccess(getEmail());
     }
 
-    // Apply survey-level ACLs and passlist to LOI documents.
+    // Apply passlist and survey-level ACLs to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
       allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
-      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isOwner(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isOwner(resource, getEmail());
+      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
+      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
     }
 
-    // Apply survey-level ACLs and passlist to submission documents.
+    // Apply passlist and survey-level ACLs to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
       allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
-      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isOwner(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isOwner(resource, getEmail());
+      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
+      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
     }
   }
 }
