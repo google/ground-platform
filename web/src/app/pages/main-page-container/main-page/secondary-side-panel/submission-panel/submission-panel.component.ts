@@ -19,13 +19,13 @@ import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
+import {Point} from 'app/models/geometry/point';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
-import { Point } from 'app/models/geometry/point';
 
 @Component({
   selector: 'submission-panel',
@@ -100,9 +100,9 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   getCaptureLocationCoord(task: Task): string {
     // x represents longitude, y represents latitude
     const {x, y} = (this.getTaskSubmissionResult(task)!.value as Point).coord;
-    const long = Math.abs(x).toString() + (x > 0 ? "° E" : "° W");
-    const lat = Math.abs(y).toString() + (y > 0 ? "° N" : "° S");
-    return lat + ", " + long;
+    const long = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
+    const lat = Math.abs(y).toString() + (y > 0 ? '° N' : '° S');
+    return lat + ', ' + long;
   }
 
   ngOnDestroy(): void {
