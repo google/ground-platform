@@ -132,12 +132,6 @@ describe('LoiEditorComponent', () => {
       fixture.componentInstance.lois = List([poi1, poi2]);
       fixture.detectChanges();
 
-      console.log(
-        666,
-        fixture.componentInstance,
-        fixture.componentInstance.lois.size
-      );
-
       const clearAllButton =
         fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
 
