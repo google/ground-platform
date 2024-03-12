@@ -412,19 +412,6 @@ describe('CreateSurveyComponent', () => {
     });
   });
 
-  describe('LOI Definition', () => {
-    beforeEach(fakeAsync(() => {
-      surveyId$.next(surveyId);
-      activeSurvey$.next(surveyWithJob);
-      tick();
-      fixture.detectChanges();
-      surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
-      fixture.detectChanges();
-    }));
-
-    // TODO
-  });
-
   describe('Task Definition', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
