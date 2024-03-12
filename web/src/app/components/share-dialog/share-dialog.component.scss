@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-.mat-dialog-content {
+.mat-mdc-dialog-content {
   border-width: 1px 0;
   border-style: solid;
   padding-top: 6px;
   padding-bottom: 6px;
 }
 
-.mat-dialog-actions {
+.mat-mdc-dialog-actions {
   .mat-mdc-unelevated-button {
     &:not(:first-child) {
         margin-left: 1em;

@@ -15,7 +15,7 @@
  */
 
 import {Component, ElementRef} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 
 import {AccountPopupComponent} from 'app/components/header/current-user-widget/account-popup/account-popup.component';
 import {AuthService} from 'app/services/auth/auth.service';
