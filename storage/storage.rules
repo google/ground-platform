@@ -28,7 +28,7 @@ service firebase.storage {
      * Returns the regular expression matching emails granted access.
      */
     function getPassRegexp() {
-      return get(/databases/(default)/documents/passlist/regexp).data.regexp
+      return firestore.get(/databases/(default)/documents/passlist/regexp).data.regexp
     }
 
     /**
@@ -36,9 +36,8 @@ service firebase.storage {
      * is explicitly listed in the passlist.
      */
     function inPasslist(email) {
-      return email.matches(getPassRegexp()) || exists(/databases/$(database)/documents/passlist/$(email));
+      return request.auth != null && email.matches(getPassRegexp()) || firestore.exists(/databases/(default)/documents/passlist/$(email));
     }
-
     
     match /offline-imagery/{allPaths=**} {
       // All authenticated users can read.
