@@ -121,7 +121,7 @@ export class LocationOfInterestService {
     const bounds = new google.maps.LatLngBounds();
 
     for (const loi of lois) {
-      loi.geometry?.extendBounds(bounds);
+      loi?.geometry?.extendBounds(bounds);
     }
 
     return bounds;

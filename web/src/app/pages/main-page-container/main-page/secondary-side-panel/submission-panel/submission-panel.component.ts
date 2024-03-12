@@ -19,6 +19,7 @@ import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
+import {Point} from 'app/models/geometry/point';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
@@ -72,12 +73,14 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   getFirebaseImageURLs() {
     this.tasks?.forEach(task => {
       if (task.type === this.taskType.PHOTO) {
-        const submissionImage = this.getTaskSubmissionResult(task)!
-          .value as string;
-        const imageRef = ref(this.storage, submissionImage);
-        getDownloadURL(imageRef).then(url => {
-          this.firebaseURLs.set(submissionImage, url);
-        });
+        const submissionImage = this.getTaskSubmissionResult(task);
+        if (submissionImage) {
+          const submissionImageValue = submissionImage.value as string;
+          const imageRef = ref(this.storage, submissionImageValue);
+          getDownloadURL(imageRef).then(url => {
+            this.firebaseURLs.set(submissionImageValue, url);
+          });
+        }
       }
     });
   }
@@ -92,6 +95,14 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   getTaskMultipleChoiceSelections(task: Task): List<Option> {
     return this.getTaskSubmissionResult(task)!.value as List<Option>;
+  }
+
+  getCaptureLocationCoord(task: Task): string {
+    // x represents longitude, y represents latitude
+    const {x, y} = (this.getTaskSubmissionResult(task)!.value as Point).coord;
+    const long = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
+    const lat = Math.abs(y).toString() + (y > 0 ? '° N' : '° S');
+    return lat + ', ' + long;
   }
 
   ngOnDestroy(): void {
