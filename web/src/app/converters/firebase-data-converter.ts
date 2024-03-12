@@ -482,13 +482,15 @@ export class FirebaseDataConverter {
     const submissionData = data.data ?? data.results ?? data.responses;
     return Map<string, Result>(
       keys(submissionData)
-        .map((taskId: string) => [
-          taskId as string,
-          FirebaseDataConverter.toResult(
-            job.tasks!.get(taskId)!,
-            submissionData[taskId]
-          ),
-        ])
+        .map((taskId: string) => {
+          return [
+            taskId as string,
+            FirebaseDataConverter.toResult(
+              submissionData[taskId],
+              job.tasks!.get(taskId)
+            ),
+          ];
+        })
         .filter(([_, resultOrError]) =>
           DataStoreService.filterAndLogError<Result>(
             resultOrError as Result | Error
@@ -499,8 +501,8 @@ export class FirebaseDataConverter {
   }
 
   private static toResult(
-    task: Task,
-    resultValue: number | string | List<string>
+    resultValue: number | string | List<string>,
+    task?: Task
   ): Result | Error {
     if (typeof resultValue === 'string') {
       return new Result(resultValue as string);
@@ -511,7 +513,11 @@ export class FirebaseDataConverter {
     if (resultValue instanceof Array) {
       return new Result(
         List(
-          resultValue.map(optionId => task.getMultipleChoiceOption(optionId))
+          resultValue.map(
+            optionId =>
+              task?.getMultipleChoiceOption(optionId) ||
+              new Option(optionId, optionId, optionId, -1)
+          )
         )
       );
     }
@@ -533,6 +539,7 @@ export class FirebaseDataConverter {
     ) {
       return new Result(geometry);
     }
+
     return Error(
       `Error converting to Result: unknown value type ${typeof resultValue}`
     );
