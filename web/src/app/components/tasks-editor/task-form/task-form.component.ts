@@ -115,7 +115,7 @@ export const Tasks: {
   },
   [TaskGroup.DRAW_AREA]: {
     icon: 'draw',
-    label: 'Draw an area',
+    label: 'Draw or walk perimeter',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
     isGeometry: true,
