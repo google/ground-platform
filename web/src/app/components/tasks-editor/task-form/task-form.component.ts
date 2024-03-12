@@ -133,6 +133,8 @@ export const Tasks: {
 
 export const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
+const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
+
 @Component({
   selector: 'task-form',
   templateUrl: './task-form.component.html',
@@ -168,6 +170,8 @@ export class TaskFormComponent {
   Tasks = Tasks;
 
   GeometryTasks = GeometryTasks;
+
+  AddLoiTaskGroups = AddLoiTaskGroups;
 
   constructor(
     private dataStoreService: DataStoreService,
