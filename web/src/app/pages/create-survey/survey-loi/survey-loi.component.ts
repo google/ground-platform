@@ -31,7 +31,7 @@ import {TaskService} from 'app/services/task/task.service';
   styleUrls: ['./survey-loi.component.scss'],
 })
 export class SurveyLoiComponent {
-  lois$!: Observable<List<LocationOfInterest>>;
+  lois!: List<LocationOfInterest>;
 
   job?: Job;
 
@@ -43,7 +43,11 @@ export class SurveyLoiComponent {
   ) {}
 
   async ngOnInit() {
-    this.lois$ = this.loiService.getLocationsOfInterest$();
+    this.loiService
+      .getLocationsOfInterest$()
+      .subscribe(
+        lois => (this.lois = lois.filter(loi => loi.predefined !== false))
+      );
 
     this.job = this.surveyService.getActiveSurvey().jobs.first();
 

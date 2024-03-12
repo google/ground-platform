@@ -100,7 +100,10 @@ export class EditJobComponent {
     this.loisSubscription.add(
       this.loiService
         .getLoisByJobId$(this.jobId!)
-        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
+        .subscribe(
+          (lois: List<LocationOfInterest>) =>
+            (this.lois = lois.filter(loi => loi.predefined !== false))
+        )
     );
   }
 

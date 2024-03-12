@@ -40,32 +40,26 @@ export class LoiEditorComponent {
   @Output() updateStrategy: EventEmitter<DataCollectionStrategy> =
     new EventEmitter<DataCollectionStrategy>();
 
-  predefinedLois = List<LocationOfInterest>([]);
-
   DataCollectionStrategy = DataCollectionStrategy;
 
   constructor(
     private dataStoreService: DataStoreService,
-    private importDialog: MatDialog
+    private dialog: MatDialog
   ) {}
-
-  ngOnChanges() {
-    this.predefinedLois = this.lois.filter(loi => loi.predefined !== false);
-  }
 
   importLois() {
     if (!this.survey.id || !this.job?.id) return;
 
-    this.importDialog.open(ImportDialogComponent, {
+    this.dialog.open(ImportDialogComponent, {
       data: {surveyId: this.survey.id, jobId: this.job.id},
       width: '350px',
       maxHeight: '800px',
     });
   }
 
-  clearLois(surveyId: string, lois: List<LocationOfInterest>) {
-    for (const loi of lois) {
-      this.dataStoreService.deleteLocationOfInterest(surveyId, loi.id);
+  clearLois() {
+    for (const loi of this.lois) {
+      this.dataStoreService.deleteLocationOfInterest(this.survey.id, loi.id);
     }
   }
 

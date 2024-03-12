@@ -27,7 +27,7 @@
         *ngIf="canImport"
         class="loi-editor-card-actions"
       >
-        <button *ngIf="predefinedLois.size == 0"
+        <button *ngIf="lois.size == 0"
           mat-flat-button
           class="import-lois-button"
           (click)="importLois()"
@@ -36,10 +36,10 @@
           Import
         </button>
 
-        <button *ngIf="predefinedLois.size > 0"
+        <button *ngIf="lois.size > 0"
           mat-flat-button
           class="clear-all-lois"
-          (click)="clearLois(survey.id, lois)"
+          (click)="clearLois()"
         >
           <mat-icon class="material-symbols-outlined">delete</mat-icon>
           Clear all
@@ -47,9 +47,9 @@
       </div>
     </div>
 
-    <div *ngIf="predefinedLois.size > 0">
+    <div *ngIf="lois.size > 0">
       <loi-selection
-        [lois]="predefinedLois"
+        [lois]="lois"
         [survey]="survey"
       >
       </loi-selection>
