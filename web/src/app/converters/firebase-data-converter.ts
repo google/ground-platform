@@ -524,13 +524,6 @@ export class FirebaseDataConverter {
     if (resultValue instanceof Timestamp) {
       return new Result(resultValue.toDate());
     }
-
-    // TODO(#1329): Surface additional information for capture location tasks
-    // Capture locations have additional information, and the geometry object is a field within it
-    if ('geometry' in resultValue) {
-      resultValue = resultValue.geometry as List<string>;
-    }
-
     const geometry = toGeometry(resultValue);
     if (
       geometry instanceof Point ||
