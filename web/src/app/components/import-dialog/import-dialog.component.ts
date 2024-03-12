@@ -56,6 +56,12 @@ export class ImportDialogComponent {
       console.error('File missing');
       return;
     }
+    if (files.length > 1) {
+      console.error(
+        'Invalid request. Only one file may be imported at the time'
+      );
+      return;
+    }
     try {
       this.isImporting = true;
       const response = await this.dataImportService.importLocationsOfInterest(
