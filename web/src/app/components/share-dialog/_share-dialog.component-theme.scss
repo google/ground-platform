@@ -10,7 +10,7 @@
     color: map.get($foreground, secondary-text);
   }
 
-  .mat-dialog-content {
+  .mat-mdc-dialog-content {
     border-color: map.get($foreground, disabled-button);
   }
 
