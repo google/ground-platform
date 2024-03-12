@@ -109,7 +109,8 @@
 
     // All users need to be able to read the passlist for rules to work.
     match /passlist/{email} {
-      allow read;
+      // TODO(#1602): Replace "regexp" with simple pattern matching.
+      allow read: if request.auth != null && email in ['regexp', getEmail()];
     }
 
     // Apply passlist and survey-level ACLs to survey documents.
