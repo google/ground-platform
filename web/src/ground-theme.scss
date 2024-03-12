@@ -162,3 +162,12 @@ snack-bar-container.notification {
   margin: 24px;
   width: 1024px;
 }
+
+// TODO: Can remove once upgraded past v16.1, there is a panelWidth
+// input property for mat-select that can be set to null. By default
+// options are set to the select trigger width, but can be set to the
+// longest option width instead.
+// For context: https://github.com/angular/components/issues/26000
+.cdk-overlay-pane:has(.mat-mdc-select-panel) {
+  min-width: fit-content;
+}

@@ -19,7 +19,11 @@
 
   <div class="task-toolbar">
     <div *ngIf="GeometryTasks.includes(taskGroup)">
-      <mat-select [(value)]="taskGroup" (selectionChange)="onTaskGroupSelect($event.value)">
+      <mat-select
+        [(value)]="taskGroup"
+        [hideSingleSelectionIndicator]="true"
+        (selectionChange)="onTaskGroupSelect($event.value)"
+      >
         <mat-select-trigger class="task-label">
           <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
           <div>{{ Tasks[taskGroup].label }}</div>
