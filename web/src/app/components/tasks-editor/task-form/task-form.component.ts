@@ -131,8 +131,7 @@ export const Tasks: {
 
 export const GeometryTasks = List([
   TaskGroup.DROP_PIN,
-  TaskGroup.DRAW_AREA,
-  TaskGroup.CAPTURE_LOCATION,
+  TaskGroup.DRAW_AREA
 ]);
 
 @Component({
