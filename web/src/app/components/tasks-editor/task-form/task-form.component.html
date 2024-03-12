@@ -45,16 +45,16 @@
         <mat-slide-toggle formControlName="required" color="primary"></mat-slide-toggle>
       </div>
 
-      <button mat-icon-button [matMenuTriggerFor]="menu">
+      <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="!addLoiTask">
         <mat-icon>more_vert</mat-icon>
       </button>
 
       <mat-menu #menu="matMenu">
-        <button mat-menu-item *ngIf="!addLoiTask" (click)="onTaskDuplicate()">
+        <button mat-menu-item (click)="onTaskDuplicate()">
           <span>Duplicate</span>
         </button>
 
-        <mat-divider *ngIf="!addLoiTask"></mat-divider>
+        <mat-divider></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">
           <span>Delete</span>
