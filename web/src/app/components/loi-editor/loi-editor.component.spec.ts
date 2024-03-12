@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {List, Map} from 'immutable';
 
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
