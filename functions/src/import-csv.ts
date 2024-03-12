@@ -158,10 +158,7 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
   const {lat: latStr, lng: lngStr, ...loi} = data;
   const lat = Number.parseFloat(latStr);
   const lng = Number.parseFloat(lngStr);
-  if (isNaN(lat) || isNaN(lng)) {
-    console.error('unable to parse latitude and/or longitude values');
-    return null;
-  }
+  if (isNaN(lat) || isNaN(lng)) return null;
   loi['predefined'] = true;
   loi['geometry'] = {
     type: 'Point',
