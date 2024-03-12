@@ -19,15 +19,20 @@
 
   <div class="task-toolbar">
     <div *ngIf="GeometryTasks.includes(taskGroup)">
-      <mat-select [(value)]="taskGroup" (selectionChange)="onTaskGroupSelect($event.value)">
+      <mat-select
+        [(value)]="taskGroup"
+        [hideSingleSelectionIndicator]="true"
+        (selectionChange)="onTaskGroupSelect($event.value)"
+      >
         <mat-select-trigger class="task-label">
           <mat-icon class="material-symbols-outlined">{{ Tasks[taskGroup].icon }}</mat-icon>
           <div>{{ Tasks[taskGroup].label }}</div>
         </mat-select-trigger>
-        <mat-option *ngFor="let geometryTaskGroup of GeometryTasks" [value]="geometryTaskGroup">
+
+        <mat-option *ngFor="let addLoiTaskGroup of AddLoiTaskGroups" [value]="addLoiTaskGroup">
           <div class="task-label">
-            <mat-icon class="material-symbols-outlined">{{ Tasks[geometryTaskGroup].icon }}</mat-icon>
-            <div>{{ Tasks[geometryTaskGroup].label }}</div>
+            <mat-icon class="material-symbols-outlined">{{ Tasks[addLoiTaskGroup].icon }}</mat-icon>
+            <div>{{ Tasks[addLoiTaskGroup].label }}</div>
           </div>
         </mat-option>
       </mat-select>

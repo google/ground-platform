@@ -89,7 +89,7 @@ export class TaskService {
 
     const loiTask = new Task(
       this.dataStoreService.generateId(),
-      TaskType.CAPTURE_LOCATION,
+      TaskType.DRAW_AREA,
       '',
       true,
       0,
