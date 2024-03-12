@@ -483,16 +483,12 @@ export class FirebaseDataConverter {
     return Map<string, Result>(
       keys(submissionData)
         .map((taskId: string) => {
-          const task = job.tasks!.get(taskId);
-
-          if (!task)
-            return [
-              Error(`Error converting to Result: missing task ${taskId}`),
-            ];
-
           return [
             taskId as string,
-            FirebaseDataConverter.toResult(task, submissionData[taskId]),
+            FirebaseDataConverter.toResult(
+              submissionData[taskId],
+              job.tasks!.get(taskId)
+            ),
           ];
         })
         .filter(([_, resultOrError]) =>
@@ -505,8 +501,8 @@ export class FirebaseDataConverter {
   }
 
   private static toResult(
-    task: Task,
-    resultValue: number | string | List<string>
+    resultValue: number | string | List<string>,
+    task?: Task
   ): Result | Error {
     if (typeof resultValue === 'string') {
       return new Result(resultValue as string);
@@ -517,7 +513,11 @@ export class FirebaseDataConverter {
     if (resultValue instanceof Array) {
       return new Result(
         List(
-          resultValue.map(optionId => task.getMultipleChoiceOption(optionId))
+          resultValue.map(
+            optionId =>
+              task?.getMultipleChoiceOption(optionId) ||
+              new Option(optionId, optionId, optionId, -1)
+          )
         )
       );
     }
