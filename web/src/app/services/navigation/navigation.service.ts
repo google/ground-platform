@@ -53,14 +53,27 @@ export class NavigationService {
   private sidePanelExpanded = true;
 
   // TODO: remove this logic once the new side panel replaces the old one
-  private static fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
-    if (params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM)) {
+  private fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
+    const submissionId = params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM);
+    const loiId = params.get(NavigationService.LOI_ID_FRAGMENT_PARAM);
+    const loiJobId = params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM);
+    
+    if (submissionId) {
+      if (submissionId.includes('null')) {
+        this.error( new Error('Check your URL. Submission id was set to null'));
+      }
       return SideNavMode.SUBMISSION;
     }
-    if (params.get(NavigationService.LOI_ID_FRAGMENT_PARAM)) {
+    if (loiId) {
+      if (loiId.includes('null')) {
+        this.error( new Error('Check your URL. Location of interest id was set to null'));
+      }
       return SideNavMode.JOB_LIST;
     }
-    if (params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM)) {
+    if (loiJobId) {
+      if (loiJobId.includes('null')) {
+        this.error( new Error('Check your URL. Location of interest id and/or job id was set to null'));
+      }
       return SideNavMode.LOI_LIST;
     }
     return SideNavMode.JOB_LIST;
@@ -103,7 +116,7 @@ export class NavigationService {
       map(params => params.get(NavigationService.TASK_ID_FRAGMENT_PARAM))
     );
     this.sideNavMode$ = fragmentParams$.pipe(
-      map(params => NavigationService.fragmentParamsToSideNavMode(params))
+      map(params => this.fragmentParamsToSideNavMode(params))
     );
   }
 
