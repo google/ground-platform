@@ -32,21 +32,28 @@ service firebase.storage {
     }
 
     /**
+     * Returns true iff the user's email is explicitly listed in the passlist.
+     */
+    function inPasslist(email) {
+      return firestore.exists(/databases/(default)/documents/passlist/$(email));
+    }
+
+    /**
      * Returns true iff the user's email matches the passlist regex or
      * is explicitly listed in the passlist.
      */
-    function inPasslist(email) {
-      return request.auth != null && email.matches(getPassRegexp()) || firestore.exists(/databases/(default)/documents/passlist/$(email));
+    function canAccess(email) {
+      return request.auth != null && (email.matches(getPassRegexp()) || inPasslist(email));
     }
     
     match /offline-imagery/{allPaths=**} {
       // All authenticated users can read.
-      allow read: if inPasslist(getEmail());
+      allow read: if canAccess(getEmail());
     }
     
     match /user-media/{allPaths=**} {
       // All authenticated users can read.
-      allow create, read, write: if inPasslist(getEmail());
+      allow create, read, write: if canAccess(getEmail());
     }    
   }
 }
