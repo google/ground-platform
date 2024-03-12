@@ -18,42 +18,42 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     /**
-     * Returns email address for the requesting user.
+     * Returns the email address of the requesting user.
      */
-    function email() {
+    function getEmail() {
       return request.auth.token.email;
     }
 
     /**
-     * Returns the regular expression for users allowed access.
+     * Returns the regular expression matching emails granted access.
      */
-    function passRegexp() {
+    function getPassRegexp() {
       return firestore.get(/databases/(default)/documents/passlist/regexp).data.regexp
     }
 
     /**
-     * Returns true iff the specified email is in the pass list.
+     * Returns true iff the user's email is explicitly listed in the passlist.
      */
-    function isInPassList(email) {
-      return firestore.exists(/databases/(default)/documents/passlist/$(email))
+    function inPasslist(email) {
+      return firestore.exists(/databases/(default)/documents/passlist/$(email));
     }
 
     /**
-     * Returns true iff the user's email is in the implicit regex or
-     * explicit passlist.
+     * Returns true iff the user's email matches the passlist regex or
+     * is explicitly listed in the passlist.
      */
     function canAccess(email) {
-      return email.matches(passRegexp()) || isInPassList(email);
+      return request.auth != null && (email.matches(getPassRegexp()) || inPasslist(email));
     }
     
     match /offline-imagery/{allPaths=**} {
       // All authenticated users can read.
-      allow read: if canAccess(email());
+      allow read: if canAccess(getEmail());
     }
     
     match /user-media/{allPaths=**} {
       // All authenticated users can read.
-      allow create, read, write: if canAccess(email());
+      allow create, read, write: if canAccess(getEmail());
     }    
   }
 }
