@@ -22,7 +22,7 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
