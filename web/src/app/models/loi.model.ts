@@ -28,6 +28,7 @@ export abstract class LocationOfInterest {
   // TODO(#1444): Make non-null, init to empty by default.
   abstract readonly properties?: Map<string, string | number>;
   abstract readonly customId: string;
+  abstract readonly predefined?: boolean;
 
   static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
     return lois
@@ -46,7 +47,8 @@ export class PointOfInterest implements LocationOfInterest {
     // TODO(#1444): User custom type instead of exposing types from data job.
     readonly location: GeoPoint,
     readonly properties?: Map<string, string | number>,
-    readonly customId: string = ''
+    readonly customId: string = '',
+    readonly predefined: boolean = true
   ) {}
 }
 
@@ -57,7 +59,8 @@ export class GeoJsonLocationOfInterest implements LocationOfInterest {
     readonly jobId: string,
     readonly geoJson: object,
     readonly properties?: Map<string, string | number>,
-    readonly customId: string = ''
+    readonly customId: string = '',
+    readonly predefined: boolean = true
   ) {}
 }
 
@@ -68,7 +71,8 @@ export class AreaOfInterest implements LocationOfInterest {
     readonly jobId: string,
     readonly polygonVertices: GeoPoint[],
     readonly properties?: Map<string, string | number>,
-    readonly customId: string = ''
+    readonly customId: string = '',
+    readonly predefined: boolean = true
   ) {}
 }
 
@@ -79,6 +83,7 @@ export class GenericLocationOfInterest implements LocationOfInterest {
     readonly jobId: string,
     readonly geometry: Geometry,
     readonly properties: Map<string, string | number>,
-    readonly customId: string = ''
+    readonly customId: string = '',
+    readonly predefined: boolean = true
   ) {}
 }

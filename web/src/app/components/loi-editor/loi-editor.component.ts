@@ -15,7 +15,7 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {List} from 'immutable';
 
@@ -44,22 +44,20 @@ export class LoiEditorComponent {
 
   constructor(
     private dataStoreService: DataStoreService,
-    private importDialog: MatDialog
+    private dialog: MatDialog
   ) {}
 
   importLois() {
-    if (!this.survey.id || !this.job?.id) return;
-
-    this.importDialog.open(ImportDialogComponent, {
+    this.dialog.open(ImportDialogComponent, {
       data: {surveyId: this.survey.id, jobId: this.job.id},
       width: '350px',
       maxHeight: '800px',
     });
   }
 
-  clearLois(surveyId: string, lois: List<LocationOfInterest>) {
-    for (const loi of lois) {
-      this.dataStoreService.deleteLocationOfInterest(surveyId, loi.id);
+  clearLois() {
+    for (const loi of this.lois) {
+      this.dataStoreService.deleteLocationOfInterest(this.survey.id, loi.id);
     }
   }
 

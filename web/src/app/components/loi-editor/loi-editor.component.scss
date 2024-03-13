@@ -55,6 +55,11 @@
         --mdc-filled-button-container-color: #FFDDAB;
         --mdc-filled-button-container-shape: 24px;
       }
+
+      button.clear-all-lois {
+        border: 1px solid #727970;
+        --mdc-filled-button-container-shape: 24px;
+      }
     }
   }
 }

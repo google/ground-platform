@@ -95,13 +95,13 @@ export class EditJobComponent {
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
-    this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
-
     this.loisSubscription.add(
       this.loiService
-        .getLoisByJobId$(this.jobId!)
+        .getPredefinedLoisByJobId$(this.job!.id)
         .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
     );
+
+    this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
   }
 
   onSectionChange(section: EditJobSection) {
