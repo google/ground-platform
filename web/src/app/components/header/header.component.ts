@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 
 import {
@@ -22,8 +22,10 @@ import {
   DialogType,
   JobDialogComponent,
 } from 'app/pages/edit-survey/job-dialog/job-dialog.component';
+import { AuthService } from 'app/services/auth/auth.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 export enum HeaderState {
   DEFAULT = 1,
@@ -41,11 +43,14 @@ export class HeaderComponent {
   state = HeaderState.DEFAULT;
   readonly HeaderState = HeaderState;
   publishingChanges = false;
+  canManage = false;
 
   constructor(
     public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
-    public navigationService: NavigationService
+    public navigationService: NavigationService,
+    public ref: ChangeDetectorRef,
+    public surveyService: SurveyService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -57,6 +62,11 @@ export class HeaderComponent {
     } else if (this.navigationService.isEditSurveyPage(this.surveyId)) {
       this.state = HeaderState.EDIT_SURVEY;
     }
+    this.surveyService.getActiveSurvey$().subscribe(_ => {
+      // Update "manage" state when survey changes.
+      console.log(this.surveyService.canManageSurvey());
+      this.canManage = this.surveyService.canManageSurvey();
+    });
   }
 
   onSurveysButtonClick(): void {
