@@ -18,10 +18,9 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog} from '@angular/material/dialog';
 import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
-
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-
 import {HeaderComponent} from './header.component';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -35,6 +34,7 @@ describe('HeaderComponent', () => {
         {provide: Router, useValue: {}},
         {provide: DraftSurveyService, useValue: {}},
         {provide: MatDialog, useValue: {}},
+        {provide: SurveyService, useValue: {canManageSurvey: () => false}},
       ],
     }).compileComponents();
   });
