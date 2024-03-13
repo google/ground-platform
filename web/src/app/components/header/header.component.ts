@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component} from '@angular/core';
+import {Component} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 
 import {
@@ -22,7 +22,6 @@ import {
   DialogType,
   JobDialogComponent,
 } from 'app/pages/edit-survey/job-dialog/job-dialog.component';
-import { AuthService } from 'app/services/auth/auth.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -49,7 +48,6 @@ export class HeaderComponent {
     public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
-    public ref: ChangeDetectorRef,
     public surveyService: SurveyService,
   ) {}
 
