@@ -90,7 +90,7 @@ describe('EditJobComponent', () => {
 
   it('displays the loi editor component', () => {
     const loiButton = fixture.debugElement.query(
-      By.css('.section-selector button:nth-child(2)')
+      By.css('.edit-job-header :nth-child(3)')
     ).nativeElement as HTMLElement;
     loiButton.click();
     fixture.detectChanges();
