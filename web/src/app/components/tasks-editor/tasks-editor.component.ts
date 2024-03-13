@@ -90,8 +90,6 @@ export class TasksEditorComponent {
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
-    TaskGroup.DROP_PIN,
-    TaskGroup.DRAW_AREA,
     TaskGroup.CAPTURE_LOCATION,
   ];
 

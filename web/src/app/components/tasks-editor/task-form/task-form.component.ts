@@ -117,7 +117,7 @@ export const Tasks: {
   },
   [TaskGroup.DRAW_AREA]: {
     icon: 'draw',
-    label: 'Draw an area',
+    label: 'Draw or walk perimeter',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
     isGeometry: true,
@@ -131,11 +131,7 @@ export const Tasks: {
   },
 };
 
-export const GeometryTasks = List([
-  TaskGroup.DROP_PIN,
-  TaskGroup.DRAW_AREA,
-  TaskGroup.CAPTURE_LOCATION,
-]);
+export const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
