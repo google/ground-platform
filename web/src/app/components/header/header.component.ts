@@ -62,7 +62,6 @@ export class HeaderComponent {
     }
     this.surveyService.getActiveSurvey$().subscribe(_ => {
       // Update "manage" state when survey changes.
-      console.log(this.surveyService.canManageSurvey());
       this.canManage = this.surveyService.canManageSurvey();
     });
   }
