@@ -26,7 +26,7 @@
     <ng-content select="[left]"></ng-content>
   </div>
 
-  <div>
+  <div *ngIf="canManage">
     <button
       mat-icon-button
       [matMenuTriggerFor]="surveyMenu"
