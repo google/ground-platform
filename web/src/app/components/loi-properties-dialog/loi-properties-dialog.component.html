@@ -15,14 +15,15 @@
 -->
 
 <div class="properties-dialog">
-  <button class="close" mat-icon-button mat-dialog-close aria-label="close">
-    <mat-icon>close</mat-icon>
-  </button>
-
-  <h1 mat-dialog-title>
+  <div mat-dialog-title class="loi-icon-and-title">
     <mat-icon svgIcon="{{ iconName }}" [ngStyle]="{color: iconColor}"></mat-icon>
+
     <div>{{ loiDisplayName }}</div>
-  </h1>
+
+    <button class="close" mat-icon-button mat-dialog-close aria-label="close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
   <mat-dialog-content>
     <mat-list>

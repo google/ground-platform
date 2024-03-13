@@ -15,30 +15,44 @@
  */
 
 .properties-dialog {
-  .close {
-    float: right;
-    top: -12px;
-    right: -12px;
-  }
+  background: #F9FAF4;
 
-  h1 {
-    flex: 1;
+  .loi-icon-and-title {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 16px 16px 0px 16px;
+
+    :nth-child(2) {
+      flex: 1;
+    }
+  }
+
+  .mat-mdc-dialog-content {
+    padding-left: 16px;
+    padding-right: 16px;
+
+    ::ng-deep .mat-list {
+      padding-left: 16px;
+    }
+
+    ::ng-deep .mat-list-item-content {
+      padding-left: 0px;
+      padding-right: 24px;
+    }
   }
 
   .property-list-item {
     .mat-line {
       display: flex;
       justify-content: space-between;
-      gap: 1rem;
-  
+      gap: 16px;
+
       &:first-child {
         white-space: nowrap;
         font-size: 16px;
       }
-  
+
       &:nth-child(1) {
         white-space: nowrap !important;
         font-size: 14px;
