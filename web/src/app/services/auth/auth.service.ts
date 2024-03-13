@@ -137,16 +137,6 @@ export class AuthService {
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 
-  canUserManageSurvey(survey: Survey): boolean {
-    const user = this.getCurrentUser();
-    if (!user) {
-      return false;
-    }
-    const userRole: Role = survey.acl.get(user.email)!;
-
-
-  }
-
   /**
    * Checks if a user can add points to a specific job.
    */
