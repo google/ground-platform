@@ -72,6 +72,16 @@ export class LocationOfInterestService {
     );
   }
 
+  getPredefinedLoisByJobId$(
+    jobId: string
+  ): Observable<List<LocationOfInterest>> {
+    return this.getLocationsOfInterest$().pipe(
+      map(lois =>
+        lois.filter(loi => loi.jobId === jobId && loi.predefined !== false)
+      )
+    );
+  }
+
   /** A label for a given geometry type. Defaults to 'Polygon'. */
   private static geometryTypeLabel(geometryType?: GeometryType): string {
     switch (geometryType) {

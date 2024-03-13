@@ -107,6 +107,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   @ViewChild(GoogleMap) map!: GoogleMap;
 
   @Input() shouldEnableDrawingTools = false;
+  @Input() showPredefinedLoisOnly = false;
 
   constructor(
     private drawingToolsService: DrawingToolsService,
@@ -129,7 +130,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
       ]).subscribe(([survey, lois, locationOfInterestId]) => {
-        const loisMap = ImmutableMap(lois.map(loi => [loi.id, loi]));
+        const loisMap = ImmutableMap(
+          (this.showPredefinedLoisOnly
+            ? lois.filter(loi => loi.predefined !== false)
+            : lois
+          ).map(loi => [loi.id, loi])
+        );
+
         const loiIdsToRemove = this.loisMap
           .filter(
             (value, key) =>

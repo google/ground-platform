@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatDialog} from '@angular/material/dialog';
 import {List, Map} from 'immutable';
 
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
@@ -48,13 +44,17 @@ describe('LoiEditorComponent', () => {
     poiId1,
     jobId1,
     new Point(new Coordinate(1.23, 4.56)),
-    Map()
+    Map(),
+    '',
+    true
   );
   const poi2 = new GenericLocationOfInterest(
     poiId2,
     jobId2,
     new Point(new Coordinate(12.3, 45.6)),
-    Map()
+    Map(),
+    '',
+    true
   );
   const job1 = new Job(jobId1, /* index */ 0);
   const job2 = new Job(jobId2, /* index */ 1);
@@ -131,8 +131,6 @@ describe('LoiEditorComponent', () => {
     it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
       fixture.componentInstance.lois = List([poi1, poi2]);
       fixture.detectChanges();
-
-      console.log(666, fixture.componentInstance.lois.size);
 
       const clearAllButton =
         fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
