@@ -92,7 +92,7 @@ export class TaskService {
       TaskType.DRAW_AREA,
       '',
       true,
-      0,
+      -1,
       undefined,
       undefined,
       true
