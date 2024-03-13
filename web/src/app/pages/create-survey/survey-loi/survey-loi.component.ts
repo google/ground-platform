@@ -43,13 +43,11 @@ export class SurveyLoiComponent {
   ) {}
 
   async ngOnInit() {
-    this.loiService
-      .getLocationsOfInterest$()
-      .subscribe(
-        lois => (this.lois = lois.filter(loi => loi.predefined !== false))
-      );
-
     this.job = this.surveyService.getActiveSurvey().jobs.first();
+
+    this.loiService
+      .getPredefinedLoisByJobId$(this.job.id)
+      .subscribe(lois => (this.lois = lois));
 
     await this.onStrategyChange(
       this.job?.strategy || DataCollectionStrategy.PREDEFINED
