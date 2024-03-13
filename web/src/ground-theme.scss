@@ -34,6 +34,7 @@
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
 @use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
 @use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
+@use 'app/pages/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
 @use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/option-editor/_option-editor.component-theme' as option-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
@@ -112,6 +113,7 @@ $foreground: map-get($theme, foreground);
 @include edit-option.theme($theme);
 @include user-avatar.theme($theme);
 @include create-survey.theme($theme);
+@include edit-job.theme($theme);
 @include step-card.theme($theme);
 @include job-details.theme($theme);
 @include drawing-tools.theme($theme);
