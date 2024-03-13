@@ -31,8 +31,9 @@ task-button:hover {
   .edit-job-header {
     display: flex;
     gap: 16px;
-    margin-bottom: 16px;
     align-items: center;
+    padding: 8px 0;
+    margin-bottom: 12px;
 
     .edit-job-header-title {
       flex: 1;
