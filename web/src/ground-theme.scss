@@ -135,6 +135,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+
+  --mdc-typography-button-letter-spacing: 0;
 }
 
 /* Space between button icon and label. */
@@ -175,4 +177,8 @@ snack-bar-container.notification {
 
 .mat-mdc-select-arrow-wrapper{
   padding-left: 12px;
+}
+
+.edit-options {
+  @include mat.form-field-density(-2);
 }

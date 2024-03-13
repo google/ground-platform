@@ -106,7 +106,12 @@
     </mat-form-field>
   </div>
 
-  <div *ngIf="typeControl.value === TaskType.MULTIPLE_CHOICE" cdkDropList (cdkDropListDropped)="drop($event)">
+  <div
+    *ngIf="typeControl.value === TaskType.MULTIPLE_CHOICE"
+    class="edit-options"
+    cdkDropList
+    (cdkDropListDropped)="drop($event)"
+  >
     <ground-edit-option
       *ngFor="let formGroup of optionsControl.controls; let i = index;"
       [formGroup]="formGroup"
@@ -125,27 +130,28 @@
     >
     </ground-edit-option>
 
-    <button
-      mat-button
-      type="button"
-      (click)="onAddOption()"
-      color="primary"
-      class="add-option"
-    >
-      Add option
-    </button>
-
-    <span *ngIf="!hasOtherOptionControl.value">
-      or
+    <div class="add-buttons">
       <button
         mat-button
         type="button"
-        (click)="onAddOtherOption()"
-        color="primary"
+        (click)="onAddOption()"
         class="add-option"
       >
-        Add other
+        Add option
       </button>
-    </span>
+
+      <div *ngIf="!hasOtherOptionControl.value" class="add-other-button">
+        or
+        <button
+          mat-button
+          type="button"
+          (click)="onAddOtherOption()"
+          color="primary"
+          class="add-option"
+        >
+          add "other"
+        </button>
+      </div>
+    </div>
   </div>
 </form>
