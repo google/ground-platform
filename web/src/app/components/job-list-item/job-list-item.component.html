@@ -37,24 +37,34 @@ limitations under the License.
       </button>
     </mat-tree-node>
     <!-- Tree node for jobs -->
-    <mat-tree-node [class.tree-node-selected]="isSelectedLoi(node)" *matTreeNodeDef="let node; when: hasChild"
-      matTreeNodePadding class="expandable-node">
-      <div class="expandable-node-start">
+    <mat-tree-node
+      [class.tree-node-selected]="isSelectedLoi(node)"
+      *matTreeNodeDef="let node; when: hasChild"
+      matTreeNodePadding class="expandable-node"
+    >
+      <div class="expandable-node-start" *ngIf="isSidePanelExpanded()">
         <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
-          <mat-icon class="mat-icon-rtl-mirror" *ngIf="isSidePanelExpanded()">
-            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+          <mat-icon class="mat-icon-rtl-mirror">
+            chevron_right
           </mat-icon>
         </button>
-        <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}"
-          [style.padding-left]="isSidePanelExpanded() ? '0' : '16px'"
-          [style.cursor]="isSidePanelExpanded() ? '' : 'pointer'"
-          (click)="isSidePanelExpanded() ? '' : treeControl.toggle(node)">
+
+        <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
           {{ node.iconName }}
         </mat-icon>
-        <div *ngIf="isSidePanelExpanded()">
-          {{ node.name }}
-        </div>
+
+        <div>{{ node.name }}</div>
       </div>
+
+      <div class="expandable-node-start" *ngIf="!isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+          <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}"
+            (click)="treeControl.toggle(node)">
+            {{ node.iconName }}
+          </mat-icon>
+        </button>
+      </div>
+
       <div [ngSwitch]="actionsType" *ngIf="isSidePanelExpanded()">
         <div *ngSwitchCase="jobListItemActionsType.MENU">
           <button mat-icon-button [matMenuTriggerFor]="jobMenu">
