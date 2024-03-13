@@ -15,7 +15,9 @@
 -->
 
 <div class="edit-job">
-  <div class="section-selector">
+  <div class="edit-job-header">
+    <div class="edit-job-header-title">{{ job?.name }}</div>
+
     <button
       mat-flat-button
       [color]="section === EditJobSection.TASKS ? 'primary' : 'basic'"
