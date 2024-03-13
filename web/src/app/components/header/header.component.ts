@@ -48,7 +48,7 @@ export class HeaderComponent {
     public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
-    public surveyService: SurveyService,
+    public surveyService: SurveyService
   ) {}
 
   async ngOnInit(): Promise<void> {

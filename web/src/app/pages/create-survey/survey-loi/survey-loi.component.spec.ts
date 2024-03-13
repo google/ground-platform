@@ -98,8 +98,8 @@ describe('SurveyLoiComponent', () => {
     fixture.detectChanges();
   });
 
-  it("Tests missing", () => {
-    // TODO(#1644): Add test coverage. 
+  it('Tests missing', () => {
+    // TODO(#1644): Add test coverage.
     expect(true).toBeTruthy();
-  })
+  });
 });
