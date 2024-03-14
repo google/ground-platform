@@ -67,6 +67,7 @@ export class LoiEditorComponent {
         surveyId: this.survey.id,
         jobId: this.job.id,
       },
+      panelClass: 'small-width-dialog',
     });
 
     dialogRef.afterClosed().subscribe(async (result: DialogData) => {

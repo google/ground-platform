@@ -173,6 +173,16 @@ snack-bar-container.notification {
   }
 }
 
+.small-width-dialog {
+  width: 340px !important;
+  max-width: 340px !important;
+
+  .mat-mdc-dialog-surface {
+    background: #F9FAF4 !important;
+    border-radius: 28px !important;
+  }
+}
+
 // TODO(#1633): Can remove once upgraded past v16.1, there is a panelWidth
 // input property for mat-select that can be set to null. By default
 // options are set to the select trigger width, but can be set to the
