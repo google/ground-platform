@@ -24,6 +24,7 @@
           ? data.dialogType
           : ''
       "
+      class="input"
     >
       <mat-label>Job name</mat-label>
       <input [id]="jobNameFieldId" matInput [(ngModel)]="data.jobName" />
@@ -47,8 +48,20 @@
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>
+  <button
+    mat-button
+    color="primary"
+    (click)="onCancelClick()"
+  >
+    Cancel
+  </button>
+
+  <button
+    mat-button
+    color="primary" 
+    [mat-dialog-close]="data"
+    cdkFocusInitial
+  >
     {{ buttonLabel }}
   </button>
 </div>
