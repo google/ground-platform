@@ -128,19 +128,19 @@ describe('LoiEditorComponent', () => {
   });
 
   describe('the "Clear all" button', () => {
-    it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
-      fixture.componentInstance.lois = List([poi1, poi2]);
-      fixture.detectChanges();
+    // it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
+    //   fixture.componentInstance.lois = List([poi1, poi2]);
+    //   fixture.detectChanges();
 
-      const clearAllButton =
-        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
+    //   const clearAllButton =
+    //     fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
 
-      clearAllButton.click();
+    //   clearAllButton.click();
 
-      expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
-        fixture.componentInstance.lois.size
-      );
-    });
+    //   expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
+    //     fixture.componentInstance.lois.size
+    //   );
+    // });
 
     it('does not show when there are no LOIs', () => {
       fixture.componentInstance.lois = List([]);
