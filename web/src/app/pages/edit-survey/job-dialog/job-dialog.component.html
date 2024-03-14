@@ -15,6 +15,7 @@
 -->
 
 <h1 mat-dialog-title>{{ title }}</h1>
+
 <div mat-dialog-content>
   <div [ngSwitch]="data.dialogType">
     <mat-form-field
@@ -27,16 +28,24 @@
       <mat-label>Job name</mat-label>
       <input [id]="jobNameFieldId" matInput [(ngModel)]="data.jobName" />
     </mat-form-field>
+
     <p *ngSwitchCase="DialogType.DeleteJob">
       This job and all of its associated data will be deleted. This operation
       can’t be undone. Are you sure?
     </p>
+
     <p *ngSwitchCase="DialogType.UndoJobs">
       If you leave this page, changes you’ve made to this survey won’t be
       published. Are you sure you want to continue?
     </p>
+
+    <p *ngSwitchCase="DialogType.DeleteLois">
+      All predefined data collection sites and their associated sites will
+      be permanently deleted.
+    </p>
   </div>
 </div>
+
 <div mat-dialog-actions>
   <button mat-button (click)="onCancelClick()">Cancel</button>
   <button mat-button [mat-dialog-close]="data" cdkFocusInitial>
