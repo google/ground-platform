@@ -15,49 +15,48 @@
 -->
 
 <div class="edit-job">
-  <div class="section-selector">
+  <div class="edit-job-header">
+    <div class="edit-job-header-title">{{ job?.name }}</div>
+
     <button
       mat-flat-button
-      [color]="section === 'tasks' ? 'primary' : 'basic'"
+      [color]="section === EditJobSection.TASKS ? 'primary' : 'basic'"
       aria-label="tasks"
-      (click)="onChangeSection('tasks')"
+      (click)="onSectionChange(EditJobSection.TASKS)"
     >
-      <mat-icon>{{ section === 'tasks' ? 'checked_small' : 'list' }}</mat-icon>
+      <mat-icon>{{ section === EditJobSection.TASKS ? 'checked_small' : 'list' }}</mat-icon>
       <span>Tasks</span>
     </button>
 
     <button
       mat-flat-button
-      [color]="section === 'lois' ? 'primary' : 'basic'"
+      [color]="section === EditJobSection.LOIS ? 'primary' : 'basic'"
       aria-label="lois"
-      (click)="onChangeSection('lois')"
+      (click)="onSectionChange(EditJobSection.LOIS)"
     >
-      <mat-icon>{{ section === 'lois' ? 'checked_small' : 'place' }}</mat-icon>
+      <mat-icon>{{ section === EditJobSection.LOIS ? 'checked_small' : 'place' }}</mat-icon>
       <span>Sites</span>
     </button>
   </div>
 
-  <!-- TODO: Refactor into EditLois. -->
   <div [ngSwitch]="section">
-    <div *ngSwitchCase="'lois'">
-      <loi-selection
+    <div *ngSwitchCase="EditJobSection.LOIS">
+      <loi-editor
         *ngIf="draftSurveyService.getSurvey$() | async as survey"
-        #loiSelection
         [canImport]="surveyService.canManageSurvey()"
-        [lois]="lois"
         [survey]="survey"
-        [jobId]="jobId"
+        [job]="job"
+        [lois]="lois"
         (updateStrategy)="onStrategyChange($event)"
-      >
-      </loi-selection>
+        #loiEditor
+      />
     </div>
 
-    <div *ngSwitchCase="'tasks'">
+    <div *ngSwitchCase="EditJobSection.TASKS">
       <tasks-editor
-        *ngIf="!isLoading"
-        #tasksEditor
         [tasks]="tasks"
         (onValueChanges)="onTasksChange($event)"
+        #tasksEditor
       >
       </tasks-editor>
     </div>

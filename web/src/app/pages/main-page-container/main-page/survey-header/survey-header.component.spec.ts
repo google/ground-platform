@@ -15,8 +15,8 @@
  */
 
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {Router} from '@angular/router';
 import {NEVER} from 'rxjs';
 
@@ -41,7 +41,12 @@ describe('SurveyHeaderComponent', () => {
             canManageSurvey: () => {},
           },
         },
-        {provide: Router, useValue: {}},
+        {
+          provide: Router,
+          useValue: {
+            isActive: () => true,
+          },
+        },
       ],
     }).compileComponents();
   }));

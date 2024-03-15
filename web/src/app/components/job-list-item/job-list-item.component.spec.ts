@@ -20,15 +20,12 @@ import {CdkTreeModule} from '@angular/cdk/tree';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 import {MatTreeModule} from '@angular/material/tree';
-import {
-  MatTreeHarness,
-  MatTreeNodeHarness,
-} from '@angular/material/tree/testing';
+import {MatTreeHarness} from '@angular/material/tree/testing';
 import {Router} from '@angular/router';
 import {List, Map} from 'immutable';
 import {Subject, of} from 'rxjs';
@@ -152,7 +149,13 @@ describe('JobListItemComponent', () => {
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['getSurveyId$', 'getLocationOfInterestId$', 'selectLocationOfInterest']
+      [
+        'getSurveyId$',
+        'getLocationOfInterestId$',
+        'selectLocationOfInterest',
+        'getSidePanelExpanded',
+        'isEditSurveyPage',
+      ]
     );
 
     lois$ = new Subject<List<LocationOfInterest>>();
@@ -161,10 +164,7 @@ describe('JobListItemComponent', () => {
     locationOfInterestId$ = new Subject<string | null>();
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
-    spyOn(
-      LocationOfInterestService,
-      'getLoiNameFromProperties'
-    ).and.returnValue(null);
+    spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.submissions$.and.returnValue(submissions$);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
@@ -176,9 +176,9 @@ describe('JobListItemComponent', () => {
       declarations: [JobListItemComponent],
       imports: [
         GroundIconModule,
+        MatDialogModule,
         MatListModule,
         MatMenuModule,
-        MatDialogModule,
         MatTreeModule,
         CdkTreeModule,
       ],

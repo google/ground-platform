@@ -89,10 +89,10 @@ export class TaskService {
 
     const loiTask = new Task(
       this.dataStoreService.generateId(),
-      TaskType.CAPTURE_LOCATION,
+      TaskType.DRAW_AREA,
       '',
       true,
-      0,
+      -1,
       undefined,
       undefined,
       true
@@ -118,10 +118,7 @@ export class TaskService {
     tasks: Map<string, Task> | undefined,
     strategy: DataCollectionStrategy
   ): Map<string, Task> {
-    return [
-      DataCollectionStrategy.AD_HOC,
-      DataCollectionStrategy.MIXED,
-    ].includes(strategy)
+    return strategy === DataCollectionStrategy.MIXED
       ? this.addLoiTask(tasks || Map<string, Task>())
       : this.removeLoiTask(tasks || Map<string, Task>());
   }

@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
@@ -70,5 +70,13 @@ export class SurveyHeaderComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  onClickSidePanelButtonEvent() {
+    this.navigationService.onClickSidePanelButton();
+  }
+
+  isEditSurveyPage() {
+    return this.navigationService.isEditSurveyPage(this.surveyId);
   }
 }

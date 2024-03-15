@@ -90,8 +90,6 @@ export class TasksEditorComponent {
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
-    TaskGroup.DROP_PIN,
-    TaskGroup.DRAW_AREA,
     TaskGroup.CAPTURE_LOCATION,
   ];
 
@@ -101,7 +99,7 @@ export class TasksEditorComponent {
     private formBuilder: FormBuilder
   ) {}
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
         this.tasks?.toArray().map((task: Task) => this.toControl(task)) || [],

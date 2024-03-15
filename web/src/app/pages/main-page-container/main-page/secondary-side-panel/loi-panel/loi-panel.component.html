@@ -16,9 +16,9 @@ limitations under the License.
 
 <div *ngIf="loi" class="loi-panel">
   <div class="header">
-    <div>
-      <mat-icon svgIcon={{icon}}></mat-icon>
-      {{ name }}
+    <div class="header-left">
+      <mat-icon svgIcon={{icon}} [ngStyle]="{color: iconColor}"></mat-icon>
+      <div>{{ name }}</div>
     </div>
 
     <button mat-icon-button aria-label="back" (click)="onClosePanel()">
@@ -33,11 +33,19 @@ limitations under the License.
     No data collected
   </div>
 
-  <mat-nav-list *ngIf="submissions && submissions.count() > 0">
-    <a mat-list-item (click)="onSelectSubmission(submission.id)" *ngFor="let submission of submissions">
-      <mat-icon matListItemIcon>text_snippet</mat-icon>
-      <h3 matListItemTitle>{{ submission.created.user.displayName }}</h3>
-      <p matListItemLine>{{ submission.created.clientTime | date: 'longDate' }}</p>
-    </a>
-  </mat-nav-list>
+  <mat-list *ngIf="submissions && submissions.count() > 0">
+    <div *ngFor="let submission of submissions; let i = index">
+      <mat-divider *ngIf="i > 0"></mat-divider>
+      <div class="submission-item">
+        <mat-list-item (click)="onSelectSubmission(submission.id)">
+          <mat-icon matListItemIcon>text_snippet</mat-icon>
+          <h3 matListItemTitle>{{ submission.created.user.displayName }}</h3>
+          <p matListItemLine>{{ submission.created.clientTime | date: 'longDate' }}</p>
+        </mat-list-item>
+        <button mat-icon-button (click)="onSelectSubmission(submission.id)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-list>
 </div>

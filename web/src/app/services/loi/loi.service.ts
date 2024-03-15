@@ -38,17 +38,6 @@ export class LocationOfInterestService {
   private selectedLocationOfInterestId$ = new ReplaySubject<string>(1);
   private selectedLocationOfInterest$: Observable<LocationOfInterest>;
 
-  // Properties in this order are used to give a LOI a name, otherwise it will
-  // be given a default name.
-  private static _inferredNamesProperties = [
-    'label',
-    'caption',
-    'name',
-    'id',
-    'code',
-    'key',
-  ];
-
   constructor(
     private dataStore: DataStoreService,
     private surveyService: SurveyService
@@ -65,13 +54,10 @@ export class LocationOfInterestService {
 
     this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
       switchMap(loiId =>
-        surveyService
-          .getActiveSurvey$()
-          .pipe(
-            switchMap(survey =>
-              this.dataStore.loadLocationOfInterest$(survey.id, loiId)
-            )
-          )
+        surveyService.getActiveSurvey$().pipe(
+          switchMap(survey => dataStore.lois$(survey)),
+          map(lois => lois.find(loi => loi.id === loiId)!)
+        )
       )
     );
   }
@@ -80,58 +66,61 @@ export class LocationOfInterestService {
     return this.lois$;
   }
 
-  getLoisWithLabels$(): Observable<List<LocationOfInterest>> {
-    return this.lois$.pipe(
-      map(lois => LocationOfInterestService.getLoisWithNames(lois))
-    );
-  }
-
   getLoisByJobId$(jobId: string): Observable<List<LocationOfInterest>> {
-    return this.getLoisWithLabels$().pipe(
+    return this.getLocationsOfInterest$().pipe(
       map(lois => lois.filter(loi => loi.jobId === jobId))
     );
   }
 
-  static getAnonymousDisplayName(loi: LocationOfInterest): string {
+  getPredefinedLoisByJobId$(
+    jobId: string
+  ): Observable<List<LocationOfInterest>> {
+    return this.getLocationsOfInterest$().pipe(
+      map(lois =>
+        lois.filter(loi => loi.jobId === jobId && loi.predefined !== false)
+      )
+    );
+  }
+
+  /** A label for a given geometry type. Defaults to 'Polygon'. */
+  private static geometryTypeLabel(geometryType?: GeometryType): string {
+    switch (geometryType) {
+      case GeometryType.POINT:
+        return 'Point';
+      case GeometryType.MULTI_POLYGON:
+      case GeometryType.POLYGON:
+        return 'Area';
+      default:
+        return 'Geometry';
+    }
+  }
+
+  static getDefaultName(loi: LocationOfInterest): string {
     const geometryType = loi.geometry?.geometryType;
-    return `Unnamed ${geometryType === GeometryType.POINT ? 'point' : 'area'}`;
+    return (
+      'Unnamed ' +
+      LocationOfInterestService.geometryTypeLabel(
+        geometryType
+      ).toLocaleLowerCase()
+    );
   }
 
-  static getLoisWithNames(
-    lois: List<LocationOfInterest>
-  ): List<LocationOfInterest> {
-    return lois.map((loi, index) => {
-      const displayName =
-        this.getLoiNameFromProperties(loi) || this.getAnonymousDisplayName(loi);
-      return {
-        ...loi,
-        name: displayName,
-      };
-    });
-  }
-
-  static getLoiNameFromProperties(loi: LocationOfInterest): string | null {
-    const properties = loi.properties;
-    let applicableProperties: string[] = [];
-
-    if (properties) {
-      applicableProperties = [...properties.keys()].filter(property => {
-        return this._inferredNamesProperties.includes(property);
-      });
+  static getDisplayName(loi: LocationOfInterest): string {
+    const {customId, properties} = loi;
+    const name = properties?.get('name')?.toString()?.trim() || '';
+    const loiId = customId?.trim() || '';
+    if (name && loiId) {
+      return `${name} (${loiId})`;
+    } else if (name) {
+      return name;
+    } else if (loiId) {
+      const geometryType = LocationOfInterestService.geometryTypeLabel(
+        loi.geometry!.geometryType
+      );
+      return `${geometryType} ${loiId}`;
+    } else {
+      return LocationOfInterestService.getDefaultName(loi);
     }
-
-    if (applicableProperties.length > 0) {
-      let loiName = '';
-      this._inferredNamesProperties.every(name => {
-        if (applicableProperties.includes(name)) {
-          loiName = properties!.get(name) as string;
-          return false;
-        }
-        return true;
-      });
-      return loiName;
-    }
-    return null;
   }
 
   static getLatLngBoundsFromLois(
@@ -142,7 +131,7 @@ export class LocationOfInterestService {
     const bounds = new google.maps.LatLngBounds();
 
     for (const loi of lois) {
-      loi.geometry?.extendBounds(bounds);
+      loi?.geometry?.extendBounds(bounds);
     }
 
     return bounds;

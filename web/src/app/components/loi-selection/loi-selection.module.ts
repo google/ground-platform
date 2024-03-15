@@ -18,7 +18,6 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
 
 import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
 
@@ -33,7 +32,6 @@ import {GroundIconModule} from 'app/modules/ground-icon.module';
     CommonModule,
     MatButtonModule,
     MatListModule,
-    MatSlideToggleModule,
     MapModule,
     GroundIconModule,
   ],

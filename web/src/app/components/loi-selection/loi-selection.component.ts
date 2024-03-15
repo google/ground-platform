@@ -15,16 +15,13 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {List} from 'immutable';
 
-import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {getLoiIcon} from 'app/utils/utils';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
 
 @Component({
   selector: 'loi-selection',
@@ -32,8 +29,6 @@ import {getLoiIcon} from 'app/utils/utils';
   styleUrls: ['./loi-selection.component.scss'],
 })
 export class LoiSelectionComponent {
-  @Input() canImport!: boolean;
-  @Input() dataCollectorsCanAddLois!: boolean;
   @Input() lois!: List<LocationOfInterest>;
   @Input() survey!: Survey;
   @Input() jobId?: string;
@@ -46,10 +41,7 @@ export class LoiSelectionComponent {
 
   getLoiIcon = getLoiIcon;
 
-  constructor(
-    private dataStoreService: DataStoreService,
-    private importDialog: MatDialog
-  ) {}
+  constructor() {}
 
   ngOnChanges() {
     this.job = this.jobId
@@ -57,29 +49,7 @@ export class LoiSelectionComponent {
       : this.survey.jobs.toList().first();
   }
 
-  onImportLois() {
-    if (!this.survey.id || !this.job?.id) {
-      return;
-    }
-
-    this.importDialog.open(ImportDialogComponent, {
-      data: {surveyId: this.survey.id, jobId: this.job.id},
-      width: '350px',
-      maxHeight: '800px',
-    });
-  }
-
-  clearLois(surveyId: string, lois: List<LocationOfInterest>) {
-    for (const loi of lois) {
-      this.dataStoreService.deleteLocationOfInterest(surveyId, loi.id);
-    }
-  }
-
-  toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {
-    this.updateStrategy.emit(
-      event.checked
-        ? DataCollectionStrategy.AD_HOC
-        : DataCollectionStrategy.PREDEFINED
-    );
+  getDisplayName(loi: LocationOfInterest): string {
+    return LocationOfInterestService.getDisplayName(loi);
   }
 }

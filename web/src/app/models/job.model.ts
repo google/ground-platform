@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {Copiable} from './copiable';
 import {Task} from './task/task.model';
 
 export enum DataCollectionStrategy {
   PREDEFINED = 'PREDEFINED',
-  AD_HOC = 'AD_HOC',
   MIXED = 'MIXED',
 }
 
@@ -32,11 +31,14 @@ export class Job extends Copiable {
     readonly color?: string,
     readonly name?: string,
     readonly tasks?: Map<string, Task>,
-    readonly dataCollectorsCanAdd?: string[],
     readonly strategy?: DataCollectionStrategy
   ) {
     super();
 
     if (!strategy) this.strategy = DataCollectionStrategy.PREDEFINED;
+  }
+
+  getTasksSorted(): List<Task> {
+    return this.tasks?.sortBy(task => task.index).toList() || List();
   }
 }

@@ -18,14 +18,10 @@ import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {filter, first, firstValueFrom} from 'rxjs';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
-import {
-  LoiPermissionsComponent,
-  LoiPermissionsOption,
-} from 'app/pages/create-survey/loi-permissions/loi-permissions.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
 import {JobService} from 'app/services/job/job.service';
@@ -45,7 +41,6 @@ export class CreateSurveyComponent implements OnInit {
   surveyId?: string;
   survey?: Survey;
   canContinue = true;
-  loiPermissionsOption!: LoiPermissionsOption;
   skipLoiSelection = false;
   // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
   // We should display a loading bar while we are waiting for the data to make a decision
@@ -63,7 +58,6 @@ export class CreateSurveyComponent implements OnInit {
     route: ActivatedRoute
   ) {
     navigationService.init(route);
-    this.onLoiPermissionsChange(LoiPermissionsOption.SURVEY_ORGANIZERS);
   }
 
   ngAfterViewChecked(): void {
@@ -117,7 +111,7 @@ export class CreateSurveyComponent implements OnInit {
       return SetupPhase.DEFINE_TASKS;
     }
     if (survey.jobs.size > 0) {
-      return SetupPhase.DEFINE_LOI_PERMISSIONS;
+      return SetupPhase.DEFINE_LOIS;
     }
     if (this.hasTitle(survey)) {
       return SetupPhase.JOB_DETAILS;
@@ -140,8 +134,7 @@ export class CreateSurveyComponent implements OnInit {
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([
     [SetupPhase.SURVEY_DETAILS, 'Create survey'],
     [SetupPhase.JOB_DETAILS, 'Add a job'],
-    [SetupPhase.DEFINE_LOI_PERMISSIONS, 'Data collection strategy'],
-    [SetupPhase.DEFINE_LOIS, 'Import data collection sites'],
+    [SetupPhase.DEFINE_LOIS, 'Data collection strategy'],
     [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
     [SetupPhase.REVIEW, 'Review and share survey'],
   ]);
@@ -167,6 +160,10 @@ export class CreateSurveyComponent implements OnInit {
     return undefined;
   }
 
+  jobName(): string {
+    return this.job()?.name ?? '';
+  }
+
   back(): void {
     switch (this.setupPhase) {
       case SetupPhase.SURVEY_DETAILS:
@@ -175,17 +172,12 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.JOB_DETAILS:
         this.setupPhase = SetupPhase.SURVEY_DETAILS;
         break;
-      case SetupPhase.DEFINE_LOI_PERMISSIONS:
-        this.setupPhase = SetupPhase.JOB_DETAILS;
-        break;
       case SetupPhase.DEFINE_LOIS:
-        this.setupPhase = SetupPhase.DEFINE_LOI_PERMISSIONS;
+        this.setupPhase = SetupPhase.JOB_DETAILS;
         break;
       case SetupPhase.DEFINE_TASKS:
         this.canContinue = true;
-        this.setupPhase = this.skipLoiSelection
-          ? SetupPhase.DEFINE_LOI_PERMISSIONS
-          : SetupPhase.DEFINE_LOIS;
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       case SetupPhase.REVIEW:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
@@ -208,13 +200,7 @@ export class CreateSurveyComponent implements OnInit {
       }
       case SetupPhase.JOB_DETAILS:
         await this.saveJobName();
-        this.setupPhase = SetupPhase.DEFINE_LOI_PERMISSIONS;
-        break;
-      case SetupPhase.DEFINE_LOI_PERMISSIONS:
-        await this.saveLoiPermissions();
-        this.setupPhase = this.skipLoiSelection
-          ? SetupPhase.DEFINE_TASKS
-          : SetupPhase.DEFINE_LOIS;
+        this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
       case SetupPhase.DEFINE_LOIS:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
@@ -230,12 +216,6 @@ export class CreateSurveyComponent implements OnInit {
         break;
     }
     this.survey = this.surveyService.getActiveSurvey();
-  }
-
-  onLoiPermissionsChange(permissionsOption: LoiPermissionsOption) {
-    this.loiPermissionsOption = permissionsOption;
-    this.skipLoiSelection =
-      permissionsOption === LoiPermissionsOption.DATA_COLLECTORS;
   }
 
   @ViewChild('surveyDetails')
@@ -255,9 +235,6 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('jobDetails')
   jobDetails?: JobDetailsComponent;
-
-  @ViewChild('loiPermissions')
-  loiPermissions?: LoiPermissionsComponent;
 
   private getFirstJob(): Job {
     // there should only be at most one job attached to this survey at this
@@ -279,38 +256,6 @@ export class CreateSurveyComponent implements OnInit {
         name,
         color: job.color || this.jobService.getNextColor(this.survey?.jobs),
       })
-    );
-  }
-
-  // TODO: Move LOI permissions saving to job service.
-  private async saveLoiPermissions() {
-    if (!this.loiPermissionsOption) return;
-
-    const canDataCollectorsAddLois =
-      this.loiPermissionsOption === LoiPermissionsOption.DATA_COLLECTORS ||
-      this.loiPermissionsOption ===
-        LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS;
-    const dataCollectorsCanAdd = canDataCollectorsAddLois
-      ? ['points', 'polygons']
-      : [];
-
-    let strategy = DataCollectionStrategy.PREDEFINED;
-    switch (this.loiPermissionsOption) {
-      case LoiPermissionsOption.DATA_COLLECTORS:
-        strategy = DataCollectionStrategy.AD_HOC;
-        break;
-      case LoiPermissionsOption.ORGANIZERS_AND_COLLECTORS:
-        strategy = DataCollectionStrategy.MIXED;
-        break;
-    }
-
-    const job = this.getFirstJob();
-
-    const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
-
-    await this.jobService.addOrUpdateJob(
-      this.surveyId!,
-      job.copyWith({dataCollectorsCanAdd, tasks, strategy})
     );
   }
 
@@ -338,8 +283,7 @@ export class CreateSurveyComponent implements OnInit {
 export enum SetupPhase {
   SURVEY_DETAILS,
   JOB_DETAILS,
-  DEFINE_TASKS,
-  DEFINE_LOI_PERMISSIONS,
   DEFINE_LOIS,
+  DEFINE_TASKS,
   REVIEW,
 }

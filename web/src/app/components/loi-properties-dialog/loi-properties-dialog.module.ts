@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,30 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
+import {MatIconModule} from '@angular/material/icon';
+import {MatInputModule} from '@angular/material/input';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatSelectModule} from '@angular/material/select';
 
-import {LoiPermissionsComponent} from './loi-permissions.component';
+import {LoiPropertiesDialogComponent} from './loi-properties-dialog.component';
 
 @NgModule({
-  declarations: [LoiPermissionsComponent],
+  declarations: [LoiPropertiesDialogComponent],
   imports: [
     CommonModule,
     MatButtonModule,
-    MatCardModule,
+    MatDialogModule,
     MatFormFieldModule,
-    MatRadioModule,
+    MatInputModule,
+    MatListModule,
+    MatSelectModule,
+    FormsModule,
     ReactiveFormsModule,
+    MatIconModule,
   ],
-  exports: [LoiPermissionsComponent],
 })
-export class LoiPermissionsModule {}
+export class PropertiesDialogModule {}

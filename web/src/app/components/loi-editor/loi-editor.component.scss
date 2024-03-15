@@ -1,0 +1,65 @@
+/**
+ * Copyright 2024 The Ground Authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.loi-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .loi-editor-card {
+    border: 1px solid #E2E3DD;
+    border-radius: 8px;
+    background: #FCFDF7;
+    display: flex;
+    flex-direction: column;
+
+    .loi-editor-card-row {
+      display: flex;
+      margin: 24px;
+
+      .loi-editor-card-row-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        color: #202124;
+        font-size: 14px;
+        font-weight: 500;
+
+        div:first-child {
+          font-size: 16px;
+          font-weight: 700;
+        }
+      }
+
+      .loi-editor-card-actions {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: end;
+      }
+  
+      button.import-lois-button {
+        --mdc-filled-button-container-color: #FFDDAB;
+        --mdc-filled-button-container-shape: 24px;
+      }
+
+      button.clear-all-lois {
+        border: 1px solid #727970;
+        --mdc-filled-button-container-shape: 24px;
+      }
+    }
+  }
+}

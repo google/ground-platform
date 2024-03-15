@@ -15,12 +15,18 @@
  */
 
 .edit-option {
-  width: 50%;
   display: flex;
   align-items: center;
   margin-bottom: 16px;
 
+  &:has(mat-form-field.mat-focused) {
+    .option-icon {
+      color: black;
+    }
+  }
+
   .option-icon {
+    color: #424940;
     margin-right: 12px;
     min-width: 24px
   }
@@ -35,6 +41,11 @@
 
   .label-option {
     flex: 1;
+    margin-bottom: -1.25em;
+
+    ::ng-deep .mat-mdc-text-field-wrapper:not(.mat-focused) {
+      background-color: inherit;
+    }
   }
 
   .delete-button-container {

@@ -11,8 +11,9 @@
     "allowJs": true,
     "paths": {
       "@/*": [
-        "src/*"
-      ]
+        "src/*",
+      ],
+      "@types/ground-schema": ["@types/ground-schema/dist/generated/schema"]
     }
   },
   "compileOnSave": true,

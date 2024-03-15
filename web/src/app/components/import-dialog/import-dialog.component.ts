@@ -16,10 +16,7 @@
 
 import {Component, Inject, NgZone} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {
-  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-  MatLegacyDialogRef as MatDialogRef,
-} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 import {DataImportService} from 'app/services/data-import/data-import.service';
 import {NotificationService} from 'app/services/notification/notification.service';
@@ -59,6 +56,12 @@ export class ImportDialogComponent {
       console.error('File missing');
       return;
     }
+    if (files.length > 1) {
+      console.error(
+        'Invalid request. Only one file may be imported at the time'
+      );
+      return;
+    }
     try {
       this.isImporting = true;
       const response = await this.dataImportService.importLocationsOfInterest(
@@ -68,6 +71,7 @@ export class ImportDialogComponent {
       );
       this.notificationService.success(`${response.count} sites imported`);
     } catch (err) {
+      console.error(err);
       this.notificationService.error('Importing data collection sites failed');
     }
     this.isImporting = false;

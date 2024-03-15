@@ -100,7 +100,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns the raw survey object from the db. Used for debbuging only.
+   * Returns the raw survey object from the db. Used for debugging only.
    */
   async loadRawSurvey(id: string) {
     return (
@@ -111,7 +111,7 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the raw survey object in the db. Used for debbuging only.
+   * Updates the raw survey object in the db. Used for debugging only.
    */
   async saveRawSurvey(id: string, data: JsonBlob) {
     await this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).set(data);
@@ -138,6 +138,39 @@ export class DataStoreService {
           )
         )
       );
+  }
+
+  /**
+   * Updates the survey with new title, description and jobs, and handles deletion of associated
+   * LOIs and submissions for the jobs to be deleted. Note that LOI/submission deletion is
+   * asynchronous and might leave unreferenced data temporarily. A scheduled job should delete
+   * these unreferenced lois and submissions(TODO(#1532)).
+   *
+   * @param survey The updated Survey object containing the modified survey data.
+   * @param jobIdsToDelete List of job ids to delete. This is used to delete all the lois and
+   *  submissions that are related to the jobs to be deleted.
+   */
+
+  updateSurvey(survey: Survey, jobIdsToDelete: List<string>): Promise<void> {
+    const {title, description, id} = survey;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const surveyJS: {[key: string]: any} = {
+      title: title,
+      description: description,
+    };
+    survey.jobs.forEach(
+      job => (surveyJS[`jobs.${job.id}`] = FirebaseDataConverter.jobToJS(job))
+    );
+    jobIdsToDelete.forEach(jobId => {
+      this.deleteAllLocationsOfInterestInJob(id, jobId);
+      this.deleteAllSubmissionsInJob(id, jobId);
+      surveyJS[`jobs.${jobId}`] = deleteField();
+    });
+
+    return this.db.firestore
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(survey.id)
+      .update(surveyJS);
   }
 
   /**
@@ -251,37 +284,6 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the LOI with the specified
-   * uuid.
-   *
-   * @param surveyId the id of the survey in which requested LOI is.
-   * @param loiId the id of the requested LOI.
-   */
-  loadLocationOfInterest$(
-    surveyId: string,
-    loiId: string
-  ): Observable<LocationOfInterest> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-      .doc(loiId)
-      .get()
-      .pipe(
-        // Fail with error if LOI could not be loaded.
-        map(doc => {
-          const loi = LoiDataConverter.toLocationOfInterest(
-            doc.id,
-            doc.data()! as DocumentData
-          );
-          if (loi instanceof Error) {
-            throw loi;
-          }
-
-          return loi;
-        })
-      );
-  }
-
-  /**
    * Returns a stream containing the user with the specified id. Remote changes
    * to the user will cause a new value to be emitted.
    *
@@ -302,16 +304,9 @@ export class DataStoreService {
         map(array =>
           List(
             array
-              .map(obj => {
-                const loi = LoiDataConverter.toLocationOfInterest(obj.id, obj);
-                if (loi instanceof Error) {
-                  throw loi;
-                }
-
-                return loi;
-              })
-              // Filter out LOIs that could not be loaded (i.e., undefined).
-              .filter(f => !!f)
+              .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+              .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
+              .map(loi => loi as LocationOfInterest)
           )
         )
       );
@@ -336,13 +331,16 @@ export class DataStoreService {
       .pipe(
         map(array =>
           List(
-            array.map(obj => {
-              return FirebaseDataConverter.toSubmission(
-                survey.getJob(loi.jobId)!,
-                obj.id,
-                obj
-              );
-            })
+            array
+              .map(obj =>
+                FirebaseDataConverter.toSubmission(
+                  survey.getJob(loi.jobId)!,
+                  obj.id,
+                  obj
+                )
+              )
+              .filter(DataStoreService.filterAndLogError<Submission>)
+              .map(submission => submission as Submission)
           )
         )
       );
@@ -353,19 +351,19 @@ export class DataStoreService {
     survey: Survey,
     loi: LocationOfInterest,
     submissionId: string
-  ) {
+  ): Observable<Submission | Error> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`)
       .doc(submissionId)
       .get()
       .pipe(
-        map(doc => {
-          return FirebaseDataConverter.toSubmission(
+        map(doc =>
+          FirebaseDataConverter.toSubmission(
             survey.getJob(loi.jobId)!,
             doc.id,
             doc.data()! as DocumentData
-          );
-        })
+          )
+        )
       );
   }
 
@@ -485,5 +483,13 @@ export class DataStoreService {
       tasksMap = tasksMap.set(taskId, task);
     });
     return tasksMap;
+  }
+
+  public static filterAndLogError<T>(entityOrError: T | Error) {
+    if (entityOrError instanceof Error) {
+      console.error(entityOrError);
+      return false;
+    }
+    return true;
   }
 }

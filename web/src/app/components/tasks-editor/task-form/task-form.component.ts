@@ -28,9 +28,11 @@ import {
   FormBuilder,
   FormGroup,
 } from '@angular/forms';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {List} from 'immutable';
-import {firstValueFrom} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 
+import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -115,7 +117,7 @@ export const Tasks: {
   },
   [TaskGroup.DRAW_AREA]: {
     icon: 'draw',
-    label: 'Draw an area',
+    label: 'Draw or walk perimeter',
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
     isGeometry: true,
@@ -129,11 +131,9 @@ export const Tasks: {
   },
 };
 
-export const GeometryTasks = List([
-  TaskGroup.DROP_PIN,
-  TaskGroup.DRAW_AREA,
-  TaskGroup.CAPTURE_LOCATION,
-]);
+export const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
+
+const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 @Component({
   selector: 'task-form',
@@ -170,6 +170,8 @@ export class TaskFormComponent {
   Tasks = Tasks;
 
   GeometryTasks = GeometryTasks;
+
+  AddLoiTaskGroups = AddLoiTaskGroups;
 
   constructor(
     private dataStoreService: DataStoreService,
@@ -277,8 +279,10 @@ export class TaskFormComponent {
     this.optionsControl.push(formGroup);
   }
 
-  onDeleteOption(index: number) {
-    firstValueFrom(
+  openDeleteDialogOption(): Promise<
+    Observable<MatDialogRef<ConfirmationDialogComponent, boolean>>
+  > {
+    return firstValueFrom(
       this.dialogService
         .openConfirmationDialog(
           'Warning',
@@ -286,7 +290,11 @@ export class TaskFormComponent {
             'Any associated data will be lost. This cannot be undone.'
         )
         .afterClosed()
-    ).then(dialogResult => {
+    );
+  }
+
+  onDeleteOption(index: number) {
+    this.openDeleteDialogOption().then(dialogResult => {
       if (dialogResult) {
         this.optionsControl.removeAt(index);
       }
@@ -302,7 +310,11 @@ export class TaskFormComponent {
   }
 
   onDeleteOtherOption(): void {
-    this.hasOtherOptionControl.setValue(false);
+    this.openDeleteDialogOption().then(dialogResult => {
+      if (dialogResult) {
+        this.hasOtherOptionControl.setValue(false);
+      }
+    });
   }
 
   drop(event: CdkDragDrop<string[]>): void {
@@ -311,9 +323,5 @@ export class TaskFormComponent {
       event.previousIndex,
       event.currentIndex
     );
-  }
-
-  onLabelBlur(): void {
-    this.labelControl.setValue(this.labelControl.value.trim());
   }
 }

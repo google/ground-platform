@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2020 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +20,8 @@ import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
 import {db} from '@/common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
-import { DecodedIdToken } from 'firebase-admin/auth';
+import {DecodedIdToken} from 'firebase-admin/auth';
+import {canImport} from './common/auth';
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -30,7 +30,7 @@ import { DecodedIdToken } from 'firebase-admin/auth';
 export async function importCsvHandler(
   req: https.Request,
   res: Response<any>,
-  idToken: DecodedIdToken
+  user: DecodedIdToken
 ) {
   // Based on https://cloud.google.com/functions/docs/writing/http#multipart_data
   if (req.method !== 'POST') {
@@ -53,15 +53,23 @@ export async function importCsvHandler(
   });
 
   // This code will process each file uploaded.
-  busboy.on('file', (_key, file, _) => {
+  busboy.on('file', async (_key, file, _) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       res.status(HttpStatus.BAD_REQUEST).end();
       return;
     }
 
-    // TODO(#941): Verify user is OWNER or SURVEY_ORGANIZER of the survey.
-
+    const survey = await db.fetchSurvey(surveyId);
+    if (!survey.exists) {
+      res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+      return;
+    }
+    if (!canImport(user, survey)) {
+      res.status(HttpStatus.FORBIDDEN).send('Permission denied');
+      return;
+    }
+  
     console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
@@ -118,7 +126,7 @@ function invertAndFlatten(obj: any) {
  * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
-  id: ['fid'],
+  id: ['system:index'],
   lat: ['lat', 'latitude', 'y'],
   lng: ['lng', 'lon', 'long', 'lng', 'x'],
 });
@@ -147,12 +155,11 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
       properties[columnName] = value;
     }
   }
-  const {latStr, lngStr, ...loi} = data;
+  const {lat: latStr, lng: lngStr, ...loi} = data;
   const lat = Number.parseFloat(latStr);
   const lng = Number.parseFloat(lngStr);
-  if (isNaN(lat) || isNaN(lng)) {
-    return null;
-  }
+  if (isNaN(lat) || isNaN(lng)) return null;
+  loi['predefined'] = true;
   loi['geometry'] = {
     type: 'Point',
     coordinates: new GeoPoint(lat, lng),

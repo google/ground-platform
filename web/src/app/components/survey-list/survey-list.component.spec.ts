@@ -20,9 +20,9 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
+import {MatDialog} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {By} from '@angular/platform-browser';
 import {Map} from 'immutable';
 import {of} from 'rxjs';
@@ -100,7 +100,7 @@ describe('SurveyListComponent', () => {
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['navigateToCreateSurvey', 'selectSurvey']
+      ['navigateToCreateSurvey', 'selectSurvey', 'getSidePanelExpanded']
     );
 
     TestBed.configureTestingModule({

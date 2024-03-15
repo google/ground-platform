@@ -26,13 +26,13 @@
 @mixin typography($theme) {
   $typography-config: mat.get-typography-config($theme);
 
-  // TODO(amysorto): use typography-config once typography levels defined
+  // TODO(#1135): use typography-config once typography levels defined
 
   .add-question {
     text-align: left;
   }
 
-  .mat-dialog-content {
+  .mat-mdc-dialog-content {
     font-family: mat.font-family($typography-config);
   }
 

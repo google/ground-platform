@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-.secondary-side-panel {
-  width: 380px;
-  padding: 24px;
-  position: absolute;
-  top: 0;
+::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D9D9D9;
+  border-radius: 10px;
+  width: 8px;
+}
+
+.secondary-side-panel-container {
+  display: flex;
   height: 100%;
-  z-index: 1;
-  background-color: white;
+}
+
+.secondary-side-panel {
+  width: 348px;
+  padding: 12px 16px 16px;
   overflow-y: auto;
+  border-top-left-radius: 8px;
 }

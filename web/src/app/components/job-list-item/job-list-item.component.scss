@@ -45,23 +45,29 @@
   padding-right: 16px;
 }
 
-.tree-node-selected #select-loi {
+.loi-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.show-properties-icon {
+  width: 24px;
+  height: 24px;
+  color: #737970;
+}
+
+.tree-node-selected .select-loi {
   font-weight: 700;
 }
 
 .loi-tree-node {
   border-radius: 24px;
   cursor: pointer;
-
-  .mat-icon {
-    width: 20px;
-    height: 20px;
-    padding-left: 10px;
-  }
 }
 
-#select-loi {
+.select-loi {
   padding-left: 16px;
   --mdc-typography-button-font-size: 14px;
   --mdc-typography-button-font-weight: 400;
+  flex: 1;
 }

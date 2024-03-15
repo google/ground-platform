@@ -17,27 +17,24 @@
 import {CdkTreeModule} from '@angular/cdk/tree';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
+import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
 import {MatTreeModule} from '@angular/material/tree';
 import {BrowserModule} from '@angular/platform-browser';
 
-import {ImportDialogModule} from 'app/components/import-dialog/import-dialog.module';
-
 import {JobListItemComponent} from './job-list-item.component';
 
 @NgModule({
   imports: [
     BrowserModule,
-    ImportDialogModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
     MatListModule,
     MatMenuModule,
-    MatDialogModule,
     MatSnackBarModule,
     MatTreeModule,
     CdkTreeModule,

@@ -48,10 +48,8 @@ export class LocationOfInterestPanelHeaderComponent
   pinUrl: SafeUrl;
   readonly geometryType = GeometryType;
   subscription: Subscription = new Subscription();
-  private readonly CAPTION_PROPERTIES = ['caption', 'label', 'name'];
-  private readonly ID_PROPERTIES = ['id', 'identifier', 'id_prod'];
+  loiDisplayName?: string;
   loiGeometryType?: GeometryType;
-  private loiProperties?: Map<string, string | number>;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -67,8 +65,8 @@ export class LocationOfInterestPanelHeaderComponent
     );
     this.subscription.add(
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
+        this.loiDisplayName = LocationOfInterestService.getDisplayName(loi);
         this.loiGeometryType = loi.geometry?.geometryType;
-        this.loiProperties = loi.properties;
       })
     );
   }
@@ -131,46 +129,6 @@ export class LocationOfInterestPanelHeaderComponent
     this.zone.run(() => {
       this.navigationService.selectSurvey(this.surveyId!);
     });
-  }
-
-  /** A label for a given geometry type. Defaults to 'Polygon'. */
-  private geometryTypeLabel(geometryType?: GeometryType): string {
-    switch (geometryType) {
-      case GeometryType.POINT:
-        return 'Point';
-      case GeometryType.MULTI_POLYGON:
-        return 'Multipolygon';
-      default:
-        return 'Polygon';
-    }
-  }
-
-  getLocationOfInterestName(): string | number {
-    const caption = this.findProperty(this.CAPTION_PROPERTIES);
-    if (caption) {
-      return caption;
-    }
-    const loiType = this.geometryTypeLabel(this.loiGeometryType);
-
-    const id = this.findProperty(this.ID_PROPERTIES);
-    if (id) {
-      return loiType + ' ' + id;
-    }
-    return loiType;
-  }
-
-  private findProperty(matchKeys: string[]): string | number | undefined {
-    if (!this.loiProperties) {
-      return;
-    }
-    for (const matchKey of matchKeys) {
-      for (const property of this.loiProperties.keys()) {
-        if (property.toLowerCase() === matchKey) {
-          return this.loiProperties.get(property);
-        }
-      }
-    }
-    return;
   }
 
   ngOnDestroy(): void {

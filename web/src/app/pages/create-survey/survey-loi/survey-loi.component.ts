@@ -15,14 +15,11 @@
  */
 
 import {Component} from '@angular/core';
-import {List, Map} from 'immutable';
+import {List} from 'immutable';
 import {Observable} from 'rxjs';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
-import {Task} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -34,7 +31,7 @@ import {TaskService} from 'app/services/task/task.service';
   styleUrls: ['./survey-loi.component.scss'],
 })
 export class SurveyLoiComponent {
-  lois$!: Observable<List<LocationOfInterest>>;
+  lois!: List<LocationOfInterest>;
 
   job?: Job;
 
@@ -46,9 +43,11 @@ export class SurveyLoiComponent {
   ) {}
 
   async ngOnInit() {
-    this.lois$ = this.loiService.getLoisWithLabels$();
-
     this.job = this.surveyService.getActiveSurvey().jobs.first();
+
+    this.loiService
+      .getPredefinedLoisByJobId$(this.job.id)
+      .subscribe(lois => (this.lois = lois));
 
     await this.onStrategyChange(
       this.job?.strategy || DataCollectionStrategy.PREDEFINED

@@ -21,11 +21,29 @@
     font-weight: 500;
     margin-bottom: 16px;
     display: flex;
-    align-items: center;
+    justify-content: space-between;
 
-    :first-child {
-      flex: 1;
+    .mat-icon {
+      padding-right: 8px;
+      min-height: 32px;
+      min-width: 24px;
     }
+
+    .header-left {
+      display: flex;
+      margin-top: 8px;
+    }
+  }
+
+  .mdc-list-item--with-leading-icon .mdc-list-item__start {
+    margin-left: 0;
+    margin-right: 16px;
+    margin-top: 24px;
+  }
+
+  .submission-item {
+    display: flex;
+    align-items: center;
   }
 
   .no-lois-container {

@@ -23,6 +23,7 @@
 @use 'app/components/import-dialog/_import-dialog.component-theme' as import-dialog;
 @use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
 @use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
+@use 'app/components/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
 @use 'app/components/loi-selection/loi-selection.component-theme' as loi-selection;
 @use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
 @use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
@@ -33,7 +34,7 @@
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
 @use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
 @use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
-@use 'app/pages/create-survey/loi-permissions/_loi-permissions.component-theme' as loi-permissions;
+@use 'app/pages/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
 @use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/option-editor/_option-editor.component-theme' as option-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
@@ -74,7 +75,7 @@ $primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
 $accent: mat.define-palette(mat.$amber-palette, 700, 600, 800);
 $warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
 
-// TODO(amysorto): add typography levels
+// TODO(#1135): add typography levels
 $typography: mat.define-typography-config(
   $font-family: 'Manrope,Arial,sans-serif',
 );
@@ -91,7 +92,7 @@ $theme: mat.define-light-theme((
 
 $foreground: map-get($theme, foreground);
 
-// TODO(amysorto): call themes on a component level
+// TODO(#1135): call themes on a component level
 /*TODO(mdc-migration): Remove all-legacy-component-themes once all legacy components are migrated
  */
 @include mat.all-legacy-component-themes($theme);
@@ -103,6 +104,7 @@ $foreground: map-get($theme, foreground);
 @include import-dialog.theme($theme);
 @include inline-editor.theme($theme);
 @include job-list-item.theme($theme);
+@include loi-properties-dialog.theme($theme);
 @include loi-selection.theme($theme);
 @include share-dialog.theme($theme);
 @include share-survey.theme($theme);
@@ -111,9 +113,9 @@ $foreground: map-get($theme, foreground);
 @include edit-option.theme($theme);
 @include user-avatar.theme($theme);
 @include create-survey.theme($theme);
+@include edit-job.theme($theme);
 @include step-card.theme($theme);
 @include job-details.theme($theme);
-@include loi-permissions.theme($theme);
 @include drawing-tools.theme($theme);
 @include option-editor.theme($theme);
 @include task-editor.theme($theme);
@@ -133,6 +135,8 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+
+  --mdc-typography-button-letter-spacing: 0;
 }
 
 /* Space between button icon and label. */
@@ -158,7 +162,23 @@ snack-bar-container.notification {
   font-weight: bold;
 }
 
-.job-dialog-container .mat-dialog-container {
+.job-dialog-container .mat-mdc-dialog-container {
   margin: 24px;
   width: 1024px;
+}
+
+// TODO(#1633): Can remove once upgraded past v16.1, there is a panelWidth
+// input property for mat-select that can be set to null. By default
+// options are set to the select trigger width, but can be set to the
+// longest option width instead.
+.cdk-overlay-pane:has(.mat-mdc-select-panel) {
+  min-width: fit-content;
+}
+
+.mat-mdc-select-arrow-wrapper{
+  padding-left: 12px;
+}
+
+.edit-options {
+  @include mat.form-field-density(-2);
 }

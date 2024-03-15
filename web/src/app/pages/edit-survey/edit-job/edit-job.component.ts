@@ -16,10 +16,10 @@
 
 import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {List, Map} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
+import {List} from 'immutable';
+import {Subscription} from 'rxjs';
 
-import {LoiSelectionComponent} from 'app/components/loi-selection/loi-selection.component';
+import {LoiEditorComponent} from 'app/components/loi-editor/loi-editor.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -30,6 +30,11 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 
+enum EditJobSection {
+  TASKS,
+  LOIS,
+}
+
 @Component({
   selector: 'edit-job',
   templateUrl: './edit-job.component.html',
@@ -37,20 +42,24 @@ import {TaskService} from 'app/services/task/task.service';
 })
 export class EditJobComponent {
   subscription: Subscription = new Subscription();
+  loisSubscription: Subscription = new Subscription();
 
   surveyId?: string;
   jobId?: string;
-  section: 'tasks' | 'lois' = 'tasks';
-  lois!: List<LocationOfInterest>;
-  isLoading = true;
 
+  section: EditJobSection = EditJobSection.TASKS;
+
+  job?: Job;
   tasks?: List<Task>;
+  lois!: List<LocationOfInterest>;
+
+  EditJobSection = EditJobSection;
 
   @ViewChild('tasksEditor')
   tasksEditor?: TasksEditorComponent;
 
-  @ViewChild('loiSelection')
-  loiSelection?: LoiSelectionComponent;
+  @ViewChild('loiEditor')
+  loiEditor?: LoiEditorComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -81,55 +90,54 @@ export class EditJobComponent {
     }
   }
 
-  private async onJobIdChange(params: Params) {
-    this.isLoading = true;
-
+  private onJobIdChange(params: Params) {
     this.jobId = params['id'];
 
-    this.tasks = this.draftSurveyService
-      .getSurvey()
-      .getJob(this.jobId!)
-      ?.tasks?.toList()
-      .sortBy(task => task.index);
+    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
-    this.lois = await firstValueFrom(
-      this.loiService.getLoisByJobId$(this.jobId!)
+    this.loisSubscription.add(
+      this.loiService
+        .getPredefinedLoisByJobId$(this.job!.id)
+        .subscribe((lois: List<LocationOfInterest>) => (this.lois = lois))
     );
 
-    this.isLoading = false;
+    this.tasks = this.job?.tasks?.toList().sortBy(task => task.index);
   }
 
-  getIndex(index: number) {
-    return index;
-  }
-
-  onChangeSection(section: 'tasks' | 'lois') {
+  onSectionChange(section: EditJobSection) {
+    if (this.tasksEditor && section === EditJobSection.LOIS) {
+      this.tasks = this.tasksEditor.toTasks();
+    }
     this.section = section;
   }
 
   onTasksChange(valid: boolean): void {
-    if (this.jobId && this.tasksEditor && valid) {
-      this.tasks = this.tasksEditor.toTasks();
-
-      this.draftSurveyService.addOrUpdateTasks(this.jobId, this.tasks);
+    if (this.jobId && this.tasksEditor) {
+      this.draftSurveyService.addOrUpdateTasks(
+        this.jobId,
+        this.tasksEditor.toTasks(),
+        valid
+      );
     }
   }
 
   onStrategyChange(strategy: DataCollectionStrategy) {
-    if (this.jobId) {
-      const job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    if (this.job) {
+      const tasks = this.taskService.updateLoiTasks(this.job?.tasks, strategy);
 
-      if (job) {
-        const tasks = this.taskService.updateLoiTasks(job?.tasks, strategy);
+      this.draftSurveyService.addOrUpdateJob(
+        this.job.copyWith({tasks, strategy})
+      );
 
-        this.draftSurveyService.addOrUpdateJob(job.copyWith({tasks, strategy}));
+      this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
-        this.tasks = tasks?.toList().sortBy(task => task.index);
-      }
+      this.tasks = tasks?.toList().sortBy(task => task.index);
     }
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+
+    this.loisSubscription.unsubscribe();
   }
 }

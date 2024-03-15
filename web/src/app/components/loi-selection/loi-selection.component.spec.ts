@@ -18,22 +18,20 @@
 // import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {List, Map} from 'immutable';
 
-import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
 
 import {LoiSelectionComponent} from './loi-selection.component';
 import {GroundIconModule} from 'app/modules/ground-icon.module';
 
-describe('LoiSelectionFormComponent', () => {
+describe('LoiSelectionComponent', () => {
   let component: LoiSelectionComponent;
   let fixture: ComponentFixture<LoiSelectionComponent>;
 
@@ -92,11 +90,8 @@ describe('LoiSelectionFormComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoiSelectionComponent);
-    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
-      List([poi1, poi2])
-    );
+    fixture.componentInstance.lois = List([poi1, poi2]);
     fixture.componentInstance.survey = survey;
-    fixture.componentInstance.canImport = true;
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -133,9 +128,10 @@ describe('LoiSelectionFormComponent', () => {
   });
 
   it('shows updated list of LOIs', () => {
-    fixture.componentInstance.lois = LocationOfInterestService.getLoisWithNames(
-      List([{...poi1, properties: Map({name: 'Test 1'})}, poi2])
-    );
+    fixture.componentInstance.lois = List([
+      {...poi1, properties: Map({name: 'Test 1'})},
+      poi2,
+    ]);
     fixture.detectChanges();
 
     const loiList: HTMLElement =
@@ -144,67 +140,5 @@ describe('LoiSelectionFormComponent', () => {
       loiList.querySelectorAll('.loi-list-item')
     ).map((element: Element) => element.textContent?.trim());
     expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
-  });
-
-  describe('when the import button is clicked', () => {
-    let importButton: HTMLElement;
-
-    beforeEach(() => {
-      importButton = fixture.debugElement.nativeElement.querySelector(
-        '.import-lois-button'
-      );
-      fixture.componentInstance.ngOnChanges();
-    });
-
-    describe('when no job ID is passed in as input', () => {
-      it('opens the import dialog with survey and ID of first job', () => {
-        importButton.click();
-
-        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: jobId1},
-          width: '350px',
-          maxHeight: '800px',
-        });
-      });
-    });
-
-    describe('when job ID is passed in as input', () => {
-      it('opens the import dialog with survey and inputted job ID', () => {
-        fixture.componentInstance.jobId = jobId2;
-        fixture.detectChanges();
-        fixture.componentInstance.ngOnChanges();
-        importButton.click();
-
-        expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: jobId2},
-          width: '350px',
-          maxHeight: '800px',
-        });
-      });
-    });
-  });
-
-  describe('the "Clear all" button', () => {
-    it('makes a deleteLocationOfInterest call per LOI when clicked', () => {
-      const clearAllButton =
-        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
-      const loiList = fixture.debugElement.nativeElement
-        .querySelector('.loi-list')
-        .querySelectorAll('.loi-list-item');
-      clearAllButton.click();
-
-      expect(dataStoreService.deleteLocationOfInterest).toHaveBeenCalledTimes(
-        loiList.length
-      );
-    });
-
-    it('does not show when there are no LOIs', () => {
-      fixture.componentInstance.lois = List([]);
-      fixture.detectChanges();
-
-      const clearAllButton =
-        fixture.debugElement.nativeElement.querySelector('.clear-all-lois');
-      expect(clearAllButton).toBe(null);
-    });
   });
 });

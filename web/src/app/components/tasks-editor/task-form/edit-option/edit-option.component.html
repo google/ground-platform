@@ -21,7 +21,7 @@
     {{ type === Cardinality.SELECT_ONE ? 'radio_button_unchecked' : 'check_box_outline_blank'}}
   </mat-icon>
 
-  <mat-form-field class="label-option">
+  <mat-form-field class="label-option" [hideRequiredMarker]="true">
     <input
       #optionInput
       matInput
@@ -41,10 +41,10 @@
   <div class="delete-button-container">
     <button
       *ngIf="index"
-      tabindex="-1"
       mat-icon-button
       (click)="onDeleteOption(index)"
       matTooltip="Delete Option"
+      type="button"
     >
       <mat-icon>close</mat-icon>
     </button>

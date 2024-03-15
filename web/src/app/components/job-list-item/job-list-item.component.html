@@ -13,63 +13,66 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 <div class="job-list-item-container">
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Tree node for lois -->
-    <mat-tree-node
-      *matTreeNodeDef="let node"
-      matTreeNodePadding
-      [class.tree-node-selected]="isSelectedLoi(node)"
-      class="loi-tree-node"
-      role="button"
-      tabindex="0"
-      mat-button
-      (click)="selectLoi(node)"
-    >
-      <mat-icon svgIcon={{node.iconName}} class={{node.jobId}} [ngStyle]="{ color: node.iconColor }"></mat-icon>
-      <div id="select-loi">
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [class.tree-node-selected]="isSelectedLoi(node)"
+      class="loi-tree-node" role="button" tabindex="0" mat-button (click)="selectLoi(node)"
+      [style.padding-left]="isSidePanelExpanded() ? '40px' : '16px'">
+      <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }} loi-icon" [ngStyle]="{color: node.iconColor}"
+        [style.padding-left]="isSidePanelExpanded() ? '10px' : '0'"></mat-icon>
+      <div class="select-loi" *ngIf="isSidePanelExpanded()">
         {{ node.name }}
       </div>
+      <button
+        mat-icon-button
+        *ngIf="isSidePanelExpanded() && hasJobProperties(node)"
+        aria-label="properties"
+        (click)="openPropertiesDialog($event, node)"
+      >
+        <mat-icon class="material-symbols-outlined show-properties-icon">
+          data_info_alert
+        </mat-icon>
+      </button>
     </mat-tree-node>
     <!-- Tree node for jobs -->
     <mat-tree-node
       [class.tree-node-selected]="isSelectedLoi(node)"
       *matTreeNodeDef="let node; when: hasChild"
-      matTreeNodePadding
-      class="expandable-node"
+      matTreeNodePadding class="expandable-node"
     >
-      <div class="expandable-node-start">
-        <button
-          mat-icon-button
-          [attr.aria-label]="'Toggle ' + node.item"
-          matTreeNodeToggle
-        >
+      <div class="expandable-node-start" *ngIf="isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
           <mat-icon class="mat-icon-rtl-mirror">
-            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+            chevron_right
           </mat-icon>
         </button>
-        <mat-icon class="job-icon" [ngStyle]="{ color: node.iconColor }">
-          {{node.iconName}}
+
+        <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
+          {{ node.iconName }}
         </mat-icon>
-        {{ node.name }}
+
+        <div>{{ node.name }}</div>
       </div>
-      <div [ngSwitch]="actionsType">
+
+      <div class="expandable-node-start" *ngIf="!isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+          <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}"
+            (click)="treeControl.toggle(node)">
+            {{ node.iconName }}
+          </mat-icon>
+        </button>
+      </div>
+
+      <div [ngSwitch]="actionsType" *ngIf="isSidePanelExpanded()">
         <div *ngSwitchCase="jobListItemActionsType.MENU">
           <button mat-icon-button [matMenuTriggerFor]="jobMenu">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #jobMenu="matMenu">
-            <button
-              mat-menu-item
-              (click)="onImportLocationsOfInterest()"
-              *ngIf="surveyService.canManageSurvey()"
-            >
-              <mat-icon>cloud_upload</mat-icon>
-              <span>Import data collection sites</span>
-            </button>
             <a class="download" (click)="onDownloadCsvClick()" target="_blank">
               <button mat-menu-item>
-                <mat-icon>cloud_download</mat-icon>
                 <span>Download job data</span>
               </button>
             </a>

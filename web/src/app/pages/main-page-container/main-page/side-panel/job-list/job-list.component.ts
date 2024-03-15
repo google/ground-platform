@@ -33,7 +33,7 @@ export class JobListComponent {
 
   constructor(
     readonly surveyService: SurveyService,
-    private navigationService: NavigationService
+    readonly navigationService: NavigationService
   ) {
     this.jobs$ = surveyService
       .getActiveSurvey$()
@@ -42,5 +42,9 @@ export class JobListComponent {
           List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)
         )
       );
+  }
+
+  isSidePanelExpanded() {
+    return this.navigationService.getSidePanelExpanded();
   }
 }

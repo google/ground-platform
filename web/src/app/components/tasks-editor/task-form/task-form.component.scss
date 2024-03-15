@@ -67,7 +67,7 @@
   .task-form {
     display: flex;
     gap: 16px;
-  
+
     .question {
       flex: 1;
     }
@@ -94,19 +94,11 @@
   margin: 3px 20px;
 }
 
-mat-form-field.task-type {  
-  ::ng-deep .mat-form-field-infix {
-    padding: 0 0 1em 0;
-  }
-
-  ::ng-deep .mat-select-arrow-wrapper {
-    transform: none
-  }
-}
-
-.icon-task-type-option {
-  ::ng-deep .mat-option-text {
-    display: inline-flex;
-    align-items: center;
+.add-buttons {
+  display: flex;
+  .add-other-button {
+    display: flex;
+    align-items: baseline;
+    font-size: 14px;
   }
 }
