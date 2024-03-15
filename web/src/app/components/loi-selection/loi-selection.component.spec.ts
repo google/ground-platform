@@ -31,6 +31,7 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 
 import {LoiSelectionComponent} from './loi-selection.component';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 
 describe('LoiSelectionFormComponent', () => {
   let component: LoiSelectionComponent;
@@ -76,7 +77,7 @@ describe('LoiSelectionFormComponent', () => {
     matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     TestBed.configureTestingModule({
-      imports: [GoogleMapsModule],
+      imports: [GoogleMapsModule, GroundIconModule],
       declarations: [LoiSelectionComponent],
       providers: [
         {
@@ -120,8 +121,15 @@ describe('LoiSelectionFormComponent', () => {
       fixture.debugElement.nativeElement.querySelector('.loi-list');
     const loiListValues = Array.from(
       loiList.querySelectorAll('.loi-list-item')
-    ).map((element: Element) => element.textContent);
+    ).map((element: Element) => element.textContent?.trim());
     expect(loiListValues).toEqual(['Unnamed point', 'Unnamed point']);
+  });
+
+  it('shows correct icon associated with LOI', () => {
+    const loiList: HTMLElement =
+      fixture.debugElement.nativeElement.querySelector('.loi-list');
+    const firstLoiIcon = loiList.querySelector('.loi-list-item mat-icon');
+    expect(firstLoiIcon?.getAttribute('data-mat-icon-name')).toBe('point');
   });
 
   it('shows updated list of LOIs', () => {
@@ -134,7 +142,7 @@ describe('LoiSelectionFormComponent', () => {
       fixture.debugElement.nativeElement.querySelector('.loi-list');
     const loiListValues = Array.from(
       loiList.querySelectorAll('.loi-list-item')
-    ).map((element: Element) => element.textContent);
+    ).map((element: Element) => element.textContent?.trim());
     expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
   });
 

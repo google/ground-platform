@@ -24,6 +24,7 @@ import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {getLoiIcon} from 'app/utils/utils';
 
 @Component({
   selector: 'loi-selection',
@@ -42,6 +43,8 @@ export class LoiSelectionComponent {
   job?: Job;
 
   DataCollectionStrategy = DataCollectionStrategy;
+
+  getLoiIcon = getLoiIcon;
 
   constructor(
     private dataStoreService: DataStoreService,

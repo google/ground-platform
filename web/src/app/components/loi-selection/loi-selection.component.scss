@@ -41,7 +41,13 @@
 
     .loi-list {
       max-height: 300px;
-      overflow-y: scroll;
+      overflow-y: auto;
+      // TODO: Find better approach for countering mat-list-item padding.
+      margin: 0 -12px;
+
+      .loi-list-item {
+        border-bottom: 1px solid lightgray;
+      }
     }
   }
 

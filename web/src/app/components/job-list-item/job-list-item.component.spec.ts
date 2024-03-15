@@ -20,7 +20,6 @@ import {CdkTreeModule} from '@angular/cdk/tree';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
 import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
@@ -52,6 +51,7 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {JobListItemComponent} from './job-list-item.component';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 const authState = {
   displayName: null,
   isAnonymous: true,
@@ -175,7 +175,7 @@ describe('JobListItemComponent', () => {
     TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
       imports: [
-        MatIconModule,
+        GroundIconModule,
         MatListModule,
         MatMenuModule,
         MatDialogModule,
