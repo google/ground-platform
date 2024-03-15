@@ -18,12 +18,12 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {BrowserModule} from '@angular/platform-browser';
 
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 import {MapModule} from 'app/pages/main-page-container/main-page/map/map.module';
 
 import {LoiSelectionComponent} from './loi-selection.component';
-import {BrowserModule} from '@angular/platform-browser';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
 
 @NgModule({
   declarations: [LoiSelectionComponent],

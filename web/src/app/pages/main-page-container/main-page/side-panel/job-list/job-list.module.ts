@@ -20,9 +20,9 @@ import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-lis
 import {BrowserModule} from '@angular/platform-browser';
 
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 
 import {JobListComponent} from './job-list.component';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
 
 @NgModule({
   imports: [

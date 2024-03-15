@@ -26,10 +26,10 @@ import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {LoiSelectionComponent} from './loi-selection.component';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
 
 describe('LoiSelectionComponent', () => {
   let component: LoiSelectionComponent;

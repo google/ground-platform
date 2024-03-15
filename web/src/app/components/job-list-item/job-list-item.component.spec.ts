@@ -40,6 +40,7 @@ import {
 } from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -48,7 +49,7 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {JobListItemComponent} from './job-list-item.component';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
+
 const authState = {
   displayName: null,
   isAnonymous: true,
