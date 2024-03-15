@@ -158,6 +158,11 @@ function getValue(taskId: string, task: Task, data: any) {
     task.options
   ) {
     return result.map(id => getMultipleChoiceValues(id, task)).join(', ');
+  } else if (task.type === 'capture_location') {
+    if (!result) {
+      return '';
+    }
+    return toWkt(result);
   } else {
     return result;
   }
