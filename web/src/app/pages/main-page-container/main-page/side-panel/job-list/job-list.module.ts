@@ -16,11 +16,11 @@
 
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 
 import {JobListComponent} from './job-list.component';
 
@@ -30,7 +30,7 @@ import {JobListComponent} from './job-list.component';
     MatListModule,
     JobListItemModule,
     MatButtonModule,
-    MatIconModule,
+    GroundIconModule,
   ],
   exports: [JobListComponent],
   declarations: [JobListComponent],

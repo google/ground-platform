@@ -21,7 +21,6 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatDialogModule} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
@@ -41,6 +40,7 @@ import {
 } from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -49,6 +49,7 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {JobListItemComponent} from './job-list-item.component';
+
 const authState = {
   displayName: null,
   isAnonymous: true,
@@ -175,7 +176,7 @@ describe('JobListItemComponent', () => {
     TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
       imports: [
-        MatIconModule,
+        GroundIconModule,
         MatDialogModule,
         MatListModule,
         MatMenuModule,

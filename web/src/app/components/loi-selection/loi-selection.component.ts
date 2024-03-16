@@ -21,6 +21,7 @@ import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {getLoiIcon} from 'app/utils/utils';
 
 @Component({
   selector: 'loi-selection',
@@ -37,6 +38,8 @@ export class LoiSelectionComponent {
   job?: Job;
 
   DataCollectionStrategy = DataCollectionStrategy;
+
+  getLoiIcon = getLoiIcon;
 
   constructor() {}
 

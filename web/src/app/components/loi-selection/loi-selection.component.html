@@ -24,7 +24,8 @@
 
       <mat-list class="loi-list">
         <mat-list-item class="loi-list-item" *ngFor="let loi of lois">
-          <p matLine>{{ getDisplayName(loi) }}</p>
+          <mat-icon svgIcon={{getLoiIcon(loi)}} [ngStyle]="{ color: job?.color }"></mat-icon>&nbsp;
+          {{ getDisplayName(loi) }}
         </mat-list-item>
       </mat-list>
     </div>
