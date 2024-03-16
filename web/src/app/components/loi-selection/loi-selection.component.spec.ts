@@ -21,12 +21,12 @@ import {GoogleMapsModule} from '@angular/google-maps';
 import {MatDialog} from '@angular/material/dialog';
 import {List, Map} from 'immutable';
 
-import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {GroundIconModule} from 'app/modules/ground-icon.module';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {LoiSelectionComponent} from './loi-selection.component';
@@ -75,7 +75,7 @@ describe('LoiSelectionComponent', () => {
     matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     TestBed.configureTestingModule({
-      imports: [GoogleMapsModule],
+      imports: [GoogleMapsModule, GroundIconModule],
       declarations: [LoiSelectionComponent],
       providers: [
         {
@@ -116,8 +116,15 @@ describe('LoiSelectionComponent', () => {
       fixture.debugElement.nativeElement.querySelector('.loi-list');
     const loiListValues = Array.from(
       loiList.querySelectorAll('.loi-list-item')
-    ).map((element: Element) => element.textContent);
+    ).map((element: Element) => element.textContent?.trim());
     expect(loiListValues).toEqual(['Unnamed point', 'Unnamed point']);
+  });
+
+  it('shows correct icon associated with LOI', () => {
+    const loiList: HTMLElement =
+      fixture.debugElement.nativeElement.querySelector('.loi-list');
+    const firstLoiIcon = loiList.querySelector('.loi-list-item mat-icon');
+    expect(firstLoiIcon?.getAttribute('data-mat-icon-name')).toBe('point');
   });
 
   it('shows updated list of LOIs', () => {
@@ -131,7 +138,7 @@ describe('LoiSelectionComponent', () => {
       fixture.debugElement.nativeElement.querySelector('.loi-list');
     const loiListValues = Array.from(
       loiList.querySelectorAll('.loi-list-item')
-    ).map((element: Element) => element.textContent);
+    ).map((element: Element) => element.textContent?.trim());
     expect(loiListValues).toEqual(['Test 1', 'Unnamed point']);
   });
 });

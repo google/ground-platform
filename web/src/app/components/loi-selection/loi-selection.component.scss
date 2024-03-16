@@ -30,11 +30,17 @@
     z-index: 1;
 
     .loi-list {
-      max-height: 300px;
-      overflow-y: scroll;
       display: flex;
       flex-direction: column;
       align-items: center;
+      max-height: 300px;
+      overflow-y: auto;
+      // TODO: Find better approach for countering mat-list-item padding.
+      margin: 0 -12px;
+
+      .loi-list-item {
+        border-bottom: 1px solid lightgray;
+      }
     }
   }
 
