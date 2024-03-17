@@ -139,6 +139,7 @@ export class EditSurveyComponent implements OnInit {
         ? `#${JobDialogComponent.JOB_NAME_FIELD_ID}`
         : 'first-tabbable',
       data: {dialogType, jobName: job.name ?? ''},
+      panelClass: 'small-width-dialog',
     });
 
     dialogRef.afterClosed().subscribe(async (result: DialogData) => {

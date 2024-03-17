@@ -22,6 +22,11 @@ import {List} from 'immutable';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {ImportDialogComponent} from '../import-dialog/import-dialog.component';
@@ -56,9 +61,22 @@ export class LoiEditorComponent {
   }
 
   clearLois() {
-    for (const loi of this.lois) {
-      this.dataStoreService.deleteLocationOfInterest(this.survey.id, loi.id);
-    }
+    const dialogRef = this.dialog.open(JobDialogComponent, {
+      data: {
+        dialogType: DialogType.DeleteLois,
+        surveyId: this.survey.id,
+        jobId: this.job.id,
+      },
+      panelClass: 'small-width-dialog',
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: DialogData) => {
+      if (!result) return;
+
+      for (const loi of this.lois) {
+        this.dataStoreService.deleteLocationOfInterest(this.survey.id, loi.id);
+      }
+    });
   }
 
   toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {

@@ -82,6 +82,7 @@ export class HeaderComponent {
 
     const dialogRef = this.dialog.open(JobDialogComponent, {
       data: {dialogType: DialogType.UndoJobs},
+      panelClass: 'small-width-dialog',
     });
 
     dialogRef.afterClosed().subscribe(async (result: DialogData) => {

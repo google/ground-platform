@@ -15,40 +15,43 @@
 -->
 
 <h1 mat-dialog-title>Share survey</h1>
-<h2>Who do you want to invite for the survey?</h2>
-<form class="share-form" [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
-  <mat-form-field class="email-input">
-    <mat-label>Email address</mat-label>
-    <input matInput formControlName="email" autocomplete="off" />
-    <mat-error *ngIf="emailControl.touched && emailControl.invalid">
-      <ng-container *ngIf="emailControl.getError('email')">
-        Invalid email format
-      </ng-container>
-      <ng-container *ngIf="emailControl.getError('forbiddenName')">
-        Email address already added
-      </ng-container>
-    </mat-error>
-  </mat-form-field>
-  <mat-form-field>
-    <mat-select formControlName="role">
-      <mat-option
-        *ngFor="let option of roleOptions"
-        [value]="option.value"
-        >{{ option.label }}</mat-option
-      >
-    </mat-select>
-  </mat-form-field>
-</form>
-<div mat-dialog-actions align="end">
-  <button mat-button mat-flat-button (click)="onCancelClicked()">
-    <label>Cancel</label>
-  </button>
-  <button
-    mat-flat-button
-    color="primary"
-    [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
-    (click)="onAddUserSubmit()"
-  >
-    <label>Done</label>
-  </button>
+
+<div mat-dialog-content>
+  <h2>Who do you want to invite for the survey?</h2>
+  <form class="share-form" [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
+    <mat-form-field class="email-input">
+      <mat-label>Email address</mat-label>
+      <input matInput formControlName="email" autocomplete="off" />
+      <mat-error *ngIf="emailControl.touched && emailControl.invalid">
+        <ng-container *ngIf="emailControl.getError('email')">
+          Invalid email format
+        </ng-container>
+        <ng-container *ngIf="emailControl.getError('forbiddenName')">
+          Email address already added
+        </ng-container>
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select formControlName="role">
+        <mat-option
+          *ngFor="let option of roleOptions"
+          [value]="option.value"
+          >{{ option.label }}</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+  </form>
+  <div mat-dialog-actions align="end">
+    <button mat-button mat-flat-button (click)="onCancelClicked()">
+      <label>Cancel</label>
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
+      (click)="onAddUserSubmit()"
+    >
+      <label>Done</label>
+    </button>
+  </div>
 </div>
