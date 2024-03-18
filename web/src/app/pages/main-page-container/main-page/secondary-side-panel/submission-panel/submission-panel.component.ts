@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
@@ -35,7 +35,6 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
 
-  @Input() submissionId!: string;
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
@@ -50,7 +49,6 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.submissionService.selectSubmission(this.submissionId);
     this.subscription.add(
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
