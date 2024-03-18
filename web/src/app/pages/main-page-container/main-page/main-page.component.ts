@@ -127,8 +127,6 @@ export class MainPageComponent implements OnInit {
   private editSubmission(submissionId: string | null) {
     if (submissionId) {
       this.submissionService.selectSubmission(submissionId);
-    } else {
-      this.submissionService.deselectSubmission();
     }
   }
 }

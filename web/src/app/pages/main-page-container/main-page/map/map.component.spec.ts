@@ -43,7 +43,6 @@ import {
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -197,7 +196,7 @@ describe('MapComponent', () => {
       ['getSelectedSubmission$']
     );
     submissionServiceSpy.getSelectedSubmission$.and.returnValue(
-      new BehaviorSubject<Submission | LoadingState>(LoadingState.LOADING)
+      new BehaviorSubject<Submission | Error>(new Error(''))
     );
 
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
