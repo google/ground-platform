@@ -40,6 +40,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   selectedTaskId: string | null = null;
   storage = getStorage();
   firebaseURLs = new Map<string, string>();
+  isLoading = true;
 
   public taskType = TaskType;
 
@@ -51,6 +52,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription.add(
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
+        this.isLoading = !(submission instanceof Submission);
+
         if (submission instanceof Submission) {
           this.submission = submission;
           this.tasks = submission.job

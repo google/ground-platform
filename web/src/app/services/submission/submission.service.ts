@@ -31,12 +31,16 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+import {LoadingState} from '../loading-state.model';
+
 @Injectable({
   providedIn: 'root',
 })
 export class SubmissionService {
   private selectedSubmissionId$ = new ReplaySubject<string>();
-  private selectedSubmission$ = new Observable<Submission | Error>();
+  private selectedSubmission$ = new Observable<
+    Submission | LoadingState | Error
+  >();
 
   constructor(
     private dataStore: DataStoreService,
@@ -52,6 +56,9 @@ export class SubmissionService {
               switchMap(loi =>
                 authService.getUser$().pipe(
                   switchMap(user => {
+                    if (submissionId === '') {
+                      return of(LoadingState.LOADING);
+                    }
                     if (submissionId === NavigationService.SUBMISSION_ID_NEW) {
                       return of(this.createNewSubmission(user, survey, loi));
                     }
@@ -106,10 +113,11 @@ export class SubmissionService {
   }
 
   selectSubmission(submissionId: string) {
+    this.selectedSubmissionId$.next('');
     this.selectedSubmissionId$.next(submissionId);
   }
 
-  getSelectedSubmission$(): Observable<Submission | Error> {
+  getSelectedSubmission$(): Observable<Submission | LoadingState | Error> {
     return this.selectedSubmission$;
   }
 }

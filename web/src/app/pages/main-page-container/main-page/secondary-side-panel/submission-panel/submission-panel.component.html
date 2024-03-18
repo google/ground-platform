@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<div>
+<div *ngIf="!isLoading">
   <div class="submission-title">
     <div class="submission-title-left">
       <button mat-icon-button (click)="navigateToSubmissionList()">
