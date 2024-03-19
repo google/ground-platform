@@ -25,7 +25,7 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {List, Map} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
@@ -196,7 +196,7 @@ describe('MapComponent', () => {
       ['getSelectedSubmission$']
     );
     submissionServiceSpy.getSelectedSubmission$.and.returnValue(
-      new BehaviorSubject<Submission | Error>(new Error(''))
+      new Observable<Submission | Error>()
     );
 
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
