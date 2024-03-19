@@ -504,38 +504,43 @@ export class FirebaseDataConverter {
     resultValue: number | string | List<string>,
     task?: Task
   ): Result | Error {
-    if (typeof resultValue === 'string') {
-      return new Result(resultValue as string);
-    }
-    if (typeof resultValue === 'number') {
-      return new Result(resultValue as number);
-    }
-    if (resultValue instanceof Array) {
-      return new Result(
-        List(
-          resultValue.map(
-            optionId =>
-              task?.getMultipleChoiceOption(optionId) ||
-              new Option(optionId, optionId, optionId, -1)
+    try {
+      if (typeof resultValue === 'string') {
+        return new Result(resultValue as string);
+      }
+      if (typeof resultValue === 'number') {
+        return new Result(resultValue as number);
+      }
+      if (resultValue instanceof Array) {
+        return new Result(
+          List(
+            resultValue
+              .filter(optionId => !optionId.startsWith('['))
+              .map(
+                optionId =>
+                  task?.getMultipleChoiceOption(optionId) ||
+                  new Option(optionId, optionId, optionId, -1)
+              )
           )
-        )
+        );
+      }
+      if (resultValue instanceof Timestamp) {
+        return new Result(resultValue.toDate());
+      }
+      const geometry = toGeometry(resultValue);
+      if (
+        geometry instanceof Point ||
+        geometry instanceof Polygon ||
+        geometry instanceof MultiPolygon
+      ) {
+        return new Result(geometry);
+      }
+      return Error(
+        `Error converting to Result: unknown value type ${typeof resultValue}`
       );
+    } catch (err: any) {
+      return err instanceof Error ? err : new Error(err);
     }
-    if (resultValue instanceof Timestamp) {
-      return new Result(resultValue.toDate());
-    }
-    const geometry = toGeometry(resultValue);
-    if (
-      geometry instanceof Point ||
-      geometry instanceof Polygon ||
-      geometry instanceof MultiPolygon
-    ) {
-      return new Result(geometry);
-    }
-
-    return Error(
-      `Error converting to Result: unknown value type ${typeof resultValue}`
-    );
   }
 
   private static resultToJS(result: Result): {} {
