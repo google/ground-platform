@@ -30,11 +30,10 @@
 
   .card {
     background-color: #f9faf4; /* M3/sys/light/surface */
-
-    .mat-progress-bar-buffer {
+    
+    .mdc-linear-progress__buffer-bar {
       background-color: #e2e3dd;
-      ;
-  }
+    }
 
     .mat-mdc-form-field-focus-overlay {
       background-color: rgb(60, 115, 60, 87);
