@@ -24,6 +24,7 @@ import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {LoadingState} from 'app/services/loading-state.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 
@@ -51,8 +52,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.submissionService.getSelectedSubmission$().subscribe(submission => {
-        this.isLoading = !(submission instanceof Submission);
+      this.submissionService.getActiveSubmission$().subscribe(submission => {
+        this.isLoading = submission === LoadingState.LOADING;
 
         if (submission instanceof Submission) {
           this.submission = submission;

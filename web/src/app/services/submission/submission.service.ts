@@ -38,7 +38,7 @@ import {LoadingState} from '../loading-state.model';
 })
 export class SubmissionService {
   private selectedSubmissionId$ = new ReplaySubject<string>();
-  private selectedSubmission$ = new Observable<
+  private activeSubmission$ = new Observable<
     Submission | LoadingState | Error
   >();
 
@@ -48,12 +48,12 @@ export class SubmissionService {
     loiService: LocationOfInterestService,
     authService: AuthService
   ) {
-    this.selectedSubmission$ = this.selectedSubmissionId$.pipe(
-      switchMap(submissionId =>
-        surveyService.getActiveSurvey$().pipe(
-          switchMap(survey =>
-            loiService.getSelectedLocationOfInterest$().pipe(
-              switchMap(loi =>
+    this.activeSubmission$ = surveyService.getActiveSurvey$().pipe(
+      switchMap(survey =>
+        loiService.getSelectedLocationOfInterest$().pipe(
+          switchMap(loi =>
+            this.selectedSubmissionId$.pipe(
+              switchMap(submissionId =>
                 authService.getUser$().pipe(
                   switchMap(user => {
                     if (submissionId === '') {
@@ -117,7 +117,7 @@ export class SubmissionService {
     this.selectedSubmissionId$.next(submissionId);
   }
 
-  getSelectedSubmission$(): Observable<Submission | LoadingState | Error> {
-    return this.selectedSubmission$;
+  getActiveSubmission$(): Observable<Submission | LoadingState | Error> {
+    return this.activeSubmission$;
   }
 }

@@ -193,9 +193,9 @@ describe('MapComponent', () => {
 
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
-      ['getSelectedSubmission$']
+      ['getActiveSubmission$']
     );
-    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
+    submissionServiceSpy.getActiveSubmission$.and.returnValue(
       new Observable<Submission | Error>()
     );
 
