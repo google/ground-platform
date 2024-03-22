@@ -23,7 +23,7 @@ import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatLegacyButtonHarness as MatButtonHarness} from '@angular/material/legacy-button/testing';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
+import {MatMenuModule} from '@angular/material/menu';
 import {MatTreeModule} from '@angular/material/tree';
 import {MatTreeHarness} from '@angular/material/tree/testing';
 import {Router} from '@angular/router';

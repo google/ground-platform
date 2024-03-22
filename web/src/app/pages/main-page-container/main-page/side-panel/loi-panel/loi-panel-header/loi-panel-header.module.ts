@@ -20,7 +20,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
-import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
+import {MatMenuModule} from '@angular/material/menu';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {LocationOfInterestPanelHeaderComponent} from './loi-panel-header.component';
