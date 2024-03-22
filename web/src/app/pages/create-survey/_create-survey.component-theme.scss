@@ -45,7 +45,6 @@
     }
 
     .progress-bar-title, .description, .option-description,
-    .mat-radio-label-content,
     .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
       color: map.get($foreground, text);
     }
