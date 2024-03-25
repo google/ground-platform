@@ -31,29 +31,12 @@
 
 .left-menu {
   width: 300px;
-}
-
-.mat-nav-list {
   padding: 12px;
+  --mdc-list-list-item-label-text-size: 14px;
+  --mdc-list-list-item-label-text-tracking: 0;
 
-  .mat-list-item {
-    height: 56px;
-    font-size: 14px;
-    border-radius: 32px;
-
-    &:hover, &:focus, &.is-active {
-      background: rgba(31, 31, 31, 0.08);
-    }
-
-    &.job-list-item {
-      .icon {
-        margin-right: 12px;
-      }
-
-      .name {
-        flex: 1;
-      }
-    }
+  .mdc-list-item--with-leading-icon .mdc-list-item__start {
+    margin-right: 12px;
   }
 }
 

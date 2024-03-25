@@ -32,10 +32,10 @@
         [routerLink]="['./survey']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon">
+        <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
           assignment
         </mat-icon>
-        <span>Survey details</span>
+        <span matListItemTitle>Survey details</span>
       </a>
 
       <a
@@ -44,10 +44,10 @@
         [routerLink]="['./share']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon">
+        <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
           group
         </mat-icon>
-        <span>Sharing</span>
+        <span matListItemTitle>Sharing</span>
       </a>
 
       <a
@@ -57,10 +57,10 @@
         [routerLink]="['./json']"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="material-symbols-outlined button-icon">
+        <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
           code
         </mat-icon>
-        <span>JSON</span>
+        <span matListItemTitle>JSON</span>
       </a>
 
       <div class="job-label-and-add-button">
@@ -82,15 +82,18 @@
         [routerLink]="jobRouterLink(job.id)"
         [routerLinkActive]="['is-active']"
       >
-        <mat-icon class="icon" [ngStyle]="{ color: job.color }">label</mat-icon>
+        <mat-icon class="icon" [ngStyle]="{ color: job.color }" matListItemIcon>
+          label
+        </mat-icon>
 
-        <span class="name">{{ job.name }}</span>
+        <span class="name" matListItemTitle>{{ job.name }}</span>
 
         <button
           mat-icon-button
           id="menu-button-{{ i }}"
           [matMenuTriggerFor]="menu"
           (click)="onMenu($event)"
+          matListItemMeta
         >
           <mat-icon>more_vert</mat-icon>
         </button>

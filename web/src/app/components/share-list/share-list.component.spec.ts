@@ -17,8 +17,8 @@
 import {HarnessLoader} from '@angular/cdk/testing';
 import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {MatLegacyListHarness as MatListHarness} from '@angular/material/legacy-list/testing';
+import {MatListModule} from '@angular/material/list';
 import {Map} from 'immutable';
 import {Subject, of} from 'rxjs';
 

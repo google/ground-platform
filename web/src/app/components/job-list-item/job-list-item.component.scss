@@ -18,18 +18,11 @@
   padding: 2px 0;
 }
 
-::ng-deep .mat-list .mat-list-item .mat-line {
+::ng-deep .mat-mdc-list .mat-mdc-list-item .mat-line {
   word-wrap: break-word !important;
   white-space: pre-wrap !important;
 }
 
-/*
-  Workaround to eliminate double-padding between right-hand side overflow
-  menu control and list item.
-*/
-:host ::ng-deep .mat-list-item-content {
-  padding-right: 8px !important;
-}
 
 .expandable-node {
   display: flex;

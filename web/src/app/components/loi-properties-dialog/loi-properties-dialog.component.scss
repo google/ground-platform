@@ -30,14 +30,9 @@
     padding-left: 16px;
     padding-right: 16px;
 
-    ::ng-deep .mat-list {
+    ::ng-deep .mat-mdc-list {
       padding-left: 16px;
       padding-right: 16px;
-    }
-
-    ::ng-deep .mat-list-item-content {
-      padding-left: 0px;
-      padding-right: 0px;
     }
   }
 
