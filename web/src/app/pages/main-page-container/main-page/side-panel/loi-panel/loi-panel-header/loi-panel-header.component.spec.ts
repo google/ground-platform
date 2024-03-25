@@ -42,7 +42,7 @@ type LoiPanelHeaderFixture =
   ComponentFixture<LocationOfInterestPanelHeaderComponent>;
 
 function getAvatarElement(fixture: LoiPanelHeaderFixture): HTMLElement {
-  return fixture.nativeElement.querySelector('img.mat-list-avatar');
+  return fixture.nativeElement.querySelector('img.mat-mdc-list-item-avatar');
 }
 
 function getHeaderElement(fixture: LoiPanelHeaderFixture): HTMLElement {
