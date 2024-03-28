@@ -25,7 +25,7 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {List, Map} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
@@ -43,7 +43,6 @@ import {
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -194,10 +193,10 @@ describe('MapComponent', () => {
 
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
-      ['getSelectedSubmission$']
+      ['getActiveSubmission$']
     );
-    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
-      new BehaviorSubject<Submission | LoadingState>(LoadingState.LOADING)
+    submissionServiceSpy.getActiveSubmission$.and.returnValue(
+      new Observable<Submission | Error>()
     );
 
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
@@ -24,6 +24,7 @@ import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {LoadingState} from 'app/services/loading-state.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 
@@ -35,12 +36,12 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 export class SubmissionPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
 
-  @Input() submissionId!: string;
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
   storage = getStorage();
   firebaseURLs = new Map<string, string>();
+  isLoading = true;
 
   public taskType = TaskType;
 
@@ -50,9 +51,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.submissionService.selectSubmission(this.submissionId);
     this.subscription.add(
-      this.submissionService.getSelectedSubmission$().subscribe(submission => {
+      this.submissionService.getActiveSubmission$().subscribe(submission => {
+        this.isLoading = submission === LoadingState.LOADING;
+
         if (submission instanceof Submission) {
           this.submission = submission;
           this.tasks = submission.job

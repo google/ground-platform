@@ -37,7 +37,6 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 // To make ESLint happy:
@@ -63,18 +62,12 @@ export class SubmissionFormComponent {
     private authService: AuthService,
     private formBuilder: FormBuilder,
     private navigationService: NavigationService,
-    submissionService: SubmissionService,
     surveyService: SurveyService,
     loiService: LocationOfInterestService
   ) {
     surveyService.getActiveSurvey$().subscribe((survey?: Survey) => {
       this.surveyId = survey?.id;
     });
-    submissionService
-      .getSelectedSubmission$()
-      .subscribe((submission?: Submission | LoadingState) =>
-        this.onSelectSubmission(submission)
-      );
     this.job$ = surveyService
       .getActiveSurvey$()
       .pipe(
