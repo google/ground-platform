@@ -17,7 +17,7 @@
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatListModule} from '@angular/material/list';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {GroundIconModule} from 'app/modules/ground-icon.module';

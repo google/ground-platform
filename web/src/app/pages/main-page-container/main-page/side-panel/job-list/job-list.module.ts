@@ -16,7 +16,7 @@
 
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatListModule} from '@angular/material/list';
 import {BrowserModule} from '@angular/platform-browser';
 
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';

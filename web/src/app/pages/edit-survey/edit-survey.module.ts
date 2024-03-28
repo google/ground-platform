@@ -20,12 +20,11 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {RouterModule} from '@angular/router';
 
-import {HeaderModule} from 'app/components/header/header.module';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
 
 import {SurveyHeaderModule} from '../main-page-container/main-page/survey-header/survey-header.module';

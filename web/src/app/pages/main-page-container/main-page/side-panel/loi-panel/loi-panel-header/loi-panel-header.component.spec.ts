@@ -19,7 +19,7 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
 import {List, Map} from 'immutable';
@@ -42,7 +42,7 @@ type LoiPanelHeaderFixture =
   ComponentFixture<LocationOfInterestPanelHeaderComponent>;
 
 function getAvatarElement(fixture: LoiPanelHeaderFixture): HTMLElement {
-  return fixture.nativeElement.querySelector('img.mat-list-avatar');
+  return fixture.nativeElement.querySelector('img.mat-mdc-list-item-avatar');
 }
 
 function getHeaderElement(fixture: LoiPanelHeaderFixture): HTMLElement {
