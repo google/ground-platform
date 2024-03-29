@@ -16,10 +16,11 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
-import {Subscription, switchMap} from 'rxjs';
+import {Subscription, of, switchMap} from 'rxjs';
 
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
+import {isLoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -55,12 +56,15 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
           switchMap(survey =>
             this.loiService.getSelectedLocationOfInterest$().pipe(
               switchMap(loi => {
-                this.iconColor = survey.getJob(loi.jobId)!.color!;
-                this.loi = loi;
-                this.name = LocationOfInterestService.getDisplayName(loi);
-                this.icon = getLoiIcon(loi);
+                if (!isLoadingState(loi)) {
+                  this.iconColor = survey.getJob(loi.jobId)!.color!;
+                  this.loi = loi;
+                  this.name = LocationOfInterestService.getDisplayName(loi);
+                  this.icon = getLoiIcon(loi);
 
-                return this.submissionService.submissions$(survey, loi);
+                  return this.submissionService.submissions$(survey, loi);
+                }
+                return of(List<Submission>());
               })
             )
           )

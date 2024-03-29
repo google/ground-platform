@@ -18,3 +18,7 @@ export enum LoadingState {
   LOADING,
   NOT_LOADED,
 }
+
+export function isLoadingState(value: any): value is LoadingState {
+  return value in LoadingState;
+}

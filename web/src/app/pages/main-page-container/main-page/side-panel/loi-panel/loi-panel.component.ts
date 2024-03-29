@@ -17,14 +17,16 @@
 import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Observable, Subscription, combineLatest} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
+import {filter, switchMap} from 'rxjs/operators';
 
 import {Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {isLoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -54,19 +56,26 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     private dialogService: DialogService,
     private zone: NgZone
   ) {
-    this.submissions$ = surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey =>
-          loiService
-            .getSelectedLocationOfInterest$()
-            .pipe(switchMap(loi => submissionService.submissions$(survey, loi)))
+    this.submissions$ = surveyService.getActiveSurvey$().pipe(
+      switchMap(survey =>
+        loiService.getSelectedLocationOfInterest$().pipe(
+          filter(loi => !isLoadingState(loi)),
+          switchMap(loi => {
+            return submissionService.submissions$(
+              survey,
+              loi as LocationOfInterest
+            );
+          })
         )
-      );
+      )
+    );
     combineLatest([
       surveyService.getActiveSurvey$(),
       loiService.getSelectedLocationOfInterest$(),
-    ]).subscribe(([survey, loi]) => (this.job = survey.jobs.get(loi.jobId)));
+    ]).subscribe(
+      ([survey, loi]) =>
+        (this.job = survey.jobs.get((loi as LocationOfInterest).jobId))
+    );
     this.photoUrls = new Map();
     this.submissions$.forEach(submissions => {
       submissions.forEach(submission => {

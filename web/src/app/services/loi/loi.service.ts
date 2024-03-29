@@ -16,7 +16,14 @@
 
 import {Injectable} from '@angular/core';
 import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  ReplaySubject,
+  Subscription,
+  firstValueFrom,
+  of,
+} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
@@ -28,6 +35,7 @@ import {
 } from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
+import {LoadingState} from 'app/services/loading-state.model';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 @Injectable({
@@ -36,7 +44,10 @@ import {SurveyService} from 'app/services/survey/survey.service';
 export class LocationOfInterestService {
   private lois$: Observable<List<LocationOfInterest>>;
   private selectedLocationOfInterestId$ = new ReplaySubject<string>(1);
-  private selectedLocationOfInterest$: Observable<LocationOfInterest>;
+  private selectedLocationOfInterest$ = new BehaviorSubject<
+    LocationOfInterest | LoadingState
+  >(LoadingState.NOT_LOADED);
+  private subscription = new Subscription();
 
   constructor(
     private dataStore: DataStoreService,
@@ -52,13 +63,19 @@ export class LocationOfInterestService {
         )
       );
 
-    this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
-      switchMap(loiId =>
-        surveyService.getActiveSurvey$().pipe(
-          switchMap(survey => dataStore.lois$(survey)),
-          map(lois => lois.find(loi => loi.id === loiId)!)
+    this.subscription.add(
+      this.selectedLocationOfInterestId$
+        .pipe(
+          switchMap(loiId =>
+            surveyService.getActiveSurvey$().pipe(
+              switchMap(survey => dataStore.lois$(survey)),
+              map(lois => lois.find(loi => loi.id === loiId)!)
+            )
+          )
         )
-      )
+        .subscribe(o => {
+          return this.selectedLocationOfInterest$.next(o);
+        })
     );
   }
 
@@ -138,10 +155,17 @@ export class LocationOfInterestService {
   }
 
   selectLocationOfInterest(loiId: string) {
+    this.selectedLocationOfInterest$.next(LoadingState.LOADING);
     this.selectedLocationOfInterestId$.next(loiId);
   }
 
-  getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
+  deselectLocationOfInterest() {
+    this.selectedLocationOfInterest$.next(LoadingState.NOT_LOADED);
+  }
+
+  getSelectedLocationOfInterest$(): BehaviorSubject<
+    LocationOfInterest | LoadingState
+  > {
     return this.selectedLocationOfInterest$;
   }
 
@@ -190,5 +214,9 @@ export class LocationOfInterestService {
       return;
     }
     await this.dataStore.updateLocationOfInterest(survey.id, loi);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

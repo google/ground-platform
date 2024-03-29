@@ -23,7 +23,6 @@ import {
   OnInit,
 } from '@angular/core';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {Map} from 'immutable';
 import {Subscription} from 'rxjs';
 
 import {GeometryType} from 'app/models/geometry/geometry';
@@ -31,6 +30,7 @@ import {Job} from 'app/models/job.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import {isLoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
@@ -65,8 +65,10 @@ export class LocationOfInterestPanelHeaderComponent
     );
     this.subscription.add(
       loiService.getSelectedLocationOfInterest$().subscribe(loi => {
-        this.loiDisplayName = LocationOfInterestService.getDisplayName(loi);
-        this.loiGeometryType = loi.geometry?.geometryType;
+        if (!isLoadingState(loi)) {
+          this.loiDisplayName = LocationOfInterestService.getDisplayName(loi);
+          this.loiGeometryType = loi.geometry?.geometryType;
+        }
       })
     );
   }
