@@ -50,7 +50,6 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.submissionService.selectSubmission(this.submissionId);
     this.subscription.add(
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
@@ -63,6 +62,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
         }
       })
     );
+
     this.subscription.add(
       this.navigationService.getTaskId$().subscribe(taskId => {
         this.selectedTaskId = taskId;

@@ -21,6 +21,7 @@ import {
   Observable,
   ReplaySubject,
   Subscription,
+  combineLatest,
   of,
 } from 'rxjs';
 import {filter, switchMap} from 'rxjs/operators';
@@ -33,7 +34,7 @@ import {Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LoadingState} from 'app/services/loading-state.model';
+import {LoadingState, isLoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -42,8 +43,6 @@ import {SurveyService} from 'app/services/survey/survey.service';
   providedIn: 'root',
 })
 export class SubmissionService {
-  // TODO: Move selected submission into side panel component where it is
-  // used.
   private selectedSubmissionId$ = new ReplaySubject<string>(1);
   private selectedSubmission$ = new BehaviorSubject<Submission | LoadingState>(
     LoadingState.NOT_LOADED
@@ -57,34 +56,22 @@ export class SubmissionService {
     authService: AuthService
   ) {
     this.subscription.add(
-      this.selectedSubmissionId$
+      combineLatest([
+        surveyService.getActiveSurvey$(),
+        loiService.getSelectedLocationOfInterest$(),
+        authService.getUser$(),
+        this.selectedSubmissionId$,
+      ])
         .pipe(
-          switchMap(submissionId =>
-            surveyService.getActiveSurvey$().pipe(
-              switchMap(survey =>
-                loiService.getSelectedLocationOfInterest$().pipe(
-                  switchMap(loi =>
-                    authService.getUser$().pipe(
-                      switchMap(user => {
-                        if (
-                          submissionId === NavigationService.SUBMISSION_ID_NEW
-                        ) {
-                          return of(
-                            this.createNewSubmission(user, survey, loi)
-                          );
-                        }
-                        return this.dataStore.loadSubmission$(
-                          survey,
-                          loi,
-                          submissionId
-                        );
-                      })
-                    )
-                  )
-                )
-              )
-            )
-          ),
+          switchMap(([survey, loi, user, submissionId]) => {
+            if (submissionId && loi && !isLoadingState(loi)) {
+              if (submissionId === NavigationService.SUBMISSION_ID_NEW) {
+                return of(this.createNewSubmission(user, survey, loi));
+              }
+              return this.dataStore.loadSubmission$(survey, loi, submissionId);
+            }
+            return of(LoadingState.LOADING);
+          }),
           filter(DataStoreService.filterAndLogError<Submission | LoadingState>)
         )
         .subscribe(o =>

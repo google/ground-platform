@@ -17,6 +17,7 @@
 import {TestBed} from '@angular/core/testing';
 import {Subject} from 'rxjs';
 
+import {Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -25,6 +26,8 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('SubmissionService', () => {
+  const activeSurvey$ = new Subject<Survey | null>();
+  const activeLoi$ = new Subject<Survey | null>();
   const user$ = new Subject<User | null>();
   let service: SubmissionService;
 
@@ -32,12 +35,22 @@ describe('SubmissionService', () => {
     TestBed.configureTestingModule({
       providers: [
         {provide: DataStoreService, useValue: {}},
-        {provide: SurveyService, useValue: {}},
-        {provide: LocationOfInterestService, useValue: {}},
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => activeSurvey$,
+          },
+        },
+        {
+          provide: LocationOfInterestService,
+          useValue: {
+            getSelectedLocationOfInterest$: () => activeLoi$,
+          },
+        },
         {
           provide: AuthService,
           useValue: {
-            user$,
+            getUser$: () => user$,
           },
         },
       ],
