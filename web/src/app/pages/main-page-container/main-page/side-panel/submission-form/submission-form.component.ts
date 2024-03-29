@@ -17,12 +17,12 @@
 import {Component} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {List, Map} from 'immutable';
-import {Observable} from 'rxjs';
-import {first, map, switchMap} from 'rxjs/operators';
+import {filter, first, map, switchMap} from 'rxjs/operators';
 
 import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
@@ -34,7 +34,7 @@ import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LoadingState} from 'app/services/loading-state.model';
+import {LoadingState, isLoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -52,7 +52,7 @@ export class SubmissionFormComponent {
   readonly taskTypes = TaskType;
   readonly cardinality = Cardinality;
   readonly jobListItemActionsType = JobListItemActionsType;
-  readonly job$: Observable<Job>;
+  job!: Job;
   surveyId?: string;
   submission?: Submission;
   submissionForm?: FormGroup;
@@ -75,15 +75,19 @@ export class SubmissionFormComponent {
       .subscribe((submission?: Submission | LoadingState) =>
         this.onSelectSubmission(submission)
       );
-    this.job$ = surveyService
+    surveyService
       .getActiveSurvey$()
       .pipe(
         switchMap(survey =>
-          loiService
-            .getSelectedLocationOfInterest$()
-            .pipe(map(loi => survey.jobs.get(loi.jobId)!))
+          loiService.getSelectedLocationOfInterest$().pipe(
+            filter(loi => !isLoadingState(loi)),
+            map(loi => survey.jobs.get((loi as LocationOfInterest).jobId)!)
+          )
         )
-      );
+      )
+      .subscribe(job => {
+        this.job = job;
+      });
   }
 
   onCancel() {
