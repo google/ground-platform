@@ -1,0 +1,26 @@
+{
+  "name": "ground",
+  "version": "0.0.1",
+  "description": "Automated testing of the Ground platform.",
+  "type": "module",
+  "scripts": {
+    "clean": "rm -rf node_modules *.js",
+    "build": "npm i --legacy-peer-deps",
+    "test": "tsx node_modules/jasmine/bin/jasmine",
+    "test:debug": "tsx --inspect node_modules/jasmine/bin/jasmine"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "selenium-webdriver": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^5.1.4",
+    "@types/selenium-webdriver": "^4.1.22",
+    "jasmine": "^5.1.0",
+    "jasmine-expect": "^5.0.0",
+    "tsx": "^4.7.1"
+  },
+  "engines": {
+    "node": "18"
+  }
+}
