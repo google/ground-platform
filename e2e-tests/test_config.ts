@@ -10,5 +10,5 @@ export class TestConfig {
     static ADHOC = true;
     static MULTIPLE_CHOICE_COUNT = 3;
     static MULTIPLE_CHOICE_ADD_OTHER = true;
-    static USER = 'test-user@gmail.com';
+    static USER = 'test-user@google.com';
 }

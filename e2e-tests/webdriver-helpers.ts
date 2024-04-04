@@ -1,5 +1,5 @@
 /** Test helpers. */
-import { Browser, Builder, By, Key, WebDriver, WebElement, until } from 'selenium-webdriver';
+import { Browser, Builder, By, Key, WebDriver, WebElement, error, until } from 'selenium-webdriver';
 import { TestConfig } from './test_config.js';
 import { LoiType, Role, TaskType} from './ground-helpers.js';
 
@@ -96,7 +96,7 @@ export class WebDriverHelper {
         await shareButton.click();
         await this.waitUntilPresent(By.css('.share-form .email-input input'));
         await this.enterText(user, By.css('.share-form .email-input input'));
-        const roleSelector = await this.driver.findElement(By.css('.share-form mat-select'));
+        const roleSelector = () => this.driver!.findElement(By.css('.share-form mat-select'));
         await this.setSelectOption(roleSelector, Role.DATA_COLLECTOR);
         const doneButton = (await this.driver.findElements(By.css('mat-dialog-container button')))[1];
         await doneButton.click();
@@ -142,9 +142,9 @@ export class WebDriverHelper {
         return this.driver.findElement(By.css('button[role="switch"]')).click();
     }
 
-    private async setSelectOption(element: WebElement, optionText: string) {
+    private async setSelectOption(element: () => Promise<WebElement>, optionText: string) {
         driverInitialized(this.driver);
-        await element.click();
+        await (await element()).click();
         await this.waitUntilPresent(By.css('div[role="listbox"] mat-option'))
         const optionElements = await this.driver.findElements(By.css('div[role="listbox"] mat-option'));
         // Make sure element is open before clicking on it.
@@ -156,23 +156,22 @@ export class WebDriverHelper {
                 break;
             }
         }
-        return this.driver.actions().keyDown(Key.ESCAPE);
+        this.driver.actions().keyDown(Key.ESCAPE);
+        return this.waitUntilTextPresent(await element(), optionText);
     }
 
     private async setLoiOption(loiType: LoiType) {
         driverInitialized(this.driver);
-        let element = this.driver.findElement(By.css('.loi-task-container mat-select-trigger'));
+        const loiSelectSelector = By.css('.loi-task-container mat-select');
+        let element = () => this.driver!.findElement(loiSelectSelector);
         await this.setSelectOption(element, loiType);
-        element = this.driver.findElement(By.css('.loi-task-container mat-select-trigger'));
-        return this.waitUntilTextPresent(element, loiType);
     }
 
     private async setTaskOption(taskIndex: number, taskType: TaskType) {
         driverInitialized(this.driver);
-        let element = await this.driver.findElements(By.css('.task-type mat-select-trigger'));
-        await this.setSelectOption(element[taskIndex], taskType);
-        element = await this.driver.findElements(By.css('.task-type mat-select-trigger'));
-        return this.waitUntilTextPresent(element[taskIndex], taskType);
+        const taskSelectSelector = By.css('.task-type mat-select');
+        let element = async () => (await this.driver!.findElements(taskSelectSelector))[taskIndex];
+        return this.setSelectOption(element, taskType);
     }
 
     private async setLoiInstructions(instructions: string) {
