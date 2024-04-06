@@ -1,8 +1,8 @@
-/** All things Ground. */
+/** Defines data type mappings to partial UI string. */
 
 export enum LoiType {
   DROP_PIN = 'pin',
-  DRAW_AREA = 'area',
+  DRAW_AREA = 'draw',
 }
 
 export enum TaskType {

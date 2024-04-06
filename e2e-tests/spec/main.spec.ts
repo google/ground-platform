@@ -5,7 +5,7 @@ import {TestConfig} from '../test_config.js';
 import {LoiType} from '../ground-helpers.js';
 
 // Increase default timeout.
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 5 * 60 * 1000; // ms
+jasmine.DEFAULT_TIMEOUT_INTERVAL = TestConfig.TEST_TIME_OUT;
 
 describe('ground-platform', () => {
   let helper: WebDriverHelper;
@@ -28,7 +28,7 @@ describe('ground-platform', () => {
       TestConfig.JOB_NAME,
       TestConfig.ADHOC
     );
-    await helper.addAllTasks(TestConfig.ADHOC ? LoiType.DROP_PIN : null);
+    await helper.addAllTasks(TestConfig.ADHOC ? TestConfig.LOI_TASK_TYPE : null);
     await helper.shareSurvey(TestConfig.USER);
     await helper.verifySurveyCreated();
   });

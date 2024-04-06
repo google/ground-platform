@@ -45,7 +45,7 @@ export class WebDriverHelper {
     await this.findElementById('add-card').click();
   }
 
-  // TODO: Add predefined GeoJSON support.
+  // TODO: Add predefined GeoJSON import support.
   async setSurveyMetadata(
     title: string,
     description: string,
