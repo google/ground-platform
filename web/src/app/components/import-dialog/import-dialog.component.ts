@@ -29,7 +29,7 @@ import {NotificationService} from 'app/services/notification/notification.servic
 export class ImportDialogComponent {
   private surveyId: string;
   private jobId: string;
-  public readonly acceptedExtensions = 'csv,geojson';
+  public readonly acceptedExtensions = '.csv,.geojson';
   uploadForm: FormGroup;
   public files: Array<File> = [];
   isImporting = false;
