@@ -27,15 +27,17 @@
 
   <mat-dialog-content>
     <mat-list>
-      <mat-list-item class="property-list-item" *ngFor="let property of properties | keyvalue; let lastItem = last;">
-        <div matLine>
-          <div>{{property.key}}</div>
-  
-          <div>{{property.value}}</div>
-        </div>
-  
+      <ng-container *ngFor="let property of properties | keyvalue; let lastItem = last;">
+        <mat-list-item>
+          <div class="mat-list-item-content">
+            <div>{{property.key}}</div>
+
+            <div>{{property.value}}</div>
+          </div>
+        </mat-list-item>
+
         <mat-divider *ngIf="!lastItem"></mat-divider>
-      </mat-list-item>
+      </ng-container>
     </mat-list>
   </mat-dialog-content>
 </div>
