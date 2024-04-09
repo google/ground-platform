@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
-import {DocumentSnapshot} from 'firebase-admin/firestore';
-import {https, Response} from 'firebase-functions/v1';
+import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
+import { DocumentSnapshot } from 'firebase-admin/firestore';
+import { https, Response } from 'firebase-functions/v1';
+import { EmulatorIdToken } from '../handlers';
 
 // This is the only cookie not stripped by Firebase CDN.
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
@@ -39,7 +40,7 @@ export function getAuthBearer(req: https.Request): string | undefined {
  * Verifies and returns the decoded user details from the `Authorization` header or session cookie.
  */
 export async function getDecodedIdToken(req: https.Request): Promise<DecodedIdToken | undefined> {
-  const idToken = getAuthBearer(req);   
+  const idToken = getAuthBearer(req);
   if (idToken) {
     return getAuth().verifyIdToken(idToken);
   } else if (req.cookies) {
@@ -59,16 +60,26 @@ export async function setSessionCookie(req: https.Request, res: Response): Promi
   res.cookie(SESSION_COOKIE_NAME, cookie, { maxAge: expiresIn, httpOnly: true, secure: true });
 }
 
-function getRole(user:DecodedIdToken, survey: DocumentSnapshot): string | null {
-  const acl = survey.get('acl')
+const OWNER_ROLE = 'OWNER';
+const DATA_COLLECTOR_ROLE = 'DATA_COLLECTOR';
+
+function isEmulatorIdToken(user: DecodedIdToken): boolean {
+  return user instanceof EmulatorIdToken;
+}
+
+function getRole(user: DecodedIdToken, survey: DocumentSnapshot): string | null {
+  if (isEmulatorIdToken(user)) {
+    return OWNER_ROLE;
+  }
+  const acl = survey.get('acl');
   return user.email ? acl?.[user.email] : null;
 }
 
-export function canExport(user:DecodedIdToken, survey: DocumentSnapshot): boolean {
+export function canExport(user: DecodedIdToken, survey: DocumentSnapshot): boolean {
   return !!getRole(user, survey);
 }
 
-export function canImport(user:DecodedIdToken, survey: DocumentSnapshot): boolean {
+export function canImport(user: DecodedIdToken, survey: DocumentSnapshot): boolean {
   const role = getRole(user, survey);
-  return role == 'OWNER' || role == 'DATA_COLLECTOR';
+  return role === OWNER_ROLE || role === DATA_COLLECTOR_ROLE;
 }
