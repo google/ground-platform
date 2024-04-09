@@ -25,7 +25,7 @@ const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
 /** Token to be used when running on local emulator for debugging. */
-class EmulatorIdToken implements DecodedIdToken {
+export class EmulatorIdToken implements DecodedIdToken {
   aud = '';
   auth_time = 0;
   exp = 0;
