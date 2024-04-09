@@ -22,6 +22,8 @@ import { EmulatorIdToken } from '../handlers';
 // This is the only cookie not stripped by Firebase CDN.
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
 export const SESSION_COOKIE_NAME = '__session';
+const OWNER_ROLE = 'OWNER';
+const DATA_COLLECTOR_ROLE = 'DATA_COLLECTOR';
 
 /**
  * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
@@ -59,9 +61,6 @@ export async function setSessionCookie(req: https.Request, res: Response): Promi
   const cookie = await getAuth().createSessionCookie(token!!, { expiresIn });
   res.cookie(SESSION_COOKIE_NAME, cookie, { maxAge: expiresIn, httpOnly: true, secure: true });
 }
-
-const OWNER_ROLE = 'OWNER';
-const DATA_COLLECTOR_ROLE = 'DATA_COLLECTOR';
 
 function isEmulatorIdToken(user: DecodedIdToken): boolean {
   return user instanceof EmulatorIdToken;
