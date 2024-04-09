@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
-import { DocumentSnapshot } from 'firebase-admin/firestore';
-import { https, Response } from 'firebase-functions/v1';
-import { EmulatorIdToken } from '../handlers';
+import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
+import {DocumentSnapshot} from 'firebase-admin/firestore';
+import {https, Response} from 'firebase-functions/v1';
+import {EmulatorIdToken} from '../handlers';
 
 // This is the only cookie not stripped by Firebase CDN.
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
