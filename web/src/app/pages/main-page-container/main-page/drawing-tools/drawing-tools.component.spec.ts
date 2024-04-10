@@ -255,7 +255,7 @@ describe('DrawingToolsComponent', () => {
       const jobSelectorLabel = fixture.debugElement.query(
         By.css('#job-selector-label')
       ).nativeElement;
-      expect(jobSelectorLabel.innerHTML).toEqual('Adding point for');
+      expect(jobSelectorLabel.innerText).toEqual('Adding point for');
     }));
 
     it('selects first job id by default', () => {
