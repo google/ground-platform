@@ -26,43 +26,45 @@
     <ng-content select="[left]"></ng-content>
   </div>
 
-  <div *ngIf="canManage">
-    <button
-      mat-icon-button
-      [matMenuTriggerFor]="surveyMenu"
-      *ngIf="state === HeaderState.MAP_VIEW"
-    >
-      <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
-    </button>
+  <div>
+    <ng-container *ngIf="canManage">
 
-    <mat-menu #surveyMenu="matMenu">
-      <a class="download" (click)="onEditSurveyClick()">
-        <button mat-menu-item>Manage survey</button>
-      </a>
-    </mat-menu>
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="surveyMenu"
+        *ngIf="canManage && state === HeaderState.MAP_VIEW"
+      >
+        <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+      </button>
 
-    <button
-      mat-button
-      class="cancel-edit-button"
-      *ngIf="state === HeaderState.EDIT_SURVEY"
-      (click)="onCancelEditSurveyClick()"
-    >
-      Cancel
-    </button>
+      <mat-menu #surveyMenu="matMenu">
+        <a class="download" (click)="onEditSurveyClick()">
+          <button mat-menu-item>Manage survey</button>
+        </a>
+      </mat-menu>
 
-    <button
-      mat-flat-button
-      class="finish-edit-button"
-      *ngIf="state === HeaderState.EDIT_SURVEY"
-      [disabled]="!isDraftSurveyDirtyAndValid()"
-      (click)="onFinishEditSurveyClick()"
-    >
-      Publish changes
-      <mat-icon *ngIf="publishingChanges"
-        ><mat-spinner diameter="18"></mat-spinner
-      ></mat-icon>
-    </button>
+      <button
+        mat-button
+        class="cancel-edit-button"
+        *ngIf="state === HeaderState.EDIT_SURVEY"
+        (click)="onCancelEditSurveyClick()"
+      >
+        Cancel
+      </button>
 
+      <button
+        mat-flat-button
+        class="finish-edit-button"
+        *ngIf="state === HeaderState.EDIT_SURVEY"
+        [disabled]="!isDraftSurveyDirtyAndValid()"
+        (click)="onFinishEditSurveyClick()"
+      >
+        Publish changes
+        <mat-icon *ngIf="publishingChanges"
+          ><mat-spinner diameter="18"></mat-spinner
+        ></mat-icon>
+      </button>
+    </ng-container>
     <ground-current-user-widget></ground-current-user-widget>
   </div>
 </div>
