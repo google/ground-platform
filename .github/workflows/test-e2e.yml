@@ -31,4 +31,4 @@ jobs:
         run: |
           gh workflow run emulator.yml
           sleep 60
-          gh workflow run --repo google/ground-android/.github/workflows --ref sufy/2420/e2e-testing emulator.yml
+          gh workflow run --repo google/ground-android emulator.yml
