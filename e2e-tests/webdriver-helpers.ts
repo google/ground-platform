@@ -160,22 +160,31 @@ export class WebDriverHelper {
     driverInitialized(this.driver);
     let lastError: Error | null = null;
     let tries = TestConfig.WAIT_FOR_SUBMISSION_TRIES;
-    const expandButtonSelector = By.css('.job-list-item-container button');
     do {
       // Wait for the first LOI submission.
       try {
-        await this.waitUntilPresent(
-          expandButtonSelector,
-          TestConfig.LONG_TIME_OUT
-        );
-        const expandSubmissionsButton = await this.driver.findElement(
-          expandButtonSelector
-        );
-        await expandSubmissionsButton.click();
-        await this.waitUntilPresent(
-          By.css('.loi-icon'),
-          TestConfig.LONG_TIME_OUT
-        );
+        try {
+          await this.waitUntilPresent(
+            By.css('.loi-icon'),
+            TestConfig.SHORT_TIME_OUT
+          );
+        } catch (e) {
+          const expandButtonSelector = By.css(
+            '.job-list-item-container button'
+          );
+          await this.waitUntilPresent(
+            expandButtonSelector,
+            TestConfig.LONG_TIME_OUT
+          );
+          const expandSubmissionsButton = await this.driver.findElement(
+            expandButtonSelector
+          );
+          await expandSubmissionsButton.click();
+          await this.waitUntilPresent(
+            By.css('.loi-icon'),
+            TestConfig.LONG_TIME_OUT
+          );
+        }
         // Wait for expected number of submissions.
         const loiIcon = await this.driver.findElement(By.css('.loi-icon'));
         await loiIcon.click();
@@ -190,13 +199,6 @@ export class WebDriverHelper {
         return;
       } catch (e) {
         lastError = e as Error;
-        // No element found. Close the expand button.
-        const expandSubmissionsButton = await this.driver.findElement(
-          expandButtonSelector
-        );
-        if (expandSubmissionsButton) {
-          await expandSubmissionsButton.click();
-        }
       }
     } while (tries-- > 0);
     fail(`No survey submissions appeared: ${lastError}`);
