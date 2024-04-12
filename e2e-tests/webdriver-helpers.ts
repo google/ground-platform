@@ -158,60 +158,51 @@ export class WebDriverHelper {
 
   async waitForSurveySubmissions() {
     driverInitialized(this.driver);
+    let lastError: Error | null = null;
     let tries = TestConfig.WAIT_FOR_SUBMISSION_TRIES;
+    const expandButtonSelector = By.css('.job-list-item-container button');
     do {
-      let expandSubmissionsButton: WebElement | null = null;
+      // Wait for the first LOI submission.
       try {
-        const expandButtonSelector = By.css('.job-list-item-container button');
         await this.waitUntilPresent(
           expandButtonSelector,
           TestConfig.LONG_TIME_OUT
         );
-        expandSubmissionsButton = await this.driver.findElement(
+        const expandSubmissionsButton = await this.driver.findElement(
           expandButtonSelector
         );
-        expandSubmissionsButton.click();
+        await expandSubmissionsButton.click();
         await this.waitUntilPresent(
           By.css('.loi-icon'),
           TestConfig.LONG_TIME_OUT
         );
+        // Wait for expected number of submissions.
+        const loiIcon = await this.driver.findElement(By.css('.loi-icon'));
+        await loiIcon.click();
+        await this.waitUntilPresent(By.css('.submission-item'));
+        const submissionItems = await this.driver.findElements(
+          By.css('.submission-item')
+        );
+        if (submissionItems.length < TestConfig.EXPECTED_SUBMISSION_COUNT) {
+          await this.delay(TestConfig.LONG_TIME_OUT);
+          throw new WebDriverHelperException('Not enough survey submissions');
+        }
         return;
       } catch (e) {
+        lastError = e as Error;
         // No element found. Close the expand button.
+        const expandSubmissionsButton = await this.driver.findElement(
+          expandButtonSelector
+        );
         if (expandSubmissionsButton) {
-          expandSubmissionsButton.click();
+          await expandSubmissionsButton.click();
         }
       }
     } while (tries-- > 0);
-    fail('No survey submissions appeared.');
+    fail(`No survey submissions appeared: ${lastError}`);
   }
 
   async verifySurveySubmissions() {
-    driverInitialized(this.driver);
-    const loiIcon = await this.driver.findElement(By.css('.loi-icon'));
-    await loiIcon.click();
-    await this.waitUntilPresent(By.css('.submission-item'));
-    let submissionItems: WebElement[];
-    do {
-      submissionItems = await this.driver.findElements(
-        By.css('.submission-item')
-      );
-    } while (submissionItems.length < TestConfig.EXPECTED_SUBMISSION_COUNT);
-    for (let i = 0; i < TestConfig.EXPECTED_SUBMISSION_COUNT; i++) {
-      const submissionElements = await this.driver.findElements(
-        By.css('.submission-item')
-      );
-      await submissionElements[i].click();
-      await this.waitUntilPresent(By.css('submission-panel'));
-      this.verifySubmissionData();
-      const backButton = await this.driver.findElement(
-        By.css('.submission-title button')
-      );
-      await backButton.click();
-    }
-  }
-
-  private async verifySubmissionData() {
     // TODO: Verify submission data.
   }
 

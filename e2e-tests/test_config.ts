@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LoiType } from "./ground-helpers";
+import {LoiType} from './ground-helpers';
 
 export class TestConfig {
   static WEB_URL = 'http://localhost:5000';

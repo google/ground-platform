@@ -43,7 +43,9 @@ describe('ground-platform', () => {
       TestConfig.JOB_NAME,
       TestConfig.ADHOC
     );
-    await helper.addAllTasks(TestConfig.ADHOC ? TestConfig.LOI_TASK_TYPE : null);
+    await helper.addAllTasks(
+      TestConfig.ADHOC ? TestConfig.LOI_TASK_TYPE : null
+    );
     await helper.shareSurvey(TestConfig.USER);
     await helper.verifySurveyCreated();
   });
