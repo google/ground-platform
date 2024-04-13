@@ -325,8 +325,8 @@ describe('DrawingToolsComponent', () => {
         job2Item.querySelector('img') as Element,
         jobColor2
       );
-      expect(job1Item.innerHTML).toContain(jobName1);
-      expect(job2Item.innerHTML).toContain(jobName2);
+      expect(job1Item.innerText).toContain(jobName1);
+      expect(job2Item.innerText).toContain(jobName2);
     }));
   });
 });
