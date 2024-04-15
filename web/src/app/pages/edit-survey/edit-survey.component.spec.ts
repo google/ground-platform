@@ -157,7 +157,7 @@ describe('EditSurveyComponent', () => {
     const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
       .nativeElement as HTMLElement;
     // TODO(#1170): Extract the spinner into a component
-    expect(spinner.innerHTML).toContain('Loading survey...');
+    expect(spinner.innerText).toContain('Loading survey...');
   });
 
   describe('when routed in with survey ID', () => {
