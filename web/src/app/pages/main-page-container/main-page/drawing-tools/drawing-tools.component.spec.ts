@@ -313,16 +313,16 @@ describe('DrawingToolsComponent', () => {
 
       const job1Item = fixture.debugElement.query(
         By.css(`#job-selector-item-${jobId1}`)
-      ).nativeElement as Element;
+      ).nativeElement as HTMLElement;
       const job2Item = fixture.debugElement.query(
         By.css(`#job-selector-item-${jobId2}`)
-      ).nativeElement as Element;
+      ).nativeElement as HTMLElement;
       assertElementSrcColor(
-        job1Item.querySelector('img') as Element,
+        job1Item.querySelector('img') as HTMLElement,
         jobColor1
       );
       assertElementSrcColor(
-        job2Item.querySelector('img') as Element,
+        job2Item.querySelector('img') as HTMLElement,
         jobColor2
       );
       expect(job1Item.innerText).toContain(jobName1);
