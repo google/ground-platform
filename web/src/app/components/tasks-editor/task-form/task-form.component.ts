@@ -131,7 +131,7 @@ export const Tasks: {
   },
 };
 
-export const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
+const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
