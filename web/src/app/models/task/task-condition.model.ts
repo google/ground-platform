@@ -16,27 +16,25 @@
 
 import {List} from 'immutable';
 
-import {Copiable} from '../copiable';
-
-export abstract class TaskCondition extends Copiable {}
-
-/**
- * Tasks with this condition are shown only when the data collector is adding a
- * new, unplanned location of interest.
- */
-export class NewUnplannedLocationOfInterestCondition extends TaskCondition {
-  constructor() {
-    super();
-  }
+export enum TaskConditionMatchType {
+  MATCH_ALL,
 }
 
-/**
- * Tasks with this condition are shown only when the user reponds to the
- * previous multiple choice question task with `taskId` with one or more of the
- * options in this condition's `responseIds`.
- */
-export class MultipleChoiceResponseCondition extends TaskCondition {
-  constructor(readonly taskId: string, readonly responseIds: List<String>) {
-    super();
-  }
+export enum TaskConditionExpressionType {
+  ONE_OF_SELECTED,
+}
+
+export class TaskConditionExpression {
+  constructor(
+    readonly expressionType: TaskConditionExpressionType,
+    readonly taskId: string,
+    readonly optionIds: List<string>
+  ) {}
+}
+
+export class TaskCondition {
+  constructor(
+    readonly matchType: TaskConditionMatchType,
+    readonly expressions: List<TaskConditionExpression>
+  ) {}
 }
