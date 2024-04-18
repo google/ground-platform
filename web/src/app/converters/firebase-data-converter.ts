@@ -251,7 +251,7 @@ export class FirebaseDataConverter {
     return new TaskCondition(
       map?.matchType,
       List(
-        map?.expressions.map((expression: any) => ({
+        map?.expressions?.map((expression: any) => ({
           expressionType: expression.expressionType,
           taskId: expression.taskId,
           optionIds: List(expression.optionId),
