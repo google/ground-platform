@@ -59,6 +59,10 @@
           <span>Duplicate</span>
         </button>
 
+        <button mat-menu-item (click)="onTaskConditionToggle()">
+          <span>{{ !conditionControl ? 'Add condition' : 'Delete condition' }}</span>
+        </button>
+
         <mat-divider></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">

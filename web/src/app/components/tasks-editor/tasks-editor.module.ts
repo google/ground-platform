@@ -30,8 +30,8 @@ import {TasksEditorComponent} from './tasks-editor.component';
     DragDropModule,
     FormsModule,
     ReactiveFormsModule,
-    TaskFormModule,
     AddTaskButtonModule,
+    TaskFormModule,
   ],
   exports: [TasksEditorComponent],
 })
