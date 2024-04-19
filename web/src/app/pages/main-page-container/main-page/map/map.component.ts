@@ -20,6 +20,7 @@ import {
   Component,
   Input,
   NgZone,
+  OnChanges,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
@@ -63,7 +64,7 @@ const enlargedPolygonStrokeWeight = 6;
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
 })
-export class MapComponent implements AfterViewInit, OnDestroy {
+export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
   lois$: Observable<List<LocationOfInterest>>;
   loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
@@ -108,6 +109,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   @Input() shouldEnableDrawingTools = false;
   @Input() showPredefinedLoisOnly = false;
+  @Input() selectedJobId = '';
 
   constructor(
     private drawingToolsService: DrawingToolsService,
@@ -124,6 +126,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    this.initMap();
+  }
+
+  ngOnChanges() {
+    this.initMap();
+  }
+
+  initMap() {
     this.subscription.add(
       combineLatest([
         this.activeSurvey$,
@@ -131,10 +141,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.navigationService.getLocationOfInterestId$(),
       ]).subscribe(([survey, lois, locationOfInterestId]) => {
         const loisMap = ImmutableMap(
-          (this.showPredefinedLoisOnly
-            ? lois.filter(loi => loi.predefined !== false)
-            : lois
-          ).map(loi => [loi.id, loi])
+          lois
+            .filter(loi =>
+              this.showPredefinedLoisOnly ? loi.predefined !== false : loi
+            )
+            .filter(loi =>
+              this.selectedJobId !== '' ? loi.jobId === this.selectedJobId : loi
+            )
+            .map(loi => [loi.id, loi])
         );
 
         const loiIdsToRemove = this.loisMap
