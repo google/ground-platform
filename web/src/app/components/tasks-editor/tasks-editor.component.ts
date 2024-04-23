@@ -236,14 +236,8 @@ export class TasksEditorComponent {
             task.condition?.expressions?.toArray().map(expression =>
               this.formBuilder.group({
                 expressionType: expression.expressionType,
-                taskId: expression.taskId,
-                optionIds: this.formBuilder.array(
-                  expression.optionIds.toArray().map(optionId =>
-                    this.formBuilder.group({
-                      optionId,
-                    })
-                  )
-                ),
+                taskId: [expression.taskId, Validators.required],
+                optionIds: [expression.optionIds?.toArray()] || ['dasdas'],
               })
             ) || []
           ),
@@ -297,6 +291,9 @@ export class TasksEditorComponent {
                     expressionType: expression.get('expressionType')
                       ?.value as TaskConditionExpressionType,
                     taskId: expression.get('taskId')?.value as string,
+                    optionIds: List(
+                      expression.get('optionIds')?.value as string[]
+                    ),
                   } as TaskConditionExpression)
               )
             ),

@@ -263,7 +263,7 @@ export class TaskFormComponent {
             this.formBuilder.group({
               expressionType: TaskConditionExpressionType.ONE_OF_SELECTED,
               taskId: '',
-              optionIds: this.formBuilder.array([]),
+              optionIds: [],
             }),
           ]),
         })
