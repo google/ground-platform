@@ -27,6 +27,7 @@ import {
   FormArray,
   FormBuilder,
   FormGroup,
+  Validators,
 } from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {List} from 'immutable';
@@ -262,7 +263,7 @@ export class TaskFormComponent {
           expressions: this.formBuilder.array([
             this.formBuilder.group({
               expressionType: TaskConditionExpressionType.ONE_OF_SELECTED,
-              taskId: '',
+              taskId: [null, Validators.required],
               optionIds: [],
             }),
           ]),
