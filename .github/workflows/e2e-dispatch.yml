@@ -1,0 +1,78 @@
+# Copyright 2024 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: End to End Test Dispatchers
+
+on:
+    workflow_dispatch:
+
+jobs:
+    createTest:
+        name: Create a new survey
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v1
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v2
+              with:
+                node-version: "18"
+
+            - name: Install dependencies
+              run: npm run build:local
+
+            - name: Run create e2e tests
+              run: npm run test:e2e:create
+
+            - name: Store data/local
+              uses: actions/upload-artifact@v4
+              with:
+                name: data-test
+                path: data/test
+                retention-days: 1
+                overwrite: true
+
+    submitTest:
+      needs: createTest
+      name: Submit to survey
+      runs-on: ubuntu-latest
+      steps:
+        - name: Run submission action
+          run: |
+            gh workflow run --repo google/ground-android e2e-dispatch.yml
+
+    verifyTest:
+        needs: submitTest
+        name: Verify survey submissions
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v1
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v2
+              with:
+                node-version: "18"
+
+            - name: Install dependencies
+              run: npm run build:local
+
+            - name: Copy Firebase emulator data
+              uses: actions/download-artifact@v4
+              with:
+                name: data-test
+                path: data/test
+
+            - name: Run create e2e tests
+              run: npm run test:e2e:verify
