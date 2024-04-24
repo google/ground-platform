@@ -61,7 +61,7 @@ export function toGeometry(geometry?: any): Geometry | Error {
   }
   try {
     switch (geometry.type) {
-      case GEOMETRY_TYPES.get(GeometryType.POINT):
+      case GEOMETRY_TYPES.get(GeometryType.POINT):        
         return toPoint(geometry.coordinates);
       case GEOMETRY_TYPES.get(GeometryType.POLYGON):
         return toPolygon(geometry.coordinates);
@@ -119,7 +119,7 @@ function toMultiPolygon(coordinatesMap?: any): MultiPolygon {
 }
 
 function toCoordinate(coordinates?: any): Coordinate {
-  if (!(coordinates && coordinates instanceof GeoPoint)) {
+  if (!coordinates && coordinates.longitude && coordinates.latitude) {
     throw new Error(
       `Error converting to Geometry: expected GeoPoint, got ${stringify(
         coordinates

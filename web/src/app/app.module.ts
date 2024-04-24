@@ -37,6 +37,7 @@ import {AppComponent} from 'app/app.component';
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AppRoutingModule} from 'app/routing.module';
 import {environment} from 'environments/environment';
+import {initializeApp} from 'firebase/app';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -47,6 +48,8 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Required to enable one-tap sign-up credential helper.
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
 };
+
+initializeApp(environment.firebase);
 
 @NgModule({
   declarations: [AppComponent],
