@@ -61,7 +61,7 @@ export function toGeometry(geometry?: any): Geometry | Error {
   }
   try {
     switch (geometry.type) {
-      case GEOMETRY_TYPES.get(GeometryType.POINT):        
+      case GEOMETRY_TYPES.get(GeometryType.POINT):
         return toPoint(geometry.coordinates);
       case GEOMETRY_TYPES.get(GeometryType.POLYGON):
         return toPolygon(geometry.coordinates);

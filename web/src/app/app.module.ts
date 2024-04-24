@@ -30,6 +30,7 @@ import {
 } from '@angular/fire/compat/functions';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {initializeApp} from 'firebase/app';
 import {GoogleAuthProvider} from 'firebase/auth';
 import {FirebaseUIModule, firebaseui} from 'firebaseui-angular';
 
@@ -37,7 +38,6 @@ import {AppComponent} from 'app/app.component';
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AppRoutingModule} from 'app/routing.module';
 import {environment} from 'environments/environment';
-import {initializeApp} from 'firebase/app';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting

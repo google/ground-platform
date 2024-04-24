@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Injectable} from '@angular/core';
-import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
 import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 
@@ -26,7 +26,7 @@ import {environment} from 'environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class AuthGuard  {
+export class AuthGuard {
   constructor(
     private authService: AuthService,
     private navigationService: NavigationService
