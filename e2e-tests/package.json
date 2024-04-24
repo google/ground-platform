@@ -6,8 +6,10 @@
   "scripts": {
     "clean": "gts clean",
     "build": "npm i --legacy-peer-deps",
-    "test": "tsx node_modules/jasmine/bin/jasmine",
-    "test:debug": "tsx --inspect node_modules/jasmine/bin/jasmine",
+    "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create_survey.spec.ts",
+    "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create_survey.spec.ts",
+    "test:verify": "tsx node_modules/jasmine/bin/jasmine spec/verify_submissions.spec.ts",
+    "test:verify:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/verify_submissions.spec.ts",
     "lint": "gts lint",
     "compile": "tsc",
     "fix": "gts fix",

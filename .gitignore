@@ -16,3 +16,5 @@
 **/*.log
 web/google-maps-api.js
 web/coverage/
+# Local emulator snapshots
+data/local*/**

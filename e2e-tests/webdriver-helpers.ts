@@ -156,6 +156,12 @@ export class WebDriverHelper {
     await this.waitUntilTextPresent(jobElement, TestConfig.JOB_NAME);
   }
 
+  async selectTestSurvey() {
+    driverInitialized(this.driver);
+    const titleElement = await this.findElementByText(By.css('mat-card-title'), TestConfig.SURVEY_TITLE);
+    await titleElement?.click();
+  }
+
   async waitForSurveySubmissions() {
     driverInitialized(this.driver);
     let lastError: Error | null = null;
@@ -234,6 +240,17 @@ export class WebDriverHelper {
   private findElementById(id: string) {
     driverInitialized(this.driver);
     return this.driver.findElement(By.id(id));
+  }
+
+  private async findElementByText(selector: By, text: string) {
+    driverInitialized(this.driver);
+    const elements = await this.driver.findElements(selector);
+    for (const element of elements) {
+      if ((await element.getText()).includes(text)) {
+        return element;
+      }
+    }
+    return null;
   }
 
   private enterText(text: string, selector: By) {

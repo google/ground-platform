@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -35,19 +35,8 @@ describe('ground-platform', () => {
     return helper.quit();
   });
 
-  it('adds a new survey', async () => {
-    await helper.addNewSurvey();
-    await helper.setSurveyMetadata(
-      TestConfig.SURVEY_TITLE,
-      TestConfig.SURVEY_DESCRIPTION,
-      TestConfig.JOB_NAME,
-      TestConfig.ADHOC
-    );
-    await helper.addAllTasks(
-      TestConfig.ADHOC ? TestConfig.LOI_TASK_TYPE : null
-    );
-    await helper.shareSurvey(TestConfig.USER);
-    await helper.verifySurveyCreated();
+  it('selects test survey', async () => {
+    await helper.selectTestSurvey();
   });
 
   it('displays submissions', async () => {
