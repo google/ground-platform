@@ -24,6 +24,14 @@
   >
     <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">When adding a new collection site...</div>
 
+    <div *ngIf="formGroup.get('condition')">
+      <ground-task-condition-form
+        [formGroup]="formGroup.get('condition')"
+        [index]="i"
+        [tasks]="multipleChoiceTasks"
+      />
+    </div>
+
     <task-form
       [formGroup]="formGroup"
       [index]="i"

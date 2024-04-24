@@ -104,6 +104,8 @@ export class TasksEditorComponent {
     private formBuilder: FormBuilder
   ) {}
 
+  multipleChoiceTasks = List<Task>();
+
   ngOnChanges(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
@@ -117,10 +119,14 @@ export class TasksEditorComponent {
     });
 
     this.formGroup.valueChanges.subscribe(_ => {
+      this.multipleChoiceTasks = this.toTasks();
+
       this.onValueChanges.emit(this.formGroup?.valid);
     });
 
     this.onValidationChanges.emit(this.formGroup?.valid);
+
+    this.multipleChoiceTasks = this.toTasks();
   }
 
   get formArray() {
@@ -201,10 +207,6 @@ export class TasksEditorComponent {
       event.previousIndex,
       event.currentIndex
     );
-  }
-
-  getMultipleChoiceTasks() {
-    return this.tasks?.filter(task => task.multipleChoice);
   }
 
   toControl(task: Task): FormGroup {

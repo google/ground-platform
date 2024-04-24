@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-import {DragDropModule} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
 
-import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
-import {TaskConditionFormModule} from './task-condition-form/task-condition-form.module';
-import {TaskFormModule} from './task-form/task-form.module';
-import {TasksEditorComponent} from './tasks-editor.component';
+import {
+  TaskConditionFormComponent,
+  TaskPipe,
+} from './task-condition-form.component';
 
 @NgModule({
-  declarations: [TasksEditorComponent],
+  declarations: [TaskConditionFormComponent, TaskPipe],
   imports: [
     CommonModule,
-    DragDropModule,
-    FormsModule,
     ReactiveFormsModule,
-    AddTaskButtonModule,
-    TaskConditionFormModule,
-    TaskFormModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
-  exports: [TasksEditorComponent],
+  exports: [TaskConditionFormComponent],
 })
-export class TasksEditorModule {}
+export class TaskConditionFormModule {}
