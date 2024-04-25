@@ -264,7 +264,7 @@ export class TaskFormComponent {
             this.formBuilder.group({
               expressionType: TaskConditionExpressionType.ONE_OF_SELECTED,
               taskId: [null, Validators.required],
-              optionIds: [],
+              optionIds: [[], Validators.required],
             }),
           ]),
         })
