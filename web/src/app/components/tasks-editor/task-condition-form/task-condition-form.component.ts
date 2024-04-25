@@ -49,7 +49,11 @@ export class TaskConditionFormComponent {
       task => task.multipleChoice && task.index < this.formGroupIndex
     );
 
-    if (this.previousMultipleTasks.size === 0) {
+    if (
+      !this.previousMultipleTasks.find(
+        task => task.id === this.taskIdControl.value
+      )
+    ) {
       if (this.taskIdControl.value !== null) this.taskIdControl.setValue(null);
       if (this.optionIdsControl.value.length !== 0)
         this.optionIdsControl.setValue([]);
