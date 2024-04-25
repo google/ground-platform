@@ -38,7 +38,7 @@ export class TaskOptionsPipe implements PipeTransform {
 })
 export class TaskConditionFormComponent {
   @Input() formGroup!: FormGroup;
-  @Input() index!: number;
+  @Input() formGroupIndex!: number;
   @Input() tasks!: List<Task>;
 
   previousMultipleTasks: List<Task> = List([]);
@@ -46,7 +46,7 @@ export class TaskConditionFormComponent {
 
   ngOnChanges() {
     this.previousMultipleTasks = this.tasks.filter(
-      task => task.multipleChoice && task.index < this.index
+      task => task.multipleChoice && task.index < this.formGroupIndex
     );
 
     if (this.previousMultipleTasks.size === 0) {

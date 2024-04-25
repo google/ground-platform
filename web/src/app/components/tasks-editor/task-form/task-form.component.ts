@@ -147,7 +147,7 @@ const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 })
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
-  @Input() index!: number;
+  @Input() formGroupIndex!: number;
 
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();
@@ -245,11 +245,11 @@ export class TaskFormComponent {
   }
 
   onTaskDelete(): void {
-    this.delete.emit(this.index);
+    this.delete.emit(this.formGroupIndex);
   }
 
   onTaskDuplicate(): void {
-    this.duplicate.emit(this.index);
+    this.duplicate.emit(this.formGroupIndex);
   }
 
   onTaskConditionToggle(): void {

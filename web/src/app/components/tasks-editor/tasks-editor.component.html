@@ -27,14 +27,14 @@
     <div *ngIf="formGroup.get('condition')">
       <ground-task-condition-form
         [formGroup]="formGroup.get('condition')"
-        [index]="i"
+        [formGroupIndex]="i"
         [tasks]="multipleChoiceTasks"
       />
     </div>
 
     <task-form
       [formGroup]="formGroup"
-      [index]="i"
+      [formGroupIndex]="i"
       (delete)="onTaskDelete(i)"
       (duplicate)="onTaskDuplicate(i)"
       (toggleCondition)="onTaskConditionToggle(i)"
