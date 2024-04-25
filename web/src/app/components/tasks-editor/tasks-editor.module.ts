@@ -20,7 +20,7 @@ import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
-import {TaskFormModule} from './task-form/tasks-form.module';
+import {TaskFormModule} from './task-form/task-form.module';
 import {TasksEditorComponent} from './tasks-editor.component';
 
 @NgModule({
@@ -30,8 +30,8 @@ import {TasksEditorComponent} from './tasks-editor.component';
     DragDropModule,
     FormsModule,
     ReactiveFormsModule,
-    TaskFormModule,
     AddTaskButtonModule,
+    TaskFormModule,
   ],
   exports: [TasksEditorComponent],
 })

@@ -34,9 +34,8 @@ import {
 } from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
 import {
-  MultipleChoiceResponseCondition,
-  NewUnplannedLocationOfInterestCondition,
   TaskCondition,
+  TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
@@ -248,31 +247,17 @@ export class FirebaseDataConverter {
   }
 
   private static toCondition(map?: DocumentData): TaskCondition | undefined {
-    switch (map?.type) {
-      case 'multiple_choice_response':
-        return FirebaseDataConverter.toMultipleChoiceResponseCondition(
-          map?.responseIds
-        );
-      case 'new_unplanned_loi':
-        return new NewUnplannedLocationOfInterestCondition();
-      default:
-        return undefined;
-    }
-  }
-
-  private static toMultipleChoiceResponseCondition(
-    taskId?: string,
-    values?: unknown
-  ): MultipleChoiceResponseCondition | undefined {
-    if (
-      !taskId ||
-      !values ||
-      !Array.isArray(values) ||
-      values.some(v => !(v instanceof String))
-    )
-      return undefined;
-    else
-      return new MultipleChoiceResponseCondition(taskId, List<String>(values));
+    if (!map) return undefined;
+    return new TaskCondition(
+      map?.matchType,
+      List(
+        map?.expressions?.map((expression: any) => ({
+          expressionType: expression.expressionType,
+          taskId: expression.taskId,
+          optionIds: List(expression.optionId),
+        }))
+      ) || []
+    );
   }
 
   private static taskToJS(task: Task): {} {
@@ -307,13 +292,10 @@ export class FirebaseDataConverter {
   }
   private static taskConditionToJS(condition?: TaskCondition): {} | undefined {
     if (!condition) return undefined;
-    if (condition instanceof NewUnplannedLocationOfInterestCondition) {
-      return {type: 'new_unplanned_loi'};
-    } else if (condition instanceof MultipleChoiceResponseCondition) {
+    if (condition.matchType === TaskConditionMatchType.MATCH_ALL) {
       return {
-        type: 'multiple_choice_response',
-        taskId: condition.taskId,
-        responseIds: condition.responseIds.toArray(),
+        matchType: condition.matchType,
+        expressions: condition.expressions,
       };
     } else {
       throw new Error(`Unimplemented task condition type $condition`);
