@@ -66,7 +66,7 @@ const enlargedPolygonStrokeWeight = 6;
 })
 export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
-  private selectedJobId$: BehaviorSubject<String> = new BehaviorSubject<String>(
+  private selectedJobId$: BehaviorSubject<string> = new BehaviorSubject<string>(
     ''
   );
   lois$: Observable<List<LocationOfInterest>>;
