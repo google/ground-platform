@@ -103,6 +103,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   markerToReposition?: google.maps.Marker;
   disableMapClicks = false;
   lastFitSurveyId = '';
+  lastFitJobId = '';
   submission: Submission | null = null;
   showSubmissionGeometry = false;
 
@@ -172,9 +173,13 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
         this.removeDeletedLocationsOfInterest(loiIdsToRemove);
         this.addNewLocationsOfInterest(survey, loisToAdd);
-        if (this.lastFitSurveyId !== survey.id) {
+        if (
+          this.lastFitSurveyId !== survey.id ||
+          this.lastFitJobId !== selectedJobId
+        ) {
           this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
           this.lastFitSurveyId = survey.id;
+          this.lastFitJobId = selectedJobId;
         }
         this.selectLocationOfInterest(locationOfInterestId);
       })
