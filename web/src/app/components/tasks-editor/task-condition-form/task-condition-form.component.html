@@ -21,7 +21,7 @@
     <mat-label>Select question</mat-label>
 
     <mat-select formControlName="taskId">
-      <mat-option *ngFor="let task of tasks | filterPreviousTasks:index" [value]="task.id">
+      <mat-option *ngFor="let task of previousMultipleTasks" [value]="task.id">
         {{task.label}}
       </mat-option>
     </mat-select>
@@ -39,9 +39,15 @@
     <mat-label>Select answer</mat-label>
 
     <mat-select formControlName="optionIds" multiple>
-      <mat-option *ngFor="let option of tasks | getTaskOptions:taskIdControl.value" [value]="option.id">
+      <mat-option *ngFor="let option of previousMultipleTasks | getTaskOptions:taskIdControl.value" [value]="option.id">
         {{option.label}}
       </mat-option>
     </mat-select>
+
+    <mat-error *ngIf="optionIdsControl.touched && optionIdsControl.invalid">
+      <ng-container *ngIf="optionIdsControl.hasError('required')">
+        At least one answer must be selected
+      </ng-container>
+    </mat-error>
   </mat-form-field>
 </div>

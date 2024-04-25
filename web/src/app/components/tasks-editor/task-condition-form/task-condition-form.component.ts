@@ -21,13 +21,6 @@ import {List} from 'immutable';
 import {Option} from 'app/models/task/option.model';
 import {Task} from 'app/models/task/task.model';
 
-@Pipe({name: 'filterPreviousTasks', pure: false})
-export class PreviousTaskPipe implements PipeTransform {
-  transform(tasks: List<Task>, filter: number): List<Task> {
-    return tasks.filter(task => task.multipleChoice && task.index < filter);
-  }
-}
-
 @Pipe({name: 'getTaskOptions', pure: false})
 export class TaskOptionsPipe implements PipeTransform {
   transform(tasks: List<Task>, filter: string): List<Option> {
@@ -48,6 +41,21 @@ export class TaskConditionFormComponent {
   @Input() index!: number;
   @Input() tasks!: List<Task>;
 
+  previousMultipleTasks: List<Task> = List([]);
+  options: List<Task> = List([]);
+
+  ngOnChanges() {
+    this.previousMultipleTasks = this.tasks.filter(
+      task => task.multipleChoice && task.index < this.index
+    );
+
+    if (this.previousMultipleTasks.size === 0) {
+      if (this.taskIdControl.value !== null) this.taskIdControl.setValue(null);
+      if (this.optionIdsControl.value.length !== 0)
+        this.optionIdsControl.setValue([]);
+    }
+  }
+
   get exppressionsControl(): FormArray {
     return this.formGroup.get('expressions') as FormArray;
   }
@@ -58,5 +66,9 @@ export class TaskConditionFormComponent {
 
   get taskIdControl(): AbstractControl {
     return this.expressionControl.get('taskId')!;
+  }
+
+  get optionIdsControl(): AbstractControl {
+    return this.expressionControl.get('optionIds')!;
   }
 }
