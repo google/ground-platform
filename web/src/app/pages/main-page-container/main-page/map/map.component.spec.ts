@@ -321,6 +321,8 @@ describe('MapComponent', () => {
     });
 
     it('should render only lois under the job', fakeAsync(() => {
+      component.ngOnChanges();
+
       expect(component.markers.size).toEqual(1);
       const marker1 = component.markers.get(poiId1)!;
       assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));

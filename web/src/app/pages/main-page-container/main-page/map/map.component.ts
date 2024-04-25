@@ -26,7 +26,7 @@ import {
 } from '@angular/core';
 import {GoogleMap} from '@angular/google-maps';
 import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, Subscription, combineLatest} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription, combineLatest} from 'rxjs';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Geometry, GeometryType} from 'app/models/geometry/geometry';
@@ -66,6 +66,9 @@ const enlargedPolygonStrokeWeight = 6;
 })
 export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
+  private selectedJobId$: BehaviorSubject<String> = new BehaviorSubject<String>(
+    ''
+  );
   lois$: Observable<List<LocationOfInterest>>;
   loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
   activeSurvey$: Observable<Survey>;
@@ -125,30 +128,24 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 
-  ngAfterViewInit() {
-    this.initMap();
-  }
-
   ngOnChanges() {
-    this.initMap();
+    this.selectedJobId$.next(this.selectedJobId);
   }
 
-  initMap() {
+  ngAfterViewInit() {
     this.subscription.add(
       combineLatest([
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
-      ]).subscribe(([survey, lois, locationOfInterestId]) => {
+        this.selectedJobId$,
+      ]).subscribe(([survey, lois, locationOfInterestId, selectedJobId]) => {
         const loisMap = ImmutableMap(
           lois
             .filter(
               loi => !this.showPredefinedLoisOnly || loi.predefined !== false
             )
-            .filter(
-              loi =>
-                this.selectedJobId === '' || loi.jobId === this.selectedJobId
-            )
+            .filter(loi => selectedJobId === '' || loi.jobId === selectedJobId)
             .map(loi => [loi.id, loi])
         );
 
