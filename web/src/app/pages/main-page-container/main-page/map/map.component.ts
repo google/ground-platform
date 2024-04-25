@@ -20,12 +20,13 @@ import {
   Component,
   Input,
   NgZone,
+  OnChanges,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
 import {GoogleMap} from '@angular/google-maps';
 import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, Subscription, combineLatest} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription, combineLatest} from 'rxjs';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Geometry, GeometryType} from 'app/models/geometry/geometry';
@@ -63,8 +64,11 @@ const enlargedPolygonStrokeWeight = 6;
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
 })
-export class MapComponent implements AfterViewInit, OnDestroy {
+export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
+  private selectedJobId$: BehaviorSubject<string> = new BehaviorSubject<string>(
+    ''
+  );
   lois$: Observable<List<LocationOfInterest>>;
   loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
   activeSurvey$: Observable<Survey>;
@@ -108,6 +112,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   @Input() shouldEnableDrawingTools = false;
   @Input() showPredefinedLoisOnly = false;
+  @Input() selectedJobId = '';
 
   constructor(
     private drawingToolsService: DrawingToolsService,
@@ -123,18 +128,25 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
   }
 
+  ngOnChanges() {
+    this.selectedJobId$.next(this.selectedJobId);
+  }
+
   ngAfterViewInit() {
     this.subscription.add(
       combineLatest([
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
-      ]).subscribe(([survey, lois, locationOfInterestId]) => {
+        this.selectedJobId$,
+      ]).subscribe(([survey, lois, locationOfInterestId, selectedJobId]) => {
         const loisMap = ImmutableMap(
-          (this.showPredefinedLoisOnly
-            ? lois.filter(loi => loi.predefined !== false)
-            : lois
-          ).map(loi => [loi.id, loi])
+          lois
+            .filter(
+              loi => !this.showPredefinedLoisOnly || loi.predefined !== false
+            )
+            .filter(loi => selectedJobId === '' || loi.jobId === selectedJobId)
+            .map(loi => [loi.id, loi])
         );
 
         const loiIdsToRemove = this.loisMap
