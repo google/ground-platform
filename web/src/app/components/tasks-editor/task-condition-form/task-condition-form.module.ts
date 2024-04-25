@@ -21,12 +21,13 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 
 import {
+  PreviousTaskPipe,
   TaskConditionFormComponent,
-  TaskPipe,
+  TaskOptionsPipe,
 } from './task-condition-form.component';
 
 @NgModule({
-  declarations: [TaskConditionFormComponent, TaskPipe],
+  declarations: [TaskConditionFormComponent, PreviousTaskPipe, TaskOptionsPipe],
   imports: [
     CommonModule,
     ReactiveFormsModule,

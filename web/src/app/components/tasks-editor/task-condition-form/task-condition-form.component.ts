@@ -21,10 +21,20 @@ import {List} from 'immutable';
 import {Option} from 'app/models/task/option.model';
 import {Task} from 'app/models/task/task.model';
 
-@Pipe({name: 'filterPrevious', pure: false})
-export class TaskPipe implements PipeTransform {
+@Pipe({name: 'filterPreviousTasks', pure: false})
+export class PreviousTaskPipe implements PipeTransform {
   transform(tasks: List<Task>, filter: number): List<Task> {
     return tasks.filter(task => task.multipleChoice && task.index < filter);
+  }
+}
+
+@Pipe({name: 'getTaskOptions', pure: false})
+export class TaskOptionsPipe implements PipeTransform {
+  transform(tasks: List<Task>, filter: string): List<Option> {
+    return (
+      tasks.find(task => task.id === filter)?.multipleChoice?.options ||
+      List([])
+    );
   }
 }
 
@@ -37,16 +47,6 @@ export class TaskConditionFormComponent {
   @Input() formGroup!: FormGroup;
   @Input() index!: number;
   @Input() tasks!: List<Task>;
-
-  options: List<Option> = List([]);
-
-  ngOnInit() {
-    this.taskIdControl.valueChanges.subscribe((value: string) => {
-      this.options =
-        this.tasks.find(task => task.id === value)?.multipleChoice?.options ||
-        List([]);
-    });
-  }
 
   get exppressionsControl(): FormArray {
     return this.formGroup.get('expressions') as FormArray;
