@@ -17,17 +17,17 @@
 import 'jasmine';
 
 import {WebDriverHelper} from '../webdriver-helpers.js';
-import {TestConfig} from '../test_config.js';
+import {TEST_TIMEOUT, WEB_URL} from '../test_config.js';
 
 // Increase default timeout.
-jasmine.DEFAULT_TIMEOUT_INTERVAL = TestConfig.TEST_TIME_OUT;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = TEST_TIMEOUT;
 
-describe('ground-platform', () => {
+describe('view submissions flow', () => {
   let helper: WebDriverHelper;
 
   beforeAll(async () => {
     helper = new WebDriverHelper();
-    await helper.start(TestConfig.WEB_URL);
+    await helper.start(WEB_URL);
     await helper.waitUntilPageReady();
   });
 
@@ -41,6 +41,6 @@ describe('ground-platform', () => {
 
   it('displays submissions', async () => {
     await helper.waitForSurveySubmissions();
-    await helper.verifySurveySubmissions();
+    await helper.verifySubmissions();
   });
 });

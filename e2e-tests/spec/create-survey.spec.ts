@@ -17,17 +17,26 @@
 import 'jasmine';
 
 import {WebDriverHelper} from '../webdriver-helpers.js';
-import {TestConfig} from '../test_config.js';
+import {
+  AD_HOC,
+  JOB_NAME,
+  LOI_TASK_TYPE,
+  SURVEY_DESCRIPTION,
+  SURVEY_TITLE,
+  TEST_TIMEOUT,
+  WEB_URL,
+  USER,
+} from '../test_config.js';
 
 // Increase default timeout.
-jasmine.DEFAULT_TIMEOUT_INTERVAL = TestConfig.TEST_TIME_OUT;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = TEST_TIMEOUT;
 
-describe('ground-platform', () => {
+describe('create survey flow', () => {
   let helper: WebDriverHelper;
 
   beforeAll(async () => {
     helper = new WebDriverHelper();
-    await helper.start(TestConfig.WEB_URL);
+    await helper.start(WEB_URL);
     await helper.waitUntilPageReady();
   });
 
@@ -38,15 +47,13 @@ describe('ground-platform', () => {
   it('adds a new survey', async () => {
     await helper.addNewSurvey();
     await helper.setSurveyMetadata(
-      TestConfig.SURVEY_TITLE,
-      TestConfig.SURVEY_DESCRIPTION,
-      TestConfig.JOB_NAME,
-      TestConfig.ADHOC
+      SURVEY_TITLE,
+      SURVEY_DESCRIPTION,
+      JOB_NAME,
+      AD_HOC
     );
-    await helper.addAllTasks(
-      TestConfig.ADHOC ? TestConfig.LOI_TASK_TYPE : null
-    );
-    await helper.shareSurvey(TestConfig.USER);
+    await helper.addAllTasks(AD_HOC ? LOI_TASK_TYPE : null);
+    await helper.shareSurvey(USER);
     await helper.verifySurveyCreated();
   });
 });

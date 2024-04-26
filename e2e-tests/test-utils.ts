@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * Maps keywords in the UI to the LOI types.
+ */
 export enum LoiType {
   DROP_PIN = 'pin',
   DRAW_AREA = 'draw',
 }
 
+/**
+ * Maps keywords in the UI to the task types.
+ */
 export enum TaskType {
   TEXT = 'text',
   SELECT_ONE = 'select one',
@@ -30,6 +36,9 @@ export enum TaskType {
   CAPTURE_LOCATION = 'capture location',
 }
 
+/**
+ * Maps keywords in the UI to the role options.
+ */
 export enum Role {
   DATA_COLLECTOR = 'data collector',
   SURVEY_ORGANIZER = 'survey organizer',

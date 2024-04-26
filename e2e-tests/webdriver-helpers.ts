@@ -23,12 +23,21 @@ import {
   WebElement,
   until,
 } from 'selenium-webdriver';
-import {TestConfig} from './test_config.js';
-import {LoiType, Role, TaskType} from './ground-helpers.js';
+import {
+  EXPECTED_SUBMISSION_COUNT,
+  JOB_NAME,
+  LONG_TIMEOUT,
+  MULTIPLE_CHOICE_ADD_OTHER,
+  MULTIPLE_CHOICE_COUNT,
+  SHORT_TIMEOUT,
+  SURVEY_TITLE,
+  WAIT_FOR_SUBMISSION_TRIES,
+} from './test_config.js';
+import {LoiType, Role, TaskType} from './test-utils.js';
 
 class WebDriverHelperException extends Error {}
 
-function driverInitialized(
+function assertWebDriverInitialized(
   driver: WebDriver | undefined
 ): asserts driver is WebDriver {
   if (!driver) {
@@ -41,19 +50,19 @@ export class WebDriverHelper {
 
   async start(url: string) {
     this.driver = await new Builder().forBrowser(Browser.CHROME).build();
-    this.driver.manage().setTimeouts({implicit: TestConfig.SHORT_TIME_OUT});
+    this.driver.manage().setTimeouts({implicit: SHORT_TIMEOUT});
     return this.driver.get(url);
   }
 
   async quit() {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     return this.driver.quit();
   }
 
   async waitUntilPageReady() {
-    driverInitialized(this.driver);
-    await this.waitUntilPresent(By.css('#add-card'), TestConfig.LONG_TIME_OUT);
-    return this.delay(TestConfig.LONG_TIME_OUT);
+    assertWebDriverInitialized(this.driver);
+    await this.waitUntilPresent(By.css('#add-card'), LONG_TIMEOUT);
+    return this.delay(LONG_TIMEOUT);
   }
 
   async addNewSurvey() {
@@ -83,7 +92,7 @@ export class WebDriverHelper {
   }
 
   async addAllTasks(loiType: LoiType | null = null) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     await this.waitUntilPresent(By.css('task-details'));
     if (loiType !== null) {
       await this.setLoiOption(loiType);
@@ -131,7 +140,7 @@ export class WebDriverHelper {
   }
 
   async shareSurvey(user: string) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const shareButton = await this.driver.findElement(
       By.css('button.share-survey-button')
     );
@@ -150,46 +159,40 @@ export class WebDriverHelper {
   }
 
   async verifySurveyCreated() {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     await this.waitUntilPresent(By.css('.job-list-item-container'));
     const jobElement = await this.driver.findElement(By.css('.job-icon ~ div'));
-    await this.waitUntilTextPresent(jobElement, TestConfig.JOB_NAME);
+    await this.waitUntilTextPresent(jobElement, JOB_NAME);
   }
 
   async selectTestSurvey() {
-    driverInitialized(this.driver);
-    const titleElement = await this.findElementByText(By.css('mat-card-title'), TestConfig.SURVEY_TITLE);
+    assertWebDriverInitialized(this.driver);
+    const titleElement = await this.findElementByText(
+      By.css('mat-card-title'),
+      SURVEY_TITLE
+    );
     await titleElement?.click();
   }
 
   async waitForSurveySubmissions() {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     let lastError: Error | null = null;
-    let tries = TestConfig.WAIT_FOR_SUBMISSION_TRIES;
+    let tries = WAIT_FOR_SUBMISSION_TRIES;
     do {
       // Wait for the first LOI submission.
       try {
         try {
-          await this.waitUntilPresent(
-            By.css('.loi-icon'),
-            TestConfig.SHORT_TIME_OUT
-          );
+          await this.waitUntilPresent(By.css('.loi-icon'), SHORT_TIMEOUT);
         } catch (e) {
           const expandButtonSelector = By.css(
             '.job-list-item-container button'
           );
-          await this.waitUntilPresent(
-            expandButtonSelector,
-            TestConfig.LONG_TIME_OUT
-          );
+          await this.waitUntilPresent(expandButtonSelector, LONG_TIMEOUT);
           const expandSubmissionsButton = await this.driver.findElement(
             expandButtonSelector
           );
           await expandSubmissionsButton.click();
-          await this.waitUntilPresent(
-            By.css('.loi-icon'),
-            TestConfig.LONG_TIME_OUT
-          );
+          await this.waitUntilPresent(By.css('.loi-icon'), LONG_TIMEOUT);
         }
         // Wait for expected number of submissions.
         const loiIcon = await this.driver.findElement(By.css('.loi-icon'));
@@ -198,8 +201,8 @@ export class WebDriverHelper {
         const submissionItems = await this.driver.findElements(
           By.css('.submission-item')
         );
-        if (submissionItems.length < TestConfig.EXPECTED_SUBMISSION_COUNT) {
-          await this.delay(TestConfig.LONG_TIME_OUT);
+        if (submissionItems.length < EXPECTED_SUBMISSION_COUNT) {
+          await this.delay(LONG_TIMEOUT);
           throw new WebDriverHelperException('Not enough survey submissions');
         }
         return;
@@ -210,27 +213,27 @@ export class WebDriverHelper {
     fail(`No survey submissions appeared: ${lastError}`);
   }
 
-  async verifySurveySubmissions() {
+  async verifySubmissions() {
     // TODO: Verify submission data.
   }
 
-  private delay(timeout = TestConfig.SHORT_TIME_OUT) {
+  private delay(timeout = SHORT_TIMEOUT) {
     return new Promise(resolve => {
       setTimeout(resolve, timeout);
     });
   }
 
-  private waitUntilPresent(selector: By, timeout = TestConfig.SHORT_TIME_OUT) {
-    driverInitialized(this.driver);
+  private waitUntilPresent(selector: By, timeout = SHORT_TIMEOUT) {
+    assertWebDriverInitialized(this.driver);
     return this.driver.wait(until.elementsLocated(selector), timeout);
   }
 
   private waitUntilTextPresent(
     element: WebElement,
     text: string,
-    timeout = TestConfig.SHORT_TIME_OUT
+    timeout = SHORT_TIMEOUT
   ) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     return this.driver.wait(
       until.elementTextMatches(element, new RegExp(text, 'i')),
       timeout
@@ -238,12 +241,12 @@ export class WebDriverHelper {
   }
 
   private findElementById(id: string) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     return this.driver.findElement(By.id(id));
   }
 
   private async findElementByText(selector: By, text: string) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const elements = await this.driver.findElements(selector);
     for (const element of elements) {
       if ((await element.getText()).includes(text)) {
@@ -254,7 +257,7 @@ export class WebDriverHelper {
   }
 
   private enterText(text: string, selector: By) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     return this.driver.findElement(selector).sendKeys(text);
   }
 
@@ -263,7 +266,7 @@ export class WebDriverHelper {
   }
 
   private clickToggle(element: WebElement | null = null) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     if (element) {
       return element.findElement(By.css('button[role="switch"]')).click();
     }
@@ -274,7 +277,7 @@ export class WebDriverHelper {
     element: () => Promise<WebElement>,
     optionText: string
   ) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     await (await element()).click();
     await this.waitUntilPresent(By.css('div[role="listbox"] mat-option'));
     const optionElements = await this.driver.findElements(
@@ -294,14 +297,14 @@ export class WebDriverHelper {
   }
 
   private async setLoiOption(loiType: LoiType) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const loiSelectSelector = By.css('.loi-task-container mat-select');
     const element = () => this.driver!.findElement(loiSelectSelector);
     await this.setSelectOption(element, loiType);
   }
 
   private async setTaskOption(taskIndex: number, taskType: TaskType) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const taskSelectSelector = By.css('.task-type mat-select');
     const element = async () =>
       (await this.driver!.findElements(taskSelectSelector))[taskIndex];
@@ -309,14 +312,14 @@ export class WebDriverHelper {
   }
 
   private async setLoiInstructions(instructions: string) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     await this.driver
       .findElement(By.css('.loi-task-container input[ng-reflect-name="label"]'))
       .sendKeys(instructions);
   }
 
   private async setInstructions(taskIndex: number, instructions: string) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const taskContainer = await this.driver.findElements(
       By.css('.task-container:not(.loi-task-container)')
     );
@@ -327,7 +330,7 @@ export class WebDriverHelper {
   }
 
   private async setRequired(taskIndex: number, required: boolean) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const taskContainer = await this.driver.findElements(
       By.css('.task-container:not(.loi-task-container)')
     );
@@ -337,25 +340,25 @@ export class WebDriverHelper {
   }
 
   private async setMultipleChoiceOptions(taskIndex: number) {
-    driverInitialized(this.driver);
+    assertWebDriverInitialized(this.driver);
     const taskContainer = (
       await this.driver.findElements(
         By.css('.task-container:not(.loi-task-container)')
       )
     )[taskIndex];
-    for (let i = 0; i < TestConfig.MULTIPLE_CHOICE_COUNT; i++) {
+    for (let i = 0; i < MULTIPLE_CHOICE_COUNT; i++) {
       const inputElements = await taskContainer.findElements(
         By.css('.edit-options [ng-reflect-name="label"]')
       );
       await inputElements[inputElements.length - 1].sendKeys(`Option ${i + 1}`);
-      if (i < TestConfig.MULTIPLE_CHOICE_COUNT - 1) {
+      if (i < MULTIPLE_CHOICE_COUNT - 1) {
         const addOptionButton = await taskContainer.findElement(
           By.css('button.add-option')
         );
         await addOptionButton.click();
       }
     }
-    if (TestConfig.MULTIPLE_CHOICE_ADD_OTHER) {
+    if (MULTIPLE_CHOICE_ADD_OTHER) {
       const buttons = await taskContainer.findElements(
         By.css('button.add-option')
       );
