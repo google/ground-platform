@@ -49,23 +49,23 @@ export class TaskConditionFormComponent {
       task => task.multipleChoice && task.index < this.formGroupIndex
     );
 
-    if (
-      !this.previousMultipleTasks.find(
-        task => task.id === this.taskIdControl.value
-      )
-    ) {
+    const isSelectedTaskIdValid = this.previousMultipleTasks.find(
+      task => task.id === this.taskIdControl.value
+    );
+
+    if (!isSelectedTaskIdValid) {
       if (this.taskIdControl.value !== null) this.taskIdControl.setValue(null);
       if (this.optionIdsControl.value.length !== 0)
         this.optionIdsControl.setValue([]);
     }
   }
 
-  get exppressionsControl(): FormArray {
+  get expressionsControl(): FormArray {
     return this.formGroup.get('expressions') as FormArray;
   }
 
   get expressionControl(): AbstractControl {
-    return this.exppressionsControl.at(0);
+    return this.expressionsControl.at(0);
   }
 
   get taskIdControl(): AbstractControl {
