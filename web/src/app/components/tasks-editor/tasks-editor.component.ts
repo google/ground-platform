@@ -104,6 +104,8 @@ export class TasksEditorComponent {
     private formBuilder: FormBuilder
   ) {}
 
+  multipleChoiceTasks = List<Task>();
+
   ngOnChanges(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
@@ -117,10 +119,14 @@ export class TasksEditorComponent {
     });
 
     this.formGroup.valueChanges.subscribe(_ => {
+      this.multipleChoiceTasks = this.toTasks();
+
       this.onValueChanges.emit(this.formGroup?.valid);
     });
 
     this.onValidationChanges.emit(this.formGroup?.valid);
+
+    this.multipleChoiceTasks = this.toTasks();
   }
 
   get formArray() {
@@ -203,10 +209,6 @@ export class TasksEditorComponent {
     );
   }
 
-  getMultipleChoiceTasks() {
-    return this.tasks?.filter(task => task.multipleChoice);
-  }
-
   toControl(task: Task): FormGroup {
     const control = this.formBuilder.group({
       id: task.id,
@@ -236,14 +238,9 @@ export class TasksEditorComponent {
             task.condition?.expressions?.toArray().map(expression =>
               this.formBuilder.group({
                 expressionType: expression.expressionType,
-                taskId: expression.taskId,
-                optionIds: this.formBuilder.array(
-                  expression.optionIds.toArray().map(optionId =>
-                    this.formBuilder.group({
-                      optionId,
-                    })
-                  )
-                ),
+                taskId: [expression.taskId, Validators.required],
+                optionIds:
+                  [expression.optionIds?.toArray(), Validators.required] || [],
               })
             ) || []
           ),
@@ -297,6 +294,9 @@ export class TasksEditorComponent {
                     expressionType: expression.get('expressionType')
                       ?.value as TaskConditionExpressionType,
                     taskId: expression.get('taskId')?.value as string,
+                    optionIds: List(
+                      expression.get('optionIds')?.value as string[]
+                    ),
                   } as TaskConditionExpression)
               )
             ),
