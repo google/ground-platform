@@ -15,46 +15,24 @@
  */
 
 .loi-container {
-  position: relative;
+  display: flex;
+  height: 500px;
 
   .loi-panel {
-    position: absolute;
-    text-align: center;
     background: var(--ground-sys-light-surface, #F9FAF4);
-    top: 60px;
-    left: 12px;
-    padding: 24px;
-    border-radius: 8px;
-    height: calc(100% - 80px - 48px);
-    width: 20%;
-    z-index: 1;
+    padding: 0px 24px 0px 16px;
+    overflow-y: auto;
+    width: 226px;
 
-    .loi-list {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-height: 300px;
-      overflow-y: auto;
-      // TODO: Find better approach for countering mat-list-item padding.
-      margin: 0 -12px;
+    .mdc-list-item {
+      padding: 0;
+      border-bottom: 1px solid lightgray;
 
       .loi-list-item {
-        border-bottom: 1px solid lightgray;
+        display: flex;
+        gap: 16px;
       }
     }
-  }
-
-  .loi-permissions {
-    position: absolute;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
-    background: var(--ground-sys-light-inverse-on-surface, #F0F1EB);
-    padding: 8px 12px 8px 8px;
-    border-radius: 40px;
-    display: flex;
-    gap: 12px;
-    z-index: 1;
   }
 
   .loi-map {
