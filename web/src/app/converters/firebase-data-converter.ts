@@ -254,7 +254,7 @@ export class FirebaseDataConverter {
         map?.expressions?.map((expression: any) => ({
           expressionType: expression.expressionType,
           taskId: expression.taskId,
-          optionIds: List(expression.optionId),
+          optionIds: List(expression.optionIds),
         }))
       ) || []
     );
