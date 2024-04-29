@@ -17,11 +17,11 @@
 import {List} from 'immutable';
 
 export enum TaskConditionMatchType {
-  MATCH_ALL,
+  MATCH_ALL = 'MATCH_ALL',
 }
 
 export enum TaskConditionExpressionType {
-  ONE_OF_SELECTED,
+  ONE_OF_SELECTED = 'ONE_OF_SELECTED',
 }
 
 export class TaskConditionExpression {

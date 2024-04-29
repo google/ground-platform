@@ -30,6 +30,11 @@ import {
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
+import {
+  TaskCondition,
+  TaskConditionExpression,
+  TaskConditionExpressionType,
+} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
@@ -198,8 +203,12 @@ export class TasksEditorComponent {
     );
   }
 
+  getMultipleChoiceTasks() {
+    return this.tasks?.filter(task => task.multipleChoice);
+  }
+
   toControl(task: Task): FormGroup {
-    return this.formBuilder.group({
+    const control = this.formBuilder.group({
       id: task.id,
       type: task.type,
       required: task.required,
@@ -216,7 +225,33 @@ export class TasksEditorComponent {
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
       addLoiTask: task.addLoiTask,
-    });
+    }) as FormGroup;
+
+    if (task.condition) {
+      control.addControl(
+        'condition',
+        this.formBuilder.group({
+          matchType: task.condition.matchType,
+          expressions: this.formBuilder.array(
+            task.condition?.expressions?.toArray().map(expression =>
+              this.formBuilder.group({
+                expressionType: expression.expressionType,
+                taskId: expression.taskId,
+                optionIds: this.formBuilder.array(
+                  expression.optionIds.toArray().map(optionId =>
+                    this.formBuilder.group({
+                      optionId,
+                    })
+                  )
+                ),
+              })
+            ) || []
+          ),
+        })
+      );
+    }
+
+    return control;
   }
 
   toTask(index: number): Task {
@@ -236,6 +271,8 @@ export class TasksEditorComponent {
       )
     );
 
+    const condition = task.get('condition') as FormGroup;
+
     return {
       id: task.get('id')?.value as string,
       type: task.get('type')?.value as TaskType,
@@ -250,6 +287,21 @@ export class TasksEditorComponent {
           } as MultipleChoice)
         : undefined,
       addLoiTask: task.get('addLoiTask')?.value as boolean,
+      condition: condition?.value
+        ? ({
+            matchType: condition.get('matchType')?.value,
+            expressions: List(
+              (condition.get('expressions') as FormArray).controls.map(
+                (expression: AbstractControl) =>
+                  ({
+                    expressionType: expression.get('expressionType')
+                      ?.value as TaskConditionExpressionType,
+                    taskId: expression.get('taskId')?.value as string,
+                  } as TaskConditionExpression)
+              )
+            ),
+          } as TaskCondition)
+        : undefined,
     } as Task;
   }
 

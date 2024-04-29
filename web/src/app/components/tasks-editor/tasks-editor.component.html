@@ -20,7 +20,7 @@
   <div
     class="task-container"
     *ngFor="let formGroup of formArray.controls; let i = index;"
-    [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value}"
+    [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value || formGroup.get('condition')}"
   >
     <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">When adding a new collection site...</div>
 
@@ -29,11 +29,10 @@
       [index]="i"
       (delete)="onTaskDelete(i)"
       (duplicate)="onTaskDuplicate(i)"
+      (toggleCondition)="onTaskConditionToggle(i)"
     >
     </task-form>
   </div>
-
-
 </div>
 
 <div id="tasks-help-text">Select task to add</div>
