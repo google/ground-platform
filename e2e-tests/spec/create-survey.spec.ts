@@ -26,7 +26,7 @@ import {
   TEST_TIMEOUT,
   WEB_URL,
   USER,
-} from '../test_config.js';
+} from '../test-config.js';
 
 // Increase default timeout.
 jasmine.DEFAULT_TIMEOUT_INTERVAL = TEST_TIMEOUT;

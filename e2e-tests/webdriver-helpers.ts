@@ -32,7 +32,7 @@ import {
   SHORT_TIMEOUT,
   SURVEY_TITLE,
   WAIT_FOR_SUBMISSION_TRIES,
-} from './test_config.js';
+} from './test-config.js';
 import {LoiType, Role, TaskType} from './test-utils.js';
 
 class WebDriverHelperException extends Error {}

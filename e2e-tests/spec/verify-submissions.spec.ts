@@ -17,7 +17,7 @@
 import 'jasmine';
 
 import {WebDriverHelper} from '../webdriver-helpers.js';
-import {TEST_TIMEOUT, WEB_URL} from '../test_config.js';
+import {TEST_TIMEOUT, WEB_URL} from '../test-config.js';
 
 // Increase default timeout.
 jasmine.DEFAULT_TIMEOUT_INTERVAL = TEST_TIMEOUT;
