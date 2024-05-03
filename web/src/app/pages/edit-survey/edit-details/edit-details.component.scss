@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,31 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
+.survey-details-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
-import {SurveyDetailsModule} from 'app/pages/create-survey/survey-details/survey-details.module';
-import {EditDetailsComponent} from 'app/pages/edit-survey/edit-details/edit-details.component';
+  .survey-detail-card {
+    background: #FCFDF7;
+    border: 1px #E2E3DD solid;
+    border-radius: 8px;
+    padding: 24px;
 
-@NgModule({
-  declarations: [EditDetailsComponent],
-  imports: [CommonModule, SurveyDetailsModule, MatButtonModule],
-  exports: [EditDetailsComponent],
-})
-export class EditDetailsModule {}
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .card-row {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 12px;
+
+      &.delete-survey {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}

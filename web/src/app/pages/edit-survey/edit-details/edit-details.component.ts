@@ -15,15 +15,21 @@
  */
 
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {MatDialogRef} from '@angular/material/dialog';
+import {Observable, Subscription, firstValueFrom} from 'rxjs';
 
+import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Survey} from 'app/models/survey.model';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {DialogService} from 'app/services/dialog/dialog.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'ground-edit-details',
   templateUrl: './edit-details.component.html',
+  styleUrls: ['./edit-details.component.scss'],
 })
 export class EditDetailsComponent implements OnInit {
   subscription: Subscription = new Subscription();
@@ -33,7 +39,12 @@ export class EditDetailsComponent implements OnInit {
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
 
-  constructor(public draftSurveyService: DraftSurveyService) {}
+  constructor(
+    public draftSurveyService: DraftSurveyService,
+    private dialogService: DialogService,
+    private surveyService: SurveyService,
+    private navigationService: NavigationService
+  ) {}
 
   ngOnInit() {
     this.subscription.add(
@@ -53,6 +64,30 @@ export class EditDetailsComponent implements OnInit {
         valid
       );
     }
+  }
+
+  openDeleteSurveyDialog(): Promise<
+    Observable<MatDialogRef<ConfirmationDialogComponent, boolean>>
+  > {
+    return firstValueFrom(
+      this.dialogService
+        .openConfirmationDialog(
+          'Warning',
+          'Are you sure you wish to delete this survey? ' +
+            'Any associated data will be lost. This cannot be undone.'
+        )
+        .afterClosed()
+    );
+  }
+
+  deleteSurvey() {
+    this.openDeleteSurveyDialog().then(dialogResult => {
+      if (dialogResult) {
+        this.surveyService.deleteSurvey(this.survey!);
+
+        this.navigationService.navigateToSurveyList();
+      }
+    });
   }
 
   ngOnDestroy() {
