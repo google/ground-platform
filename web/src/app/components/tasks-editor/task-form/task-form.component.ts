@@ -312,7 +312,7 @@ export class TaskFormComponent {
     this.optionsControl.push(formGroup);
   }
 
-  openDeleteDialogOption(): Promise<
+  openDeleteOptionDialog(): Promise<
     Observable<MatDialogRef<ConfirmationDialogComponent, boolean>>
   > {
     return firstValueFrom(
@@ -327,7 +327,7 @@ export class TaskFormComponent {
   }
 
   onDeleteOption(index: number) {
-    this.openDeleteDialogOption().then(dialogResult => {
+    this.openDeleteOptionDialog().then(dialogResult => {
       if (dialogResult) {
         this.optionsControl.removeAt(index);
       }
@@ -343,7 +343,7 @@ export class TaskFormComponent {
   }
 
   onDeleteOtherOption(): void {
-    this.openDeleteDialogOption().then(dialogResult => {
+    this.openDeleteOptionDialog().then(dialogResult => {
       if (dialogResult) {
         this.hasOtherOptionControl.setValue(false);
       }
