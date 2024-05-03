@@ -329,6 +329,16 @@ describe('MapComponent', () => {
       assertMarkerIcon(marker1, jobColor1, 30);
       expect(marker1.getMap()).toEqual(component.map.googleMap!);
     }));
+
+    it('should fit the map when survey changed', fakeAsync(() => {
+      spyOn(component.map, 'fitBounds');
+      component.selectedJobId = jobId2;
+      component.ngOnChanges();
+
+      expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
+        new google.maps.LatLngBounds(new google.maps.LatLng(45.6, 12.3))
+      );
+    }));
   });
 
   describe('when backend LOIs update', () => {

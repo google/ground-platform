@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,12 @@
  * limitations under the License.
  */
 
-.loi-container {
+.task-condition-form {
   display: flex;
-  height: 500px;
+  align-items: baseline;
+  gap: 12px;
 
-  .loi-panel {
-    background: var(--ground-sys-light-surface, #F9FAF4);
-    padding: 0px 24px 0px 16px;
-    overflow-y: auto;
-    width: 226px;
-
-    .mdc-list-item {
-      padding: 0;
-      border-bottom: 1px solid lightgray;
-
-      .loi-list-item {
-        display: flex;
-        gap: 16px;
-      }
-    }
+  .mat-mdc-form-field {
+    flex: 1;
   }
-
-  .loi-map {
-    height: 500px;
-    width: 100%;
-  }
-}
-
-.no-lois-image-container {
-  padding-top: 40px;
-  font-size: 11px;
-  color: #727970;
-  text-align: center;
 }
