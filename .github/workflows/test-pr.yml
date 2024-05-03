@@ -44,7 +44,7 @@ jobs:
         run: ./precheck.sh
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install
 
       - name: Run Jasmine tests
         run: npm run test-with-coverage

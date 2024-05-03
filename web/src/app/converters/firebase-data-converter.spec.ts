@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timestamp} from '@angular/fire/firestore';
+import {Timestamp} from 'firebase/firestore';
 import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';

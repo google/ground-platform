@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rm -rf node_modules dist",
     "pregenerate": "rm -rf dist && mkdir -p dist/generated",
-    "generate": "npm i --legacy-peer-deps && json2ts --no-declareExternallyReferenced --no-bannerComment --cwd=src -i 'src/*.json' -o dist/tmp/",
+    "generate": "npm install && json2ts --no-declareExternallyReferenced --no-bannerComment --cwd=src -i 'src/*.json' -o dist/tmp/",
     "postgenerate": "cat dist/tmp/*.d.ts > dist/generated/index.d.ts",
     "prebuild": "npm run generate",
     "build": "tsc dist/generated/index.d.ts"
