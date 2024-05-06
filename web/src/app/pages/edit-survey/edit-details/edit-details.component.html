@@ -32,10 +32,9 @@
     <div class="card-title">Delete survey</div>
     <div class="card-row delete-survey">
       <div style="flex: 1;">Permanently delete survey and associated data</div>
-      <div>
-        <button mat-stroked-button color="warn" (click)="deleteSurvey()">
-          Delete survey
-        </button>
-      </div>
+
+      <button mat-flat-button (click)="openDeleteSurveyDialog()">
+        Delete survey
+      </button>
   </div>
 </div>

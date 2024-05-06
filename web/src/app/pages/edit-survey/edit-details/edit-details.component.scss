@@ -35,9 +35,19 @@
       font-weight: 600;
       margin-top: 12px;
 
+      :nth-child(1) {
+        flex: 1;
+      }
+
       &.delete-survey {
         display: flex;
         align-items: center;
+
+        button {
+          border-radius: 100px;
+          border: 1px solid #747775;
+          color: #BA1A1A;
+        }
       }
     }
   }
