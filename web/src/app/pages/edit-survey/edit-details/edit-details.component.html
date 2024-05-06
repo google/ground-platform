@@ -18,7 +18,7 @@
   <div class="survey-detail-card">
     <div class="card-title">Survey name and description</div>
 
-    <div class="card-row">
+    <div class="card-row edit-survey-details">
       <survey-details
         #surveyDetails
         [title]="survey?.title"
@@ -31,7 +31,7 @@
   <div class="survey-detail-card">
     <div class="card-title">Delete survey</div>
     <div class="card-row delete-survey">
-      <div style="flex: 1;">Permanently delete survey and associated data</div>
+      <div>Permanently delete survey and associated data</div>
 
       <button mat-flat-button (click)="openDeleteSurveyDialog()">
         Delete survey

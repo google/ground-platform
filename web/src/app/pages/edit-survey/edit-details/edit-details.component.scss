@@ -28,15 +28,20 @@
     .card-title {
       font-size: 16px;
       font-weight: 700;
+      line-height: 24px;
     }
 
     .card-row {
       font-size: 14px;
-      font-weight: 600;
-      margin-top: 12px;
+      font-weight: 500;
+      line-height: 20px;
 
       :nth-child(1) {
         flex: 1;
+      }
+
+      &.edit-survey-details {
+        margin-top: 12px;
       }
 
       &.delete-survey {
@@ -44,8 +49,12 @@
         align-items: center;
 
         button {
+          height: 40px;
           border-radius: 100px;
           border: 1px solid #747775;
+          background: #FCFDF7;
+          padding: 10px 24px;
+          gap: 8px;
           color: #BA1A1A;
         }
       }
