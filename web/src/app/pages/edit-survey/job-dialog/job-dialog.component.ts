@@ -23,6 +23,8 @@ export enum DialogType {
   DeleteJob,
   UndoJobs,
   DeleteLois,
+  DeleteOption,
+  DeleteSurvey,
 }
 
 export interface DialogData {
@@ -56,6 +58,10 @@ export class JobDialogComponent {
         return 'Unpublished changes';
       case DialogType.DeleteLois:
         return 'Delete predefined sites';
+      case DialogType.DeleteOption:
+        return 'Delete option';
+      case DialogType.DeleteSurvey:
+        return 'Delete survey';
       default:
         return '';
     }
@@ -72,6 +78,10 @@ export class JobDialogComponent {
       case DialogType.UndoJobs:
         return 'Continue';
       case DialogType.DeleteLois:
+        return 'Confirm';
+      case DialogType.DeleteOption:
+        return 'Confirm';
+      case DialogType.DeleteSurvey:
         return 'Confirm';
       default:
         return '';

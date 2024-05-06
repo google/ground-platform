@@ -121,7 +121,7 @@
       [formGroup]="formGroup"
       [index]="i"
       [type]="cardinalityControl.value"
-      (delete)="onDeleteOption(i)"
+      (delete)="openDeleteOptionDialog(i)"
     >
     </ground-edit-option>
 
@@ -130,7 +130,7 @@
       [formGroup]="otherOption"
       [index]="-1"
       [type]="cardinalityControl.value"
-      (delete)="onDeleteOtherOption()"
+      (delete)="openDeleteOptionDialog()"
     >
     </ground-edit-option>
 

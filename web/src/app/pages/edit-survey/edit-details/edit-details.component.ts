@@ -15,16 +15,20 @@
  */
 
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {Observable, Subscription, firstValueFrom} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
+import {Subscription} from 'rxjs';
 
-import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Survey} from 'app/models/survey.model';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
-import {DialogService} from 'app/services/dialog/dialog.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from '../job-dialog/job-dialog.component';
 
 @Component({
   selector: 'ground-edit-details',
@@ -40,8 +44,8 @@ export class EditDetailsComponent implements OnInit {
   surveyDetails?: SurveyDetailsComponent;
 
   constructor(
+    public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
-    private dialogService: DialogService,
     private surveyService: SurveyService,
     private navigationService: NavigationService
   ) {}
@@ -66,28 +70,20 @@ export class EditDetailsComponent implements OnInit {
     }
   }
 
-  openDeleteSurveyDialog(): Promise<
-    Observable<MatDialogRef<ConfirmationDialogComponent, boolean>>
-  > {
-    return firstValueFrom(
-      this.dialogService
-        .openConfirmationDialog(
-          'Warning',
-          'Are you sure you wish to delete this survey? ' +
-            'Any associated data will be lost. This cannot be undone.'
-        )
-        .afterClosed()
-    );
-  }
+  openDeleteSurveyDialog() {
+    this.dialog
+      .open(JobDialogComponent, {
+        data: {dialogType: DialogType.DeleteSurvey},
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (result?.dialogType === DialogType.DeleteSurvey) {
+          this.surveyService.deleteSurvey(this.survey!);
 
-  deleteSurvey() {
-    this.openDeleteSurveyDialog().then(dialogResult => {
-      if (dialogResult) {
-        this.surveyService.deleteSurvey(this.survey!);
-
-        this.navigationService.navigateToSurveyList();
-      }
-    });
+          this.navigationService.navigateToSurveyList();
+        }
+      });
   }
 
   ngOnDestroy() {
