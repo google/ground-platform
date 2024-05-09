@@ -48,7 +48,6 @@
 @use 'app/pages/main-page-container/main-page/_main-page.component-theme' as main-page;
 @use 'app/pages/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
 
-@import '@angular/material/theming';
 @import 'firebaseui/dist/firebaseui.css';
 
 // Include the common styles for Angular Material. This allows us to only
@@ -127,15 +126,15 @@ button .mat-icon + label {
 }
 
 .mat-mdc-menu-item mat-icon {
-  color: mat-color($foreground, icon) !important;
+  color: mat.get-color-from-palette($foreground, icon) !important;
 }
 
 snack-bar-container.success {
-  background-color: mat-color($primary);
+  background-color: mat.get-color-from-palette($primary, default)
 }
 
 snack-bar-container.error {
-  background-color: mat-color($warn);
+  background-color: mat.get-color-from-palette($warn, default)
 }
 
 snack-bar-container.notification {
