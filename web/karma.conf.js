@@ -19,11 +19,14 @@
 
 process.env.CHROME_BIN = require('puppeteer').executablePath();
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     basePath: '',
-    frameworks:
-        ['jasmine', 'jasmine-matchers', '@angular-devkit/build-angular'],
+    frameworks: [
+      'jasmine',
+      'jasmine-matchers',
+      '@angular-devkit/build-angular',
+    ],
     plugins: [
       'karma-jasmine',
       'karma-chrome-launcher',
@@ -34,8 +37,7 @@ module.exports = function(config) {
       '@angular-devkit/build-angular/plugins/karma',
     ],
     client: {
-      clearContext:
-          false,  // leave Jasmine Spec Runner output visible in browser
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
     coverageIstanbulReporter: {
       dir: require('path').join(__dirname, './coverage/web'),

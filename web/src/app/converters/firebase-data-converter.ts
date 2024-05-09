@@ -403,10 +403,6 @@ export class FirebaseDataConverter {
         `Error converting to submission: submission ${id} does not have document data.`
       );
     }
-    // TODO(#1288): Clean up remaining references to old responses field
-    // Support submissions that have results or responses fields instead of data
-    // before model change.
-    const submissionData = data.data ?? data.results ?? data.responses;
     return new Submission(
       id,
       data.loiId,
@@ -461,6 +457,9 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toResults(job: Job, data: DocumentData): Map<string, Result> {
+    // TODO(#1288): Clean up remaining references to old responses field
+    // Support submissions that have results or responses fields instead of data
+    // before model change.
     const submissionData = data.data ?? data.results ?? data.responses;
     return Map<string, Result>(
       keys(submissionData)
