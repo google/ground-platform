@@ -55,13 +55,13 @@ limitations under the License.
                 <div class="submission-response-geometry-number" [ngStyle]="{ 'background-color': this.submission?.job.color ?? 'black' }">
                   {{i}}
                 </div>
-                <div class="submission-response-geometry-label">
+                <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.DRAW_AREA" class="submission-response-geometry-label">
                   {{task.id}}
                 </div>
+                <div *ngIf="task.type === taskType.CAPTURE_LOCATION" class="submission-response-geometry-label">
+                  {{getCaptureLocationCoord(task)}}
+                </div>
               </div>
-            </div>
-            <div *ngIf="task.type === taskType.CAPTURE_LOCATION" >
-              {{getCaptureLocationCoord(task)}}
             </div>
             <!-- Remaining task types -->
             <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE || task.type === taskType.TIME || task.type === taskType.DATE_TIME">

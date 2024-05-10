@@ -160,7 +160,6 @@
       }
     }
   },
-  "defaultProject": "web",
   "cli": {
     "analytics": "a3d976d8-4082-411f-98f4-58b9c7a5b304"
   }

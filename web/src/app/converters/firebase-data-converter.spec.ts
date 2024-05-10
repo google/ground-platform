@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timestamp} from 'firebase/firestore';
+import {Timestamp} from '@angular/fire/firestore';
 import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
@@ -131,6 +131,7 @@ class MockModel {
       task002: MockModel.task002,
       task003: MockModel.task003,
       task004: MockModel.task004,
+      task005: MockModel.task005,
     })
   );
 }
