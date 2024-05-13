@@ -298,7 +298,7 @@ export class DataStoreService {
 
   lois$({id}: Survey): Observable<List<LocationOfInterest>> {
     return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`, ref => ref.orderBy('properties.name'))
+      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`)
       .valueChanges({idField: 'id'})
       .pipe(
         map(array =>
