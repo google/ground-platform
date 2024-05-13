@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import {HttpClientModule} from '@angular/common/http';
 import {NgModule} from '@angular/core';
-import {AngularFireModule} from '@angular/fire/compat';
-import {AngularFireAuthModule} from '@angular/fire/compat/auth';
+import {AngularFireModule, FIREBASE_OPTIONS} from '@angular/fire/compat';
+import { provideAuth, getAuth } from '@angular/fire/auth'; 
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import {USE_EMULATOR as USE_DATABASE_EMULATOR} from '@angular/fire/compat/database';
 import {
   AngularFirestoreModule,
@@ -28,6 +30,7 @@ import {
   AngularFireFunctionsModule,
   USE_EMULATOR as USE_FUNCTIONS_EMULATOR,
 } from '@angular/fire/compat/functions';
+import { provideStorage, getStorage, StorageModule } from '@angular/fire/storage';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {GoogleAuthProvider} from 'firebase/auth';
@@ -37,6 +40,8 @@ import {AppComponent} from 'app/app.component';
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AppRoutingModule} from 'app/routing.module';
 import {environment} from 'environments/environment';
+import { AuthService } from './services/auth/auth.service';
+import { AuthGuard } from './services/auth/auth.guard';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -55,8 +60,9 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
       provide: FIRESTORE_SETTINGS,
       useValue: {ignoreUndefinedProperties: true},
     },
-    // Emulator ports defined in ../firebase.local.json
-    // TODO(#979): Set up auth emulator and enable rules.
+    { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
+    AuthService,
+    AuthGuard,
     {
       provide: USE_DATABASE_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 9000] : undefined,
@@ -71,12 +77,12 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
     },
   ],
   imports: [
-    // TODO(#967): Replace compat libs with new AngularFire APIs:
-    //   provideFirebaseApp(() => initializeApp(environment.firebase)),
-    //   provideFirestore(() => getFirestore()),
-    AngularFireModule.initializeApp(environment.firebase),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     AngularFireModule,
+    provideAuth(() => getAuth()), 
     AngularFireAuthModule,
+    provideStorage(() => getStorage()),
+    StorageModule,
     AngularFirestoreModule,
     AngularFireFunctionsModule,
     BrowserAnimationsModule,

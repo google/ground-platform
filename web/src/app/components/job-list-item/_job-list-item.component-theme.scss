@@ -18,7 +18,7 @@
   }
 
   .mat-tree {
-    background-color: #edeee9; /* M3/sys/light/surface-container */
+    --mat-tree-container-background-color: #edeee9; /* M3/sys/light/surface-container */
 
     .mat-mdc-unelevated-button {
       background-color: #edeee9; /* M3/sys/light/surface-container */

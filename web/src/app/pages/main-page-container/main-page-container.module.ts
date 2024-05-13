@@ -23,7 +23,6 @@ import {MainPageModule} from './main-page/main-page.module';
 import {MainPageContainerComponent} from './main-page-container.component';
 
 @NgModule({
-  entryComponents: [],
   declarations: [MainPageContainerComponent],
   imports: [
     CommonModule,

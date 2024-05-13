@@ -15,7 +15,7 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {Storage, getDownloadURL, ref} from '@angular/fire/storage';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
@@ -39,12 +39,12 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
-  storage = getStorage();
   firebaseURLs = new Map<string, string>();
 
   public taskType = TaskType;
 
   constructor(
+    private storage: Storage,
     private submissionService: SubmissionService,
     private navigationService: NavigationService
   ) {}

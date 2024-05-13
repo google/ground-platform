@@ -48,7 +48,6 @@
 @use 'app/pages/main-page-container/main-page/_main-page.component-theme' as main-page;
 @use 'app/pages/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
 
-@import '@angular/material/theming';
 @import 'firebaseui/dist/firebaseui.css';
 
 // Include the common styles for Angular Material. This allows us to only
@@ -73,8 +72,6 @@ $theme: mat.define-light-theme((
  typography: $typography,
  density: 0,
 ));
-
-$foreground: map-get($theme, foreground);
 
 // TODO(#1135): call themes on a component level
 @include mat.all-component-themes($theme);
@@ -127,15 +124,15 @@ button .mat-icon + label {
 }
 
 .mat-mdc-menu-item mat-icon {
-  color: mat-color($foreground, icon) !important;
+  color: mat.get-theme-color($theme, foreground, icon) !important;
 }
 
 snack-bar-container.success {
-  background-color: mat-color($primary);
+  background-color: mat.get-theme-color($theme, primary);
 }
 
 snack-bar-container.error {
-  background-color: mat-color($warn);
+  background-color: mat.get-theme-color($theme, warn);
 }
 
 snack-bar-container.notification {
