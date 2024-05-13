@@ -4,7 +4,7 @@
     "outDir": "./out-tsc/app",
     "types": ["googlemaps", "node"]
   },
-  "files": ["src/main.ts", "src/polyfills.ts"],
+  "files": ["src/main.ts"],
   "include": ["src/**/*.ts"],
   "exclude": [
     "src/test.ts",
