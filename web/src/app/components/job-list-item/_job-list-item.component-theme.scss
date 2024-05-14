@@ -8,10 +8,15 @@
 
   .expandable-node-start {
     color: #424940;
+
+    .job-name {
+      color: #424940;
+    }
   }
 
   .tree-node-selected {
     background-color: map.get($background, selected-button);
+
     .select-loi {
       color: map.get($foreground, base);
     }
@@ -38,6 +43,15 @@
   $typography-config: mat.get-typography-config($theme);
 
   // TODO(#1135): use typography-config once typography levels defined
+
+  .expandable-node-start {
+    .job-name {
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 20px;
+      font-style: normal;
+    }
+  }
 
   .download {
     text-decoration: none;

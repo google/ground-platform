@@ -31,16 +31,19 @@
   .expandable-node-start {
     display: flex;
     align-items: center;
+    min-width: 0;
+
+    .job-icon {
+      padding-right: 16px;
+    }
+
+    .job-name {
+      flex: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
   }
-}
-
-.job-icon {
-  padding-right: 16px;
-}
-
-.loi-icon {
-  width: 20px;
-  height: 20px;
 }
 
 .show-properties-icon {
@@ -49,18 +52,25 @@
   color: #737970;
 }
 
-.tree-node-selected .select-loi {
-  font-weight: 700;
-}
-
 .loi-tree-node {
   border-radius: 24px;
   cursor: pointer;
-}
 
-.select-loi {
-  padding-left: 16px;
-  --mdc-typography-button-font-size: 14px;
-  --mdc-typography-button-font-weight: 400;
-  flex: 1;
+  .loi-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .loi-name {
+    --mdc-typography-button-font-size: 14px;
+    --mdc-typography-button-font-weight: 400;
+    flex: 1;
+    padding-left: 16px;
+  }
+
+  &.tree-node-selected {
+    .loi-name {
+      font-weight: 700;
+    }
+  }
 }
