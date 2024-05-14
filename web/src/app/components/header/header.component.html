@@ -28,42 +28,41 @@
 
   <div>
     <ng-container *ngIf="canManage">
-
       <button
         mat-icon-button
-        [matMenuTriggerFor]="surveyMenu"
+        [matMenuTriggerFor]="editSurveyMenu"
         *ngIf="canManage && state === HeaderState.MAP_VIEW"
       >
         <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
       </button>
 
-      <mat-menu #surveyMenu="matMenu">
-        <a class="download" (click)="onEditSurveyClick()">
+      <mat-menu #editSurveyMenu="matMenu">
+        <a (click)="onEditSurveyClick()">
           <button mat-menu-item>Manage survey</button>
         </a>
       </mat-menu>
 
-      <button
-        mat-button
-        class="cancel-edit-button"
-        *ngIf="state === HeaderState.EDIT_SURVEY"
-        (click)="onCancelEditSurveyClick()"
-      >
-        Cancel
-      </button>
+      <ng-container *ngIf="state === HeaderState.EDIT_SURVEY">
+        <button
+          mat-button
+          class="cancel-edit-button"
+          (click)="onCancelEditSurveyClick()"
+        >
+          Cancel
+        </button>
 
-      <button
-        mat-flat-button
-        class="finish-edit-button"
-        *ngIf="state === HeaderState.EDIT_SURVEY"
-        [disabled]="!isDraftSurveyDirtyAndValid()"
-        (click)="onFinishEditSurveyClick()"
-      >
-        Publish changes
-        <mat-icon *ngIf="publishingChanges"
-          ><mat-spinner diameter="18"></mat-spinner
-        ></mat-icon>
-      </button>
+        <button
+          mat-flat-button
+          class="finish-edit-button"
+          [disabled]="!isDraftSurveyDirtyAndValid()"
+          (click)="onFinishEditSurveyClick()"
+        >
+          Publish changes
+          <mat-icon *ngIf="publishingChanges">
+            <mat-spinner diameter="18"></mat-spinner>
+          </mat-icon>
+        </button>
+      </ng-container>
     </ng-container>
     <ground-current-user-widget></ground-current-user-widget>
   </div>
