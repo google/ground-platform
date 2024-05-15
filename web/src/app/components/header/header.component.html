@@ -64,6 +64,21 @@
         </button>
       </ng-container>
     </ng-container>
+
+    <button mat-icon-button [matMenuTriggerFor]="infoMenu">
+      <mat-icon fontSet="material-symbols-outlined">info_outline_24px</mat-icon>
+    </button>
+
+    <mat-menu #infoMenu="matMenu">
+      <a>
+        <button mat-menu-item>Terms of service</button>
+      </a>
+
+      <a (click)="onAboutClick()">
+        <button mat-menu-item>About</button>
+      </a>
+    </mat-menu>
+
     <ground-current-user-widget></ground-current-user-widget>
   </div>
 </div>
