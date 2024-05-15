@@ -28,13 +28,13 @@
 
   <div>
     <ng-container *ngIf="canManage">
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="editSurveyMenu"
-        *ngIf="canManage && state === HeaderState.MAP_VIEW"
-      >
-        <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
-      </button>
+      <ng-container *ngIf="canManage && state === HeaderState.MAP_VIEW">
+        <button mat-icon-button [matMenuTriggerFor]="editSurveyMenu">
+          <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+        </button>
+
+        <div class="header-divider"></div>
+      </ng-container>
 
       <mat-menu #editSurveyMenu="matMenu">
         <a (click)="onEditSurveyClick()">

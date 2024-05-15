@@ -9,6 +9,10 @@
     color: #1A1C19;
   }
 
+  .header-divider {
+    border-left: 1px solid map.get($foreground, divider);
+  }
+
   .header .cancel-edit-button {
     --mdc-text-button-label-text-color: #516351;
   }

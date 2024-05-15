@@ -21,6 +21,11 @@
   align-items: center;
   justify-content: space-between;
 
+  .header-divider {
+    height: 32px;
+    margin: 0 12px;
+  }
+
   div {
     display: flex;
     align-items: center;
