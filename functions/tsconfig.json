@@ -12,8 +12,7 @@
     "paths": {
       "@/*": [
         "src/*",
-      ],
-      "@types/ground-schema": ["@types/ground-schema/dist/generated/schema"]
+      ]
     }
   },
   "compileOnSave": true,
