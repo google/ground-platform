@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { Map } from "immutable";
-import { Message } from "protobufjs";
-
-export function toFirestoreMap(message: Message): Map<string, any> {
-    return Map();
-}
-  
+describe('toFirestoreMap()', () => {
+    it('converts string fields', () => {
+        
+    });
+});
