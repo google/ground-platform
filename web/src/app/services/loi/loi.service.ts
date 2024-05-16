@@ -64,7 +64,13 @@ export class LocationOfInterestService {
 
   getLocationsOfInterest$(): Observable<List<LocationOfInterest>> {
     return this.lois$.pipe(
-      map(lois => lois.sort((a, b) => LocationOfInterestService.getDisplayName(a).localeCompare(LocationOfInterestService.getDisplayName(b))))
+      map(lois =>
+        lois.sort((a, b) =>
+          LocationOfInterestService.getDisplayName(a).localeCompare(
+            LocationOfInterestService.getDisplayName(b)
+          )
+        )
+      )
     );
   }
 
