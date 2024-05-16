@@ -1,6 +1,6 @@
 {
   "name": "lib",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "description": "Common TypeScript libraries",
   "scripts": {
     "clean": "rm -rf node_modules dist *.log",

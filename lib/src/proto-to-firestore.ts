@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export { toFirestoreMap } from './proto-to-firestore';
+import { DocumentSnapshot } from "@google-cloud/firestore";
+
+import { Map } from "immutable";
+
+export function toFirestoreMap(doc: DocumentSnapshot): Map<string, any> {
+    return Map();
+  }
+  
