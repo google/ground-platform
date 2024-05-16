@@ -124,15 +124,15 @@ button .mat-icon + label {
 }
 
 .mat-mdc-menu-item mat-icon {
-  color: mat.get-theme-color($theme, foreground, icon) !important;
+  color: mat.get-color-from-palette($foreground, icon) !important;
 }
 
 snack-bar-container.success {
-  background-color: mat.get-theme-color($theme, primary);
+  background-color: mat.get-color-from-palette($primary, default)
 }
 
 snack-bar-container.error {
-  background-color: mat.get-theme-color($theme, warn);
+  background-color: mat.get-color-from-palette($warn, default)
 }
 
 snack-bar-container.notification {

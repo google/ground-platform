@@ -16,7 +16,7 @@
             "outputPath": "dist/web",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
@@ -96,31 +96,31 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "web:build"
+            "buildTarget": "web:build"
           },
           "configurations": {
             "local": {
-              "browserTarget": "web:build:local"
+              "buildTarget": "web:build:local"
             },
             "dev": {
-              "browserTarget": "web:build:dev"
+              "buildTarget": "web:build:dev"
             },
             "production": {
-              "browserTarget": "web:build:production"
+              "buildTarget": "web:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "web:build"
+            "buildTarget": "web:build"
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.spec.json",
             "fileReplacements": [
               {
@@ -160,7 +160,6 @@
       }
     }
   },
-  "defaultProject": "web",
   "cli": {
     "analytics": "a3d976d8-4082-411f-98f4-58b9c7a5b304"
   }

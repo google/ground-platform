@@ -119,10 +119,7 @@ function toMultiPolygon(coordinatesMap?: any): MultiPolygon {
 }
 
 function toCoordinate(coordinates?: any): Coordinate {
-  if (
-    !coordinates ||
-    !(coordinates instanceof GeoPoint || 'latitude' in coordinates || 'longitude' in coordinates)
-  ) {
+  if (!(coordinates && coordinates.longitude && coordinates.latitude)) {
     throw new Error(
       `Error converting to Geometry: expected GeoPoint, got ${stringify(
         coordinates

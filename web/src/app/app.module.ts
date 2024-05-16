@@ -33,6 +33,7 @@ import {
 import { provideStorage, getStorage, StorageModule } from '@angular/fire/storage';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {initializeApp} from 'firebase/app';
 import {GoogleAuthProvider} from 'firebase/auth';
 import {FirebaseUIModule, firebaseui} from 'firebaseui-angular';
 
@@ -52,6 +53,8 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Required to enable one-tap sign-up credential helper.
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
 };
+
+initializeApp(environment.firebase);
 
 @NgModule({
   declarations: [AppComponent],
