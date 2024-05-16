@@ -18,7 +18,9 @@
   },
   "private": true,
   "dependencies": {
-    "ground/shared-protos": "file:../proto"
+    "@google-cloud/firestore": "^7.7.0",
+    "@ground/shared-protos": "file:../proto",
+    "immutable": "^4.3.6"
   },
   "devDependencies": {
     "@types/jasmine": "^4.3.5",
