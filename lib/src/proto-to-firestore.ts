@@ -14,14 +14,37 @@
  * limitations under the License.
  */
 
-import { Map } from "immutable";
-
 import { registry } from "./message-registry";
+import { DocumentData } from "@google-cloud/firestore";
 
-export function toFirestoreMap(message: any): Map<string, any> {
+export function toDocumentData(message: any): DocumentData | Error {
     const type = message.constructor.name;
     const descriptor = registry.nested[type];
-    console.log(descriptor);
-    return Map();
+    if (!descriptor?.fields) return Error(`Unknown message type $type`);
+
+    const firestoreMap: DocumentData = {};
+    for (const name in descriptor.fields) {
+        const field = descriptor.fields[name];
+        if (!field) {
+            console.debug(`Skipping unknown field $name in $type`);
+            continue;
+        }
+        const value = message[name];
+        if (value && !isEmpty(value)) {
+            const fieldNumber = descriptor.fields[name].id;
+            firestoreMap[fieldNumber.toString()] = value;
+        }
+    }
+    return firestoreMap;
 }
   
+function isEmpty(obj: any) {
+    switch (typeof obj) {
+        case "string":
+            return obj === "";
+        case "object":
+            return Object.keys(obj).length === 0;
+        default:
+            return false;
+    }
+}

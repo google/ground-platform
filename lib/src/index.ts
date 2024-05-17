@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { toFirestoreMap } from './proto-to-firestore';
+export { toDocumentData } from './proto-to-firestore';

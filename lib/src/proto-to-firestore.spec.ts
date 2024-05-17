@@ -15,17 +15,19 @@
  */
 
 import { Survey } from "./generated/ground-protos";
-import { toFirestoreMap } from "./proto-to-firestore";
-import { Map } from "immutable";
+import { toDocumentData } from "./proto-to-firestore";
 
-describe('toFirestoreMap()', () => {
+describe('toDocumentData()', () => {
     it('converts string fields', () => {        
-        const output = toFirestoreMap(
+        const output = toDocumentData(
             new Survey({
                 name: "Survey name",
                 description: "Survey desc"
             }));
-        const expected = Map({});
+        const expected = {
+            "2": "Survey name",
+            "3": "Survey desc"
+        };
         expect(output).toEqual(expected);
     });
 });
