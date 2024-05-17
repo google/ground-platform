@@ -22,7 +22,8 @@ export interface ProtoOptions {
 }
 
 export interface FieldDescriptor {
-  type: string; // Could be more specific, e.g., 'string', 'int32', 'google.protobuf.Timestamp'
+  keyType?: string; // Used for proto map<>
+  type: string;
   id: number;
 }
 

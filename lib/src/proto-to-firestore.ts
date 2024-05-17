@@ -14,37 +14,69 @@
  * limitations under the License.
  */
 
-import { registry } from "./message-registry";
-import { DocumentData } from "@google-cloud/firestore";
+import { FieldDescriptor, registry } from "./message-registry";
+import { DocumentData, DocumentFieldValue } from "@google-cloud/firestore";
 
 export function toDocumentData(message: any): DocumentData | Error {
-    const type = message.constructor.name;
-    const descriptor = registry.nested[type];
-    if (!descriptor?.fields) return Error(`Unknown message type $type`);
+  const type = message.constructor.name;
+  const descriptor = registry.nested[type];
+  if (!descriptor?.fields) return Error(`Unknown message type $type`);
 
-    const firestoreMap: DocumentData = {};
-    for (const name in descriptor.fields) {
-        const field = descriptor.fields[name];
-        if (!field) {
-            console.debug(`Skipping unknown field $name in $type`);
-            continue;
-        }
-        const value = message[name];
-        if (value && !isEmpty(value)) {
-            const fieldNumber = descriptor.fields[name].id;
-            firestoreMap[fieldNumber.toString()] = value;
-        }
+  const firestoreMap: DocumentData = {};
+  for (const name in descriptor.fields) {
+    const fieldDescriptor = descriptor?.fields[name];
+    const fieldNumber = fieldDescriptor?.id;
+    if (!fieldNumber) {
+      console.debug(`Skipping unknown field $name in $type`);
+      continue;
     }
-    return firestoreMap;
+    const value = toDocumentFieldValue(fieldDescriptor, message[name]);
+    if (value) {
+      firestoreMap[fieldNumber.toString()] = value;
+    }
+  }
+  return firestoreMap;
 }
-  
+
+function toDocumentFieldValue(
+  field: FieldDescriptor,
+  value: any
+): DocumentFieldValue | null {
+  if (value == null || isEmpty(value)) {
+    return null;
+  } else if (field.keyType) {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [
+        k.toString(),
+        toValue(field.type, v),
+      ])
+    );
+  } else {
+    return toValue(field.type, value);
+  }
+}
+
+function toValue(fieldType: string, value: any): DocumentFieldValue | null {
+  switch (typeof value) {
+   // TODO: Validate against fieldType.
+   case "string":
+    case "number": // This handles proto enums as well.
+      return value;
+    case "object":
+      return toDocumentData(value);
+    default:
+      console.debug(`Unsupported proto field type ${typeof value}`);
+      return null;
+  }
+}
+
 function isEmpty(obj: any) {
-    switch (typeof obj) {
-        case "string":
-            return obj === "";
-        case "object":
-            return Object.keys(obj).length === 0;
-        default:
-            return false;
-    }
+  switch (typeof obj) {
+    case "string":
+      return obj === "";
+    case "object":
+      return Object.keys(obj).length === 0;
+    default:
+      return false;
+  }
 }

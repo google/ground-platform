@@ -14,20 +14,42 @@
  * limitations under the License.
  */
 
-import { Survey } from "./generated/ground-protos";
+import { Role, Survey } from "./generated/ground-protos";
 import { toDocumentData } from "./proto-to-firestore";
 
-describe('toDocumentData()', () => {
-    it('converts string fields', () => {        
-        const output = toDocumentData(
-            new Survey({
-                name: "Survey name",
-                description: "Survey desc"
-            }));
-        const expected = {
-            "2": "Survey name",
-            "3": "Survey desc"
-        };
-        expect(output).toEqual(expected);
-    });
+describe("toDocumentData()", () => {
+  [
+    {
+      desc: "converts string fields",
+      input: new Survey({
+        name: "Survey name",
+        description: "Survey desc",
+      }),
+      expected: {
+        "2": "Survey name",
+        "3": "Survey desc",
+      },
+    },
+    {
+        desc: "converts map<string, enum>",
+        input: new Survey({
+          acl: {
+            "email1": Role.DATA_COLLECTOR,
+            "email2": Role.SURVEY_ORGANIZER
+          }
+        }),
+        expected: {
+          "4": {
+            "email1": 2,
+            "email2": 3,
+          }
+        },
+      },
+  ].forEach(({ desc, input, expected }) =>
+    it(desc, () => {
+      const output = toDocumentData(input);
+      console.log(output);
+      expect(output).toEqual(expected);
+    })
+  );
 });
