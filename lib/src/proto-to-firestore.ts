@@ -15,9 +15,8 @@
  */
 
 import { Map } from "immutable";
-import { Message } from "protobufjs";
 
-export function toFirestoreMap(message: Message): Map<string, any> {
+export function toFirestoreMap(message: any): Map<string, any> {
     return Map();
 }
   

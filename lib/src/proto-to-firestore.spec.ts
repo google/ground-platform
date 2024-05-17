@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
+import { Survey } from "./generated/ground-protos";
+import { toFirestoreMap } from "./proto-to-firestore";
+import { Map } from "immutable";
+
 describe('toFirestoreMap()', () => {
-    it('converts string fields', () => {
-        
+    it('converts string fields', () => {        
+        const output = toFirestoreMap(
+            new Survey({
+                name: "Survey name",
+                description: "Survey desc"
+            }));
+        const expected = Map({});
+        expect(output).toEqual(expected);
     });
 });

@@ -6,13 +6,17 @@
     "clean": "rm -rf node_modules dist *.log",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
+    "postinstall": "npm run generate:pb",
     "test": "npm run build && jasmine dist/**/*.spec.js",
-    "build": "npm install && npm run generate:pb && tsc",
+    "build": "npm install && tsc",
     "watch": "npm run build && tsc --watch",
-    "generate:pbjs": "pbjs -t static-module ../proto/*.proto -o dist/ground-protos.js",
-    "generate:pbjson": "pbjs -t json ../proto/*.proto > dist/ground-protos.json",
-    "generate:pbts": "pbts dist/ground-protos.js -o dist/ground-protos.d.ts",
-    "generate:pb": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts"
+    "generate:pbjs": "pbjs -t static-module ../proto/*.proto -o $npm_package_config_codegen_path/ground-protos.js",
+    "generate:pbjson": "pbjs -t json ../proto/*.proto -o $npm_package_config_codegen_path/ground-protos.json",
+    "generate:pbts": "pbts $npm_package_config_codegen_path/ground-protos.js -o $npm_package_config_codegen_path/ground-protos.d.ts",
+    "generate:pb": "mkdir -p $npm_package_config_codegen_path && npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts"
+  },
+  "config": {
+    "codegen_path": "src/generated"
   },
   "engines": {
     "node": "18"
