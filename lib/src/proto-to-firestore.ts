@@ -16,7 +16,12 @@
 
 import { Map } from "immutable";
 
+import { registry } from "./message-registry";
+
 export function toFirestoreMap(message: any): Map<string, any> {
+    const type = message.constructor.name;
+    const descriptor = registry.nested[type];
+    console.log(descriptor);
     return Map();
 }
   
