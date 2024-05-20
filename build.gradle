@@ -13,7 +13,7 @@ repositories {
 sourceSets {
     main {
         resources {
-            srcDirs "src"
+            srcDirs "proto/src"
         }
     }
 }
