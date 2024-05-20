@@ -27,7 +27,7 @@
     "@angular/cdk": "^17.3.8",
     "@angular/common": "^17.3.8",
     "@angular/compiler": "^17.3.8",
-    "@angular/core": "^17.3.8",
+    "@angular/core": "^17.3.9",
     "@angular/fire": "^17.0.1",
     "@angular/forms": "^17.3.8",
     "@angular/google-maps": "^17.3.8",
