@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,23 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {RouterModule} from '@angular/router';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
 
-import {MainPageModule} from './main-page/main-page.module';
-import {MainPageContainerComponent} from './main-page-container.component';
+import {
+  TaskConditionFormComponent,
+  TaskOptionsPipe,
+} from './task-condition-form.component';
 
 @NgModule({
-  declarations: [MainPageContainerComponent],
+  declarations: [TaskConditionFormComponent, TaskOptionsPipe],
   imports: [
     CommonModule,
-    RouterModule,
-    MainPageModule,
-    MatProgressSpinnerModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
   ],
+  exports: [TaskConditionFormComponent],
 })
-export class MainPageContainerModule {}
+export class TaskConditionFormModule {}

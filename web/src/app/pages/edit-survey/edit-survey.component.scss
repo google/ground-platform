@@ -32,16 +32,21 @@
 .left-menu {
   width: 300px;
   padding: 12px;
+
   --mdc-list-list-item-label-text-size: 14px;
-  --mdc-list-list-item-label-text-tracking: 0;
+  --mdc-list-list-item-leading-label-color: #444746;
+  --mdc-list-list-item-hover-label-text-color: #444746;
+  --mdc-list-list-item-label-icon-size: 14px;
+  --mdc-list-list-item-leading-icon-color: #444746;
+  --mdc-list-list-item-hover-leading-icon-color: #444746;
 
-  .mdc-list-item--with-leading-icon .mdc-list-item__start {
-    margin-right: 12px;
+  .mat-mdc-list-item {
+    border-radius: 32px;
+
+    .mat-mdc-list-item-icon {
+      margin-right: 12px;
+    }
   }
-}
-
-.button-icon {
-  margin-right: 12px;
 }
 
 .job-label-and-add-button {
@@ -67,6 +72,7 @@
     text-align: left;
 
     h1 {
+      color: #1A1C19;
       font-size: 28px;
       font-weight: 400;
       line-height: 36px;

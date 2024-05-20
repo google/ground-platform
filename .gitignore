@@ -16,5 +16,6 @@
 **/*.log
 web/google-maps-api.js
 web/coverage/
-# Local emulator snapshots
-data/local*/**
+# Firebase Emulator local snapshots
+data/local
+data/test

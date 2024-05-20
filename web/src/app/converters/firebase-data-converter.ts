@@ -34,9 +34,8 @@ import {
 } from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
 import {
-  MultipleChoiceResponseCondition,
-  NewUnplannedLocationOfInterestCondition,
   TaskCondition,
+  TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
@@ -248,31 +247,17 @@ export class FirebaseDataConverter {
   }
 
   private static toCondition(map?: DocumentData): TaskCondition | undefined {
-    switch (map?.type) {
-      case 'multiple_choice_response':
-        return FirebaseDataConverter.toMultipleChoiceResponseCondition(
-          map?.responseIds
-        );
-      case 'new_unplanned_loi':
-        return new NewUnplannedLocationOfInterestCondition();
-      default:
-        return undefined;
-    }
-  }
-
-  private static toMultipleChoiceResponseCondition(
-    taskId?: string,
-    values?: unknown
-  ): MultipleChoiceResponseCondition | undefined {
-    if (
-      !taskId ||
-      !values ||
-      !Array.isArray(values) ||
-      values.some(v => !(v instanceof String))
-    )
-      return undefined;
-    else
-      return new MultipleChoiceResponseCondition(taskId, List<String>(values));
+    if (!map) return undefined;
+    return new TaskCondition(
+      map?.matchType,
+      List(
+        map?.expressions?.map((expression: any) => ({
+          expressionType: expression.expressionType,
+          taskId: expression.taskId,
+          optionIds: List(expression.optionIds),
+        }))
+      ) || []
+    );
   }
 
   private static taskToJS(task: Task): {} {
@@ -307,13 +292,10 @@ export class FirebaseDataConverter {
   }
   private static taskConditionToJS(condition?: TaskCondition): {} | undefined {
     if (!condition) return undefined;
-    if (condition instanceof NewUnplannedLocationOfInterestCondition) {
-      return {type: 'new_unplanned_loi'};
-    } else if (condition instanceof MultipleChoiceResponseCondition) {
+    if (condition.matchType === TaskConditionMatchType.MATCH_ALL) {
       return {
-        type: 'multiple_choice_response',
-        taskId: condition.taskId,
-        responseIds: condition.responseIds.toArray(),
+        matchType: condition.matchType,
+        expressions: condition.expressions,
       };
     } else {
       throw new Error(`Unimplemented task condition type $condition`);
@@ -421,10 +403,6 @@ export class FirebaseDataConverter {
         `Error converting to submission: submission ${id} does not have document data.`
       );
     }
-    // TODO(#1288): Clean up remaining references to old responses field
-    // Support submissions that have results or responses fields instead of data
-    // before model change.
-    const submissionData = data.data ?? data.results ?? data.responses;
     return new Submission(
       id,
       data.loiId,
@@ -479,6 +457,9 @@ export class FirebaseDataConverter {
    * @param data the source data in a dictionary keyed by string.
    */
   private static toResults(job: Job, data: DocumentData): Map<string, Result> {
+    // TODO(#1288): Clean up remaining references to old responses field
+    // Support submissions that have results or responses fields instead of data
+    // before model change.
     const submissionData = data.data ?? data.results ?? data.responses;
     return Map<string, Result>(
       keys(submissionData)

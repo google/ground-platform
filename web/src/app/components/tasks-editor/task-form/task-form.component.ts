@@ -27,13 +27,18 @@ import {
   FormArray,
   FormBuilder,
   FormGroup,
+  Validators,
 } from '@angular/forms';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatDialogRef} from '@angular/material/dialog';
 import {List} from 'immutable';
 import {Observable, firstValueFrom} from 'rxjs';
 
 import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
+import {
+  TaskConditionExpressionType,
+  TaskConditionMatchType,
+} from 'app/models/task/task-condition.model';
 import {TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
@@ -131,7 +136,7 @@ export const Tasks: {
   },
 };
 
-export const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
+const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
@@ -142,10 +147,11 @@ const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 })
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
-  @Input() index!: number;
+  @Input() formGroupIndex!: number;
 
   @Output() delete = new EventEmitter();
   @Output() duplicate = new EventEmitter();
+  @Output() toggleCondition = new EventEmitter();
 
   /** When expanded, options and actions below the fold are visible to the user. */
   expanded: boolean;
@@ -154,6 +160,8 @@ export class TaskFormComponent {
   selected: boolean;
 
   addLoiTask?: boolean;
+
+  hasCondition?: boolean;
 
   otherOption?: FormGroup;
 
@@ -201,6 +209,7 @@ export class TaskFormComponent {
     this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
     this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
     this.addLoiTask = this.addLoiTaskControl.value;
+    this.hasCondition = this.conditionControl?.value;
 
     if (this.addLoiTask) this.formGroup.get('required')?.disable();
 
@@ -231,12 +240,36 @@ export class TaskFormComponent {
     return this.formGroup.get('addLoiTask')!;
   }
 
+  get conditionControl(): AbstractControl {
+    return this.formGroup.get('condition')!;
+  }
+
   onTaskDelete(): void {
-    this.delete.emit(this.index);
+    this.delete.emit(this.formGroupIndex);
   }
 
   onTaskDuplicate(): void {
-    this.duplicate.emit(this.index);
+    this.duplicate.emit(this.formGroupIndex);
+  }
+
+  onTaskConditionToggle(): void {
+    if (this.formGroup.get('condition')) {
+      this.formGroup.removeControl('condition');
+    } else {
+      this.formGroup.addControl(
+        'condition',
+        this.formBuilder.group({
+          matchType: TaskConditionMatchType.MATCH_ALL,
+          expressions: this.formBuilder.array([
+            this.formBuilder.group({
+              expressionType: TaskConditionExpressionType.ONE_OF_SELECTED,
+              taskId: [null, Validators.required],
+              optionIds: [[], Validators.required],
+            }),
+          ]),
+        })
+      );
+    }
   }
 
   getTaskTypeOption(
