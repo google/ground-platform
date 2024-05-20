@@ -12,4 +12,3 @@ plugins {
 }
 
 rootProject.name = 'ground-protos'
-include('lib')

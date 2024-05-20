@@ -1,7 +1,5 @@
-plugins {
-    id 'java'
-    id 'maven-publish'
-}
+apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 group = 'com.google.ground'
 version = '0.0.1'
@@ -13,7 +11,7 @@ repositories {
 sourceSets {
     main {
         resources {
-            srcDirs "proto/src"
+            srcDirs "src"
         }
     }
 }
