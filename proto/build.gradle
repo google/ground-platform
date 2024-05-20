@@ -1,0 +1,36 @@
+plugins {
+    id 'base'
+    id 'maven-publish'
+}
+
+// Specify where your .proto files are located
+def protoFiles = fileTree('src') {
+    include '**/*.proto'
+}
+
+// Task to create a JAR file containing the proto files
+task packageProtos(type: Jar) {
+    from protoFiles // Include all proto files
+    archiveClassifier.set('protos') // Optional: Add a classifier to the artifact name
+}
+
+// Configuration for publishing the artifact
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact packageProtos
+            groupId = 'com.google.ground'
+            artifactId = 'ground-protos'
+            version = '0.0.1'
+
+            // pom.withXml {
+            //     // (Optional) Add additional POM metadata if needed
+            //     asNode().appendNode('description', 'A collection of protobuf files')
+            // }
+        }
+    }
+    repositories {
+        mavenLocal() // Publish to your local Maven repository
+        // Or specify a remote repository for broader distribution
+    }
+}
