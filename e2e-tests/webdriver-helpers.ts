@@ -23,6 +23,8 @@ import {
   WebElement,
   until,
 } from 'selenium-webdriver';
+import * as chrome from 'selenium-webdriver/chrome'
+
 import {
   EXPECTED_SUBMISSION_COUNT,
   JOB_NAME,
@@ -49,7 +51,9 @@ export class WebDriverHelper {
   private driver?: WebDriver;
 
   async start(url: string) {
-    this.driver = await new Builder().forBrowser(Browser.CHROME).build();
+    const builder = new Builder().forBrowser(Browser.CHROME);
+    const options = new chrome.Options();
+    this.driver = await builder.setChromeOptions(options.addArguments('--headless=new')).build();
     this.driver.manage().setTimeouts({implicit: SHORT_TIMEOUT});
     return this.driver.get(url);
   }
