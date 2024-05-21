@@ -26,7 +26,6 @@ jobs:
           - name: Check out code
             uses: actions/checkout@v4
           - name: Run End To End Tests
-            run: |
-              gh workflow run e2e-dispatch.yml
+            uses: ./.github/workflows/e2e-dispatch.yml
             env:
               GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

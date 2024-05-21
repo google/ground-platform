@@ -47,17 +47,12 @@ jobs:
                 overwrite: true
 
     submitTest:
-      permissions:
-        actions: write
       needs: createTest
       name: Submit to survey
       runs-on: ubuntu-latest
       steps:
         - name: Run submission action
-          run: |
-            gh workflow run --repo sufyanAbbasi/ground-android e2e-dispatch.yml
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          uses: sufyanAbbasi/ground-android/.github/workflows/e2e-dispatch.yml@master
 
     verifyTest:
         needs: submitTest
