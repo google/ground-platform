@@ -43,7 +43,7 @@ jobs:
       timeout-minutes: 3
       steps:
         - name: Run submit-test
-          uses: sufyanAbbasi/ground-platform/.github/actions/submit-test.yml@master
+          uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
 
     verifyTest:
         needs: submitTest
