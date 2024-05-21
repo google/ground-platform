@@ -16,6 +16,9 @@ name: Create a new survey
 runs:
   using: 'composite'
   steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:

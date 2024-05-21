@@ -16,7 +16,7 @@ name: Verify survey submissions
 runs:
     using: 'composite'
     steps:
-        - name: Check out code
+        - name: Checkout code
           uses: actions/checkout@v4
 
         - name: Set up Node.js
