@@ -29,13 +29,16 @@ jobs:
               with:
                 node-version: "18"
 
+            - name: Install Chrome
+              uses: browser-actions/setup-chrome@v1
+
             - name: Install dependencies
               run: npm run build:local
 
             - name: Run create e2e tests
               run: npm run test:e2e:create
 
-            - name: Store data/local
+            - name: Copy Firebase emulator data
               uses: actions/upload-artifact@v4
               with:
                 name: data-test
@@ -60,12 +63,15 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Check out code
-              uses: actions/checkout@v1
+              uses: actions/checkout@v4
 
             - name: Set up Node.js
               uses: actions/setup-node@v2
               with:
                 node-version: "18"
+            
+            - name: Install Chrome
+              uses: browser-actions/setup-chrome@v1
 
             - name: Install dependencies
               run: npm run build:local
