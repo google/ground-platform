@@ -23,7 +23,8 @@ runs:
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      repository: ${{ inputs.platform-repository }}
+      with:
+        repository: ${{ inputs.platform-repository }}
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
