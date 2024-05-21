@@ -28,6 +28,7 @@ runs:
           uses: browser-actions/setup-chrome@v1
 
         - name: Install dependencies
+          shell: bash
           run: npm run build:local
 
         - name: Copy Firebase emulator data

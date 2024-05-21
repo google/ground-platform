@@ -25,9 +25,11 @@ runs:
         uses: browser-actions/setup-chrome@v1
 
       - name: Install dependencies
+        shell: bash
         run: npm run build:local
 
       - name: Run create e2e tests
+        shell: bash
         run: npm run test:e2e:create
 
       - name: Copy Firebase emulator data
