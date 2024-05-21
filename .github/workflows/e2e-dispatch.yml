@@ -51,6 +51,8 @@ jobs:
         - name: Run submission action
           run: |
             gh workflow run --repo sufyanAbbasi/ground-android e2e-dispatch.yml
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     verifyTest:
         needs: submitTest
