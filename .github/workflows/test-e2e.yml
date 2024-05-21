@@ -23,6 +23,9 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 5
         if: github.event.issue.pull_request && contains(github.event.comment.body, '/e2eTest')
+        steps:
+          - name: Check out code
+            uses: actions/checkout@v4
 
     createTest:
       needs: e2eTest
@@ -30,9 +33,6 @@ jobs:
       runs-on: ubuntu-latest
       timeout-minutes: 3
       steps:
-          - name: Check out code
-            uses: actions/checkout@v4
-
           - name: Run create-test
             uses: ./.github/actions/create-test
 
@@ -43,7 +43,7 @@ jobs:
       timeout-minutes: 3
       steps:
         - name: Run submit-test
-          uses: ./.github/actions/submit-test
+          uses: sufyanAbbasi/ground-platform/.github/actions/submit-test.yml@master
 
     verifyTest:
         needs: submitTest
