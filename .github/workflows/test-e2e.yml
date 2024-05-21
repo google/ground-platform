@@ -26,3 +26,5 @@ jobs:
           - name: Run End To End Tests
             run: |
               gh workflow run e2e-dispatch.yml
+            env:
+              GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
