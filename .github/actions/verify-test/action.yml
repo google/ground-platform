@@ -13,29 +13,35 @@
 # limitations under the License.
 name: Verify survey submissions
 
+inputs:
+  platform-repository:
+    description: 'ground-platform repository under test'
+    default: google/ground-platform
+
 runs:
-    using: 'composite'
-    steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      repository: ${{ inputs.platform-repository }}
 
-        - name: Set up Node.js
-          uses: actions/setup-node@v2
-          with:
-            node-version: "18"
-        
-        - name: Install Chrome
-          uses: browser-actions/setup-chrome@v1
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: "18"
+    
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@v1
 
-        - name: Install dependencies
-          shell: bash
-          run: npm run build:local
+    - name: Install dependencies
+      shell: bash
+      run: npm run build:local
 
-        - name: Copy Firebase emulator data
-          uses: actions/download-artifact@v4
-          with:
-            name: data-test
-            path: data/test
+    - name: Copy Firebase emulator data
+      uses: actions/download-artifact@v4
+      with:
+        name: data-test
+        path: data/test
 
-        - name: Run create e2e tests
-          run: npm run test:e2e:verify
+    - name: Run create e2e tests
+      run: npm run test:e2e:verify

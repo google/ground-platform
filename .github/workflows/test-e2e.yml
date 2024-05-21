@@ -19,37 +19,43 @@ on:
   workflow_call:
 
 jobs:
-    e2eTest:
-        runs-on: ubuntu-latest
-        timeout-minutes: 5
-        if: github.event.issue.pull_request && contains(github.event.comment.body, '/e2eTest')
-        steps:
-          - name: Check out code
-            uses: actions/checkout@v4
-
-    createTest:
-      needs: e2eTest
-      name: Create a new survey
+  e2eTest:
       runs-on: ubuntu-latest
-      timeout-minutes: 3
+      timeout-minutes: 5
+      if: github.event.issue.pull_request && contains(github.event.comment.body, '/e2eTest')
       steps:
-          - name: Run create-test
-            uses: ./.github/actions/create-test
+        - name: Start test
+          run: |
+            echo "Begin end to end test"
+          
 
-    submitTest:
-      needs: createTest
-      name: Submit to survey
-      runs-on: ubuntu-latest
-      timeout-minutes: 3
-      steps:
-        - name: Run submit-test
-          uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
+  createTest:
+    needs: e2eTest
+    name: Create a new survey
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+        - name: Run create-test
+          uses: ./.github/actions/create-test
+          with:
+            platform-repository: ${{ github.repository }}
 
-    verifyTest:
-        needs: submitTest
-        name: Verify survey submissions
-        runs-on: ubuntu-latest
-        timeout-minutes: 3
-        steps:
-          - name: Run verify-test
-            uses: ./.github/actions/verify-test
+  submitTest:
+    needs: createTest
+    name: Submit to survey
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run submit-test
+        uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
+
+  verifyTest:
+    needs: submitTest
+    name: Verify survey submissions
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run verify-test
+        uses: ./.github/actions/verify-test
+        with:
+          platform-repository: ${{ github.repository }}

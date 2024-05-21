@@ -13,32 +13,38 @@
 # limitations under the License.
 name: Create a new survey
 
+inputs:
+  platform-repository:
+    description: 'ground-platform repository under test'
+    default: google/ground-platform
+
 runs:
   using: 'composite'
   steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      repository: ${{ inputs.platform-repository }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: "18"
 
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@v1
 
-      - name: Install dependencies
-        shell: bash
-        run: npm run build:local
+    - name: Install dependencies
+      shell: bash
+      run: npm run build:local
 
-      - name: Run create e2e tests
-        shell: bash
-        run: npm run test:e2e:create
+    - name: Run create e2e tests
+      shell: bash
+      run: npm run test:e2e:create
 
-      - name: Copy Firebase emulator data
-        uses: actions/upload-artifact@v4
-        with:
-          name: data-test
-          path: data/test
-          retention-days: 1
-          overwrite: true
+    - name: Copy Firebase emulator data
+      uses: actions/upload-artifact@v4
+      with:
+        name: data-test
+        path: data/test
+        retention-days: 1
+        overwrite: true
