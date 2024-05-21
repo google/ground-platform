@@ -47,6 +47,8 @@ jobs:
                 overwrite: true
 
     submitTest:
+      permissions:
+        actions: write
       needs: createTest
       name: Submit to survey
       runs-on: ubuntu-latest
