@@ -49,10 +49,7 @@ jobs:
     submitTest:
       needs: createTest
       name: Submit to survey
-      runs-on: ubuntu-latest
-      steps:
-        - name: Run submission action
-          uses: sufyanAbbasi/ground-android/.github/workflows/e2e-dispatch.yml@master
+      uses: sufyanAbbasi/ground-android/.github/workflows/e2e-dispatch.yml@master
 
     verifyTest:
         needs: submitTest

@@ -16,6 +16,11 @@ name: End to End Test
 on:
   issue_comment:
     types: [created]
+  workflow_call:
+      secrets:
+        GITHUB_TOKEN:
+          required: true
+          description: The GitHub token
 
 jobs:
     e2eTest:
