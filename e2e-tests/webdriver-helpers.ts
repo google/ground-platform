@@ -23,7 +23,7 @@ import {
   WebElement,
   until,
 } from 'selenium-webdriver';
-import * as chrome from 'selenium-webdriver/chrome'
+import * as chrome from 'selenium-webdriver/chrome';
 
 import {
   EXPECTED_SUBMISSION_COUNT,
@@ -35,7 +35,7 @@ import {
   SURVEY_TITLE,
   WAIT_FOR_SUBMISSION_TRIES,
 } from './test-config.js';
-import {LoiType, Role, TaskType} from './test-utils.js';
+import { LoiType, Role, TaskType } from './test-utils.js';
 
 class WebDriverHelperException extends Error {}
 
@@ -52,13 +52,23 @@ export class WebDriverHelper {
 
   async start(url: string) {
     const builder = new Builder().forBrowser(Browser.CHROME);
-    const options = new chrome.Options();
-    options.addArguments("--disable-extensions"); // disabling extensions
-    options.addArguments("--disable-dev-shm-usage"); // overcome limited resource problems
-    options.addArguments("--no-sandbox"); // Bypass OS security model
-    options.addArguments('--headless'); // Run in headless mode.
-    this.driver = await builder.setChromeOptions(options).build();
-    this.driver.manage().setTimeouts({implicit: SHORT_TIMEOUT});
+    const chromeOptions = new chrome.Options();
+    const chromePath = process.env.CHROME_PATH;
+    if (chromePath) {
+      console.log(`Chrome Path: ${chromePath}`);
+      chromeOptions.setChromeBinaryPath(chromePath);
+    }
+    chromeOptions.addArguments(
+      '--headless',
+      '--disable-gpu',
+      '--window-size=1920,1200',
+      '--ignore-certificate-errors',
+      '--disable-extensions',
+      '--no-sandbox',
+      '--disable-dev-shm-usage'
+    );
+    this.driver = await builder.setChromeOptions(chromeOptions).build();
+    this.driver.manage().setTimeouts({ implicit: SHORT_TIMEOUT });
     return this.driver.get(url);
   }
 
@@ -226,7 +236,7 @@ export class WebDriverHelper {
   }
 
   private delay(timeout = SHORT_TIMEOUT) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, timeout);
     });
   }

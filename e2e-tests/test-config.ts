@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LoiType} from './test-utils';
+import { LoiType } from './test-utils';
 
 export const WEB_URL = 'http://localhost:5000';
 export const TEST_TIMEOUT = 5 * 60 * 1000; // 5m
