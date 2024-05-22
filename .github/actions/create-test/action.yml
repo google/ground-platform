@@ -71,6 +71,10 @@ runs:
       shell: bash
       run: npm run build:local
 
+    - name: DELETE ME Install dependencies
+      shell: bash
+      run: npm run build --prefix e2e-tests
+
     - name: Run create e2e tests
       shell: bash
       run: npm run test:e2e:create
