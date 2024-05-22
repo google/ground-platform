@@ -53,7 +53,11 @@ export class WebDriverHelper {
   async start(url: string) {
     const builder = new Builder().forBrowser(Browser.CHROME);
     const options = new chrome.Options();
-    this.driver = await builder.setChromeOptions(options.addArguments('--headless=new')).build();
+    options.addArguments("--disable-extensions"); // disabling extensions
+    options.addArguments("--disable-dev-shm-usage"); // overcome limited resource problems
+    options.addArguments("--no-sandbox"); // Bypass OS security model
+    options.addArguments('--headless'); // Run in headless mode.
+    this.driver = await builder.setChromeOptions(options).build();
     this.driver.manage().setTimeouts({implicit: SHORT_TIMEOUT});
     return this.driver.get(url);
   }
