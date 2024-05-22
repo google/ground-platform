@@ -36,8 +36,8 @@ runs:
       id: setup-chrome
     
     - name: Save CHROME_PATH
-      run: |
-      echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+      shell: bash
+      run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
     - name: Install dependencies
       shell: bash
