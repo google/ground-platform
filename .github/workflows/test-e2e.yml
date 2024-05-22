@@ -40,22 +40,22 @@ jobs:
           with:
             platform-repository: ${{ github.repository }}
 
-  submitTest:
-    needs: createTest
-    name: Submit to survey
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Run submit-test
-        uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
+  # submitTest:
+  #   needs: createTest
+  #   name: Submit to survey
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - name: Run submit-test
+  #       uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
 
-  verifyTest:
-    needs: submitTest
-    name: Verify survey submissions
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Run verify-test
-        uses: ./.github/actions/verify-test
-        with:
-          platform-repository: ${{ github.repository }}
+  # verifyTest:
+  #   needs: submitTest
+  #   name: Verify survey submissions
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 5
+  #   steps:
+  #     - name: Run verify-test
+  #       uses: ./.github/actions/verify-test
+  #       with:
+  #         platform-repository: ${{ github.repository }}

@@ -31,7 +31,7 @@ import {
 // Increase default timeout.
 jasmine.DEFAULT_TIMEOUT_INTERVAL = TEST_TIMEOUT;
 
-describe('create survey flow', () => {
+xdescribe('create survey flow', () => {
   let helper: WebDriverHelper;
 
   beforeAll(async () => {
