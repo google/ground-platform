@@ -296,17 +296,23 @@ export class WebDriverHelper {
     optionText: string
   ) {
     assertWebDriverInitialized(this.driver);
-    await (await element()).click();
+    try {
+      await (await element()).click();
+    } catch(e) {
+      // Susceptible to StaleElementReferenceError. Delay and try again.
+      await this.delay();
+      await (await element()).click();
+    }
     await this.waitUntilPresent(By.css('div[role="listbox"] mat-option'));
     const optionElements = await this.driver.findElements(
       By.css('div[role="listbox"] mat-option')
     );
     // Make sure element is open before clicking on it.
     await this.delay();
-    for (const element of optionElements) {
-      const elementText = (await element.getText()).toLowerCase();
+    for (const el of optionElements) {
+      const elementText = (await el.getText()).toLowerCase();
       if (elementText.includes(optionText)) {
-        await element.click();
+        await el.click();
         break;
       }
     }
