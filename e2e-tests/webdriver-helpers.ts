@@ -54,7 +54,7 @@ export class WebDriverHelper {
     const builder = new Builder().forBrowser(Browser.CHROME);
     const chromeOptions = new chrome.Options();
     const chromePath = process.env.CHROME_PATH;
-    console.log(`Chrome Path: ${chromePath}`);
+    throw new Error(`Chrome Path: ${chromePath}`);
     if (chromePath) {
       chromeOptions.setChromeBinaryPath(chromePath);
     }
