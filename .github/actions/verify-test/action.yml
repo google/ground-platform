@@ -62,6 +62,8 @@ runs:
     - name: Install Chrome
       uses: browser-actions/setup-chrome@v1
       id: setup-chrome
+      with:
+        chrome-version: 120
     
     - name: Save CHROME_PATH
       shell: bash
