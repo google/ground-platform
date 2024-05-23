@@ -85,6 +85,6 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: data-test
-        path: data/test-upload
+        path: ground-platform/data/test-upload
         retention-days: 1
         overwrite: true

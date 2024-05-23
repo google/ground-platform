@@ -78,7 +78,11 @@ runs:
       uses: actions/download-artifact@v4
       with:
         name: data-test
-        path: data/test
+        path: data
+
+    - name: List data folder
+      shell: bash
+      run: ls data
 
     - name: Run create e2e tests
       run: npm run test:e2e:verify
