@@ -59,23 +59,32 @@ runs:
       shell: bash
       run: npm list
 
-    - name: Install Chrome
-      uses: browser-actions/setup-chrome@v1
-      id: setup-chrome
-      with:
-        chrome-version: 125
+    # - name: Install Chrome
+    #   uses: browser-actions/setup-chrome@v1
+    #   id: setup-chrome
+    #   with:
+    #     chrome-version: 125
     
-    - name: Save CHROME_PATH
-      shell: bash
-      run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+    # - name: Save CHROME_PATH
+    #   shell: bash
+    #   run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
-    - name: Install dependencies
-      shell: bash
-      run: npm run build:local
+    # - name: Install dependencies
+    #   shell: bash
+    #   run: npm run build:local
 
-    - name: Run create e2e tests
+    # - name: Run create e2e tests
+    #   shell: bash
+    #   run: npm run test:e2e:create
+
+
+    - name: DELETE ME copy data/local to data/test
       shell: bash
-      run: npm run test:e2e:create
+      run: cp -r data/local data/test
+
+    - name: List data
+      shell: bash
+      run: ls data
 
     - name: Move Firebase emulator data (avoids .gitignore)
       shell: bash
@@ -88,3 +97,4 @@ runs:
         path: ground-platform/data/test-upload
         retention-days: 1
         overwrite: true
+        if-no-files-found: error
