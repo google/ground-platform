@@ -77,10 +77,14 @@ runs:
       shell: bash
       run: npm run test:e2e:create
 
+    - name: Move Firebase emulator data (avoids .gitignore)
+      shell: bash
+      run: mv data/test/ data/test-upload
+
     - name: Copy Firebase emulator data
       uses: actions/upload-artifact@v4
       with:
         name: data-test
-        path: data/test
+        path: data/test-upload
         retention-days: 1
         overwrite: true
