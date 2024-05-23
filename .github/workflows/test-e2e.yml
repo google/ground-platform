@@ -21,7 +21,7 @@ on:
 jobs:
   e2eTest:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     if: github.event.issue.pull_request && contains(github.event.comment.body, '/e2eTest')
     steps:
       - name: Start test
@@ -33,7 +33,7 @@ jobs:
     needs: e2eTest
     name: Create a new survey
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,7 +46,7 @@ jobs:
     needs: createTest
     name: Submit to survey
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Run submit-test
         uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
@@ -55,7 +55,7 @@ jobs:
     needs: submitTest
     name: Verify survey submissions
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

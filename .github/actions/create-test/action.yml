@@ -69,17 +69,9 @@ runs:
       shell: bash
       run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
-    # - name: Install dependencies
-    #   shell: bash
-    #   run: npm run build:local
-
-    - name: DELETE ME Install dependencies
+    - name: Install dependencies
       shell: bash
-      run: npm i
-
-    - name: DELETE ME Install dependencies
-      shell: bash
-      run: npm run build --prefix e2e-tests
+      run: npm run build:local
 
     - name: Run create e2e tests
       shell: bash
