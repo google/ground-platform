@@ -63,7 +63,7 @@ runs:
       uses: browser-actions/setup-chrome@v1
       id: setup-chrome
       with:
-        chrome-version: 120
+        chrome-version: 125
     
     - name: Save CHROME_PATH
       shell: bash
