@@ -35,10 +35,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-        - name: Run create-test
-          uses: ./.github/actions/create-test
-          with:
-            platform-repository: ${{ github.repository }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run create-test
+        uses: ./.github/actions/create-test
+        with:
+          platform-repository: ${{ github.repository }}
 
   submitTest:
     needs: createTest
@@ -55,6 +57,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Run verify-test
         uses: ./.github/actions/verify-test
         with:
