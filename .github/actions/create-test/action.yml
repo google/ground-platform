@@ -94,7 +94,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: data-test
-        path: ./ground-platform/data/test-upload
+        path: '**/data/test-upload'
         retention-days: 1
         overwrite: true
         if-no-files-found: error
