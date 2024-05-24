@@ -106,6 +106,12 @@ export class TasksEditorComponent {
 
   multipleChoiceTasks = List<Task>();
 
+  ngOnInit(): void {
+    if (!this.formArray.length) {
+      this.onTaskAdd(TaskGroup.CAPTURE_LOCATION, true);
+    }
+  }
+
   ngOnChanges(): void {
     this.formGroup = this.formBuilder.group({
       tasks: this.formBuilder.array(
@@ -133,13 +139,13 @@ export class TasksEditorComponent {
     return this.formGroup.get('tasks') as FormArray;
   }
 
-  onTaskAdd(group: TaskGroup) {
+  onTaskAdd(group: TaskGroup, required = false) {
     const types = taskGroupToTypes.get(group);
 
     const formGroup = this.formBuilder.group({
       id: this.dataStoreService.generateId(),
       type: types?.first(),
-      required: false,
+      required: required,
       label: ['', Validators.required],
       cardinality: null,
       options: this.formBuilder.array([]),
