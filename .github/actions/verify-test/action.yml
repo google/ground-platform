@@ -26,7 +26,7 @@ runs:
       with:
         repository: ${{ inputs.platform-repository }}
 
-    - name: Cache Firebase emulator
+    - name: Load cached Firebase emulator
       uses: actions/cache@v4
       with:
         path: ~/.cache/firebase/emulators
@@ -39,7 +39,7 @@ runs:
       with:
         node-version: "18"
 
-    - name: Cache node modules
+    - name: Load cached Node modules
       id: cache-npm
       uses: actions/cache@v3
       env:
@@ -77,12 +77,9 @@ runs:
     - name: Copy Firebase emulator data
       uses: actions/download-artifact@v4
       with:
-        name: data-test
+        name: data-submit
         path: data/
 
-    - name: List data folder
+    - name: Run verify e2e tests
       shell: bash
-      run: ls data
-
-    - name: Run create e2e tests
       run: npm run test:e2e:verify
