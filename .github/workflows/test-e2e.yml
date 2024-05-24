@@ -46,7 +46,7 @@ jobs:
     needs: createTest
     name: Submit to survey
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Run submit-test
         uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
