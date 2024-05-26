@@ -12,7 +12,7 @@
     "deploy": "npm run build && npx firebase deploy --project",
     "logs": "npx firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
-    "build": "npm install && tsc",
+    "build": "npm i --legacy-peer-deps && tsc",
     "watch": "npm run build && tsc --watch"
   },
   "dependencies": {
@@ -38,10 +38,10 @@
   },
   "private": true,
   "devDependencies": {
-    "@types/ground-schema": "file:../schema/dist/generated",
     "@types/busboy": "^1.5.0",
     "@types/cookie-parser": "^1.4.4",
     "@types/cors": "2.8.12",
+    "@types/ground-schema": "file:../schema/dist/generated",
     "@types/jasmine": "^4.3.5",
     "@types/jsonstream": "0.8.30",
     "@types/node": "18.7.13",
