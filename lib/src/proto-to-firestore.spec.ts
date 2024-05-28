@@ -48,6 +48,7 @@ describe("toDocumentData()", () => {
   ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toDocumentData(input);
+      // DO NOT SUBMIT      
       console.log(output);
       expect(output).toEqual(expected);
     })
