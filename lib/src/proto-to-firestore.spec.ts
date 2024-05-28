@@ -53,12 +53,17 @@ describe("toDocumentData()", () => {
         expected: {
           "1": 3
         },
-      }
+      },
+      {
+        desc: "skips unset (0) enum value",
+        input: new Task.DateTimeQuestion({
+          type: Task.DateTimeQuestion.Type.UNSPECIFIED_DATE_TIME_QUESTION_TYPE
+        }),
+        expected: {},
+      },
   ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toDocumentData(input);
-      // DO NOT SUBMIT      
-      console.log(output);
       expect(output).toEqual(expected);
     })
   );
