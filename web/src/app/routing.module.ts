@@ -29,6 +29,7 @@ import {AuthGuard} from 'app/services/auth/auth.guard';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
+import {AboutComponent} from './pages/about/about.component';
 import {EditDetailsComponent} from './pages/edit-survey/edit-details/edit-details.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
@@ -82,6 +83,11 @@ const routes: Routes = [
   {
     path: NavigationService.ERROR,
     component: ErrorComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: NavigationService.ABOUT,
+    component: AboutComponent,
     canActivate: [AuthGuard],
   },
 ];
