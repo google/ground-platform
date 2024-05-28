@@ -17,6 +17,11 @@
 import { FieldDescriptor, MessageDescriptor, registry } from "./message-registry";
 import { DocumentData, DocumentFieldValue } from "@google-cloud/firestore";
 
+/**
+ * Returns the map representation of the provided message ready for serialization in Firestore.
+ * The map is keyed by message field numbers represented as strings, while field values are 
+ * converted to corresponding Firestore data types. 
+ */
 export function toDocumentData(message: any): DocumentData | Error {
   const type = message.constructor.name;
   const descriptor =  registry.getDescriptor(message);
