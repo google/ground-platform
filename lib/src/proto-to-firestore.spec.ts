@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Role, Survey, Task } from "./generated/ground-protos";
+import { Job, Role, Style, Survey, Task } from "./generated/ground-protos";
 import { toDocumentData } from "./proto-to-firestore";
 
 describe("toDocumentData()", () => {
@@ -30,6 +30,15 @@ describe("toDocumentData()", () => {
         "3": "Survey desc",
       },
     },
+    {
+      desc: "converts nested message",
+      input: new Job({
+        style: new Style({color: "#112233"})
+      }),
+      expected: {
+        "4": {"1": "#112233"}
+      },
+    },    
     {
         desc: "converts map<string, enum>",
         input: new Survey({

@@ -22,16 +22,11 @@ export function toDocumentData(message: any): DocumentData | Error {
   const descriptor =  registry.getDescriptor(message);
   if (!descriptor) return Error(`Unknown message type ${type}`);
 
-  if (descriptor.fields) {
-    return messageToData(message, descriptor);
-  } else {
-    return Error(`Unimplemented field type ${descriptor}`);
+  if (!descriptor.fields) {
+    // `values`, `nested`, and `oneofs` fields are handled implicitly in `messageToData()`.
+    return Error(`Unexpected field type ${descriptor}`);
   }
-  // descriptor:
-  // fields?: { [fieldName: string]: FieldDescriptor };
-  // oneofs?: { [oneofName: string]: OneOfDescriptor };
-  // nested?: { [nestedMessageName: string]: MessageDescriptor };
-  // values?: { [enumValueName: string]: number }; // For enums
+  return messageToData(message, descriptor);
 }
 
 function messageToData(message: any, descriptor: MessageDescriptor): DocumentData {
