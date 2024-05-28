@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,39 +14,18 @@
  * limitations under the License.
  */
 
-.header {
-  padding: 16px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+import {Location} from '@angular/common';
+import {Component} from '@angular/core';
 
-  .header-divider {
-    height: 32px;
-    margin: 0 12px;
-  }
+@Component({
+  selector: 'ground-about-page',
+  templateUrl: './about.component.html',
+  styleUrls: ['./about.component.scss'],
+})
+export class AboutComponent {
+  constructor(private _location: Location) {}
 
-  div {
-    display: flex;
-    align-items: center;
-
-    .logo {
-      width: 40px;
-      height: 40px;
-      margin-left: 4px;
-      cursor: pointer;
-    }
-
-    .ground-title {
-      margin-left: 12px;
-    }
-
-    .cancel-edit-button {
-      margin-right: 8px;
-    }
-
-    .finish-edit-button {
-      border-radius: 100px;
-    }
+  onBackButtonClick() {
+    this._location.back();
   }
 }
