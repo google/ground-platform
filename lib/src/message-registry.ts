@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import assert from "assert";
 import registryJson from "./generated/ground-protos.json";
 
 export interface ProtoOptions {
@@ -47,12 +48,16 @@ export class MessageRegistry {
   constructor(private readonly json: MessageRegistryJson) {}
 
   getDescriptor(message: any): MessageDescriptor | null {
-      const typePath = message.constructor.getTypeUrl("").substr(1).split(".")
-      let node = this.json as any;
-      for (const type of typePath) {
-        node = node?.nested[type];
-      }
-      return node;  
+    // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
+    const typeUrl = message.constructor.getTypeUrl("");
+    assert(typeUrl.substr(0, 1) == "/")
+    // Remove preceding "/" and split path along ".";
+    const typePath = typeUrl.substr(1).split(".")
+    let node = this.json as any;
+    for (const type of typePath) {
+      node = node?.nested[type];
+    }
+    return node;  
   }
 }
 
