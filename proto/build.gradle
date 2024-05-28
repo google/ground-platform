@@ -1,36 +1,26 @@
-plugins {
-    id 'base'
-    id 'maven-publish'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+group = 'com.google.ground'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()                              // For resolving Gradle plugin dependencies
 }
 
-// Specify where your .proto files are located
-def protoFiles = fileTree('src') {
-    include '**/*.proto'
+sourceSets {
+    main {
+        resources {
+            srcDirs "src"
+        }
+    }
 }
 
-// Task to create a JAR file containing the proto files
-task packageProtos(type: Jar) {
-    from protoFiles // Include all proto files
-    archiveClassifier.set('protos') // Optional: Add a classifier to the artifact name
-}
-
-// Configuration for publishing the artifact
+// Publishing configuration for JitPack.
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact packageProtos
-            groupId = 'com.google.ground'
-            artifactId = 'ground-protos'
-            version = '0.0.1'
-
-            // pom.withXml {
-            //     // (Optional) Add additional POM metadata if needed
-            //     asNode().appendNode('description', 'A collection of protobuf files')
-            // }
+            from components.java
         }
-    }
-    repositories {
-        mavenLocal() // Publish to your local Maven repository
-        // Or specify a remote repository for broader distribution
     }
 }
