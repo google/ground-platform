@@ -20,8 +20,8 @@ option java_package = "com.google.android.ground.proto";
 option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
-import "com/google/ground/audit_info.proto";
-import "com/google/ground/geometry.proto";
+import "audit_info.proto";
+import "geometry.proto";
 
 // Data submitted by data collectors for relevant tasks in a job.
 message Submission {
