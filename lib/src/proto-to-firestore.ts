@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-import { FieldDescriptor, registry } from "./message-registry";
+import { FieldDescriptor, MessageDescriptor, registry } from "./message-registry";
 import { DocumentData, DocumentFieldValue } from "@google-cloud/firestore";
 
 export function toDocumentData(message: any): DocumentData | Error {
   const type = message.constructor.name;
-  const descriptor = registry.nested[type];
-  if (!descriptor?.fields) return Error(`Unknown message type $type`);
+  const descriptor =  registry.getDescriptor(message);
+  if (!descriptor) return Error(`Unknown message type ${type}`);
 
+  if (descriptor.fields) {
+    return messageToData(message, descriptor);
+  } else {
+    return Error(`Unimplemented field type ${descriptor}`);
+  }
+  // descriptor:
+  // fields?: { [fieldName: string]: FieldDescriptor };
+  // oneofs?: { [oneofName: string]: OneOfDescriptor };
+  // nested?: { [nestedMessageName: string]: MessageDescriptor };
+  // values?: { [enumValueName: string]: number }; // For enums
+}
+
+function messageToData(message: any, descriptor: MessageDescriptor): DocumentData {
   const firestoreMap: DocumentData = {};
   for (const name in descriptor.fields) {
-    const fieldDescriptor = descriptor?.fields[name];
+    const fieldDescriptor = descriptor.fields[name];
     const fieldNumber = fieldDescriptor?.id;
     if (!fieldNumber) {
       console.debug(`Skipping unknown field $name in $type`);

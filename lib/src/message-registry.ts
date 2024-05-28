@@ -38,9 +38,22 @@ export interface OneOfDescriptor {
   oneof: string[]; // Names of fields in the oneof
 }
 
-export interface MessageRegistry {
+export interface MessageRegistryJson {
   options?: ProtoOptions;
   nested: { [messageName: string]: MessageDescriptor };
 }
 
-export const registry = registryJson as MessageRegistry;
+export class MessageRegistry { 
+  constructor(private readonly json: MessageRegistryJson) {}
+
+  getDescriptor(message: any): MessageDescriptor | null {
+      const typePath = message.constructor.getTypeUrl("").substr(1).split(".")
+      let node = this.json as any;
+      for (const type of typePath) {
+        node = node?.nested[type];
+      }
+      return node;  
+  }
+}
+
+export const registry = new MessageRegistry(registryJson as MessageRegistryJson);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Role, Survey } from "./generated/ground-protos";
+import { Role, Survey, Task } from "./generated/ground-protos";
 import { toDocumentData } from "./proto-to-firestore";
 
 describe("toDocumentData()", () => {
@@ -45,6 +45,15 @@ describe("toDocumentData()", () => {
           }
         },
       },
+      {
+        desc: "converts enum value",
+        input: new Task.DateTimeQuestion({
+          type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME
+        }),
+        expected: {
+          "1": 3
+        },
+      }
   ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toDocumentData(input);
