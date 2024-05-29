@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {  Job, Style, Survey } from "./generated/ground-protos";
+import { Job, Role, Style, Survey } from "./generated/ground-protos";
 import { toMessage } from "./firestore-to-proto";
 import { Constructor } from "protobufjs";
 
@@ -34,28 +34,27 @@ fdescribe("toMessage()", () => {
     {
       desc: "converts nested message",
       input: {
-        "4": {"1": "#112233"}
+        "4": { "1": "#112233" },
       },
       expected: new Job({
-        style: new Style({color: "#112233"})
+        style: new Style({ color: "#112233" }),
       }),
     },
-    // },    
-    // {
-    //     desc: "converts map<string, enum>",
-    //     input: new Survey({
-    //       acl: {
-    //         "email1": Role.DATA_COLLECTOR,
-    //         "email2": Role.SURVEY_ORGANIZER
-    //       }
-    //     }),
-    //     expected: {
-    //       "4": {
-    //         "email1": 2,
-    //         "email2": 3,
-    //       }
-    //     },
-    //   },
+    {
+      desc: "converts map<string, enum>",
+      input: {
+        "4": {
+          email1: 2,
+          email2: 3,
+        },
+      },
+      expected: new Survey({
+        acl: {
+          email1: Role.DATA_COLLECTOR,
+          email2: Role.SURVEY_ORGANIZER,
+        },
+      }),
+    },
     //   {
     //     desc: "converts enum value",
     //     input: new Task.DateTimeQuestion({

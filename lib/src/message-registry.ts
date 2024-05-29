@@ -53,14 +53,19 @@ export interface MessageRegistryJson {
 export class MessageRegistry { 
   constructor(private readonly json: MessageRegistryJson) {}
 
-  getDescriptor(constructor: any): MessageDescriptor | null {
+  getMessageDescriptor(constructor: any): MessageDescriptor | null {
+    if (!constructor.getTypeUrl) return null;
     // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
     const typeUrl = constructor.getTypeUrl("");
     assert(typeUrl?.substr(0, 1) == "/")
     // Remove preceding "/" and split path along ".";
-    const typePath = typeUrl.substr(1).split(".")
+    const typePath = typeUrl.substr(1).split(".");
+    return this.getDescriptorByPath(typePath);
+  }
+
+  private getDescriptorByPath(path: string[]): any | null {
     let node = this.json as any;
-    for (const type of typePath) {
+    for (const type of path) {
       node = node?.nested[type];
     }
     return node;  
@@ -85,6 +90,10 @@ export class MessageRegistry {
     }
     return node;
   }
+
+  getEnumValues(messagePath: string[], enumName: string):{ [enumValueName: string]: number } | null {
+    return this.getDescriptorByPath([...messagePath, enumName])?.values;
+  } 
 }
 
 export const registry = new MessageRegistry(registryJson as MessageRegistryJson);

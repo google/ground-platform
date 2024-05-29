@@ -22,7 +22,7 @@ export function toMessage<T>(
   data: DocumentData,
   constructor: Constructor<T>
 ): T | Error {
-  const descriptor = registry.getDescriptor(constructor);
+  const descriptor = registry.getMessageDescriptor(constructor);
   if (!descriptor)
     return Error(`Message type ${constructor.name} not found in registry`);
   return toMessageInternal(data, constructor, descriptor, []);
@@ -61,9 +61,43 @@ function toMessageValue(
   descriptorPath: string[],
   fieldName: string,
   firestoreValue: any
-): any | null {
+): any | Error | null {
   if (!descriptor.fields) return null;
-  const fieldType = descriptor.fields[fieldName]?.type;
+  const fields = descriptor.fields[fieldName];
+  const fieldType = fields?.type;
+  if (fields.keyType) {
+    if (fields.keyType !== "string")
+      return Error(`${fields.keyType} map keys not supported`);
+    // TODO: Check that firestoreValue is an object.
+    return toMessageMapValue(descriptorPath, fieldType, firestoreValue);
+  } else {
+    return toMessageValueOfType(descriptorPath, fieldType, firestoreValue);
+  }
+}
+
+function toMessageMapValue(
+  // Path of message type described by descriptor from root of registry.
+  descriptorPath: string[],
+  valueType: string,
+  nestedObject: [key: string]
+): any | null {
+  let messageMap: { [key: string]: any } = {};
+  for (const key in nestedObject) {
+    const firestoreValue = nestedObject[key];
+    messageMap[key.toString()] = toMessageValueOfType(
+      descriptorPath,
+      valueType,
+      firestoreValue
+    );
+  }
+  return messageMap;
+}
+
+function toMessageValueOfType(
+  descriptorPath: string[],
+  fieldType: string,
+  firestoreValue: any
+) {
   // TODO: Check value type corresponds to appropriate type.
   switch (fieldType) {
     case "string":
@@ -74,21 +108,29 @@ function toMessageValue(
     default:
       const nestedDescriptorPath = [...descriptorPath, fieldType];
       const constructor = registry.getConstructorByPath(nestedDescriptorPath);
+
       // Skip unknown types.
       if (!constructor) return null;
-      const nestedDescriptor = registry.getDescriptor(constructor);
-      // Skip unknown types.
-      if (!nestedDescriptor) return null;
-      // TODO: Check firestoreValue is a DocumentData.
-      return toMessageInternal(
-        firestoreValue as DocumentData,
-        constructor,
-        nestedDescriptor,
-        nestedDescriptorPath
-      );
+      const nestedDescriptor = registry.getMessageDescriptor(constructor);
+      if (nestedDescriptor) {
+        // TODO: Check firestoreValue is a DocumentData.
+        return toMessageInternal(
+          firestoreValue as DocumentData,
+          constructor,
+          nestedDescriptor,
+          nestedDescriptorPath
+        );
+      } else {
+        // Type to get enum values by path instead of constructor.
+        const enumValues = registry.getEnumValues(descriptorPath, fieldType);
+        const enumValue = Number(firestoreValue);
+        // Only include valid numeric values.
+        return enumValues && Object.values(enumValues).includes(enumValue)
+          ? enumValue
+          : null;
+      }
   }
 }
-
 function createInstance<T>(constructor: Constructor<T>, ...args: any[]): T {
   return new constructor(...args);
 }
