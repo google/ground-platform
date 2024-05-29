@@ -18,7 +18,7 @@ import { Job, Role, Style, Survey, Task } from "./generated/ground-protos";
 import { toMessage } from "./firestore-to-proto";
 import { Constructor } from "protobufjs";
 
-fdescribe("toMessage()", () => {
+describe("toMessage()", () => {
   [
     {
       desc: "converts string fields",
