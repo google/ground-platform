@@ -17,6 +17,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
 import {Map} from 'immutable';
 import {from, of} from 'rxjs';
@@ -47,7 +48,7 @@ describe('EditJobComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent],
-      imports: [MatDialogModule, TasksEditorModule],
+      imports: [MatDialogModule, TasksEditorModule, NoopAnimationsModule],
       providers: [
         {provide: DataStoreService, useValue: {generateId: () => '123'}},
         {provide: DialogService, useValue: {}},
