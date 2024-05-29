@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,42 +14,38 @@
  * limitations under the License.
  */
 
-.header {
-  padding: 16px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.page {
+  min-height: 100%;
+  padding-bottom: 40px;
 
-  .header-divider {
-    height: 32px;
-    margin: 0 12px;
+  .page-title {
+    margin: 60px 160px 24px 160px;
   }
 
-  div {
-    display: flex;
-    align-items: center;
+  .container {
+    margin: 0px 160px;
 
     .logo {
-      width: 40px;
-      height: 40px;
-      margin-left: 4px;
-      cursor: pointer;
+      width: 120px;
+      height: 120px;
     }
 
-    .ground-title {
-      margin-left: 12px;
+    a {
+      color: #47854B;
+      text-decoration: none;
     }
 
-    .cancel-edit-button {
-      height: 40px;
-      margin-right: 8px;
+    section {
+      margin-top: 24px;
+      font-family: "Manrope";
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 24px;
+      color: #1A1C19;
     }
 
-    .finish-edit-button {
-      height: 40px;
-      border-radius: 100px;
-      padding: 10px 24px;
+    .back-button {
+      margin-top: 48px;
     }
   }
 }
