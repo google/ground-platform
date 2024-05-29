@@ -16,6 +16,8 @@
 
 import assert from "assert";
 import registryJson from "./generated/ground-protos.json";
+import * as GroundProtos from "./generated/ground-protos";
+import { Constructor } from "protobufjs";
 
 export interface ProtoOptions {
   java_package: string;
@@ -73,6 +75,15 @@ export class MessageRegistry {
       }
     }
     return null;
+  }
+
+  getConstructorByPath<T>(path: string[]): Constructor<T> | null {
+    let node = GroundProtos as any;
+    for (const typeName of path) {
+      node = node[typeName];
+      if (!node) return null;
+    }
+    return node;
   }
 }
 

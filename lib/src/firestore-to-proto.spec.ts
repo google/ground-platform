@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {  Survey } from "./generated/ground-protos";
+import {  Job, Style, Survey } from "./generated/ground-protos";
 import { toMessage } from "./firestore-to-proto";
 import { Constructor } from "protobufjs";
 
@@ -31,14 +31,15 @@ fdescribe("toMessage()", () => {
         description: "Survey desc",
       }),
     },
-    // {
-    //   desc: "converts nested message",
-    //   input: new Job({
-    //     style: new Style({color: "#112233"})
-    //   }),
-    //   expected: {
-    //     "4": {"1": "#112233"}
-    //   },
+    {
+      desc: "converts nested message",
+      input: {
+        "4": {"1": "#112233"}
+      },
+      expected: new Job({
+        style: new Style({color: "#112233"})
+      }),
+    },
     // },    
     // {
     //     desc: "converts map<string, enum>",
