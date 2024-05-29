@@ -122,12 +122,11 @@ function toMessageValueOfType(
         );
       } else {
         // Type to get enum values by path instead of constructor.
-        const enumValues = registry.getEnumValues(descriptorPath, fieldType);
+        const enumValues =
+          registry.getEnumValues(descriptorPath, fieldType) || [];
         const enumValue = Number(firestoreValue);
         // Only include valid numeric values.
-        return enumValues && Object.values(enumValues).includes(enumValue)
-          ? enumValue
-          : null;
+        return Object.values(enumValues).includes(enumValue) ? enumValue : null;
       }
   }
 }
