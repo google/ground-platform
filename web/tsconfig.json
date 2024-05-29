@@ -9,10 +9,7 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"],
-    "paths": {
-      "@types/ground-schema": ["@types/ground-schema/dist/generated/schema"]
-    },    
+    "types": ["node"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
