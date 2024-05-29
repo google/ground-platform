@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "module": "CommonJS",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
@@ -9,11 +8,8 @@
     "strict": true,
     "target": "es2019",
     "allowJs": true,
-    "paths": {
-      "@/*": [
-        "src/*",
-      ]
-    }
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
   "compileOnSave": true,
   "include": [
