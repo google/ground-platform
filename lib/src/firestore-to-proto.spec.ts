@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Job, Role, Style, Survey } from "./generated/ground-protos";
+import { Job, Role, Style, Survey, Task } from "./generated/ground-protos";
 import { toMessage } from "./firestore-to-proto";
 import { Constructor } from "protobufjs";
 
@@ -55,22 +55,20 @@ fdescribe("toMessage()", () => {
         },
       }),
     },
-    //   {
-    //     desc: "converts enum value",
-    //     input: new Task.DateTimeQuestion({
-    //       type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME
-    //     }),
-    //     expected: {
-    //       "1": 3
-    //     },
-    //   },
-    //   {
-    //     desc: "skips unset (0) enum value",
-    //     input: new Task.DateTimeQuestion({
-    //       type: Task.DateTimeQuestion.Type.UNSPECIFIED_DATE_TIME_QUESTION_TYPE
-    //     }),
-    //     expected: {},
-    //   },
+    {
+      desc: "converts enum value",
+      input: {
+        "1": 3,
+      },
+      expected: new Task.DateTimeQuestion({
+        type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
+      }),
+    },
+    {
+      desc: "skips unset (0) enum value",
+      input: {},
+      expected: new Task.DateTimeQuestion(),
+    },
   ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toMessage(input, expected.constructor as Constructor<any>);
