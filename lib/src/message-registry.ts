@@ -29,10 +29,14 @@ export interface FieldDescriptor {
 }
 
 export interface MessageDescriptor {
+  // Normal proto fields.
   fields?: { [fieldName: string]: FieldDescriptor };
+  // Possible oneof selector values.
   oneofs?: { [oneofName: string]: OneOfDescriptor };
+  // Nested message type definition.
   nested?: { [nestedMessageName: string]: MessageDescriptor };
-  values?: { [enumValueName: string]: number }; // For enums
+  // Enum definitions, including valid values.
+  values?: { [enumValueName: string]: number };
 }
 
 export interface OneOfDescriptor {

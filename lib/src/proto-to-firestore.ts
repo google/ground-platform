@@ -25,12 +25,10 @@ import { DocumentData, DocumentFieldValue } from "@google-cloud/firestore";
 export function toDocumentData(message: any): DocumentData | Error {
   const type = message.constructor.name;
   const descriptor =  registry.getDescriptor(message.constructor);
+  // Fail if message not defined in registry.
   if (!descriptor) return Error(`Unknown message type ${type}`);
-
-  if (!descriptor.fields) {
-    // `values`, `nested`, and `oneofs` fields are handled implicitly in `messageToData()`.
-    return Error(`Unexpected field type ${descriptor}`);
-  }
+  // Messages must also have at least one field.
+  if (!descriptor.fields)  return Error(`Invalid message definition: ${descriptor}`);  
   return messageToData(message, descriptor);
 }
 
