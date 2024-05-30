@@ -70,7 +70,6 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-tools": "^13.8.2",
-    "fuzzy": "^0.1.3",
     "gts": "^4.0.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.3.0",
