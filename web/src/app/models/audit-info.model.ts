@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FieldValue} from 'firebase/firestore';
+import {FieldValue} from '@angular/fire/firestore';
 
 import {User} from './user.model';
 
