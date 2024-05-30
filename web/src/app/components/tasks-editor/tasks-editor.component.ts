@@ -38,6 +38,7 @@ import {
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
+import {TaskService} from 'app/services/task/task.service';
 import {moveItemInFormArray} from 'app/utils/utils';
 
 export enum TaskGroup {
@@ -101,6 +102,7 @@ export class TasksEditorComponent {
   constructor(
     private dataStoreService: DataStoreService,
     private dialogService: DialogService,
+    private taskService: TaskService,
     private formBuilder: FormBuilder
   ) {}
 
@@ -176,23 +178,7 @@ export class TasksEditorComponent {
         if (dialogResult) {
           const task = this.toTask(index);
 
-          const duplicatedTask = new Task(
-            this.dataStoreService.generateId(),
-            task.type,
-            task.label,
-            task.required,
-            this.formArray.controls.length + 1,
-            task.multipleChoice
-              ? ({
-                  ...task.multipleChoice,
-                  options: task.multipleChoice.options?.map(option => ({
-                    ...option,
-                    id: this.dataStoreService.generateId(),
-                  })),
-                } as MultipleChoice)
-              : undefined,
-            task.condition
-          );
+          const duplicatedTask = this.taskService.createDuplicateTask(task);
 
           const control = this.toControl(duplicatedTask);
 

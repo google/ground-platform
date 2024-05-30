@@ -56,7 +56,7 @@ export class TaskService {
   }
 
   /**
-   * Creates and returns a new task with a generated unique identifier and a single English label.
+   * Creates and returns a new task with a generated unique identifier.
    */
   createTask(
     type: TaskType,
@@ -67,6 +67,25 @@ export class TaskService {
   ): Task {
     const taskId = this.dataStoreService.generateId();
     return new Task(taskId, type, label, required, index, multipleChoice);
+  }
+
+  /**
+   * Duplicates a task returning the same task with a different generated unique identifier.
+   */
+  createDuplicateTask(task: Task): Task {
+    return {
+      ...task,
+      id: this.dataStoreService.generateId(),
+      multipleChoice: task.multipleChoice
+        ? ({
+            ...task.multipleChoice,
+            options: task.multipleChoice.options?.map(option => ({
+              ...option,
+              id: this.dataStoreService.generateId(),
+            })),
+          } as MultipleChoice)
+        : undefined,
+    } as Task;
   }
 
   getTasks$(): Observable<List<Task>> {

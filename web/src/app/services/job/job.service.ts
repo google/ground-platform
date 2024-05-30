@@ -25,6 +25,8 @@ import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+import {TaskService} from '../task/task.service';
+
 enum JobDefaultColors {
   ORANGE = '#F37C22',
   BLUE = '#2278CF',
@@ -40,7 +42,8 @@ enum JobDefaultColors {
 export class JobService {
   constructor(
     private dataStoreService: DataStoreService,
-    private surveyService: SurveyService
+    private surveyService: SurveyService,
+    private taskService: TaskService
   ) {}
 
   /**
@@ -61,6 +64,24 @@ export class JobService {
   createNewJob(): Job {
     const jobId = this.dataStoreService.generateId();
     return new Job(jobId, /* index */ -1);
+  }
+
+  /**
+   * Duplicates a job returning the same job with a different generated unique identifier.
+   */
+  createDuplicatedJob(job: Job, jobs: Map<string, Job> | undefined): Job {
+    return job.copyWith({
+      id: this.dataStoreService.generateId(),
+      name: `Copy of ${job.name}`,
+      color: this.getNextColor(jobs),
+      index: -1,
+      tasks: Map<string, Task>(
+        job.tasks?.toArray().map(([_, task]) => {
+          const duplicateTask = this.taskService.createDuplicateTask(task);
+          return [duplicateTask.id, duplicateTask];
+        })
+      ),
+    });
   }
 
   /**
