@@ -7,8 +7,5 @@
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "eslint-plugin-absolute-imports"
-  ],
-  "rules": {
-    "absolute-imports/only-absolute-imports": "error"
-  }
+  ]
 }

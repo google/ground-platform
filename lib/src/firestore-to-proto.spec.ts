@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Job, Role, Style, Survey, Task} from 'src/generated/ground-protos';
-import {toMessage} from 'src/firestore-to-proto';
+import {Job, Role, Style, Survey, Task} from './generated/ground-protos';
+import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
 describe('toMessage()', () => {

@@ -15,11 +15,7 @@
  */
 
 import {Constructor} from 'protobufjs';
-import {
-  MessageDescriptor,
-  MessageTypePath,
-  registry,
-} from 'src/message-registry';
+import {MessageDescriptor, MessageTypePath, registry} from './message-registry';
 import {DocumentData} from '@google-cloud/firestore';
 
 export function toMessage<T>(

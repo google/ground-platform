@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Job, Role, Style, Survey, Task} from 'src/generated/ground-protos';
-import {toDocumentData} from 'src/proto-to-firestore';
+import {Job, Role, Style, Survey, Task} from './generated/ground-protos';
+import {toDocumentData} from './proto-to-firestore';
 
 describe('toDocumentData()', () => {
   [

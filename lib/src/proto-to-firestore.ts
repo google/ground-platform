@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  FieldDescriptor,
-  MessageDescriptor,
-  registry,
-} from 'src/message-registry';
+import {FieldDescriptor, MessageDescriptor, registry} from './message-registry';
 import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
 
 /**
