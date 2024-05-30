@@ -5,11 +5,14 @@
     "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2019", "dom"],
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@ground/lib/*": ["../lib/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

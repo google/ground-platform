@@ -15,3 +15,5 @@
  */
 
 export {toDocumentData} from './proto-to-firestore';
+export {toMessage} from './firestore-to-proto';
+export * as Pb from './generated/ground-protos'

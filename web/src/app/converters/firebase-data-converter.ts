@@ -28,6 +28,7 @@ import {
   SubmissionData,
 } from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
+import {toDocumentData, Pb, toMessage} from '@ground/lib/src';
 import {
   Cardinality,
   MultipleChoice,
@@ -117,6 +118,14 @@ export class FirebaseDataConverter {
     description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ) {
+    console.log("!!!!!");
+    console.log(toMessage, Pb);
+    const pb = new Pb.Survey({
+      name: title,
+      description
+    });
+    const data = toDocumentData(pb);
+    console.log(data);
     return {
       title,
       description,
