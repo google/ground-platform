@@ -19,6 +19,9 @@ import registryJson from "./generated/ground-protos.json";
 import * as GroundProtos from "./generated/ground-protos";
 import { Constructor } from "protobufjs";
 
+/** Path of message or enum type declaration in definition files and registry. */
+export type MessageTypePath = string[];
+
 export interface ProtoOptions {
   java_package: string;
   java_multiple_files: boolean;
@@ -50,28 +53,55 @@ export interface MessageRegistryJson {
   nested: { [messageName: string]: MessageDescriptor };
 }
 
-export class MessageRegistry { 
+export class MessageRegistry {
   constructor(private readonly json: MessageRegistryJson) {}
 
-  getMessageDescriptor(constructor: any): MessageDescriptor | null {
+  getTypePath(constructor: any): string[] | null {
     if (!constructor.getTypeUrl) return null;
     // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
     const typeUrl = constructor.getTypeUrl("");
-    assert(typeUrl?.substr(0, 1) == "/")
+    assert(typeUrl?.substr(0, 1) == "/");
     // Remove preceding "/" and split path along ".";
-    const typePath = typeUrl.substr(1).split(".");
-    return this.getDescriptorByPath(typePath);
+    return typeUrl.substr(1).split(".");
   }
 
-  private getDescriptorByPath(path: string[]): any | null {
+  getMessageDescriptor(constructor: any): MessageDescriptor | null {
+    const typePath = this.getTypePath(constructor);
+    return typePath ? this.getDescriptorByPath(typePath) : null;
+  }
+
+  /**
+   * Searches the descriptor hierarchy starting for the specified `typeName`,
+   * starting from the specified containing `messageTypePath`. If the type
+   * is not found there, the parent containing type is checked, recursively
+   * down to the registry root.
+   */
+  findType(
+    messageTypePath: string[],
+    typeName: string
+  ): string[] | null {
+    // Create copy to prevent destructive edits to `messageTypePath`.
+    const parentPath = [...messageTypePath];
+    do {
+      const descriptorPath = [...parentPath, typeName];
+      if (this.getDescriptorByPath(descriptorPath)) return descriptorPath;
+    } while (parentPath.pop() !== undefined);
+    return null;
+  }
+
+  getDescriptorByPath(path: string[]): any | null {
     let node = this.json as any;
     for (const type of path) {
-      node = node?.nested[type];
+      if (!node || !node.nested) return null;
+      node = node.nested[type];
     }
-    return node;  
+    return node;
   }
 
-  getFieldNameByNumber(descriptor: MessageDescriptor, fieldNo: Number): string | null {
+  getFieldNameByNumber(
+    descriptor: MessageDescriptor,
+    fieldNo: Number
+  ): string | null {
     if (!descriptor.fields) return null;
     for (const fieldName in descriptor.fields) {
       const field = descriptor.fields[fieldName];
@@ -90,10 +120,8 @@ export class MessageRegistry {
     }
     return node;
   }
-
-  getEnumValues(messagePath: string[], enumName: string):{ [enumValueName: string]: number } | null {
-    return this.getDescriptorByPath([...messagePath, enumName])?.values;
-  } 
 }
 
-export const registry = new MessageRegistry(registryJson as MessageRegistryJson);
+export const registry = new MessageRegistry(
+  registryJson as MessageRegistryJson
+);
