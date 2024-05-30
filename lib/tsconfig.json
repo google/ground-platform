@@ -4,6 +4,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "dist",
+    "declaration": true,
     "sourceMap": true,
     "strict": true,
     "target": "es2019",

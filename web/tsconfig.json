@@ -11,7 +11,7 @@
     "skipLibCheck": true,
     "types": ["node"],
     "paths": {
-      "@ground/lib/*": ["../lib/*"]
+      "@ground/lib": ["../lib"]
     }
   },
   "angularCompilerOptions": {
