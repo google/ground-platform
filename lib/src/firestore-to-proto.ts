@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import { Constructor } from "protobufjs";
-import { MessageDescriptor, MessageTypePath, registry } from "./message-registry";
-import { DocumentData } from "@google-cloud/firestore";
+import {Constructor} from 'protobufjs';
+import {
+  MessageDescriptor,
+  MessageTypePath,
+  registry,
+} from 'src/message-registry';
+import {DocumentData} from '@google-cloud/firestore';
 
 export function toMessage<T>(
   data: DocumentData,
@@ -51,7 +55,7 @@ function toMessageInternal<T>(
       fieldName,
       firestoreValue
     );
-    if (!!messageValue) properties[fieldName] = messageValue;
+    if (messageValue) properties[fieldName] = messageValue;
   }
   return createInstance<T>(constructor, properties);
 }
@@ -70,24 +74,24 @@ function toMessageValue(
   const fields = descriptor.fields[fieldName];
   const fieldType = fields?.type;
   if (fields.keyType) {
-    if (fields.keyType !== "string")
+    if (fields.keyType !== 'string')
       return Error(`${fields.keyType} map keys not supported`);
     // TODO: Check that firestoreValue is an object.
-    return toMessageMapValue(messageTypePath, fieldType, firestoreValue);
+    return toMapValue(messageTypePath, fieldType, firestoreValue);
   } else {
-    return toMessageValueOfType(messageTypePath, fieldType, firestoreValue);
+    return toFieldValue(messageTypePath, fieldType, firestoreValue);
   }
 }
 
-function toMessageMapValue(
+function toMapValue(
   messageTypePath: MessageTypePath,
   valueType: string,
   nestedObject: [key: string]
 ): any | null {
-  let messageMap: { [key: string]: any } = {};
+  const messageMap: {[key: string]: any} = {};
   for (const key in nestedObject) {
     const firestoreValue = nestedObject[key];
-    messageMap[key.toString()] = toMessageValueOfType(
+    messageMap[key.toString()] = toFieldValue(
       messageTypePath,
       valueType,
       firestoreValue
@@ -96,7 +100,7 @@ function toMessageMapValue(
   return messageMap;
 }
 
-function toMessageValueOfType(
+function toFieldValue(
   // Path of the containing messsage type.
   messageTypePath: MessageTypePath,
   fieldType: string,
@@ -104,33 +108,46 @@ function toMessageValueOfType(
 ): any | Error | null {
   // TODO: Check value type corresponds to appropriate type.
   switch (fieldType) {
-    case "string":
-    case "int32":
-    case "int64":
-    case "bool":
+    case 'string':
+    case 'int32':
+    case 'int64':
+    case 'bool':
       return firestoreValue;
     default:
-      const fieldTypePath = registry.findType(messageTypePath, fieldType);
-      if (!fieldTypePath) return Error(`Unknown field type ${fieldType}`);
-      const constructor = registry.getConstructorByPath(fieldTypePath);
-      const nestedDescriptor = constructor ? registry.getMessageDescriptor(constructor) : null;
-      if (constructor && nestedDescriptor) {
-        if (!nestedDescriptor) return Error(`Unknown message type ${nestedDescriptor}`);
-        // TODO: Check firestoreValue is a DocumentData.
-        return toMessageInternal(
-          firestoreValue as DocumentData,
-          constructor,
-          nestedDescriptor,
-          fieldTypePath
-        );
-      } else {
-        // If not a constructor, found assume value is an enum value.
-        const enumValue = Number(firestoreValue);
-        // Only include valid numeric values.
-        return isNaN(enumValue) ? null : enumValue;
-      }
+      return toMessageOrEnumValue(messageTypePath, fieldType, firestoreValue);
   }
 }
+
+function toMessageOrEnumValue(
+  // Path of the containing messsage type.
+  messageTypePath: MessageTypePath,
+  fieldType: string,
+  firestoreValue: any
+): any | Error | null {
+  const fieldTypePath = registry.findType(messageTypePath, fieldType);
+  if (!fieldTypePath) return Error(`Unknown field type ${fieldType}`);
+  const constructor = registry.getConstructorByPath(fieldTypePath);
+  const nestedDescriptor = constructor
+    ? registry.getMessageDescriptor(constructor)
+    : null;
+  if (constructor && nestedDescriptor) {
+    if (!nestedDescriptor)
+      return Error(`Unknown message type ${nestedDescriptor}`);
+    // TODO: Check firestoreValue is a DocumentData.
+    return toMessageInternal(
+      firestoreValue as DocumentData,
+      constructor,
+      nestedDescriptor,
+      fieldTypePath
+    );
+  } else {
+    // If constructor not found, assume value is an enum value.
+    const enumValue = Number(firestoreValue);
+    // Only include valid numeric values.
+    return isNaN(enumValue) ? null : enumValue;
+  }
+}
+
 function createInstance<T>(constructor: Constructor<T>, ...args: any[]): T {
   return new constructor(...args);
 }

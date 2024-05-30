@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import assert from "assert";
-import registryJson from "./generated/ground-protos.json";
-import * as GroundProtos from "./generated/ground-protos";
-import { Constructor } from "protobufjs";
+import assert from 'assert';
+import registryJson from 'src/generated/ground-protos.json';
+import * as GroundProtos from 'src/generated/ground-protos';
+import {Constructor} from 'protobufjs';
 
 /** Path of message or enum type declaration in definition files and registry. */
 export type MessageTypePath = string[];
@@ -35,13 +35,13 @@ export interface FieldDescriptor {
 
 export interface MessageDescriptor {
   // Normal proto fields.
-  fields?: { [fieldName: string]: FieldDescriptor };
+  fields?: {[fieldName: string]: FieldDescriptor};
   // Possible oneof selector values.
-  oneofs?: { [oneofName: string]: OneOfDescriptor };
+  oneofs?: {[oneofName: string]: OneOfDescriptor};
   // Nested message type definition.
-  nested?: { [nestedMessageName: string]: MessageDescriptor };
+  nested?: {[nestedMessageName: string]: MessageDescriptor};
   // Enum definitions, including valid values.
-  values?: { [enumValueName: string]: number };
+  values?: {[enumValueName: string]: number};
 }
 
 export interface OneOfDescriptor {
@@ -50,7 +50,7 @@ export interface OneOfDescriptor {
 
 export interface MessageRegistryJson {
   options?: ProtoOptions;
-  nested: { [messageName: string]: MessageDescriptor };
+  nested: {[messageName: string]: MessageDescriptor};
 }
 
 export class MessageRegistry {
@@ -59,10 +59,10 @@ export class MessageRegistry {
   getTypePath(constructor: any): string[] | null {
     if (!constructor.getTypeUrl) return null;
     // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
-    const typeUrl = constructor.getTypeUrl("");
-    assert(typeUrl?.substr(0, 1) == "/");
+    const typeUrl = constructor.getTypeUrl('');
+    assert(typeUrl?.substr(0, 1) === '/');
     // Remove preceding "/" and split path along ".";
-    return typeUrl.substr(1).split(".");
+    return typeUrl.substr(1).split('.');
   }
 
   getMessageDescriptor(constructor: any): MessageDescriptor | null {
@@ -76,10 +76,7 @@ export class MessageRegistry {
    * is not found there, the parent containing type is checked, recursively
    * down to the registry root.
    */
-  findType(
-    messageTypePath: string[],
-    typeName: string
-  ): string[] | null {
+  findType(messageTypePath: string[], typeName: string): string[] | null {
     // Create copy to prevent destructive edits to `messageTypePath`.
     const parentPath = [...messageTypePath];
     do {

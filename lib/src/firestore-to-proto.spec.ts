@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-import { Job, Role, Style, Survey, Task } from "./generated/ground-protos";
-import { toMessage } from "./firestore-to-proto";
-import { Constructor } from "protobufjs";
+import {Job, Role, Style, Survey, Task} from 'src/generated/ground-protos';
+import {toMessage} from 'src/firestore-to-proto';
+import {Constructor} from 'protobufjs';
 
-describe("toMessage()", () => {
+describe('toMessage()', () => {
   [
     {
-      desc: "converts string fields",
+      desc: 'converts string fields',
       input: {
-        "2": "Survey name",
-        "3": "Survey desc",
+        '2': 'Survey name',
+        '3': 'Survey desc',
       },
       expected: new Survey({
-        name: "Survey name",
-        description: "Survey desc",
+        name: 'Survey name',
+        description: 'Survey desc',
       }),
     },
     {
-      desc: "converts nested message",
+      desc: 'converts nested message',
       input: {
-        "4": { "1": "#112233" },
+        '4': {'1': '#112233'},
       },
       expected: new Job({
-        style: new Style({ color: "#112233" }),
+        style: new Style({color: '#112233'}),
       }),
     },
     {
-      desc: "converts map<string, enum>",
+      desc: 'converts map<string, enum>',
       input: {
-        "4": {
+        '4': {
           email1: 2,
           email2: 3,
         },
@@ -56,20 +56,20 @@ describe("toMessage()", () => {
       }),
     },
     {
-      desc: "converts enum value",
+      desc: 'converts enum value',
       input: {
-        "1": 3,
+        '1': 3,
       },
       expected: new Task.DateTimeQuestion({
         type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
       }),
     },
     {
-      desc: "skips unset (0) enum value",
+      desc: 'skips unset (0) enum value',
       input: {},
       expected: new Task.DateTimeQuestion(),
     },
-  ].forEach(({ desc, input, expected }) =>
+  ].forEach(({desc, input, expected}) =>
     it(desc, () => {
       const output = toMessage(input, expected.constructor as Constructor<any>);
       expect(output).toEqual(expected);

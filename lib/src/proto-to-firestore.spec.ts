@@ -14,63 +14,63 @@
  * limitations under the License.
  */
 
-import { Job, Role, Style, Survey, Task } from "./generated/ground-protos";
-import { toDocumentData } from "./proto-to-firestore";
+import {Job, Role, Style, Survey, Task} from 'src/generated/ground-protos';
+import {toDocumentData} from 'src/proto-to-firestore';
 
-describe("toDocumentData()", () => {
+describe('toDocumentData()', () => {
   [
     {
-      desc: "converts string fields",
+      desc: 'converts string fields',
       input: new Survey({
-        name: "Survey name",
-        description: "Survey desc",
+        name: 'Survey name',
+        description: 'Survey desc',
       }),
       expected: {
-        "2": "Survey name",
-        "3": "Survey desc",
+        '2': 'Survey name',
+        '3': 'Survey desc',
       },
     },
     {
-      desc: "converts nested message",
+      desc: 'converts nested message',
       input: new Job({
-        style: new Style({color: "#112233"})
+        style: new Style({color: '#112233'}),
       }),
       expected: {
-        "4": {"1": "#112233"}
+        '4': {'1': '#112233'},
       },
-    },    
+    },
     {
-        desc: "converts map<string, enum>",
-        input: new Survey({
-          acl: {
-            "email1": Role.DATA_COLLECTOR,
-            "email2": Role.SURVEY_ORGANIZER
-          }
-        }),
-        expected: {
-          "4": {
-            "email1": 2,
-            "email2": 3,
-          }
+      desc: 'converts map<string, enum>',
+      input: new Survey({
+        acl: {
+          email1: Role.DATA_COLLECTOR,
+          email2: Role.SURVEY_ORGANIZER,
+        },
+      }),
+      expected: {
+        '4': {
+          email1: 2,
+          email2: 3,
         },
       },
-      {
-        desc: "converts enum value",
-        input: new Task.DateTimeQuestion({
-          type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME
-        }),
-        expected: {
-          "1": 3
-        },
+    },
+    {
+      desc: 'converts enum value',
+      input: new Task.DateTimeQuestion({
+        type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
+      }),
+      expected: {
+        '1': 3,
       },
-      {
-        desc: "skips unset (0) enum value",
-        input: new Task.DateTimeQuestion({
-          type: Task.DateTimeQuestion.Type.UNSPECIFIED_DATE_TIME_QUESTION_TYPE
-        }),
-        expected: {},
-      },
-  ].forEach(({ desc, input, expected }) =>
+    },
+    {
+      desc: 'skips unset (0) enum value',
+      input: new Task.DateTimeQuestion({
+        type: Task.DateTimeQuestion.Type.UNSPECIFIED_DATE_TIME_QUESTION_TYPE,
+      }),
+      expected: {},
+    },
+  ].forEach(({desc, input, expected}) =>
     it(desc, () => {
       const output = toDocumentData(input);
       expect(output).toEqual(expected);
