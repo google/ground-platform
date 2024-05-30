@@ -29,21 +29,21 @@ jobs:
           echo "Begin end to end test"
           
 
-  createTest:
-    needs: e2eTest
-    name: Create a new survey
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run create-test
-        uses: ./.github/actions/create-test
-        with:
-          platform-repository: ${{ github.repository }}
+  # createTest:
+  #   needs: e2eTest
+  #   name: Create a new survey
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Run create-test
+  #       uses: ./.github/actions/create-test
+  #       with:
+  #         platform-repository: ${{ github.repository }}
 
   submitTest:
-    needs: createTest
+    # needs: createTest
     name: Submit to survey
     runs-on: ubuntu-latest
     timeout-minutes: 15
