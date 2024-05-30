@@ -40,7 +40,7 @@ function toMessageInternal<T>(
   for (const key in data) {
     const firestoreValue = data[key];
     const fieldNo = parseInt(key);
-    // Skip non-numeric keys  .
+    // Skip non-numeric keys.
     if (Number.isNaN(fieldNo)) continue;
     const fieldName = registry.getFieldNameByNumber(descriptor, fieldNo);
     // Skip unrecognized field numbers.
