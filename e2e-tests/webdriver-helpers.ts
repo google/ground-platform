@@ -84,7 +84,8 @@ export class WebDriverHelper {
   }
 
   async addNewSurvey() {
-    await this.findElementById('add-card').click();
+    const el = await this.findElementById('add-card')
+    await el.click();
   }
 
   // TODO: Add predefined GeoJSON import support.
@@ -280,15 +281,18 @@ export class WebDriverHelper {
   }
 
   private async clickContinue() {
-    await this.findElementById('continue-button').click();
+    const el = await this.findElementById('continue-button')
+    await el.click();
   }
 
-  private clickToggle(element: WebElement | null = null) {
+  private async clickToggle(element: WebElement | null = null) {
     assertWebDriverInitialized(this.driver);
     if (element) {
-      return element.findElement(By.css('button[role="switch"]')).click();
+      const el = await element.findElement(By.css('button[role="switch"]'));
+      return el.click();
     }
-    return this.driver.findElement(By.css('button[role="switch"]')).click();
+    const el = await this.driver.findElement(By.css('button[role="switch"]'));
+    return el.click();
   }
 
   private async setSelectOption(
