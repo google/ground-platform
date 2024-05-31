@@ -73,7 +73,6 @@ function toDocumentFieldValue(
 
 function toValue(fieldType: string, value: any): DocumentFieldValue | null {
   switch (typeof value) {
-    // TODO: Validate against fieldType.
     case 'string':
     case 'number': // This handles proto enums as well.
       return value;
