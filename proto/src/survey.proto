@@ -27,10 +27,8 @@ message Survey {
     string name = 2;
     // User-facing description of the survey.
     string description = 3;
-    // The user id of the owner of the survey.
-    string owner_id = 4;
     // Defines who has access to do what with this survey.
-    map<string, Role> acl = 5;
+    map<string, Role> acl = 4;
 }
 
 // Defines a user's role in a survey.
