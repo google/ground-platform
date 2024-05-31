@@ -42,7 +42,7 @@ function messageToData(
     const fieldDescriptor = descriptor.fields[name];
     const fieldNumber = fieldDescriptor?.id;
     if (!fieldNumber) {
-      console.debug('Skipping unknown field $name in $type');
+      // Skipping unknown field.
       continue;
     }
     const value = toDocumentFieldValue(fieldDescriptor, message[name]);
@@ -73,7 +73,6 @@ function toDocumentFieldValue(
 
 function toValue(fieldType: string, value: any): DocumentFieldValue | null {
   switch (typeof value) {
-    // TODO: Validate against fieldType.
     case 'string':
     case 'number': // This handles proto enums as well.
       return value;
