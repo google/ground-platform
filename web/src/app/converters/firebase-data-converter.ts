@@ -28,7 +28,6 @@ import {
   SubmissionData,
 } from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
-import {toDocumentData, Pb, toMessage} from '@ground/lib/dist';
 import {
   Cardinality,
   MultipleChoice,
@@ -118,15 +117,6 @@ export class FirebaseDataConverter {
     description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ) {
-    const pb = new Pb.Survey({
-      name: title,
-      description,
-      ownerId: "TODO",
-      acl: {[ownerEmail]: Pb.Role.SURVEY_ORGANIZER}
-    });
-    console.log(pb);
-    const data = toDocumentData(pb);
-    console.log(data);
     return {
       title,
       description,
