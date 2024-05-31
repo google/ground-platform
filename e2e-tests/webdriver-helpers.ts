@@ -84,7 +84,7 @@ export class WebDriverHelper {
   }
 
   async addNewSurvey() {
-    const el = await this.findElementById('add-card')
+    const el = await this.findElementById('add-card');
     await el.click();
   }
 
@@ -281,7 +281,7 @@ export class WebDriverHelper {
   }
 
   private async clickContinue() {
-    const el = await this.findElementById('continue-button')
+    const el = await this.findElementById('continue-button');
     await el.click();
   }
 
@@ -302,7 +302,7 @@ export class WebDriverHelper {
     assertWebDriverInitialized(this.driver);
     try {
       await (await element()).click();
-    } catch(e) {
+    } catch (e) {
       // Susceptible to StaleElementReferenceError. Delay and try again.
       await this.delay();
       await (await element()).click();
