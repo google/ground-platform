@@ -14,33 +14,35 @@
  * limitations under the License.
  */
 
-import { FieldDescriptor, MessageDescriptor, registry } from "./message-registry";
-import { DocumentData, DocumentFieldValue } from "@google-cloud/firestore";
+import {FieldDescriptor, MessageDescriptor, registry} from './message-registry';
+import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
 
 /**
  * Returns the map representation of the provided message ready for serialization in Firestore.
- * The map is keyed by message field numbers represented as strings, while field values are 
- * converted to corresponding Firestore data types. 
+ * The map is keyed by message field numbers represented as strings, while field values are
+ * converted to corresponding Firestore data types.
  */
 export function toDocumentData(message: any): DocumentData | Error {
   const type = message.constructor.name;
-  const descriptor =  registry.getDescriptor(message);
+  const descriptor = registry.getMessageDescriptor(message.constructor);
+  // Fail if message not defined in registry.
   if (!descriptor) return Error(`Unknown message type ${type}`);
-
-  if (!descriptor.fields) {
-    // `values`, `nested`, and `oneofs` fields are handled implicitly in `messageToData()`.
-    return Error(`Unexpected field type ${descriptor}`);
-  }
+  // Messages must also have at least one field.
+  if (!descriptor.fields)
+    return Error(`Invalid message definition: ${descriptor}`);
   return messageToData(message, descriptor);
 }
 
-function messageToData(message: any, descriptor: MessageDescriptor): DocumentData {
+function messageToData(
+  message: any,
+  descriptor: MessageDescriptor
+): DocumentData {
   const firestoreMap: DocumentData = {};
   for (const name in descriptor.fields) {
     const fieldDescriptor = descriptor.fields[name];
     const fieldNumber = fieldDescriptor?.id;
     if (!fieldNumber) {
-      console.debug(`Skipping unknown field $name in $type`);
+      // Skipping unknown field.
       continue;
     }
     const value = toDocumentFieldValue(fieldDescriptor, message[name]);
@@ -55,7 +57,7 @@ function toDocumentFieldValue(
   field: FieldDescriptor,
   value: any
 ): DocumentFieldValue | null {
-  if (value == null || isEmpty(value)) {
+  if (value === null || isEmpty(value)) {
     return null;
   } else if (field.keyType) {
     return Object.fromEntries(
@@ -71,11 +73,10 @@ function toDocumentFieldValue(
 
 function toValue(fieldType: string, value: any): DocumentFieldValue | null {
   switch (typeof value) {
-   // TODO: Validate against fieldType.
-   case "string":
-    case "number": // This handles proto enums as well.
+    case 'string':
+    case 'number': // This handles proto enums as well.
       return value;
-    case "object":
+    case 'object':
       return toDocumentData(value);
     default:
       console.debug(`Unsupported proto field type ${typeof value}`);
@@ -85,9 +86,9 @@ function toValue(fieldType: string, value: any): DocumentFieldValue | null {
 
 function isEmpty(obj: any) {
   switch (typeof obj) {
-    case "string":
-      return obj === "";
-    case "object":
+    case 'string':
+      return obj === '';
+    case 'object':
       return Object.keys(obj).length === 0;
     default:
       return false;

@@ -5,7 +5,7 @@
   },
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "rules": {
-    "absolute-imports/only-absolute-imports": "error"
-  }
+  "plugins": [
+    "eslint-plugin-absolute-imports"
+  ]
 }
