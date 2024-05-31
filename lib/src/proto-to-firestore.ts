@@ -42,7 +42,7 @@ function messageToData(
     const fieldDescriptor = descriptor.fields[name];
     const fieldNumber = fieldDescriptor?.id;
     if (!fieldNumber) {
-      console.debug('Skipping unknown field $name in $type');
+      console.debug('Skipping unknown field ${name} in ${type}');
       continue;
     }
     const value = toDocumentFieldValue(fieldDescriptor, message[name]);
