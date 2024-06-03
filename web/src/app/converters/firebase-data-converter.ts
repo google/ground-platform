@@ -15,7 +15,6 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {GroundProtos as Pb} from '@ground/lib/dist';
 import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
@@ -70,7 +69,6 @@ const TASK_TYPE_STRINGS_BY_ENUM = Map(
  * empty array.
  */
 function keys(dict?: {}): string[] {
-  Pb.Survey({});
   return Object.keys(dict || {});
 }
 
