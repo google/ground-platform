@@ -217,6 +217,17 @@ export class DataStoreService {
       });
   }
 
+  async deleteSurvey(survey: Survey) {
+    const {id: surveyId} = survey;
+
+    await Promise.all(survey.jobs.map(job => this.deleteJob(surveyId, job.id)));
+
+    return await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .delete();
+  }
+
   async deleteJob(surveyId: string, jobId: string) {
     await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
     await this.deleteAllSubmissionsInJob(surveyId, jobId);

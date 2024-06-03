@@ -16,13 +16,14 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
 
 import {SurveyDetailsModule} from 'app/pages/create-survey/survey-details/survey-details.module';
 import {EditDetailsComponent} from 'app/pages/edit-survey/edit-details/edit-details.component';
 
 @NgModule({
   declarations: [EditDetailsComponent],
-  imports: [CommonModule, SurveyDetailsModule],
+  imports: [CommonModule, SurveyDetailsModule, MatButtonModule],
   exports: [EditDetailsComponent],
 })
 export class EditDetailsModule {}

@@ -15,15 +15,25 @@
  */
 
 import {Component, OnInit, ViewChild} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 import {Survey} from 'app/models/survey.model';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
+
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from '../job-dialog/job-dialog.component';
 
 @Component({
   selector: 'ground-edit-details',
   templateUrl: './edit-details.component.html',
+  styleUrls: ['./edit-details.component.scss'],
 })
 export class EditDetailsComponent implements OnInit {
   subscription: Subscription = new Subscription();
@@ -33,7 +43,12 @@ export class EditDetailsComponent implements OnInit {
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
 
-  constructor(public draftSurveyService: DraftSurveyService) {}
+  constructor(
+    public dialog: MatDialog,
+    public draftSurveyService: DraftSurveyService,
+    private surveyService: SurveyService,
+    private navigationService: NavigationService
+  ) {}
 
   ngOnInit() {
     this.subscription.add(
@@ -53,6 +68,22 @@ export class EditDetailsComponent implements OnInit {
         valid
       );
     }
+  }
+
+  openDeleteSurveyDialog() {
+    this.dialog
+      .open(JobDialogComponent, {
+        data: {dialogType: DialogType.DeleteSurvey},
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (result?.dialogType === DialogType.DeleteSurvey) {
+          this.surveyService.deleteSurvey(this.survey!);
+
+          this.navigationService.navigateToSurveyList();
+        }
+      });
   }
 
   ngOnDestroy() {

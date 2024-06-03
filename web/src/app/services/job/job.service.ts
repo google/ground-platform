@@ -63,7 +63,14 @@ export class JobService {
    */
   createNewJob(): Job {
     const jobId = this.dataStoreService.generateId();
-    return new Job(jobId, /* index */ -1);
+    const task = this.createTask(TaskType.CAPTURE_LOCATION, '', true, 0);
+    return new Job(
+      jobId,
+      /* index */ -1,
+      undefined,
+      undefined,
+      Map([[task.id, task]])
+    );
   }
 
   /**
