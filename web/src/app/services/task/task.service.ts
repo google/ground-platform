@@ -70,7 +70,7 @@ export class TaskService {
   }
 
   /**
-   * Duplicates a task returning the same task with a different generated unique identifier.
+   * Returns a new task which is an exact copy of the provided task, but with new UUIDs for all items recursively.
    */
   createDuplicateTask(task: Task): Task {
     return {
