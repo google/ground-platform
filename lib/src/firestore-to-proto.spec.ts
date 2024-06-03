@@ -15,64 +15,63 @@
  */
 
 import {Job, Role, Style, Survey, Task} from './generated/ground-protos';
-import {toDocumentData} from './proto-to-firestore';
+import {toMessage} from './firestore-to-proto';
+import {Constructor} from 'protobufjs';
 
-describe('toDocumentData()', () => {
+describe('toMessage()', () => {
   [
     {
       desc: 'converts string fields',
-      input: new Survey({
-        name: 'Survey name',
-        description: 'Survey desc',
-      }),
-      expected: {
+      input: {
         '2': 'Survey name',
         '3': 'Survey desc',
       },
+      expected: new Survey({
+        name: 'Survey name',
+        description: 'Survey desc',
+      }),
     },
     {
       desc: 'converts nested message',
-      input: new Job({
-        style: new Style({color: '#112233'}),
-      }),
-      expected: {
+      input: {
         '4': {'1': '#112233'},
       },
+      expected: new Job({
+        style: new Style({color: '#112233'}),
+      }),
     },
     {
       desc: 'converts map<string, enum>',
-      input: new Survey({
-        acl: {
-          email1: Role.DATA_COLLECTOR,
-          email2: Role.SURVEY_ORGANIZER,
-        },
-      }),
-      expected: {
+      input: {
         '4': {
           email1: 2,
           email2: 3,
         },
       },
+      expected: new Survey({
+        acl: {
+          email1: Role.DATA_COLLECTOR,
+          email2: Role.SURVEY_ORGANIZER,
+        },
+      }),
     },
     {
       desc: 'converts enum value',
-      input: new Task.DateTimeQuestion({
-        type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
-      }),
-      expected: {
+      input: {
         '1': 3,
       },
+      expected: new Task.DateTimeQuestion({
+        type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
+      }),
     },
     {
       desc: 'skips unset (0) enum value',
-      input: new Task.DateTimeQuestion({
-        type: Task.DateTimeQuestion.Type.UNSPECIFIED_DATE_TIME_QUESTION_TYPE,
-      }),
-      expected: {},
+      input: {},
+      expected: new Task.DateTimeQuestion(),
     },
   ].forEach(({desc, input, expected}) =>
     it(desc, () => {
-      const output = toDocumentData(input);
+      const output = toMessage(input, expected.constructor as Constructor<any>);
       expect(output).toEqual(expected);
     })
   );
