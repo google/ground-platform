@@ -43,7 +43,6 @@
     "@types/cors": "2.8.12",
     "@types/jasmine": "^4.3.5",
     "@types/jsonstream": "0.8.30",
-    "@types/node": "18.7.13",
     "@types/terraformer__wkt": "2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
