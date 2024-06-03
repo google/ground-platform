@@ -17,7 +17,7 @@
 // import * as admin from 'firebase-admin';
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {db} from '@/common/context';
+import {db} from './common/context';
 
 export async function onWriteSubmissionHandler(
   change: Change<DocumentSnapshot>,

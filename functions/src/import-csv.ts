@@ -18,7 +18,7 @@ import {https, Response} from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
 import * as csvParser from 'csv-parser';
 import * as Busboy from 'busboy';
-import {db} from '@/common/context';
+import {db} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';

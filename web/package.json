@@ -1,5 +1,5 @@
 {
-  "name": "ground",
+  "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf node_modules dist coverage *.log",
@@ -37,6 +37,7 @@
     "@angular/platform-browser": "^17.3.8",
     "@angular/platform-browser-dynamic": "^17.3.8",
     "@angular/router": "^17.3.8",
+    "@ground/lib": "file:../lib",
     "@grpc/grpc-js": "^1.8.8",
     "@iplab/ngx-file-upload": "^17",
     "firebase": "^10.7.2",
@@ -60,11 +61,10 @@
     "@angular/compiler-cli": "^17.3.8",
     "@angular/language-service": "^17.3.8",
     "@jridgewell/source-map": "^0.3.2",
-    "@types/googlemaps": "^3.43.3",
+    "@types/google.maps": "^3.54.10",
     "@types/jasmine": "~3.6.0",
     "@types/jasmine-expect": "3.8.1",
     "@types/jasminewd2": "^2.0.8",
-    "@types/node": "^14.11.2",
     "@types/webpack-env": "^1.15.3",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
