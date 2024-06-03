@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from 'assert';
 import registryJson from './generated/ground-protos.json';
 import * as GroundProtos from './generated/ground-protos';
 import {Constructor} from 'protobufjs';
@@ -60,7 +59,10 @@ export class MessageRegistry {
     if (!constructor.getTypeUrl) return null;
     // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
     const typeUrl = constructor.getTypeUrl('');
-    assert(typeUrl?.substr(0, 1) === '/');
+    if (typeUrl?.substr(0, 1) !== '/') {
+      console.error("Invalid type URL returned by protojs class:", typeUrl);
+      return null;
+    }
     // Remove preceding "/" and split path along ".";
     return typeUrl.substr(1).split('.');
   }

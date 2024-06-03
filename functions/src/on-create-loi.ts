@@ -16,9 +16,9 @@
 
 import {EventContext} from 'firebase-functions';
 import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {db} from '@/common/context';
-import {Datastore} from '@/common/datastore';
-import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
+import {db} from './common/context';
+import {Datastore} from './common/datastore';
+import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
 import {geojsonToWKT} from '@terraformer/wkt';
 
 type PropertyGenerator = {
