@@ -1,7 +1,7 @@
 {
   "name": "@ground/root",
   "version": "0.0.1",
-  "description": "Ground hosted components",
+  "description": "Root package for Ground hosted components",
   "scripts": {
     "clean": "rm -rf node_modules && npm run clean --prefix functions && npm run clean --prefix web && npm run clean --prefix e2e-tests",
     "build": "npm i && npm run build --prefix schema && npm run build --prefix functions && npm run build:$npm_config_variant --prefix web && npm run build --prefix e2e-tests",
