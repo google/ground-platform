@@ -16,7 +16,7 @@
 
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {broadcastSurveyUpdate} from '@/common/broadcast-survey-update';
+import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
 
 export function onWriteSurveyHandler(
   _: Change<DocumentSnapshot>,

@@ -48,7 +48,6 @@
     "@typescript-eslint/parser": "^5.39.0",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-absolute-imports": "^0.0.3",
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-functions-test": "^3.2.0",
     "firebase-tools": "13.6.0",
