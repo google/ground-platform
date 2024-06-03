@@ -5,7 +5,6 @@
     "clean": "rm -rf node_modules dist coverage *.log",
     "start:dev": "npm run build:dev --project=$npm_config_project && ng serve -c dev",
     "start:prod": "npm run build:prod --project=$npm_config_project && ng serve -c production",
-    "preinstall": "npm install --prefix ../lib",
     "build-lib": "npm run build --prefix ../lib",
     "build": "npm run build-lib && npm install && ng build -c",
     "update-web-keys": "npm run --prefix scripts update-web-keys",
