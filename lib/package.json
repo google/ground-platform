@@ -8,12 +8,13 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm run generate:pb && tsc",
-    "generate:pbjs": "mkdir -p $npm_package_config_codegen_path && pbjs -t static-module node_modules/@ground/shared-protos/src/*.proto -o $npm_package_config_codegen_path/ground-protos.js",
-    "generate:pbjson": "mkdir -p $npm_package_config_codegen_path && pbjs -t json node_modules/@ground/shared-protos/src/*.proto -o $npm_package_config_codegen_path/ground-protos.json",
+    "generate:pbjs": "mkdir -p $npm_package_config_codegen_path && pbjs -t static-module $npm_package_config_proto_path -o $npm_package_config_codegen_path/ground-protos.js",
+    "generate:pbjson": "mkdir -p $npm_package_config_codegen_path && pbjs -t json $npm_package_config_proto_path -o $npm_package_config_codegen_path/ground-protos.json",
     "generate:pbts": "mkdir -p $npm_package_config_codegen_path && pbts $npm_package_config_codegen_path/ground-protos.js -o $npm_package_config_codegen_path/ground-protos.d.ts",
     "generate:pb": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts"
   },
   "config": {
+    "proto_path": "../proto/src/*.proto",
     "codegen_path": "src/generated"
   },
   "engines": {
@@ -22,7 +23,6 @@
   "private": true,
   "dependencies": {
     "@google-cloud/firestore": "^7.7.0",
-    "@ground/shared-protos": "file:../proto",
     "immutable": "^4.3.6",
     "protobufjs": "^7.3.0"
   },
