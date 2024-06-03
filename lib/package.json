@@ -1,5 +1,5 @@
 {
-  "name": "lib",
+  "name": "@ground/lib",
   "main": "dist/index.js",
   "description": "Common TypeScript libraries",
   "scripts": {

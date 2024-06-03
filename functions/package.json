@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "@ground/functions",
   "main": "dist/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {

@@ -1,5 +1,5 @@
 {
-  "name": "ground",
+  "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf node_modules dist coverage *.log",
@@ -22,7 +22,8 @@
     "deploy:dev": "npm run build:dev --project=$npm_config_project && npm run login && npx firebase deploy --only hosting --project $npm_config_project"
   },
   "private": true,
-  "dependencies": {
+  "dependencies": { 
+    "@ground/lib": "file:../lib",
     "@angular/animations": "^17.3.8",
     "@angular/cdk": "^17.3.8",
     "@angular/common": "^17.3.8",
