@@ -129,6 +129,15 @@ export class SurveyService {
   }
 
   /**
+   * Deletes the survey and its subcollections.
+   *
+   * @param surveyId the id of the survey.
+   */
+  deleteSurvey(survey: Survey): Promise<void> {
+    return this.dataStore.deleteSurvey(survey);
+  }
+
+  /**
    * Returns the acl of the current survey.
    */
   getActiveSurveyAcl(): AclEntry[] {
