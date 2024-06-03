@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
-import registryJson from "./generated/ground-protos.json";
+import assert from 'assert';
+import registryJson from './generated/ground-protos.json';
+import * as GroundProtos from './generated/ground-protos';
+import {Constructor} from 'protobufjs';
+
+/** Path of message or enum type declaration in definition files and registry. */
+export type MessageTypePath = string[];
 
 export interface ProtoOptions {
   java_package: string;
@@ -28,10 +34,14 @@ export interface FieldDescriptor {
 }
 
 export interface MessageDescriptor {
-  fields?: { [fieldName: string]: FieldDescriptor };
-  oneofs?: { [oneofName: string]: OneOfDescriptor };
-  nested?: { [nestedMessageName: string]: MessageDescriptor };
-  values?: { [enumValueName: string]: number }; // For enums
+  // Normal proto fields.
+  fields?: {[fieldName: string]: FieldDescriptor};
+  // Possible oneof selector values.
+  oneofs?: {[oneofName: string]: OneOfDescriptor};
+  // Nested message type definition.
+  nested?: {[nestedMessageName: string]: MessageDescriptor};
+  // Enum definitions, including valid values.
+  values?: {[enumValueName: string]: number};
 }
 
 export interface OneOfDescriptor {
@@ -40,20 +50,75 @@ export interface OneOfDescriptor {
 
 export interface MessageRegistryJson {
   options?: ProtoOptions;
-  nested: { [messageName: string]: MessageDescriptor };
+  nested: {[messageName: string]: MessageDescriptor};
 }
 
-export class MessageRegistry { 
+export class MessageRegistry {
   constructor(private readonly json: MessageRegistryJson) {}
 
-  getDescriptor(message: any): MessageDescriptor | null {
-      const typePath = message.constructor.getTypeUrl("").substr(1).split(".")
-      let node = this.json as any;
-      for (const type of typePath) {
-        node = node?.nested[type];
+  getTypePath(constructor: any): string[] | null {
+    if (!constructor.getTypeUrl) return null;
+    // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
+    const typeUrl = constructor.getTypeUrl('');
+    assert(typeUrl?.substr(0, 1) === '/');
+    // Remove preceding "/" and split path along ".";
+    return typeUrl.substr(1).split('.');
+  }
+
+  getMessageDescriptor(constructor: any): MessageDescriptor | null {
+    const typePath = this.getTypePath(constructor);
+    return typePath ? this.getDescriptorByPath(typePath) : null;
+  }
+
+  /**
+   * Searches the descriptor hierarchy starting for the specified `typeName`,
+   * starting from the specified containing `messageTypePath`. If the type
+   * is not found there, the parent containing type is checked, recursively
+   * down to the registry root.
+   */
+  findType(messageTypePath: string[], typeName: string): string[] | null {
+    // Create copy to prevent destructive edits to `messageTypePath`.
+    const parentPath = [...messageTypePath];
+    do {
+      const descriptorPath = [...parentPath, typeName];
+      if (this.getDescriptorByPath(descriptorPath)) return descriptorPath;
+    } while (parentPath.pop() !== undefined);
+    return null;
+  }
+
+  getDescriptorByPath(path: string[]): any | null {
+    let node = this.json as any;
+    for (const type of path) {
+      if (!node || !node.nested) return null;
+      node = node.nested[type];
+    }
+    return node;
+  }
+
+  getFieldNameByNumber(
+    descriptor: MessageDescriptor,
+    fieldNo: Number
+  ): string | null {
+    if (!descriptor.fields) return null;
+    for (const fieldName in descriptor.fields) {
+      const field = descriptor.fields[fieldName];
+      if (field.id === fieldNo) {
+        return fieldName;
       }
-      return node;  
+    }
+    return null;
+  }
+
+  getConstructorByPath<T>(path: string[]): Constructor<T> | null {
+    let node = GroundProtos as any;
+    for (const typeName of path) {
+      node = node[typeName];
+      if (!node) return null;
+    }
+    return node;
   }
 }
 
-export const registry = new MessageRegistry(registryJson as MessageRegistryJson);
+export const registry = new MessageRegistry(
+  registryJson as MessageRegistryJson
+);
