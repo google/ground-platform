@@ -12,7 +12,7 @@
     "build:local": "npm run build local",
     "watch:local": "npm run build local -- --watch",
     "pretest": "./pretest.sh",
-    "test": "ng test",
+    "test": "npm run build && ng test",
     "test:headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "test-with-coverage": "npm run pretest && npm run test:headless -- --code-coverage && npm run posttest",
     "lint": "ng lint",
