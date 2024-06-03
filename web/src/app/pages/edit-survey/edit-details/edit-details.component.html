@@ -14,9 +14,27 @@
   limitations under the License.
 -->
 
-<survey-details
-  #surveyDetails
-  [title]="survey?.title"
-  [description]="survey?.description"
-  (onValueChanges)="onDetailChanges($event)"
-></survey-details>
+<div class="survey-details-container">
+  <div class="survey-detail-card">
+    <div class="card-title">Survey name and description</div>
+
+    <div class="card-row edit-survey-details">
+      <survey-details
+        #surveyDetails
+        [title]="survey?.title"
+        [description]="survey?.description"
+        (onValueChanges)="onDetailChanges($event)"
+      ></survey-details>
+    </div>
+  </div>
+
+  <div class="survey-detail-card">
+    <div class="card-title">Delete survey</div>
+    <div class="card-row delete-survey">
+      <div>Permanently delete survey and associated data</div>
+
+      <button mat-flat-button (click)="openDeleteSurveyDialog()">
+        Delete survey
+      </button>
+  </div>
+</div>

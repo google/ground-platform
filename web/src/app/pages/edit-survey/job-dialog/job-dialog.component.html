@@ -44,6 +44,16 @@
       All predefined data collection sites and their associated sites will
       be permanently deleted.
     </p>
+
+    <p *ngSwitchCase="DialogType.DeleteOption">
+      Are you sure you wish to delete this option?
+      All associated data will be lost. This cannot be undone.
+    </p>
+
+    <p *ngSwitchCase="DialogType.DeleteSurvey">
+      Are you sure you wish to delete this survey?
+      All associated data will be lost. This cannot be undone.
+    </p>
   </div>
 </div>
 
@@ -58,7 +68,7 @@
 
   <button
     mat-button
-    color="primary" 
+    color="primary"
     [mat-dialog-close]="data"
     cdkFocusInitial
   >

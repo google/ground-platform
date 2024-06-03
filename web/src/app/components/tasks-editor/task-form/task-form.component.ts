@@ -29,19 +29,21 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {List} from 'immutable';
-import {Observable, firstValueFrom} from 'rxjs';
 
-import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {
   TaskConditionExpressionType,
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
 import {TaskType} from 'app/models/task/task.model';
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DialogService} from 'app/services/dialog/dialog.service';
 import {moveItemInFormArray} from 'app/utils/utils';
 
 import {
@@ -182,8 +184,8 @@ export class TaskFormComponent {
   AddLoiTaskGroups = AddLoiTaskGroups;
 
   constructor(
+    public dialog: MatDialog,
     private dataStoreService: DataStoreService,
-    private dialogService: DialogService,
     private formBuilder: FormBuilder
   ) {
     this.expanded = false;
@@ -312,28 +314,6 @@ export class TaskFormComponent {
     this.optionsControl.push(formGroup);
   }
 
-  openDeleteDialogOption(): Promise<
-    Observable<MatDialogRef<ConfirmationDialogComponent, boolean>>
-  > {
-    return firstValueFrom(
-      this.dialogService
-        .openConfirmationDialog(
-          'Warning',
-          'Are you sure you wish to delete this option? ' +
-            'Any associated data will be lost. This cannot be undone.'
-        )
-        .afterClosed()
-    );
-  }
-
-  onDeleteOption(index: number) {
-    this.openDeleteDialogOption().then(dialogResult => {
-      if (dialogResult) {
-        this.optionsControl.removeAt(index);
-      }
-    });
-  }
-
   onAddOtherOption(): void {
     this.otherOption = this.formBuilder.group({
       label: {value: 'Other...', disabled: true},
@@ -342,12 +322,19 @@ export class TaskFormComponent {
     this.hasOtherOptionControl.setValue(true);
   }
 
-  onDeleteOtherOption(): void {
-    this.openDeleteDialogOption().then(dialogResult => {
-      if (dialogResult) {
-        this.hasOtherOptionControl.setValue(false);
-      }
-    });
+  openDeleteOptionDialog(index?: number) {
+    this.dialog
+      .open(JobDialogComponent, {
+        data: {dialogType: DialogType.DeleteOption},
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (result?.dialogType === DialogType.DeleteOption) {
+          if (index !== undefined) this.optionsControl.removeAt(index);
+          else this.hasOtherOptionControl.setValue(false);
+        }
+      });
   }
 
   drop(event: CdkDragDrop<string[]>): void {
