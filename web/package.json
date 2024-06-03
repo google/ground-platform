@@ -63,7 +63,6 @@
     "@types/jasmine": "~3.6.0",
     "@types/jasmine-expect": "3.8.1",
     "@types/jasminewd2": "^2.0.8",
-    "@types/node": "18.19.33",
     "@types/webpack-env": "^1.15.3",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
