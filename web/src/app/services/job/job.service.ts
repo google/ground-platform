@@ -74,7 +74,7 @@ export class JobService {
   }
 
   /**
-   * Duplicates a job returning the same job with a different generated unique identifier.
+   * Returns a new job which is an exact copy of the specified job, but with new UUIDs for all items recursively.
    */
   createDuplicatedJob(job: Job, jobs: Map<string, Job> | undefined): Job {
     return job.copyWith({
