@@ -18,7 +18,7 @@ import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
 import {canExport} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
-import {db} from '@/common/context';
+import {db} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
 import {DecodedIdToken} from 'firebase-admin/auth';

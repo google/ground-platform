@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "@ground/functions",
   "main": "dist/index.js",
   "description": "Cloud Functions for Firebase",
   "scripts": {
@@ -43,13 +43,11 @@
     "@types/cors": "2.8.12",
     "@types/jasmine": "^4.3.5",
     "@types/jsonstream": "0.8.30",
-    "@types/node": "18.7.13",
     "@types/terraformer__wkt": "2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-absolute-imports": "^0.0.3",
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-functions-test": "^3.2.0",
     "firebase-tools": "13.6.0",
