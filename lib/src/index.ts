@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
+export * as GroundProtos from './generated/ground-protos'
 export {toDocumentData} from './proto-to-firestore';
+export {toMessage} from './firestore-to-proto';
