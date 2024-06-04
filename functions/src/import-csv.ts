@@ -22,7 +22,7 @@ import {db} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';
-
+import {GroundProtos as Pb} from '@ground/lib';
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'survey' id and 'job' id to the database.
@@ -69,7 +69,7 @@ export async function importCsvHandler(
       res.status(HttpStatus.FORBIDDEN).send('Permission denied');
       return;
     }
-  
+
     console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
@@ -126,23 +126,47 @@ function invertAndFlatten(obj: any) {
  * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
-  id: ['system:index'],
+  customId: ['system:index'],
   lat: ['lat', 'latitude', 'y'],
   lng: ['lng', 'lon', 'long', 'lng', 'x'],
 });
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
-  const loi = csvRowToLocationOfInterest(row, jobId);
-  if (loi) {
+  const loi = deepMerge(
+    csvRowToLocationOfInterest(row, jobId) || {},
+    csvRowToLocationOfInterestLegacy(row, jobId) || {}
+  );
+  if (loi.length) {
     await db.insertLocationOfInterest(surveyId, loi);
   }
+}
+
+function isObject(item: any) {
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+function deepMerge(target: any, ...sources: any[]): any {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, {[key]: {}});
+        deepMerge(target[key], source[key]);
+      } else {
+        Object.assign(target, {[key]: source[key]});
+      }
+    }
+  }
+  return deepMerge(target, ...sources);
 }
 
 /**
  * Convert the provided row (key-value pairs) and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function csvRowToLocationOfInterest(row: any, jobId: string) {
+function csvRowToLocationOfInterestLegacy(row: any, jobId: string) {
   const data: any = {jobId};
   const properties: {[name: string]: any} = {};
   for (const columnName in row) {
@@ -168,4 +192,33 @@ function csvRowToLocationOfInterest(row: any, jobId: string) {
     loi['properties'] = properties;
   }
   return loi;
+}
+
+function csvRowToLocationOfInterest(row: any, jobId: string) {
+  const loi: any = {};
+  const properties: {[name: string]: any} = {};
+  for (const columnName in row) {
+    const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
+    const value = row[columnName];
+    if (loiKey) {
+      // Handle column differently if column name is recognized as having special significance.
+      loi[loiKey] = value;
+    } else {
+      properties[columnName] = value;
+    }
+  }
+  const {customId, lat: latStr, lng: lngStr} = loi;
+  const lat = Number.parseFloat(latStr);
+  const lng = Number.parseFloat(lngStr);
+  if (isNaN(lat) || isNaN(lng)) return null;
+  const point = Pb.Point({
+    coordinates: Pb.Coordinates({latitude: lat, longitude: lng}),
+  });
+  return Pb.LocationOfInterest({
+    jobId,
+    customId,
+    predefined: true,
+    point,
+    properties
+  });
 }
