@@ -70,22 +70,29 @@ export class TaskService {
   }
 
   /**
-   * Returns a new task which is an exact copy of the provided task, but with new UUIDs for all items recursively.
+   * Returns a new task which is an exact copy of the provided task, but with new UUIDs.
    */
-  createDuplicateTask(task: Task): Task {
+  duplicateTask(task: Task): Task {
     return {
       ...task,
       id: this.dataStoreService.generateId(),
       multipleChoice: task.multipleChoice
-        ? ({
-            ...task.multipleChoice,
-            options: task.multipleChoice.options?.map(option => ({
-              ...option,
-              id: this.dataStoreService.generateId(),
-            })),
-          } as MultipleChoice)
+        ? this.duplicateMultipleChoice(task.multipleChoice)
         : undefined,
     } as Task;
+  }
+
+  /**
+   * Returns a new multiple choice which is an exact copy of the provided one, but with new UUIDs for all options.
+   */
+  duplicateMultipleChoice(multipleChoice: MultipleChoice): MultipleChoice {
+    return {
+      ...multipleChoice,
+      options: multipleChoice.options?.map(option => ({
+        ...option,
+        id: this.dataStoreService.generateId(),
+      })),
+    } as MultipleChoice;
   }
 
   getTasks$(): Observable<List<Task>> {

@@ -111,16 +111,16 @@ export class EditSurveyComponent implements OnInit {
   }
 
   async duplicateJob(job: Job): Promise<void> {
-    const duplicatedJob = this.jobService.createDuplicatedJob(
+    const newJob = this.jobService.duplicateJob(
       job,
-      this.survey?.jobs
+      this.jobService.getNextColor(this.survey?.jobs)
     );
 
-    this.draftSurveyService.addOrUpdateJob(duplicatedJob, true);
+    this.draftSurveyService.addOrUpdateJob(newJob, true);
 
     this.navigationService.navigateToEditJob(
       this.draftSurveyService.getSurvey().id,
-      duplicatedJob.id
+      newJob.id
     );
   }
 

@@ -76,15 +76,15 @@ export class JobService {
   /**
    * Returns a new job which is an exact copy of the specified job, but with new UUIDs for all items recursively.
    */
-  createDuplicatedJob(job: Job, jobs: Map<string, Job> | undefined): Job {
+  duplicateJob(job: Job, color: string | undefined): Job {
     return job.copyWith({
       id: this.dataStoreService.generateId(),
       name: `Copy of ${job.name}`,
-      color: this.getNextColor(jobs),
+      color,
       index: -1,
       tasks: Map<string, Task>(
         job.tasks?.toArray().map(([_, task]) => {
-          const duplicateTask = this.taskService.createDuplicateTask(task);
+          const duplicateTask = this.taskService.duplicateTask(task);
           return [duplicateTask.id, duplicateTask];
         })
       ),

@@ -178,9 +178,9 @@ export class TasksEditorComponent {
         if (dialogResult) {
           const task = this.toTask(index);
 
-          const duplicatedTask = this.taskService.createDuplicateTask(task);
+          const newTask = this.taskService.duplicateTask(task);
 
-          const control = this.toControl(duplicatedTask);
+          const control = this.toControl(newTask);
 
           this.formArray.push(control);
         }
