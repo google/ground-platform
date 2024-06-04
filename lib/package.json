@@ -9,7 +9,7 @@
     "test": "npm run build && jasmine dist/**/*.spec.js",
     "build": "npm install && npm run generate:pb && tsc",
     "postbuild": "npm run cp-generated",
-    "cp-generated": "cp $npm_package_config_codegen_path/* dist",
+    "cp-generated": "cp $npm_package_config_codegen_path/* dist/generated",
     "generate:pbjs": "mkdir -p $npm_package_config_codegen_path && pbjs -t static-module $npm_package_config_proto_path -o $npm_package_config_codegen_path/ground-protos.js",
     "generate:pbjson": "mkdir -p $npm_package_config_codegen_path && pbjs -t json $npm_package_config_proto_path -o $npm_package_config_codegen_path/ground-protos.json",
     "generate:pbts": "mkdir -p $npm_package_config_codegen_path && pbts $npm_package_config_codegen_path/ground-protos.js -o $npm_package_config_codegen_path/ground-protos.d.ts",
