@@ -22,7 +22,8 @@ import {db} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';
-import {GroundProtos as Pb} from '@ground/lib';
+import {GroundProtos as Pb, toDocumentData} from '@ground/lib';
+
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
  * 'survey' id and 'job' id to the database.
@@ -126,14 +127,14 @@ function invertAndFlatten(obj: any) {
  * is ignored when mapping column aliases to LOI properties.
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
-  customId: ['system:index'],
-  lat: ['lat', 'latitude', 'y'],
-  lng: ['lng', 'lon', 'long', 'lng', 'x'],
+  customTag: ['system:index'],
+  latStr: ['lat', 'latitude', 'y'],
+  lngStr: ['lng', 'lon', 'long', 'lng', 'x'],
 });
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
   const loi = deepMerge(
-    csvRowToLocationOfInterest(row, jobId) || {},
+    toDocumentData(csvRowToLocationOfInterest(row, jobId)) || {},
     csvRowToLocationOfInterestLegacy(row, jobId) || {}
   );
   if (loi.length) {
@@ -194,31 +195,37 @@ function csvRowToLocationOfInterestLegacy(row: any, jobId: string) {
   return loi;
 }
 
-function csvRowToLocationOfInterest(row: any, jobId: string) {
+function csvRowToLocationOfInterest(row: any, jobId: string): Pb.LocationOfInterest | null {
   const loi: any = {};
   const properties: {[name: string]: any} = {};
   for (const columnName in row) {
     const loiKey = SPECIAL_COLUMN_NAMES[columnName.toLowerCase()];
     const value = row[columnName];
+    if (!value) continue;
     if (loiKey) {
       // Handle column differently if column name is recognized as having special significance.
       loi[loiKey] = value;
     } else {
-      properties[columnName] = value;
+      const numValue = Number.parseFloat(value);
+      if (isNaN(numValue)) {
+        properties[columnName] = value;
+      } else {
+        properties[columnName] = numValue;
+      }
     }
   }
-  const {customId, lat: latStr, lng: lngStr} = loi;
-  const lat = Number.parseFloat(latStr);
-  const lng = Number.parseFloat(lngStr);
-  if (isNaN(lat) || isNaN(lng)) return null;
-  const point = Pb.Point({
-    coordinates: Pb.Coordinates({latitude: lat, longitude: lng}),
+  const {customTag, latStr, lngStr} = loi;
+  const latitude = Number.parseFloat(latStr);
+  const longitude = Number.parseFloat(lngStr);
+  if (isNaN(latitude) || isNaN(longitude)) return null;
+  const point = new Pb.Point({
+    coordinates: new Pb.Coordinates({latitude, longitude}),
   });
-  return Pb.LocationOfInterest({
+  return new Pb.LocationOfInterest({
     jobId,
-    customId,
+    customTag,
     predefined: true,
-    point,
-    properties
+    geometry: {point},
+    properties,
   });
 }
