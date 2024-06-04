@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as Pb from './generated/ground-protos';
+import {GroundProtos} from './index';
 import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
-const {Job, Role, Style, Survey, Task} =  Pb.google.ground.v1beta1;
+const {Job, Role, Style, Survey, Task} = GroundProtos;
 
 describe('toMessage()', () => {
   [
@@ -34,6 +34,8 @@ describe('toMessage()', () => {
       }),
     },
     {
+      // DO NOT SUBMIT
+      // TODO: Resolve proto package names on message descriptor lookup.
       desc: 'converts nested message',
       input: {
         '4': {'1': '#112233'},
