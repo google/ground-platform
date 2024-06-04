@@ -16,55 +16,57 @@
 
 syntax = "proto3";
 
-option java_package = "com.google.android.ground.proto";
+package google.ground.v1beta1;
+
 option java_multiple_files = true;
+option java_package = "com.google.android.ground.proto";
 
 // An arbitrary geometry, represented using WGS 84 Web Mercator coordinate
 // system. Designed for compatibility with Google Maps Platform and GeoJSON
 // format defined at geojson.org.
 message Geometry {
-    // Required. A geometry may be one of the following types:
-    oneof geometry_type {
-        // A point geometry.
-        Point point = 1;
-        // A polygon geometry.
-        Polygon polygon = 2;
-        // A multi-polygon geometry.
-        MultiPolygon multi_polygon = 3;
-    }
+  // Required. A geometry may be one of the following types:
+  oneof geometry_type {
+    // A point geometry.
+    Point point = 1;
+    // A polygon geometry.
+    Polygon polygon = 2;
+    // A multi-polygon geometry.
+    MultiPolygon multi_polygon = 3;
+  }
 }
 
 // A pair of coordinates in the WGS 84 Web Mercator system.
 message Coordinates {
-    // Required. WGS 84 latitude.
-    double latitude = 1;
-    // Required. WGS 84 longitude.
-    double longitude = 2;
+  // Required. WGS 84 latitude.
+  double latitude = 1;
+  // Required. WGS 84 longitude.
+  double longitude = 2;
 }
 
 // A single point on the map.
 message Point {
-    // Required. The point's coordinates.
-    Coordinates coordinates = 1;
+  // Required. The point's coordinates.
+  Coordinates coordinates = 1;
 }
 
 // A closed line-string with four or more vertices.
 message LinearRing {
-    // Required. The coordinates of the ring's vertices. The first and last
-    // positions must contain identical values.
-    repeated Coordinates coordinates = 1;
+  // Required. The coordinates of the ring's vertices. The first and last
+  // positions must contain identical values.
+  repeated Coordinates coordinates = 1;
 }
 
 // A polygon geometry.
 message Polygon {
-    // Required. The outer shell of the polygon.
-    LinearRing shell = 1;
-    // Holes in the polygon, if any.
-    repeated LinearRing holes = 2;
+  // Required. The outer shell of the polygon.
+  LinearRing shell = 1;
+  // Holes in the polygon, if any.
+  repeated LinearRing holes = 2;
 }
 
 // A multi-polygon geometry.
 message MultiPolygon {
-    // Required. The individual polygons comprising the multi-polygon.
-    repeated Polygon polygons = 1;
+  // Required. The individual polygons comprising the multi-polygon.
+  repeated Polygon polygons = 1;
 }

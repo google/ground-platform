@@ -16,26 +16,28 @@
 
 syntax = "proto3";
 
-option java_package = "com.google.android.ground.proto";
-option java_multiple_files = true;
+package google.ground.v1beta1;
 
 import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.google.android.ground.proto";
 
 // Audit info about *who* performed a particular action and *when*. User email
 // addresses are omitted for privacy reasons.
 message AuditInfo {
-    // Required. The id of the user performing the action.
-    string user_id = 1;
+  // Required. The id of the user performing the action.
+  string user_id = 1;
 
-    // Required. Time and date reported by the client.
-    google.protobuf.Timestamp client_timestamp = 2;
+  // Required. Time and date reported by the client.
+  .google.protobuf.Timestamp client_timestamp = 2;
 
-    // Required. Time and date reported by the server.
-    google.protobuf.Timestamp server_timestamp = 3;
+  // Required. Time and date reported by the server.
+  .google.protobuf.Timestamp server_timestamp = 3;
 
-    // The user-facing name of the user.
-    string display_name = 4;
+  // The user-facing name of the user.
+  string display_name = 4;
 
-    // URL of the user's profile picture.
-    string photo_url = 5;
+  // URL of the user's profile picture.
+  string photo_url = 5;
 }
