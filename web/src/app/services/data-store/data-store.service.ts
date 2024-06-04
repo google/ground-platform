@@ -24,8 +24,8 @@ import {
 } from '@angular/fire/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
+import {map, switchMap} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
@@ -311,20 +311,35 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  lois$({id}: Survey): Observable<List<LocationOfInterest>> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`)
-      .valueChanges({idField: 'id'})
-      .pipe(
-        map(array =>
-          List(
-            array
-              .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
-              .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
-              .map(loi => loi as LocationOfInterest)
-          )
-        )
-      );
+  lois$({id}: Survey, {email}: User): Observable<List<LocationOfInterest>> {
+    const predefinedLois = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${id}/lois`,
+      ref => ref.where('predefined', '==', true)
+    );
+
+    const userLois = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${id}/lois`,
+      ref =>
+        ref
+          .where('predefined', '==', false)
+          .where('created.user.email', '==', email)
+    );
+
+    return combineLatest([
+      predefinedLois.valueChanges({idField: 'id'}),
+      userLois.valueChanges({idField: 'id'}),
+    ]).pipe(
+      map(lois => {
+        const [predefinedLois, userLois] = lois;
+        const combined = predefinedLois.concat(userLois);
+        return List(
+          combined
+            .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+            .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
+            .map(loi => loi as LocationOfInterest)
+        );
+      })
+    );
   }
 
   /**

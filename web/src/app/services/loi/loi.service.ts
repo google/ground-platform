@@ -30,6 +30,8 @@ import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+import {AuthService} from '../auth/auth.service';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -39,24 +41,35 @@ export class LocationOfInterestService {
   private selectedLocationOfInterest$: Observable<LocationOfInterest>;
 
   constructor(
+    private authService: AuthService,
     private dataStore: DataStoreService,
     private surveyService: SurveyService
   ) {
-    this.lois$ = surveyService
-      .getActiveSurvey$()
+    this.lois$ = this.authService
+      .getUser$()
       .pipe(
-        switchMap(survey =>
-          survey.isUnsavedNew()
-            ? of(List<LocationOfInterest>())
-            : dataStore.lois$(survey)
+        switchMap(user =>
+          this.surveyService
+            .getActiveSurvey$()
+            .pipe(
+              switchMap(survey =>
+                survey.isUnsavedNew()
+                  ? of(List<LocationOfInterest>())
+                  : dataStore.lois$(survey, user)
+              )
+            )
         )
       );
 
     this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
       switchMap(loiId =>
-        surveyService.getActiveSurvey$().pipe(
-          switchMap(survey => dataStore.lois$(survey)),
-          map(lois => lois.find(loi => loi.id === loiId)!)
+        this.authService.getUser$().pipe(
+          switchMap(user =>
+            this.surveyService.getActiveSurvey$().pipe(
+              switchMap(survey => dataStore.lois$(survey, user)),
+              map(lois => lois.find(loi => loi.id === loiId)!)
+            )
+          )
         )
       )
     );
