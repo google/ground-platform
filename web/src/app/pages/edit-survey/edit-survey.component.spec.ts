@@ -116,6 +116,7 @@ describe('EditSurveyComponent', () => {
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'createNewJob',
+      'duplicateJob',
       'getNextColor',
     ]);
     jobServiceSpy.createNewJob.and.returnValue(newJob);
@@ -262,11 +263,10 @@ describe('EditSurveyComponent', () => {
         duplicateButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          job1.copyWith({
-            id: newJob.id,
-            name: `Copy of ${job1.name}`,
-            color: undefined,
-          }),
+          jobServiceSpy.duplicateJob(
+            job1,
+            jobServiceSpy.getNextColor(survey.jobs)
+          ),
           true
         );
       });

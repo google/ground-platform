@@ -16,8 +16,12 @@
 
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {DocumentData, FieldPath} from '@angular/fire/firestore';
-import {deleteField, serverTimestamp} from 'firebase/firestore';
+import {
+  DocumentData,
+  FieldPath,
+  deleteField,
+  serverTimestamp,
+} from '@angular/fire/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, firstValueFrom} from 'rxjs';
