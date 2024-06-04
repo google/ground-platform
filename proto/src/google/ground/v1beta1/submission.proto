@@ -16,8 +16,10 @@
 
 syntax = "proto3";
 
-import "audit_info.proto";
-import "geometry.proto";
+package google.ground.v1beta1;
+
+import "google/ground/v1beta1/audit_info.proto";
+import "google/ground/v1beta1/geometry.proto";
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
@@ -96,7 +98,7 @@ message TaskData {
     // The date and/or time provided by the user. Date is set to
     // UNIX epoch if unspecified (1970-01-01:00Z), time is set to
     // 0:00:00.00.
-    google.protobuf.Timestamp date_time = 1;
+    .google.protobuf.Timestamp date_time = 1;
   }
 
   message MultipleChoice {
@@ -122,7 +124,7 @@ message TaskData {
     double altitude = 3;
     // Required. The time reported by the device when the location was
     // captured.
-    google.protobuf.Timestamp timestamp = 4;
+    .google.protobuf.Timestamp timestamp = 4;
   }
 
   // The result of a "take a photo" task.

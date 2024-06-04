@@ -16,8 +16,10 @@
 
 syntax = "proto3";
 
-import "audit_info.proto";
-import "geometry.proto";
+package google.ground.v1beta1;
+
+import "google/ground/v1beta1/audit_info.proto";
+import "google/ground/v1beta1/geometry.proto";
 
 option java_multiple_files = true;
 option java_package = "com.google.android.ground.proto";

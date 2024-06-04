@@ -16,6 +16,8 @@
 
 syntax = "proto3";
 
+package google.ground.v1beta1;
+
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
@@ -28,10 +30,10 @@ message AuditInfo {
   string user_id = 1;
 
   // Required. Time and date reported by the client.
-  google.protobuf.Timestamp client_timestamp = 2;
+  .google.protobuf.Timestamp client_timestamp = 2;
 
   // Required. Time and date reported by the server.
-  google.protobuf.Timestamp server_timestamp = 3;
+  .google.protobuf.Timestamp server_timestamp = 3;
 
   // The user-facing name of the user.
   string display_name = 4;
