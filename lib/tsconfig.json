@@ -15,5 +15,8 @@
   "compileOnSave": true,
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "src/generated"
   ]
 }
