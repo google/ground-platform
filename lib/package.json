@@ -3,7 +3,7 @@
   "main": "dist/index.js",
   "description": "Ground shared lib",
   "scripts": {
-    "clean": "rm -rf node_modules dist *.log",
+    "clean": "rm -rf node_modules dist *.log src/generated",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "test": "npm run build && jasmine dist/**/*.spec.js",
