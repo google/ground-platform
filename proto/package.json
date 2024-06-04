@@ -4,7 +4,7 @@
   "description": "Shared Protocol Buffer definitions",
   "scripts": {
     "lint": "buf lint",
-    "format": "buf format"
+    "format": "buf format --write"
   },
   "dependencies": {
     "@bufbuild/buf": "^1.32.2"
