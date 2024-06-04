@@ -1,0 +1,12 @@
+{
+  "name": "ground-protos",
+  "version": "0.0.1",
+  "description": "Shared Protocol Buffer definitions",
+  "scripts": {
+    "lint": "buf lint",
+    "format": "buf format"
+  },
+  "dependencies": {
+    "@bufbuild/buf": "^1.32.2"
+  }
+}
