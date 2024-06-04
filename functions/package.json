@@ -12,8 +12,8 @@
     "deploy": "npm run build && npx firebase deploy --project",
     "logs": "npx firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
-    "build:lib": "npm run build --workspace=../lib",
     "prebuild": "npm run build:lib && npm install",
+    "build:lib": "npm run build --workspace=../lib",
     "build": "tsc",
     "watch": "npm run build && tsc --watch"
   },
