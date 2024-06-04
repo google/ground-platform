@@ -91,7 +91,7 @@ jobs:
           node-version: "18"
 
       - name: Run buf linter
-        run: npm run lint
+        run: npm i && npm run lint
       
   test-lib:
     name: lib
