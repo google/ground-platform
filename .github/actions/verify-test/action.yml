@@ -18,6 +18,10 @@ inputs:
     description: 'ground-platform repository under test'
     default: sufyanAbbasi/ground-platform
 
+  use-repo-data:
+    description: 'Whether to use the local repository emulator data or not'
+    default: 'true'
+
 runs:
   using: 'composite'
   steps:
@@ -76,9 +80,16 @@ runs:
 
     - name: Copy Firebase emulator data
       uses: actions/download-artifact@v4
+      if: inputs.use-repo-data != 'true'
       with:
         name: data-submit
         path: data/
+
+    - name: Copy the local repo data
+      uses: actions/download-artifact@v4
+      if: inputs.use-repo-data == 'true'
+      shell: bash
+      run: cp -r data/test-submit data/test
 
     - name: Run verify e2e tests
       shell: bash

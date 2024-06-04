@@ -41,6 +41,7 @@ jobs:
         uses: ./.github/actions/create-test
         with:
           platform-repository: ${{ github.repository }}
+          upload-artifacts: true
 
   submitTest:
     needs: createTest
@@ -52,6 +53,8 @@ jobs:
         uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
         with:
           google-maps-key: ${{ secrets.GOOGLE_MAPS_KEY }}
+          use-repo-data: false
+          upload-artifacts: true
 
   verifyTest:
     needs: submitTest
@@ -65,3 +68,4 @@ jobs:
         uses: ./.github/actions/verify-test
         with:
           platform-repository: ${{ github.repository }}
+          use-repo-data: false

@@ -18,6 +18,10 @@ inputs:
     description: 'ground-platform repository under test'
     default: sufyanAbbasi/ground-platform
 
+  upload-artifacts:
+    description: 'Whether to upload the final emulator data artifacts'
+    default: 'false'
+
 runs:
   using: 'composite'
   steps:
@@ -82,6 +86,7 @@ runs:
       run: mv data/test/ ./test
 
     - name: Copy Firebase emulator data
+      if: inputs.upload-artifacts == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: data-create
