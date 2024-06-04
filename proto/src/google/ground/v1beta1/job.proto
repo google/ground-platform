@@ -60,7 +60,7 @@ message Task {
   // Defines possible values of the `level` field.
   enum DataCollectionLevel {
     // Default value when level is not specified.
-    UNSPECIFIED_DATA_COLLECTION_LEVEL = 0;
+    DATA_COLLECTION_LEVEL_UNSPECIFIED = 0;
     // Data collected at this level is used to define a location of
     // interest (LOI). Specifically, geometry tasks of this type may be used
     // to allow data collectors to define the LOI's geometry. Future
@@ -106,7 +106,7 @@ message Task {
   message TextQuestion {
     // Valid values for the `type` field.
     enum Type {
-      UNSPECIFIED_TEXT_QUESTION_TYPE = 0;
+      TYPE_UNSPECIFIED = 0;
       // A single line of text.
       SHORT_TEXT = 1;
     }
@@ -123,7 +123,7 @@ message Task {
   message DateTimeQuestion {
     // Allowed values for the `type` field.
     enum Type {
-      UNSPECIFIED_DATE_TIME_QUESTION_TYPE = 0;
+      TYPE_UNSPECIFIED = 0;
       DATE_ONLY = 1;
       TIME_ONLY = 2;
       BOTH_DATE_AND_TIME = 3;
@@ -136,7 +136,7 @@ message Task {
   message MultipleChoiceQuestion {
     // Valid values for the `type` field.
     enum Type {
-      UNSPECIFIED_MULTIPLE_CHOICE_QUESTION_TYPE = 0;
+      TYPE_UNSPECIFIED = 0;
       // Allow only one valid to be selected.
       SELECT_ONE = 1;
       // Allow one or more values to be selected.
@@ -168,7 +168,7 @@ message Task {
   message DrawGeometry {
     // Possible values for the `allowed_methods` field.
     enum Method {
-      UNSPECIFIED_DRAW_GEOMETRY_METHOD = 0;
+      METHOD_UNSPECIFIED = 0;
       DROP_PIN = 1;
       DRAW_AREA = 2;
     }
