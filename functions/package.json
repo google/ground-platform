@@ -12,10 +12,12 @@
     "deploy": "npm run build && npx firebase deploy --project",
     "logs": "npx firebase functions:log",
     "test": "npm run build && jasmine dist/**/*.spec.js",
-    "build": "npm install && tsc",
+    "build:lib": "npm run build --workspace=../lib",
+    "build": "npm run build:lib && npm install && tsc",
     "watch": "npm run build && tsc --watch"
   },
   "dependencies": {
+    "@ground/lib": "file:../lib",
     "@fast-csv/format": "4.3.5",
     "@terraformer/wkt": "2.1.2",
     "busboy": "1.5.0",
