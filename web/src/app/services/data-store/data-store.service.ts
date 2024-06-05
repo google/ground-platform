@@ -314,7 +314,7 @@ export class DataStoreService {
   lois$({id}: Survey, {email}: User): Observable<List<LocationOfInterest>> {
     const predefinedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${id}/lois`,
-      ref => ref.where('predefined', '==', true)
+      ref => ref.where('predefined', 'in', [true, null])
     );
 
     const userLois = this.db.collection(
@@ -329,8 +329,7 @@ export class DataStoreService {
       predefinedLois.valueChanges({idField: 'id'}),
       userLois.valueChanges({idField: 'id'}),
     ]).pipe(
-      map(lois => {
-        const [predefinedLois, userLois] = lois;
+      map(([predefinedLois, userLois]) => {
         const combined = predefinedLois.concat(userLois);
         return List(
           combined
