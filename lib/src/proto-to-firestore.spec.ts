@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import * as Pb from './generated/ground-protos';
+import {GroundProtos} from '@ground/proto';
 import {toDocumentData} from './proto-to-firestore';
 
-const {Job, Role, Style, Survey, Task} =  Pb.google.ground.v1beta1;
+const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
 
 describe('toDocumentData()', () => {
   [
