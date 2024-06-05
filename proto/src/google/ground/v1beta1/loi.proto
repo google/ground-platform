@@ -57,4 +57,15 @@ message LocationOfInterest {
   // by a backend. If `false` or unset, the LOI was added by data collectors
   // during the data collection process.
   bool predefined = 9;
+
+  // Arbitrary key-value pairs associated with this LOI.
+  map<string, Property> properties = 10;
+
+  // A single value associated with an LOI.
+  message Property {
+    oneof property_type {
+      string string_value = 1;
+      double numeric_value = 2;
+    }
+  }
 }
