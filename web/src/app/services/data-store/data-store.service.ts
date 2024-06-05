@@ -312,28 +312,41 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  lois$({id}: Survey, {email}: User): Observable<List<LocationOfInterest>> {
+  getAccessibleLois$(
+    surveyId: string,
+    userEmail: string
+  ): Observable<List<LocationOfInterest>> {
+    const toLocationOfInterests = (
+      loiIds: {id: string}[]
+    ): List<LocationOfInterest> =>
+      List(
+        loiIds
+          .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+          .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
+          .map(loi => loi as LocationOfInterest)
+      );
+
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref
-          .where(documentId(), '==', id)
-          .where(new FieldPath('acl', email), '==', Role.SURVEY_ORGANIZER)
+          .where(documentId(), '==', surveyId)
+          .where(new FieldPath('acl', userEmail), '==', Role.SURVEY_ORGANIZER)
       )
       .get()
       .pipe(
         switchMap(({empty: userIsNotSurveyOrganizer}) => {
           if (userIsNotSurveyOrganizer) {
             const predefinedLois = this.db.collection(
-              `${SURVEYS_COLLECTION_NAME}/${id}/lois`,
+              `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
               ref => ref.where('predefined', 'in', [true, null])
             );
 
             const userLois = this.db.collection(
-              `${SURVEYS_COLLECTION_NAME}/${id}/lois`,
+              `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
               ref =>
                 ref
                   .where('predefined', '==', false)
-                  .where('created.user.email', '==', email)
+                  .where('created.user.email', '==', userEmail)
             );
 
             return combineLatest([
@@ -341,36 +354,16 @@ export class DataStoreService {
               userLois.valueChanges({idField: 'id'}),
             ]).pipe(
               map(([predefinedLois, userLois]) => {
-                const combined = predefinedLois.concat(userLois);
-                return List(
-                  combined
-                    .map(obj =>
-                      LoiDataConverter.toLocationOfInterest(obj.id, obj)
-                    )
-                    .filter(
-                      DataStoreService.filterAndLogError<LocationOfInterest>
-                    )
-                    .map(loi => loi as LocationOfInterest)
-                );
+                const accessibleLois = predefinedLois.concat(userLois);
+                return toLocationOfInterests(accessibleLois);
               })
             );
           } else {
             return this.db
-              .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`)
+              .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
               .valueChanges({idField: 'id'})
               .pipe(
-                map(array =>
-                  List(
-                    array
-                      .map(obj =>
-                        LoiDataConverter.toLocationOfInterest(obj.id, obj)
-                      )
-                      .filter(
-                        DataStoreService.filterAndLogError<LocationOfInterest>
-                      )
-                      .map(loi => loi as LocationOfInterest)
-                  )
-                )
+                map(accessibleLois => toLocationOfInterests(accessibleLois))
               );
           }
         })
