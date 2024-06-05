@@ -14,5 +14,7 @@
  * limitations under the License.
  */
 
-export {toDocumentData} from './proto-to-firestore';
-export {toMessage} from './firestore-to-proto';
+import GroundProtos from "./ground-protos";
+import registryJson from "./ground-protos.json";
+
+export { GroundProtos, registryJson };

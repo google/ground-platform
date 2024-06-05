@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {Job, Role, Style, Survey, Task} from './generated/ground-protos';
+import {GroundProtos} from '@ground/proto';
 import {toDocumentData} from './proto-to-firestore';
+
+const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
 
 describe('toDocumentData()', () => {
   [
@@ -66,7 +68,7 @@ describe('toDocumentData()', () => {
     {
       desc: 'skips unset (0) enum value',
       input: new Task.DateTimeQuestion({
-        type: Task.DateTimeQuestion.Type.UNSPECIFIED_DATE_TIME_QUESTION_TYPE,
+        type: Task.DateTimeQuestion.Type.TYPE_UNSPECIFIED,
       }),
       expected: {},
     },
