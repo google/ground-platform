@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import registryJson from '@ground/proto/ground-protos.json';
-import {GroundProtos} from './index';
+import {GroundProtos, registryJson} from '@ground/proto';
 import {Constructor} from 'protobufjs';
 
 /** Path of message or enum type declaration in definition files and registry. */

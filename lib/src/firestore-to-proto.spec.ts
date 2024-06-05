@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from './index';
+import {GroundProtos} from '@ground/proto';
 import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 

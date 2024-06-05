@@ -14,5 +14,6 @@
  * limitations under the License.
  */
 
-export {toDocumentData} from './proto-to-firestore';
-export {toMessage} from './firestore-to-proto';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GroundProtos = require("./ground-protos");
+exports.registryJson = require("./ground-protos.json");

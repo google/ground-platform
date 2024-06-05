@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from './index';
+import {GroundProtos} from '@ground/proto';
 import {toDocumentData} from './proto-to-firestore';
 
 const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;

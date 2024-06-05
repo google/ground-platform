@@ -9,6 +9,7 @@
     "format": "buf format --write",
     "prebuild": "npm install",
     "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
+    "postbuild": "cp src/index.* dist/",
     "pbjs": "mkdir -p dist && pbjs -p src src/google/ground/v1beta1/*.proto",
     "generate:pbjs": "npm run pbjs -- -t static-module -o dist/ground-protos.js",
     "generate:pbjson": "npm run pbjs -- -t json -o dist/ground-protos.json",
