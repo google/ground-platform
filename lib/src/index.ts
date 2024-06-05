@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {google} from '@ground/proto/ground-protos';
+import GroundProtos from '@ground/proto/ground-protos';
 
-export const GroundProtos = google.ground.v1beta1;
+export {GroundProtos}
 export {toDocumentData} from './proto-to-firestore';
 export {toMessage} from './firestore-to-proto';

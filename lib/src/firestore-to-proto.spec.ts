@@ -18,7 +18,7 @@ import {GroundProtos} from './index';
 import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
-const {Job, Role, Style, Survey, Task} = GroundProtos;
+const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
 
 describe('toMessage()', () => {
   [

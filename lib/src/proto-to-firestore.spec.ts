@@ -17,7 +17,7 @@
 import {GroundProtos} from './index';
 import {toDocumentData} from './proto-to-firestore';
 
-const {Job, Role, Style, Survey, Task} = GroundProtos;
+const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
 
 describe('toDocumentData()', () => {
   [
