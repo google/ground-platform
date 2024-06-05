@@ -37,8 +37,8 @@ import {AuthService} from '../auth/auth.service';
 })
 export class LocationOfInterestService {
   private lois$: Observable<List<LocationOfInterest>>;
-  private selectedLocationOfInterestId$ = new ReplaySubject<string>(1);
-  private selectedLocationOfInterest$: Observable<LocationOfInterest>;
+  private selectedLoiId$ = new ReplaySubject<string>(1);
+  private selectedLoi$: Observable<LocationOfInterest>;
 
   constructor(
     private authService: AuthService,
@@ -61,16 +61,9 @@ export class LocationOfInterestService {
         )
       );
 
-    this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
+    this.selectedLoi$ = this.selectedLoiId$.pipe(
       switchMap(loiId =>
-        this.authService.getUser$().pipe(
-          switchMap(user =>
-            this.surveyService.getActiveSurvey$().pipe(
-              switchMap(survey => dataStore.lois$(survey, user)),
-              map(lois => lois.find(loi => loi.id === loiId)!)
-            )
-          )
-        )
+        this.lois$.pipe(map(lois => lois.find(loi => loi.id === loiId)!))
       )
     );
   }
@@ -159,11 +152,11 @@ export class LocationOfInterestService {
   }
 
   selectLocationOfInterest(loiId: string) {
-    this.selectedLocationOfInterestId$.next(loiId);
+    this.selectedLoiId$.next(loiId);
   }
 
   getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
-    return this.selectedLocationOfInterest$;
+    return this.selectedLoi$;
   }
 
   async addPoint(
