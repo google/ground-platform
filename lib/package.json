@@ -6,27 +6,18 @@
     "clean": "rm -rf node_modules dist *.log $npm_package_config_codegen_path",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
-    "test": "npm run build && jasmine dist/**/*.spec.js",
-    "prebuild": "npm install && npm run generate:pb",
-    "build": "tsc",
-    "postbuild": "npm run cp-generated",
-    "cp-generated": "cp $npm_package_config_codegen_path/* dist/generated",
-    "pbjs": "mkdir -p $npm_package_config_codegen_path && pbjs -p $npm_package_config_pb_path $npm_package_config_pb_files",
-    "generate:pbjs": "npm run pbjs -- -t static-module -o $npm_package_config_codegen_path/ground-protos.js",
-    "generate:pbjson": "npm run pbjs -- -t json -o $npm_package_config_codegen_path/ground-protos.json",
-    "generate:pbts": "mkdir -p $npm_package_config_codegen_path && pbts $npm_package_config_codegen_path/ground-protos.js -o $npm_package_config_codegen_path/ground-protos.d.ts",
-    "generate:pb": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts"
-  },
-  "config": {
-    "pb_path": "../proto/src",
-    "pb_files": "../proto/src/google/ground/v1beta1/*.proto",
-    "codegen_path": "src/generated"
+    "pretest": "npm run build",
+    "test": "jasmine --config=jasmine.json",
+    "build:proto": "npm run build --workspace ../proto",
+    "prebuild": "npm install && npm run build:proto",
+    "build": "tsc"
   },
   "engines": {
     "node": "18"
   },
   "private": true,
   "dependencies": {
+    "@ground/proto": "file:../proto",
     "@google-cloud/firestore": "^7.7.0",
     "immutable": "^4.3.6",
     "protobufjs": "^7.3.0"
@@ -41,8 +32,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "gts": "^5.3.0",
     "jasmine": "^5.1.0",
+    "jasmine-spec-reporter": "^7.0.0",
     "prettier": "^2.8.1",
-    "protobufjs-cli": "^1.1.2",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
     "typescript": "4.8.4"
