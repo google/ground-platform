@@ -1,0 +1,8 @@
+version: v2
+modules:
+  - path: src
+lint:
+  use:
+    - DEFAULT
+  except:
+    - ENUM_VALUE_PREFIX
