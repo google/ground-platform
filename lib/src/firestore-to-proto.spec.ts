@@ -34,8 +34,6 @@ describe('toMessage()', () => {
       }),
     },
     {
-      // DO NOT SUBMIT
-      // TODO: Resolve proto package names on message descriptor lookup.
       desc: 'converts nested message',
       input: {
         '4': {'1': '#112233'},
