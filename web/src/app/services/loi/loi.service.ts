@@ -27,10 +27,9 @@ import {
   LocationOfInterest,
 } from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-
-import {AuthService} from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
