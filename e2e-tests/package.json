@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "clean": "gts clean",
-    "build": "npm i --legacy-peer-deps",
+    "build": "npm i",
     "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
     "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
     "test:verify": "tsx node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
