@@ -313,7 +313,7 @@ export class DataStoreService {
   }
 
   getAccessibleLois$(
-    surveyId: string,
+    {id: surveyId, acl}: Survey,
     userEmail: string
   ): Observable<List<LocationOfInterest>> {
     const toLocationOfInterests = (
@@ -326,48 +326,37 @@ export class DataStoreService {
           .map(loi => loi as LocationOfInterest)
       );
 
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME, ref =>
+    const userIsSurveyOrganizer = acl.get(userEmail) === Role.SURVEY_ORGANIZER;
+
+    if (userIsSurveyOrganizer) {
+      return this.db
+        .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
+        .valueChanges({idField: 'id'})
+        .pipe(map(accessibleLois => toLocationOfInterests(accessibleLois)));
+    }
+
+    const predefinedLois = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      ref => ref.where('predefined', 'in', [true, null])
+    );
+
+    const userLois = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      ref =>
         ref
-          .where(documentId(), '==', surveyId)
-          .where(new FieldPath('acl', userEmail), '==', Role.SURVEY_ORGANIZER)
-      )
-      .get()
-      .pipe(
-        switchMap(({empty: userIsNotSurveyOrganizer}) => {
-          if (userIsNotSurveyOrganizer) {
-            const predefinedLois = this.db.collection(
-              `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-              ref => ref.where('predefined', 'in', [true, null])
-            );
+          .where('predefined', '==', false)
+          .where('created.user.email', '==', userEmail)
+    );
 
-            const userLois = this.db.collection(
-              `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-              ref =>
-                ref
-                  .where('predefined', '==', false)
-                  .where('created.user.email', '==', userEmail)
-            );
-
-            return combineLatest([
-              predefinedLois.valueChanges({idField: 'id'}),
-              userLois.valueChanges({idField: 'id'}),
-            ]).pipe(
-              map(([predefinedLois, userLois]) => {
-                const accessibleLois = predefinedLois.concat(userLois);
-                return toLocationOfInterests(accessibleLois);
-              })
-            );
-          } else {
-            return this.db
-              .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-              .valueChanges({idField: 'id'})
-              .pipe(
-                map(accessibleLois => toLocationOfInterests(accessibleLois))
-              );
-          }
-        })
-      );
+    return combineLatest([
+      predefinedLois.valueChanges({idField: 'id'}),
+      userLois.valueChanges({idField: 'id'}),
+    ]).pipe(
+      map(([predefinedLois, userLois]) => {
+        const accessibleLois = predefinedLois.concat(userLois);
+        return toLocationOfInterests(accessibleLois);
+      })
+    );
   }
 
   /**
