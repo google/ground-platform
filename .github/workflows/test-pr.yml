@@ -90,7 +90,7 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Run buf linter
+      - name: Lint Protocol Buffer definitions
         run: npm i && npm run lint
       
   test-lib:
