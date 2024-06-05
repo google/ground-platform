@@ -25,6 +25,8 @@ import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+import {TaskService} from '../task/task.service';
+
 enum JobDefaultColors {
   ORANGE = '#F37C22',
   BLUE = '#2278CF',
@@ -40,7 +42,8 @@ enum JobDefaultColors {
 export class JobService {
   constructor(
     private dataStoreService: DataStoreService,
-    private surveyService: SurveyService
+    private surveyService: SurveyService,
+    private taskService: TaskService
   ) {}
 
   /**
@@ -60,7 +63,32 @@ export class JobService {
    */
   createNewJob(): Job {
     const jobId = this.dataStoreService.generateId();
-    return new Job(jobId, /* index */ -1);
+    const task = this.createTask(TaskType.CAPTURE_LOCATION, '', true, 0);
+    return new Job(
+      jobId,
+      /* index */ -1,
+      undefined,
+      undefined,
+      Map([[task.id, task]])
+    );
+  }
+
+  /**
+   * Returns a new job which is an exact copy of the specified job, but with new UUIDs for all items recursively.
+   */
+  duplicateJob(job: Job, color: string | undefined): Job {
+    return job.copyWith({
+      id: this.dataStoreService.generateId(),
+      name: `Copy of ${job.name}`,
+      color,
+      index: -1,
+      tasks: Map<string, Task>(
+        job.tasks?.toArray().map(([_, task]) => {
+          const duplicateTask = this.taskService.duplicateTask(task);
+          return [duplicateTask.id, duplicateTask];
+        })
+      ),
+    });
   }
 
   /**

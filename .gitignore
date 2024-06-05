@@ -13,6 +13,7 @@
 **/bower_components
 **/node_modules
 **/build/
+**/generated/
 **/*.log
 web/google-maps-api.js
 web/coverage/

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Datastore} from '@/common/datastore';
+import {Datastore} from './datastore';
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
 
