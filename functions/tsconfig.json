@@ -2,12 +2,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "module": "CommonJS",
+    "esModuleInterop": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "dist",
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
+    "resolveJsonModule": true,
     "allowJs": true
   },
   "compileOnSave": true,

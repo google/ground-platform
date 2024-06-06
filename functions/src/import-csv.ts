@@ -15,14 +15,18 @@
  */
 
 import {https, Response} from 'firebase-functions';
-import * as HttpStatus from 'http-status-codes';
-import * as csvParser from 'csv-parser';
-import * as Busboy from 'busboy';
+import HttpStatus from 'http-status-codes';
+import csvParser from 'csv-parser';
+import Busboy from 'busboy';
 import {db} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';
-import {GroundProtos as Pb, toDocumentData} from '@ground/lib';
+import {GroundProtos} from "@ground/proto"
+import {toDocumentData} from '@ground/lib';
+
+type LocationOfInterest = GroundProtos.google.ground.v1beta1.LocationOfInterest;
+const {LocationOfInterest, Point, Coordinates} = GroundProtos.google.ground.v1beta1;
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -195,7 +199,7 @@ function csvRowToLocationOfInterestLegacy(row: any, jobId: string) {
   return loi;
 }
 
-function csvRowToLocationOfInterest(row: any, jobId: string): Pb.LocationOfInterest | null {
+function csvRowToLocationOfInterest(row: any, jobId: string): LocationOfInterest | null {
   const loi: any = {};
   const properties: {[name: string]: any} = {};
   for (const columnName in row) {
@@ -218,10 +222,10 @@ function csvRowToLocationOfInterest(row: any, jobId: string): Pb.LocationOfInter
   const latitude = Number.parseFloat(latStr);
   const longitude = Number.parseFloat(lngStr);
   if (isNaN(latitude) || isNaN(longitude)) return null;
-  const point = new Pb.Point({
-    coordinates: new Pb.Coordinates({latitude, longitude}),
+  const point = new Point({
+    coordinates: new Coordinates({latitude, longitude}),
   });
-  return new Pb.LocationOfInterest({
+  return new LocationOfInterest({
     jobId,
     customTag,
     predefined: true,

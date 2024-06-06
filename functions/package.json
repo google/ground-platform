@@ -19,8 +19,9 @@
     "watch": "npm run build && tsc --watch"
   },
   "dependencies": {
-    "@fast-csv/format": "4.3.5",
+    "@ground/proto": "file:../proto",
     "@ground/lib": "file:../lib",
+    "@fast-csv/format": "4.3.5",
     "@terraformer/wkt": "2.1.2",
     "busboy": "1.5.0",
     "cookie-parser": "^1.4.6",

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import * as cors from 'cors';
+import cors from 'cors';
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { https, Response } from 'firebase-functions';
 import { getDecodedIdToken } from './common/auth';
 import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 
 const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
