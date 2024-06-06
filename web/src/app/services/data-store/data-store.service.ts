@@ -26,7 +26,7 @@ import {
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
@@ -313,7 +313,7 @@ export class DataStoreService {
   }
 
   getAccessibleLois$(
-    {id: surveyId, acl}: Survey,
+    {id: surveyId}: Survey,
     userEmail: string,
     canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
