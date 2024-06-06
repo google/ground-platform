@@ -16,3 +16,4 @@
 
 export {toDocumentData} from './proto-to-firestore';
 export {toMessage} from './firestore-to-proto';
+export {deepMerge} from './deep-merge';
