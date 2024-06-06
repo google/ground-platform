@@ -79,12 +79,6 @@ export class LocationOfInterestService {
     );
   }
 
-  getLoisByJobId$(jobId: string): Observable<List<LocationOfInterest>> {
-    return this.getLocationsOfInterest$().pipe(
-      map(lois => lois.filter(loi => loi.jobId === jobId))
-    );
-  }
-
   getPredefinedLoisByJobId$(
     jobId: string
   ): Observable<List<LocationOfInterest>> {
