@@ -50,7 +50,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Run submit-test
-        uses: sufyanAbbasi/ground-android/.github/actions/submit-test@master
+        uses: google/ground-android/.github/actions/submit-test@master
         with:
           google-maps-key: ${{ secrets.GOOGLE_MAPS_KEY }}
           use-repo-data: false

@@ -16,7 +16,7 @@ name: Create a new survey
 inputs:
   platform-repository:
     description: 'ground-platform repository under test'
-    default: sufyanAbbasi/ground-platform
+    default: google/ground-platform
 
   upload-artifacts:
     description: 'Whether to upload the final emulator data artifacts'
