@@ -84,8 +84,14 @@ export class WebDriverHelper {
   }
 
   async addNewSurvey() {
-    const el = await this.findElementById('add-card');
-    await el.click();
+    try {
+      const el = await this.findElementById('add-card');
+      await el.click();
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to addNewSurvey: ${(e as Error).message}`);
+    }
   }
 
   // TODO: Add predefined GeoJSON import support.
@@ -95,141 +101,185 @@ export class WebDriverHelper {
     jobName: string,
     toggleAdhoc: boolean
   ) {
-    await this.waitUntilPresent(By.css('survey-details'));
-    await this.enterText(title, By.css('input[ng-reflect-name="title"]'));
-    await this.enterText(
-      description,
-      By.css('input[ng-reflect-name="description"]')
-    );
-    await this.clickContinue();
-    await this.enterText(jobName, By.css('input[ng-reflect-name="name"]'));
-    await this.clickContinue();
-    if (toggleAdhoc) {
-      await this.clickToggle();
+    try {
+      await this.waitUntilPresent(By.css('survey-details'));
+      await this.enterText(title, By.css('input[ng-reflect-name="title"]'));
+      await this.enterText(
+        description,
+        By.css('input[ng-reflect-name="description"]')
+      );
+      await this.clickContinue();
+      await this.enterText(jobName, By.css('input[ng-reflect-name="name"]'));
+      await this.clickContinue();
+      if (toggleAdhoc) {
+        await this.clickToggle();
+      }
+      await this.clickContinue();
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to setSurveyMetadata: ${(e as Error).message}`);
     }
-    await this.clickContinue();
   }
 
   async addAllTasks(loiType: LoiType | null = null) {
-    assertWebDriverInitialized(this.driver);
-    await this.waitUntilPresent(By.css('task-details'));
-    if (loiType !== null) {
-      await this.setLoiOption(loiType);
-      await this.setLoiInstructions(`Instructions for ${loiType}`);
-    }
-    let taskIndex = 0;
-    const taskButtons = await this.driver.findElements(
-      By.css('add-task-button button')
-    );
-    for (const taskType of Object.values(TaskType)) {
-      switch (taskType) {
-        case TaskType.PHOTO:
-          await taskButtons[1].click();
-          await this.setInstructions(
-            taskIndex,
-            `Instructions for ${TaskType.PHOTO}`
-          );
-          await this.setRequired(taskIndex, true);
-          break;
-        case TaskType.CAPTURE_LOCATION:
-          await taskButtons[2].click();
-          await this.setInstructions(
-            taskIndex,
-            `Instructions for ${TaskType.CAPTURE_LOCATION}`
-          );
-          await this.setRequired(taskIndex, true);
-          break;
-        case TaskType.SELECT_ONE:
-        case TaskType.SELECT_MULTIPLE:
-          await taskButtons[0].click();
-          await this.setInstructions(taskIndex, `Instructions for ${taskType}`);
-          await this.setRequired(taskIndex, true);
-          await this.setTaskOption(taskIndex, taskType as TaskType);
-          await this.setMultipleChoiceOptions(taskIndex);
-          break;
-        default:
-          await taskButtons[0].click();
-          await this.setInstructions(taskIndex, `Instructions for ${taskType}`);
-          await this.setRequired(taskIndex, true);
-          await this.setTaskOption(taskIndex, taskType as TaskType);
+    try {
+      assertWebDriverInitialized(this.driver);
+      await this.waitUntilPresent(By.css('task-details'));
+      if (loiType !== null) {
+        await this.setLoiOption(loiType);
+        await this.setLoiInstructions(`Instructions for ${loiType}`);
       }
-      taskIndex++;
+      let taskIndex = 0;
+      const taskButtons = await this.driver.findElements(
+        By.css('add-task-button button')
+      );
+      for (const taskType of Object.values(TaskType)) {
+        switch (taskType) {
+          case TaskType.PHOTO:
+            await taskButtons[1].click();
+            await this.setInstructions(
+              taskIndex,
+              `Instructions for ${TaskType.PHOTO}`
+            );
+            await this.setRequired(taskIndex, true);
+            break;
+          case TaskType.CAPTURE_LOCATION:
+            await taskButtons[2].click();
+            await this.setInstructions(
+              taskIndex,
+              `Instructions for ${TaskType.CAPTURE_LOCATION}`
+            );
+            await this.setRequired(taskIndex, true);
+            break;
+          case TaskType.SELECT_ONE:
+          case TaskType.SELECT_MULTIPLE:
+            await taskButtons[0].click();
+            await this.setInstructions(
+              taskIndex,
+              `Instructions for ${taskType}`
+            );
+            await this.setRequired(taskIndex, true);
+            await this.setTaskOption(taskIndex, taskType as TaskType);
+            await this.setMultipleChoiceOptions(taskIndex);
+            break;
+          default:
+            await taskButtons[0].click();
+            await this.setInstructions(
+              taskIndex,
+              `Instructions for ${taskType}`
+            );
+            await this.setRequired(taskIndex, true);
+            await this.setTaskOption(taskIndex, taskType as TaskType);
+        }
+        taskIndex++;
+      }
+      await this.clickContinue();
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to addAllTasks: ${(e as Error).message}`);
     }
-    await this.clickContinue();
   }
 
   async shareSurvey(user: string) {
-    assertWebDriverInitialized(this.driver);
-    const shareButton = await this.driver.findElement(
-      By.css('button.share-survey-button')
-    );
-    await shareButton.click();
-    await this.waitUntilPresent(By.css('.share-form .email-input input'));
-    await this.enterText(user, By.css('.share-form .email-input input'));
-    const roleSelector = () =>
-      this.driver!.findElement(By.css('.share-form mat-select'));
-    await this.setSelectOption(roleSelector, Role.DATA_COLLECTOR);
-    const doneButton = (
-      await this.driver.findElements(By.css('mat-dialog-container button'))
-    )[1];
-    await doneButton.click();
-    await this.delay();
-    await this.clickContinue();
+    try {
+      assertWebDriverInitialized(this.driver);
+      const shareButton = await this.driver.findElement(
+        By.css('button.share-survey-button')
+      );
+      await shareButton.click();
+      await this.waitUntilPresent(By.css('.share-form .email-input input'));
+      await this.enterText(user, By.css('.share-form .email-input input'));
+      const roleSelector = () =>
+        this.driver!.findElement(By.css('.share-form mat-select'));
+      await this.setSelectOption(roleSelector, Role.DATA_COLLECTOR);
+      const doneButton = (
+        await this.driver.findElements(By.css('mat-dialog-container button'))
+      )[1];
+      await doneButton.click();
+      await this.delay();
+      await this.clickContinue();
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to shareSurvey: ${(e as Error).message}`);
+    }
   }
 
   async verifySurveyCreated() {
-    assertWebDriverInitialized(this.driver);
-    await this.waitUntilPresent(By.css('.job-list-item-container'));
-    const jobElement = await this.driver.findElement(By.css('.job-icon ~ div'));
-    await this.waitUntilTextPresent(jobElement, JOB_NAME);
+    try {
+      assertWebDriverInitialized(this.driver);
+      await this.waitUntilPresent(By.css('.job-list-item-container'));
+      const jobElement = await this.driver.findElement(
+        By.css('.job-icon ~ div')
+      );
+      await this.waitUntilTextPresent(jobElement, JOB_NAME);
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to verifySurveyCreated: ${(e as Error).message}`);
+    }
   }
 
   async selectTestSurvey() {
-    assertWebDriverInitialized(this.driver);
-    const titleElement = await this.findElementByText(
-      By.css('mat-card-title'),
-      SURVEY_TITLE
-    );
-    await titleElement?.click();
+    try {
+      assertWebDriverInitialized(this.driver);
+      const titleElement = await this.findElementByText(
+        By.css('mat-card-title'),
+        SURVEY_TITLE
+      );
+      await titleElement?.click();
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to selectTestSurvey: ${(e as Error).message}`);
+    }
   }
 
   async waitForSurveySubmissions() {
-    assertWebDriverInitialized(this.driver);
-    let lastError: Error | null = null;
-    let tries = WAIT_FOR_SUBMISSION_TRIES;
-    do {
-      // Wait for the first LOI submission.
-      try {
+    try {
+      assertWebDriverInitialized(this.driver);
+      let lastError: Error | null = null;
+      let tries = WAIT_FOR_SUBMISSION_TRIES;
+      do {
+        // Wait for the first LOI submission.
         try {
-          await this.waitUntilPresent(By.css('.loi-icon'), SHORT_TIMEOUT);
+          try {
+            await this.waitUntilPresent(By.css('.loi-icon'), SHORT_TIMEOUT);
+          } catch (e) {
+            const expandButtonSelector = By.css(
+              '.job-list-item-container button'
+            );
+            await this.waitUntilPresent(expandButtonSelector, LONG_TIMEOUT);
+            const expandSubmissionsButton = await this.driver.findElement(
+              expandButtonSelector
+            );
+            await expandSubmissionsButton.click();
+            await this.waitUntilPresent(By.css('.loi-icon'), LONG_TIMEOUT);
+          }
+          // Wait for expected number of submissions.
+          const loiIcon = await this.driver.findElement(By.css('.loi-icon'));
+          await loiIcon.click();
+          await this.waitUntilPresent(By.css('.submission-item'));
+          const submissionItems = await this.driver.findElements(
+            By.css('.submission-item')
+          );
+          if (submissionItems.length < EXPECTED_SUBMISSION_COUNT) {
+            await this.delay(LONG_TIMEOUT);
+            throw new WebDriverHelperException('Not enough survey submissions');
+          }
+          return;
         } catch (e) {
-          const expandButtonSelector = By.css(
-            '.job-list-item-container button'
-          );
-          await this.waitUntilPresent(expandButtonSelector, LONG_TIMEOUT);
-          const expandSubmissionsButton = await this.driver.findElement(
-            expandButtonSelector
-          );
-          await expandSubmissionsButton.click();
-          await this.waitUntilPresent(By.css('.loi-icon'), LONG_TIMEOUT);
+          lastError = e as Error;
         }
-        // Wait for expected number of submissions.
-        const loiIcon = await this.driver.findElement(By.css('.loi-icon'));
-        await loiIcon.click();
-        await this.waitUntilPresent(By.css('.submission-item'));
-        const submissionItems = await this.driver.findElements(
-          By.css('.submission-item')
-        );
-        if (submissionItems.length < EXPECTED_SUBMISSION_COUNT) {
-          await this.delay(LONG_TIMEOUT);
-          throw new WebDriverHelperException('Not enough survey submissions');
-        }
-        return;
-      } catch (e) {
-        lastError = e as Error;
-      }
-    } while (tries-- > 0);
-    fail(`No survey submissions appeared: ${lastError}`);
+      } while (tries-- > 0);
+      fail(`No survey submissions appeared: ${lastError}`);
+    } catch (e) {
+      console.error(e);
+      console.log((e as Error).stack);
+      throw new Error(`Unable to selectTestSurvey: ${(e as Error).message}`);
+    }
   }
 
   async verifySubmissions() {

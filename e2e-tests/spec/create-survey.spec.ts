@@ -45,45 +45,15 @@ describe('create survey flow', () => {
   });
 
   it('adds a new survey', async () => {
-    try {
-      await helper.addNewSurvey();
-    } catch (e) {
-      console.error(e);
-      console.log((e as Error).stack);
-      throw new Error(`Unable to addNewSurvey: ${(e as Error).message}`);
-    }
-    try {
-      await helper.setSurveyMetadata(
-        SURVEY_TITLE,
-        SURVEY_DESCRIPTION,
-        JOB_NAME,
-        AD_HOC
-      );
-    } catch (e) {
-      console.error(e);
-      console.log((e as Error).stack);
-      throw new Error(`Unable to setSurveyMetadata: ${(e as Error).message}`);
-    }
-    try {
-      await helper.addAllTasks(AD_HOC ? LOI_TASK_TYPE : null);
-    } catch (e) {
-      console.error(e);
-      console.log((e as Error).stack);
-      throw new Error(`Unable to addAllTasks: ${(e as Error).message}`);
-    }
-    try {
-      await helper.shareSurvey(USER);
-    } catch (e) {
-      console.error(e);
-      console.log((e as Error).stack);
-      throw new Error(`Unable to shareSurvey: ${(e as Error).message}`);
-    }
-    try {
-      await helper.verifySurveyCreated();
-    } catch (e) {
-      console.error(e);
-      console.log((e as Error).stack);
-      throw new Error(`Unable to verifySurveyCreated: ${(e as Error).message}`);
-    }
+    await helper.addNewSurvey();
+    await helper.setSurveyMetadata(
+      SURVEY_TITLE,
+      SURVEY_DESCRIPTION,
+      JOB_NAME,
+      AD_HOC
+    );
+    await helper.addAllTasks(AD_HOC ? LOI_TASK_TYPE : null);
+    await helper.shareSurvey(USER);
+    await helper.verifySurveyCreated();
   });
 });
