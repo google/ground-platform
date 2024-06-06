@@ -312,26 +312,34 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
+  private toLocationsOfInterest = (
+    loiIds: {id: string}[]
+  ): List<LocationOfInterest> =>
+    List(
+      loiIds
+        .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+        .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
+        .map(loi => loi as LocationOfInterest)
+    );
+
+  /**
+   * Returns a stream containing all the Location of Interests based
+   * on provided parameters.
+   *
+   * @param id the id of the survey instance.
+   * @param userEmail the email of the user to filter the results.
+   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
+   */
   getAccessibleLois$(
     {id: surveyId}: Survey,
     userEmail: string,
     canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
-    const toLocationsOfInterest = (
-      loiIds: {id: string}[]
-    ): List<LocationOfInterest> =>
-      List(
-        loiIds
-          .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
-          .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
-          .map(loi => loi as LocationOfInterest)
-      );
-
     if (canManageSurvey) {
       return this.db
         .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
         .valueChanges({idField: 'id'})
-        .pipe(map(toLocationsOfInterest));
+        .pipe(map(this.toLocationsOfInterest));
     }
 
     const predefinedLois = this.db.collection(
@@ -352,7 +360,7 @@ export class DataStoreService {
       userLois.valueChanges({idField: 'id'}),
     ]).pipe(
       map(([predefinedLois, userLois]) =>
-        toLocationsOfInterest(predefinedLois.concat(userLois))
+        this.toLocationsOfInterest(predefinedLois.concat(userLois))
       )
     );
   }
