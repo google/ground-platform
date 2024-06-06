@@ -21,6 +21,8 @@ import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
 import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
+import {Datastore} from './common/datastore';
+import {DocumentData} from 'firebase-admin/firestore';
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
@@ -69,7 +71,7 @@ export async function importGeoJsonHandler(
       res.status(HttpStatus.FORBIDDEN).send('Permission denied');
       return;
     }
-      
+
     console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
@@ -130,14 +132,14 @@ export async function importGeoJsonHandler(
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function geoJsonToLoi(geoJsonLoi: any, jobId: string) {
+function geoJsonToLoi(geoJsonLoi: any, jobId: string): DocumentData {
   // TODO: Add created/modified metadata.
-  const { id, geometry, properties } = geoJsonLoi;
+  const {id, geometry, properties} = geoJsonLoi;
   return {
     jobId,
     customId: id,
     predefined: true,
-    geometry,
-    properties
+    geometry: Datastore.toFirestoreMap(geometry),
+    properties,
   };
 }

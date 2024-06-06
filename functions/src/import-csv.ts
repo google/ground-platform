@@ -22,11 +22,13 @@ import {db} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';
-import {GroundProtos} from "@ground/proto"
+import {GroundProtos} from '@ground/proto';
 import {toDocumentData, deepMerge} from '@ground/lib';
+import {Datastore} from './common/datastore';
 
 type LocationOfInterest = GroundProtos.google.ground.v1beta1.LocationOfInterest;
-const {LocationOfInterest, Point, Coordinates} = GroundProtos.google.ground.v1beta1;
+const {LocationOfInterest, Point, Coordinates} =
+  GroundProtos.google.ground.v1beta1;
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -168,17 +170,20 @@ function csvRowToLocationOfInterestLegacy(row: any, jobId: string) {
   const lng = Number.parseFloat(lngStr);
   if (isNaN(lat) || isNaN(lng)) return null;
   loi['predefined'] = true;
-  loi['geometry'] = {
+  loi['geometry'] = Datastore.toFirestoreMap({
     type: 'Point',
     coordinates: new GeoPoint(lat, lng),
-  };
+  });
   if (Object.keys(properties).length > 0) {
     loi['properties'] = properties;
   }
   return loi;
 }
 
-function csvRowToLocationOfInterest(row: any, jobId: string): LocationOfInterest | null {
+function csvRowToLocationOfInterest(
+  row: any,
+  jobId: string
+): LocationOfInterest | null {
   const loi: any = {};
   const properties: {[name: string]: any} = {};
   for (const columnName in row) {

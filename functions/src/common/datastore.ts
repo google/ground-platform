@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import { firestore } from 'firebase-admin';
-import { GeoPoint } from 'firebase-admin/firestore';
+import { DocumentData, GeoPoint } from 'firebase-admin/firestore';
 
 /**
  * 
@@ -138,11 +138,7 @@ export class Datastore {
     return this.fetchDoc_(`${survey(surveyId)}/sheets/config`);
   }
 
-  async insertLocationOfInterest(surveyId: string, loi: any) {
-    const loiDoc = {
-      ...loi,
-      geometry: Datastore.toFirestoreMap(loi.geometry),
-    };
+  async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
     const docRef = this.db_.doc(survey(surveyId));
     const doc = await docRef.get();
     if (!doc.exists) {
