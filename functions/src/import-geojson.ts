@@ -180,13 +180,12 @@ function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
 
     case 'Polygon':
       const polygon = toPolygonPb(geometry.coordinates);
-      return new Pb.Geometry({polygon});      
+      return new Pb.Geometry({polygon});
     case 'MultiPolygon':
       return new Pb.Geometry({multiPolygon: new Pb.MultiPolygon({})});
-    default:
-      // Unsupported GeoJSON type.
-      null;
   }
+  // Unsupported GeoJSON type.
+  return null;
 }
 
 function toCoordinatesPb(position: Position): Pb.Coordinates | null {
@@ -202,10 +201,14 @@ function toCoordinatesPb(position: Position): Pb.Coordinates | null {
 
 function toPolygonPb(positions: Position[][]): Pb.Polygon | null {
   const [shell, ...holes] = positions;
-    // Ignore if shell is missing.
+  // Ignore if shell is missing.
   const shellPb = shell ? toLinearRingPb(shell) : null;
-  const holesPb = holes?.map(h => toLinearRingPb(h))?.filter(h => !!h).map(h => h!!) || [];
-  return shellPb? new Pb.Polygon({shell: shellPb, holes: holesPb}) : null;
+  const holesPb =
+    holes
+      ?.map(h => toLinearRingPb(h))
+      ?.filter(h => !!h)
+      .map(h => h!!) || [];
+  return shellPb ? new Pb.Polygon({shell: shellPb, holes: holesPb}) : null;
 }
 
 function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
