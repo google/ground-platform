@@ -317,7 +317,7 @@ export class DataStoreService {
     userEmail: string,
     canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
-    const toLocationOfInterests = (
+    const toLocationsOfInterest = (
       loiIds: {id: string}[]
     ): List<LocationOfInterest> =>
       List(
@@ -331,7 +331,7 @@ export class DataStoreService {
       return this.db
         .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
         .valueChanges({idField: 'id'})
-        .pipe(map(accessibleLois => toLocationOfInterests(accessibleLois)));
+        .pipe(map(toLocationsOfInterest));
     }
 
     const predefinedLois = this.db.collection(
@@ -351,10 +351,9 @@ export class DataStoreService {
       predefinedLois.valueChanges({idField: 'id'}),
       userLois.valueChanges({idField: 'id'}),
     ]).pipe(
-      map(([predefinedLois, userLois]) => {
-        const accessibleLois = predefinedLois.concat(userLois);
-        return toLocationOfInterests(accessibleLois);
-      })
+      map(([predefinedLois, userLois]) =>
+        toLocationsOfInterest(predefinedLois.concat(userLois))
+      )
     );
   }
 
