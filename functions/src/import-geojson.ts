@@ -21,11 +21,17 @@ import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
 import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
+import {GroundProtos} from '@ground/proto';
 import {Datastore} from './common/datastore';
 import {DocumentData} from 'firebase-admin/firestore';
+import {toDocumentData, deepMerge} from '@ground/lib';
+import {Feature, Geometry, Position} from 'geojson';
+
+import Pb = GroundProtos.google.ground.v1beta1;
+const pb = GroundProtos.google.ground.v1beta1;
 
 /**
- * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
+ * Rea  d the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
 export async function importGeoJsonHandler(
@@ -94,7 +100,10 @@ export async function importGeoJsonHandler(
           return;
         }
         try {
-          const loi = geoJsonToLoi(geoJsonLoi, jobId);
+          const loi = deepMerge(
+            toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)),
+            geoJsonToLoiLegacy(geoJsonLoi, jobId)
+          );
           if (loi) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
@@ -132,7 +141,7 @@ export async function importGeoJsonHandler(
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function geoJsonToLoi(geoJsonLoi: any, jobId: string): DocumentData {
+function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = geoJsonLoi;
   return {
@@ -142,4 +151,66 @@ function geoJsonToLoi(geoJsonLoi: any, jobId: string): DocumentData {
     geometry: Datastore.toFirestoreMap(geometry),
     properties,
   };
+}
+
+/**
+ * Convert the provided GeoJSON LocationOfInterest and jobId into a
+ * LocationOfInterest for insertion into the data store.
+ */
+function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
+  // TODO: Add created/modified metadata.
+  const {id, geometry, properties} = feature;
+  const geometryPb = toGeometryPb(geometry);
+  return new pb.LocationOfInterest({
+    jobId,
+    customTag: id?.toString(),
+    predefined: true,
+    geometry: geometryPb,
+    properties,
+  });
+}
+
+function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
+  switch (geometry.type) {
+    case 'Point':
+      const coordinates = toCoordinatesPb(geometry.coordinates);
+      if (!coordinates) return null;
+      const point = new Pb.Point({coordinates});
+      return new Pb.Geometry({point});
+
+    case 'Polygon':
+      const polygon = toPolygonPb(geometry.coordinates);
+      return new Pb.Geometry({polygon});      
+    case 'MultiPolygon':
+      return new Pb.Geometry({multiPolygon: new Pb.MultiPolygon({})});
+    default:
+      // Unsupported GeoJSON type.
+      null;
+  }
+}
+
+function toCoordinatesPb(position: Position): Pb.Coordinates | null {
+  if (position.length != 2) {
+    // Ignore invalid GeoJSON position.
+    return null;
+  }
+  return new Pb.Coordinates({
+    longitude: position[0],
+    latitude: position[1],
+  });
+}
+
+function toPolygonPb(positions: Position[][]): Pb.Polygon | null {
+  const [shell, ...holes] = positions;
+    // Ignore if shell is missing.
+  const shellPb = shell ? toLinearRingPb(shell) : null;
+  const holesPb = holes?.map(h => toLinearRingPb(h))?.filter(h => !!h).map(h => h!!) || [];
+  return shellPb? new Pb.Polygon({shell: shellPb, holes: holesPb}) : null;
+}
+
+function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
+  const coords = positions.map(p => toCoordinatesPb(p));
+  // Don't convert rings with invalid coords.
+  if (coords.includes(null)) return null;
+  return new Pb.LinearRing({coordinates: coords.map(c => c!)});
 }

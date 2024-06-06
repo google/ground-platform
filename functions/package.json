@@ -19,10 +19,11 @@
     "watch": "npm run build && tsc --watch"
   },
   "dependencies": {
-    "@ground/proto": "file:../proto",
-    "@ground/lib": "file:../lib",
     "@fast-csv/format": "4.3.5",
+    "@ground/lib": "file:../lib",
+    "@ground/proto": "file:../proto",
     "@terraformer/wkt": "2.1.2",
+    "@types/geojson": "^7946.0.14",
     "busboy": "1.5.0",
     "cookie-parser": "^1.4.6",
     "cors": "2.8.5",
