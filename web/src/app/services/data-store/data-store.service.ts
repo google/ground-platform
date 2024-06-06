@@ -314,7 +314,8 @@ export class DataStoreService {
 
   getAccessibleLois$(
     {id: surveyId, acl}: Survey,
-    userEmail: string
+    userEmail: string,
+    canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
     const toLocationOfInterests = (
       loiIds: {id: string}[]
@@ -326,9 +327,7 @@ export class DataStoreService {
           .map(loi => loi as LocationOfInterest)
       );
 
-    const userIsSurveyOrganizer = acl.get(userEmail) === Role.SURVEY_ORGANIZER;
-
-    if (userIsSurveyOrganizer) {
+    if (canManageSurvey) {
       return this.db
         .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
         .valueChanges({idField: 'id'})
