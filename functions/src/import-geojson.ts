@@ -173,21 +173,24 @@ function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
 function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
   switch (geometry.type) {
     case 'Point':
-      const coordinates = toCoordinatesPb(geometry.coordinates);
-      if (!coordinates) return null;
-      const point = new Pb.Point({coordinates});
-      return new Pb.Geometry({point});
-
+      const point = toPointPb(geometry.coordinates);
+      return point ? new Pb.Geometry({point}) : null;
     case 'Polygon':
       const polygon = toPolygonPb(geometry.coordinates);
-      return new Pb.Geometry({polygon});
+      return polygon ? new Pb.Geometry({polygon}) || null;
     case 'MultiPolygon':
-      return new Pb.Geometry({multiPolygon: new Pb.MultiPolygon({})});
+      const multiPolygon = toMultiPolygon(geometry.coordinates);
+      return multiPolygon ? new Pb.Geometry({multiPolygon}) : null;
   }
   // Unsupported GeoJSON type.
   return null;
 }
 
+function toPointPb(position: Position): Pb.Point | null {
+  const coordinatesPb = toCoordinatesPb(position);
+  return coordinatesPb ? new Pb.Point({coordinates: coordinatesPb}) : null;
+
+}
 function toCoordinatesPb(position: Position): Pb.Coordinates | null {
   if (position.length != 2) {
     // Ignore invalid GeoJSON position.
@@ -216,4 +219,11 @@ function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
   // Don't convert rings with invalid coords.
   if (coords.includes(null)) return null;
   return new Pb.LinearRing({coordinates: coords.map(c => c!)});
+}
+
+function toMultiPolygon(positions: Position[][][]): Pb.MultiPolygon | null {
+  const polygons = positions.map(p => toPolygonPb(p));
+  // Don't convert invalid multi-polygons.
+  if (polygons.includes(null)) return null;
+  return new Pb.MultiPolygon({polygons: polygons.map(p => p!)});
 }
