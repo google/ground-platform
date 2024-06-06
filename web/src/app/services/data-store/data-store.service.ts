@@ -312,15 +312,16 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  private toLocationsOfInterest = (
+  private toLocationsOfInterest(
     loiIds: {id: string}[]
-  ): List<LocationOfInterest> =>
-    List(
+  ): List<LocationOfInterest> {
+    return List(
       loiIds
         .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
         .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
         .map(loi => loi as LocationOfInterest)
     );
+  }
 
   /**
    * Returns a stream containing all the Location of Interests based
