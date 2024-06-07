@@ -65,49 +65,49 @@ message TaskData {
   // User-provided data must be one of the following types:
   oneof task_data_type {
     // A manually entered text response.
-    Text text = 4;
+    TextResponse text_response = 4;
 
     // A manually entered number response.
-    Number number = 5;
+    NumberResponse number_response = 5;
 
     // A manually selected date and/or time response.
-    DateTime date_time = 6;
+    DateTimeResponse date_time_response = 6;
 
     // Response to a multiple-choice question.
-    MultipleChoice multiple_choice_question = 7;
+    MultipleChoiceResponses multiple_choice_responses = 7;
 
     // Result of data collector drawing a geometry (e.g., dropping a pin,
     // drawing or walking a perimeter).
-    DrawGeometry draw_geometry = 8;
+    DrawGeometryResult draw_geometry_result = 8;
 
     // The result of capturing the device's current fused location.
-    CaptureLocation capture_location = 9;
+    CaptureLocationResult capture_location_result = 9;
 
     // The result of a "take a photo" task.
-    TakePhoto take_photo = 10;
+    TakePhotoResult take_photo_result = 10;
   }
 
   // A manually entered text response.
-  message Text {
+  message TextResponse {
     // The text provided by the user.
     string text = 1;
   }
 
   // A manually entered number response.
-  message Number {
+  message NumberResponse {
     // The number provided by the user.
     double number = 2;
   }
 
   // A manually selected date and/or time response.
-  message DateTime {
+  message DateTimeResponse {
     // The date and/or time provided by the user. Date is set to
     // UNIX epoch if unspecified (1970-01-01:00Z), time is set to
     // 0:00:00.00.
     .google.protobuf.Timestamp date_time = 1;
   }
 
-  message MultipleChoice {
+  message MultipleChoiceResponses {
     // The unique IDs of options selected by the user.
     repeated string selected_option_ids = 1;
 
@@ -115,14 +115,14 @@ message TaskData {
     string other_text = 2;
   }
 
-  message DrawGeometry {
+  message DrawGeometryResult {
     // The geometry provided by the data collector.
     Geometry geometry = 1;
   }
 
   // The values returned by the data collector's device when completing a
   // "capture location" task.
-  message CaptureLocation {
+  message CaptureLocationResult {
     // Required. The device's coordinates.
     Coordinates coordinates = 1;
 
@@ -138,7 +138,7 @@ message TaskData {
   }
 
   // The result of a "take a photo" task.
-  message TakePhoto {
+  message TakePhotoResult {
     // Relative path of photo in remote storage.
     string photo_path = 1;
   }
