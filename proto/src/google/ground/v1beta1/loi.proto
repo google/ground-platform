@@ -55,7 +55,7 @@ message LocationOfInterest {
 
   enum SamplingFrameType {
     // Indicated the value was not set.
-    UNSPECIFIED_SAMPLING_FRAME_TYPE = 0;
+    SAMPLING_FRAME_TYPE_UNSPECIFIED = 0;
     // Indicates the LOI was imported or otherwise defined beforehand.
     PREDEFINED = 1;
     // Indicated the LOI was added on-the-fly during data collection.
