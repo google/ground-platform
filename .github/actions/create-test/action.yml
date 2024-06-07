@@ -73,6 +73,10 @@ runs:
       shell: bash
       run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
+    - name: Install nx-linux-x64-gnu
+      shell: bash
+      run: npm install @nx/nx-linux-x64-gnu
+
     - name: Install dependencies
       shell: bash
       run: npm run build:local
