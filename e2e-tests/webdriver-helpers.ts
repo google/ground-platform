@@ -89,7 +89,6 @@ export class WebDriverHelper {
       await el.click();
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to addNewSurvey: ${(e as Error).message}`);
     }
   }
@@ -117,7 +116,6 @@ export class WebDriverHelper {
       await this.clickContinue();
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to setSurveyMetadata: ${(e as Error).message}`);
     }
   }
@@ -177,7 +175,6 @@ export class WebDriverHelper {
       await this.clickContinue();
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to addAllTasks: ${(e as Error).message}`);
     }
   }
@@ -202,7 +199,6 @@ export class WebDriverHelper {
       await this.clickContinue();
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to shareSurvey: ${(e as Error).message}`);
     }
   }
@@ -217,7 +213,6 @@ export class WebDriverHelper {
       await this.waitUntilTextPresent(jobElement, JOB_NAME);
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to verifySurveyCreated: ${(e as Error).message}`);
     }
   }
@@ -232,7 +227,6 @@ export class WebDriverHelper {
       await titleElement?.click();
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to selectTestSurvey: ${(e as Error).message}`);
     }
   }
@@ -277,7 +271,6 @@ export class WebDriverHelper {
       fail(`No survey submissions appeared: ${lastError}`);
     } catch (e) {
       console.error(e);
-      console.log((e as Error).stack);
       throw new Error(`Unable to selectTestSurvey: ${(e as Error).message}`);
     }
   }

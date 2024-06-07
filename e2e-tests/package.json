@@ -11,11 +11,7 @@
     "test:verify": "tsx node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
     "test:verify:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
     "lint": "gts lint",
-    "compile": "tsc",
-    "fix": "gts fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "fix": "gts fix"
   },
   "license": "Apache-2.0",
   "dependencies": {
