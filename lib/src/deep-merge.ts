@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
+import {GeoPoint} from '@google-cloud/firestore';
+
 function isObject(item: any) {
-    return item && typeof item === 'object' && !Array.isArray(item);
-  }
-  
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+
 /**
  * Merge two objects by key-value pairs, recursively.
  */
-export function deepMerge(target: any, ...sources: any[]): any {
+export function deepMerge(target: any, source: any): any {
   // TODO(#1758): Delete once this is no longer used.
-  if (!sources.length) return target;
-  const source = sources.shift();
-
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
-      if (isObject(source[key])) {
+      if (isObject(source[key]) && !(source[key] instanceof GeoPoint)) {
         if (!target[key]) Object.assign(target, {[key]: {}});
         deepMerge(target[key], source[key]);
       } else {
@@ -36,5 +35,5 @@ export function deepMerge(target: any, ...sources: any[]): any {
       }
     }
   }
-  return deepMerge(target, ...sources);
+  return target;
 }
