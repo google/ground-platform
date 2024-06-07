@@ -18,7 +18,8 @@ import {GroundProtos} from '@ground/proto';
 import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
-const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
+const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
+  GroundProtos.google.ground.v1beta1;
 
 describe('toMessage()', () => {
   [
@@ -70,6 +71,23 @@ describe('toMessage()', () => {
       desc: 'skips unset (0) enum value',
       input: {},
       expected: new Task.DateTimeQuestion(),
+    },
+    {
+      desc: 'converts repeated message',
+      input: {
+        '1': [
+          {'1': 5, '2': 7},
+          {'1': 12, '2': 23},
+          {'1': 9, '2': 2},
+        ],
+      },
+      expected: new LinearRing({
+        coordinates: [
+          new Coordinates({latitude: 5, longitude: 7}),
+          new Coordinates({latitude: 12, longitude: 23}),
+          new Coordinates({latitude: 9, longitude: 2}),
+        ],
+      }),
     },
   ].forEach(({desc, input, expected}) =>
     it(desc, () => {

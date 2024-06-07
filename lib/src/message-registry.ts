@@ -29,6 +29,7 @@ export interface FieldDescriptor {
   keyType?: string; // Used for proto map<>
   type: string;
   id: number;
+  rule?: 'repeated';
 }
 
 export interface MessageDescriptor {
