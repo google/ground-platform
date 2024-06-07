@@ -209,7 +209,7 @@ function csvRowToLocationOfInterestPb(
   return new Pb.LocationOfInterest({
     jobId,
     customTag,
-    predefined: true,
+    samplingFrameType: Pb.LocationOfInterest.SamplingFrameType.PREDEFINED,
     geometry: {point},
     properties,
   });

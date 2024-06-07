@@ -53,10 +53,15 @@ message LocationOfInterest {
   // field in GeoJSON Features.
   string custom_tag = 8;
 
-  // If `true`, the LOI was defined by the survey organizer or generated
-  // by a backend. If `false` or unset, the LOI was added by data collectors
-  // during the data collection process.
-  bool predefined = 9;
+  enum SamplingFrameType {
+    // Indicated the value was not set.
+    UNSPECIFIED_SAMPLING_FRAME_TYPE = 0;
+    // Indicates the LOI was imported or otherwise defined beforehand.
+    PREDEFINED = 1;
+    // Indicated the LOI was added on-the-fly during data collection.
+    FREE_FORM = 2;
+  }
+  SamplingFrameType sampling_frame_type = 9;
 
   // Arbitrary key-value pairs associated with this LOI.
   map<string, Property> properties = 10;

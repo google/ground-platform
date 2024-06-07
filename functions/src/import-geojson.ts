@@ -165,7 +165,7 @@ function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
   return new Pb.LocationOfInterest({
     jobId,
     customTag: id?.toString(),
-    predefined: true,
+    samplingFrameType: Pb.LocationOfInterest.SamplingFrameType.PREDEFINED,
     geometry: geometryPb,
     properties,
   });
