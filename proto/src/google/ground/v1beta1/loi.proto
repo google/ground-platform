@@ -56,7 +56,6 @@ message LocationOfInterest {
   // Valid values for `source`.
   enum Source {
     // Indicated the value was not set.
-
     SOURCE_UNSPECIFIED = 0;
 
     // Indicates the LOI was defined by organizers beforehand.
@@ -65,7 +64,6 @@ message LocationOfInterest {
     // Indicated the LOI was added at data collection time.
     DATA_COLLECTOR = 2;
   }
-
   // Required. Indicates who created this LOI.
   Source source = 9;
 
