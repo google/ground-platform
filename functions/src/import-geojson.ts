@@ -77,7 +77,9 @@ export async function importGeoJsonHandler(
       return;
     }
 
-    console.debug(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
+    console.debug(
+      `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
+    );
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
     let geoJsonType: any = null;
@@ -188,14 +190,15 @@ function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
 function toPointPb(position: Position): Pb.Point | null {
   const coordinatesPb = toCoordinatesPb(position);
   return coordinatesPb ? new Pb.Point({coordinates: coordinatesPb}) : null;
-
 }
 function toCoordinatesPb(position: Position): Pb.Coordinates | null {
   const [longitude, latitude] = position;
-  return longitude && latitude ? new Pb.Coordinates({
-    longitude,
-    latitude
-  }) : null;
+  return longitude && latitude
+    ? new Pb.Coordinates({
+        longitude,
+        latitude,
+      })
+    : null;
 }
 
 function toPolygonPb(positions: Position[][]): Pb.Polygon | null {
@@ -219,6 +222,9 @@ function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
 
 function toMultiPolygon(positions: Position[][][]): Pb.MultiPolygon | null {
   // Skip invalid polygons.
-  const polygons = positions.map(p => toPolygonPb(p)).filter(p => !!p).map(p => p!);
+  const polygons = positions
+    .map(p => toPolygonPb(p))
+    .filter(p => !!p)
+    .map(p => p!);
   return polygons.length > 0 ? new Pb.MultiPolygon({polygons}) : null;
 }
