@@ -132,8 +132,8 @@ function invertAndFlatten(obj: any) {
  */
 const SPECIAL_COLUMN_NAMES = invertAndFlatten({
   customTag: ['system:index'],
-  latStr: ['lat', 'latitude', 'y'],
-  lngStr: ['lng', 'lon', 'long', 'lng', 'x'],
+  lat: ['lat', 'latitude', 'y'],
+  lng: ['lng', 'lon', 'long', 'lng', 'x'],
 });
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
@@ -162,14 +162,12 @@ function csvRowToLocationOfInterestLegacy(row: any, jobId: string) {
       properties[columnName] = value;
     }
   }
-  const {lat: latStr, lng: lngStr, ...loi} = data;
-  const lat = Number.parseFloat(latStr);
-  const lng = Number.parseFloat(lngStr);
+  const {lat, lng, ...loi} = data;
   if (isNaN(lat) || isNaN(lng)) return null;
   loi['predefined'] = true;
   loi['geometry'] = Datastore.toFirestoreMap({
     type: 'Point',
-    coordinates: new GeoPoint(lat, lng),
+    coordinates: new GeoPoint(Number(lat), Number(lng)),
   });
   if (Object.keys(properties).length > 0) {
     loi['properties'] = properties;
@@ -199,12 +197,10 @@ function csvRowToLocationOfInterestPb(
       }
     }
   }
-  const {customTag, latStr, lngStr} = loi;
-  const latitude = Number.parseFloat(latStr);
-  const longitude = Number.parseFloat(lngStr);
-  if (isNaN(latitude) || isNaN(longitude)) return null;
+  const {customTag, lat, lng} = loi;
+  if (isNaN(lat) || isNaN(lng)) return null;
   const point = new Pb.Point({
-    coordinates: new Pb.Coordinates({latitude, longitude}),
+    coordinates: new Pb.Coordinates({longitude: Number(lng), latitude: Number(lat)}),
   });
   return new Pb.LocationOfInterest({
     jobId,
