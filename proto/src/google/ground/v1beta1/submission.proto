@@ -66,17 +66,23 @@ message TaskData {
   oneof task_data_type {
     // A manually entered text response.
     Text text = 4;
+
     // A manually entered number response.
     Number number = 5;
+
     // A manually selected date and/or time response.
     DateTime date_time = 6;
+
     // Response to a multiple-choice question.
     MultipleChoice multiple_choice_question = 7;
+
     // Result of data collector drawing a geometry (e.g., dropping a pin,
     // drawing or walking a perimeter).
     DrawGeometry draw_geometry = 8;
+
     // The result of capturing the device's current fused location.
     CaptureLocation capture_location = 9;
+
     // The result of a "take a photo" task.
     TakePhoto take_photo = 10;
   }
@@ -104,6 +110,7 @@ message TaskData {
   message MultipleChoice {
     // The unique IDs of options selected by the user.
     repeated string selected_option_ids = 1;
+
     // The text provided in the "Other (please specify)" field, if present.
     string other_text = 2;
   }
@@ -118,10 +125,13 @@ message TaskData {
   message CaptureLocation {
     // Required. The device's coordinates.
     Coordinates coordinates = 1;
+
     // The accuracy of `coordinates` returned by the device, in meters.
     double accuracy = 2;
+
     // The altitude captured by the device.
     double altitude = 3;
+
     // Required. The time reported by the device when the location was
     // captured.
     .google.protobuf.Timestamp timestamp = 4;

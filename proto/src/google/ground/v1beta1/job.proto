@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package google.ground.v1beta1;
+package google.ground.v0beta;
 
 option java_multiple_files = true;
 option java_package = "com.google.android.ground.proto";
@@ -26,13 +26,17 @@ option java_package = "com.google.android.ground.proto";
 message Job {
   // Required. The system-defined unique identifier of this entity.
   string id = 1;
+
   // Required. Index of the job when shown in lists.
   int32 index = 2;
+
   // User-facing name of the job.
   string name = 3;
+
   // The style used when rendering geometries and other UI elements associated
   // with this job.
   Style style = 4;
+
   // One or more data collection tasks to be carried out by the user in order
   // to collect and submit data.
   repeated Task tasks = 5;
@@ -49,11 +53,14 @@ message Style {
 message Task {
   // Required. The system-defined unique identifier of this entity.
   string id = 1;
+
   // Index of the task when shown in lists.
   int32 index = 2;
+
   // Question or instructions shown to the user describing the task to be
   // completed.
   string prompt = 3;
+
   // When true, the user may not skip this task.
   bool required = 4;
 
@@ -61,18 +68,21 @@ message Task {
   enum DataCollectionLevel {
     // Default value when level is not specified.
     DATA_COLLECTION_LEVEL_UNSPECIFIED = 0;
+
     // Data collected at this level is used to define a location of
     // interest (LOI). Specifically, geometry tasks of this type may be used
     // to allow data collectors to define the LOI's geometry. Future
     // implementations may use this to allow other LOI properties to be
     // added or modified.
     LOI_METADATA = 1;
+
     // Data collected at this level is associated with, but does not define,
     // a location of interest (LOI). Specifically, geometry tasks of this
     // type define one or more annotations of the associated LOI. rather
     // than the geometry of the LOI itself.
     LOI_DATA = 2;
   }
+
   // Defines to which entity data collected in this task is associated with.
   // Defaults to LOCATION_OF_INTEREST_DATA.
   DataCollectionLevel level = 5;
@@ -86,18 +96,24 @@ message Task {
   oneof task_type {
     // A question whose response is entered manually as text.
     TextQuestion text_question = 7;
+
     // A question whose response is entered manually as a number.
     NumberQuestion number_question = 8;
+
     // A question whose response is entered manually as a date and/or time.
     DateTimeQuestion date_time_question = 9;
+
     // A question whose response is manually selected from a list of
     // options.
     MultipleChoiceQuestion multiple_choice_question = 10;
+
     // A task in which the user must manually draw a geometry (point,
     // polygon, etc.) on the map.
     DrawGeometry draw_geometry = 11;
+
     // A task in which the user must capture their current device location.
     CaptureLocation capture_location = 12;
+
     // A task in which the user must take a photo.
     TakePhoto take_photo = 13;
   }
@@ -136,14 +152,19 @@ message Task {
   message MultipleChoiceQuestion {
     // Valid values for the `type` field.
     enum Type {
+      // Default value when no type is set/
       TYPE_UNSPECIFIED = 0;
+
       // Allow only one valid to be selected.
       SELECT_ONE = 1;
+
       // Allow one or more values to be selected.
       SELECT_MULTIPLE = 2;
     }
+
     // The type of multiple choice question.
     Type type = 1;
+
     // The list of allowed multiple choice options.
     repeated Option options = 2;
 
@@ -156,8 +177,10 @@ message Task {
     message Option {
       // Required. The system-defined unique identifier of this entity.
       string id = 1;
+
       // Required. The index of the option when shown as a list.
       int32 index = 2;
+
       // The user-facing label of the option.
       string label = 3;
     }

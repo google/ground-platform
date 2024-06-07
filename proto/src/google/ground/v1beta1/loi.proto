@@ -56,12 +56,16 @@ message LocationOfInterest {
   // Valid values for `source`.
   enum Source {
     // Indicated the value was not set.
+
     SOURCE_UNSPECIFIED = 0;
+
     // Indicates the LOI was defined by organizers beforehand.
     SURVEY_ORGANIZER = 1;
+
     // Indicated the LOI was added at data collection time.
     DATA_COLLECTOR = 2;
   }
+
   // Required. Indicates who created this LOI.
   Source source = 9;
 
@@ -71,7 +75,10 @@ message LocationOfInterest {
   // A single value associated with an LOI.
   message Property {
     oneof property_type {
+      // A string value.
       string string_value = 1;
+
+      // A numeric value.
       double numeric_value = 2;
     }
   }

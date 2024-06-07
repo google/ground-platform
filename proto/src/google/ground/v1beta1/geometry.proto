@@ -29,8 +29,10 @@ message Geometry {
   oneof geometry_type {
     // A point geometry.
     Point point = 1;
+
     // A polygon geometry.
     Polygon polygon = 2;
+    
     // A multi-polygon geometry.
     MultiPolygon multi_polygon = 3;
   }
@@ -40,6 +42,7 @@ message Geometry {
 message Coordinates {
   // Required. WGS 84 latitude.
   double latitude = 1;
+
   // Required. WGS 84 longitude.
   double longitude = 2;
 }
@@ -61,6 +64,7 @@ message LinearRing {
 message Polygon {
   // Required. The outer shell of the polygon.
   LinearRing shell = 1;
+
   // Holes in the polygon, if any.
   repeated LinearRing holes = 2;
 }
