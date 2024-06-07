@@ -205,7 +205,7 @@ function csvRowToLocationOfInterestPb(
   return new Pb.LocationOfInterest({
     jobId,
     customTag,
-    samplingFrameType: Pb.LocationOfInterest.SamplingFrameType.PREDEFINED,
+    source: Pb.LocationOfInterest.Source.SURVEY_ORGANIZER,
     geometry: {point},
     properties,
   });

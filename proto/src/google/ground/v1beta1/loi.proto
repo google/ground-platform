@@ -53,15 +53,15 @@ message LocationOfInterest {
   // field in GeoJSON Features.
   string custom_tag = 8;
 
-  enum SamplingFrameType {
+  enum Source {
     // Indicated the value was not set.
-    SAMPLING_FRAME_TYPE_UNSPECIFIED = 0;
-    // Indicates the LOI was imported or otherwise defined beforehand.
-    PREDEFINED = 1;
-    // Indicated the LOI was added on-the-fly during data collection.
-    FREE_FORM = 2;
+    SOURCE_UNSPECIFIED = 0;
+    // Indicates the LOI was defined by organizers beforehand.
+    SURVEY_ORGANIZER = 1;
+    // Indicated the LOI was added at data collection time.
+    DATA_COLLECTOR = 2;
   }
-  SamplingFrameType sampling_frame_type = 9;
+  Source source = 9;
 
   // Arbitrary key-value pairs associated with this LOI.
   map<string, Property> properties = 10;
