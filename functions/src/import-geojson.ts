@@ -30,7 +30,7 @@ import {Feature, Geometry, Position} from 'geojson';
 import Pb = GroundProtos.google.ground.v1beta1;
 
 /**
- * Rea  d the body of a multipart HTTP POSTed form containing a GeoJson 'file'
+ * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
 export async function importGeoJsonHandler(
@@ -77,7 +77,7 @@ export async function importGeoJsonHandler(
       return;
     }
 
-    console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
+    console.debug(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
     let geoJsonType: any = null;
@@ -95,7 +95,7 @@ export async function importGeoJsonHandler(
           return;
         }
         if (geoJsonLoi.type !== 'Feature') {
-          console.debug(`Skipping loi with type ${geoJsonLoi.type}`);
+          console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
           return;
         }
         try {
@@ -103,7 +103,6 @@ export async function importGeoJsonHandler(
             toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)),
             geoJsonToLoiLegacy(geoJsonLoi, jobId)
           );
-          console.log('LOI', loi);
           if (loi) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
@@ -122,7 +121,7 @@ export async function importGeoJsonHandler(
   busboy.on('finish', async () => {
     await Promise.all(inserts);
     const count = inserts.length;
-    console.log(`${count} LOIs imported`);
+    console.debug(`${count} LOIs imported`);
     res.status(HttpStatus.OK).end(JSON.stringify({count}));
   });
 
