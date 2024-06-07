@@ -26,9 +26,7 @@ import {GroundProtos} from '@ground/proto';
 import {toDocumentData, deepMerge} from '@ground/lib';
 import {Datastore} from './common/datastore';
 
-type LocationOfInterest = GroundProtos.google.ground.v1beta1.LocationOfInterest;
-const {LocationOfInterest, Point, Coordinates} =
-  GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.google.ground.v1beta1;
 
 /**
  * Streams a multipart HTTP POSTed form containing a CSV 'file' and required
@@ -139,10 +137,9 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
 });
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
-  const loi = deepMerge(
-    toDocumentData(csvRowToLocationOfInterest(row, jobId)) || {},
-    csvRowToLocationOfInterestLegacy(row, jobId) || {}
-  );
+  const loi = csvRowToLocationOfInterestLegacy(row, jobId) || {};
+  const loiPb = csvRowToLocationOfInterestPb(row, jobId);
+  if (loiPb) deepMerge(loi, toDocumentData(loiPb) || {});
   if (loi.length) {
     await db.insertLocationOfInterest(surveyId, loi);
   }
@@ -180,10 +177,10 @@ function csvRowToLocationOfInterestLegacy(row: any, jobId: string) {
   return loi;
 }
 
-function csvRowToLocationOfInterest(
+function csvRowToLocationOfInterestPb(
   row: any,
   jobId: string
-): LocationOfInterest | null {
+): Pb.LocationOfInterest | null {
   const loi: any = {};
   const properties: {[name: string]: any} = {};
   for (const columnName in row) {
@@ -206,10 +203,10 @@ function csvRowToLocationOfInterest(
   const latitude = Number.parseFloat(latStr);
   const longitude = Number.parseFloat(lngStr);
   if (isNaN(latitude) || isNaN(longitude)) return null;
-  const point = new Point({
-    coordinates: new Coordinates({latitude, longitude}),
+  const point = new Pb.Point({
+    coordinates: new Pb.Coordinates({latitude, longitude}),
   });
-  return new LocationOfInterest({
+  return new Pb.LocationOfInterest({
     jobId,
     customTag,
     predefined: true,

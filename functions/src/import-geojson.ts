@@ -28,7 +28,6 @@ import {toDocumentData, deepMerge} from '@ground/lib';
 import {Feature, Geometry, Position} from 'geojson';
 
 import Pb = GroundProtos.google.ground.v1beta1;
-const pb = GroundProtos.google.ground.v1beta1;
 
 /**
  * Rea  d the body of a multipart HTTP POSTed form containing a GeoJson 'file'
@@ -104,6 +103,7 @@ export async function importGeoJsonHandler(
             toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)),
             geoJsonToLoiLegacy(geoJsonLoi, jobId)
           );
+          console.log('LOI', loi);
           if (loi) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
@@ -161,7 +161,7 @@ function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = feature;
   const geometryPb = toGeometryPb(geometry);
-  return new pb.LocationOfInterest({
+  return new Pb.LocationOfInterest({
     jobId,
     customTag: id?.toString(),
     predefined: true,
@@ -177,7 +177,7 @@ function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
       return point ? new Pb.Geometry({point}) : null;
     case 'Polygon':
       const polygon = toPolygonPb(geometry.coordinates);
-      return polygon ? new Pb.Geometry({polygon}) || null;
+      return polygon ? new Pb.Geometry({polygon}) : null;
     case 'MultiPolygon':
       const multiPolygon = toMultiPolygon(geometry.coordinates);
       return multiPolygon ? new Pb.Geometry({multiPolygon}) : null;
@@ -192,14 +192,11 @@ function toPointPb(position: Position): Pb.Point | null {
 
 }
 function toCoordinatesPb(position: Position): Pb.Coordinates | null {
-  if (position.length != 2) {
-    // Ignore invalid GeoJSON position.
-    return null;
-  }
-  return new Pb.Coordinates({
-    longitude: position[0],
-    latitude: position[1],
-  });
+  const [longitude, latitude] = position;
+  return longitude && latitude ? new Pb.Coordinates({
+    longitude,
+    latitude
+  }) : null;
 }
 
 function toPolygonPb(positions: Position[][]): Pb.Polygon | null {
@@ -222,8 +219,7 @@ function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
 }
 
 function toMultiPolygon(positions: Position[][][]): Pb.MultiPolygon | null {
-  const polygons = positions.map(p => toPolygonPb(p));
-  // Don't convert invalid multi-polygons.
-  if (polygons.includes(null)) return null;
-  return new Pb.MultiPolygon({polygons: polygons.map(p => p!)});
+  // Skip invalid polygons.
+  const polygons = positions.map(p => toPolygonPb(p)).filter(p => !!p).map(p => p!);
+  return polygons.length > 0 ? new Pb.MultiPolygon({polygons}) : null;
 }

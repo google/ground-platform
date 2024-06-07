@@ -7,7 +7,7 @@
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "shell": "npx firebase functions:shell",
-    "emulators": "npx firebase emulators:start --only functions,firestore --project",
+    "emulators": "npx firebase emulators:start --only functions,firestore --project ground-local-dev",
     "login": "firebase login",
     "deploy": "npm run build && npx firebase deploy --project",
     "logs": "npx firebase functions:log",

@@ -22,7 +22,7 @@ import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
  * The map is keyed by message field numbers represented as strings, while field values are
  * converted to corresponding Firestore data types.
  */
-export function toDocumentData(message: any): DocumentData | Error {
+export function toDocumentData(message: object): DocumentData | Error {
   const type = message.constructor.name;
   const descriptor = registry.getMessageDescriptor(message.constructor);
   // Fail if message not defined in registry.
@@ -63,24 +63,43 @@ function toDocumentFieldValue(
     return Object.fromEntries(
       Object.entries(value).map(([k, v]) => [
         k.toString(),
-        toValue(field.type, v),
+        toValueOrNull(field.type, v),
       ])
     );
   } else {
-    return toValue(field.type, value);
+    return toValueOrNull(field.type, value);
   }
 }
 
-function toValue(fieldType: string, value: any): DocumentFieldValue | null {
+function toValueOrNull(
+  fieldType: string,
+  value: any
+): DocumentFieldValue | null {
+  const v = toValue(fieldType, value);
+  if (v instanceof Error) {
+    console.error(v);
+    return null;
+  } else return v;
+}
+
+function toValue(
+  fieldType: string,
+  value: any
+): DocumentFieldValue | Error | null {
+  // TODO(#1758): Coerce values to type specified in `fieldType`.
   switch (typeof value) {
     case 'string':
     case 'number': // This handles proto enums as well.
+    case 'boolean':
       return value;
     case 'object':
-      return toDocumentData(value);
+      if (Array.isArray(value)) {
+        return value.map(e => toValue(fieldType, e));
+      } else {
+        return toDocumentData(value);
+      }
     default:
-      console.debug(`Unsupported proto field type ${typeof value}`);
-      return null;
+      return Error(`Unsupported field type ${typeof value}`);
   }
 }
 

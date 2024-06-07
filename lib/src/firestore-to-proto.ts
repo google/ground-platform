@@ -51,6 +51,10 @@ function toMessageInternal<T>(
       fieldName,
       firestoreValue
     );
+    if (messageValue instanceof Error) {
+      console.debug(messageValue);
+      continue;
+    }
     if (messageValue) properties[fieldName] = messageValue;
   }
   return createInstance<T>(constructor, properties);
