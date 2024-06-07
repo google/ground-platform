@@ -73,6 +73,10 @@ runs:
       shell: bash
       run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
 
+    - name: Delete package-lock.json
+      shell: bash
+      run: rm -rf **/package-lock.json
+
     - name: Install dependencies
       shell: bash
       run: npm run build:local
