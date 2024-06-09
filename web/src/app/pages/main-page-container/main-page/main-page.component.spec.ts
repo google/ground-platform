@@ -60,11 +60,11 @@ describe('MainPageComponent', () => {
 
     const submissionService = jasmine.createSpyObj('SubmissionService', [
       'selectSubmission$',
-      'getSelectedSubmission$',
+      'getActiveSubmission$',
     ]);
 
     // No submission selected initially
-    submissionService.getSelectedSubmission$.and.returnValue(
+    submissionService.getActiveSubmission$.and.returnValue(
       of(LoadingState.LOADING)
     );
 

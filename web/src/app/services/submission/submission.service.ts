@@ -16,14 +16,8 @@
 
 import {Injectable} from '@angular/core';
 import {List, Map} from 'immutable';
-import {
-  BehaviorSubject,
-  Observable,
-  ReplaySubject,
-  Subscription,
-  of,
-} from 'rxjs';
-import {filter, switchMap} from 'rxjs/operators';
+import {Observable, ReplaySubject, of} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -33,22 +27,20 @@ import {Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+
+import {LoadingState} from '../loading-state.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SubmissionService {
-  // TODO: Move selected submission into side panel component where it is
-  // used.
-  private selectedSubmissionId$ = new ReplaySubject<string>(1);
-  private selectedSubmission$ = new BehaviorSubject<Submission | LoadingState>(
-    LoadingState.NOT_LOADED
-  );
-  private subscription = new Subscription();
+  private selectedSubmissionId$ = new ReplaySubject<string>();
+  private activeSubmission$ = new Observable<
+    Submission | LoadingState | Error
+  >();
 
   constructor(
     private dataStore: DataStoreService,
@@ -56,40 +48,32 @@ export class SubmissionService {
     loiService: LocationOfInterestService,
     authService: AuthService
   ) {
-    this.subscription.add(
-      this.selectedSubmissionId$
-        .pipe(
-          switchMap(submissionId =>
-            surveyService.getActiveSurvey$().pipe(
-              switchMap(survey =>
-                loiService.getSelectedLocationOfInterest$().pipe(
-                  switchMap(loi =>
-                    authService.getUser$().pipe(
-                      switchMap(user => {
-                        if (
-                          submissionId === NavigationService.SUBMISSION_ID_NEW
-                        ) {
-                          return of(
-                            this.createNewSubmission(user, survey, loi)
-                          );
-                        }
-                        return this.dataStore.loadSubmission$(
-                          survey,
-                          loi,
-                          submissionId
-                        );
-                      })
-                    )
-                  )
+    this.activeSubmission$ = surveyService.getActiveSurvey$().pipe(
+      switchMap(survey =>
+        loiService.getSelectedLocationOfInterest$().pipe(
+          switchMap(loi =>
+            this.selectedSubmissionId$.pipe(
+              switchMap(submissionId =>
+                authService.getUser$().pipe(
+                  switchMap(user => {
+                    if (submissionId === '') {
+                      return of(LoadingState.LOADING);
+                    }
+                    if (submissionId === NavigationService.SUBMISSION_ID_NEW) {
+                      return of(this.createNewSubmission(user, survey, loi));
+                    }
+                    return this.dataStore.loadSubmission$(
+                      survey,
+                      loi,
+                      submissionId
+                    );
+                  })
                 )
               )
             )
-          ),
-          filter(DataStoreService.filterAndLogError<Submission | LoadingState>)
+          )
         )
-        .subscribe(o =>
-          this.selectedSubmission$.next(o as Submission | LoadingState)
-        )
+      )
     );
   }
 
@@ -97,7 +81,7 @@ export class SubmissionService {
     user: User,
     survey: Survey,
     loi: LocationOfInterest
-  ): Submission | LoadingState {
+  ): Submission {
     if (!user) {
       throw Error('Login required to create new submission.');
     }
@@ -129,19 +113,11 @@ export class SubmissionService {
   }
 
   selectSubmission(submissionId: string) {
-    this.selectedSubmission$.next(LoadingState.LOADING);
+    this.selectedSubmissionId$.next('');
     this.selectedSubmissionId$.next(submissionId);
   }
 
-  deselectSubmission() {
-    this.selectedSubmission$.next(LoadingState.NOT_LOADED);
-  }
-
-  getSelectedSubmission$(): BehaviorSubject<Submission | LoadingState> {
-    return this.selectedSubmission$;
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+  getActiveSubmission$(): Observable<Submission | LoadingState | Error> {
+    return this.activeSubmission$;
   }
 }

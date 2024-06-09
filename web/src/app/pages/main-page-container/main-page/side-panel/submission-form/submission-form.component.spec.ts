@@ -154,7 +154,7 @@ class MockLocationOfInterestService {
 }
 
 class MockSubmissionService {
-  getSelectedSubmission$() {
+  getActiveSubmission$() {
     return of<Submission>(MockModel.submission001);
   }
 }

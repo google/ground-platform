@@ -197,7 +197,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       combineLatest([
         this.navigationService.getLocationOfInterestId$(),
         this.navigationService.getSubmissionId$(),
-        this.submissionService.getSelectedSubmission$(),
+        this.submissionService.getActiveSubmission$(),
       ]).subscribe(([, submissionId, submission]) => {
         this.showSubmissionGeometry = !!submissionId;
         if (submission instanceof Submission) {
