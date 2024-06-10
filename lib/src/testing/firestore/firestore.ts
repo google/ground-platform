@@ -28,4 +28,3 @@ class TestFirestore {
 }
 
 export const testFirestore = new TestFirestore();
-
