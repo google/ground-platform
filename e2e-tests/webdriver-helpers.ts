@@ -29,6 +29,7 @@ import {
   EXPECTED_SUBMISSION_COUNT,
   JOB_NAME,
   LONG_TIMEOUT,
+  DEFAULT_TASK_TYPES,
   MULTIPLE_CHOICE_ADD_OTHER,
   MULTIPLE_CHOICE_COUNT,
   SHORT_TIMEOUT,
@@ -59,7 +60,7 @@ export class WebDriverHelper {
       chromeOptions.setChromeBinaryPath(chromePath);
     }
     chromeOptions.addArguments(
-      '--headless',
+      // '--headless',
       '--disable-gpu',
       '--window-size=1920,1200',
       '--ignore-certificate-errors',
@@ -129,45 +130,38 @@ export class WebDriverHelper {
         await this.setLoiInstructions(`Instructions for ${loiType}`);
       }
       let taskIndex = 0;
+      const taskTypesList = [...DEFAULT_TASK_TYPES, ...Object.values(TaskType)];
       const taskButtons = await this.driver.findElements(
         By.css('add-task-button button')
       );
-      for (const taskType of Object.values(TaskType)) {
+      for (const taskType of taskTypesList) {
+        // Create a new task, if not a default task.
+        if (taskIndex >= DEFAULT_TASK_TYPES.length) {
+          switch (taskType) {
+            case TaskType.PHOTO:
+              await taskButtons[1].click();
+              break;
+            case TaskType.CAPTURE_LOCATION:
+              await taskButtons[2].click();
+              break;
+            default:
+              await taskButtons[0].click();
+          }
+          // Set to required (don't need to if it's default).
+          await this.setRequired(taskIndex, true);
+        }
+        await this.setInstructions(taskIndex, `Instructions for ${taskType}`);
         switch (taskType) {
           case TaskType.PHOTO:
-            await taskButtons[1].click();
-            await this.setInstructions(
-              taskIndex,
-              `Instructions for ${TaskType.PHOTO}`
-            );
-            await this.setRequired(taskIndex, true);
-            break;
           case TaskType.CAPTURE_LOCATION:
-            await taskButtons[2].click();
-            await this.setInstructions(
-              taskIndex,
-              `Instructions for ${TaskType.CAPTURE_LOCATION}`
-            );
-            await this.setRequired(taskIndex, true);
+            // Do nothing;
             break;
           case TaskType.SELECT_ONE:
           case TaskType.SELECT_MULTIPLE:
-            await taskButtons[0].click();
-            await this.setInstructions(
-              taskIndex,
-              `Instructions for ${taskType}`
-            );
-            await this.setRequired(taskIndex, true);
             await this.setTaskOption(taskIndex, taskType as TaskType);
             await this.setMultipleChoiceOptions(taskIndex);
             break;
           default:
-            await taskButtons[0].click();
-            await this.setInstructions(
-              taskIndex,
-              `Instructions for ${taskType}`
-            );
-            await this.setRequired(taskIndex, true);
             await this.setTaskOption(taskIndex, taskType as TaskType);
         }
         taskIndex++;
@@ -376,9 +370,16 @@ export class WebDriverHelper {
 
   private async setTaskOption(taskIndex: number, taskType: TaskType) {
     assertWebDriverInitialized(this.driver);
+    const taskContainerSelector = By.css(
+      '.task-container:not(.loi-task-container)'
+    );
     const taskSelectSelector = By.css('.task-type mat-select');
-    const element = async () =>
-      (await this.driver!.findElements(taskSelectSelector))[taskIndex];
+    const element = async () => {
+      const taskContainers = await this.driver!.findElements(
+        taskContainerSelector
+      );
+      return taskContainers[taskIndex].findElement(taskSelectSelector);
+    };
     return this.setSelectOption(element, taskType);
   }
 
