@@ -131,7 +131,6 @@ export class FirebaseDataConverter {
       })
     );
 
-    //TODO return data
     return {
       ...data,
       title: name,
