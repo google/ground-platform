@@ -209,7 +209,7 @@ function csvRowToLocationOfInterestPb(
   return new Pb.LocationOfInterest({
     jobId,
     customTag,
-    source: Pb.LocationOfInterest.Source.SURVEY_ORGANIZER,
+    source: Pb.LocationOfInterest.Source.IMPORTED,
     geometry: {point},
     properties,
   });
