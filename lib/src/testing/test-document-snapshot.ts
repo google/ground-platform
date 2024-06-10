@@ -16,7 +16,7 @@
 
 import {DocumentData} from '@google-cloud/firestore';
 
-export class FakeDocumentSnapshot {
+export class TestDocumentSnapshot {
   constructor(private readonly testData: DocumentData) {}
 
   get(key: string) {
