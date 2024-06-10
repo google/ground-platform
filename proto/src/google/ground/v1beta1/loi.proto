@@ -53,14 +53,19 @@ message LocationOfInterest {
   // field in GeoJSON Features.
   string custom_tag = 8;
 
+  // Valid values for location of interest `source`.
   enum Source {
-    // Indicated the value was not set.
+    // Indicates the value was not set.
     SOURCE_UNSPECIFIED = 0;
-    // Indicates the LOI was defined by organizers beforehand.
-    SURVEY_ORGANIZER = 1;
-    // Indicated the LOI was added at data collection time.
-    DATA_COLLECTOR = 2;
+
+    // Indicates the LOI was imported by survey as part of a
+    // statistical sampling design or other structured source.
+    IMPORTED = 1;
+
+    // Indicates the LOI was added at data collection time.
+    FIELD_DATA = 2;
   }
+  // Required. Indicates who created this LOI and when.
   Source source = 9;
 
   // Arbitrary key-value pairs associated with this LOI.
@@ -69,7 +74,10 @@ message LocationOfInterest {
   // A single value associated with an LOI.
   message Property {
     oneof property_type {
+      // A string value.
       string string_value = 1;
+
+      // A numeric value.
       double numeric_value = 2;
     }
   }
