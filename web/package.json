@@ -13,7 +13,7 @@
     "build:prod": "npm run update-web-keys $npm_config_project && npm run build -- production",
     "build:local": "npm run build local",
     "watch:local": "npm run build local -- --watch",
-    "pretest": "./pretest.sh && npm run build",
+    "pretest": "./pretest.sh && npm run build:lib",
     "test": "ng test",
     "test:headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "test-with-coverage": "npm run pretest && npm run test:headless -- --code-coverage && npm run posttest",
