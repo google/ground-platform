@@ -15,7 +15,7 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {toDocumentData} from '@ground/lib/dist/proto-to-firestore';
+import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
 

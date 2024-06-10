@@ -25,7 +25,6 @@
   },
   "private": true,
   "dependencies": {
-    "@ground/proto": "file:../proto",
     "@angular/animations": "^17.3.8",
     "@angular/cdk": "^17.3.8",
     "@angular/common": "^17.3.8",
@@ -39,6 +38,7 @@
     "@angular/platform-browser-dynamic": "^17.3.8",
     "@angular/router": "^17.3.8",
     "@ground/lib": "file:../lib",
+    "@ground/proto": "file:../proto",
     "@grpc/grpc-js": "^1.8.8",
     "@iplab/ngx-file-upload": "^17",
     "firebase": "^10.7.2",
