@@ -58,7 +58,7 @@ runs:
           ${{ runner.os }}-
 
     - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-      name: List the state of node modules
+      name: List the state of Node modules
       continue-on-error: true
       shell: bash
       run: npm list
@@ -78,7 +78,7 @@ runs:
       shell: bash
       run: npm install @nx/nx-linux-x64-gnu
 
-    - name: Install dependencies
+    - name: Install and build dependencies
       shell: bash
       run: npm run build:local
 
@@ -94,6 +94,6 @@ runs:
       shell: bash
       run: cp -r data/test-submit data/test
 
-    - name: Run verify e2e tests
+    - name: Run 'Verify survey' test
       shell: bash
       run: npm run test:e2e:verify
