@@ -449,7 +449,7 @@ export class DataStoreService {
    */
   async createSurvey(
     ownerEmail: string,
-    title: string,
+    name: string,
     description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ): Promise<string> {
@@ -460,7 +460,7 @@ export class DataStoreService {
       .set(
         FirebaseDataConverter.newSurveyJS(
           ownerEmail,
-          title,
+          name,
           description,
           offlineBaseMapSources
         )

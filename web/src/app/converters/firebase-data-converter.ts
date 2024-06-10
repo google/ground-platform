@@ -15,6 +15,8 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
+import {toDocumentData} from '@ground/lib/dist/proto-to-firestore';
+import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
@@ -44,6 +46,8 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {toGeometry} from './geometry-converter';
 import {Point} from '../models/geometry/point';
 import {Polygon} from '../models/geometry/polygon';
+
+const Pb = GroundProtos.google.ground.v1beta1;
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -113,15 +117,27 @@ export class FirebaseDataConverter {
 
   static newSurveyJS(
     ownerEmail: string,
-    title: string,
+    name: string,
     description: string,
     offlineBaseMapSources?: OfflineBaseMapSource[]
   ) {
+    const data = toDocumentData(
+      new Pb.Survey({
+        name,
+        description,
+        acl: {
+          [ownerEmail]: Pb.Role.SURVEY_ORGANIZER,
+        },
+      })
+    );
+
+    //TODO return data
     return {
-      title,
+      ...data,
+      title: name,
       description,
       acl: {[ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER)},
-      ...(offlineBaseMapSources?.length ? {offlineBaseMapSources} : {}),
+      offlineBaseMapSources,
     };
   }
 
