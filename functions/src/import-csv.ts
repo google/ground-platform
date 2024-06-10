@@ -138,8 +138,8 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
   const loi = {
-    ...(csvRowToLocationOfInterestLegacy(row, jobId) || {}),
-    ...toDocumentData(csvRowToLocationOfInterestPb(row, jobId) || {}) || {},
+    ...csvRowToLocationOfInterestLegacy(row, jobId),
+    ...toDocumentData(csvRowToLocationOfInterestPb(row, jobId) || {}),
   };
   if (Object.keys(loi).length > 0) {
     await db.insertLocationOfInterest(surveyId, loi);

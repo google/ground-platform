@@ -102,7 +102,7 @@ export async function importGeoJsonHandler(
         }
         try {
           const loi = {
-            ...toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)|| {}) || {},
+            ...toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId) || {}),
             ...geoJsonToLoiLegacy(geoJsonLoi, jobId)
           };
           if (Object.keys(loi).length > 0) {
