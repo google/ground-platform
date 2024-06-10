@@ -45,7 +45,7 @@ jobs:
 
   submitTest:
     needs: createTest
-    name: Submit data to survey
+    name: Collect and submit data
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
