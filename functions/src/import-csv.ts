@@ -23,7 +23,7 @@ import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';
 import {GroundProtos} from '@ground/proto';
-import {toDocumentData, deepMerge} from '@ground/lib';
+import {toDocumentData} from '@ground/lib';
 import {Datastore} from './common/datastore';
 
 import Pb = GroundProtos.google.ground.v1beta1;
@@ -137,10 +137,11 @@ const SPECIAL_COLUMN_NAMES = invertAndFlatten({
 });
 
 async function insertRow(surveyId: string, jobId: string, row: any) {
-  const loi = csvRowToLocationOfInterestLegacy(row, jobId) || {};
-  const loiPb = csvRowToLocationOfInterestPb(row, jobId);
-  if (loiPb) deepMerge(loi, toDocumentData(loiPb) || {});
-  if (loi.length) {
+  const loi = {
+    ...(csvRowToLocationOfInterestLegacy(row, jobId) || {}),
+    ...toDocumentData(csvRowToLocationOfInterestPb(row, jobId) || {}) || {},
+  };
+  if (Object.keys(loi).length > 0) {
     await db.insertLocationOfInterest(surveyId, loi);
   }
 }
@@ -200,7 +201,10 @@ function csvRowToLocationOfInterestPb(
   const {customTag, lat, lng} = loi;
   if (isNaN(lat) || isNaN(lng)) return null;
   const point = new Pb.Point({
-    coordinates: new Pb.Coordinates({longitude: Number(lng), latitude: Number(lat)}),
+    coordinates: new Pb.Coordinates({
+      longitude: Number(lng),
+      latitude: Number(lat),
+    }),
   });
   return new Pb.LocationOfInterest({
     jobId,

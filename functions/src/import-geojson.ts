@@ -24,7 +24,7 @@ import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
 import {Datastore} from './common/datastore';
 import {DocumentData} from 'firebase-admin/firestore';
-import {toDocumentData, deepMerge} from '@ground/lib';
+import {toDocumentData} from '@ground/lib';
 import {Feature, Geometry, Position} from 'geojson';
 
 import Pb = GroundProtos.google.ground.v1beta1;
@@ -101,11 +101,11 @@ export async function importGeoJsonHandler(
           return;
         }
         try {
-          const loi = deepMerge(
-            toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)),
-            geoJsonToLoiLegacy(geoJsonLoi, jobId)
-          );
-          if (loi) {
+          const loi = {
+            ...toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)|| {}) || {},
+            ...geoJsonToLoiLegacy(geoJsonLoi, jobId)
+          };
+          if (Object.keys(loi).length > 0) {
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
         } catch (err) {
@@ -158,10 +158,11 @@ function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
+function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest | null{
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = feature;
   const geometryPb = toGeometryPb(geometry);
+  if (!geometryPb) return null;
   return new Pb.LocationOfInterest({
     jobId,
     customTag: id?.toString(),
