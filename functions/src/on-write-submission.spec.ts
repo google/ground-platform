@@ -25,7 +25,7 @@ import {
 const test = require('firebase-functions-test')();
 
 describe('onWriteSubmission()', () => {
-  const functions = require('./index');
+  let functions: any;
 
   const SURVEY_ID = 'survey1';
   const SUBMISSION = newDocumentSnapshot({loiId: 'loi1'});
@@ -37,6 +37,8 @@ describe('onWriteSubmission()', () => {
 
   beforeAll(() => {
     stubAdminApi();
+    // Module must be loaded after Admin API has been stubbed.
+    functions = require('./index');
   });
 
   afterAll(() => {
@@ -68,13 +70,13 @@ describe('onWriteSubmission()', () => {
 
     await test.wrap(functions.onWriteSubmission)(
       {before: undefined, after: SUBMISSION},
-      CONTEXT
+    CONTEXT
     );
 
     expect(loiUpdateSpy).toHaveBeenCalledOnceWith({submissionCount: 2});
   });
 
-  fit('update submission count on delete', async () => {
+  it('update submission count on delete', async () => {
     installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 1);
     const loiUpdateSpy = installLoiUpdateSpy(LOI_PATH);
 
