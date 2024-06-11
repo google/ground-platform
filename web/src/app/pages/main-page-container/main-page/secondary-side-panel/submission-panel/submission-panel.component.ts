@@ -15,9 +15,9 @@
  */
 
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
-import {Subscription} from 'rxjs';
+import {Subscription, firstValueFrom} from 'rxjs';
 
 import {Point} from 'app/models/geometry/point';
 import {Result} from 'app/models/submission/result.model';
@@ -39,14 +39,14 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
-  storage = getStorage();
   firebaseURLs = new Map<string, string>();
 
   public taskType = TaskType;
 
   constructor(
     private submissionService: SubmissionService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private storage: AngularFireStorage,
   ) {}
 
   ngOnInit() {
@@ -76,9 +76,11 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
         const submissionImage = this.getTaskSubmissionResult(task);
         if (submissionImage) {
           const submissionImageValue = submissionImage.value as string;
-          const imageRef = ref(this.storage, submissionImageValue);
-          getDownloadURL(imageRef).then(url => {
+          const imageRef = this.storage.ref(submissionImageValue);
+          firstValueFrom(imageRef.getDownloadURL()).then((url: string) => {
             this.firebaseURLs.set(submissionImageValue, url);
+          }).catch((error: Error) => {
+            console.error(error);
           });
         }
       }

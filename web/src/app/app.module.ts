@@ -19,6 +19,7 @@ import {NgModule} from '@angular/core';
 import {AngularFireModule} from '@angular/fire/compat';
 import {AngularFireAuthModule} from '@angular/fire/compat/auth';
 import {USE_EMULATOR as USE_DATABASE_EMULATOR} from '@angular/fire/compat/database';
+import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {
   AngularFirestoreModule,
   SETTINGS as FIRESTORE_SETTINGS,
@@ -71,7 +72,7 @@ initializeApp(environment.firebase);
     {
       provide: USE_FUNCTIONS_EMULATOR,
       useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
-    },
+    }    
   ],
   imports: [
     // TODO(#967): Replace compat libs with new AngularFire APIs:
@@ -82,6 +83,7 @@ initializeApp(environment.firebase);
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireFunctionsModule,
+    AngularFireStorageModule,
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
