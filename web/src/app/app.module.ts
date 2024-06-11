@@ -28,6 +28,7 @@ import {
   AngularFireFunctionsModule,
   USE_EMULATOR as USE_FUNCTIONS_EMULATOR,
 } from '@angular/fire/compat/functions';
+import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {initializeApp} from 'firebase/app';
@@ -82,6 +83,7 @@ initializeApp(environment.firebase);
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireFunctionsModule,
+    AngularFireStorageModule,
     BrowserAnimationsModule,
     BrowserModule,
     AppRoutingModule,
