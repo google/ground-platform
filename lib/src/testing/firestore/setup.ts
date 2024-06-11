@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
+import {testFirestore} from './firestore';
 
-jasmine.getEnv().clearReporters()
-jasmine.getEnv().addReporter(
-  new SpecReporter({
-    spec: {
-      displayPending: true,
-      displayStacktrace: StacktraceOption.RAW,
-    },
-  })
-)
+export function stubAdminApi() {
+  spyOn(require('firebase-admin'), 'initializeApp').and.returnValue({
+    firestore: () => testFirestore,
+  });
+  spyOn(require('firebase-admin/firestore'), 'getFirestore').and.returnValue(
+    testFirestore
+  );
+}

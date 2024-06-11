@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
-
-jasmine.getEnv().clearReporters()
-jasmine.getEnv().addReporter(
-  new SpecReporter({
-    spec: {
-      displayPending: true,
-      displayStacktrace: StacktraceOption.RAW,
-    },
-  })
-)
+export * from "./firestore";
+export * from "./event-context";
+export * from "./document-snapshot";
+export * from "./query";
+export * from "./setup";

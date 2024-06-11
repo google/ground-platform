@@ -20,7 +20,8 @@
     "@ground/proto": "file:../proto",
     "@google-cloud/firestore": "^7.7.0",
     "immutable": "^4.3.6",
-    "protobufjs": "^7.3.0"
+    "protobufjs": "^7.3.0",
+    "firebase-functions": "^5.0.1"
   },
   "devDependencies": {
     "@types/jasmine": "^4.3.5",
