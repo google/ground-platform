@@ -38,7 +38,7 @@
     "@angular/platform-browser-dynamic": "^17.3.8",
     "@angular/router": "^17.3.8",
     "@ground/lib": "file:../lib",
-    "@grpc/grpc-js": "^1.8.8",
+    "@grpc/grpc-js": "^1.10.9",
     "@iplab/ngx-file-upload": "^17",
     "firebase": "^10.7.2",
     "firebaseui": "^6.1.0",
