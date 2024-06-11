@@ -46,7 +46,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   constructor(
     private submissionService: SubmissionService,
     private navigationService: NavigationService,
-    private storage: AngularFireStorage,
+    private storage: AngularFireStorage
   ) {}
 
   ngOnInit() {
@@ -77,11 +77,13 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
         if (submissionImage) {
           const submissionImageValue = submissionImage.value as string;
           const imageRef = this.storage.ref(submissionImageValue);
-          firstValueFrom(imageRef.getDownloadURL()).then((url: string) => {
-            this.firebaseURLs.set(submissionImageValue, url);
-          }).catch((error: Error) => {
-            console.error(error);
-          });
+          firstValueFrom(imageRef.getDownloadURL())
+            .then((url: string) => {
+              this.firebaseURLs.set(submissionImageValue, url);
+            })
+            .catch((error: Error) => {
+              console.error(error);
+            });
         }
       }
     });
