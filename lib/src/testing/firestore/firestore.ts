@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
+// Set project as workaround for https://github.com/firebase/firebase-functions/issues/437.
+process.env.GCLOUD_PROJECT = 'fake-project';
 
-jasmine.getEnv().clearReporters()
-jasmine.getEnv().addReporter(
-  new SpecReporter({
-    spec: {
-      displayPending: true,
-      displayStacktrace: StacktraceOption.RAW,
-    },
-  })
-)
+class TestFirestore {
+  // TODO: Add test impl instead of using spies.
+  doc = jasmine.createSpy('doc');
+  collection = jasmine.createSpy('collection');
+
+  settings() {
+    // no-op.
+  }
+}
+
+export const testFirestore = new TestFirestore();

@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
+import {DocumentData, DocumentSnapshot} from '@google-cloud/firestore';
 
-jasmine.getEnv().clearReporters()
-jasmine.getEnv().addReporter(
-  new SpecReporter({
-    spec: {
-      displayPending: true,
-      displayStacktrace: StacktraceOption.RAW,
-    },
-  })
-)
+export class TestDocumentSnapshot {
+  constructor(private readonly testData: DocumentData) {}
+
+  get(key: string) {
+    return this.testData[key];
+  }
+
+  data() {
+    return this.testData;
+  }
+}
+
+export function newDocumentSnapshot(testData: DocumentData): DocumentSnapshot {
+  return new TestDocumentSnapshot(testData) as unknown as DocumentSnapshot;
+}

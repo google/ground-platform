@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@google-cloud/firestore';
-
-export class FakeDocumentSnapshot {
-  constructor(private readonly testData: DocumentData) {}
-
-  get(key: string) {
-    return this.testData[key];
-  }
-
-  data() {
-    return this.testData;
-  }
+export function newCountQuery(result: number) {
+  return {
+    count: () => ({
+      get: async () => ({
+        data: () => ({
+          count: result,
+        }),
+      }),
+    }),
+  };
 }
