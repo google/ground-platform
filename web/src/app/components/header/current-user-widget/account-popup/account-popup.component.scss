@@ -16,7 +16,7 @@
 
 :host {
   display: block;
-  width: 250px;
+  text-align: center;
 }
 
 .user-thumb {
@@ -28,16 +28,25 @@
 .user-email {
   white-space: nowrap;
   overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
 }
 
 .user-display-name {
   white-space: nowrap;
   overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
 }
 
 .user-description {
   margin: 0px auto;
   margin-top: 10px;
+  text-align: center;
+}
+
+.user-avatar {
+  font-size: 1.8em;
 }
 
 .btn-signout {

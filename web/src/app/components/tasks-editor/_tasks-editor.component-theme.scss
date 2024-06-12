@@ -18,14 +18,34 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  .edit-job-header-title {
-    color: mat.get-theme-color($theme, on-surface);
+  .edit-job {
+    .tasks-editor {
+      color: mat.get-theme-color($theme, on-surface);
+    }
+
+    .toolbar-right {
+      color: mat.get-theme-color($theme, outline);
+    }
   }
 }
 
 @mixin typography($theme) {
-  .edit-job-header-title {
-    font: mat.get-theme-typography($theme, headline-small, font);
+  tasks-editor {
+    .task-label, .loi-task-label {
+      font: mat.get-theme-typography($theme, title-medium, font);
+    }
+
+    .toolbar-right {
+      font: mat.get-theme-typography($theme, label-large, font);
+    }
+  }
+
+  #tasks-help-text {
+    font: mat.get-theme-typography($theme, body-medium, font);
+  }
+
+  .task-button {
+    font: mat.get-theme-typography($theme, label-large, font);
   }
 }
 

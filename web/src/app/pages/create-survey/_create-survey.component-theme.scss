@@ -18,68 +18,46 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  $color-config: mat.get-color-config($theme);
-  $foreground: map.get($color-config, foreground);
-
-  // TODO: Use theme colors once GM3 is supported (or custom palette is defined)
-  // The colors defined below are a part of the GM3 color schemes, while the
-  // theme colors are based on M2 palettes.
   .page {
-    background-color: #edeee9; /* M3/sys/light/surface-container */
+    background-color: mat.get-theme-color($theme, surface-container);
   }
 
   .card {
-    background-color: #f9faf4; /* M3/sys/light/surface */
+    background-color: mat.get-theme-color($theme, surface);
     
     .mdc-linear-progress__buffer-bar {
-      background-color: #e2e3dd;
+      background-color: mat.get-theme-color($theme, surface-container-highest);
     }
 
-    .mat-mdc-form-field-focus-overlay {
-      background-color: rgb(60, 115, 60, 87);
+    .progress-bar-title, .description {
+      color: mat.get-theme-color($theme, on-surface-variant);
     }
 
-    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-      background-color: #f0f1eb;
-    }
-
-    .progress-bar-title, .description, .option-description,
-    .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
-      color: map.get($foreground, text);
+    .title {
+      color: mat.get-theme-color($theme, on-surface);
     }
   }
-
-
 }
 
 @mixin typography($theme) {
-  $typography-config: mat.get-typography-config($theme);
-
-  // TODO(#1135): use typography-config once typography levels defined
-
-  .loading-label {
-    font-family: mat.font-family($typography-config);
-  }
-
   .progress-bar-title {
-    font-size: 14px;
-    font-weight: 500;
+    font: mat.get-theme-typography($theme, title-small, font);
   }
 
-  .card {
-    font-family: mat.font-family($typography-config);
+  .title {
+    font: mat.get-theme-typography($theme, headline-medium, font);
+
+    div {
+      font: mat.get-theme-typography($theme, label-large, font);
+    }
   }
 
-  .button-section {
-    font-weight: 400;
+  .description {
+    font: mat.get-theme-typography($theme, body-large, font);
   }
 }
 
 @mixin theme($theme) {
   @include color($theme);
-
-  $typography-config: mat.get-typography-config($theme);
-  @if $typography-config != null {
-    @include typography($theme);
-  }
+  @include typography($theme);
 }
