@@ -5,17 +5,13 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf build node_modules",
-    "build": "npm i --legacy-peer-deps",
-    "test:create": "tsx jasmine spec/create-survey.spec.ts",
-    "test:create:debug": "tsx --inspect jasmine spec/create-survey.spec.ts",
-    "test:verify": "tsx jasmine spec/verify-submissions.spec.ts",
-    "test:verify:debug": "tsx --inspect jasmine spec/verify-submissions.spec.ts",
+    "build": "npm i",
+    "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
+    "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
+    "test:verify": "tsx node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
+    "test:verify:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
     "lint": "gts lint",
-    "compile": "tsc",
-    "fix": "gts fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "fix": "gts fix"
   },
   "license": "Apache-2.0",
   "dependencies": {

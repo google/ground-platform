@@ -16,7 +16,7 @@
 
 import 'jasmine';
 
-import {WebDriverHelper} from '../webdriver-helpers.js';
+import { WebDriverHelper } from '../webdriver-helpers.js';
 import {
   AD_HOC,
   JOB_NAME,

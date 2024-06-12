@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
+import {EventContext} from 'firebase-functions';
 
-jasmine.getEnv().clearReporters()
-jasmine.getEnv().addReporter(
-  new SpecReporter({
-    spec: {
-      displayPending: true,
-      displayStacktrace: StacktraceOption.RAW,
-    },
-  })
-)
+export class TestEventContext {
+  constructor(public readonly params: Record<string, any>) {}
+}
+
+export function newEventContext(params: Record<string, any>): EventContext {
+  return new TestEventContext(params) as unknown as EventContext;
+}
