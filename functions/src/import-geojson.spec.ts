@@ -14,35 +14,89 @@
  * limitations under the License.
  */
 
+import {stubAdminApi, testFirestore} from '@ground/lib/dist/testing/firestore';
+import {importGeoJsonHandler} from './import-geojson';
+import {DecodedIdToken} from 'firebase-admin/auth';
+import functions from 'firebase-functions';
+import {Blob, FormData} from 'formdata-node';
+import {buffer} from 'node:stream/consumers';
+import {FormDataEncoder} from 'form-data-encoder';
+
 const test = require('firebase-functions-test')();
 
 describe('importGeoJson()', () => {
-  let functions: any;
-
   const surveyId = 'survey001';
-  const loiId = 'loi123';
+  const jobId = 'job123';
   // const SUBMISSION = new TestDocumentSnapshot({ loiId });
   // const CONTEXT = new TestEventContext({ surveyId });
-  // const SURVEY_PATH = `surveys/${surveyId}`;
   // const SUBMISSIONS_PATH = `${SURVEY_PATH}/submissions`;
-  // const LOI_PATH = `${SURVEY_PATH}/lois/${loiId}`;
+  const LOI_COLLECTION = `surveys/${surveyId}/lois`;
 
   beforeAll(() => {
-    // firestoreMock = installMockFirestore();
-    functions = require('./index');
+    stubAdminApi();
   });
-
 
   afterAll(() => {
     test.cleanup();
   });
 
-  it('imports points', () => {
-    const req = { query: { surveyId, loiId }};
-    functions.importGeoJson(req, {
-      status: (code: number) => {
-        expect(code).toEqual(200);
-      }
+  fit('imports points', async () => {
+    spyOn(require('firebase-admin/auth'), 'getAuth').and.returnValue({
+      getUser: () => {},
+      verifySessionCookie: () => {},
     });
+    const add = jasmine.createSpy('add');
+    // TODO: rename back to mockFirestore
+    testFirestore.collection.withArgs(LOI_COLLECTION).and.returnValue({add});
+    const form = new FormData();
+    form.append('survey', surveyId);
+    form.append('job', jobId);
+    form.append(
+      'file',
+      new Blob([JSON.stringify({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [125.6, 10.1],
+            },
+            properties: {
+              name: 'Dinagat Islands',
+            },
+          },
+        ],
+      })]),
+      'file.json'
+    );
+    const encoder = new FormDataEncoder(form);
+
+    const req = jasmine.createSpyObj<functions.https.Request>(
+      'request',
+      {},
+      {
+        method: 'POST',
+        url: '/importGeoJson',
+        headers: encoder.headers,
+        rawBody: await buffer(encoder),
+      }
+    );
+    const res = jasmine.createSpyObj<functions.Response<any>>('response', [
+      'json',
+      'send',
+      'status',
+      'render',
+      'header',
+      'redirect',
+      'end',
+      'write',
+    ]);
+    // const res = new MockExpressResponse();
+
+    importGeoJsonHandler(req, res, {} as DecodedIdToken);
+
+    expect(res.status).toHaveBeenCalledOnceWith(200);
+    expect(add).toHaveBeenCalledOnceWith({});
   });
 });
