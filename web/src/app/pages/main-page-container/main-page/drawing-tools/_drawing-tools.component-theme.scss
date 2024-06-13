@@ -2,26 +2,19 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  $color-config: mat.get-color-config($theme);
-  $primary: map.get($color-config, primary);
-
   .job-selector-section {
-    background-color: map.get($primary, default-contrast);
+    background-color: mat.get-theme-color($theme, on-surface);
   }
 
   .add-point-button {
-    // TODO(#1135): find corresponding color in palette
-    background-color: #202225;
+    background-color: mat.get-theme-color($theme, on-surface);
   }
 
   .add-point-button:hover {
-    background-color: map.get($primary, 500);
+    background-color: mat.get-theme-color($theme, primary);
   }
 }
 
 @mixin theme($theme) {
-  $color-config: mat.get-color-config($theme);
-  @if $color-config != null {
-    @include color($theme);
-  }
+  @include color($theme);
 }

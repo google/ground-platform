@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-.mat-mdc-dialog-actions {
-  .mat-mdc-unelevated-button {
-    &:not(:first-child) {
-        margin-left: 1em;
-      }
-    }
-}
-
-.role-select {
-  margin: -4px 0;
-}
-
-.pending-changes {
-  margin: 16px;
-}
-
 .share-form {
   display: flex;
   flex-direction: column;

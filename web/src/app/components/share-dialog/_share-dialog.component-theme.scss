@@ -1,75 +1,12 @@
 @use 'sass:map';
 @use '@angular/material' as mat;
 
-@mixin color($theme) {
-  $color-config: mat.get-color-config($theme);
-  $foreground: map.get($color-config, foreground);
-  $background: map.get($color-config, background);
-
-  .list-heading {
-    color: map.get($foreground, secondary-text);
-  }
-
-  .mat-mdc-dialog-content {
-    border-color: map.get($foreground, disabled-button);
-  }
-
-  .user-email {
-    color: map.get($foreground, dark-secondary-text);
-  }
-
-  .role-select {
-    color: map.get($foreground, dark-secondary-text);
-  }
-
-  .remove-option {
-    border-top: 1px solid map.get($background, disabled-list-option);
-  }
-
-  .pending-changes {
-    color: map.get($foreground, secondary-text);
-  }
-}
-
 @mixin typography($theme) {
-  $typography-config: mat.get-typography-config($theme);
-
-  // TODO(#1135): use typography-config once typography levels defined
-
-  .list-heading {
-    font-family: mat.font-family($typography-config);
-    font-size: medium;
-    font-weight: 500;
-  }
-
-  .user-email {
-    font-family: mat.font-family($typography-config);
-    text-overflow: ellipsis;
-  }
-
-  .user-role {
-    font-family: mat.font-family($typography-config);
-  }
-
-  .pending-changes {
-    font-style: italic;
-  }
-
-  h2 {
-    font-family: mat.font-family($typography-config);
-    font-size: medium;
-    font-weight: normal;
+  .share-dialog-description {
+    font: mat.get-theme-typography($theme, body-medium, font);
   }
 }
 
 @mixin theme($theme) {
-  $color-config: mat.get-color-config($theme);
-  @if $color-config != null {
-    @include color($theme);
-  }
-
-  $typography-config: mat.get-typography-config($theme);
-  @if $typography-config != null {
-    @include typography($theme);
-  }
+  @include typography($theme);
 }
