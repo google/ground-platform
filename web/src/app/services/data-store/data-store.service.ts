@@ -447,16 +447,19 @@ export class DataStoreService {
    * to include the specified user email as survey organizer.
    */
   async createSurvey(
-    ownerEmail: string,
     name: string,
-    description: string
+    description: string,
+    user: User
   ): Promise<string> {
     const surveyId = this.generateId();
+    const {email: ownerEmail, id: ownerId} = user;
     const acl = Map<string, Role>({[ownerEmail]: Role.SURVEY_ORGANIZER});
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(FirebaseDataConverter.partialSurveyToJS(name, description, acl));
+      .set(
+        FirebaseDataConverter.newSurveyToJS(name, description, acl, ownerId)
+      );
     return Promise.resolve(surveyId);
   }
 

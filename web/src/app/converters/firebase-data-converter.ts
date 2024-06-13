@@ -121,16 +121,18 @@ export class FirebaseDataConverter {
     return role;
   }
 
-  static partialSurveyToJS(
+  static newSurveyToJS(
     name: string,
-    description?: string,
-    acl?: Map<string, Role>
+    description: string,
+    acl: Map<string, Role>,
+    ownerId: string
   ) {
     const data = toDocumentData(
       new Pb.Survey({
         name,
         description,
-        acl: acl?.map(role => PB_ROLES.get(role)!).toObject(),
+        acl: acl.map(role => PB_ROLES.get(role)!).toObject(),
+        ownerId,
       })
     );
 
@@ -138,7 +140,22 @@ export class FirebaseDataConverter {
       ...data,
       title: name,
       description,
-      acl: acl && FirebaseDataConverter.aclToJs(acl),
+      acl: FirebaseDataConverter.aclToJs(acl),
+    };
+  }
+
+  static partialSurveyToJS(name: string, description?: string) {
+    const data = toDocumentData(
+      new Pb.Survey({
+        name,
+        ...(description && {description}),
+      })
+    );
+
+    return {
+      ...data,
+      title: name,
+      ...(description && {description}),
     };
   }
 

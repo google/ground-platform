@@ -117,11 +117,10 @@ export class SurveyService {
 
   async createSurvey(title: string, description?: string): Promise<string> {
     const user = await firstValueFrom(this.authService.getUser$());
-    const email = user?.email || 'Unknown email';
     const surveyId = await this.dataStore.createSurvey(
-      email,
       title,
-      description ?? ''
+      description ?? '',
+      user
     );
     return Promise.resolve(surveyId);
   }
