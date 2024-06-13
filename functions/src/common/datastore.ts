@@ -139,12 +139,7 @@ export class Datastore {
   }
 
   async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
-    const docRef = this.db_.doc(survey(surveyId));
-    const doc = await docRef.get();
-    if (!doc.exists) {
-      throw new Error(`${survey(surveyId)} not found`);
-    }
-    await docRef.collection('lois').add(loiDoc);
+    await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 
   async countSubmissionsForLoi(
