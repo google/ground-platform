@@ -24,11 +24,12 @@ import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
 import {Datastore} from './common/datastore';
 import {DocumentData} from 'firebase-admin/firestore';
-import {toDocumentData} from '@ground/lib';
+import {toDocumentData, deleteEmpty} from '@ground/lib';
 import {Feature, Geometry, Position} from 'geojson';
 
 import Pb = GroundProtos.google.ground.v1beta1;
 
+type ErrorHandler = (errorCode: number, message?: string) => void;
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
@@ -38,9 +39,32 @@ export async function importGeoJsonHandler(
   res: functions.Response<any>,
   user: DecodedIdToken
 ) {
+  await new Promise((resolve, reject) =>
+    importGeoJsonHandlerInternal(
+      req,
+      res,
+      user,
+      () => {
+        res.status(HttpStatus.OK).end();
+        resolve(undefined);
+      },
+      (errorCode: number, message?: string) => {
+        res.status(errorCode).end(message);
+        reject();
+      }
+    )
+  );
+}
+
+function importGeoJsonHandlerInternal(
+  req: functions.https.Request,
+  res: functions.Response<any>,
+  user: DecodedIdToken,
+  done: () => void,
+  error: ErrorHandler
+) {
   if (req.method !== 'POST') {
-    res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
-    return;
+    return error(HttpStatus.METHOD_NOT_ALLOWED);
   }
 
   const busboy = Busboy({headers: req.headers});
@@ -53,23 +77,19 @@ export async function importGeoJsonHandler(
   const inserts: any[] = [];
 
   const db = getDatastore();
-  
+
   // This code will process each file uploaded.
   busboy.on('file', async (_field, file, _filename) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
-      res
-        .status(HttpStatus.BAD_REQUEST)
-        .end(JSON.stringify({error: 'Invalid request'}));
-      return;
+      return error(HttpStatus.BAD_REQUEST);
     }
     const survey = await db.fetchSurvey(surveyId);
     if (!survey.exists) {
-      res.status(HttpStatus.NOT_FOUND).send('Survey not found');
-      return;
+      return error(HttpStatus.NOT_FOUND);
     }
     // if (!canImport(user, survey)) {
-    //   res.status(HttpStatus.FORBIDDEN).send('Permission denied');
+    //   res.status(HttpStatus.FORBIDDEN).end('Permission denied');
     //   return;
     // }
 
@@ -86,17 +106,17 @@ export async function importGeoJsonHandler(
     file
       .pipe(JSONStream.parse(['features', true], undefined))
       .on('data', (geoJsonLoi: any) => {
-        if (geoJsonType !== 'FeatureCollection') {
-          // TODO: report error to user
-          console.debug(`Invalid ${geoJsonType}`);
-          res.status(HttpStatus.BAD_REQUEST).end();
-          return;
-        }
-        if (geoJsonLoi.type !== 'Feature') {
-          console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
-          return;
-        }
         try {
+          if (geoJsonType !== 'FeatureCollection') {
+            return error(
+              HttpStatus.BAD_REQUEST,
+              `Expected 'FeatureCollection', got '${geoJsonType}'`
+            );
+          }
+          if (geoJsonLoi.type !== 'Feature') {
+            console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
+            return;
+          }
           const loi = {
             ...toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId) || {}),
             ...geoJsonToLoiLegacy(geoJsonLoi, jobId),
@@ -105,12 +125,8 @@ export async function importGeoJsonHandler(
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           }
         } catch (err) {
-          console.error(err);
           req.unpipe(busboy);
-          res
-            .status(HttpStatus.BAD_REQUEST)
-            .end(JSON.stringify({error: (err as Error).message}));
-          // TODO(#525): Abort stream on error. How?
+          return error(HttpStatus.BAD_REQUEST, (err as Error).message);
         }
       });
   });
@@ -123,16 +139,22 @@ export async function importGeoJsonHandler(
 
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on('finish', async () => {
-    await Promise.all(inserts);
-    const count = inserts.length;
-    console.debug(`${count} LOIs imported`);
-    res.status(HttpStatus.OK).end(JSON.stringify({count}));
+    try {
+      await inserts[0];
+      const count = inserts.length;
+      console.debug(`${count} LOIs imported`);
+      res.send(JSON.stringify({count}));
+      done();
+    } catch (err: any) {
+      console.debug(err);
+      error(HttpStatus.BAD_REQUEST, err);
+    }
   });
 
   busboy.on('error', (err: any) => {
     console.error('Busboy error', err);
     req.unpipe(busboy);
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(err.message);
+    error(HttpStatus.INTERNAL_SERVER_ERROR, err);
   });
 
   // Start processing the body data.
@@ -148,13 +170,13 @@ export async function importGeoJsonHandler(
 function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = geoJsonLoi;
-  return {
+  return deleteEmpty({
     jobId,
     customId: id,
     predefined: true,
     geometry: Datastore.toFirestoreMap(geometry),
     properties,
-  };
+  });
 }
 
 /**
