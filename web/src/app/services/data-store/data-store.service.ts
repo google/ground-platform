@@ -31,7 +31,6 @@ import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
@@ -172,34 +171,40 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the survey with new title.
+   * Updates the survey with new name.
    *
    * @param surveyId the id of the survey.
-   * @param newTitle the new title of the survey.
+   * @param newName the new name of the survey.
    */
-  updateSurveyTitle(surveyId: string, newTitle: string): Promise<void> {
+  updateSurveyTitle(surveyId: string, newName: string): Promise<void> {
+    console.log('updateSurveyTitle');
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: newTitle}, {merge: true});
+      .set(FirebaseDataConverter.partialSurveyToJS(newName), {
+        merge: true,
+      });
   }
 
   /**
-   * Updates the survey with new title and new description.
+   * Updates the survey with new name and new description.
    *
    * @param surveyId the id of the survey.
-   * @param newTitle the new title of the survey.
+   * @param newName the new name of the survey.
    * @param newDescription the new description of the survey.
    */
   updateSurveyTitleAndDescription(
     surveyId: string,
-    newTitle: string,
+    newName: string,
     newDescription: string
   ): Promise<void> {
+    console.log('updateSurveyTitleAndDescription');
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: newTitle, description: newDescription}, {merge: true});
+      .set(FirebaseDataConverter.partialSurveyToJS(newName, newDescription), {
+        merge: true,
+      });
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
@@ -439,26 +444,19 @@ export class DataStoreService {
   /**
    * Creates a new survey in the remote db using the specified title,
    * returning the id of the newly created survey. ACLs are initialized
-   * to include the specified user email as survey owner.
+   * to include the specified user email as survey organizer.
    */
   async createSurvey(
     ownerEmail: string,
     name: string,
-    description: string,
-    offlineBaseMapSources?: OfflineBaseMapSource[]
+    description: string
   ): Promise<string> {
     const surveyId = this.generateId();
+    const acl = Map<string, Role>({[ownerEmail]: Role.SURVEY_ORGANIZER});
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(
-        FirebaseDataConverter.newSurveyJS(
-          ownerEmail,
-          name,
-          description,
-          offlineBaseMapSources
-        )
-      );
+      .set(FirebaseDataConverter.partialSurveyToJS(name, description, acl));
     return Promise.resolve(surveyId);
   }
 

@@ -22,7 +22,6 @@ import {List, Map} from 'immutable';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Result} from 'app/models/submission/result.model';
 import {
@@ -48,6 +47,13 @@ import {Point} from '../models/geometry/point';
 import {Polygon} from '../models/geometry/polygon';
 
 const Pb = GroundProtos.google.ground.v1beta1;
+
+const PB_ROLES = Map([
+  [Role.OWNER, Pb.Role.SURVEY_ORGANIZER],
+  [Role.SURVEY_ORGANIZER, Pb.Role.SURVEY_ORGANIZER],
+  [Role.DATA_COLLECTOR, Pb.Role.DATA_COLLECTOR],
+  [Role.VIEWER, Pb.Role.VIEWER],
+]);
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -115,19 +121,16 @@ export class FirebaseDataConverter {
     return role;
   }
 
-  static newSurveyJS(
-    ownerEmail: string,
+  static partialSurveyToJS(
     name: string,
-    description: string,
-    offlineBaseMapSources?: OfflineBaseMapSource[]
+    description?: string,
+    acl?: Map<string, Role>
   ) {
     const data = toDocumentData(
       new Pb.Survey({
         name,
         description,
-        acl: {
-          [ownerEmail]: Pb.Role.SURVEY_ORGANIZER,
-        },
+        acl: acl?.map(role => PB_ROLES.get(role)!).toObject(),
       })
     );
 
@@ -135,8 +138,7 @@ export class FirebaseDataConverter {
       ...data,
       title: name,
       description,
-      acl: {[ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER)},
-      offlineBaseMapSources,
+      acl: acl && FirebaseDataConverter.aclToJs(acl),
     };
   }
 

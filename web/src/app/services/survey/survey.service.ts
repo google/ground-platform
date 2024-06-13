@@ -116,14 +116,12 @@ export class SurveyService {
   }
 
   async createSurvey(title: string, description?: string): Promise<string> {
-    const offlineBaseMapSources = environment.offlineBaseMapSources;
     const user = await firstValueFrom(this.authService.getUser$());
     const email = user?.email || 'Unknown email';
     const surveyId = await this.dataStore.createSurvey(
       email,
       title,
-      description ?? '',
-      offlineBaseMapSources
+      description ?? ''
     );
     return Promise.resolve(surveyId);
   }

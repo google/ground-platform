@@ -29,7 +29,6 @@ export const environment = {
     apiKey: 'fake-api-key',
   },
   cloudFunctionsUrl: '',
-  offlineBaseMapSources: [{url: ''}],
   useEmulators: true,
   env: Env.Local,
 };
