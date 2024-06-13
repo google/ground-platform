@@ -2,11 +2,9 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  $color-config: mat.get-color-config($theme);
-  $primary: map.get($color-config, 'primary');
-
   button.share-survey-button.mdc-button.mdc-button--unelevated {
-    background-color: map.get($primary, 100);
+    background-color: mat.get-theme-color($theme, secondary-container);
+    color: mat.get-theme-color($theme, on-secondary-container);
   }
 }
 
