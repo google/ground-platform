@@ -53,28 +53,30 @@ describe('importGeoJson()', () => {
     form.append('job', jobId);
     form.append(
       'file',
-      new Blob([JSON.stringify({
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [125.6, 10.1],
+      new Blob([
+        JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [125.6, 10.1],
+              },
+              properties: {
+                name: 'Dinagat Islands',
+              },
             },
-            properties: {
-              name: 'Dinagat Islands',
-            },
-          },
-        ],
-      })]),
+          ],
+        }),
+      ]),
       'file.json'
     );
     const encoder = new FormDataEncoder(form);
 
     const req = jasmine.createSpyObj<functions.https.Request>(
       'request',
-      {},
+      ['unpipe'],
       {
         method: 'POST',
         url: '/importGeoJson',
@@ -83,14 +85,8 @@ describe('importGeoJson()', () => {
       }
     );
     const res = jasmine.createSpyObj<functions.Response<any>>('response', [
-      'json',
-      'send',
       'status',
-      'render',
-      'header',
-      'redirect',
       'end',
-      'write',
     ]);
     // const res = new MockExpressResponse();
 
