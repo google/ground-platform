@@ -162,7 +162,7 @@ function getValue(taskId: string, task: Task, data: any) {
     if (!result) {
       return '';
     }
-    return toWkt(result);
+    return toWkt(result.geometry || result);
   } else {
     return result;
   }
