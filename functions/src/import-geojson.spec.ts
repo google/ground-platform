@@ -22,22 +22,19 @@ import {Blob, FormData} from 'formdata-node';
 import {buffer} from 'node:stream/consumers';
 import {FormDataEncoder} from 'form-data-encoder';
 
-const test = require('firebase-functions-test')();
-
 describe('importGeoJson()', () => {
   const surveyId = 'survey001';
   const jobId = 'job123';
   // const SUBMISSION = new TestDocumentSnapshot({ loiId });
   // const CONTEXT = new TestEventContext({ surveyId });
   // const SUBMISSIONS_PATH = `${SURVEY_PATH}/submissions`;
-  const LOI_COLLECTION = `surveys/${surveyId}/lois`;
+  // const LOI_COLLECTION = `surveys/${surveyId}/lois`;
 
   beforeAll(() => {
     stubAdminApi();
   });
 
   afterAll(() => {
-    test.cleanup();
   });
 
   fit('imports points', async () => {
@@ -47,29 +44,30 @@ describe('importGeoJson()', () => {
     });
     const add = jasmine.createSpy('add');
     // TODO: rename back to mockFirestore
-    testFirestore.collection.withArgs(LOI_COLLECTION).and.returnValue({add});
+    testFirestore.doc(`surveys/${surveyId}`).set({
+      name: 'Test'
+    });
+    // testFirestore.collection.withArgs(LOI_COLLECTION).and.returnValue({add});
     const form = new FormData();
     form.append('survey', surveyId);
     form.append('job', jobId);
     form.append(
       'file',
-      new Blob([
-        JSON.stringify({
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: [125.6, 10.1],
-              },
-              properties: {
-                name: 'Dinagat Islands',
-              },
+      new Blob([JSON.stringify({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [125.6, 10.1],
             },
-          ],
-        }),
-      ]),
+            properties: {
+              name: 'Dinagat Islands',
+            },
+          },
+        ],
+      })]),
       'file.json'
     );
     const encoder = new FormDataEncoder(form);
@@ -86,7 +84,7 @@ describe('importGeoJson()', () => {
     );
     const res = jasmine.createSpyObj<functions.Response<any>>('response', [
       'status',
-      'end',
+      'end'
     ]);
     // const res = new MockExpressResponse();
 

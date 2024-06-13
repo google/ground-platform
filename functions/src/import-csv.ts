@@ -18,7 +18,7 @@ import {https, Response} from 'firebase-functions';
 import HttpStatus from 'http-status-codes';
 import csvParser from 'csv-parser';
 import Busboy from 'busboy';
-import {db} from './common/context';
+import {getDatastore} from './common/context';
 import {GeoPoint} from 'firebase-admin/firestore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {canImport} from './common/auth';
@@ -42,6 +42,8 @@ export async function importCsvHandler(
     res.status(HttpStatus.METHOD_NOT_ALLOWED).end();
     return;
   }
+  const db = getDatastore();
+
   const busboy = Busboy({headers: req.headers});
 
   // Dictionary used to accumulate form values, keyed by field name.
@@ -142,7 +144,7 @@ async function insertRow(surveyId: string, jobId: string, row: any) {
     ...toDocumentData(csvRowToLocationOfInterestPb(row, jobId) || {}),
   };
   if (Object.keys(loi).length > 0) {
-    await db.insertLocationOfInterest(surveyId, loi);
+    await getDatastore().insertLocationOfInterest(surveyId, loi);
   }
 }
 

@@ -13,7 +13,7 @@
     "logs": "npx firebase functions:log",
     "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
-    "xpreinstall": "npm run build:lib && npm install",
+    "xprebuild": "npm run build:lib && npm install",
     "build:lib": "npm run build --workspace=../lib",
     "build": "tsc",
     "watch": "npm run build && tsc --watch"
@@ -58,6 +58,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "firebase-functions-test": "^3.3.0",
     "firebase-tools": "13.6.0",
+    "firestore-jest-mock": "^0.25.0",
     "form-data-encoder": "^4.0.2",
     "formdata-node": "^6.0.3",
     "gts": "^3.1.1",

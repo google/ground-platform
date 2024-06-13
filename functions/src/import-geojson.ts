@@ -16,7 +16,7 @@
 
 import functions from 'firebase-functions';
 import HttpStatus from 'http-status-codes';
-import {db} from './common/context';
+import {getDatastore} from './common/context';
 import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
 // import {canImport} from './common/auth';
@@ -52,6 +52,8 @@ export async function importGeoJsonHandler(
   // stream before operations are complete.
   const inserts: any[] = [];
 
+  const db = getDatastore();
+  
   // This code will process each file uploaded.
   busboy.on('file', async (_field, file, _filename) => {
     const {survey: surveyId, job: jobId} = params;
@@ -61,11 +63,11 @@ export async function importGeoJsonHandler(
         .end(JSON.stringify({error: 'Invalid request'}));
       return;
     }
-    // const survey = await db.fetchSurvey(surveyId);
-    // if (!survey.exists) {
-    //   res.status(HttpStatus.NOT_FOUND).send('Survey not found');
-    //   return;
-    // }
+    const survey = await db.fetchSurvey(surveyId);
+    if (!survey.exists) {
+      res.status(HttpStatus.NOT_FOUND).send('Survey not found');
+      return;
+    }
     // if (!canImport(user, survey)) {
     //   res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     //   return;

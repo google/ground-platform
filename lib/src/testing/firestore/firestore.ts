@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
+const MockFirebase = require('mock-cloud-firestore');
+
 // Set project as workaround for https://github.com/firebase/firebase-functions/issues/437.
 process.env.GCLOUD_PROJECT = 'fake-project';
 
-class TestFirestore {
-  // TODO: Add test impl instead of using spies.
-  doc = jasmine.createSpy('doc');
-  collection = jasmine.createSpy('collection');
-
-  settings() {
-    // no-op.
-  }
-}
-
-export const testFirestore = new TestFirestore();
+export const testFirestore = new MockFirebase().firestore();

@@ -17,11 +17,11 @@
   },
   "private": true,
   "dependencies": {
-    "@ground/proto": "file:../proto",
     "@google-cloud/firestore": "^7.7.0",
+    "@ground/proto": "file:../proto",
+    "firebase-functions": "^5.0.1",
     "immutable": "^4.3.6",
-    "protobufjs": "^7.3.0",
-    "firebase-functions": "^5.0.1"
+    "protobufjs": "^7.3.0"
   },
   "devDependencies": {
     "@types/jasmine": "^4.3.5",
@@ -34,6 +34,7 @@
     "gts": "^5.3.0",
     "jasmine": "^5.1.0",
     "jasmine-spec-reporter": "^7.0.0",
+    "mock-cloud-firestore": "^0.12.0",
     "prettier": "^2.8.1",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
