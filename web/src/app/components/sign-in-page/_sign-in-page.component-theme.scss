@@ -2,18 +2,13 @@
 @use '@angular/material' as mat;
 
 @mixin typography($theme) {
-  $typography-config: mat.get-typography-config($theme);
-
-  // TODO(#1135): use typography-config once typography levels defined
-
   .body-container {
     .title {
-      font-family: mat.font-family($typography-config);
-      font-size: 1.8em;
-      font-weight: bold;
+      font: mat.get-theme-typography($theme, headline-medium, font);
     }
   
     .content {
+      font: mat.get-theme-typography($theme, body-large, font);
       text-align: center;
       padding: 40px;
     }
@@ -21,8 +16,5 @@
 }
 
 @mixin theme($theme) {
-  $typography-config: mat.get-typography-config($theme);
-  @if $typography-config != null {
-    @include typography($theme);
-  }
+  @include typography($theme);
 }

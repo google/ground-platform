@@ -23,7 +23,6 @@
   white-space: pre-wrap !important;
 }
 
-
 .expandable-node {
   display: flex;
   justify-content: space-between;
@@ -49,7 +48,6 @@
 .show-properties-icon {
   width: 24px;
   height: 24px;
-  color: #737970;
 }
 
 .loi-tree-node {
@@ -62,8 +60,6 @@
   }
 
   .loi-name {
-    --mdc-typography-button-font-size: 14px;
-    --mdc-typography-button-font-weight: 400;
     flex: 1;
     padding-left: 16px;
   }
