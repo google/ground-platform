@@ -53,12 +53,6 @@ export async function importGeoJsonHandler(
     // stream before operations are complete.
     const inserts: any[] = [];
 
-    // Handle non-file fields in the task. survey and job must appear
-    // before the file for the file handler to work properly.
-    busboy.on('field', (key, val) => {
-      params[key] = val;
-    });
-
     // This code will process each file uploaded.
     busboy.on('file', async (_field, file, _filename) => {
       const {survey: surveyId, job: jobId} = params;
@@ -118,6 +112,12 @@ export async function importGeoJsonHandler(
             // TODO(#525): Abort stream on error. How?
           }
         });
+    });
+
+    // Handle non-file fields in the task. survey and job must appear
+    // before the file for the file handler to work properly.
+    busboy.on('field', (key, val) => {
+      params[key] = val;
     });
 
     // Triggered once all uploaded files are processed by Busboy.
