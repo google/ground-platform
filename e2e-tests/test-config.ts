@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LoiType} from './test-utils';
+import { LoiType, TaskType } from './test-utils';
 
 export const WEB_URL = 'http://localhost:5000';
 export const TEST_TIMEOUT = 5 * 60 * 1000; // 5m
@@ -24,6 +24,7 @@ export const SURVEY_TITLE = 'A test title';
 export const SURVEY_DESCRIPTION = 'A test description';
 export const JOB_NAME = 'A job name';
 export const AD_HOC = true;
+export const DEFAULT_TASK_TYPES = [TaskType.CAPTURE_LOCATION];
 export const LOI_TASK_TYPE = LoiType.DROP_PIN;
 export const MULTIPLE_CHOICE_COUNT = 3;
 export const MULTIPLE_CHOICE_ADD_OTHER = true;

@@ -1,0 +1,99 @@
+# Copyright 2024 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Verify survey submissions
+
+inputs:
+  platform-repository:
+    description: 'ground-platform repository under test'
+    default: google/ground-platform
+
+  use-repo-data:
+    description: 'Whether to use the local repository emulator data or not'
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.platform-repository }}
+
+    - name: Load cached Firebase emulator
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/firebase/emulators
+        key: ${{ runner.os }}-firebase-emulators-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-firebase-emulators-
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: "18"
+
+    - name: Load cached Node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        # npm cache files are stored in `~/.npm` on Linux/macOS
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      name: List the state of Node modules
+      continue-on-error: true
+      shell: bash
+      run: npm list
+    
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@v1
+      id: setup-chrome
+      with:
+        chrome-version: 125
+    
+    - name: Save CHROME_PATH
+      shell: bash
+      run: |
+        echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+
+    - name: Install nx-linux-x64-gnu
+      shell: bash
+      run: npm install @nx/nx-linux-x64-gnu
+
+    - name: Install and build dependencies
+      shell: bash
+      run: npm run build:local
+
+    - name: Copy Firebase emulator data
+      uses: actions/download-artifact@v4
+      if: inputs.use-repo-data != 'true'
+      with:
+        name: data-submit
+        path: data/
+
+    - name: Copy the local repo data
+      if: inputs.use-repo-data == 'true'
+      shell: bash
+      run: cp -r data/test-submit data/test
+
+    - name: Run 'Verify survey' test
+      shell: bash
+      run: npm run test:e2e:verify
