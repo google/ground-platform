@@ -16,7 +16,7 @@
 
 import {EventContext} from 'firebase-functions';
 import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {db} from './common/context';
+import {getDatastore} from './common/context';
 import {Datastore} from './common/datastore';
 import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
 import {geojsonToWKT} from '@terraformer/wkt';
@@ -36,6 +36,8 @@ export async function onCreateLoiHandler(
   const loi = snapshot.data();
 
   if (!loiId || !loi) return;
+
+  const db = getDatastore();
 
   let properties = loi.properties || {};
 
