@@ -1,8 +1,10 @@
 {
-  "extends": "./node_modules/gts",
+  "extends": "../node_modules/gts",
   "env": {
     "jasmine": true
   },
-  "root": true,
-  "parser": "@typescript-eslint/parser"
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "root": true
 }
