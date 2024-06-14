@@ -33,6 +33,7 @@ type Task = {
   readonly index: number;
   readonly multipleChoice?: any;
   readonly options?: any;
+  readonly hasOtherOption?: boolean;
 };
 
 // TODO: Refactor into meaningful pieces.
@@ -173,11 +174,31 @@ function getValue(taskId: string, task: Task, data: any) {
  * the code is not defined, returns the label in English.
  */
 function getMultipleChoiceValues(id: any, task: Task) {
+  // "Other" options are encoded to be surrounded by square brakets, to let us
+  // distinguish them from the other pre-defined options.
+  if (isOtherOption(id)) {
+    return extractOtherOption(id);
+  }
   const options = task.options || {};
   const option = options[id] || {};
   const label = option.label || {};
   // TODO: i18n.
   return option.code || label || '';
+}
+
+function isOtherOption(submission: any): boolean {
+  // "Other" options are encoded to be surrounded by square brakets, to let us
+  // distinguish them from the other pre-defined options.
+  return (
+    typeof submission === 'string' &&
+    submission.startsWith('[ ') &&
+    submission.endsWith(' ]')
+  );
+}
+
+function extractOtherOption(submission: string): string {
+  const match = submission.match(/\[(.*?)\]/); // Match any text between []
+  return match ? match[1].trim() : ''; // Extract the match and remove spaces
 }
 
 /**
