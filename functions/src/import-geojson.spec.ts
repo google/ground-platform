@@ -22,6 +22,7 @@ import {Blob, FormData} from 'formdata-node';
 import {buffer} from 'node:stream/consumers';
 import {FormDataEncoder} from 'form-data-encoder';
 import HttpStatus from 'http-status-codes';
+import {invokeCallbackAsync} from './handlers';
 
 describe('importGeoJson()', () => {
   const surveyId = 'survey001';
@@ -92,7 +93,12 @@ describe('importGeoJson()', () => {
     res.status.and.returnValue(res);
     res.end.and.returnValue(res);
 
-    await importGeoJsonHandler(req, res, {} as DecodedIdToken);
+    await invokeCallbackAsync(
+      importGeoJsonHandler,
+      req,
+      res,
+      {} as DecodedIdToken
+    );
 
     expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
 

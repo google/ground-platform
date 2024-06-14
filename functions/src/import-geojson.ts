@@ -19,7 +19,7 @@ import HttpStatus from 'http-status-codes';
 import {getDatastore} from './common/context';
 import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
-// import {canImport} from './common/auth';
+import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
 import {Datastore} from './common/datastore';
@@ -28,35 +28,13 @@ import {toDocumentData, deleteEmpty} from '@ground/lib';
 import {Feature, Geometry, Position} from 'geojson';
 
 import Pb = GroundProtos.google.ground.v1beta1;
+import {ErrorHandler} from './handlers';
 
-type ErrorHandler = (errorCode: number, message?: string) => void;
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-export async function importGeoJsonHandler(
-  req: functions.https.Request,
-  res: functions.Response<any>,
-  user: DecodedIdToken
-) {
-  await new Promise((resolve, reject) =>
-    importGeoJsonHandlerInternal(
-      req,
-      res,
-      user,
-      () => {
-        res.status(HttpStatus.OK).end();
-        resolve(undefined);
-      },
-      (errorCode: number, message?: string) => {
-        res.status(errorCode).end(message);
-        reject();
-      }
-    )
-  );
-}
-
-function importGeoJsonHandlerInternal(
+export function importGeoJsonHandler(
   req: functions.https.Request,
   res: functions.Response<any>,
   user: DecodedIdToken,
@@ -64,7 +42,10 @@ function importGeoJsonHandlerInternal(
   error: ErrorHandler
 ) {
   if (req.method !== 'POST') {
-    return error(HttpStatus.METHOD_NOT_ALLOWED);
+    return error(
+      HttpStatus.METHOD_NOT_ALLOWED,
+      `Expected method POST, got ${req.method}`
+    );
   }
 
   const busboy = Busboy({headers: req.headers});
@@ -82,16 +63,18 @@ function importGeoJsonHandlerInternal(
   busboy.on('file', async (_field, file, _filename) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
-      return error(HttpStatus.BAD_REQUEST);
+      return error(HttpStatus.BAD_REQUEST, `Missing survey and/or job ID`);
     }
     const survey = await db.fetchSurvey(surveyId);
     if (!survey.exists) {
-      return error(HttpStatus.NOT_FOUND);
+      return error(HttpStatus.NOT_FOUND, `Survey ${surveyId} not found`);
     }
-    // if (!canImport(user, survey)) {
-    //   res.status(HttpStatus.FORBIDDEN).end('Permission denied');
-    //   return;
-    // }
+    if (!canImport(user, survey)) {
+      return error(
+        HttpStatus.FORBIDDEN,
+        `Use does not have permission to import into survey ${surveyId}`
+      );
+    }
 
     console.debug(
       `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`

@@ -20,6 +20,7 @@ import {https, Response} from 'firebase-functions';
 import {getDecodedIdToken} from './common/auth';
 import {INTERNAL_SERVER_ERROR, UNAUTHORIZED} from 'http-status-codes';
 import cookieParser from 'cookie-parser';
+import HttpStatus from 'http-status-codes';
 
 const corsOptions = {origin: true};
 const corsMiddleware = cors(corsOptions);
@@ -81,6 +82,71 @@ export function onHttpsRequest(handler: HttpsRequestHandler) {
             } catch (error) {
               onError(res, error);
             }
+          })
+      )
+    )
+  );
+}
+
+export type ErrorHandler = (errorCode: number, message: string) => void;
+
+export type HttpsRequestCallback = (
+  req: https.Request,
+  res: Response<any>,
+  user: DecodedIdToken,
+  done: () => void,
+  error: ErrorHandler
+) => void;
+
+export async function invokeCallbackAsync(
+  callback: HttpsRequestCallback,
+  req: https.Request,
+  res: Response<any>,
+  user: DecodedIdToken
+) {
+  await new Promise((resolve, reject) =>
+    invokeCallback(
+      callback,
+      req,
+      res,
+      user,
+      () => {
+        res.status(HttpStatus.OK).end();
+        resolve(undefined);
+      },
+      (errorCode: number, message: string) => {
+        res.status(errorCode).end(message);
+        reject(`${message} (HTTP status ${errorCode})`);
+      }
+    )
+  );
+}
+
+function invokeCallback(
+  callback: HttpsRequestCallback,
+  req: https.Request,
+  res: Response<any>,
+  user: DecodedIdToken,
+  done: () => void,
+  error: ErrorHandler
+) {
+  try {
+    callback(req, res, user, done, error);
+  } catch (e: any) {
+    console.error('Unhandled exception', e);
+    error(HttpStatus.INTERNAL_SERVER_ERROR, e.toString());
+  }
+}
+
+export function onHttpsRequest2(callback: HttpsRequestCallback) {
+  return https.onRequest((req: https.Request, res: Response) =>
+    corsMiddleware(req, res, () =>
+      cookieParser()(
+        req,
+        res,
+        async () =>
+          await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
+            await invokeCallbackAsync(callback, req, res, idToken);
           })
       )
     )
