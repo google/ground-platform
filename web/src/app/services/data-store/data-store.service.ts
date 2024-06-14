@@ -182,9 +182,10 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(FirebaseDataConverter.partialSurveyToJS(newName), {
-        merge: true,
-      });
+      .set(
+        {title: newName, ...ProtoModelConverter.partialSurveyToJS(newName)},
+        {merge: true}
+      );
   }
 
   /**
