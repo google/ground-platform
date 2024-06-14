@@ -27,4 +27,4 @@ jasmine.getEnv().addReporter(
       displayStacktrace: StacktraceOption.RAW,
     },
   })
-)
+);

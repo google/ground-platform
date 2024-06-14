@@ -41,12 +41,17 @@ export function getAuthBearer(req: https.Request): string | undefined {
 /**
  * Verifies and returns the decoded user details from the `Authorization` header or session cookie.
  */
-export async function getDecodedIdToken(req: https.Request): Promise<DecodedIdToken | undefined> {
+export async function getDecodedIdToken(
+  req: https.Request
+): Promise<DecodedIdToken | undefined> {
   const idToken = getAuthBearer(req);
   if (idToken) {
     return getAuth().verifyIdToken(idToken);
   } else if (req.cookies) {
-    return await getAuth().verifySessionCookie(req.cookies[SESSION_COOKIE_NAME], true /** checkRevoked */);
+    return await getAuth().verifySessionCookie(
+      req.cookies[SESSION_COOKIE_NAME],
+      true /** checkRevoked */
+    );
   } else {
     return;
   }
@@ -55,18 +60,28 @@ export async function getDecodedIdToken(req: https.Request): Promise<DecodedIdTo
 /**
  * Generates and sets a session cookie for the current user into the provided response.
  */
-export async function setSessionCookie(req: https.Request, res: Response): Promise<void> {
+export async function setSessionCookie(
+  req: https.Request,
+  res: Response
+): Promise<void> {
   const token = getAuthBearer(req);
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-  const cookie = await getAuth().createSessionCookie(token!!, { expiresIn });
-  res.cookie(SESSION_COOKIE_NAME, cookie, { maxAge: expiresIn, httpOnly: true, secure: true });
+  const cookie = await getAuth().createSessionCookie(token!, {expiresIn});
+  res.cookie(SESSION_COOKIE_NAME, cookie, {
+    maxAge: expiresIn,
+    httpOnly: true,
+    secure: true,
+  });
 }
 
 function isEmulatorIdToken(user: DecodedIdToken): boolean {
   return user instanceof EmulatorIdToken;
 }
 
-function getRole(user: DecodedIdToken, survey: DocumentSnapshot): string | null {
+function getRole(
+  user: DecodedIdToken,
+  survey: DocumentSnapshot
+): string | null {
   if (isEmulatorIdToken(user)) {
     return OWNER_ROLE;
   }
@@ -74,11 +89,17 @@ function getRole(user: DecodedIdToken, survey: DocumentSnapshot): string | null 
   return user.email ? acl?.[user.email] : null;
 }
 
-export function canExport(user: DecodedIdToken, survey: DocumentSnapshot): boolean {
+export function canExport(
+  user: DecodedIdToken,
+  survey: DocumentSnapshot
+): boolean {
   return !!getRole(user, survey);
 }
 
-export function canImport(user: DecodedIdToken, survey: DocumentSnapshot): boolean {
+export function canImport(
+  user: DecodedIdToken,
+  survey: DocumentSnapshot
+): boolean {
   const role = getRole(user, survey);
   return role === OWNER_ROLE || role === DATA_COLLECTOR_ROLE;
 }

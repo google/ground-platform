@@ -68,7 +68,7 @@ describe('onWriteSubmission()', () => {
 
     await test.wrap(functions.onWriteSubmission)(
       {before: undefined, after: SUBMISSION},
-    CONTEXT
+      CONTEXT
     );
 
     expect(loiUpdateSpy).toHaveBeenCalledOnceWith({submissionCount: 2});
