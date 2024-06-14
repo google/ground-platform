@@ -15,8 +15,6 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {toDocumentData} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
@@ -45,15 +43,6 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {toGeometry} from './geometry-converter';
 import {Point} from '../models/geometry/point';
 import {Polygon} from '../models/geometry/polygon';
-
-const Pb = GroundProtos.google.ground.v1beta1;
-
-const PB_ROLES = Map([
-  [Role.OWNER, Pb.Role.SURVEY_ORGANIZER],
-  [Role.SURVEY_ORGANIZER, Pb.Role.SURVEY_ORGANIZER],
-  [Role.DATA_COLLECTOR, Pb.Role.DATA_COLLECTOR],
-  [Role.VIEWER, Pb.Role.VIEWER],
-]);
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -122,40 +111,14 @@ export class FirebaseDataConverter {
   }
 
   static newSurveyToJS(
-    name: string,
+    title: string,
     description: string,
-    acl: Map<string, Role>,
-    ownerId: string
+    acl: Map<string, Role>
   ) {
-    const data = toDocumentData(
-      new Pb.Survey({
-        name,
-        description,
-        acl: acl.map(role => PB_ROLES.get(role)!).toObject(),
-        ownerId,
-      })
-    );
-
     return {
-      ...data,
-      title: name,
+      title,
       description,
       acl: FirebaseDataConverter.aclToJs(acl),
-    };
-  }
-
-  static partialSurveyToJS(name: string, description?: string) {
-    const data = toDocumentData(
-      new Pb.Survey({
-        name,
-        ...(description && {description}),
-      })
-    );
-
-    return {
-      ...data,
-      title: name,
-      ...(description && {description}),
     };
   }
 

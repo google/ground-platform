@@ -29,6 +29,7 @@ import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {ProtoModelConverter} from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -202,9 +203,14 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(FirebaseDataConverter.partialSurveyToJS(newName, newDescription), {
-        merge: true,
-      });
+      .set(
+        {
+          title: newName,
+          description: newDescription,
+          ...ProtoModelConverter.partialSurveyToJS(newName, newDescription),
+        },
+        {merge: true}
+      );
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
@@ -457,9 +463,15 @@ export class DataStoreService {
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(
-        FirebaseDataConverter.newSurveyToJS(name, description, acl, ownerId)
-      );
+      .set({
+        ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
+        ...ProtoModelConverter.newSurveyToProto(
+          name,
+          description,
+          acl,
+          ownerId
+        ),
+      });
     return Promise.resolve(surveyId);
   }
 
