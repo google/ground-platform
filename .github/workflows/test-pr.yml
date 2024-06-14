@@ -71,8 +71,11 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Run Jasmine tests
+      - name: Run tests
         run: npm run test
+
+      - name: Run lint checks
+        run: npm run lint
 
   lint-protos:
     name: proto
