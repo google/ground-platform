@@ -2,29 +2,19 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  $color-config: mat.get-color-config($theme);
-  $foreground: map.get($color-config, foreground);
-
   .vertical-divider {
-    border-left: 1px solid map.get($foreground, divider);
+    border-left: 1px solid mat.get-theme-color($theme, outline);
   }
 
   .question-container {
-    border: 1px map.get($foreground, divider);
-  }
-
-  .drag-icon {
-    color: map.get($foreground, icon);
+    border: 1px mat.get-theme-color($theme, outline);
   }
 
   .horizontal-line {
-    border: 1px solid map.get($foreground, divider);
+    border: 1px solid mat.get-theme-color($theme, outline);
   }
 }
 
 @mixin theme($theme) {
-  $color-config: mat.get-color-config($theme);
-  @if $color-config != null {
-    @include color($theme);
-  }
+  @include color($theme);
 }

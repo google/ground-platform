@@ -3,44 +3,10 @@
 
 @mixin color($theme) {
   .user-email {
-    // TODO(#1135): find corresponding color in palette
-    color: grey;
-  }
-}
-
-@mixin typography($theme) {
-  $typography-config: mat.get-typography-config($theme);
-
-  // TODO(#1135): use typography-config once typography levels defined
-
-  :host {
-    text-align: center;
-  }
-
-  .user-email {
-    font-size: 14px;
-    text-overflow: ellipsis;
-  }
-
-  .user-display-name {
-    font-size: 16px;
-    text-overflow: ellipsis;
-  }
-
-  .user-description {
-    text-align: center;
-  }
-
-  .user-avatar {
-    font-size: 1.8em;
+    color: mat.get-theme-color($theme, on-surface-variant);
   }
 }
 
 @mixin theme($theme) {
   @include color($theme);
-
-  $typography-config: mat.get-typography-config($theme);
-  @if $typography-config != null {
-    @include typography($theme);
-  }
 }

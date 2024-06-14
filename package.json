@@ -4,7 +4,7 @@
   "description": "Root package for Ground hosted components",
   "scripts": {
     "clean": "rm -rf node_modules && for p in lib web functions e2e-tests; do npm run clean --prefix $p; done",
-    "build": "npm i && npm run build --prefix schema && npm run build --prefix functions && npm run build:$npm_config_variant --prefix web && npm run build --prefix e2e-tests",
+    "build": "npm i && npm run build --prefix functions && npm run build:$npm_config_variant --prefix web && npm run build --prefix e2e-tests",
     "build:local": "npm run build --project=$npm_config_project --variant=local",
     "build:dev": "npm run build --project=$npm_config_project --variant=dev",
     "build:prod": "npm run build --project=$npm_config_project --variant=prod",
