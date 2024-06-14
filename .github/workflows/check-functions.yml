@@ -17,14 +17,14 @@
 # The first time the Docker image is created, the total build time can exceed
 # the 10 min default. Increase the max. build time to 20 min to prevent
 # timeouts.
-name: Check Cloud Functions
+name: functions
 on:
   pull_request:
     paths:
       - "functions/**"
 jobs:
-  run-tests:
-    name: Run tests
+  check:
+    name: check
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -42,22 +42,5 @@ jobs:
       - name: Run tests
         run: npm run test
 
-  run-lint:
-      name: Run lint checks
-      runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: ./functions
-
-      steps:
-        - name: Check out code
-          uses: actions/checkout@v1
-
-        - name: Set up Node.js
-          uses: actions/setup-node@v2
-          with:
-              node-version: "18"
-
-        - name: Run checks
-          run: npm run lint
-          
+      - name: Run lint
+        run: npm run lint
