@@ -17,7 +17,7 @@
 // import * as admin from 'firebase-admin';
 import {Change, EventContext} from 'firebase-functions';
 import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {db} from './common/context';
+import {getDatastore} from './common/context';
 
 export async function onWriteSubmissionHandler(
   change: Change<DocumentSnapshot>,
@@ -26,12 +26,13 @@ export async function onWriteSubmissionHandler(
   const surveyId = context.params.surveyId;
   const loiId = change.after?.get('loiId') || change.before?.get('loiId');
   if (!loiId) return;
-  // Note: Counting submissions requires scanning the index, which has O(N) cost,
+  // Note: Counting submissions requires scanning the index, which has O(N) cost,
   // where N=submission count. This could be done in constant time by
   // incrementing/decrementing the count on create/delete, however that could lead to
   // skew or invalid states should the event not be handled for any reason.
   // An example of how this might be done for is shared here for future reference:
   //   https://gist.github.com/gino-m/6097f38c950921b7f98d8de87bbde4dd
+  const db = getDatastore();
   const count = await db.countSubmissionsForLoi(surveyId, loiId);
   await db.updateSubmissionCount(surveyId, loiId, count);
 }

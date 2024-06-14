@@ -21,11 +21,7 @@
         "type": 301
       }
     ],
-    "rewrites": [
-      {
-        "source": "/importCsv",
-        "function": "importCsv"
-      },
+    "rewrites": [      
       {
         "source": "/importGeoJson",
         "function": "importGeoJson"
