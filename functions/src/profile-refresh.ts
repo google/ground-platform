@@ -35,5 +35,5 @@ export async function handleProfileRefresh(
 
   await getDatastore().mergeUserProfile(user);
 
-  return "OK";
+  return 'OK';
 }
