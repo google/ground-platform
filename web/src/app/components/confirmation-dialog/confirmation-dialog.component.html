@@ -14,22 +14,9 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>{{ title }}</h1>
-<div mat-dialog-content>{{ message }}</div>
-<div
-  mat-dialog-actions
-  fxLayout
-  fxLayoutAlign="end"
-  class="confirmation-actions"
->
-  <ng-container *ngIf="showDiscardActions; else defaultActions">
-    <button mat-button (click)="onClose()">Cancel</button>
-    <button mat-flat-button color="primary" (click)="onConfirm()">
-      Discard
-    </button>
-  </ng-container>
-  <ng-template #defaultActions>
-    <button mat-button (click)="onClose()">No</button>
-    <button mat-flat-button color="primary" (click)="onConfirm()">Yes</button>
-  </ng-template>
-</div>
+<h2 mat-dialog-title>{{ title }}</h2>
+<mat-dialog-content>{{ message }}</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onClose()">No</button>
+  <button mat-button (click)="onConfirm()" cdkFocusInitial>Yes</button>
+</mat-dialog-actions>
