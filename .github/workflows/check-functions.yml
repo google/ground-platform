@@ -17,14 +17,14 @@
 # The first time the Docker image is created, the total build time can exceed
 # the 10 min default. Increase the max. build time to 20 min to prevent
 # timeouts.
-name: ground-platform/functions
+name: ground-platform / functions
 on:
   pull_request:
     paths:
       - "functions/**"
 jobs:
-  ci:
-    name: CI
+  run-checks:
+    name: Run checks
     runs-on: ubuntu-latest
     defaults:
       run:
