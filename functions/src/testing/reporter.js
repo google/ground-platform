@@ -16,7 +16,7 @@
 
 import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
 
-jasmine.getEnv().clearReporters()
+jasmine.getEnv().clearReporters();
 jasmine.getEnv().addReporter(
   new SpecReporter({
     spec: {
@@ -24,4 +24,4 @@ jasmine.getEnv().addReporter(
       displayStacktrace: StacktraceOption.RAW,
     },
   })
-)
+);

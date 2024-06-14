@@ -15,13 +15,13 @@
  */
 
 import * as cors from 'cors';
-import { DecodedIdToken } from 'firebase-admin/auth';
-import { https, Response } from 'firebase-functions';
-import { getDecodedIdToken } from './common/auth';
-import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
+import {DecodedIdToken} from 'firebase-admin/auth';
+import {https, Response} from 'firebase-functions';
+import {getDecodedIdToken} from './common/auth';
+import {INTERNAL_SERVER_ERROR, UNAUTHORIZED} from 'http-status-codes';
 import * as cookieParser from 'cookie-parser';
 
-const corsOptions = { origin: true };
+const corsOptions = {origin: true};
 const corsMiddleware = cors(corsOptions);
 
 /** Token to be used when running on local emulator for debugging. */
@@ -29,7 +29,7 @@ export class EmulatorIdToken implements DecodedIdToken {
   aud = '';
   auth_time = 0;
   exp = 0;
-  firebase = { identities: { }, sign_in_provider: '' };
+  firebase = {identities: {}, sign_in_provider: ''};
   iat = 0;
   iss = '';
   sub = '';
@@ -40,9 +40,13 @@ export class EmulatorIdToken implements DecodedIdToken {
  * Checks for and extracts the current user's details, passing them to the provided function if found.
  * Sends an UNAUTHORIZED HTTP response code if not present or invalid.
  */
-async function requireIdToken(req: https.Request, res: Response, next: (decodedIdToken: DecodedIdToken) => Promise<any>): Promise<any> {
-  if (process.env.FUNCTIONS_EMULATOR === "true") {      
-    console.warn("Local emulator detected. Bypassing authentication.");
+async function requireIdToken(
+  req: https.Request,
+  res: Response,
+  next: (decodedIdToken: DecodedIdToken) => Promise<any>
+): Promise<any> {
+  if (process.env.FUNCTIONS_EMULATOR === 'true') {
+    console.warn('Local emulator detected. Bypassing authentication.');
     return next(new EmulatorIdToken());
   }
   const token = await getDecodedIdToken(req);
@@ -58,12 +62,16 @@ function onError(res: any, err: any) {
   res.status(INTERNAL_SERVER_ERROR).send('Internal error');
 }
 
-export type HttpsRequestHandler = (req: https.Request, res: Response, idToken: DecodedIdToken) => Promise<any>
+export type HttpsRequestHandler = (
+  req: https.Request,
+  res: Response,
+  idToken: DecodedIdToken
+) => Promise<any>;
 
 export function onHttpsRequest(handler: HttpsRequestHandler) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
-      cookieParser()(req, res, () => 
+      cookieParser()(req, res, () =>
         requireIdToken(req, res, (idToken: DecodedIdToken) =>
           handler(req, res, idToken).catch((error: any) => onError(res, error))
         )

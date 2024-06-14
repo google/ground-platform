@@ -26,7 +26,7 @@ export async function onWriteSubmissionHandler(
   const surveyId = context.params.surveyId;
   const loiId = change.after?.get('loiId') || change.before?.get('loiId');
   if (!loiId) return;
-  // Note: Counting submissions requires scanning the index, which has O(N) cost,
+  // Note: Counting submissions requires scanning the index, which has O(N) cost,
   // where N=submission count. This could be done in constant time by
   // incrementing/decrementing the count on create/delete, however that could lead to
   // skew or invalid states should the event not be handled for any reason.

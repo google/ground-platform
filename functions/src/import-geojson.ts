@@ -69,7 +69,7 @@ export async function importGeoJsonHandler(
       res.status(HttpStatus.FORBIDDEN).send('Permission denied');
       return;
     }
-      
+
     console.log(`Importing GeoJSON into survey '${surveyId}', job '${jobId}'`);
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
@@ -132,12 +132,12 @@ export async function importGeoJsonHandler(
  */
 function geoJsonToLoi(geoJsonLoi: any, jobId: string) {
   // TODO: Add created/modified metadata.
-  const { id, geometry, properties } = geoJsonLoi;
+  const {id, geometry, properties} = geoJsonLoi;
   return {
     jobId,
     customId: id,
     predefined: true,
     geometry,
-    properties
+    properties,
   };
 }

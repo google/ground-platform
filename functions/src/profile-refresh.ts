@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { db } from './common/context';
-import { CallableRequest, HttpsError } from 'firebase-functions/v2/https';
-import { getAuth } from 'firebase-admin/auth';
+import {db} from './common/context';
+import {CallableRequest, HttpsError} from 'firebase-functions/v2/https';
+import {getAuth} from 'firebase-admin/auth';
 
 type ProfileRefreshResponse = String | HttpsError;
 type ProfileRefreshRequest = CallableRequest<ProfileRefreshResponse>;
@@ -24,13 +24,14 @@ type ProfileRefreshRequest = CallableRequest<ProfileRefreshResponse>;
 /**
  * Store profile of current user in database so it can be displayed to other collaborators.
  */
-export async function handleProfileRefresh(request: ProfileRefreshRequest): Promise<ProfileRefreshResponse> {
+export async function handleProfileRefresh(
+  request: ProfileRefreshRequest
+): Promise<ProfileRefreshResponse> {
   if (!request.auth) {
-    return new HttpsError("unauthenticated", "Missing user credentials");
+    return new HttpsError('unauthenticated', 'Missing user credentials');
   }
   const uid = request.auth.token.uid;
   const user = await getAuth().getUser(uid);
   await db.mergeUserProfile(user);
-  return "OK";
+  return 'OK';
 }
-
