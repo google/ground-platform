@@ -3,18 +3,13 @@
 
 @mixin color($theme) {
   $color-config: mat.get-color-config($theme);
-  $foreground: map.get($color-config, foreground);
-
   .edit-option {
     .drag-icon {
-      color: map.get($foreground, icon);
+      color: mat.get-theme-color($theme, on-surface-variant);
     }
   }
 }
 
 @mixin theme($theme) {
-  $color-config: mat.get-color-config($theme);
-  @if $color-config != null {
-    @include color($theme);
-  }
+  @include color($theme);
 }
