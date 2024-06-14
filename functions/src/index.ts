@@ -18,7 +18,6 @@ import 'module-alias/register';
 import * as functions from 'firebase-functions';
 import {onHttpsRequest} from './handlers';
 import {handleProfileRefresh} from './profile-refresh';
-import {importCsvHandler} from './import-csv';
 import {sessionLoginHandler} from './session-login';
 import {importGeoJsonHandler} from './import-geojson';
 import {exportCsvHandler} from './export-csv';
@@ -44,8 +43,6 @@ export const surveyPathTemplate = survey('{surveyId}');
 export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
-
-export const importCsv = onHttpsRequest(importCsvHandler);
 
 export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
 

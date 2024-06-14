@@ -24,10 +24,6 @@
     ],
     "rewrites": [
       {
-        "source": "/importCsv",
-        "function": "importCsv"
-      },
-      {
         "source": "/importGeoJson",
         "function": "importGeoJson"
       },
