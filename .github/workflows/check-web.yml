@@ -1,4 +1,4 @@
-# Copyright 2021 The Ground Authors.
+# Copyright 2024 The Ground Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,15 +17,14 @@
 # The first time the Docker image is created, the total build time can exceed
 # the 10 min default. Increase the max. build time to 20 min to prevent
 # timeouts.
-name: Run tests
+name: ground-platform/web
 on:
   pull_request:
     paths:
       - "web/**"
-      - "lib/**"
 jobs:
-  web-test-coverage:
-    name: web
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,48 +45,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Jasmine tests
+      - name: Run tests
         run: npm run test-with-coverage
 
-      - name: Update test coverage analysis
+      - name: Update test coverage report
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  lint-protos:
-    name: proto
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./proto
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
-      - name: Lint Protocol Buffer definitions
-        run: npm i && npm run lint
-      
-  test-lib:
-    name: lib
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./lib
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v1
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
-      - name: Run Jasmine tests
-        run: npm run test
