@@ -17,26 +17,28 @@
 // Include Angular Material theme mixins globally using shared Ground palette
 // defined in src/app/styles.
 @use '@angular/material' as mat;
+@use './m3-theme';
 
 @use 'app/components/header/current-user-widget/account-popup/_account-popup.component-theme' as account-popup;
 @use 'app/components/header/_header.component-theme.scss' as header;
 @use 'app/components/import-dialog/_import-dialog.component-theme' as import-dialog;
 @use 'app/components/inline-editor/inline-editor.component-theme' as inline-editor;
 @use 'app/components/job-list-item/_job-list-item.component-theme' as job-list-item;
+@use 'app/components/loi-editor/_loi-editor.component-theme.scss' as loi-editor;
 @use 'app/components/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
 @use 'app/components/loi-selection/loi-selection.component-theme' as loi-selection;
 @use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
 @use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
+@use 'app/components/tasks-editor/_tasks-editor.component-theme' as tasks-editor;
 @use 'app/components/tasks-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
 @use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
 @use 'app/pages/create-survey/step-card/_step-card.component-theme' as step-card;
-@use 'app/pages/create-survey/job-details/_job-details.component-theme' as job-details;
+@use 'app/pages/edit-survey/_edit-survey.component-theme.scss' as edit-survey;
 @use 'app/pages/edit-survey/edit-job/_edit-job.component-theme' as edit-job;
 @use 'app/pages/main-page-container/main-page/drawing-tools/_drawing-tools.component-theme' as drawing-tools;
-@use 'app/pages/main-page-container/main-page/job-dialog/task-editor/option-editor/_option-editor.component-theme' as option-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
 @use 'app/pages/main-page-container/main-page/map/_map.component-theme' as map;
@@ -45,69 +47,50 @@
 @use 'app/pages/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
 @use 'app/pages/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
 @use 'app/pages/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
-@use 'app/pages/main-page-container/main-page/_main-page.component-theme' as main-page;
 @use 'app/pages/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
 
 @import 'firebaseui/dist/firebaseui.css';
+
+$theme: m3-theme.$light-theme;
 
 // Include the common styles for Angular Material. This allows us to only
 // have to load a single css file for Angular Material in your app.
 @include mat.core();
 
-$primary: mat.define-palette(mat.$green-palette, 700, 600, 800);
-$accent: mat.define-palette(mat.$amber-palette, 700, 600, 800);
-$warn: mat.define-palette(mat.$pink-palette, 600, 500, 700);
+html {
+  @include mat.all-component-themes($theme);
 
-// TODO(#1135): add typography levels
-$typography: mat.define-typography-config(
-  $font-family: 'Manrope,Arial,sans-serif',
-);
-
-$theme: mat.define-light-theme((
- color: (
-   primary: $primary,
-   accent: $accent,
-   warn: $warn,
- ),
- typography: $typography,
- density: 0,
-));
-
-$foreground: map-get($theme, foreground);
-
-// TODO(#1135): call themes on a component level
-@include mat.all-component-themes($theme);
-
-// Custom component themes
-@include account-popup.theme($theme);
-@include header.theme($theme);
-@include import-dialog.theme($theme);
-@include inline-editor.theme($theme);
-@include job-list-item.theme($theme);
-@include loi-properties-dialog.theme($theme);
-@include loi-selection.theme($theme);
-@include share-dialog.theme($theme);
-@include share-survey.theme($theme);
-@include sign-in-page.theme($theme);
-@include survey-list.theme($theme);
-@include edit-option.theme($theme);
-@include user-avatar.theme($theme);
-@include create-survey.theme($theme);
-@include edit-job.theme($theme);
-@include step-card.theme($theme);
-@include job-details.theme($theme);
-@include drawing-tools.theme($theme);
-@include option-editor.theme($theme);
-@include task-editor.theme($theme);
-@include job-dialog.theme($theme);
-@include map.theme($theme);
-@include loi-panel-header.theme($theme);
-@include loi-panel.theme($theme);
-@include submission-form.theme($theme);
-@include survey-header.theme($theme);
-@include title-dialog.theme($theme);
-@include main-page.theme($theme);
-@include secondary-side-panel.theme($theme);
+  // Custom component themes
+  @include account-popup.theme($theme);
+  @include header.theme($theme);
+  @include import-dialog.theme($theme);
+  @include inline-editor.theme($theme);
+  @include job-list-item.theme($theme);
+  @include loi-editor.theme($theme);
+  @include loi-properties-dialog.theme($theme);
+  @include loi-selection.theme($theme);
+  @include share-dialog.theme($theme);
+  @include share-survey.theme($theme);
+  @include sign-in-page.theme($theme);
+  @include survey-list.theme($theme);
+  @include tasks-editor.theme($theme);
+  @include edit-option.theme($theme);
+  @include user-avatar.theme($theme);
+  @include create-survey.theme($theme);
+  @include edit-survey.theme($theme);
+  @include edit-job.theme($theme);
+  @include step-card.theme($theme);
+  @include drawing-tools.theme($theme);
+  @include task-editor.theme($theme);
+  @include job-dialog.theme($theme);
+  @include map.theme($theme);
+  @include loi-panel-header.theme($theme);
+  @include loi-panel.theme($theme);
+  @include submission-form.theme($theme);
+  @include survey-header.theme($theme);
+  @include title-dialog.theme($theme);
+  @include secondary-side-panel.theme($theme);
+}
 
 // Global styles
 html,
@@ -115,7 +98,6 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-
   --mdc-typography-button-letter-spacing: 0;
 }
 
@@ -123,18 +105,6 @@ body {
 button .mat-icon + label {
   padding-left: 6px;
   cursor: pointer;
-}
-
-.mat-mdc-menu-item mat-icon {
-  color: mat.get-color-from-palette($foreground, icon) !important;
-}
-
-snack-bar-container.success {
-  background-color: mat.get-color-from-palette($primary, default)
-}
-
-snack-bar-container.error {
-  background-color: mat.get-color-from-palette($warn, default)
 }
 
 snack-bar-container.notification {
@@ -147,22 +117,9 @@ snack-bar-container.notification {
   width: 1024px;
 }
 
-.loi-properties-dialog-container {
-  .mat-mdc-dialog-surface {
-    background: #F9FAF4 !important;
-  }
-}
-
 .small-width-dialog {
   width: 340px !important;
   max-width: 340px !important;
-
-  .mat-mdc-dialog-surface {
-    background: #F9FAF4 !important;
-    border-radius: 28px !important;
-    padding-top: 16px;
-    padding-bottom: 16px;
-  }
 }
 
 // TODO(#1633): Can remove once upgraded past v16.1, there is a panelWidth
