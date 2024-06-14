@@ -16,7 +16,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {GeoPoint} from 'firebase/firestore';
 import {List, Map} from 'immutable';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
