@@ -29,6 +29,9 @@ const PB_ROLES = Map([
 ]);
 
 export class ProtoModelConverter {
+  /**
+   * Creates a proto rapresentation of a Survey.
+   */
   static newSurveyToProto(
     name: string,
     description: string,
@@ -45,7 +48,10 @@ export class ProtoModelConverter {
     );
   }
 
-  static partialSurveyToJS(name: string, description?: string): {} {
+  /**
+   * Creates a proto rapresentation of a Survey.
+   */
+  static partialSurveyToProto(name: string, description?: string): {} {
     return toDocumentData(
       new Pb.Survey({
         name,

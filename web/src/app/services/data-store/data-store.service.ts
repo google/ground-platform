@@ -183,7 +183,7 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set(
-        {title: newName, ...ProtoModelConverter.partialSurveyToJS(newName)},
+        {title: newName, ...ProtoModelConverter.partialSurveyToProto(newName)},
         {merge: true}
       );
   }
@@ -208,7 +208,7 @@ export class DataStoreService {
         {
           title: newName,
           description: newDescription,
-          ...ProtoModelConverter.partialSurveyToJS(newName, newDescription),
+          ...ProtoModelConverter.partialSurveyToProto(newName, newDescription),
         },
         {merge: true}
       );
