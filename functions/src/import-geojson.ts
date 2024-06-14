@@ -186,43 +186,46 @@ function toLoiPb(
 function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
   switch (geometry.type) {
     case 'Point':
-      const point = toPointPb(geometry.coordinates);
-      return point ? new Pb.Geometry({point}) : null;
+      return toPointGeometry(geometry.coordinates);
     case 'Polygon':
-      const polygon = toPolygonPb(geometry.coordinates);
-      return polygon ? new Pb.Geometry({polygon}) : null;
+      return toPolygonGeometry(geometry.coordinates);
     case 'MultiPolygon':
-      const multiPolygon = toMultiPolygon(geometry.coordinates);
-      return multiPolygon ? new Pb.Geometry({multiPolygon}) : null;
+      return toMultiPolygonGeometry(geometry.coordinates);
   }
   // Unsupported GeoJSON type.
   return null;
 }
 
-function toPointPb(position: Position): Pb.Point | null {
-  const coordinatesPb = toCoordinatesPb(position);
-  return coordinatesPb ? new Pb.Point({coordinates: coordinatesPb}) : null;
+function toPointGeometry(position: Position): Pb.Geometry | null {
+  const coordinates = toCoordinatesPb(position);
+  const point = coordinates ? new Pb.Point({coordinates}) : null;
+  return point ? new Pb.Geometry({point}) : null;
 }
+
 function toCoordinatesPb(position: Position): Pb.Coordinates | null {
   const [longitude, latitude] = position;
-  return longitude && latitude
-    ? new Pb.Coordinates({
-        longitude,
-        latitude,
-      })
-    : null;
+  if (!longitude && !latitude) return null;
+  return new Pb.Coordinates({longitude, latitude});
 }
 
 function toPolygonPb(positions: Position[][]): Pb.Polygon | null {
-  const [shell, ...holes] = positions;
+  const [shellCoords, ...holeCoords] = positions;
   // Ignore if shell is missing.
-  const shellPb = shell ? toLinearRingPb(shell) : null;
-  const holesPb =
-    holes
+  if (!shellCoords) return null;
+  const shell = toLinearRingPb(shellCoords);
+  if (!shell) return null;
+  const holes =
+    holeCoords
       ?.map(h => toLinearRingPb(h))
       ?.filter(h => !!h)
-      .map(h => h!!) || [];
-  return shellPb ? new Pb.Polygon({shell: shellPb, holes: holesPb}) : null;
+      ?.map(h => h as Pb.LinearRing) || [];
+  return new Pb.Polygon({shell, holes});
+}
+
+function toPolygonGeometry(positions: Position[][]): Pb.Geometry | null {
+  const polygon = toPolygonPb(positions);
+  if (!polygon) return null;
+  return new Pb.Geometry({polygon});
 }
 
 function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
@@ -232,11 +235,13 @@ function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
   return new Pb.LinearRing({coordinates: coords.map(c => c!)});
 }
 
-function toMultiPolygon(positions: Position[][][]): Pb.MultiPolygon | null {
+function toMultiPolygonGeometry(positions: Position[][][]): Pb.Geometry | null {
   // Skip invalid polygons.
   const polygons = positions
     .map(p => toPolygonPb(p))
     .filter(p => !!p)
     .map(p => p!);
-  return polygons.length > 0 ? new Pb.MultiPolygon({polygons}) : null;
+  if (polygons.length) return null;
+  const multiPolygon = new Pb.MultiPolygon({polygons});
+  return new Pb.Geometry({multiPolygon});
 }

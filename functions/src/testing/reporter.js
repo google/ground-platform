@@ -19,7 +19,8 @@ import {SpecReporter, StacktraceOption} from 'jasmine-spec-reporter';
 // Show references to TypeScript code in stacktraces.
 require('source-map-support').install();
 
-jasmine.getEnv().clearReporters()
+jasmine.getEnv().clearReporters();
+
 jasmine.getEnv().addReporter(
   new SpecReporter({
     spec: {

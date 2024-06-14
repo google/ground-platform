@@ -51,7 +51,7 @@ describe('onWriteSubmission()', () => {
     // testFirestore.collection.withArgs(submissionsPath).and.returnValue({
     //   where: jasmine
     //     .createSpy('where')
-    //     .withArgs('loiId', '==', loiId)        
+    //     .withArgs('loiId', '==', loiId)
     //     .and.returnValue(newCountQuery(count)),
     // });
   }
