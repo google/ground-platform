@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {db} from './common/context';
+import {getDatastore} from './common/context';
 import {CallableRequest, HttpsError} from 'firebase-functions/v2/https';
 import {getAuth} from 'firebase-admin/auth';
 
@@ -32,6 +32,8 @@ export async function handleProfileRefresh(
   }
   const uid = request.auth.token.uid;
   const user = await getAuth().getUser(uid);
-  await db.mergeUserProfile(user);
-  return 'OK';
+
+  await getDatastore().mergeUserProfile(user);
+
+  return "OK";
 }

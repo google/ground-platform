@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import * as HttpStatus from 'http-status-codes';
-import {db} from './common/context';
+import {getDatastore} from './common/context';
 import * as Busboy from 'busboy';
 import * as JSONStream from 'jsonstream-ts';
 import {canImport} from './common/auth';
@@ -44,6 +44,8 @@ export async function importGeoJsonHandler(
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
   const inserts: any[] = [];
+
+  const db = getDatastore();
 
   // Handle non-file fields in the task. survey and job must appear
   // before the file for the file handler to work properly.
