@@ -222,13 +222,13 @@ export class CreateSurveyComponent implements OnInit {
   surveyDetails?: SurveyDetailsComponent;
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
-    const [title, description] = this.surveyDetails!.toTitleAndDescription();
+    const [name, description] = this.surveyDetails!.toTitleAndDescription();
     if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
-      return await this.surveyService.createSurvey(title, description);
+      return await this.surveyService.createSurvey(name, description);
     }
     return await this.surveyService.updateTitleAndDescription(
       this.surveyId!,
-      title,
+      name,
       description
     );
   }

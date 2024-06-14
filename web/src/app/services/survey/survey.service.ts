@@ -79,7 +79,7 @@ export class SurveyService {
       return new Observable<List<Survey>>();
     }
     const userEmail = user.email;
-    return this.dataStore.loadAccessibleSurvey$(userEmail);
+    return this.dataStore.loadAccessibleSurveys$(userEmail);
   }
 
   /**
@@ -115,10 +115,10 @@ export class SurveyService {
     return this.dataStore.updateAcl(surveyId, acl);
   }
 
-  async createSurvey(title: string, description?: string): Promise<string> {
+  async createSurvey(name: string, description?: string): Promise<string> {
     const user = await firstValueFrom(this.authService.getUser$());
     const surveyId = await this.dataStore.createSurvey(
-      title,
+      name,
       description ?? '',
       user
     );

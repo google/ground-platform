@@ -290,12 +290,12 @@ describe('CreateSurveyComponent', () => {
       }));
 
       it('creates new survey with title and description after clicking continue', fakeAsync(() => {
-        const newTitle = 'newTitle';
+        const newName = 'newName';
         const newDescription = 'newDescription';
         const surveyDetailsComponent = component.surveyDetails!;
         surveyDetailsComponent.formGroup.controls[
           surveyDetailsComponent.titleControlKey
-        ].setValue(newTitle);
+        ].setValue(newName);
         surveyDetailsComponent.formGroup.controls[
           surveyDetailsComponent.descriptionControlKey
         ].setValue(newDescription);
@@ -304,7 +304,7 @@ describe('CreateSurveyComponent', () => {
         flush();
 
         expect(surveyServiceSpy.createSurvey).toHaveBeenCalledOnceWith(
-          newTitle,
+          newName,
           newDescription
         );
         expect(

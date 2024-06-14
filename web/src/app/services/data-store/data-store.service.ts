@@ -118,7 +118,7 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
    *
    */
-  loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
+  loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath('acl', userEmail), 'in', Object.keys(Role))
