@@ -1,0 +1,63 @@
+# Copyright 2021 The Ground Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This build is run automatically on pushes and pull requests.
+
+# The first time the Docker image is created, the total build time can exceed
+# the 10 min default. Increase the max. build time to 20 min to prevent
+# timeouts.
+name: Check Cloud Functions
+on:
+  pull_request:
+    paths:
+      - "functions/**"
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./functions
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Run tests
+        run: npm run test
+
+  run-lint:
+      name: Run lint checks
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ./functions
+
+      steps:
+        - name: Check out code
+          uses: actions/checkout@v1
+
+        - name: Set up Node.js
+          uses: actions/setup-node@v2
+          with:
+              node-version: "18"
+
+        - name: Run checks
+          run: npm run lint
+          
