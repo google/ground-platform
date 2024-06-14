@@ -15,6 +15,7 @@
  */
 
 import {FieldDescriptor, MessageDescriptor, registry} from './message-registry';
+import {isEmpty} from './obj-util';
 import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
 
 /**
@@ -100,16 +101,5 @@ function toValue(
       }
     default:
       return Error(`Unsupported field type ${typeof value}`);
-  }
-}
-
-function isEmpty(obj: any) {
-  switch (typeof obj) {
-    case 'string':
-      return obj === '';
-    case 'object':
-      return Object.keys(obj).length === 0;
-    default:
-      return false;
   }
 }

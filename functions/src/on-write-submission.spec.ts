@@ -17,9 +17,7 @@
 import {
   stubAdminApi,
   newEventContext,
-  newDocumentSnapshot,
-  testFirestore,
-  newCountQuery,
+  newDocumentSnapshot
 } from '@ground/lib/dist/testing/firestore';
 
 const test = require('firebase-functions-test')();
@@ -50,17 +48,17 @@ describe('onWriteSubmission()', () => {
     loiId: string,
     count: number
   ) {
-    testFirestore.collection.withArgs(submissionsPath).and.returnValue({
-      where: jasmine
-        .createSpy('where')
-        .withArgs('loiId', '==', loiId)        
-        .and.returnValue(newCountQuery(count)),
-    });
+    // testFirestore.collection.withArgs(submissionsPath).and.returnValue({
+    //   where: jasmine
+    //     .createSpy('where')
+    //     .withArgs('loiId', '==', loiId)        
+    //     .and.returnValue(newCountQuery(count)),
+    // });
   }
 
   function installLoiUpdateSpy(loiPath: string) {
     const loiUpdateSpy = jasmine.createSpy('update');
-    testFirestore.doc.withArgs(loiPath).and.returnValue({update: loiUpdateSpy});
+    // testFirestore.doc.withArgs(loiPath).and.returnValue({update: loiUpdateSpy});
     return loiUpdateSpy;
   }
 

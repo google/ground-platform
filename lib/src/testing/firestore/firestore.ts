@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { Firestore } from "@google-cloud/firestore";
+
 const MockFirebase = require('mock-cloud-firestore');
 
 // Set project as workaround for https://github.com/firebase/firebase-functions/issues/437.
 process.env.GCLOUD_PROJECT = 'fake-project';
 
-export const testFirestore = new MockFirebase().firestore();
+export const testFirestore = new MockFirebase().firestore() as Firestore;

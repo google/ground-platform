@@ -21,6 +21,7 @@ import functions from 'firebase-functions';
 import {Blob, FormData} from 'formdata-node';
 import {buffer} from 'node:stream/consumers';
 import {FormDataEncoder} from 'form-data-encoder';
+import HttpStatus from 'http-status-codes';
 
 describe('importGeoJson()', () => {
   const surveyId = 'survey001';
@@ -34,18 +35,17 @@ describe('importGeoJson()', () => {
     stubAdminApi();
   });
 
-  afterAll(() => {
-  });
+  afterAll(() => {});
 
   fit('imports points', async () => {
     spyOn(require('firebase-admin/auth'), 'getAuth').and.returnValue({
       getUser: () => {},
       verifySessionCookie: () => {},
     });
-    const add = jasmine.createSpy('add');
+    // const add = jasmine.createSpy('add');
     // TODO: rename back to mockFirestore
     testFirestore.doc(`surveys/${surveyId}`).set({
-      name: 'Test'
+      name: 'Test',
     });
     // testFirestore.collection.withArgs(LOI_COLLECTION).and.returnValue({add});
     const form = new FormData();
@@ -53,21 +53,23 @@ describe('importGeoJson()', () => {
     form.append('job', jobId);
     form.append(
       'file',
-      new Blob([JSON.stringify({
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [125.6, 10.1],
+      new Blob([
+        JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [125.6, 10.1],
+              },
+              properties: {
+                name: 'Dinagat Islands',
+              },
             },
-            properties: {
-              name: 'Dinagat Islands',
-            },
-          },
-        ],
-      })]),
+          ],
+        }),
+      ]),
       'file.json'
     );
     const encoder = new FormDataEncoder(form);
@@ -83,14 +85,44 @@ describe('importGeoJson()', () => {
       }
     );
     const res = jasmine.createSpyObj<functions.Response<any>>('response', [
+      'send',
       'status',
-      'end'
+      'end',
     ]);
-    // const res = new MockExpressResponse();
+    res.status.and.returnValue(res);
+    res.end.and.returnValue(res);
 
-    importGeoJsonHandler(req, res, {} as DecodedIdToken);
+    await importGeoJsonHandler(req, res, {} as DecodedIdToken);
 
-    expect(res.status).toHaveBeenCalledOnceWith(200);
-    expect(add).toHaveBeenCalledOnceWith({});
+    expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
+
+    const loiCollection = await testFirestore
+      .collection(`surveys/${surveyId}/lois`)
+      .get();
+    const loiData = loiCollection.docs.map(doc => doc.data());
+    console.log(loiData);
+    expect(loiData).toEqual([
+      {
+        '2': 'job123',
+        '3': {'1': {'1': {'1': 10.1, '2': 125.6}}},
+        '9': 1,
+        '10': {name: 'Dinagat Islands'},
+        jobId: 'job123',
+        predefined: true,
+        geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
+        properties: {name: 'Dinagat Islands'},
+      },
+    ]);
   });
 });
+
+/**
+ * Returns a new Object with the specified coordinates. Use in place of GeoPoint
+ * in tests to work around lack of support in MockFirebase lib.
+ */
+function TestGeoPoint(_latitude: number, _longitude: number) {
+  return {
+    _latitude,
+    _longitude,
+  };
+}
