@@ -15,14 +15,22 @@
  */
 
 import {Datastore} from './datastore';
-import {initializeApp} from 'firebase-admin/app';
+import {initializeApp, getApp} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
 
 let datastore: Datastore;
 
+export function initializeFirebaseApp() {
+  try {
+    getApp();
+  } catch (e) {
+    initializeApp();
+  }
+}
+
 export function getDatastore(): Datastore {
   if (!datastore) {
-    initializeApp();
+    initializeFirebaseApp()
     datastore = new Datastore(getFirestore());
   }
   return datastore;
