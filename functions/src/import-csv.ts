@@ -71,7 +71,7 @@ export async function importCsvHandler(
       res.status(HttpStatus.FORBIDDEN).send('Permission denied');
       return;
     }
-  
+
     console.log(`Importing CSV into survey '${surveyId}', job '${jobId}'`);
 
     // Pipe file through CSV parser lib, inserting each row in the db as it is
