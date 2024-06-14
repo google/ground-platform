@@ -23,8 +23,8 @@ on:
     paths:
       - "lib/**"
 jobs:      
-  run-checks:
-    name: Run checks
+  check:
+    name: Check
     runs-on: ubuntu-latest
     defaults:
       run:
