@@ -18,31 +18,18 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-
-  // TODO(#1135): find corresponding color in palette
-
   .edit-job-header-title {
-    color: #1A1C19;
+    color: mat.get-theme-color($theme, on-surface);
   }
 }
 
 @mixin typography($theme) {
-  $typography-config: mat.get-typography-config($theme);
-
-  // TODO(#1135): use typography-config once typography levels defined
-
   .edit-job-header-title {
-    font-weight: 500;
-    font-size: 24px;
-    line-height: 32px;
+    font: mat.get-theme-typography($theme, headline-small, font);
   }
 }
 
 @mixin theme($theme) {
   @include color($theme);
-
-  $typography-config: mat.get-typography-config($theme);
-  @if $typography-config != null {
-    @include typography($theme);
-  }
+  @include typography($theme);
 }

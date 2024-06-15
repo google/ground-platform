@@ -21,6 +21,11 @@
   align-items: center;
   justify-content: space-between;
 
+  .header-divider {
+    height: 32px;
+    margin: 0 12px;
+  }
+
   div {
     display: flex;
     align-items: center;
@@ -34,14 +39,20 @@
 
     .ground-title {
       margin-left: 12px;
+      font-family: 'Urbanist';
+      font-size: 22px;
+      font-weight: 400;
     }
 
     .cancel-edit-button {
+      height: 40px;
       margin-right: 8px;
     }
 
     .finish-edit-button {
+      height: 40px;
       border-radius: 100px;
+      padding: 10px 24px;
     }
   }
 }

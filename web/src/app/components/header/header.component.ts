@@ -16,6 +16,7 @@
 
 import {Component} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
+import {Router} from '@angular/router';
 
 import {
   DialogData,
@@ -48,7 +49,8 @@ export class HeaderComponent {
     public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
-    public surveyService: SurveyService
+    public surveyService: SurveyService,
+    private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -72,6 +74,10 @@ export class HeaderComponent {
 
   onEditSurveyClick() {
     this.navigationService.navigateToEditSurvey(this.surveyId);
+  }
+
+  onAboutClick() {
+    this.router.navigate([NavigationService.ABOUT]);
   }
 
   onCancelEditSurveyClick() {

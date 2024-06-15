@@ -1,0 +1,9 @@
+{
+  "spec_dir": "spec",
+  "spec_files": ["**/*.spec.ts"],
+  "helpers": ["./node_modules/jasmine-expect/index.js"],
+  "env": {
+    "stopSpecOnExpectationFailure": false,
+    "random": false
+  }
+}

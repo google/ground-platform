@@ -2,62 +2,52 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  // TODO: Use theme colors once GM3 is supported (or custom palette is defined)
-  // The colors defined below are a part of the GM3 color schemes, while the
-  // theme colors are based on M2 palettes.
-
   .page {
-    background-color: #edeee9;
+    background-color: mat.get-theme-color($theme, surface-container);
   }
 
   .mat-mdc-card {
     &.survey-card {
-      background-color: #f9faf4; /* M3/sys/light/surface */
+      background-color: mat.get-theme-color($theme, surface);
 
       &:hover {
-        background-color: #dde5d9; /* M3/sys/light/surface-variant */
+        background-color: mat.get-theme-color($theme, surface-variant);
       }
     }
 
     &.new-survey-card {
-      background-color: #dde5d9; /* M3/sys/light/surface-variant */
+      background-color: mat.get-theme-color($theme, surface-variant);
     }
 
     .add-icon-container {
-      background: #89FA9B; /* M3/sys/light/primary-container */
+      background-color: mat.get-theme-color($theme, primary-container);
     }
   
     .survey-title {
-      color: #1a1c19; /* M3/sys/light/on-surface */
+      color: mat.get-theme-color($theme, on-surface);
+    }
+
+    .survey-description {
+      color: mat.get-theme-color($theme, outline);
     }
   }
 }
 
 @mixin typography($theme) {
-  $typography-config: mat.get-typography-config($theme);
-
-  // TODO(#1135): use typography-config once typography levels defined
-
   .page-title {
-    font-family: mat.font-family($typography-config);
-    font-style: normal;
-    font-weight: 400;
-    font-size: 45px;
+    font: mat.get-theme-typography($theme, display-medium, font);
   }
 
   .survey-title {
-    font-family: mat.font-family($typography-config);
-    font-style: normal;
-    font-weight: 400;
-    font-size: 25px;
+    font: mat.get-theme-typography($theme, headline-small, font);
+  }
+
+  .survey-description {
+    font: mat.get-theme-typography($theme, body-medium, font);
   }
 }
 
 @mixin theme($theme) {
   @include color($theme);
-
-  $typography-config: mat.get-typography-config($theme);
-  @if $typography-config != null {
-    @include typography($theme);
-  }
+  @include typography($theme);
 }

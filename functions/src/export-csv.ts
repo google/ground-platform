@@ -18,7 +18,7 @@ import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
 import {canExport} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
-import {db} from '@/common/context';
+import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
 import {DecodedIdToken} from 'firebase-admin/auth';
@@ -42,6 +42,7 @@ export async function exportCsvHandler(
   res: functions.Response<any>,
   user: DecodedIdToken
 ) {
+  const db = getDatastore();
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
   const survey = await db.fetchSurvey(surveyId);
@@ -163,7 +164,7 @@ function getValue(taskId: string, task: Task, data: any) {
     if (!result) {
       return '';
     }
-    return toWkt(result);
+    return toWkt(result.geometry || result);
   } else {
     return result;
   }

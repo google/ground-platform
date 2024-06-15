@@ -16,18 +16,17 @@
 
 import 'module-alias/register';
 import * as functions from 'firebase-functions';
-import {onHttpsRequest} from '@/handlers';
-import {handleProfileRefresh} from '@/profile-refresh';
-import {importCsvHandler} from '@/import-csv';
-import {sessionLoginHandler} from '@/session-login';
-import {importGeoJsonHandler} from '@/import-geojson';
-import {exportCsvHandler} from '@/export-csv';
+import {onHttpsRequest} from './handlers';
+import {handleProfileRefresh} from './profile-refresh';
+import {sessionLoginHandler} from './session-login';
+import {importGeoJsonHandler} from './import-geojson';
+import {exportCsvHandler} from './export-csv';
 import {onCall} from 'firebase-functions/v2/https';
-import {onWriteSubmissionHandler} from '@/on-write-submission';
-import {onCreateLoiHandler} from '@/on-create-loi';
-import {onWriteLoiHandler} from '@/on-write-loi';
-import {onWriteSurveyHandler} from '@/on-write-survey';
-import {loi, submission, survey} from '@/common/datastore';
+import {onWriteSubmissionHandler} from './on-write-submission';
+import {onCreateLoiHandler} from './on-create-loi';
+import {onWriteLoiHandler} from './on-write-loi';
+import {onWriteSurveyHandler} from './on-write-survey';
+import {loi, submission, survey} from './common/datastore';
 
 /** Template for LOI write triggers capturing survey and LOI ids. */
 export const loiPathTemplate = loi('{surveyId}', '{loiId}');
@@ -44,8 +43,6 @@ export const surveyPathTemplate = survey('{surveyId}');
 export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
-
-export const importCsv = onHttpsRequest(importCsvHandler);
 
 export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
 

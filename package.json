@@ -1,20 +1,25 @@
 {
-  "name": "ground",
+  "name": "@ground/root",
   "version": "0.0.1",
-  "description": "Ground hosted components",
+  "description": "Root package for Ground hosted components",
   "scripts": {
-    "clean": "rm -rf node_modules && npm run clean --prefix schema && npm run clean --prefix functions && npm run clean --prefix web",
-    "build": "npm install && npm run build --prefix schema && npm run build --prefix functions && npm run build:$npm_config_variant --prefix web",
+    "clean": "rm -rf node_modules && for p in lib web functions e2e-tests; do npm run clean --prefix $p; done",
+    "build": "npm i && npm run build --prefix functions && npm run build:$npm_config_variant --prefix web && npm run build --prefix e2e-tests",
     "build:local": "npm run build --project=$npm_config_project --variant=local",
     "build:dev": "npm run build --project=$npm_config_project --variant=dev",
     "build:prod": "npm run build --project=$npm_config_project --variant=prod",
     "watch:local": "npm run watch --prefix functions & npm run watch:local --prefix web",
     "start:local": "npx firebase emulators:exec 'npm run watch:local' --project ground-local-dev --ui --config firebase.local.json --import data/local",
     "export:local": "npx firebase emulators:export data/local --project ground-local-dev --only firestore",
+    "start-and-export:test": "npx firebase emulators:exec 'npm run watch:local' --project ground-local-dev --ui --config firebase.local.json --import data/test --export-on-exit data/test",
     "login": "npx firebase login",
     "deploy": "npm run build:$npm_config_variant --project=$npm_config_project && npm run login && firebase deploy --project $npm_config_project",
     "deploy:dev": "npm run deploy --variant=dev --project=$npm_config_project",
-    "deploy:prod": "npm run deploy --variant=prod --project=$npm_config_project"
+    "deploy:prod": "npm run deploy --variant=prod --project=$npm_config_project",
+    "test:e2e:create": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:create --prefix=e2e-tests'",
+    "test:e2e:create:debug": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:create:debug --prefix=e2e-tests'",
+    "test:e2e:verify": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:verify --prefix=e2e-tests'",
+    "test:e2e:verify:debug": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:verify:debug --prefix=e2e-tests'"
   },
   "repository": {
     "type": "git",
@@ -26,9 +31,20 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
-    "firebase-tools": "11.23.1"
+    "firebase-tools": "13.6.0",
+    "gts": "^5.3.0",
+    "lerna": "^8.1.3",
+    "start-server-and-test": "^2.0.3",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2"
   },
   "engines": {
     "node": "18"
-  }
+  },
+  "workspaces": [
+    "proto",
+    "lib",
+    "functions",
+    "web"
+  ]
 }

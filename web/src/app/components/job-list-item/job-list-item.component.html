@@ -22,7 +22,7 @@ limitations under the License.
       [style.padding-left]="isSidePanelExpanded() ? '40px' : '16px'">
       <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }} loi-icon" [ngStyle]="{color: node.iconColor}"
         [style.padding-left]="isSidePanelExpanded() ? '10px' : '0'"></mat-icon>
-      <div class="select-loi" *ngIf="isSidePanelExpanded()">
+      <div class="loi-name" *ngIf="isSidePanelExpanded()">
         {{ node.name }}
       </div>
       <button
@@ -53,7 +53,7 @@ limitations under the License.
           {{ node.iconName }}
         </mat-icon>
 
-        <div>{{ node.name }}</div>
+        <div class="job-name">{{ node.name }}</div>
       </div>
 
       <div class="expandable-node-start" *ngIf="!isSidePanelExpanded()">
@@ -71,7 +71,7 @@ limitations under the License.
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #jobMenu="matMenu">
-            <a class="download" (click)="onDownloadCsvClick()" target="_blank">
+            <a (click)="onDownloadCsvClick()" target="_blank">
               <button mat-menu-item>
                 <span>Download job data</span>
               </button>

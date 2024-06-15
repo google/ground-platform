@@ -25,7 +25,6 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 
-import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 
 import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
@@ -33,7 +32,7 @@ import {JobDialogComponent} from './job-dialog.component';
 import {TaskEditorModule} from './task-editor/task-editor.module';
 
 @NgModule({
-  declarations: [JobDialogComponent, ConfirmationDialogComponent],
+  declarations: [JobDialogComponent],
   imports: [
     CommonModule,
     MatDialogModule,

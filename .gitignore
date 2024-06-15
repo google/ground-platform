@@ -1,4 +1,5 @@
 .*
+!.vscode/
 !.gitignore
 !.eslintignore
 !.eslintrc.json
@@ -13,6 +14,10 @@
 **/bower_components
 **/node_modules
 **/build/
+**/generated/
 **/*.log
 web/google-maps-api.js
 web/coverage/
+# Firebase Emulator local snapshots
+data/local
+data/test

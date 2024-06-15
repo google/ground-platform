@@ -16,8 +16,12 @@
 
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {DocumentData, FieldPath} from '@angular/fire/firestore';
-import {deleteField, serverTimestamp} from 'firebase/firestore';
+import {
+  DocumentData,
+  FieldPath,
+  deleteField,
+  serverTimestamp,
+} from '@angular/fire/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, firstValueFrom} from 'rxjs';
@@ -211,6 +215,17 @@ export class DataStoreService {
       .update({
         [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
       });
+  }
+
+  async deleteSurvey(survey: Survey) {
+    const {id: surveyId} = survey;
+
+    await Promise.all(survey.jobs.map(job => this.deleteJob(surveyId, job.id)));
+
+    return await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .delete();
   }
 
   async deleteJob(surveyId: string, jobId: string) {

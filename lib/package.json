@@ -1,0 +1,42 @@
+{
+  "name": "@ground/lib",
+  "main": "dist/index.js",
+  "description": "Ground shared lib",
+  "scripts": {
+    "clean": "rm -rf node_modules dist *.log $npm_package_config_codegen_path",
+    "lint": "eslint --ext .js,.ts src/",
+    "lint:fix": "npm run lint -- --fix",
+    "pretest": "npm run build",
+    "test": "jasmine --config=jasmine.json",
+    "build:proto": "npm run build --workspace ../proto",
+    "prebuild": "npm install && npm run build:proto",
+    "build": "tsc"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "private": true,
+  "dependencies": {
+    "@ground/proto": "file:../proto",
+    "@google-cloud/firestore": "^7.7.0",
+    "immutable": "^4.3.6",
+    "protobufjs": "^7.3.0",
+    "firebase-functions": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^4.3.5",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "@typescript-eslint/parser": "^5.39.0",
+    "eslint": "^8.26.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "gts": "^5.3.0",
+    "jasmine": "^5.1.0",
+    "jasmine-spec-reporter": "^7.0.0",
+    "prettier": "^2.8.1",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "4.8.4"
+  }
+}

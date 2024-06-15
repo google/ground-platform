@@ -39,7 +39,6 @@ export class EditStyleButtonComponent implements OnInit {
   markerPinUrl: SafeUrl;
 
   constructor(
-    // tslint:disable-next-line:no-any
     private dialog: MatDialog,
     private sanitizer: DomSanitizer,
     private groundPinService: GroundPinService

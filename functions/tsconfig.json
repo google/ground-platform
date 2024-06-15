@@ -8,13 +8,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2019",
-    "allowJs": true,
-    "paths": {
-      "@/*": [
-        "src/*",
-      ],
-      "@types/ground-schema": ["@types/ground-schema/dist/generated/schema"]
-    }
+    "allowJs": true
   },
   "compileOnSave": true,
   "include": [

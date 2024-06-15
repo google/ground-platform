@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-import {Datastore} from '@/common/datastore';
-import {initializeApp} from "firebase-admin/app";
-import {getFirestore} from "firebase-admin/firestore";
+import {Datastore} from './datastore';
+import {initializeApp, getApp} from 'firebase-admin/app';
+import {getFirestore} from 'firebase-admin/firestore';
 
-initializeApp();
+let datastore: Datastore;
 
-export const db = new Datastore(getFirestore());
+export function initializeFirebaseApp() {
+  try {
+    getApp();
+  } catch (e) {
+    initializeApp();
+  }
+}
+
+export function getDatastore(): Datastore {
+  if (!datastore) {
+    initializeFirebaseApp();
+    datastore = new Datastore(getFirestore());
+  }
+  return datastore;
+}

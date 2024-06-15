@@ -16,23 +16,32 @@
 
 import {TestBed} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
-import {NEVER} from 'rxjs';
+import {NEVER, Subject} from 'rxjs';
 
+import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {JobService} from 'app/services/job/job.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('JobService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};
-  beforeEach(() =>
+  const activeSurvey$ = new Subject<Survey | null>();
+
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [RouterTestingModule],
       providers: [
         {provide: DataStoreService, useValue: dataStoreServiceStub},
-        {provide: SurveyService, useValue: {getSurveyAcl: () => NEVER}},
+        {
+          provide: SurveyService,
+          useValue: {
+            getActiveSurvey$: () => activeSurvey$,
+            getSurveyAcl: () => NEVER,
+          },
+        },
       ],
-    })
-  );
+    });
+  });
 
   it('should be created', () => {
     const service: JobService = TestBed.inject(JobService);

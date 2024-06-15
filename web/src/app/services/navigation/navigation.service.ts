@@ -49,6 +49,7 @@ export class NavigationService {
   static readonly SURVEYS_EDIT = 'edit';
   static readonly JOB_SEGMENT = 'job';
   static readonly ERROR = 'error';
+  static readonly ABOUT = 'about';
 
   private sidePanelExpanded = true;
 
