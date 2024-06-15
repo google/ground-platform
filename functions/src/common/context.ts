@@ -30,7 +30,7 @@ export function initializeFirebaseApp() {
 
 export function getDatastore(): Datastore {
   if (!datastore) {
-    initializeFirebaseApp()
+    initializeFirebaseApp();
     datastore = new Datastore(getFirestore());
   }
   return datastore;
