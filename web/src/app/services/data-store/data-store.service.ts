@@ -178,7 +178,6 @@ export class DataStoreService {
    * @param newName the new name of the survey.
    */
   updateSurveyTitle(surveyId: string, newName: string): Promise<void> {
-    console.log('updateSurveyTitle');
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
@@ -200,7 +199,6 @@ export class DataStoreService {
     newName: string,
     newDescription: string
   ): Promise<void> {
-    console.log('updateSurveyTitleAndDescription');
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
