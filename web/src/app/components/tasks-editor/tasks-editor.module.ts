@@ -18,6 +18,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatDialogModule} from '@angular/material/dialog';
 
 import {AddTaskButtonModule} from './add-task-button/add-task-button.module';
 import {TaskConditionFormModule} from './task-condition-form/task-condition-form.module';
@@ -30,6 +31,7 @@ import {TasksEditorComponent} from './tasks-editor.component';
     CommonModule,
     DragDropModule,
     FormsModule,
+    MatDialogModule,
     ReactiveFormsModule,
     AddTaskButtonModule,
     TaskConditionFormModule,

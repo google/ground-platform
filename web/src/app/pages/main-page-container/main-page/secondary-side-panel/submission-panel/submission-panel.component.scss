@@ -20,14 +20,8 @@
   justify-content: space-between;
 }
 
-.submission-title-text {
-  font-size: 24px;
-}
-
 .submission-subtitle { 
-  padding-left: 48px;
-  font-size: 12px;
-  color: #424940;
+  padding-left: var(--mdc-icon-button-state-layer-size);
 }
 
 .submission-tasks-container {
@@ -38,18 +32,8 @@
   padding: 16px 0;
 }
 
-.submission-question {
-  color: #727970;
-  font-size: 12px;
-}
-
 .submission-response {
-  font-size: 16px;
   padding-top: 8px;
-}
-
-.submission-no-response {
-  color: #727970;
 }
 
 .submission-img {
@@ -74,13 +58,9 @@
   margin-top: 8px;
 }
 
-.selected-submission-response-geometry {
-  background-color: #e8e8e3;
-}
-
 .submission-response-geometry-number {
   display: flex;
-  border-radius: 6px;
+  border-radius: 6px;     
   width: 24px;
   height: 24px;
   justify-content: center;
