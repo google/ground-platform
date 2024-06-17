@@ -21,6 +21,16 @@
   .edit-survey-title {
     color: mat.get-theme-color($theme, on-background);
   }
+
+  .survey-detail-card {
+    --mdc-filled-button-container-color: transparent;
+    --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
+    border: 1px solid mat.get-theme-color($theme, neutral, 90);
+
+    .mdc-button {
+      border: 1px solid mat.get-theme-color($theme, outline);
+    }
+  }
  }
  
  @mixin typography($theme) {
@@ -30,6 +40,16 @@
 
   .job-label {
     font: mat.get-theme-typography($theme, title-medium, font);
+  }
+
+  .survey-detail-card {
+    .card-title {
+      font: mat.get-theme-typography($theme, title-medium, font);
+    }
+
+    .card-row {
+      font: mat.get-theme-typography($theme, body-medium, font);
+    }
   }
  }
  

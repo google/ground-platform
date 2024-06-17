@@ -18,8 +18,10 @@ import {TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
-import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
-import {DialogService} from 'app/services/dialog/dialog.service';
+import {
+  ConfirmationDialogComponent,
+  DialogService,
+} from 'app/services/dialog/dialog.service';
 
 describe('DialogService', () => {
   let service: DialogService;
@@ -51,18 +53,13 @@ describe('DialogService', () => {
           data: {
             title: testTitle,
             message: testMessage,
-            showDiscardActions: false,
           },
         })
       );
     });
 
     it('should return correct dialog with discard actions', () => {
-      service.openConfirmationDialog(
-        testTitle,
-        testMessage,
-        /* showDiscardActions */ true
-      );
+      service.openConfirmationDialog(testTitle, testMessage);
 
       expect(matDialog.open).toHaveBeenCalledWith(
         ConfirmationDialogComponent,
@@ -70,7 +67,6 @@ describe('DialogService', () => {
           data: {
             title: testTitle,
             message: testMessage,
-            showDiscardActions: true,
           },
         })
       );

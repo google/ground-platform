@@ -199,8 +199,7 @@ export class JobDialogComponent implements OnDestroy {
     this.dialogService
       .openConfirmationDialog(
         'Discard changes',
-        'Unsaved changes to this job will be lost. Are you sure?',
-        /* showDiscardActions= */ true
+        'Unsaved changes to this job will be lost. Are you sure?'
       )
       .afterClosed()
       .subscribe(async dialogResult => {
