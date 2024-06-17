@@ -9,6 +9,22 @@
     .mdc-list-item__secondary-text {
       color: mat.get-theme-color($theme, outline);
     }
+
+    .submission-subtitle {
+      color: mat.get-theme-color($theme, on-surface-variant);
+    }
+
+    .submission-question {
+      color: mat.get-theme-color($theme, outline);
+    }
+
+    .submission-no-response {
+      color: mat.get-theme-color($theme, outline);
+    }
+
+    .selected-submission-response-geometry {
+      background-color: mat.get-theme-color($theme, surface-dim);
+    }
   }
 }
 
@@ -16,6 +32,26 @@
   .secondary-side-panel {
     .header {
       font: mat.get-theme-typography($theme, headline-small, font);
+    }
+
+    .no-lois-container {
+      font: mat.get-theme-typography($theme, label-small, font);
+    }
+
+    .submission-title-text {
+      font: mat.get-theme-typography($theme, headline-small, font);
+    }
+
+    .submission-subtitle {
+      font: mat.get-theme-typography($theme, body-small, font);
+    }
+
+    .submission-question {
+      font: mat.get-theme-typography($theme, label-medium, font);
+    }
+
+    .submission-response {
+      font: mat.get-theme-typography($theme, body-large, font);
     }
   }
 }
