@@ -13,7 +13,7 @@
     "export:local": "npx firebase emulators:export data/local --project ground-local-dev --only firestore",
     "start-and-export:test": "npx firebase emulators:exec 'npm run watch:local' --project ground-local-dev --ui --config firebase.local.json --import data/test --export-on-exit data/test",
     "login": "npx firebase login",
-    "deploy": "npm run build:$npm_config_variant --project=$npm_config_project && npm run login && firebase deploy --project $npm_config_project",
+    "deploy": "npm run login && firebase deploy --project $npm_config_project",
     "deploy:dev": "npm run deploy --variant=dev --project=$npm_config_project",
     "deploy:prod": "npm run deploy --variant=prod --project=$npm_config_project",
     "test:e2e:create": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:create --workspace=e2e-tests'",
