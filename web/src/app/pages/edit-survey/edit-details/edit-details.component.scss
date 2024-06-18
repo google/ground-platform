@@ -20,22 +20,9 @@
   gap: 16px;
 
   .survey-detail-card {
-    background: #FCFDF7;
-    border: 1px #E2E3DD solid;
-    border-radius: 8px;
-    padding: 24px;
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 24px;
-    }
+    --mdc-elevated-card-container-elevation: 0;
 
     .card-row {
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 20px;
-
       :nth-child(1) {
         flex: 1;
       }
@@ -47,16 +34,6 @@
       &.delete-survey {
         display: flex;
         align-items: center;
-
-        button {
-          height: 40px;
-          border-radius: 100px;
-          border: 1px solid #747775;
-          background: transparent;
-          padding: 10px 24px;
-          gap: 8px;
-          color: #BA1A1A;
-        }
       }
     }
   }

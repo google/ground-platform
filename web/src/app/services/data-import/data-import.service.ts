@@ -20,8 +20,6 @@ import {environment} from 'environments/environment';
 
 import {HttpClientService} from '../http-client/http-client.service';
 
-const IMPORT_CSV_URL = `${environment.cloudFunctionsUrl}/importCsv`;
-
 const IMPORT_GEOJSON_URL = `${environment.cloudFunctionsUrl}/importGeoJson`;
 
 export interface ImportResult {
@@ -47,8 +45,6 @@ export class DataImportService {
     let importUrl;
     if (file.name.endsWith('.geojson') || file.name.endsWith('.json')) {
       importUrl = IMPORT_GEOJSON_URL;
-    } else if (file.name.endsWith('.csv')) {
-      importUrl = IMPORT_CSV_URL;
     } else {
       throw new Error('Invalid file format');
     }
