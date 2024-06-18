@@ -27,6 +27,7 @@ import {
   LocationOfInterest,
 } from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -35,29 +36,37 @@ import {SurveyService} from 'app/services/survey/survey.service';
 })
 export class LocationOfInterestService {
   private lois$: Observable<List<LocationOfInterest>>;
-  private selectedLocationOfInterestId$ = new ReplaySubject<string>(1);
-  private selectedLocationOfInterest$: Observable<LocationOfInterest>;
+  private selectedLoiId$ = new ReplaySubject<string>(1);
+  private selectedLoi$: Observable<LocationOfInterest>;
 
   constructor(
+    private authService: AuthService,
     private dataStore: DataStoreService,
     private surveyService: SurveyService
   ) {
-    this.lois$ = surveyService
-      .getActiveSurvey$()
+    this.lois$ = this.authService
+      .getUser$()
       .pipe(
-        switchMap(survey =>
-          survey.isUnsavedNew()
-            ? of(List<LocationOfInterest>())
-            : dataStore.lois$(survey)
+        switchMap(user =>
+          this.surveyService
+            .getActiveSurvey$()
+            .pipe(
+              switchMap(survey =>
+                survey.isUnsavedNew()
+                  ? of(List<LocationOfInterest>())
+                  : dataStore.getAccessibleLois$(
+                      survey,
+                      user.email,
+                      this.surveyService.canManageSurvey()
+                    )
+              )
+            )
         )
       );
 
-    this.selectedLocationOfInterest$ = this.selectedLocationOfInterestId$.pipe(
+    this.selectedLoi$ = this.selectedLoiId$.pipe(
       switchMap(loiId =>
-        surveyService.getActiveSurvey$().pipe(
-          switchMap(survey => dataStore.lois$(survey)),
-          map(lois => lois.find(loi => loi.id === loiId)!)
-        )
+        this.lois$.pipe(map(lois => lois.find(loi => loi.id === loiId)!))
       )
     );
   }
@@ -71,12 +80,6 @@ export class LocationOfInterestService {
           )
         )
       )
-    );
-  }
-
-  getLoisByJobId$(jobId: string): Observable<List<LocationOfInterest>> {
-    return this.getLocationsOfInterest$().pipe(
-      map(lois => lois.filter(loi => loi.jobId === jobId))
     );
   }
 
@@ -146,11 +149,11 @@ export class LocationOfInterestService {
   }
 
   selectLocationOfInterest(loiId: string) {
-    this.selectedLocationOfInterestId$.next(loiId);
+    this.selectedLoiId$.next(loiId);
   }
 
   getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
-    return this.selectedLocationOfInterest$;
+    return this.selectedLoi$;
   }
 
   async addPoint(
