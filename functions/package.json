@@ -11,7 +11,7 @@
     "login": "firebase login",
     "deploy": "npm run build && firebase deploy --project",
     "logs": "firebase functions:log",
-    "xpretest": "npm run build",
+    "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
     "prebuild": "npm run build:lib && npm install",
     "build:lib": "npm run build --workspace=../lib",
