@@ -4,7 +4,7 @@
   "description": "Shared Protocol Buffer definitions",
   "main": "dist/index.js",
   "scripts": {
-    "clean": "rm -rf node_modules dist",
+    "clean": "rm -rf dist",
     "lint": "buf lint",
     "format": "buf format --write",
     "prebuild": "npm install",

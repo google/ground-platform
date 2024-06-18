@@ -2,7 +2,7 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "clean": "rm -rf node_modules dist coverage *.log",
+    "clean": "rm -rf dist coverage *.log",
     "start:dev": "npm run build:dev --project=$npm_config_project && ng serve -c dev",
     "start:prod": "npm run build:prod --project=$npm_config_project && ng serve -c production",
     "prebuild": "npm install && npm run build:lib",

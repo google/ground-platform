@@ -4,7 +4,7 @@
   "description": "Automated testing of the Ground platform.",
   "type": "module",
   "scripts": {
-    "clean": "rm -rf build node_modules",
+    "clean": "rm -rf build",
     "build": "npm i",
     "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
     "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
