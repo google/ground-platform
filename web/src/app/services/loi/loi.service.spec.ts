@@ -23,6 +23,8 @@ import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {GenericLocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {User} from 'app/models/user.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -31,6 +33,7 @@ import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
+  const user$ = new Subject<User | null>();
 
   const getMockLoi = (
     properties: ImmutableMap<string, string | number> = ImmutableMap(),
@@ -52,6 +55,7 @@ describe('LocationOfInterestService', () => {
     };
     TestBed.configureTestingModule({
       providers: [
+        {provide: AuthService, useValue: {getUser$: () => user$}},
         {provide: DataStoreService, useValue: {}},
         {
           provide: SurveyService,
