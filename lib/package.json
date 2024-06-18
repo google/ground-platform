@@ -9,7 +9,7 @@
     "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
     "build:proto": "npm run build --workspace ../proto",
-    "prebuild": "npm install && npm run build:proto",
+    "prebuild": "npm run build:proto",
     "build": "tsc"
   },
   "engines": {

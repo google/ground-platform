@@ -13,7 +13,7 @@
     "logs": "firebase functions:log",
     "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
-    "prebuild": "npm run build:lib && npm install",
+    "prebuild": "npm run build:lib",
     "build:lib": "npm run build --workspace=../lib",
     "build": "tsc",
     "watch": "npm run build && tsc --watch"
