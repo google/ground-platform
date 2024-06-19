@@ -4,12 +4,11 @@
   "description": "Ground shared lib",
   "scripts": {
     "clean": "rm -rf dist *.log $npm_package_config_codegen_path",
+    "clean:npm": "rm -rf node_modules",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
-    "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
-    "build:proto": "npm run build --workspace ../proto",
-    "prebuild": "npm run build:proto",
+    "preinstall": "npm run build --workspace ../proto",
     "build": "tsc"
   },
   "engines": {
