@@ -56,16 +56,10 @@ to save the updated demo data to the local filesystem for use on the next run.
 
 ### 3. Deploy
 
-Build using dev or production keys:
+Build using dev or production keys and deploy to live Firebase project with:
 
 ```bash
-npm run build --config=dev --project=<firebase-project>
+npm run build-and-deploy --config=dev --project=<firebase-project>
 ```
 
 Replace `dev` with `prod` for production environments.
-
-Deploy to live Firebase project:
-
-```bash
-npm run deploy --project=<firebase-project>
-```
