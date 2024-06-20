@@ -17,7 +17,8 @@
 import {GroundProtos} from '@ground/proto';
 import {toDocumentData} from './proto-to-firestore';
 
-const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
+const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
+  GroundProtos.google.ground.v1beta1;
 
 describe('toDocumentData()', () => {
   [
@@ -30,6 +31,23 @@ describe('toDocumentData()', () => {
       expected: {
         '2': 'Survey name',
         '3': 'Survey desc',
+      },
+    },
+    {
+      desc: 'converts repeated message',
+      input: new LinearRing({
+        coordinates: [
+          new Coordinates({latitude: 5, longitude: 7}),
+          new Coordinates({latitude: 12, longitude: 23}),
+          new Coordinates({latitude: 9, longitude: 2}),
+        ],
+      }),
+      expected: {
+        '1': [
+          {'1': 5, '2': 7},
+          {'1': 12, '2': 23},
+          {'1': 9, '2': 2},
+        ],
       },
     },
     {
