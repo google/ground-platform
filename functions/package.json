@@ -13,6 +13,8 @@
     "deploy": "firebase deploy --project $npm_config_project",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
+    "ci-local-deps": "npm run ci --workspace=../proto --workspace=../lib",
+    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "tsc",
     "watch": "tsc --watch"
   },

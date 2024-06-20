@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf dist coverage *.log",
+    "ci-local-deps": "npm run ci --workspace=../proto --workspace=../lib",
+    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "npm run --prefix scripts copy-keys && ng build -c $npm_config_config",
     "watch": "npm run build -- --watch",
     "start": "npm run build --config=$npm_config_config && ng serve -c $npm_config_config",
