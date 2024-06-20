@@ -33,6 +33,31 @@ describe('toDocumentData()', () => {
       },
     },
     {
+      desc: 'converts array',
+      input: new Job({
+        tasks: [
+          new Task({
+            prompt: 'Task 1',
+            textQuestion: new Task.TextQuestion({
+              type: Task.TextQuestion.Type.SHORT_TEXT,
+            }),
+          }),
+          new Task({
+            prompt: 'Task 2',
+            numberQuestion: new Task.NumberQuestion({
+              type: Task.NumberQuestion.Type.FLOAT,
+            }),
+          }),
+        ],
+      }),
+      expected: {
+        5: [
+          {3: 'Task 1', 7: {1: 1}},
+          {3: 'Task 2', 8: {1: 1}},
+        ],
+      },
+    },
+    {
       desc: 'converts nested message',
       input: new Job({
         style: new Style({color: '#112233'}),

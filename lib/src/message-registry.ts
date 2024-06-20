@@ -27,6 +27,7 @@ export interface ProtoOptions {
 
 export interface FieldDescriptor {
   keyType?: string; // Used for proto map<>
+  rule?: string;
   type: string;
   id: number;
 }
@@ -40,6 +41,8 @@ export interface MessageDescriptor {
   nested?: {[nestedMessageName: string]: MessageDescriptor};
   // Enum definitions, including valid values.
   values?: {[enumValueName: string]: number};
+  //
+  repeated?: boolean;
 }
 
 export interface OneOfDescriptor {
@@ -59,7 +62,7 @@ export class MessageRegistry {
     // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
     const typeUrl = constructor.getTypeUrl('');
     if (typeUrl?.substr(0, 1) !== '/') {
-      console.error("Invalid type URL returned by protojs class:", typeUrl);
+      console.error('Invalid type URL returned by protojs class:', typeUrl);
       return null;
     }
     // Remove preceding "/" and split path along ".";

@@ -43,6 +43,31 @@ describe('toMessage()', () => {
       }),
     },
     {
+      desc: 'converts array',
+      input: {
+        5: [
+          {3: 'Task 1', 7: {1: 1}},
+          {3: 'Task 2', 8: {1: 1}},
+        ],
+      },
+      expected: new Job({
+        tasks: [
+          new Task({
+            prompt: 'Task 1',
+            textQuestion: new Task.TextQuestion({
+              type: Task.TextQuestion.Type.SHORT_TEXT,
+            }),
+          }),
+          new Task({
+            prompt: 'Task 2',
+            numberQuestion: new Task.NumberQuestion({
+              type: Task.NumberQuestion.Type.FLOAT,
+            }),
+          }),
+        ],
+      }),
+    },
+    {
       desc: 'converts map<string, enum>',
       input: {
         '4': {

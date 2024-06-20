@@ -71,13 +71,21 @@ function toDocumentFieldValue(
   }
 }
 
+function toObjectValue(fieldType: string, value: any) {
+  if (Array.isArray(value)) {
+    return value.map(v => toValue(fieldType, v));
+  } else {
+    return toDocumentData(value);
+  }
+}
+
 function toValue(fieldType: string, value: any): DocumentFieldValue | null {
   switch (typeof value) {
     case 'string':
     case 'number': // This handles proto enums as well.
       return value;
     case 'object':
-      return toDocumentData(value);
+      return toObjectValue(fieldType, value);
     default:
       console.debug(`Unsupported proto field type ${typeof value}`);
       return null;
