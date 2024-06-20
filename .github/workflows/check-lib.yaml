@@ -39,13 +39,10 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Install dependencies
-        run: npm && npm run ci-local-deps
+      - name: Build and install dependencies
+        run: npm run ci
 
-      - name: Build local dependencies
-        run: npm run build-local-deps
-
-      - name: Build
+      - name: Build lub
         run: npm run build
 
       - name: Run tests

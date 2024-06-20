@@ -4,7 +4,9 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "clean": "rm -rf dist *.log",
-    "clean:npm": "rm -rf node_modules",
+    "ci": "npm run ci-local-deps && npm run build-local-deps && npm ci",
+    "ci-local-deps": "npm ci --workspace=../proto --workspace=../lib",
+    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "shell": "firebase functions:shell",
@@ -13,8 +15,6 @@
     "deploy": "firebase deploy --project $npm_config_project",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
-    "ci-local-deps": "npm run ci --workspace=../proto --workspace=../lib",
-    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "tsc",
     "watch": "tsc --watch"
   },
