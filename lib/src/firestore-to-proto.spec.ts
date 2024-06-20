@@ -18,7 +18,8 @@ import {GroundProtos} from '@ground/proto';
 import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
-const {Job, Role, Style, Survey, Task} = GroundProtos.google.ground.v1beta1;
+const {Coordinates, Job, LinearRing, Role, Style, Survey, Task} =
+  GroundProtos.google.ground.v1beta1;
 
 describe('toMessage()', () => {
   [
@@ -43,27 +44,19 @@ describe('toMessage()', () => {
       }),
     },
     {
-      desc: 'converts array',
+      desc: 'converts repeated message',
       input: {
-        5: [
-          {3: 'Task 1', 7: {1: 1}},
-          {3: 'Task 2', 8: {1: 1}},
+        '1': [
+          {'1': 5, '2': 7},
+          {'1': 12, '2': 23},
+          {'1': 9, '2': 2},
         ],
       },
-      expected: new Job({
-        tasks: [
-          new Task({
-            prompt: 'Task 1',
-            textQuestion: new Task.TextQuestion({
-              type: Task.TextQuestion.Type.SHORT_TEXT,
-            }),
-          }),
-          new Task({
-            prompt: 'Task 2',
-            numberQuestion: new Task.NumberQuestion({
-              type: Task.NumberQuestion.Type.FLOAT,
-            }),
-          }),
+      expected: new LinearRing({
+        coordinates: [
+          new Coordinates({latitude: 5, longitude: 7}),
+          new Coordinates({latitude: 12, longitude: 23}),
+          new Coordinates({latitude: 9, longitude: 2}),
         ],
       }),
     },

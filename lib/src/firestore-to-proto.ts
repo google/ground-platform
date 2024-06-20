@@ -112,6 +112,7 @@ function toFieldValue(
     case 'int32':
     case 'int64':
     case 'bool':
+    case 'double':
       return firestoreValue;
     default:
       return toMessageOrEnumValue(messageTypePath, fieldType, firestoreValue);
