@@ -43,7 +43,7 @@ jobs:
         run: ./precheck.sh
 
       - name: Build and install dependencies
-        run: npm run ci
+        run: npm run ci-all
 
       - name: Build web
         run: npm run build --config=local

@@ -4,7 +4,7 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "clean": "rm -rf dist *.log",
-    "ci": "npm run ci-local-deps && npm run build-local-deps && npm ci",
+    "ci-all": "npm run ci-local-deps && npm run build-local-deps && npm ci",
     "ci-local-deps": "npm ci --workspace=../proto --workspace=../lib",
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "lint": "eslint --ext .js,.ts src/",
