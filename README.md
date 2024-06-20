@@ -25,15 +25,15 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 
 ### 1. Configure
 
-Create and configure your Firebase project as per the [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide), copying the resulting web keys into `web/keys/<firebase-project>/firebase-config`.js
+Follow "[first-time setup](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide#first-time-setup)" and "[Set up a Firebase project](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide#set-up-a-firebase-project)" instructions in [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide), copying the resulting web keys into `web/keys/<firebase-project>/firebase-config.js`. 
 
 ### 1. Install deps
 
-```bash
-npm ci --workspaces
+```bash 
+npm run ci
 ```
 
-### 2. Develop
+### 2. Run locally
 
 Build and run against a local Firebase emulator:
 
@@ -41,12 +41,18 @@ Build and run against a local Firebase emulator:
 npm run start:local
 ```
 
-Useful URLs:
+Once the local server is ready, access the web app at
+[http://localhost:5000](http://localhost:5000). For development, and
+testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000.
+Changes to the web app in `web/` and to Cloud Functions in `functions/` are
+automatically rebuilt and reloaded on save.
 
-| Service                 | URL                    |
-| ----------------------- | ---------------------- |
-| Ground web console      | http://localhost:5000  |
-| Firebase Emulator Suite | http://localhost:4000  |
+**Note**: The local build variant doesn't require API keys to run, so you can
+expect to see warnings related to missing API keys. Authentication is also
+disabled.
+
+The local emulator is preloaded with a demo survey. Run `npm run export:local`
+to save the updated demo data to the local filesystem for use on the next run.
 
 ### 3. Deploy
 

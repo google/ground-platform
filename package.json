@@ -4,6 +4,7 @@
   "description": "Root package for Ground hosted components",
   "scripts": {
     "clean": "npm run clean --workspaces --if-present",
+    "ci": "npm ci && npm run ci --workspaces",
     "build": "npm run build --workspaces --if-present",
     "deploy": "npm run login && firebase deploy --project $npm_config_project",
     "watch:local": "npm run watch --workspace functions > functions.log 2>&1 & npm run watch --config=local --project=local --workspace web > web.log 2>&1",
