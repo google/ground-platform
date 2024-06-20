@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build
+        run: npm run build --config=local
+
       - name: Run tests
         run: npm run test-with-coverage
 
