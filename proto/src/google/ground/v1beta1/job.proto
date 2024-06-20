@@ -126,14 +126,22 @@ message Task {
       // A single line of text.
       SHORT_TEXT = 1;
     }
-    // The type of text question. Defaults to SHORT_TEXT.
+    // Required. The type of text question.
     Type type = 1;
   }
 
   // A question whose response is entered manually as a number.
   message NumberQuestion {
-    // Placeholder message. Fields may be added here in the future.
-  }
+    // Allowed values for the `type` field.
+    enum Type {
+      // Type not specified.
+      TYPE_UNSPECIFIED = 0;
+      // A number 
+      FLOAT = 1;
+    }
+    // Required. The type of number question.
+    Type type = 1;  
+}
 
   // A question whose response is entered manually as a data and/or time.
   message DateTimeQuestion {
@@ -144,7 +152,7 @@ message Task {
       TIME_ONLY = 2;
       BOTH_DATE_AND_TIME = 3;
     }
-    // The type of data/time question.
+    // Required. The type of data/time question.
     Type type = 1;
   }
 
@@ -162,10 +170,10 @@ message Task {
       SELECT_MULTIPLE = 2;
     }
 
-    // The type of multiple choice question.
+    // Required. The type of multiple choice question.
     Type type = 1;
 
-    // The list of allowed multiple choice options.
+    // Required. The list of allowed multiple choice options.
     repeated Option options = 2;
 
     // When true, an additional option is presented to data collectors with
@@ -195,21 +203,29 @@ message Task {
       DROP_PIN = 1;
       DRAW_AREA = 2;
     }
-    // One or more methods which the user may use to complete the geometry
-    // task. If multiple methods are specified, data collectors are prompted
-    // which method should be used.
+    // Required. One or more methods which the user may use to complete the 
+    // geometry task. If multiple methods are specified, data collectors are
+    // prompted which method should be used.
     repeated Method allowed_methods = 1;
   }
 
   // A task in which the user must capture their current device location.
   message CaptureLocation {
-    // Placeholder message. Fields may be added here in the future.
+    // Required. The minimum accuracy, in meters, required when capturing
+    // the current location. Set to 999.0 to represent "no limit".
+    float min_accuracy_meters = 1;
   }
 
   // A task in which the user must take a photo.
   message TakePhoto {
-    // Placeholder message. Fields may be added here in the future.
-  }
+    // Required. The minimum compass heading, in degrees, at which the photo may
+    // be captured. Use 0 with max. 360 to disable this constraint.
+    uint32 min_heading_degrees = 1;
+
+    // Required. The maximum compass heading, in degrees, at which the photo may
+    // be captured. Use 360 with min. 0 to disable this constraint.
+    uint32 max_heading_degrees = 1;
+}
 
   // Defines a single condition used to determine whether a task should be
   // shown.
@@ -222,10 +238,10 @@ message Task {
     }
   }
 
-  // A condition which passed if any of the specified values are selected.
+  // A condition which passes if any of the specified values are selected.
   message MultipleChoiceSelection {
-    // List of multiple choice option IDs which trigger the associated task;
-    // the task is shown if one or more of the related options are selected.
+    // Required. List of multiple choice option IDs which trigger the associated
+    // task. The task is shown if one or more of the related options are selected.
     repeated string option_ids = 1;
   }
 }
