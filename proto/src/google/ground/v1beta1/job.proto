@@ -84,7 +84,7 @@ message Task {
   }
 
   // Defines to which entity data collected in this task is associated with.
-  // Defaults to LOCATION_OF_INTEREST_DATA.
+  // Defaults to LOI_DATA.
   DataCollectionLevel level = 5;
 
   // Conditions which control whether this task is shown during data
