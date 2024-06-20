@@ -35,7 +35,7 @@ npm ci --workspaces
 
 ### 2. Develop
 
-Build and run against a local Firebase emulator with:
+Build and run against a local Firebase emulator:
 
 ```bash
 npm run start:local
@@ -56,7 +56,7 @@ Build using dev or production keys:
 npm run build --config=dev --project=<firebase-project>
 ```
 
-Replace `dev` with `prod` for production environmetns.
+Replace `dev` with `prod` for production environments.
 
 Deploy to live Firebase project:
 
