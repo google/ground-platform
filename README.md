@@ -25,7 +25,7 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 
 ### 1. Configure
 
-Follow "[first-time setup](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide#first-time-setup)" and "[Set up a Firebase project](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide#set-up-a-firebase-project)" instructions in [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide), copying the resulting web keys into `web/keys/<firebase-project>/firebase-config.js`. 
+Set up your environment by following instructions in "[first-time setup](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide#first-time-setup)" before you begin.
 
 ### 1. Install deps
 
@@ -54,12 +54,6 @@ disabled.
 The local emulator is preloaded with a demo survey. Run `npm run export:local`
 to save the updated demo data to the local filesystem for use on the next run.
 
-### 3. Deploy
+### Next steps
 
-Build using dev or production keys and deploy to live Firebase project with:
-
-```bash
-npm run build-and-deploy --config=dev --project=<firebase-project>
-```
-
-Replace `dev` with `prod` for production environments.
+For instructions on how to deploy to a live dev or prod Firebase project, see the [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide).
