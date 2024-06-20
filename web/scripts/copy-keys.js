@@ -20,7 +20,12 @@ import { readFileSync, writeFileSync } from 'fs';
 // `environments` folder before build. It expects the keys to be copied verbatim from
 // the "CDN" tab of the web app in the Firebase console.
 
-const project = process.argv[2];
+const config = process.env['npm_config_config'];
+
+// Keys are already provided by local emu config.
+if (config === 'local') process.exit(0);
+
+const project = process.env['npm_config_project'];
 const originalConfig = readFileSync(`../keys/${project}/firebase-config.js`, 'utf8');
 const updatedConfig = originalConfig.replace('const firebaseConfig', 'export const firebaseConfig');
 writeFileSync('../src/environments/.firebase-config.ts', updatedConfig);

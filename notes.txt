@@ -1,3 +1,0 @@
-npm ci && npm ci --workspaces 
-# Is first npm ci one necessary?
-npm run build:dev --project=gnd-dev

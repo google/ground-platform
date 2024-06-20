@@ -20,3 +20,46 @@ This repo contains Ground's hosted components and related docs:
 ## Contributing guidelines
 
 Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our submission process, coding rules and more.
+
+## Quick start
+
+### 1. Configure
+
+Create and configure your Firebase project as per the [Ground Developer's Guide](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide), copying the resulting web keys into `web/keys/<firebase-project>/firebase-config`.js
+
+### 1. Install deps
+
+```bash
+npm ci --workspaces
+```
+
+### 2. Develop
+
+Build and run against a local Firebase emulator with:
+
+```bash
+npm run start:local
+```
+
+Useful URLs:
+
+| Service                 | URL                    |
+| ----------------------- | ---------------------- |
+| Ground web console      | http://localhost:5000  |
+| Firebase Emulator Suite | http://localhost:4000  |
+
+### 3. Deploy
+
+Build using dev or production keys:
+
+```bash
+npm run build --config=dev --project=<firebase-project>
+```
+
+Replace `dev` with `prod` for production environmetns.
+
+Deploy to live Firebase project:
+
+```bash
+npm run deploy --project=<firebase-project>
+```
