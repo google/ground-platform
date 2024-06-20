@@ -29,6 +29,7 @@ export interface FieldDescriptor {
   keyType?: string; // Used for proto map<>
   type: string;
   id: number;
+  rule?: 'repeated';
 }
 
 export interface MessageDescriptor {
@@ -59,7 +60,7 @@ export class MessageRegistry {
     // Gets URL of nested type in the format "/ClassA.ClassB.ClassC".
     const typeUrl = constructor.getTypeUrl('');
     if (typeUrl?.substr(0, 1) !== '/') {
-      console.error("Invalid type URL returned by protojs class:", typeUrl);
+      console.error('Invalid type URL returned by protojs class:', typeUrl);
       return null;
     }
     // Remove preceding "/" and split path along ".";
