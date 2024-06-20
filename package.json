@@ -7,6 +7,7 @@
     "ci": "npm ci && npm run ci --workspaces",
     "build": "npm run build --workspaces --if-present",
     "deploy": "npm run login && firebase deploy --project $npm_config_project",
+    "build-and-deploy": "npm run build && npm run deploy",
     "watch:local": "npm run watch --workspace functions > functions.log 2>&1 & npm run watch --config=local --project=local --workspace web > web.log 2>&1",
     "start:local": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/local",
     "export:local": "firebase emulators:export data/local --project local --only firestore",
