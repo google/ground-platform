@@ -67,24 +67,17 @@ function toMessageValue(
   firestoreValue: any
 ): any | Error | null {
   if (!descriptor.fields) return null;
-  const fields = descriptor.fields[fieldName];
-  const fieldType = fields?.type;
-  if (fields.rule === 'repeated') {
-    return firestoreValue.map((fv: any) => {
-      if (fields.keyType) {
-        if (fields.keyType !== 'string')
-          return Error(`${fields.keyType} map keys not supported`);
-        // TODO: Check that fv is an object.
-        return toMapValue(messageTypePath, fieldType, fv);
-      } else {
-        return toFieldValue(messageTypePath, fieldType, fv);
-      }
-    });
-  } else if (fields.keyType) {
-    if (fields.keyType !== 'string')
-      return Error(`${fields.keyType} map keys not supported`);
+  const field = descriptor.fields[fieldName];
+  const fieldType = field?.type;
+  if (field.keyType) {
+    if (field.keyType !== 'string')
+      return Error(`${field.keyType} map keys not supported`);
     // TODO: Check that firestoreValue is an object.
     return toMapValue(messageTypePath, fieldType, firestoreValue);
+  } else if (field?.rule === 'repeated') {
+    if (!Array.isArray(firestoreValue))
+      return Error(`Expected array, but got ${firestoreValue}`);
+    return firestoreValue.map(v => toFieldValue(messageTypePath, fieldType, v));
   } else {
     return toFieldValue(messageTypePath, fieldType, firestoreValue);
   }

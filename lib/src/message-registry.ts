@@ -27,9 +27,9 @@ export interface ProtoOptions {
 
 export interface FieldDescriptor {
   keyType?: string; // Used for proto map<>
-  rule?: string;
   type: string;
   id: number;
+  rule?: 'repeated';
 }
 
 export interface MessageDescriptor {
@@ -41,8 +41,6 @@ export interface MessageDescriptor {
   nested?: {[nestedMessageName: string]: MessageDescriptor};
   // Enum definitions, including valid values.
   values?: {[enumValueName: string]: number};
-  //
-  repeated?: boolean;
 }
 
 export interface OneOfDescriptor {
