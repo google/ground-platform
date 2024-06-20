@@ -136,7 +136,7 @@ message Task {
     enum Type {
       // Type not specified.
       TYPE_UNSPECIFIED = 0;
-      // A number 
+      // A number with a whole and optional decimal component.
       FLOAT = 1;
     }
     // Required. The type of number question.
@@ -224,7 +224,7 @@ message Task {
 
     // Required. The maximum compass heading, in degrees, at which the photo may
     // be captured. Use 360 with min. 0 to disable this constraint.
-    uint32 max_heading_degrees = 1;
+    uint32 max_heading_degrees = 2;
 }
 
   // Defines a single condition used to determine whether a task should be
