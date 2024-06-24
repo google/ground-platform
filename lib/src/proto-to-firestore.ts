@@ -94,12 +94,16 @@ function toValue(
     case 'boolean':
       return value;
     case 'object':
-      if (Array.isArray(value)) {
-        return value.map(e => toValue(fieldType, e));
-      } else {
-        return toDocumentData(value);
-      }
+      return toObjectValue(fieldType, value);
     default:
       return Error(`Unsupported field type ${typeof value}`);
+  }
+}
+
+function toObjectValue(fieldType: string, value: any) {
+  if (Array.isArray(value)) {
+    return value.map(v => toValue(fieldType, v));
+  } else {
+    return toDocumentData(value);
   }
 }
