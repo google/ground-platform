@@ -6,7 +6,6 @@
     "clean": "rm -rf dist *.log",
     "ci-all": "npm run ci-local-deps && npm run build-local-deps && npm ci",
     "ci-local-deps": "npm ci --workspace=../proto --workspace=../lib",
-    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "shell": "firebase functions:shell",
@@ -14,7 +13,9 @@
     "deploy": "firebase login && firebase deploy --project $npm_config_project",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
+    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "tsc",
+    "build-all": "npm run build-local-deps && npm run build",
     "watch": "tsc --watch"
   },
   "dependencies": {

@@ -7,6 +7,7 @@
     "ci-local-deps": "npm ci --workspace=../proto --workspace=../lib",
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "npm run --prefix scripts copy-keys && ng build -c $npm_config_config",
+    "build-all": "npm run build-local-deps && npm run build",
     "watch": "npm run build -- --watch",
     "start": "npm run build --config=$npm_config_config && ng serve -c $npm_config_config",
     "pretest": "./pretest.sh",

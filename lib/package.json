@@ -10,7 +10,8 @@
     "ci-all": "npm run ci-local-deps && npm run build-local-deps && npm ci",
     "ci-local-deps": "npm ci --workspace=../proto",
     "build-local-deps": "npm run build --workspace=../proto",
-    "build": "tsc"
+    "build": "tsc",
+    "build-all": "npm run build-local-deps && npm run build"
   },
   "engines": {
     "node": "18"
