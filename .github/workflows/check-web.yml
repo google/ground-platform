@@ -42,8 +42,11 @@ jobs:
       - name: Create empty key files
         run: ./precheck.sh
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Build and install dependencies
+        run: npm run ci-all
+
+      - name: Build web
+        run: npm run build --config=local
 
       - name: Run tests
         run: npm run test-with-coverage

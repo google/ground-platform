@@ -41,6 +41,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-  
+
+      - name: Build protos
+        run: npm run build
+
       - name: Run lint checks
         run: npm run lint

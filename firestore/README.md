@@ -7,19 +7,11 @@ This directory contains configuration files for new Firestore instances. Complet
 1. Log into Firebase:
 
     ```
-    $ firebase login
+    $ npx firebase login
     ```
 
-2. Select your Firebase project:
+2. Deploy the Firestore configuration:
 
     ```
-    $ firebase use --add <project-name>
-    ```
-    Where `<project-name>` is the name of a project associated with your
-    Firebase account.
-
-3. Deploy the Firestore configuration:
-
-    ```
-    $ firebase deploy --only firestore
+    $ npx firebase deploy --only firestore --project <firebase-project>
     ```

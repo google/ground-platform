@@ -1,15 +1,16 @@
 {
   "name": "@ground/lib",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "description": "Ground shared lib",
   "scripts": {
-    "clean": "rm -rf node_modules dist *.log $npm_package_config_codegen_path",
+    "clean": "rm -rf dist *.log src/generated",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
-    "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
-    "build:proto": "npm run build --workspace ../proto",
-    "prebuild": "npm install && npm run build:proto",
+    "ci-all": "npm run ci-local-deps && npm run build-local-deps && npm ci",
+    "ci-local-deps": "npm ci --workspace=../proto",
+    "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc"
   },
   "engines": {
