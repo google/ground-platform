@@ -24,7 +24,6 @@
     "@ground/lib": "file:../lib",
     "@ground/proto": "file:../proto",
     "@terraformer/wkt": "2.1.2",
-    "@types/geojson": "^7946.0.14",
     "busboy": "1.5.0",
     "cookie-parser": "^1.4.6",
     "cors": "2.8.5",
@@ -38,7 +37,6 @@
     "jsonstream-ts": "1.3.6",
     "module-alias": "^2.2.2",
     "requests": "0.3.0",
-    "source-map-support": "^0.5.21",
     "ts-node": "^10.9.1"
   },
   "engines": {
@@ -52,6 +50,8 @@
     "@types/jasmine": "^4.3.5",
     "@types/jsonstream": "0.8.30",
     "@types/terraformer__wkt": "2.0.0",
+    "@types/geojson": "^7946.0.14",
+    "source-map-support": "^0.5.21",
     "firebase-functions-test": "^3.3.0",
     "firebase-tools": "13.6.0",
     "form-data-encoder": "^4.0.2",
