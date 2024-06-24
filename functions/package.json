@@ -17,6 +17,8 @@
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "build": "tsc",
     "build-all": "npm run build-local-deps && npm run build",
+    "build-and-test": "npm run build && npm run test",
+    "build-all-and-test": "npm run build-all && npm run test",
     "watch": "tsc --watch"
   },
   "dependencies": {
