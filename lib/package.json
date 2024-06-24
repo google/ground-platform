@@ -1,6 +1,7 @@
 {
   "name": "@ground/lib",
   "main": "dist/index.js",
+  "version": "0.0.1",
   "description": "Ground shared lib",
   "scripts": {
     "clean": "rm -rf dist *.log src/generated",

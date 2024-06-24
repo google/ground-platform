@@ -1,6 +1,7 @@
 {
   "name": "@ground/functions",
   "main": "dist/index.js",
+  "version": "0.0.1",
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "clean": "rm -rf dist *.log",
