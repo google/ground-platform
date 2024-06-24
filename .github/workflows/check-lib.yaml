@@ -42,7 +42,7 @@ jobs:
       - name: Build and install dependencies
         run: npm run ci-all
 
-      - name: Build lub
+      - name: Build lib
         run: npm run build
 
       - name: Run tests
