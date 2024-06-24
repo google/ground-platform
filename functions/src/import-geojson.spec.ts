@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import {stubAdminApi, testFirestore} from '@ground/lib/dist/testing/firestore';
-import {importGeoJsonHandler} from './import-geojson';
+import {stubAdminApi, mockFirestore, TestGeoPoint} from '@ground/lib/dist/testing/firestore';
+import {createPostRequestSpy, createResponseSpy} from './testing/http-test-helpers';
+import {importGeoJsonCallback} from './import-geojson';
 import {DecodedIdToken} from 'firebase-admin/auth';
-import functions from 'firebase-functions';
 import {Blob, FormData} from 'formdata-node';
-import {buffer} from 'node:stream/consumers';
-import {FormDataEncoder} from 'form-data-encoder';
 import HttpStatus from 'http-status-codes';
 import {invokeCallbackAsync} from './handlers';
+import {OWNER_ROLE} from './common/auth';
 
 describe('importGeoJson()', () => {
   const surveyId = 'survey001';
   const jobId = 'job123';
-  // const SUBMISSION = new TestDocumentSnapshot({ loiId });
-  // const CONTEXT = new TestEventContext({ surveyId });
-  // const SUBMISSIONS_PATH = `${SURVEY_PATH}/submissions`;
-  // const LOI_COLLECTION = `surveys/${surveyId}/lois`;
+  const email = 'somebody@test.it';
+  const survey = {
+    name: 'Test',
+    acl: {
+      [email]: OWNER_ROLE,
+    },
+  };
 
   beforeAll(() => {
     stubAdminApi();
@@ -38,17 +40,11 @@ describe('importGeoJson()', () => {
 
   afterAll(() => {});
 
-  fit('imports points', async () => {
+  it('imports points', async () => {
     spyOn(require('firebase-admin/auth'), 'getAuth').and.returnValue({
-      getUser: () => {},
       verifySessionCookie: () => {},
     });
-    // const add = jasmine.createSpy('add');
-    // TODO: rename back to mockFirestore
-    testFirestore.doc(`surveys/${surveyId}`).set({
-      name: 'Test',
-    });
-    // testFirestore.collection.withArgs(LOI_COLLECTION).and.returnValue({add});
+    mockFirestore.doc(`surveys/${surveyId}`).set(survey);
     const form = new FormData();
     form.append('survey', surveyId);
     form.append('job', jobId);
@@ -73,41 +69,19 @@ describe('importGeoJson()', () => {
       ]),
       'file.json'
     );
-    const encoder = new FormDataEncoder(form);
 
-    const req = jasmine.createSpyObj<functions.https.Request>(
-      'request',
-      ['unpipe'],
-      {
-        method: 'POST',
-        url: '/importGeoJson',
-        headers: encoder.headers,
-        rawBody: await buffer(encoder),
-      }
-    );
-    const res = jasmine.createSpyObj<functions.Response<any>>('response', [
-      'send',
-      'status',
-      'end',
-    ]);
-    res.status.and.returnValue(res);
-    res.end.and.returnValue(res);
-
-    await invokeCallbackAsync(
-      importGeoJsonHandler,
-      req,
-      res,
-      {} as DecodedIdToken
-    );
+    const req = await createPostRequestSpy({url: '/importGeoJson'}, form);
+    const res = createResponseSpy();
+    await invokeCallbackAsync(importGeoJsonCallback, req, res, {
+      email,
+    } as DecodedIdToken);
 
     expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
 
-    const loiCollection = await testFirestore
+    const lois = await mockFirestore
       .collection(`surveys/${surveyId}/lois`)
       .get();
-    const loiData = loiCollection.docs.map(doc => doc.data());
-    console.log(loiData);
-    expect(loiData).toEqual([
+    expect(lois.docs.map(doc => doc.data())).toEqual([
       {
         '2': 'job123',
         '3': {'1': {'1': {'1': 10.1, '2': 125.6}}},
@@ -121,14 +95,3 @@ describe('importGeoJson()', () => {
     ]);
   });
 });
-
-/**
- * Returns a new Object with the specified coordinates. Use in place of GeoPoint
- * in tests to work around lack of support in MockFirebase lib.
- */
-function TestGeoPoint(_latitude: number, _longitude: number) {
-  return {
-    _latitude,
-    _longitude,
-  };
-}

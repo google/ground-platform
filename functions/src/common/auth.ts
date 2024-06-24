@@ -22,7 +22,7 @@ import {EmulatorIdToken} from '../handlers';
 // This is the only cookie not stripped by Firebase CDN.
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
 export const SESSION_COOKIE_NAME = '__session';
-const OWNER_ROLE = 'OWNER';
+export const OWNER_ROLE = 'OWNER';
 const DATA_COLLECTOR_ROLE = 'DATA_COLLECTOR';
 
 /**

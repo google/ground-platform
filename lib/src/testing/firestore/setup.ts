@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {testFirestore} from './firestore';
+import {mockFirestore} from './firestore';
 
 export function stubAdminApi() {
   spyOn(require('firebase-admin'), 'initializeApp').and.returnValue({
-    firestore: () => testFirestore,
+    firestore: () => mockFirestore,
   });
   spyOn(require('firebase-admin/firestore'), 'getFirestore').and.returnValue(
-    testFirestore
+    mockFirestore
   );
 }

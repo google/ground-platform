@@ -21,4 +21,17 @@ const MockFirebase = require('mock-cloud-firestore');
 // Set project as workaround for https://github.com/firebase/firebase-functions/issues/437.
 process.env.GCLOUD_PROJECT = 'fake-project';
 
-export const testFirestore = new MockFirebase().firestore() as Firestore;
+export const mockFirestore = new MockFirebase().firestore() as Firestore;
+
+
+/**
+ * Returns a new Object with the specified coordinates. Use in place of GeoPoint
+ * in tests to work around lack of support in MockFirebase lib.
+ */
+export function TestGeoPoint(_latitude: number, _longitude: number) {
+    return {
+      _latitude,
+      _longitude,
+    };
+  }
+  

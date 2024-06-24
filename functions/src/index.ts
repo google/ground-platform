@@ -19,7 +19,7 @@ import * as functions from 'firebase-functions';
 import {onHttpsRequest, onHttpsRequest2} from './handlers';
 import {handleProfileRefresh} from './profile-refresh';
 import {sessionLoginHandler} from './session-login';
-import {importGeoJsonHandler} from './import-geojson';
+import {importGeoJsonCallback} from './import-geojson';
 import {exportCsvHandler} from './export-csv';
 import {onCall} from 'firebase-functions/v2/https';
 import {onWriteSubmissionHandler} from './on-write-submission';
@@ -44,7 +44,7 @@ export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
 
-export const importGeoJson = onHttpsRequest2(importGeoJsonHandler);
+export const importGeoJson = onHttpsRequest2(importGeoJsonCallback);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 

@@ -34,7 +34,7 @@ import {ErrorHandler} from './handlers';
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
  */
-export function importGeoJsonHandler(
+export function importGeoJsonCallback(
   req: functions.https.Request,
   res: functions.Response<any>,
   user: DecodedIdToken,
@@ -72,7 +72,7 @@ export function importGeoJsonHandler(
     if (!canImport(user, survey)) {
       return error(
         HttpStatus.FORBIDDEN,
-        `Use does not have permission to import into survey ${surveyId}`
+        `User does not have permission to import into survey ${surveyId}`
       );
     }
 
