@@ -88,17 +88,22 @@ function toValue(
   value: any
 ): DocumentFieldValue | Error | null {
   // TODO(#1758): Coerce values to type specified in `fieldType`.
+function toObjectValue(fieldType: string, value: any) {
+  if (Array.isArray(value)) {
+    return value.map(e => toValue(fieldType, e));
+  } else {
+    return toDocumentData(value);
+  }
+}
+
+function toValue(fieldType: string, value: any): DocumentFieldValue | null {
   switch (typeof value) {
     case 'string':
     case 'number': // This handles proto enums as well.
     case 'boolean':
       return value;
     case 'object':
-      if (Array.isArray(value)) {
-        return value.map(e => toValue(fieldType, e));
-      } else {
-        return toDocumentData(value);
-      }
+      return toObjectValue(fieldType, value);
     default:
       return Error(`Unsupported field type ${typeof value}`);
   }

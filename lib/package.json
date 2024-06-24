@@ -3,13 +3,13 @@
   "main": "dist/index.js",
   "description": "Ground shared lib",
   "scripts": {
-    "clean": "rm -rf node_modules dist *.log $npm_package_config_codegen_path",
+    "clean": "rm -rf dist *.log src/generated",
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
-    "pretest": "npm run build",
     "test": "jasmine --config=jasmine.json",
-    "build:proto": "npm run build --workspace ../proto",
-    "prebuild": "npm install && npm run build:proto",
+    "ci-all": "npm run ci-local-deps && npm run build-local-deps && npm ci",
+    "ci-local-deps": "npm ci --workspace=../proto",
+    "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc"
   },
   "engines": {
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@types/jasmine": "^4.3.5",
+    "@types/source-map-support": "^0.5.10",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
     "eslint": "^8.26.0",
@@ -36,6 +37,7 @@
     "jasmine-spec-reporter": "^7.0.0",
     "mock-cloud-firestore": "^0.12.0",
     "prettier": "^2.8.1",
+    "source-map-support": "^0.5.21",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
     "typescript": "4.8.4"

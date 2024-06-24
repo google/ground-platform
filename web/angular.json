@@ -63,7 +63,7 @@
               "sourceMap": true,
               "namedChunks": true
             },
-            "production": {
+            "prod": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -105,8 +105,8 @@
             "dev": {
               "buildTarget": "web:build:dev"
             },
-            "production": {
-              "buildTarget": "web:build:production"
+            "prod": {
+              "buildTarget": "web:build:prod"
             }
           }
         },

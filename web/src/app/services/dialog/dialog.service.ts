@@ -14,29 +14,67 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {Component, Injectable, inject} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
 
-import {ConfirmationDialogComponent} from 'app/components/confirmation-dialog/confirmation-dialog.component';
+export interface DialogData {
+  title: string;
+  message: string;
+}
+
+@Component({
+  selector: 'ground-confirmation-dialog',
+  template: `
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+    <mat-dialog-content>{{ data.message }}</mat-dialog-content>
+    <mat-dialog-actions>
+      <button mat-button (click)="onClose()">No</button>
+      <button mat-button (click)="onConfirm()">Yes</button>
+    </mat-dialog-actions>
+  `,
+  standalone: true,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatDialogClose,
+    MatButtonModule,
+  ],
+})
+export class ConfirmationDialogComponent {
+  readonly dialogRef = inject(MatDialogRef<ConfirmationDialogComponent>);
+  readonly data = inject<DialogData>(MAT_DIALOG_DATA);
+
+  onConfirm() {
+    this.dialogRef.close(true);
+  }
+
+  onClose() {
+    this.dialogRef.close(false);
+  }
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class DialogService {
-  constructor(private dialog: MatDialog) {}
+  readonly dialog = inject(MatDialog);
 
-  openConfirmationDialog(
-    title: string,
-    message: string,
-    showDiscardActions = false
-  ): MatDialogRef<ConfirmationDialogComponent> {
+  openConfirmationDialog(title: string, message: string) {
     return this.dialog.open(ConfirmationDialogComponent, {
       maxWidth: '500px',
-      autoFocus: false,
       data: {
-        title,
-        message,
-        showDiscardActions,
+        title: title,
+        message: message,
       },
     });
   }

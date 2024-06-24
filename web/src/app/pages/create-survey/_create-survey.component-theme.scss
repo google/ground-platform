@@ -55,6 +55,10 @@
   .description {
     font: mat.get-theme-typography($theme, body-large, font);
   }
+
+  .loading-label {
+    font: mat.get-theme-typography($theme, body-large, font);
+  }
 }
 
 @mixin theme($theme) {

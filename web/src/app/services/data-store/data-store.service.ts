@@ -20,11 +20,12 @@ import {
   DocumentData,
   FieldPath,
   deleteField,
+  documentId,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, firstValueFrom} from 'rxjs';
+import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
@@ -311,20 +312,58 @@ export class DataStoreService {
       .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
   }
 
-  lois$({id}: Survey): Observable<List<LocationOfInterest>> {
-    return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/lois`)
-      .valueChanges({idField: 'id'})
-      .pipe(
-        map(array =>
-          List(
-            array
-              .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
-              .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
-              .map(loi => loi as LocationOfInterest)
-          )
-        )
-      );
+  private toLocationsOfInterest(
+    loiIds: {id: string}[]
+  ): List<LocationOfInterest> {
+    return List(
+      loiIds
+        .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+        .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
+        .map(loi => loi as LocationOfInterest)
+    );
+  }
+
+  /**
+   * Returns a stream containing all the Location of Interests based
+   * on provided parameters.
+   *
+   * @param id the id of the survey instance.
+   * @param userEmail the email of the user to filter the results.
+   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
+   */
+  getAccessibleLois$(
+    {id: surveyId}: Survey,
+    userEmail: string,
+    canManageSurvey: boolean
+  ): Observable<List<LocationOfInterest>> {
+    if (canManageSurvey) {
+      return this.db
+        .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
+        .valueChanges({idField: 'id'})
+        .pipe(map(this.toLocationsOfInterest));
+    }
+
+    const predefinedLois = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      ref => ref.where('predefined', 'in', [true, null])
+    );
+
+    const userLois = this.db.collection(
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      ref =>
+        ref
+          .where('predefined', '==', false)
+          .where('created.user.email', '==', userEmail)
+    );
+
+    return combineLatest([
+      predefinedLois.valueChanges({idField: 'id'}),
+      userLois.valueChanges({idField: 'id'}),
+    ]).pipe(
+      map(([predefinedLois, userLois]) =>
+        this.toLocationsOfInterest(predefinedLois.concat(userLois))
+      )
+    );
   }
 
   /**

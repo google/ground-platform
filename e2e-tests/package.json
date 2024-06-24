@@ -4,8 +4,6 @@
   "description": "Automated testing of the Ground platform.",
   "type": "module",
   "scripts": {
-    "clean": "rm -rf build node_modules",
-    "build": "npm i",
     "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
     "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
     "test:verify": "tsx node_modules/jasmine/bin/jasmine spec/verify-submissions.spec.ts",
@@ -23,6 +21,7 @@
     "@types/selenium-webdriver": "^4.1.22",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
+    "esbuild": "^0.20.2",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-absolute-imports": "^0.0.3",
