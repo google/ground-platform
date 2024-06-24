@@ -88,6 +88,7 @@ function toValue(
   value: any
 ): DocumentFieldValue | Error | null {
   // TODO(#1758): Coerce values to type specified in `fieldType`.Fix   switch (typeof value) {
+  switch (typeof value) {
     case 'string':
     case 'number': // This handles proto enums as well.
     case 'boolean':
