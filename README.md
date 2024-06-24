@@ -41,18 +41,11 @@ Build and run against a local Firebase emulator:
 npm run start:local
 ```
 
-Once the local server is ready, access the web app at
-[http://localhost:5000](http://localhost:5000). For development, and
-testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000.
-Changes to the web app in `web/` and to Cloud Functions in `functions/` are
-automatically rebuilt and reloaded on save.
+Once the local server is ready, access the web app at [http://localhost:5000](http://localhost:5000). For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
 
-**Note**: The local build variant doesn't require API keys to run, so you can
-expect to see warnings related to missing API keys. Authentication is also
-disabled.
+**Note**: The local build variant doesn't require API keys to run, but warnings related to missing Maps API keys will appear in the console. Authentication is also disabled.
 
-The local emulator is preloaded with a demo survey. Run `npm run export:local`
-to save the updated demo data to the local filesystem for use on the next run.
+The local emulator is preloaded with a demo survey. Run `npm run export:local` to save the updated demo data to the local filesystem for use on the next run.
 
 ### Next steps
 
