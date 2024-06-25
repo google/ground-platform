@@ -148,6 +148,12 @@ function invokeCallback(
   }
 }
 
+/**
+ * Call an asynchronous HTTPS request handler. Handlers of this type are expected to call
+ * `done()` on completion or `error()` on failure. The handler itself may return before
+ * work is completed, but the HTTPS request will not complete until one of those two
+ * callbacks are invoked.
+ */
 export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>

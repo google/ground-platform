@@ -48,9 +48,6 @@ describe('importGeoJson()', () => {
   afterAll(() => {});
 
   it('imports points', async () => {
-    spyOn(require('firebase-admin/auth'), 'getAuth').and.returnValue({
-      verifySessionCookie: () => {},
-    });
     mockFirestore.doc(`surveys/${surveyId}`).set(survey);
     const form = new FormData();
     form.append('survey', surveyId);
