@@ -1,13 +1,13 @@
 {
-  "name": "ground-protos",
+  "name": "@ground/proto",
   "version": "0.0.1",
-  "description": "Shared Protocol Buffer definitions",
+  "description": "Ground shared Protocol Buffer definitions",
   "main": "dist/index.js",
   "scripts": {
-    "clean": "rm -rf node_modules dist",
+    "clean": "rm -rf dist",
+    "ci-all": "npm ci",
     "lint": "buf lint",
     "format": "buf format --write",
-    "prebuild": "npm install",
     "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
     "postbuild": "cp src/index.* dist/",
     "pbjs": "mkdir -p dist && pbjs -p src src/google/ground/v1beta1/*.proto",

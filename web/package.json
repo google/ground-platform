@@ -2,17 +2,13 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "clean": "rm -rf node_modules dist coverage *.log",
-    "start:dev": "npm run build:dev --project=$npm_config_project && ng serve -c dev",
-    "start:prod": "npm run build:prod --project=$npm_config_project && ng serve -c production",
-    "prebuild": "npm install && npm run build:lib",
-    "build": "ng build -c",
-    "update-web-keys": "npm run --prefix scripts update-web-keys",
-    "build:lib": "npm run build --workspace=../lib",
-    "build:dev": "npm run update-web-keys $npm_config_project && npm run build -- dev",
-    "build:prod": "npm run update-web-keys $npm_config_project && npm run build -- production",
-    "build:local": "npm run build local",
-    "watch:local": "npm run build local -- --watch",
+    "clean": "rm -rf dist coverage *.log",
+    "ci-all": "npm run ci-local-deps && npm run build-local-deps && npm ci",
+    "ci-local-deps": "npm ci --workspace=../proto --workspace=../lib",
+    "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
+    "build": "npm run --prefix scripts copy-keys && ng build -c $npm_config_config",
+    "watch": "npm run build -- --watch",
+    "start": "npm run build --config=$npm_config_config && ng serve -c $npm_config_config",
     "pretest": "./pretest.sh && npm run build:lib",
     "test": "ng test",
     "test:headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
@@ -21,7 +17,7 @@
     "lint:fix": "npm run lint -- --fix",
     "posttest": "./posttest.sh && npm run lint",
     "login": "npx firebase login",
-    "deploy:dev": "npm run build:dev --project=$npm_config_project && npm run login && npx firebase deploy --only hosting --project $npm_config_project"
+    "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project"
   },
   "private": true,
   "dependencies": {
