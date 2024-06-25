@@ -69,6 +69,9 @@ export type HttpsRequestHandler = (
   idToken: DecodedIdToken
 ) => Promise<any>;
 
+/**
+ * A synchronous HTTPS request handler. The HTTPS request is closed as soon as the handler resolves.
+ */
 export function onHttpsRequest(handler: HttpsRequestHandler) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
@@ -88,8 +91,15 @@ export function onHttpsRequest(handler: HttpsRequestHandler) {
   );
 }
 
-export type ErrorHandler = (errorCode: number, message: string) => void;
+/** A function which is to be called by HTTPS callbacks on failure. */
+export type ErrorHandler = (httpStatusCode: number, message: string) => void;
 
+/**
+ * A callback-based HTTPS request handler. Functions of this type are expected to call
+ * `done()` on completion or `error()` on failure. The function itself may return before
+ * work is completed, but the HTTPS request will not complete until one of those two
+ * callbacks are invoked.
+ */
 export type HttpsRequestCallback = (
   req: https.Request,
   res: Response<any>,
@@ -138,7 +148,7 @@ function invokeCallback(
   }
 }
 
-export function onHttpsRequest2(callback: HttpsRequestCallback) {
+export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(

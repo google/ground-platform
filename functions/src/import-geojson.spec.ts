@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-import {stubAdminApi, mockFirestore, TestGeoPoint} from '@ground/lib/dist/testing/firestore';
-import {createPostRequestSpy, createResponseSpy} from './testing/http-test-helpers';
+import {
+  stubAdminApi,
+  mockFirestore,
+  TestGeoPoint,
+} from '@ground/lib/dist/testing/firestore';
+import {
+  createPostRequestSpy,
+  createResponseSpy,
+} from './testing/http-test-helpers';
 import {importGeoJsonCallback} from './import-geojson';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {Blob, FormData} from 'formdata-node';

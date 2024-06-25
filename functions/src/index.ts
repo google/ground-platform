@@ -16,7 +16,7 @@
 
 import 'module-alias/register';
 import * as functions from 'firebase-functions';
-import {onHttpsRequest, onHttpsRequest2} from './handlers';
+import {onHttpsRequest, onHttpsRequestAsync} from './handlers';
 import {handleProfileRefresh} from './profile-refresh';
 import {sessionLoginHandler} from './session-login';
 import {importGeoJsonCallback} from './import-geojson';
@@ -44,7 +44,7 @@ export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
 
-export const importGeoJson = onHttpsRequest2(importGeoJsonCallback);
+export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 
