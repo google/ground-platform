@@ -63,7 +63,7 @@ export function importGeoJsonCallback(
   busboy.on('file', async (_field, file, _filename) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
-      return error(HttpStatus.BAD_REQUEST, `Missing survey and/or job ID`);
+      return error(HttpStatus.BAD_REQUEST, 'Missing survey and/or job ID');
     }
     const survey = await db.fetchSurvey(surveyId);
     if (!survey.exists) {
