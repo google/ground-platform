@@ -18,9 +18,11 @@ import {
   stubAdminApi,
   newEventContext,
   newDocumentSnapshot,
-  mockFirestore
+  mockFirestore,
+  newCountQuery,
 } from '@ground/lib/dist/testing/firestore';
 import * as functions from './index';
+import {loi} from './common/datastore';
 
 const test = require('firebase-functions-test')();
 
@@ -46,13 +48,18 @@ describe('onWriteSubmission()', () => {
     loiId: string,
     count: number
   ) {
-    mockFirestore.collection(SUBMISSIONS_PATH).doc('001').set({
-      a: 'a'
-    });
+    mockFirestore.doc(loi(SURVEY_ID, loiId)).set({});
+    spyOn(mockFirestore, 'collection')
+      .withArgs(submissionsPath)
+      .and.returnValue({
+        where: jasmine
+          .createSpy('where')
+          .withArgs('loiId', '==', loiId)
+          .and.returnValue(newCountQuery(count)),
+      } as any);
   }
 
-
-  fit('update submission count on create', async () => {
+  it('update submission count on create', async () => {
     installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 2);
 
     await test.wrap(functions.onWriteSubmission)(
@@ -85,18 +92,22 @@ describe('onWriteSubmission()', () => {
     );
 
     const loi = await mockFirestore.doc(LOI_PATH).get();
-    expect(loi.data()).not.toHaveBeenCalled();
+    expect(loi.data()).toEqual({});
   });
 
-  // it('throw error on failed update', async () => {
-  //   installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 1);
-  //   loi.data().and.throwError('LOI update failed');
+  it('throw error on failed update', async () => {
+    installSubmissionCountSpy(SUBMISSIONS_PATH, LOI_ID, 1);
+    spyOn(mockFirestore, 'doc')
+      .withArgs(LOI_PATH)
+      .and.callFake(() => {
+        throw new Error();
+      });
 
-  //   await expectAsync(
-  //     test.wrap(functions.onWriteSubmission)(
-  //       {before: undefined, after: SUBMISSION},
-  //       CONTEXT
-  //     )
-  //   ).toBeRejected();
-  // });
+    await expectAsync(
+      test.wrap(functions.onWriteSubmission)(
+        {before: undefined, after: SUBMISSION},
+        CONTEXT
+      )
+    ).toBeRejected();
+  });
 });
