@@ -37,7 +37,7 @@ jobs:
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Build Ground
-        run: npm run build:dev --project=gnd-dev
+        run: npm run build --config=dev --project=gnd-dev
 
       - name: Deploy to Firebase
         uses: docker://w9jds/firebase-action:master
