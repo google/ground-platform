@@ -29,6 +29,13 @@ const PB_ROLES = Map([
 ]);
 
 /**
+ * Converts Role instance to its proto message type.
+ */
+export function roleToProto(role: Role) {
+  return PB_ROLES.get(role) || Pb.Role.VIEWER;
+}
+
+/**
  * Creates a proto rapresentation of a Survey.
  */
 export function newSurveyToProto(
@@ -41,7 +48,7 @@ export function newSurveyToProto(
     new Pb.Survey({
       name,
       description,
-      acl: acl.map(role => PB_ROLES.get(role)!).toObject(),
+      acl: acl.map(role => roleToProto(role)).toObject(),
       ownerId,
     })
   );
