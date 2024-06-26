@@ -8,7 +8,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
-        "test",
+        "build-and-test",
         "--workspace=functions"
       ],
       "sourceMaps": true
@@ -20,7 +20,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
-        "test",
+        "build-and-test",
         "--workspace=lib"
       ],
       "sourceMaps": true
@@ -32,7 +32,7 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
-        "test",
+        "build-and-test",
         "--workspace=web"
       ],
       "sourceMaps": true
