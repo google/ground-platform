@@ -82,6 +82,7 @@ function toObjectValue(fieldType: string, value: any) {
 function toValue(fieldType: string, value: any): DocumentFieldValue | null {
   switch (typeof value) {
     case 'string':
+    case 'boolean':
     case 'number': // This handles proto enums as well.
       return value;
     case 'object':
