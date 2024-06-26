@@ -29,6 +29,7 @@ import {onWriteSurveyHandler} from './on-write-survey';
 import {loi, submission, survey} from './common/datastore';
 import {initializeFirebaseApp} from './common/context';
 
+// Ensure Firebase is initialized.
 initializeFirebaseApp();
 
 /** Template for LOI write triggers capturing survey and LOI ids. */

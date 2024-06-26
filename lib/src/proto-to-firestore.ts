@@ -23,11 +23,14 @@ import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
  * The map is keyed by message field numbers represented as strings, while field values are
  * converted to corresponding Firestore data types.
  */
-export function toDocumentData(message: object): DocumentData | Error {
+export function toDocumentData(message: object): DocumentData {
+  if (Object.keys(message).length === 0) {
+    return {};
+  }
   const type = message.constructor.name;
   const descriptor = registry.getMessageDescriptor(message.constructor);
   // Fail if message not defined in registry.
-  if (!descriptor) return Error(`Unknown message type ${type}`);
+  if (!descriptor) throw new Error(`Unknown message type ${type}`);
   // Messages must also have at least one field.
   if (!descriptor.fields)
     return Error(`Invalid message definition: ${descriptor}`);
@@ -47,7 +50,7 @@ function messageToData(
       continue;
     }
     const value = toDocumentFieldValue(fieldDescriptor, message[name]);
-    if (value) {
+    if (value !== null) {
       firestoreMap[fieldNumber.toString()] = value;
     }
   }

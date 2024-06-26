@@ -100,12 +100,28 @@ export function importGeoJsonCallback(
             console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
             return;
           }
-          const loi = {
-            ...toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId) || {}),
-            ...geoJsonToLoiLegacy(geoJsonLoi, jobId),
-          };
-          if (Object.keys(loi).length > 0) {
+          try {
+            console.debug('Feature:', JSON.stringify(geoJsonLoi, null, 2));
+            console.debug(
+              'Pb:',
+              JSON.stringify(toLoiPb(geoJsonLoi as Feature, jobId), null, 2)
+            );
+            console.debug(
+              'Data:',
+              JSON.stringify(
+                toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)),
+                null,
+                2
+              )
+            );
+            const data = toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId));
+            const loi = {
+              ...data,
+              ...geoJsonToLoiLegacy(geoJsonLoi, jobId),
+            };
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
+          } catch (loiErr) {
+            console.debug('Skipping LOI', loiErr);
           }
         } catch (err) {
           req.unpipe(busboy);
@@ -166,14 +182,10 @@ function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function toLoiPb(
-  feature: Feature,
-  jobId: string
-): Pb.LocationOfInterest | null {
+function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = feature;
   const geometryPb = toGeometryPb(geometry);
-  if (!geometryPb) return null;
   return new Pb.LocationOfInterest({
     jobId,
     customTag: id?.toString(),
@@ -183,7 +195,7 @@ function toLoiPb(
   });
 }
 
-function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
+function toGeometryPb(geometry: Geometry): Pb.Geometry {
   switch (geometry.type) {
     case 'Point':
       return toPointGeometry(geometry.coordinates);
@@ -191,57 +203,48 @@ function toGeometryPb(geometry: Geometry): Pb.Geometry | null {
       return toPolygonGeometry(geometry.coordinates);
     case 'MultiPolygon':
       return toMultiPolygonGeometry(geometry.coordinates);
+    default:
+      throw new Error(`Unsupported GeoJSON type '${geometry.type}'`);
   }
-  // Unsupported GeoJSON type.
-  return null;
 }
 
-function toPointGeometry(position: Position): Pb.Geometry | null {
+function toPointGeometry(position: Position): Pb.Geometry {
   const coordinates = toCoordinatesPb(position);
-  const point = coordinates ? new Pb.Point({coordinates}) : null;
-  return point ? new Pb.Geometry({point}) : null;
+  const point = new Pb.Point({coordinates});
+  return new Pb.Geometry({point});
 }
 
-function toCoordinatesPb(position: Position): Pb.Coordinates | null {
+function toCoordinatesPb(position: Position): Pb.Coordinates {
   const [longitude, latitude] = position;
-  if (!longitude && !latitude) return null;
+  if (longitude === undefined || latitude === undefined)
+    throw new Error('Missing coordinate(s)');
   return new Pb.Coordinates({longitude, latitude});
 }
 
-function toPolygonPb(positions: Position[][]): Pb.Polygon | null {
+function toPolygonPb(positions: Position[][]): Pb.Polygon {
   const [shellCoords, ...holeCoords] = positions;
   // Ignore if shell is missing.
-  if (!shellCoords) return null;
+  if (!shellCoords)
+    throw new Error('Missing required polygon shell coordinates');
   const shell = toLinearRingPb(shellCoords);
-  if (!shell) return null;
-  const holes =
-    holeCoords
-      ?.map(h => toLinearRingPb(h))
-      ?.filter(h => !!h)
-      ?.map(h => h as Pb.LinearRing) || [];
+  const holes = holeCoords?.map(h => toLinearRingPb(h));
   return new Pb.Polygon({shell, holes});
 }
 
-function toPolygonGeometry(positions: Position[][]): Pb.Geometry | null {
+function toPolygonGeometry(positions: Position[][]): Pb.Geometry {
   const polygon = toPolygonPb(positions);
-  if (!polygon) return null;
   return new Pb.Geometry({polygon});
 }
 
-function toLinearRingPb(positions: Position[]): Pb.LinearRing | null {
-  const coords = positions.map(p => toCoordinatesPb(p));
-  // Don't convert rings with invalid coords.
-  if (coords.includes(null)) return null;
-  return new Pb.LinearRing({coordinates: coords.map(c => c!)});
+function toLinearRingPb(positions: Position[]): Pb.LinearRing {
+  const coordinates = positions.map(p => toCoordinatesPb(p));
+  return new Pb.LinearRing({coordinates});
 }
 
-function toMultiPolygonGeometry(positions: Position[][][]): Pb.Geometry | null {
+function toMultiPolygonGeometry(positions: Position[][][]): Pb.Geometry {
   // Skip invalid polygons.
-  const polygons = positions
-    .map(p => toPolygonPb(p))
-    .filter(p => !!p)
-    .map(p => p!);
-  if (polygons.length) return null;
+  const polygons = positions.map(p => toPolygonPb(p));
+  if (polygons.length === 0) throw new Error('Empty multi-polygon');
   const multiPolygon = new Pb.MultiPolygon({polygons});
   return new Pb.Geometry({multiPolygon});
 }
