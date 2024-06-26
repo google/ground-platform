@@ -77,9 +77,13 @@ runs:
       shell: bash
       run: npm install @nx/nx-linux-x64-gnu
 
-    - name: Install and build dependencies
+    - name: Install dependencies
       shell: bash
-      run: npm run build:local
+      run: npm run ci-all
+
+    - name: Build project and local deps
+      shell: bash
+      run: npm run build-all --config=local
 
     - name: Run 'Create survey' test
       shell: bash
