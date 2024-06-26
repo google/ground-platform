@@ -5,6 +5,7 @@
 !.eslintrc.json
 !.prettierrc.js
 !.github/
+**/isolate
 **/keys/
 **/dist/
 **/firebase-debug.log
