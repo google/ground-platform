@@ -19,6 +19,7 @@
     "build-all": "npm run build-local-deps && npm run build",
     "build-and-test": "npm run build && npm run test",
     "build-all-and-test": "npm run build-all && npm run test",
+    "build-all-and-deploy": "npm run build-all && npm run deploy",
     "watch": "tsc --watch"
   },
   "dependencies": {
