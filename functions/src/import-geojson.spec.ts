@@ -66,6 +66,7 @@ describe('importGeoJson()', () => {
               },
               properties: {
                 name: 'Dinagat Islands',
+                area: 3.08
               },
             },
           ],
@@ -90,11 +91,11 @@ describe('importGeoJson()', () => {
         '2': 'job123',
         '3': {'1': {'1': {'1': 10.1, '2': 125.6}}},
         '9': 1,
-        '10': {name: 'Dinagat Islands'},
+        '10': {name: 'Dinagat Islands', area: 3.08},
         jobId: 'job123',
         predefined: true,
         geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
-        properties: {name: 'Dinagat Islands'},
+        properties: {name: 'Dinagat Islands', area: 3.08},
       },
     ]);
   });
