@@ -10,7 +10,7 @@
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "shell": "firebase functions:shell",
-    "emulators": "firebase emulators:start --only functions,firestore --project $npm_config_project",
+    "emulators": "firebase emulators:start --only functions,firestore --project local",
     "deploy": "firebase login && firebase deploy --project $npm_config_project --only functions",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
