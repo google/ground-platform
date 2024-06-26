@@ -33,9 +33,15 @@ Set up your environment by following instructions in "[first-time setup](https:/
 npm run ci-all
 ```
 
-### 2. Run locally
+### 2. Build and run locally
 
-Build and run against a local Firebase emulator:
+Build with:
+
+```bash 
+npm run build-all --config=local
+```
+
+Run against a local Firebase emulator:
 
 ```bash
 npm run start:local
