@@ -113,7 +113,7 @@ Alternatively, you can test and deploy against a real Firebase project:
 4. Build and deploy all the things dev Firebase:
 
     ```shell
-    npm run deploy:dev --project=<project-id>
+    npm run deploy --config=dev --project=<project-id>
     ```
 
 Once complete, the web app will be available at dev project's Firebase Hosting URL.
@@ -121,7 +121,7 @@ Once complete, the web app will be available at dev project's Firebase Hosting U
 The web app may also be develop locally against the dev Firebase server with:
 
 ```shell
-cd web && npm run start:dev --project=<project-id>
+cd web && npm run start --config=dev --project=<project-id>
 ```
 
 The web app will be accessible at http://localhost:4200. The app will be rebuilt and reloaded changes are saved.
@@ -139,7 +139,7 @@ Before you begin work on a change, comment on one of the [open issues](https://g
 We strongly encourage contributors to create a separate branch for each pull request. Maintainers working directly in `google/ground-platform` should create branches with names in the form `<username>/<issue-no>/<short-desc>`. For example:
 
 ```shell
-git checkout -d gino-m/1234/fix-save-button
+git checkout -d <user-id>/1234/fix-save-button
 ```
 
 ### Creating a pull request
