@@ -45,8 +45,8 @@ jobs:
       - name: Build and install dependencies
         run: npm run ci-all
 
-      - name: Build web
-        run: npm run build --config=local
+      - name: Build web and local deps
+        run: npm run build-all --config=local
 
       - name: Run tests
         run: npm run test-with-coverage
