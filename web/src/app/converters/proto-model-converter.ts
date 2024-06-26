@@ -16,9 +16,9 @@
 
 import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
+import {Role} from 'app/models/role.model';
 import {Map} from 'immutable';
 
-import {Role} from 'app/models/role.model';
 const Pb = GroundProtos.google.ground.v1beta1;
 
 const PB_ROLES = Map([
@@ -28,35 +28,35 @@ const PB_ROLES = Map([
   [Role.VIEWER, Pb.Role.VIEWER],
 ]);
 
-export class ProtoModelConverter {
-  /**
-   * Creates a proto rapresentation of a Survey.
-   */
-  static newSurveyToProto(
-    name: string,
-    description: string,
-    acl: Map<string, Role>,
-    ownerId: string
-  ): {} {
-    return toDocumentData(
-      new Pb.Survey({
-        name,
-        description,
-        acl: acl.map(role => PB_ROLES.get(role)!).toObject(),
-        ownerId,
-      })
-    );
-  }
+/**
+ * Creates a proto rapresentation of a Survey.
+ */
+export function newSurveyToProto(
+  name: string,
+  description: string,
+  acl: Map<string, Role>,
+  ownerId: string
+): {} {
+  return toDocumentData(
+    new Pb.Survey({
+      name,
+      description,
+      acl: acl.map(role => PB_ROLES.get(role)!).toObject(),
+      ownerId,
+    })
+  );
+}
 
-  /**
-   * Creates a proto rapresentation of a Survey.
-   */
-  static partialSurveyToProto(name: string, description?: string): {} {
-    return toDocumentData(
-      new Pb.Survey({
-        name,
-        ...(description && {description}),
-      })
-    );
-  }
+/**
+ * Creates a proto rapresentation of a Survey.
+ */
+export function partialSurveyToProto(name: string, description?: string): {} {
+  return toDocumentData(
+    new Pb.Survey({
+      name,
+      ...(description && {description}),
+    })
+  );
+}
+
 }

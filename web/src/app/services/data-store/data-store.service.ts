@@ -20,17 +20,14 @@ import {
   DocumentData,
   FieldPath,
   deleteField,
-  documentId,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
-import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
-import {map} from 'rxjs/operators';
-
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
-import {ProtoModelConverter} from 'app/converters/proto-model-converter';
+import {
+  newSurveyToProto,
+  partialSurveyToProto,
+} from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -38,6 +35,10 @@ import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {List, Map} from 'immutable';
+import {Observable, combineLatest, firstValueFrom} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -182,10 +183,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(
-        {title: newName, ...ProtoModelConverter.partialSurveyToProto(newName)},
-        {merge: true}
-      );
+      .set({title: newName, ...partialSurveyToProto(newName)}, {merge: true});
   }
 
   /**
@@ -207,7 +205,7 @@ export class DataStoreService {
         {
           title: newName,
           description: newDescription,
-          ...ProtoModelConverter.partialSurveyToProto(newName, newDescription),
+          ...partialSurveyToProto(newName, newDescription),
         },
         {merge: true}
       );
@@ -503,12 +501,7 @@ export class DataStoreService {
       .doc(surveyId)
       .set({
         ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
-        ...ProtoModelConverter.newSurveyToProto(
-          name,
-          description,
-          acl,
-          ownerId
-        ),
+        ...newSurveyToProto(name, description, acl, ownerId),
       });
     return Promise.resolve(surveyId);
   }
