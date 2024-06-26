@@ -65,5 +65,3 @@ export function partialSurveyToProto(name: string, description?: string): {} {
     })
   );
 }
-
-}
