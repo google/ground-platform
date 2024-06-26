@@ -42,10 +42,8 @@
     ]
   },
   "functions": {
-    "source": "./functions/isolate",
-    "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"],
-    "predeploy": "isolate",
-    "isolate": true
+    "source": "functions",
+    "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"]
   },
   "storage": {
     "rules": "storage/storage.rules"

@@ -28,7 +28,6 @@
   "homepage": "https://groundplatform.org",
   "devDependencies": {
     "firebase-tools": "13.6.0",
-    "isolate-package": "^1.18.0",
     "lerna": "^8.1.3",
     "start-server-and-test": "^2.0.3",
     "ts-node": "^10.9.2",

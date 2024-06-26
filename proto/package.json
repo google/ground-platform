@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Ground shared Protocol Buffer definitions",
   "main": "dist/index.js",
-  "files": ["dist"],
   "scripts": {
     "clean": "rm -rf dist",
     "ci-all": "npm ci",
