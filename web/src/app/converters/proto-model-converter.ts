@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {DocumentData} from '@angular/fire/firestore';
 import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {Role} from 'app/models/role.model';
@@ -32,7 +33,11 @@ const PB_ROLES = Map([
  * Converts Role instance to its proto message type.
  */
 export function roleToProto(role: Role) {
-  return PB_ROLES.get(role) || Pb.Role.VIEWER;
+  const pbRole = PB_ROLES.get(role);
+
+  if (!pbRole) throw new Error(`Invalid role encountered: ${role}`);
+
+  return pbRole;
 }
 
 /**
@@ -43,7 +48,7 @@ export function newSurveyToProto(
   description: string,
   acl: Map<string, Role>,
   ownerId: string
-): {} {
+): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
       name,
@@ -57,7 +62,10 @@ export function newSurveyToProto(
 /**
  * Creates a proto rapresentation of a Survey.
  */
-export function partialSurveyToProto(name: string, description?: string): {} {
+export function partialSurveyToProto(
+  name: string,
+  description?: string
+): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
       name,
