@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getDatastore, initializeFirebaseApp} from './common/context';
+import {getDatastore} from './common/context';
 import {CallableRequest, HttpsError} from 'firebase-functions/v2/https';
 import {getAuth} from 'firebase-admin/auth';
 
@@ -30,7 +30,6 @@ export async function handleProfileRefresh(
   if (!request.auth) {
     return new HttpsError('unauthenticated', 'Missing user credentials');
   }
-  initializeFirebaseApp();
   const uid = request.auth.token.uid;
   const user = await getAuth().getUser(uid);
   await getDatastore().mergeUserProfile(user);

@@ -27,6 +27,9 @@ import {onCreateLoiHandler} from './on-create-loi';
 import {onWriteLoiHandler} from './on-write-loi';
 import {onWriteSurveyHandler} from './on-write-survey';
 import {loi, submission, survey} from './common/datastore';
+import {initializeFirebaseApp} from './common/context';
+
+initializeFirebaseApp();
 
 /** Template for LOI write triggers capturing survey and LOI ids. */
 export const loiPathTemplate = loi('{surveyId}', '{loiId}');
