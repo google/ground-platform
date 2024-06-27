@@ -17,8 +17,9 @@
 import {DocumentData} from '@angular/fire/firestore';
 import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
-import {Role} from 'app/models/role.model';
 import {Map} from 'immutable';
+
+import {Role} from 'app/models/role.model';
 
 const Pb = GroundProtos.google.ground.v1beta1;
 
