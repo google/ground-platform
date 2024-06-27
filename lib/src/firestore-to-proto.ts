@@ -51,13 +51,17 @@ function toMessageInternal<T>(
       fieldName,
       firestoreValue
     );
+    if (messageValue instanceof Error) {
+      console.debug(messageValue);
+      continue;
+    }
     if (messageValue) properties[fieldName] = messageValue;
   }
   return createInstance<T>(constructor, properties);
 }
 
 /**
- * Returns the equivalent protobuf field value for a give Firestore value.
+ * Returns the equivalent protobuf field value for a given Firestore value.
  */
 function toMessageValue(
   descriptor: MessageDescriptor,
@@ -106,7 +110,7 @@ function toFieldValue(
   fieldType: string,
   firestoreValue: any
 ): any | Error | null {
-  // TODO: Check value type corresponds to appropriate type.
+  // TODO(#1758): Check value type corresponds to appropriate type.
   switch (fieldType) {
     case 'string':
     case 'int32':
