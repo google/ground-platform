@@ -23,8 +23,8 @@ import {
 } from '@ground/lib/dist/testing/firestore';
 import * as functions from './index';
 import {loi} from './common/datastore';
-import { Firestore } from 'firebase-admin/firestore';
-import { resetDatastore } from './common/context';
+import {Firestore} from 'firebase-admin/firestore';
+import {resetDatastore} from './common/context';
 
 const test = require('firebase-functions-test')();
 
