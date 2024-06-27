@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
-export {toDocumentData} from './proto-to-firestore';
-export {toMessage} from './firestore-to-proto';
-export {deleteEmpty, isEmpty} from './obj-util';
+export function deleteEmpty(
+  dict: Record<any, any | undefined | null>
+): Record<any, any> {
+  return Object.keys(dict).reduce((acc, key) => {
+    if (!isEmpty(dict[key])) {
+      acc[key] = dict[key];
+    }
+    return acc;
+  }, {} as Record<string, any>);
+}
+
+export function isEmpty(obj: any | null | undefined): boolean {
+  if (obj === null || obj === undefined) return true;
+  switch (typeof obj) {
+    case 'string':
+      return obj === '';
+    case 'object':
+      return Object.keys(obj).length === 0;
+    default:
+      return false;
+  }
+}

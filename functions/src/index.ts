@@ -16,10 +16,10 @@
 
 import 'module-alias/register';
 import * as functions from 'firebase-functions';
-import {onHttpsRequest} from './handlers';
+import {onHttpsRequest, onHttpsRequestAsync} from './handlers';
 import {handleProfileRefresh} from './profile-refresh';
 import {sessionLoginHandler} from './session-login';
-import {importGeoJsonHandler} from './import-geojson';
+import {importGeoJsonCallback} from './import-geojson';
 import {exportCsvHandler} from './export-csv';
 import {onCall} from 'firebase-functions/v2/https';
 import {onWriteSubmissionHandler} from './on-write-submission';
@@ -27,6 +27,10 @@ import {onCreateLoiHandler} from './on-create-loi';
 import {onWriteLoiHandler} from './on-write-loi';
 import {onWriteSurveyHandler} from './on-write-survey';
 import {loi, submission, survey} from './common/datastore';
+import {initializeFirebaseApp} from './common/context';
+
+// Ensure Firebase is initialized.
+initializeFirebaseApp();
 
 /** Template for LOI write triggers capturing survey and LOI ids. */
 export const loiPathTemplate = loi('{surveyId}', '{loiId}');
@@ -44,7 +48,7 @@ export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
 
-export const importGeoJson = onHttpsRequest(importGeoJsonHandler);
+export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 

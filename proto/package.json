@@ -16,6 +16,9 @@
     "generate:pbjson": "npm run pbjs -- -t json -o dist/ground-protos.json",
     "generate:pbts": "mkdir -p dist && pbts dist/ground-protos.js -o dist/ground-protos.d.ts"
   },
+  "dependencies": {
+    "protobufjs": "^7.3.2"
+  },
   "devDependencies": {
     "@bufbuild/buf": "^1.32.2",
     "protobufjs-cli": "^1.1.2"

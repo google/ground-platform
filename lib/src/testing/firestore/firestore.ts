@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
+import { Firestore } from "@google-cloud/firestore";
+
+const MockFirebase = require('mock-cloud-firestore');
+
 // Set project as workaround for https://github.com/firebase/firebase-functions/issues/437.
 process.env.GCLOUD_PROJECT = 'fake-project';
 
-class TestFirestore {
-  // TODO: Add test impl instead of using spies.
-  doc = jasmine.createSpy('doc');
-  collection = jasmine.createSpy('collection');
-
-  settings() {
-    // no-op.
-  }
+export function createMockFirestore(): Firestore {
+  return new MockFirebase().firestore();
 }
 
-export const testFirestore = new TestFirestore();
+/**
+ * Returns a new Object with the specified coordinates. Use in place of GeoPoint
+ * in tests to work around lack of support in MockFirebase lib.
+ */
+export function TestGeoPoint(_latitude: number, _longitude: number) {
+    return {
+      _latitude,
+      _longitude,
+    };
+  }
+  

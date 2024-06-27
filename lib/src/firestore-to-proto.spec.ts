@@ -89,6 +89,23 @@ describe('toMessage()', () => {
       input: {},
       expected: new Task.DateTimeQuestion(),
     },
+    {
+      desc: 'converts repeated message',
+      input: {
+        '1': [
+          {'1': 5, '2': 7},
+          {'1': 12, '2': 23},
+          {'1': 9, '2': 2},
+        ],
+      },
+      expected: new LinearRing({
+        coordinates: [
+          new Coordinates({latitude: 5, longitude: 7}),
+          new Coordinates({latitude: 12, longitude: 23}),
+          new Coordinates({latitude: 9, longitude: 2}),
+        ],
+      }),
+    },
   ].forEach(({desc, input, expected}) =>
     it(desc, () => {
       const output = toMessage(input, expected.constructor as Constructor<any>);

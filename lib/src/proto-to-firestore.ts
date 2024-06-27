@@ -15,6 +15,7 @@
  */
 
 import {FieldDescriptor, MessageDescriptor, registry} from './message-registry';
+import {isEmpty} from './obj-util';
 import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
 
 /**
@@ -22,11 +23,14 @@ import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
  * The map is keyed by message field numbers represented as strings, while field values are
  * converted to corresponding Firestore data types.
  */
-export function toDocumentData(message: any): DocumentData | Error {
+export function toDocumentData(message: object): DocumentData {
+  if (Object.keys(message).length === 0) {
+    return {};
+  }
   const type = message.constructor.name;
   const descriptor = registry.getMessageDescriptor(message.constructor);
   // Fail if message not defined in registry.
-  if (!descriptor) return Error(`Unknown message type ${type}`);
+  if (!descriptor) throw new Error(`Unknown message type ${type}`);
   // Messages must also have at least one field.
   if (!descriptor.fields)
     return Error(`Invalid message definition: ${descriptor}`);
@@ -46,7 +50,7 @@ function messageToData(
       continue;
     }
     const value = toDocumentFieldValue(fieldDescriptor, message[name]);
-    if (value) {
+    if (value !== null) {
       firestoreMap[fieldNumber.toString()] = value;
     }
   }
@@ -63,11 +67,40 @@ function toDocumentFieldValue(
     return Object.fromEntries(
       Object.entries(value).map(([k, v]) => [
         k.toString(),
-        toValue(field.type, v),
+        toValueOrNull(field.type, v),
       ])
     );
   } else {
-    return toValue(field.type, value);
+    return toValueOrNull(field.type, value);
+  }
+}
+
+function toValueOrNull(
+  fieldType: string,
+  value: any
+): DocumentFieldValue | null {
+  const v = toValue(fieldType, value);
+  if (v instanceof Error) {
+    console.error(v);
+    return null;
+  } else return v;
+}
+
+function toValue(
+  fieldType: string,
+  value: any
+): DocumentFieldValue | Error | null {
+  // TODO(#1758): Coerce values to type specified in `fieldType`.Fix   switch (typeof value) {
+  switch (typeof value) {
+    case 'string':
+    case 'boolean':
+    case 'number': // This handles proto enums as well.
+    case 'boolean':
+      return value;
+    case 'object':
+      return toObjectValue(fieldType, value);
+    default:
+      return Error(`Unsupported field type ${typeof value}`);
   }
 }
 
@@ -76,30 +109,5 @@ function toObjectValue(fieldType: string, value: any) {
     return value.map(v => toValue(fieldType, v));
   } else {
     return toDocumentData(value);
-  }
-}
-
-function toValue(fieldType: string, value: any): DocumentFieldValue | null {
-  switch (typeof value) {
-    case 'string':
-    case 'boolean':
-    case 'number': // This handles proto enums as well.
-      return value;
-    case 'object':
-      return toObjectValue(fieldType, value);
-    default:
-      console.debug(`Unsupported proto field type ${typeof value}`);
-      return null;
-  }
-}
-
-function isEmpty(obj: any) {
-  switch (typeof obj) {
-    case 'string':
-      return obj === '';
-    case 'object':
-      return Object.keys(obj).length === 0;
-    default:
-      return false;
   }
 }

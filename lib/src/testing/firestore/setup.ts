@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import {testFirestore} from './firestore';
+import {Firestore} from '@google-cloud/firestore';
 
-export function stubAdminApi() {
+export function stubAdminApi(mockFirestore: Firestore) {
   spyOn(require('firebase-admin'), 'initializeApp').and.returnValue({
-    firestore: () => testFirestore,
+    firestore: () => mockFirestore,
   });
   spyOn(require('firebase-admin/firestore'), 'getFirestore').and.returnValue(
-    testFirestore
+    mockFirestore
   );
+}
+
+export function resetSpies() {
+  require('firebase-admin').initializeApp.and.callThrough();
+  require('firebase-admin/firestore').getFirestore.and.callThrough();
 }

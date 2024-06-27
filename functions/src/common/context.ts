@@ -18,7 +18,7 @@ import {Datastore} from './datastore';
 import {initializeApp, getApp} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
 
-let datastore: Datastore;
+let datastore: Datastore | undefined;
 
 export function initializeFirebaseApp() {
   try {
@@ -34,4 +34,8 @@ export function getDatastore(): Datastore {
     datastore = new Datastore(getFirestore());
   }
   return datastore;
+}
+
+export function resetDatastore() {
+  datastore = undefined;
 }
