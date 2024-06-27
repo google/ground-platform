@@ -4,7 +4,8 @@
       "**/*.spec.js"
     ],
     "helpers": [
-      "testing/reporter.js"
+      "testing/reporter.js",
+      "testing/diff.js"
     ],
     "stopSpecOnExpectationFailure": false,
     "random": false
