@@ -43,6 +43,10 @@ describe('importGeoJson()', () => {
       [email]: OWNER_ROLE,
     },
   };
+  const testProperties = {
+    name: 'Dinagat Islands',
+    area: 3.08,
+  };
   const geoJsonWithPoint = {
     type: 'FeatureCollection',
     features: [
@@ -52,40 +56,37 @@ describe('importGeoJson()', () => {
           type: 'Point',
           coordinates: [125.6, 10.1],
         },
-        properties: {
-          name: 'Dinagat Islands',
-          area: 3.08,
-        },
+        properties: testProperties,
       },
     ],
   };
   // LocationOfInterest fields:
-  const [job_id, geometry, submission_count, source, properties] = [
+  const [$job_id, $geometry, $submission_count, $source, $properties] = [
     2, 3, 4, 9, 10,
   ];
 
   // Geometry fields:
-  const [point, polygon, multi_polygon] = [1, 2, 3];
+  const [$point, $polygon, $multi_polygon] = [1, 2, 3];
   // Polygon fields:
-  const [shell] = [1];
+  const [$shell] = [1];
   // LinearRing fields:
-  const [coordinates] = [1];
+  const [$coordinates] = [1];
   // MultiPolygon fields:
-  const [polygons] = [1];
+  const [$polygons] = [1];
   // Coordinates fields:
-  const [latitude, longitude] = [1, 2];
+  const [$latitude, $longitude] = [1, 2];
   const pointLoi = {
-    [job_id]: 'job123',
-    [geometry]: {
-      [point]: {[coordinates]: {[latitude]: 10.1, [longitude]: 125.6}},
+    [$job_id]: 'job123',
+    [$geometry]: {
+      [$point]: {[$coordinates]: {[$latitude]: 10.1, [$longitude]: 125.6}},
     },
-    [submission_count]: 0,
-    [source]: 1, // IMPORTED
-    [properties]: {name: 'Dinagat Islands', area: 3.08},
+    [$submission_count]: 0,
+    [$source]: 1, // IMPORTED
+    [$properties]: {name: 'Dinagat Islands', area: 3.08},
     jobId: 'job123',
     predefined: true,
     geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
-    properties: {name: 'Dinagat Islands', area: 3.08},
+    properties: testProperties,
   };
   const geoJsonWithPolygon = {
     type: 'FeatureCollection',
@@ -107,21 +108,21 @@ describe('importGeoJson()', () => {
     ],
   };
   const polygonLoi = {
-    [job_id]: 'job123',
-    [geometry]: {
-      [polygon]: {
-        [shell]: {
-          [coordinates]: [
-            {[latitude]: 0, [longitude]: 100},
-            {[latitude]: 0, [longitude]: 101},
-            {[latitude]: 1, [longitude]: 101},
-            {[latitude]: 0, [longitude]: 100},
+    [$job_id]: 'job123',
+    [$geometry]: {
+      [$polygon]: {
+        [$shell]: {
+          [$coordinates]: [
+            {[$latitude]: 0, [$longitude]: 100},
+            {[$latitude]: 0, [$longitude]: 101},
+            {[$latitude]: 1, [$longitude]: 101},
+            {[$latitude]: 0, [$longitude]: 100},
           ],
         },
       },
     },
-    [submission_count]: 0,
-    [source]: 1, // IMPORTED
+    [$submission_count]: 0,
+    [$source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
     geometry: {
@@ -166,37 +167,37 @@ describe('importGeoJson()', () => {
     ],
   };
   const multiPolygonLoi = {
-    [job_id]: 'job123',
-    [geometry]: {
-      [multi_polygon]: {
-        [polygons]: [
+    [$job_id]: 'job123',
+    [$geometry]: {
+      [$multi_polygon]: {
+        [$polygons]: [
           // polygons[0]
           {
-            [shell]: {
-              [coordinates]: [
-                {[latitude]: 0, [longitude]: 100},
-                {[latitude]: 0, [longitude]: 101},
-                {[latitude]: 1, [longitude]: 101},
-                {[latitude]: 0, [longitude]: 100},
+            [$shell]: {
+              [$coordinates]: [
+                {[$latitude]: 0, [$longitude]: 100},
+                {[$latitude]: 0, [$longitude]: 101},
+                {[$latitude]: 1, [$longitude]: 101},
+                {[$latitude]: 0, [$longitude]: 100},
               ],
             },
           },
           // polygons[1]
           {
-            [shell]: {
-              [coordinates]: [
-                {[latitude]: 1, [longitude]: 120},
-                {[latitude]: 1, [longitude]: 121},
-                {[latitude]: 2, [longitude]: 121},
-                {[latitude]: 1, [longitude]: 120},
+            [$shell]: {
+              [$coordinates]: [
+                {[$latitude]: 1, [$longitude]: 120},
+                {[$latitude]: 1, [$longitude]: 121},
+                {[$latitude]: 2, [$longitude]: 121},
+                {[$latitude]: 1, [$longitude]: 120},
               ],
             },
           },
         ],
       },
     },
-    [submission_count]: 0,
-    [source]: 1, // IMPORTED
+    [$submission_count]: 0,
+    [$source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
     geometry: {
