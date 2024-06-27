@@ -18,15 +18,17 @@ import {
   stubAdminApi,
   newEventContext,
   newDocumentSnapshot,
-  mockFirestore,
   newCountQuery,
+  createMockFirestore,
 } from '@ground/lib/dist/testing/firestore';
 import * as functions from './index';
 import {loi} from './common/datastore';
+import { Firestore } from 'firebase-admin/firestore';
 
 const test = require('firebase-functions-test')();
 
 describe('onWriteSubmission()', () => {
+  let mockFirestore: Firestore;
   const SURVEY_ID = 'survey1';
   const SUBMISSION = newDocumentSnapshot({loiId: 'loi1'});
   const CONTEXT = newEventContext({surveyId: SURVEY_ID});
@@ -35,8 +37,9 @@ describe('onWriteSubmission()', () => {
   const LOI_ID = 'loi1';
   const LOI_PATH = `${SURVEY_PATH}/lois/${LOI_ID}`;
 
-  beforeAll(() => {
-    stubAdminApi();
+  beforeEach(() => {
+    mockFirestore = createMockFirestore();
+    stubAdminApi(mockFirestore);
   });
 
   afterAll(() => {

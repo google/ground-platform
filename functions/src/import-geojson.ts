@@ -101,19 +101,6 @@ export function importGeoJsonCallback(
             return;
           }
           try {
-            console.debug('Feature:', JSON.stringify(geoJsonLoi, null, 2));
-            console.debug(
-              'Pb:',
-              JSON.stringify(toLoiPb(geoJsonLoi as Feature, jobId), null, 2)
-            );
-            console.debug(
-              'Data:',
-              JSON.stringify(
-                toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId)),
-                null,
-                2
-              )
-            );
             const data = toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId));
             const loi = {
               ...data,
@@ -139,7 +126,7 @@ export function importGeoJsonCallback(
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on('finish', async () => {
     try {
-      await inserts[0];
+      await Promise.all(inserts);
       const count = inserts.length;
       console.debug(`${count} LOIs imported`);
       res.send(JSON.stringify({count}));
