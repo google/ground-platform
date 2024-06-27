@@ -32,7 +32,7 @@ import {OWNER_ROLE} from './common/auth';
 import {resetDatastore} from './common/context';
 import {Firestore} from 'firebase-admin/firestore';
 
-fdescribe('importGeoJson()', () => {
+describe('importGeoJson()', () => {
   let mockFirestore: Firestore;
   const surveyId = 'survey001';
   const jobId = 'job123';
@@ -241,9 +241,12 @@ fdescribe('importGeoJson()', () => {
   ];
 
   beforeEach(() => {
-    resetDatastore();
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+  });
+
+  afterEach(() => {
+    resetDatastore();
   });
 
   async function loiData(surveyId: string) {

@@ -24,6 +24,7 @@ import {
 import * as functions from './index';
 import {loi} from './common/datastore';
 import { Firestore } from 'firebase-admin/firestore';
+import { resetDatastore } from './common/context';
 
 const test = require('firebase-functions-test')();
 
@@ -40,6 +41,10 @@ describe('onWriteSubmission()', () => {
   beforeEach(() => {
     mockFirestore = createMockFirestore();
     stubAdminApi(mockFirestore);
+  });
+
+  afterEach(() => {
+    resetDatastore();
   });
 
   afterAll(() => {
