@@ -23,6 +23,21 @@ import {
   createPostRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
+import {
+  $job_id,
+  $geometry,
+  $submission_count,
+  $source,
+  $properties,
+  $point,
+  $polygon,
+  $multi_polygon,
+  $shell,
+  $coordinates,
+  $polygons,
+  $latitude,
+  $longitude,
+} from '@ground/lib/dist/testing/proto-field-aliases';
 import {importGeoJsonCallback} from './import-geojson';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {Blob, FormData} from 'formdata-node';
@@ -60,21 +75,6 @@ describe('importGeoJson()', () => {
       },
     ],
   };
-  // LocationOfInterest fields:
-  const [$job_id, $geometry, $submission_count, $source, $properties] = [
-    2, 3, 4, 9, 10,
-  ];
-
-  // Geometry fields:
-  const [$point, $polygon, $multi_polygon] = [1, 2, 3];
-  // Polygon fields:
-  const [$shell] = [1];
-  // LinearRing fields:
-  const [$coordinates] = [1];
-  // MultiPolygon fields:
-  const [$polygons] = [1];
-  // Coordinates fields:
-  const [$latitude, $longitude] = [1, 2];
   const pointLoi = {
     [$job_id]: 'job123',
     [$geometry]: {
