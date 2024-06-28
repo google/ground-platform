@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import {DocumentData} from '@angular/fire/firestore';
+import {toMessage} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
 import {GeoPoint} from 'firebase/firestore';
 import {Map} from 'immutable';
 
@@ -26,10 +28,10 @@ import {
   GeoJsonLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
-import {toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+
+import {geometryPbToModel} from './geometry-data-converter';
+
 import Pb = GroundProtos.google.ground.v1beta1;
-import { geometryPbToModel } from './geometry-data-converter';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -64,7 +66,9 @@ export function loiDocToModel(
   );
 }
 
-function propertiesPbToModel(pb: {[k: string]: Pb.LocationOfInterest.IProperty}): Map<string, string | number> {
+function propertiesPbToModel(pb: {
+  [k: string]: Pb.LocationOfInterest.IProperty;
+}): Map<string, string | number> {
   const properties: {[k: string]: string | number} = {};
   for (const k in pb.keys) {
     const v = pb[k].stringValue || pb[k].numericValue;

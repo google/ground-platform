@@ -29,6 +29,10 @@ import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {
+  LegacyLoiDataConverter,
+  loiDocToModel,
+} from 'app/converters/loi-data-converter';
+import {
   newSurveyToProto,
   partialSurveyToProto,
 } from 'app/converters/proto-model-converter';
@@ -39,7 +43,6 @@ import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
-import {LegacyLoiDataConverter, loiDocToModel} from 'app/converters/loi-data-converter';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
