@@ -27,8 +27,7 @@ import {
   LocationOfInterest,
   PointOfInterest,
 } from 'app/models/loi.model';
-
-import {LoiDataConverter} from './loi-data-converter';
+import {LegacyLoiDataConverter} from './loi-data-converter';
 
 const x = -42.121;
 const y = 28.482;
@@ -93,7 +92,10 @@ describe('toLocationOfInterest', () => {
   ];
 
   for (const t of testData) {
-    const got = LoiDataConverter.toLocationOfInterest(t.inputId, t.inputData);
+    const got = LegacyLoiDataConverter.toLocationOfInterest(
+      t.inputId,
+      t.inputData
+    );
     if (got instanceof Error) {
       throw new Error(`got unexpected error: ${got}`);
     }
@@ -122,7 +124,10 @@ describe('toLocationOfInterest_Error', () => {
   ];
 
   for (const t of testData) {
-    const got = LoiDataConverter.toLocationOfInterest(t.inputId, t.inputData);
+    const got = LegacyLoiDataConverter.toLocationOfInterest(
+      t.inputId,
+      t.inputData
+    );
     if (!(got instanceof Error)) {
       throw new Error(`expected error but instead got ${got}`);
     }
@@ -201,7 +206,7 @@ describe('loiToJS', () => {
   ];
 
   for (const t of testData) {
-    const got = LoiDataConverter.loiToJS(t.loi);
+    const got = LegacyLoiDataConverter.loiToJS(t.loi);
     if (got instanceof Error) {
       throw new Error(`got unexpected error ${got}`);
     }
@@ -237,7 +242,7 @@ describe('loiToJS_Error', () => {
   ];
 
   for (const t of testData) {
-    const got = LoiDataConverter.loiToJS(t.loi);
+    const got = LegacyLoiDataConverter.loiToJS(t.loi);
     if (!(got instanceof Error)) {
       throw new Error(`expected error but instead got ${got}`);
     }
