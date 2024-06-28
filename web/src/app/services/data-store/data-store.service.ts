@@ -28,7 +28,6 @@ import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {LoiDataConverter} from 'app/converters/loi-data-converter';
 import {
   newSurveyToProto,
   partialSurveyToProto,
@@ -40,6 +39,7 @@ import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+import {LegacyLoiDataConverter, loiDocToModel} from 'app/converters/loi-data-converter';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -320,7 +320,7 @@ export class DataStoreService {
   ): List<LocationOfInterest> {
     return List(
       loiIds
-        .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+        .map(obj => loiDocToModel(obj.id, obj))
         .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
         .map(loi => loi as LocationOfInterest)
     );
@@ -471,7 +471,7 @@ export class DataStoreService {
     surveyId: string,
     loi: LocationOfInterest
   ): Promise<void> {
-    const loiJs = LoiDataConverter.loiToJS(loi);
+    const loiJs = LegacyLoiDataConverter.loiToJS(loi);
     if (loiJs instanceof Error) {
       throw loiJs;
     }
