@@ -25,18 +25,11 @@
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
 
-    /**
-     * Returns the email address of the requesting user.
-     */
-    function getEmail() {
-      return request.auth.token.email;
-    }
-
    /**
      * Returns the role of the specified email address in the given survey.
      */
-    function getRole(survey, email) {
-      return survey.acl[email];
+    function getRole(survey) {
+      return survey.acl[request.auth.token.email];
     }
 
     /**
@@ -49,40 +42,40 @@
     /**
      * Returns true iff the user's email is explicitly listed in the passlist.
      */
-    function inPasslist(email) {
-      return exists(/databases/$(database)/documents/passlist/$(email));
+    function inPasslist() {
+      return exists(/databases/$(database)/documents/passlist/$(request.auth.token.email));
     }
 
     /**
      * Returns true iff the user's email matches the passlist regex or
      * is explicitly listed in the passlist.
      */
-    function canAccess(email) {
-      return request.auth != null && (email.matches(getPassRegexp()) || inPasslist(email));
+    function canAccess() {
+      return request.auth != null && (request.auth.token.email.matches(getPassRegexp()) || inPasslist());
     }
 
     /**
      * Returns true iff the user with the given email can read the specified
      * survey.
      */
-    function canViewSurvey(surveyId, email) {
-      return canAccess(email) && getRole(surveyId, email) != null;
+    function canViewSurvey(survey) {
+      return canAccess() && getRole(survey) != null;
     }
 
     /**
      * Returns true iff the user with the given email has one of the specified
      * roles in the given survey.
      */
-    function isOneOf(survey, email, roles) {
-      return survey.acl[email] in roles;
+    function isOneOf(survey, roles) {
+      return survey.acl[request.auth.token.email] in roles;
     }
 
     /**
      * Returns true iff the user with the given email can manage the specified
      * survey (modify the survey document, edit user data, etc.).
      */
-    function canManageSurvey(survey, email) {
-      return canAccess(email) && isOneOf(survey, email, ['OWNER', 'SURVEY_ORGANIZER']);
+    function canManageSurvey(survey) {
+      return canAccess() && isOneOf(survey, ['OWNER', 'SURVEY_ORGANIZER']);
     }
 
     /**
@@ -90,16 +83,16 @@
      * and submissions to the specified survey (i.e., add/edit LOIs and
      * submissions).
      */
-    function canCollectData(survey, email) {
-      return canAccess(email) && isOneOf(surveyId, email, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
+    function canCollectData(survey) {
+      return canAccess() && isOneOf(surveyId, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
     }
 
     /**
      * Returns true iff the user with the provided email created the specified resource.
      */
-    function isCreator(resource, email) {
+    function isCreator(resource) {
       // TODO(#1154): Make `owner` its own field and stop assuming `creator==owner`.
-      return resource.data.created.user.email == email;     
+      return resource.data.created.user.email == request.auth.token.email;     
     }
 
     // All users need to be able to read the passlist for rules to work.
@@ -108,35 +101,35 @@
     }
 
     // All users need to be able to read the passlist for rules to work.
-    match /passlist/{email} {
+    match /passlist/{entry} {
       // TODO(#1602): Replace "regexp" with simple pattern matching.
-      allow read: if request.auth != null && email in ['regexp', getEmail()];
+      allow read: if request.auth != null && entry in ['regexp', request.auth.token.email];
     }
 
     // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
-      allow read: if canViewSurvey(resource.data, getEmail());
-      allow write: if canManageSurvey(resource.data, getEmail());
-      allow create: if canAccess(getEmail());
+      allow read: if canViewSurvey(resource.data);
+      allow write: if canManageSurvey(resource.data);
+      allow create: if canAccess();
     }
 
     // Allow passlisted users to access Terms of Service and other config.
     match /config/{id} {
-      allow read: if canAccess(getEmail());
+      allow read: if canAccess();
     }
 
     // Apply passlist and survey-level ACLs to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      allow read: if canViewSurvey(getSurvey(), getEmail());
-      allow create: if canManageSurvey(getSurvey(), getEmail()) || isCreator(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(), getEmail()) || isCreator(resource, getEmail());
+      allow read: if canViewSurvey(getSurvey());
+      allow create: if canManageSurvey(getSurvey()) || isCreator(request.resource);
+      allow write: if canManageSurvey(getSurvey()) || isCreator(resource);
     }
 
     // Apply passlist and survey-level ACLs to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      allow read: if canViewSurvey(getSurvey(), getEmail());
-      allow create: if canManageSurvey(getSurvey(), getEmail()) || isCreator(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(), getEmail()) || isCreator(resource, getEmail());
+      allow read: if canViewSurvey(getSurvey());
+      allow create: if canManageSurvey(getSurvey()) || isCreator(request.resource);
+      allow write: if canManageSurvey(getSurvey()) || isCreator(resource);
     }
   }
 }
