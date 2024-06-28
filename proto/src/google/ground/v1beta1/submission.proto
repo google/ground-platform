@@ -34,20 +34,26 @@ message Submission {
   // refers.
   string loi_id = 2;
 
+  // The sequential index in which this task was completed.
+  int32 index = 3;
+
   // Required. The ID of the job to which this submission refers. This can
   // also be obtained from the location of interest, but is duplicated here
   // to facilitate filtering.
-  string job_id = 3;
+  string job_id = 4;
+
+  // Required. The user ID of the submission's owner.
+  string owner_id = 5;
 
   // Required. Info about who created this submission and when.
-  AuditInfo created = 4;
+  AuditInfo created = 6;
 
   // Info about who last modified this submission and when. If unset,
   // the submission was never modified after it was created.
-  AuditInfo last_modified = 5;
+  AuditInfo last_modified = 7;
 
   // The data collector's responses to tasks in this job.
-  repeated TaskData task_data = 6;
+  repeated TaskData task_data = 8;
 }
 
 // Data provided by data collectors for a specific task and LOI.
