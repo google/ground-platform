@@ -27,6 +27,7 @@ import {
   LocationOfInterest,
   PointOfInterest,
 } from 'app/models/loi.model';
+
 import {LegacyLoiDataConverter} from './loi-data-converter';
 
 const x = -42.121;
