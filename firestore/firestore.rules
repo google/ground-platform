@@ -84,7 +84,7 @@
      * submissions).
      */
     function canCollectData(survey) {
-      return canAccess() && isOneOf(surveyId, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
+      return canAccess() && isOneOf(survey, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
     }
 
     /**
