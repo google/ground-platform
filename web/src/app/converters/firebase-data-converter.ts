@@ -20,7 +20,6 @@ import {List, Map} from 'immutable';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Result} from 'app/models/submission/result.model';
 import {
@@ -111,17 +110,15 @@ export class FirebaseDataConverter {
     return role;
   }
 
-  static newSurveyJS(
-    ownerEmail: string,
+  static newSurveyToJS(
     title: string,
     description: string,
-    offlineBaseMapSources?: OfflineBaseMapSource[]
+    acl: Map<string, Role>
   ) {
     return {
       title,
       description,
-      acl: {[ownerEmail]: FirebaseDataConverter.toRoleId(Role.OWNER)},
-      ...(offlineBaseMapSources?.length ? {offlineBaseMapSources} : {}),
+      acl: FirebaseDataConverter.aclToJs(acl),
     };
   }
 

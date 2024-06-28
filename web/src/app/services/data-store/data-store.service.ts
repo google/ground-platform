@@ -20,19 +20,21 @@ import {
   DocumentData,
   FieldPath,
   deleteField,
-  documentId,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
+import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {
+  newSurveyToProto,
+  partialSurveyToProto,
+} from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {OfflineBaseMapSource} from 'app/models/offline-base-map-source';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
@@ -50,12 +52,6 @@ export type JsonBlob = {[field: string]: any};
   providedIn: 'root',
 })
 export class DataStoreService {
-  private readonly VALID_ROLES = [
-    'owner',
-    'data-collector',
-    'survey-organizer',
-    'viewer',
-  ];
   constructor(private db: AngularFirestore) {}
 
   /**
@@ -126,7 +122,7 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
    *
    */
-  loadAccessibleSurvey$(userEmail: string): Observable<List<Survey>> {
+  loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath('acl', userEmail), 'in', Object.keys(Role))
@@ -179,34 +175,41 @@ export class DataStoreService {
   }
 
   /**
-   * Updates the survey with new title.
+   * Updates the survey with new name.
    *
    * @param surveyId the id of the survey.
-   * @param newTitle the new title of the survey.
+   * @param newName the new name of the survey.
    */
-  updateSurveyTitle(surveyId: string, newTitle: string): Promise<void> {
+  updateSurveyTitle(surveyId: string, newName: string): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: newTitle}, {merge: true});
+      .set({title: newName, ...partialSurveyToProto(newName)}, {merge: true});
   }
 
   /**
-   * Updates the survey with new title and new description.
+   * Updates the survey with new name and new description.
    *
    * @param surveyId the id of the survey.
-   * @param newTitle the new title of the survey.
+   * @param newName the new name of the survey.
    * @param newDescription the new description of the survey.
    */
   updateSurveyTitleAndDescription(
     surveyId: string,
-    newTitle: string,
+    newName: string,
     newDescription: string
   ): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: newTitle, description: newDescription}, {merge: true});
+      .set(
+        {
+          title: newName,
+          description: newDescription,
+          ...partialSurveyToProto(newName, newDescription),
+        },
+        {merge: true}
+      );
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
@@ -484,26 +487,23 @@ export class DataStoreService {
   /**
    * Creates a new survey in the remote db using the specified title,
    * returning the id of the newly created survey. ACLs are initialized
-   * to include the specified user email as survey owner.
+   * to include the specified user email as survey organizer.
    */
   async createSurvey(
-    ownerEmail: string,
-    title: string,
+    name: string,
     description: string,
-    offlineBaseMapSources?: OfflineBaseMapSource[]
+    user: User
   ): Promise<string> {
     const surveyId = this.generateId();
+    const {email: ownerEmail, id: ownerId} = user;
+    const acl = Map<string, Role>({[ownerEmail]: Role.SURVEY_ORGANIZER});
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(
-        FirebaseDataConverter.newSurveyJS(
-          ownerEmail,
-          title,
-          description,
-          offlineBaseMapSources
-        )
-      );
+      .set({
+        ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
+        ...newSurveyToProto(name, description, acl, ownerId),
+      });
     return Promise.resolve(surveyId);
   }
 

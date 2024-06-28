@@ -79,7 +79,7 @@ export class SurveyService {
       return new Observable<List<Survey>>();
     }
     const userEmail = user.email;
-    return this.dataStore.loadAccessibleSurvey$(userEmail);
+    return this.dataStore.loadAccessibleSurveys$(userEmail);
   }
 
   /**
@@ -115,15 +115,12 @@ export class SurveyService {
     return this.dataStore.updateAcl(surveyId, acl);
   }
 
-  async createSurvey(title: string, description?: string): Promise<string> {
-    const offlineBaseMapSources = environment.offlineBaseMapSources;
+  async createSurvey(name: string, description?: string): Promise<string> {
     const user = await firstValueFrom(this.authService.getUser$());
-    const email = user?.email || 'Unknown email';
     const surveyId = await this.dataStore.createSurvey(
-      email,
-      title,
+      name,
       description ?? '',
-      offlineBaseMapSources
+      user
     );
     return Promise.resolve(surveyId);
   }

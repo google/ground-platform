@@ -34,6 +34,9 @@ message Survey {
 
   // Defines who has access to do what with this survey.
   map<string, Role> acl = 4;
+
+  // Required. User id of the survey owner.
+  string owner_id = 5;
 }
 
 // Defines a user's role in a survey.

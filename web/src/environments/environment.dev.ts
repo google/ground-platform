@@ -22,7 +22,6 @@ export const environment = {
   googleMapsApiKey: firebaseConfig.apiKey,
   firebase: firebaseConfig,
   cloudFunctionsUrl: `https://${firebaseConfig.projectId}.web.app`,
-  offlineBaseMapSources: [],
   useEmulators: false,
   env: Env.Dev,
 };

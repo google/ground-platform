@@ -40,6 +40,7 @@
     "@angular/router": "^17.3.8",
     "@babel/runtime": "^7.24.7",
     "@ground/lib": "file:../lib",
+    "@ground/proto": "file:../proto",
     "@grpc/grpc-js": "^1.10.9",
     "@iplab/ngx-file-upload": "^17",
     "firebase": "^10.7.2",

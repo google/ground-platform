@@ -25,7 +25,6 @@ export const environment = {
   production: false,
   googleMapsApiKey: '',
   cloudFunctionsUrl: '',
-  offlineBaseMapSources: [{url: ''}],
   useEmulators: false,
   env: Env.Test,
 };
