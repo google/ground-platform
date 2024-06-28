@@ -36,6 +36,9 @@ jobs:
           FILE_NAME: "web/keys/gnd-dev/firebase-config.js"
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
 
+      - name: Install deps
+        run: npm run ci-all
+  
       - name: Build Ground
         run: npm run build-all --config=dev --project=gnd-dev
 
