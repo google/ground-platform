@@ -28,7 +28,7 @@ import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {LoiDataConverter} from 'app/converters/loi-data-converter';
 import {
   newSurveyToProto,
   partialSurveyToProto,
