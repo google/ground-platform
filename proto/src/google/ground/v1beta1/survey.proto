@@ -40,7 +40,7 @@ message Survey {
 }
 
 // Defines a user's role in a survey.
-enum Role {
+enum  Role {
   // Default value when role is missing.
   ROLE_UNSPECIFIED = 0;
 

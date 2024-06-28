@@ -26,6 +26,13 @@
     }
 
     /**
+     * Returns the user ID of the requesting user.
+     */
+    function getUid() {
+      return request.auth.uid;
+    }
+
+    /**
      * Returns the email address of the requesting user.
      */
     function getEmail() {
@@ -36,7 +43,7 @@
      * Returns the role of the specified email address in the given survey.
      */
     function getRole(survey, email) {
-      return survey.acl[email];
+      return survey['4'][email] || survey.acl[email];
     }
 
     /**
@@ -74,7 +81,7 @@
      * roles in the given survey.
      */
     function isOneOf(survey, email, roles) {
-      return survey.acl[email] in roles;
+      return getRole(survey, email) in roles;
     }
 
     /**
@@ -82,7 +89,7 @@
      * survey (modify the survey document, edit user data, etc.).
      */
     function canManageSurvey(survey, email) {
-      return canAccess(email) && isOneOf(survey, email, ['OWNER', 'SURVEY_ORGANIZER']);
+      return canAccess(email) && isOneOf(survey, email, ['OWNER', 'SURVEY_ORGANIZER', 3 /* SURVEY_ORGANIZER */]);
     }
 
     /**
@@ -91,7 +98,7 @@
      * submissions).
      */
     function canCollectData(survey, email) {
-      return canAccess(email) && isOneOf(surveyId, email, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
+      return canAccess(email) && isOneOf(surveyId, email, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR', 2 /* DATA_COLLECTOR */, 3 /* SURVEY_ORGANIZER */]);
     }
 
     /**
