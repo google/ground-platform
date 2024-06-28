@@ -26,6 +26,10 @@ import {
   GeoJsonLocationOfInterest,
   LocationOfInterest,
 } from 'app/models/loi.model';
+import {toMessage} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
+import Pb = GroundProtos.google.ground.v1beta1;
+import { geometryPbToModel } from './geometry-data-converter';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
@@ -35,7 +39,42 @@ function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
 }
 
-export class LoiDataConverter {
+export function loiPbToDoc(
+  id: string,
+  data: DocumentData
+): LocationOfInterest | Error {
+  // Use old converter if document doesn't include `job_id` using the new
+  // proto-based format.
+  if (!data['2']) {
+    return LegacyLoiDataConverter.toLocationOfInterest(id, data);
+  }
+  const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
+  if (!pb.jobId) return Error(`Missing job_id in loi ${id}`);
+  if (!pb.geometry) return Error(`Missing geometry in loi ${id}`);
+  const geometry = geometryPbToModel(pb.geometry);
+  if (!geometry) return new Error(`Invalid geometry in loi ${id}`);
+  const properties = propertiesPbToModel(pb.properties || {});
+  return new GenericLocationOfInterest(
+    id,
+    pb.jobId,
+    geometry,
+    properties,
+    pb.customTag,
+    pb.source === Pb.LocationOfInterest.Source.IMPORTED
+  );
+}
+
+function propertiesPbToModel(pb: {[k: string]: Pb.LocationOfInterest.IProperty}): Map<string, string | number> {
+  const properties: {[k: string]: string | number} = {};
+  for (const k in pb.keys) {
+    const v = pb[k].stringValue || pb[k].numericValue;
+    if (v !== null && v !== undefined) {
+      properties[k] = v;
+    }
+  }
+  return Map(properties);
+}
+export class LegacyLoiDataConverter {
   /**
    * Converts the raw object representation deserialized from Firebase into an
    * immutable LocationOfInterest instance.
