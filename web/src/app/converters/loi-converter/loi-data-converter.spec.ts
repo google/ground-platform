@@ -19,14 +19,7 @@ import {Map} from 'immutable';
 
 import {GEOMETRY_TYPES, toGeometry} from 'app/converters/geometry-converter';
 import {Geometry, GeometryType} from 'app/models/geometry/geometry';
-import {Point} from 'app/models/geometry/point';
-import {
-  AreaOfInterest,
-  GenericLocationOfInterest,
-  GeoJsonLocationOfInterest,
-  LocationOfInterest,
-  PointOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 
 import {LoiDataConverter} from './loi-data-converter';
 
@@ -60,7 +53,7 @@ describe('toLocationOfInterest', () => {
         geometry: geoPointData,
         properties: {},
       },
-      want: new GenericLocationOfInterest(
+      want: new LocationOfInterest(
         'id0',
         'jobId0',
         geoPoint,
@@ -79,7 +72,7 @@ describe('toLocationOfInterest', () => {
           prop2: '',
         },
       },
-      want: new GenericLocationOfInterest(
+      want: new LocationOfInterest(
         'id0',
         'jobId0',
         geoPoint,
@@ -123,121 +116,6 @@ describe('toLocationOfInterest_Error', () => {
 
   for (const t of testData) {
     const got = LoiDataConverter.toLocationOfInterest(t.inputId, t.inputData);
-    if (!(got instanceof Error)) {
-      throw new Error(`expected error but instead got ${got}`);
-    }
-
-    it(t.expectation, () =>
-      expect((got as Error).message).toContain(t.wantErrorMessage)
-    );
-  }
-});
-
-describe('loiToJS', () => {
-  const geoPointWithError = toGeometry(geoPointData);
-  if (geoPointData instanceof Error) {
-    throw new Error(
-      `got unexpected error in geometry conversion ${geoPointWithError}`
-    );
-  }
-  const geoPoint = geoPointWithError as unknown as GeoPoint;
-  const point = geoPointWithError as unknown as Point;
-
-  const testData: {
-    expectation: string;
-    loi: LocationOfInterest;
-    want: {};
-  }[] = [
-    {
-      expectation: 'converts GenericLocationOfInterest with Point geometry',
-      loi: new GenericLocationOfInterest('id0', 'jobId0', point, Map()),
-      want: {
-        jobId: 'jobId0',
-        geometry: {
-          coordinates: new GeoPoint(point.coord.x, point.coord.y),
-          type: GEOMETRY_TYPES.get(GeometryType.POINT),
-        },
-      },
-    },
-    {
-      expectation: 'converts GeoJsonLocationOfInterest',
-      loi: new GeoJsonLocationOfInterest(
-        'id0',
-        'jobId0',
-        geoPoint,
-        Map<string, string | number>()
-      ),
-      want: {
-        jobId: 'jobId0',
-        geoJson: point,
-      },
-    },
-    {
-      expectation: 'converts AreaOfInterest',
-      loi: new AreaOfInterest(
-        'id0',
-        'jobId0',
-        [geoPoint],
-        Map<string, string | number>()
-      ),
-      want: {
-        jobId: 'jobId0',
-        polygonVertices: [point],
-      },
-    },
-    {
-      expectation: 'converts empty AreaOfInterest',
-      loi: new AreaOfInterest(
-        'id0',
-        'jobId0',
-        [],
-        Map<string, string | number>()
-      ),
-      want: {
-        jobId: 'jobId0',
-        polygonVertices: [],
-      },
-    },
-  ];
-
-  for (const t of testData) {
-    const got = LoiDataConverter.loiToJS(t.loi);
-    if (got instanceof Error) {
-      throw new Error(`got unexpected error ${got}`);
-    }
-
-    it(t.expectation, () => expect(got as {}).toEqual(t.want));
-  }
-});
-
-describe('loiToJS_Error', () => {
-  const geoPointWithError = toGeometry(geoPointData);
-  if (geoPointData instanceof Error) {
-    throw new Error(
-      `got unexpected error in geometry conversion ${geoPointWithError}`
-    );
-  }
-  const geoPoint = geoPointWithError as unknown as GeoPoint;
-
-  const testData: {
-    expectation: string;
-    loi: LocationOfInterest;
-    wantErrorMessage: string;
-  }[] = [
-    {
-      expectation: 'Cannot convert PointOfInterest',
-      loi: new PointOfInterest(
-        'id0',
-        'jobId0',
-        geoPoint,
-        Map<string, string | number>()
-      ),
-      wantErrorMessage: 'Cannot convert unexpected loi class',
-    },
-  ];
-
-  for (const t of testData) {
-    const got = LoiDataConverter.loiToJS(t.loi);
     if (!(got instanceof Error)) {
       throw new Error(`expected error but instead got ${got}`);
     }

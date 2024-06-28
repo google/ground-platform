@@ -34,10 +34,7 @@ import {AuditInfo} from 'app/models/audit-info.model';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {GroundIconModule} from 'app/modules/ground-icon.module';
@@ -101,7 +98,7 @@ describe('JobListItemComponent', () => {
     const lois: LocationOfInterest[] = [];
     for (let i = 0; i < count; i++) {
       lois.push(
-        new GenericLocationOfInterest(
+        new LocationOfInterest(
           /* id= */ 'loi' + i,
           /* jobId= */ job.id,
           /* geometry= */ new Point(new Coordinate(1.23, 4.56)),

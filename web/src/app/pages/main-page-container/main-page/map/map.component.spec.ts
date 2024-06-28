@@ -31,10 +31,7 @@ import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -96,25 +93,25 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map()
   );
-  const poi1 = new GenericLocationOfInterest(
+  const poi1 = new LocationOfInterest(
     poiId1,
     jobId1,
     new Point(new Coordinate(1.23, 4.56)),
     Map()
   );
-  const poi2 = new GenericLocationOfInterest(
+  const poi2 = new LocationOfInterest(
     poiId2,
     jobId2,
     new Point(new Coordinate(12.3, 45.6)),
     Map()
   );
-  const poi3 = new GenericLocationOfInterest(
+  const poi3 = new LocationOfInterest(
     poiId3,
     jobId2,
     new Point(new Coordinate(78.9, 78.9)),
     Map()
   );
-  const poi4 = new GenericLocationOfInterest(
+  const poi4 = new LocationOfInterest(
     poiId4,
     jobId2,
     new Point(new Coordinate(45, 45)),
@@ -141,13 +138,13 @@ describe('MapComponent', () => {
     [20, -10],
     [-10, -10],
   ];
-  const polygonLoi1 = new GenericLocationOfInterest(
+  const polygonLoi1 = new LocationOfInterest(
     polygonLoiId1,
     jobId1,
     polygonShellCoordsToPolygon(polygon1ShellCoordinates),
     Map()
   );
-  const multipolygonLoi1 = new GenericLocationOfInterest(
+  const multipolygonLoi1 = new LocationOfInterest(
     multipolygonLoiId1,
     jobId1,
     new MultiPolygon(
@@ -343,13 +340,13 @@ describe('MapComponent', () => {
 
   describe('when backend LOIs update', () => {
     it('should update lois when backend lois update', fakeAsync(() => {
-      const poi2Modified = new GenericLocationOfInterest(
+      const poi2Modified = new LocationOfInterest(
         poiId2,
         jobId2,
         new Point(new Coordinate(12.3, 45.7)),
         Map()
       );
-      const polygonLoi1Modified = new GenericLocationOfInterest(
+      const polygonLoi1Modified = new LocationOfInterest(
         polygonLoiId1,
         jobId1,
         polygonShellCoordsToPolygon(polygon1ShellCoordinatesModified),
@@ -560,7 +557,7 @@ describe('MapComponent', () => {
 
     assertMarkerLatLng(marker, new google.maps.LatLng(2.23, 5.56));
     expect(loiServiceSpy.updatePoint).toHaveBeenCalledOnceWith(
-      new GenericLocationOfInterest(
+      new LocationOfInterest(
         poi1.id,
         poi1.jobId,
         new Point(new Coordinate(5.56, 2.23)),

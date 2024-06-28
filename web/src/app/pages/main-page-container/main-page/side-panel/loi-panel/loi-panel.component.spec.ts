@@ -24,10 +24,7 @@ import {of} from 'rxjs';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -54,7 +51,7 @@ const mockSurvey = new Survey(
   /* acl= */ Map()
 );
 
-const mockLocationOfInterest = new GenericLocationOfInterest(
+const mockLocationOfInterest = new LocationOfInterest(
   'loi001',
   'job001',
   new Point(new Coordinate(0.0, 0.0)),
