@@ -48,7 +48,6 @@ export function loiDocToModel(
   if (!data['2']) {
     return LegacyLoiDataConverter.toLocationOfInterest(id, data);
   }
-  console.log(`Converting LOI ${id} from new model`);
   const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
   if (!pb.jobId) return Error(`Missing job_id in loi ${id}`);
   if (!pb.geometry) return Error(`Missing geometry in loi ${id}`);
