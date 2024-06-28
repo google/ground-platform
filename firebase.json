@@ -44,7 +44,7 @@
   "functions": {
     "source": "./functions/isolate",
     "ignore": [".git", "firebase-debug.log", "firebase-debug.*.log"],
-    "predeploy": "isolate",
+    "predeploy": "npx isolate",
     "isolate": true
   },
   "storage": {
