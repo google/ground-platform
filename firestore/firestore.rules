@@ -21,7 +21,7 @@
     /**
      * Fetches and returns the survey with the specified id.
      */
-    function getSurvey(surveyId) {
+    function getSurvey() {
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
 
@@ -127,16 +127,16 @@
 
     // Apply passlist and survey-level ACLs to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
-      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
+      allow read: if canViewSurvey(getSurvey(), getEmail());
+      allow create: if canManageSurvey(getSurvey(), getEmail()) || isCreator(request.resource, getEmail());
+      allow write: if canManageSurvey(getSurvey(), getEmail()) || isCreator(resource, getEmail());
     }
 
     // Apply passlist and survey-level ACLs to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
-      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
+      allow read: if canViewSurvey(getSurvey(), getEmail());
+      allow create: if canManageSurvey(getSurvey(), getEmail()) || isCreator(request.resource, getEmail());
+      allow write: if canManageSurvey(getSurvey(), getEmail()) || isCreator(resource, getEmail());
     }
   }
 }
