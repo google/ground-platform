@@ -25,7 +25,7 @@ import {Point} from 'app/models/geometry/point';
 
 import Pb = GroundProtos.google.ground.v1beta1;
 
-export function geometryPbToModel(pb: Pb.Geometry): Geometry {
+export function geometryPbToModel(pb: Pb.IGeometry): Geometry {
   if (pb.point) {
     return pointPbToModel(pb.point);
   } else if (pb.polygon) {
@@ -33,7 +33,7 @@ export function geometryPbToModel(pb: Pb.Geometry): Geometry {
   } else if (pb.multiPolygon) {
     return multiPolygonPbToModel(pb.multiPolygon);
   } else {
-    throw new Error(`Unsupported or missing geometry: ${pb.geometryType}`);
+    throw new Error('Unsupported or missing geometry type');
   }
 }
 
