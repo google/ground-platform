@@ -17,9 +17,11 @@ import {DocumentData} from '@angular/fire/firestore';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {Map} from 'immutable';
+
 import {toGeometry} from 'app/converters/geometry-converter';
 import {Geometry} from 'app/models/geometry/geometry';
 import {LocationOfInterest} from 'app/models/loi.model';
+
 import {geometryPbToModel} from './geometry-data-converter';
 
 import Pb = GroundProtos.google.ground.v1beta1;
