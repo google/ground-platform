@@ -47,7 +47,7 @@ export function loiDocToModel(
   const geometry = geometryPbToModel(pb.geometry);
   if (!geometry) return new Error(`Invalid geometry in loi ${id}`);
   const properties = propertiesPbToModel(pb.properties || {});
-  return new GenericLocationOfInterest(
+  return new LocationOfInterest(
     id,
     pb.jobId,
     geometry,
