@@ -18,7 +18,6 @@ import {GeoPoint} from 'firebase/firestore';
 import {Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {PointOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
@@ -60,9 +59,5 @@ export class TestData {
     strategy = DataCollectionStrategy.PREDEFINED,
   }): Job {
     return new Job(id, index, color, name, Map(tasks), strategy);
-  }
-
-  public static newPointOfInterest(): PointOfInterest {
-    return new PointOfInterest('loi001', 'job001', new GeoPoint(0, 0), Map());
   }
 }

@@ -22,10 +22,7 @@ import {map, switchMap} from 'rxjs/operators';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {GeometryType} from 'app/models/geometry/geometry';
 import {Point} from 'app/models/geometry/point';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -161,45 +158,10 @@ export class LocationOfInterestService {
     lng: number,
     jobId: string
   ): Promise<LocationOfInterest | null> {
-    // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
-    // upgrading to RxJS 7.
-    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
-    return await this.addPointInternal(survey, lat, lng, jobId);
+    throw new Error('Adding LOIs via web app not yet supported');
   }
 
   async updatePoint(loi: LocationOfInterest): Promise<void> {
-    // TODO: Update to use `await firstValueFrom(getActiveSurvey$()` when
-    // upgrading to RxJS 7.
-    const survey = await firstValueFrom(this.surveyService.getActiveSurvey$());
-    return await this.updatePointInternal(survey, loi);
-  }
-
-  private async addPointInternal(
-    survey: Survey,
-    lat: number,
-    lng: number,
-    jobId: string
-  ): Promise<LocationOfInterest | null> {
-    if (!(survey.jobs || new Map()).get(jobId)) {
-      return null;
-    }
-    const newLocationOfInterest = new GenericLocationOfInterest(
-      this.dataStore.generateId(),
-      jobId,
-      new Point(new Coordinate(lng, lat)),
-      ImmutableMap()
-    );
-    await this.dataStore.updateLocationOfInterest(
-      survey.id,
-      newLocationOfInterest
-    );
-    return newLocationOfInterest;
-  }
-
-  private async updatePointInternal(survey: Survey, loi: LocationOfInterest) {
-    if (survey.jobs.isEmpty()) {
-      return;
-    }
-    await this.dataStore.updateLocationOfInterest(survey.id, loi);
+    throw new Error('Editing LOIs via web app not yet supported');
   }
 }

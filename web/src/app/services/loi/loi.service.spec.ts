@@ -21,7 +21,7 @@ import {Subject, of} from 'rxjs';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
-import {GenericLocationOfInterest} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -39,7 +39,7 @@ describe('LocationOfInterestService', () => {
     properties: ImmutableMap<string, string | number> = ImmutableMap(),
     customId = ''
   ) => {
-    return new GenericLocationOfInterest(
+    return new LocationOfInterest(
       'loi001',
       'job001',
       new Point(new Coordinate(0.0, 0.0)),
@@ -93,7 +93,7 @@ describe('LocationOfInterestService', () => {
 
   describe('getLatLngBoundsFromLois', () => {
     const jobId1 = 'job001';
-    const poi1 = new GenericLocationOfInterest(
+    const poi1 = new LocationOfInterest(
       'poi001',
       jobId1,
       new Point(new Coordinate(30, 30)),
@@ -113,13 +113,13 @@ describe('LocationOfInterestService', () => {
       [20, -10],
       [-10, -10],
     ];
-    const polygonLoi1 = new GenericLocationOfInterest(
+    const polygonLoi1 = new LocationOfInterest(
       'polygon_loi001',
       jobId1,
       polygonShellCoordsToPolygon(polygon1ShellCoordinates),
       Map()
     );
-    const multipolygonLoi1 = new GenericLocationOfInterest(
+    const multipolygonLoi1 = new LocationOfInterest(
       'multipolygon_loi001',
       jobId1,
       new MultiPolygon(
