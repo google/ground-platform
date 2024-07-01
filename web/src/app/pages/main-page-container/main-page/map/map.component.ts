@@ -33,10 +33,7 @@ import {Geometry, GeometryType} from 'app/models/geometry/geometry';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {TaskType} from 'app/models/task/task.model';
@@ -97,7 +94,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   };
   mapOptions: google.maps.MapOptions = this.initialMapOptions;
   showRepositionConfirmDialog = false;
-  newLocationOfInterestToReposition?: GenericLocationOfInterest;
+  newLocationOfInterestToReposition?: LocationOfInterest;
   oldLatLng?: google.maps.LatLng;
   newLatLng?: google.maps.LatLng;
   markerToReposition?: google.maps.Marker;
@@ -512,7 +509,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       event.latLng!.lng()
     );
 
-    this.newLocationOfInterestToReposition = new GenericLocationOfInterest(
+    this.newLocationOfInterestToReposition = new LocationOfInterest(
       id,
       jobId,
       new Point(new Coordinate(event.latLng!.lng(), event.latLng!.lat())),

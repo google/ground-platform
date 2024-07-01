@@ -14,70 +14,11 @@
  * limitations under the License.
  */
 
-import {GeoPoint} from 'firebase/firestore';
 import {List, Map} from 'immutable';
 
 import {Geometry} from './geometry/geometry';
 
-export abstract class LocationOfInterest {
-  abstract readonly id: string;
-  abstract readonly jobId: string;
-  abstract readonly name?: string;
-  // TODO(#1444): Make non-null once other subtypes are removed.
-  abstract readonly geometry?: Geometry;
-  // TODO(#1444): Make non-null, init to empty by default.
-  abstract readonly properties?: Map<string, string | number>;
-  abstract readonly customId: string;
-  abstract readonly predefined?: boolean;
-
-  static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
-    return lois
-      .sort((a, b) =>
-        (a.geometry?.getArea() || 0) < (b.geometry?.getArea() || 0) ? -1 : 1
-      )
-      .first();
-  }
-}
-
-// TODO(#1444): Delete me in favor of single LOI type.
-export class PointOfInterest implements LocationOfInterest {
-  constructor(
-    readonly id: string,
-    readonly jobId: string,
-    // TODO(#1444): User custom type instead of exposing types from data job.
-    readonly location: GeoPoint,
-    readonly properties?: Map<string, string | number>,
-    readonly customId: string = '',
-    readonly predefined: boolean = true
-  ) {}
-}
-
-// TODO(#1444): Delete me in favor of single LOI type.
-export class GeoJsonLocationOfInterest implements LocationOfInterest {
-  constructor(
-    readonly id: string,
-    readonly jobId: string,
-    readonly geoJson: object,
-    readonly properties?: Map<string, string | number>,
-    readonly customId: string = '',
-    readonly predefined: boolean = true
-  ) {}
-}
-
-// TODO(#1444): Delete me in favor of single LOI type.
-export class AreaOfInterest implements LocationOfInterest {
-  constructor(
-    readonly id: string,
-    readonly jobId: string,
-    readonly polygonVertices: GeoPoint[],
-    readonly properties?: Map<string, string | number>,
-    readonly customId: string = '',
-    readonly predefined: boolean = true
-  ) {}
-}
-
-// TODO(#1444): Merge into LocationOfInterest and make concrete.
-export class GenericLocationOfInterest implements LocationOfInterest {
+export class LocationOfInterest {
   constructor(
     readonly id: string,
     readonly jobId: string,
@@ -86,4 +27,12 @@ export class GenericLocationOfInterest implements LocationOfInterest {
     readonly customId: string = '',
     readonly predefined: boolean = true
   ) {}
+
+  static getSmallestByArea(lois: List<LocationOfInterest>): LocationOfInterest {
+    return lois
+      .sort((a, b) =>
+        (a.geometry?.getArea() || 0) < (b.geometry?.getArea() || 0) ? -1 : 1
+      )
+      .first();
+  }
 }
