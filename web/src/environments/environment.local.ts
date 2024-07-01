@@ -25,7 +25,7 @@ export const environment = {
   production: false,
   googleMapsApiKey: '',
   firebase: {
-    projectId: 'ground-local-dev',
+    projectId: 'local',
     apiKey: 'fake-api-key',
   },
   cloudFunctionsUrl: '',
