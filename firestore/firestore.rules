@@ -138,5 +138,12 @@
       allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
       allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
     }
+
+    // Apply passlist and survey-level ACLs to job documents.
+    match /surveys/{surveyId}/jobs/{jobId} {
+      allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
+      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
+      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
+    }
   }
 }
