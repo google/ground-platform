@@ -16,19 +16,10 @@
 import {DocumentData} from '@angular/fire/firestore';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
-import {GeoPoint} from 'firebase/firestore';
 import {Map} from 'immutable';
-
-import {GEOMETRY_TYPES, toGeometry} from 'app/converters/geometry-converter';
+import {toGeometry} from 'app/converters/geometry-converter';
 import {Geometry} from 'app/models/geometry/geometry';
-import {Point} from 'app/models/geometry/point';
-import {
-  AreaOfInterest,
-  GenericLocationOfInterest,
-  GeoJsonLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
-
+import {LocationOfInterest} from 'app/models/loi.model';
 import {geometryPbToModel} from './geometry-data-converter';
 
 import Pb = GroundProtos.google.ground.v1beta1;
@@ -105,7 +96,7 @@ export class LegacyLoiDataConverter {
         return result;
       }
 
-      return new GenericLocationOfInterest(
+      return new LocationOfInterest(
         id,
         data.jobId,
         result as Geometry,
@@ -116,40 +107,6 @@ export class LegacyLoiDataConverter {
     } catch (err) {
       return new Error(
         `Error converting to LOI: invalid LOI in remote data store; data: ${data}, error message: ${err}`
-      );
-    }
-  }
-
-  // TODO(Nick): Add polygon / multipolygon conversion, remove AreaOfInterest
-  // and GeoJsonLocationOfInterest. This may not be urgent, as only point
-  // conversion seems to be used on the frontend.
-  public static loiToJS(loi: LocationOfInterest): {} | Error {
-    // TODO: Set audit info (created / last modified user and timestamp).
-    if (loi.geometry instanceof Point) {
-      // TODO: Add geometryToJS converters in geometry-converter.ts call it from here. Then GEOMETRY_TYPES can be local.
-      const {jobId, geometry} = loi;
-      return {
-        jobId,
-        geometry: {
-          coordinates: new GeoPoint(geometry.coord.x, geometry.coord.y),
-          type: GEOMETRY_TYPES.get(geometry.geometryType),
-        },
-      };
-    } else if (loi instanceof GeoJsonLocationOfInterest) {
-      const {jobId, geoJson} = loi;
-      return {
-        jobId,
-        geoJson,
-      };
-    } else if (loi instanceof AreaOfInterest) {
-      const {jobId, polygonVertices} = loi;
-      return {
-        jobId,
-        polygonVertices,
-      };
-    } else {
-      return new Error(
-        `Cannot convert unexpected loi class ${loi.constructor.name} to json.`
       );
     }
   }

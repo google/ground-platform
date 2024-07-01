@@ -35,10 +35,7 @@ import {AuditInfo} from 'app/models/audit-info.model';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
@@ -110,7 +107,7 @@ class MockModel {
     /*acl=*/ Map({})
   );
 
-  static loi001 = new GenericLocationOfInterest(
+  static loi001 = new LocationOfInterest(
     'loi001',
     MockModel.job001.id,
     new Point(new Coordinate(0.0, 0.0)),

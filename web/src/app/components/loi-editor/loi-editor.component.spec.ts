@@ -23,7 +23,7 @@ import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
-import {GenericLocationOfInterest} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
@@ -40,7 +40,7 @@ describe('LoiEditorComponent', () => {
   const poiId2 = 'poi002';
   const jobId1 = 'job001';
   const jobId2 = 'job002';
-  const poi1 = new GenericLocationOfInterest(
+  const poi1 = new LocationOfInterest(
     poiId1,
     jobId1,
     new Point(new Coordinate(1.23, 4.56)),
@@ -48,7 +48,7 @@ describe('LoiEditorComponent', () => {
     '',
     true
   );
-  const poi2 = new GenericLocationOfInterest(
+  const poi2 = new LocationOfInterest(
     poiId2,
     jobId2,
     new Point(new Coordinate(12.3, 45.6)),

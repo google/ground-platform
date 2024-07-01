@@ -30,10 +30,7 @@ import {LinearRing} from 'app/models/geometry/linear-ring';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
-import {
-  GenericLocationOfInterest,
-  LocationOfInterest,
-} from 'app/models/loi.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestPanelHeaderComponent} from 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/loi-panel-header.component';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -55,7 +52,7 @@ describe('LocationOfInterestPanelHeaderComponent', () => {
   let fixture: ComponentFixture<LocationOfInterestPanelHeaderComponent>;
   let mockSelectedLoi$: BehaviorSubject<LocationOfInterest>;
 
-  const pointLocationOfInterest = new GenericLocationOfInterest(
+  const pointLocationOfInterest = new LocationOfInterest(
     'somePoint',
     'someJob',
     new Point(new Coordinate(1.23, 4.56)),
@@ -78,13 +75,13 @@ describe('LocationOfInterestPanelHeaderComponent', () => {
     ),
     List()
   );
-  const polygonLocationOfInterest = new GenericLocationOfInterest(
+  const polygonLocationOfInterest = new LocationOfInterest(
     'somePolygon',
     'someJob',
     polygon1,
     Map()
   );
-  const multiPolygonLocationOfInterest = new GenericLocationOfInterest(
+  const multiPolygonLocationOfInterest = new LocationOfInterest(
     'someMultiPolygon',
     'someJob',
     new MultiPolygon(List([polygon1, polygon2])),

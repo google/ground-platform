@@ -470,23 +470,6 @@ export class DataStoreService {
     return serverTimestamp();
   }
 
-  updateLocationOfInterest(
-    surveyId: string,
-    loi: LocationOfInterest
-  ): Promise<void> {
-    const loiJs = LegacyLoiDataConverter.loiToJS(loi);
-    if (loiJs instanceof Error) {
-      throw loiJs;
-    }
-
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .collection('lois')
-      .doc(loi.id)
-      .set(loiJs);
-  }
-
   /**
    * Creates a new survey in the remote db using the specified title,
    * returning the id of the newly created survey. ACLs are initialized
