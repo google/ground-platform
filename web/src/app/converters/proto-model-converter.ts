@@ -19,7 +19,9 @@ import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {Map} from 'immutable';
 
+import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 
 const Pb = GroundProtos.google.ground.v1beta1;
 
@@ -71,6 +73,45 @@ export function partialSurveyToProto(
     new Pb.Survey({
       name,
       ...(description && {description}),
+    })
+  );
+}
+
+/**
+ * Creates a proto rapresentation of a Job.
+ */
+export function jobToProto(job: Job): DocumentData {
+  return toDocumentData(
+    new Pb.Job({
+      id: job.id,
+      index: job.index,
+      name: job.name,
+      style: new Pb.Style({color: job.color}),
+      tasks: job.tasks
+        ?.map(task => {
+          const pbTask = new Pb.Task({
+            id: task.id,
+            index: task.index,
+            prompt: task.label,
+            required: task.required,
+            takePhoto: new Pb.Task.TakePhoto({}),
+            level: task.addLoiTask
+              ? Pb.Task.DataCollectionLevel.LOI_DATA
+              : Pb.Task.DataCollectionLevel.LOI_METADATA,
+          });
+
+          switch (task.type) {
+            case TaskType.CAPTURE_LOCATION:
+              pbTask.captureLocation = new Pb.Task.CaptureLocation({
+                minAccuracyMeters: null,
+              });
+              break;
+          }
+
+          return pbTask;
+        })
+        .toList()
+        .toArray(),
     })
   );
 }

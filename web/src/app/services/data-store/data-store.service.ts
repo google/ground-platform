@@ -30,6 +30,7 @@ import {map} from 'rxjs/operators';
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
 import {
+  jobToProto,
   newSurveyToProto,
   partialSurveyToProto,
 } from 'app/converters/proto-model-converter';
@@ -152,26 +153,35 @@ export class DataStoreService {
    *  submissions that are related to the jobs to be deleted.
    */
 
-  updateSurvey(survey: Survey, jobIdsToDelete: List<string>): Promise<void> {
-    const {title, description, id} = survey;
+  async updateSurvey(
+    survey: Survey,
+    jobIdsToDelete: List<string>
+  ): Promise<void> {
+    const {title, description, id: surveyId, jobs} = survey;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const surveyJS: {[key: string]: any} = {
       title: title,
       description: description,
     };
-    survey.jobs.forEach(
-      job => (surveyJS[`jobs.${job.id}`] = FirebaseDataConverter.jobToJS(job))
-    );
-    jobIdsToDelete.forEach(jobId => {
-      this.deleteAllLocationsOfInterestInJob(id, jobId);
-      this.deleteAllSubmissionsInJob(id, jobId);
-      surveyJS[`jobs.${jobId}`] = deleteField();
+    jobs.forEach(job => {
+      const {id: jobId} = job;
+      if (jobIdsToDelete.includes(jobId)) {
+        this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
+        this.deleteAllSubmissionsInJob(surveyId, jobId);
+        surveyJS[`jobs.${jobId}`] = deleteField();
+      } else {
+        surveyJS[`jobs.${jobId}`] = FirebaseDataConverter.jobToJS(job);
+      }
     });
-
-    return this.db.firestore
+    await this.db.firestore
       .collection(SURVEYS_COLLECTION_NAME)
-      .doc(survey.id)
-      .update(surveyJS);
+      .doc(surveyId)
+      .update({
+        ...surveyJS,
+        ...partialSurveyToProto(title, description),
+      });
+
+    await Promise.all(jobs.map(job => this.updateJob(surveyId, job)));
   }
 
   /**
@@ -212,13 +222,23 @@ export class DataStoreService {
       );
   }
 
-  addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
+  addOrUpdateJob(surveyId: string, job: Job): Promise<[void, void]> {
+    return Promise.all([
+      this.db
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId)
+        .update({
+          [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
+        }),
+      this.updateJob(surveyId, job),
+    ]);
+  }
+
+  updateJob(surveyId: string, job: Job): Promise<void> {
     return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update({
-        [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
-      });
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+      .doc(job.id)
+      .set(jobToProto(job));
   }
 
   async deleteSurvey(survey: Survey) {
