@@ -21,7 +21,7 @@
     /**
      * Fetches and returns the survey with the specified id.
      */
-    function getSurvey() {
+    function getSurvey(surveyId) {
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
 
@@ -120,19 +120,19 @@
 
     // Apply passlist and survey-level ACLs to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      allow read: if canViewSurvey(getSurvey());
-      allow create: if canManageSurvey(getSurvey()) || isCreator(request.resource);
-      allow write: if canManageSurvey(getSurvey()) || isCreator(resource);
+      allow read: if canViewSurvey(getSurvey(surveyId));
+      allow create: if canManageSurvey(getSurvey(surveyId)) || isCreator(request.resource);
+      allow write: if canManageSurvey(getSurvey(surveyId)) || isCreator(resource);
     }
 
     // Apply passlist and survey-level ACLs to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
       // Allow if user has has read access to the survey.
-      allow read: if canViewSurvey(getSurvey());
+      allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the new submission and can collect data.
-      allow create: if isCreator(request.resource) && canCollectData(getSurvey());
+      allow create: if isCreator(request.resource) && canCollectData(getSurvey(surveyId));
       // Allow if user is owner of the existing submission or can manage survey.
-      allow write: if isCreator(resource) || canManageSurvey(getSurvey());
+      allow write: if isCreator(resource) || canManageSurvey(getSurvey(surveyId));
     }
   }
 }
