@@ -28,7 +28,10 @@ import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {LoiDataConverter} from 'app/converters/loi-converter/loi-data-converter';
+import {
+  LegacyLoiDataConverter,
+  loiDocToModel,
+} from 'app/converters/loi-data-converter';
 import {
   jobToProto,
   newSurveyToProto,
@@ -340,7 +343,7 @@ export class DataStoreService {
   ): List<LocationOfInterest> {
     return List(
       loiIds
-        .map(obj => LoiDataConverter.toLocationOfInterest(obj.id, obj))
+        .map(obj => loiDocToModel(obj.id, obj))
         .filter(DataStoreService.filterAndLogError<LocationOfInterest>)
         .map(loi => loi as LocationOfInterest)
     );
