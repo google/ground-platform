@@ -21,7 +21,8 @@ import {Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Task, TaskType} from 'app/models/task/task.model';
+import {Cardinality} from 'app/models/task/multiple-choice.model';
+import {TaskType} from 'app/models/task/task.model';
 
 const Pb = GroundProtos.google.ground.v1beta1;
 
@@ -89,7 +90,44 @@ export function jobToProto(job: Job): DocumentData {
       style: new Pb.Style({color: job.color}),
       tasks: job.tasks
         ?.map(task => {
-          const pbTask = new Pb.Task({
+          let pbTask = {};
+
+          switch (task.type) {
+            case TaskType.NUMBER:
+              pbTask = {
+                numberQuestion: new Pb.Task.NumberQuestion(),
+              };
+              break;
+            case TaskType.CAPTURE_LOCATION:
+              pbTask = {
+                captureLocation: new Pb.Task.CaptureLocation(),
+              };
+              break;
+            case TaskType.MULTIPLE_CHOICE:
+              pbTask = {
+                multipleChoiceQuestion: new Pb.Task.MultipleChoiceQuestion({
+                  type:
+                    task.multipleChoice!.cardinality === Cardinality.SELECT_ONE
+                      ? Pb.Task.MultipleChoiceQuestion.Type.SELECT_ONE
+                      : Pb.Task.MultipleChoiceQuestion.Type.SELECT_MULTIPLE,
+                  hasOtherOption: task.multipleChoice!.hasOtherOption,
+                  options: task
+                    .multipleChoice!.options.map(
+                      option =>
+                        new Pb.Task.MultipleChoiceQuestion.Option({
+                          id: option.id,
+                          index: option.index,
+                          label: option.label,
+                        })
+                    )
+                    .toArray(),
+                }),
+              };
+              break;
+          }
+
+          return new Pb.Task({
+            ...pbTask,
             id: task.id,
             index: task.index,
             prompt: task.label,
@@ -98,17 +136,8 @@ export function jobToProto(job: Job): DocumentData {
             level: task.addLoiTask
               ? Pb.Task.DataCollectionLevel.LOI_DATA
               : Pb.Task.DataCollectionLevel.LOI_METADATA,
+            conditions: [],
           });
-
-          switch (task.type) {
-            case TaskType.CAPTURE_LOCATION:
-              pbTask.captureLocation = new Pb.Task.CaptureLocation({
-                minAccuracyMeters: null,
-              });
-              break;
-          }
-
-          return pbTask;
         })
         .toList()
         .toArray(),
