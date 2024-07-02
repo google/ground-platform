@@ -26,6 +26,9 @@ import {
   $color,
   $index,
   $dtq$type,
+  $required,
+  $level,
+  $textQuestion,
 } from './testing/proto-field-aliases';
 
 const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
@@ -41,7 +44,7 @@ describe('toDocumentData()', () => {
       }),
       expected: {
         [$title]: 'Survey name',
-        [$description]: 'Survey desc',  
+        [$description]: 'Survey desc',
       },
     },
     {
@@ -101,7 +104,7 @@ describe('toDocumentData()', () => {
         type: Task.DateTimeQuestion.Type.TYPE_UNSPECIFIED,
       }),
       expected: {
-      [$dtq$type]: 0 // UNSPECIFIED
+        [$dtq$type]: 0, // UNSPECIFIED
       },
     },
     {
@@ -119,6 +122,20 @@ describe('toDocumentData()', () => {
           {[$latitude]: 12, [$longitude]: 23},
           {[$latitude]: 9, [$longitude]: 2},
         ],
+      },
+    },
+    {
+      desc: 'converts oneof',
+      input: new Task({
+        textQuestion: new Task.TextQuestion({
+          type: Task.TextQuestion.Type.SHORT_TEXT,
+        }),
+      }),
+      expected: {
+        [$index]: 0,
+        [$required]: false,
+        [$level]: 0,
+        [$textQuestion]: {'1': 1},
       },
     },
   ].forEach(({desc, input, expected}) =>

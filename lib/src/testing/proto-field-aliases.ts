@@ -34,5 +34,7 @@ export const [$latitude, $longitude] = [1, 2];
 export const [$index, $style] = [2, 4];
 // Style fields:
 export const [$color] = [1];
+// Task fields:
+export const [$required, $level, $textQuestion] = [4, 5, 7];
 // DateTimeQuestion:
 export const [$dtq$type] = [1];
