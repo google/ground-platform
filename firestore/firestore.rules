@@ -120,23 +120,23 @@
 
     // Apply passlist and survey-level ACLs to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      allow read: if canViewSurvey(getSurvey());
-      allow create: if canManageSurvey(getSurvey()) || isCreator(request.resource);
-      allow write: if canManageSurvey(getSurvey()) || isCreator(resource);
+      allow read: if canViewSurvey(getSurvey(surveyId));
+      allow create: if canManageSurvey(getSurvey(surveyId)) || isCreator(request.resource);
+      allow write: if canManageSurvey(getSurvey(surveyId)) || isCreator(resource);
     }
 
     // Apply passlist and survey-level ACLs to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      allow read: if canViewSurvey(getSurvey());
-      allow create: if canManageSurvey(getSurvey()) || isCreator(request.resource);
-      allow write: if canManageSurvey(getSurvey()) || isCreator(resource);
+      allow read: if canViewSurvey(getSurvey(surveyId));
+      allow create: if canManageSurvey(getSurvey(surveyId)) || isCreator(request.resource);
+      allow write: if canManageSurvey(getSurvey(surveyId)) || isCreator(resource);
     }
 
     // Apply passlist and survey-level ACLs to job documents.
     match /surveys/{surveyId}/jobs/{jobId} {
-      allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
-      allow create: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(request.resource, getEmail());
-      allow write: if canManageSurvey(getSurvey(surveyId), getEmail()) || isCreator(resource, getEmail());
+      allow read: if canViewSurvey(getSurvey(surveyId));
+      allow create: if canManageSurvey(getSurvey(surveyId)) || isCreator(request.resource);
+      allow write: if canManageSurvey(getSurvey(surveyId)) || isCreator(resource);
     }
   }
 }
