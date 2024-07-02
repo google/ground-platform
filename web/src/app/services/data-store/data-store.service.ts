@@ -28,14 +28,11 @@ import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
+import {loiDocToModel} from 'app/converters/loi-data-converter';
 import {
-  LegacyLoiDataConverter,
-  loiDocToModel,
-} from 'app/converters/loi-data-converter';
-import {
-  jobToProto,
-  newSurveyToProto,
-  partialSurveyToProto,
+  jobToDocument,
+  newSurveyToDocument,
+  partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -181,7 +178,7 @@ export class DataStoreService {
       .doc(surveyId)
       .update({
         ...surveyJS,
-        ...partialSurveyToProto(title, description),
+        ...partialSurveyToDocument(title, description),
       });
 
     await Promise.all(jobs.map(job => this.updateJob(surveyId, job)));
@@ -197,7 +194,10 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: newName, ...partialSurveyToProto(newName)}, {merge: true});
+      .set(
+        {title: newName, ...partialSurveyToDocument(newName)},
+        {merge: true}
+      );
   }
 
   /**
@@ -219,7 +219,7 @@ export class DataStoreService {
         {
           title: newName,
           description: newDescription,
-          ...partialSurveyToProto(newName, newDescription),
+          ...partialSurveyToDocument(newName, newDescription),
         },
         {merge: true}
       );
@@ -241,7 +241,7 @@ export class DataStoreService {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
       .doc(job.id)
-      .set(jobToProto(job));
+      .set(jobToDocument(job));
   }
 
   async deleteSurvey(survey: Survey) {
@@ -508,7 +508,7 @@ export class DataStoreService {
       .doc(surveyId)
       .set({
         ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
-        ...newSurveyToProto(name, description, acl, ownerId),
+        ...newSurveyToDocument(name, description, acl, ownerId),
       });
     return Promise.resolve(surveyId);
   }
