@@ -132,7 +132,6 @@ export function jobToProto(job: Job): DocumentData {
             index: task.index,
             prompt: task.label,
             required: task.required,
-            takePhoto: new Pb.Task.TakePhoto({}),
             level: task.addLoiTask
               ? Pb.Task.DataCollectionLevel.LOI_DATA
               : Pb.Task.DataCollectionLevel.LOI_METADATA,
