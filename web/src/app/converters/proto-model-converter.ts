@@ -110,7 +110,7 @@ export function jobToDocument(job: Job): DocumentData {
             level: task.addLoiTask
               ? Pb.Task.DataCollectionLevel.LOI_DATA
               : Pb.Task.DataCollectionLevel.LOI_METADATA,
-            conditions: [],
+            conditions: taskConditionToPartialMessage(task),
           });
         })
         .toList()
@@ -204,4 +204,24 @@ function taskTypeToPartialMessage(task: Task): Pb.ITask {
     default:
       throw new Error(`Invalid role encountered: ${taskType}`);
   }
+}
+
+/**
+ * Creates a partial rapresentation of a Task.
+ */
+function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
+  const {condition: taskCondition} = task;
+
+  return (
+    taskCondition?.expressions
+      .map(
+        expression =>
+          new Pb.Task.Condition({
+            multipleChoice: new Pb.Task.MultipleChoiceSelection({
+              optionIds: expression.optionIds.toArray(),
+            }),
+          })
+      )
+      .toArray() || []
+  );
 }
