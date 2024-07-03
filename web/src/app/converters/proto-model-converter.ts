@@ -79,6 +79,17 @@ export function partialSurveyToDocument(
 }
 
 /**
+ * Creates a proto rapresentation of a survey access control list.
+ */
+export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
+  return toDocumentData(
+    new Pb.Survey({
+      acl: acl.map(role => roleToProtoRole(role)).toObject(),
+    })
+  );
+}
+
+/**
  * Creates a proto rapresentation of a Job.
  */
 export function jobToDocument(job: Job): DocumentData {

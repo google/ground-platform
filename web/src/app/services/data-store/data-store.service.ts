@@ -30,6 +30,7 @@ import {map} from 'rxjs/operators';
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
 import {
+  aclToDocument,
   jobToDocument,
   newSurveyToDocument,
   partialSurveyToDocument,
@@ -479,7 +480,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update({acl: FirebaseDataConverter.aclToJs(acl)});
+      .update({acl: FirebaseDataConverter.aclToJs(acl), ...aclToDocument(acl)});
   }
 
   generateId() {
