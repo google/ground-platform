@@ -28,13 +28,12 @@ import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
+import {loiDocToModel} from 'app/converters/loi-data-converter';
 import {
-  LegacyLoiDataConverter,
-  loiDocToModel,
-} from 'app/converters/loi-data-converter';
-import {
-  newSurveyToProto,
-  partialSurveyToProto,
+  aclToDocument,
+  jobToDocument,
+  newSurveyToDocument,
+  partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -155,26 +154,35 @@ export class DataStoreService {
    *  submissions that are related to the jobs to be deleted.
    */
 
-  updateSurvey(survey: Survey, jobIdsToDelete: List<string>): Promise<void> {
-    const {title, description, id} = survey;
+  async updateSurvey(
+    survey: Survey,
+    jobIdsToDelete: List<string>
+  ): Promise<void> {
+    const {title, description, id: surveyId, jobs} = survey;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const surveyJS: {[key: string]: any} = {
       title: title,
       description: description,
     };
-    survey.jobs.forEach(
-      job => (surveyJS[`jobs.${job.id}`] = FirebaseDataConverter.jobToJS(job))
-    );
-    jobIdsToDelete.forEach(jobId => {
-      this.deleteAllLocationsOfInterestInJob(id, jobId);
-      this.deleteAllSubmissionsInJob(id, jobId);
-      surveyJS[`jobs.${jobId}`] = deleteField();
+    jobs.forEach(job => {
+      const {id: jobId} = job;
+      if (jobIdsToDelete.includes(jobId)) {
+        this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
+        this.deleteAllSubmissionsInJob(surveyId, jobId);
+        surveyJS[`jobs.${jobId}`] = deleteField();
+      } else {
+        surveyJS[`jobs.${jobId}`] = FirebaseDataConverter.jobToJS(job);
+      }
     });
-
-    return this.db.firestore
+    await this.db.firestore
       .collection(SURVEYS_COLLECTION_NAME)
-      .doc(survey.id)
-      .update(surveyJS);
+      .doc(surveyId)
+      .update({
+        ...surveyJS,
+        ...partialSurveyToDocument(title, description),
+      });
+
+    await Promise.all(jobs.map(job => this.updateJob(surveyId, job)));
   }
 
   /**
@@ -187,7 +195,10 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: newName, ...partialSurveyToProto(newName)}, {merge: true});
+      .set(
+        {title: newName, ...partialSurveyToDocument(newName)},
+        {merge: true}
+      );
   }
 
   /**
@@ -209,19 +220,29 @@ export class DataStoreService {
         {
           title: newName,
           description: newDescription,
-          ...partialSurveyToProto(newName, newDescription),
+          ...partialSurveyToDocument(newName, newDescription),
         },
         {merge: true}
       );
   }
 
-  addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
+  addOrUpdateJob(surveyId: string, job: Job): Promise<[void, void]> {
+    return Promise.all([
+      this.db
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId)
+        .update({
+          [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
+        }),
+      this.updateJob(surveyId, job),
+    ]);
+  }
+
+  updateJob(surveyId: string, job: Job): Promise<void> {
     return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update({
-        [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
-      });
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+      .doc(job.id)
+      .set(jobToDocument(job));
   }
 
   async deleteSurvey(survey: Survey) {
@@ -459,7 +480,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update({acl: FirebaseDataConverter.aclToJs(acl)});
+      .update({acl: FirebaseDataConverter.aclToJs(acl), ...aclToDocument(acl)});
   }
 
   generateId() {
@@ -488,7 +509,7 @@ export class DataStoreService {
       .doc(surveyId)
       .set({
         ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
-        ...newSurveyToProto(name, description, acl, ownerId),
+        ...newSurveyToDocument(name, description, acl, ownerId),
       });
     return Promise.resolve(surveyId);
   }
