@@ -3,18 +3,20 @@
   "version": "0.0.1",
   "description": "Ground shared Protocol Buffer definitions",
   "main": "dist/index.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "shx rm -rf dist",
     "ci-all": "npm ci",
     "lint": "buf lint",
     "format": "buf format --write",
     "build": "npm run generate:pbjs && npm run generate:pbjson && npm run generate:pbts",
-    "postbuild": "cp src/index.* dist/",
-    "pbjs": "mkdir -p dist && pbjs -p src src/google/ground/v1beta1/*.proto",
+    "postbuild": "shx cp src/index.* dist/",
+    "pbjs": "shx mkdir -p dist && pbjs -p src src/google/ground/v1beta1/*.proto",
     "generate:pbjs": "npm run pbjs -- -t static-module -o dist/ground-protos.js",
     "generate:pbjson": "npm run pbjs -- -t json -o dist/ground-protos.json",
-    "generate:pbts": "mkdir -p dist && pbts dist/ground-protos.js -o dist/ground-protos.d.ts"
+    "generate:pbts": "shx mkdir -p dist && pbts dist/ground-protos.js -o dist/ground-protos.d.ts"
   },
   "dependencies": {
     "protobufjs": "^7.3.2"
