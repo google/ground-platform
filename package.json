@@ -6,7 +6,7 @@
     "clean-all": "npm run clean --workspaces --if-present",
     "ci-all": "npm ci && npm ci --workspaces",
     "build-all": "npm run build --workspaces --if-present",
-    "deploy": "firebase login && firebase deploy --project $npm_config_project",
+    "deploy": "firebase login && cross-env-shell firebase deploy --project $npm_config_project",
     "build-all-and-deploy": "npm run build-all && npm run deploy",
     "watch:local": "npm run watch --workspace functions > functions.log 2>&1 & npm run watch --config=local --project=local --workspace web > web.log 2>&1",
     "start:local": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/local",
@@ -27,6 +27,7 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "firebase-tools": "13.6.0",
     "isolate-package": "^1.18.0",
     "lerna": "^8.1.3",
