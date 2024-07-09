@@ -12,7 +12,7 @@
     "build-all-and-test": "npm run build-all && npm run test",
     "watch": "npm run build -- --watch",
     "start": "npm run build && cross-env-shell ng serve -c $npm_config_config",
-    "build-and-start": "npm run build && npm run start",    
+    "build-and-start": "npm run build && npm run start",
     "build-all-and-start": "npm run build-all && npm run start",
     "pretest": "./pretest.sh",
     "test": "ng test",
@@ -70,6 +70,7 @@
     "@types/jasmine-expect": "3.8.1",
     "@types/jasminewd2": "^2.0.8",
     "@types/webpack-env": "^1.15.3",
+    "cross-env": "^5.2.1",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^3.6.1",
@@ -93,6 +94,7 @@
     "prettier": "^2.8.1",
     "prettier-eslint": "^15.0.1",
     "puppeteer": "^22.10.0",
+    "shx": "^0.3.4",
     "ts-node": "^8.10.2",
     "typescript": "^5.4.5"
   }
