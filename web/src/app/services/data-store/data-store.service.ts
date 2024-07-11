@@ -351,10 +351,10 @@ export class DataStoreService {
   }
 
   /**
-   * Returns a stream containing all the Location of Interests based
-   * on provided parameters.
+   * Returns an Observable that loads and emits all the Location of Interests
+   * based on provided parameters.
    *
-   * @param id the id of the survey instance.
+   * @param survey the survey instance.
    * @param userEmail the email of the user to filter the results.
    * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
    */
@@ -394,19 +394,30 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the submissions with the specified
-   * uuid.
+   * Returns an Observable that loads and emits all the Submissions
+   * based on provided parameters.
    *
-   * @param id the id of the requested survey (it should have tasks inside).
-   * @param loiId the id of the requested loi.
+   * @param survey the survey instance.
+   * @param loi the loi instance.
+   * @param userEmail the email of the user to filter the results.
+   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
    */
-  submissions$(
+  getAccessibleSubmissions$(
     survey: Survey,
-    loi: LocationOfInterest
+    loi: LocationOfInterest,
+    userEmail: string,
+    canManageSurvey: boolean
   ): Observable<List<Submission>> {
+    console.log('canManageSurvey', canManageSurvey);
     return this.db
-      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        ref.where('loiId', '==', loi.id)
+      .collection(
+        `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`,
+        ref => {
+          let q = ref.where('loiId', '==', loi.id);
+          if (!canManageSurvey)
+            q = q.where('lastModified.user.email', '==', userEmail);
+          return q;
+        }
       )
       .valueChanges({idField: 'id'})
       .pipe(
