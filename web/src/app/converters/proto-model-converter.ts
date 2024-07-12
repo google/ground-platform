@@ -17,7 +17,7 @@
 import {DocumentData} from '@angular/fire/firestore';
 import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
@@ -99,22 +99,7 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks
-        ?.map(task => {
-          return new Pb.Task({
-            ...taskTypeToPartialMessage(task),
-            id: task.id,
-            index: task.index,
-            prompt: task.label,
-            required: task.required,
-            level: task.addLoiTask
-              ? Pb.Task.DataCollectionLevel.LOI_DATA
-              : Pb.Task.DataCollectionLevel.LOI_METADATA,
-            conditions: taskConditionToPartialMessage(task),
-          });
-        })
-        .toList()
-        .toArray(),
+      tasks: tasksToDocument(job.tasks?.toList() || List([])),
     })
   );
 }
@@ -224,4 +209,26 @@ function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
       )
       .toArray() || []
   );
+}
+
+/**
+ * Creates a proto rapresentation of a list of tasks.
+ */
+export function tasksToDocument(tasks: List<Task>): Pb.ITask[] {
+  return tasks
+    .map(
+      task =>
+        new Pb.Task({
+          ...taskTypeToPartialMessage(task),
+          id: task.id,
+          index: task.index,
+          prompt: task.label,
+          required: task.required,
+          level: task.addLoiTask
+            ? Pb.Task.DataCollectionLevel.LOI_DATA
+            : Pb.Task.DataCollectionLevel.LOI_METADATA,
+          conditions: taskConditionToPartialMessage(task),
+        })
+    )
+    .toArray();
 }
