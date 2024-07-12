@@ -14,16 +14,24 @@
   limitations under the License.
 -->
 
-<div class="page">
+<div class="page error-page">
   <ground-header></ground-header>
 
-  <div class="container">
-    <div class="card">
-      <div class="content">
+  <div class="page-content">
+      <img src="/assets/img/access-denied.svg">
+
+      <ng-container *ngIf="errorType == ErrorType.GENERIC">
         <h1>Oops, something went wrong</h1>
 
         <h2>{{error}}</h2>
-      </div>
+      </ng-container>
+
+      <ng-container *ngIf="errorType == ErrorType.ACCESS_DENIED">
+        <h1>Access denied</h1>
+
+        <a mat-flat-button color="primary" href="https://forms.gle/RgnFcCz9ma1gLr6v7" target="_blank">
+          Click here for registration
+        </a>
+      </ng-container>
     </div>
-  </div>
 </div>
