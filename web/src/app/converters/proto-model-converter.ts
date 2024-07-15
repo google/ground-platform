@@ -45,7 +45,7 @@ export function roleToProtoRole(role: Role) {
 }
 
 /**
- * Creates a proto rapresentation of a Survey.
+ * Returns the proto representation of a Survey model object.
  */
 export function newSurveyToDocument(
   name: string,
@@ -64,7 +64,7 @@ export function newSurveyToDocument(
 }
 
 /**
- * Creates a proto rapresentation of a Survey.
+ * Returns the proto representation of a partial Survey model object.
  */
 export function partialSurveyToDocument(
   name: string,
@@ -79,7 +79,7 @@ export function partialSurveyToDocument(
 }
 
 /**
- * Creates a proto rapresentation of a survey access control list.
+ * Returns the proto representation of a Survey ACL model object.
  */
 export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
   return toDocumentData(
@@ -90,7 +90,7 @@ export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
 }
 
 /**
- * Creates a proto rapresentation of a Job.
+ * Returns the proto representation of a Job model object.
  */
 export function jobToDocument(job: Job): DocumentData {
   return toDocumentData(
@@ -105,7 +105,7 @@ export function jobToDocument(job: Job): DocumentData {
 }
 
 /**
- * Creates a partial rapresentation of a Task.
+ * Returns the proto representation of a partial Task model object.
  */
 function taskTypeToPartialMessage(task: Task): Pb.ITask {
   const {type: taskType, multipleChoice: taskMultipleChoice} = task;
@@ -192,7 +192,7 @@ function taskTypeToPartialMessage(task: Task): Pb.ITask {
 }
 
 /**
- * Creates a partial rapresentation of a Task.
+ * Returns the proto representation of a partial Task Condition model object.
  */
 function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
   const {condition: taskCondition} = task;
@@ -212,7 +212,7 @@ function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
 }
 
 /**
- * Creates a proto rapresentation of a list of tasks.
+ * Returns the proto representation of a list of Task model objects.
  */
 export function tasksToDocument(tasks: List<Task>): Pb.ITask[] {
   return tasks
