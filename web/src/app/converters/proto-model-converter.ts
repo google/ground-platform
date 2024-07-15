@@ -21,7 +21,11 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Cardinality} from 'app/models/task/multiple-choice.model';
+import {
+  Cardinality,
+  MultipleChoice,
+} from 'app/models/task/multiple-choice.model';
+import {TaskCondition} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
 import Pb = GroundProtos.google.ground.v1beta1;
@@ -99,17 +103,22 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: tasksToDocument(job.tasks?.toList() || List([])),
+      tasks: toTasksMessage(job.tasks?.toList() || List([])),
     })
   );
 }
 
-/**
- * Returns the proto representation of a partial Task model object.
- */
-function taskTypeToPartialMessage(task: Task): Pb.ITask {
-  const {type: taskType, multipleChoice: taskMultipleChoice} = task;
+export function tasksToDocument(tasks: List<Task>): DocumentData {
+  return toDocumentData(tasksToMessage(tasks));
+}
 
+/**
+ * Returns a Protobuf message representing a partial Task model.
+ */
+function toTaskTypeMessage(
+  taskType: TaskType,
+  taskMultipleChoice?: MultipleChoice
+): Pb.ITask {
   switch (taskType) {
     case TaskType.TEXT:
       return {
@@ -124,7 +133,7 @@ function taskTypeToPartialMessage(task: Task): Pb.ITask {
             taskMultipleChoice!.cardinality === Cardinality.SELECT_ONE
               ? Pb.Task.MultipleChoiceQuestion.Type.SELECT_ONE
               : Pb.Task.MultipleChoiceQuestion.Type.SELECT_MULTIPLE,
-          hasOtherOption: task.multipleChoice!.hasOtherOption,
+          hasOtherOption: taskMultipleChoice!.hasOtherOption,
           options: taskMultipleChoice!.options
             .map(
               option =>
@@ -192,11 +201,11 @@ function taskTypeToPartialMessage(task: Task): Pb.ITask {
 }
 
 /**
- * Returns the proto representation of a partial Task Condition model object.
+ * Returns a Protobuf message representing a TaskCondition model.
  */
-function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
-  const {condition: taskCondition} = task;
-
+function toTaskConditionMessage(
+  taskCondition?: TaskCondition
+): Pb.Task.ICondition[] {
   return (
     taskCondition?.expressions
       .map(
@@ -212,14 +221,14 @@ function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
 }
 
 /**
- * Returns the proto representation of a list of Task model objects.
+ * Returns a Protobuf message containing a list of Task model.
  */
-export function tasksToDocument(tasks: List<Task>): Pb.ITask[] {
+function toTasksMessage(tasks: List<Task>): Pb.ITask[] {
   return tasks
     .map(
       task =>
         new Pb.Task({
-          ...taskTypeToPartialMessage(task),
+          ...toTaskTypeMessage(task.type, task.multipleChoice),
           id: task.id,
           index: task.index,
           prompt: task.label,
@@ -227,7 +236,7 @@ export function tasksToDocument(tasks: List<Task>): Pb.ITask[] {
           level: task.addLoiTask
             ? Pb.Task.DataCollectionLevel.LOI_DATA
             : Pb.Task.DataCollectionLevel.LOI_METADATA,
-          conditions: taskConditionToPartialMessage(task),
+          conditions: toTaskConditionMessage(task.condition),
         })
     )
     .toArray();
