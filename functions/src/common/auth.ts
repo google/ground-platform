@@ -23,7 +23,7 @@ import {EmulatorIdToken} from '../handlers';
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
 export const SESSION_COOKIE_NAME = '__session';
 export const OWNER_ROLE = 'OWNER';
-const DATA_COLLECTOR_ROLE = 'DATA_COLLECTOR';
+const SURVEY_ORGANIZER_ROLE = 'SURVEY_ORGANIZER';
 
 /**
  * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
@@ -101,5 +101,5 @@ export function canImport(
   survey: DocumentSnapshot
 ): boolean {
   const role = getRole(user, survey);
-  return role === OWNER_ROLE || role === DATA_COLLECTOR_ROLE;
+  return role === OWNER_ROLE || role === SURVEY_ORGANIZER_ROLE;
 }
