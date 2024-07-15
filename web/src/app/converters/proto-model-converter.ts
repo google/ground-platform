@@ -103,16 +103,13 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks
-        ?.toList()
-        .map(task => toTaskMessage(task))
-        .toArray(),
+      tasks: job.tasks?.toList().map(toTaskMessage).toArray(),
     })
   );
 }
 
 export function tasksToDocument(tasks: List<Task>): DocumentData {
-  return toDocumentData(tasksToMessage(tasks));
+  return toDocumentData(tasks.toList().map(toTaskMessage).toArray());
 }
 
 /**
@@ -216,6 +213,7 @@ function toTaskConditionMessage(
           new Pb.Task.Condition({
             multipleChoice: new Pb.Task.MultipleChoiceSelection({
               optionIds: expression.optionIds.toArray(),
+              taskId: expression.taskId,
             }),
           })
       )
