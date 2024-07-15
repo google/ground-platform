@@ -103,7 +103,10 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: toTasksMessage(job.tasks?.toList() || List([])),
+      tasks: job.tasks
+        ?.toList()
+        .map(task => toTaskMessage(task))
+        .toArray(),
     })
   );
 }
@@ -221,23 +224,18 @@ function toTaskConditionMessage(
 }
 
 /**
- * Returns a Protobuf message containing a list of Task model.
+ * Returns a Protobuf messager epresenting a Task model.
  */
-function toTasksMessage(tasks: List<Task>): Pb.ITask[] {
-  return tasks
-    .map(
-      task =>
-        new Pb.Task({
-          ...toTaskTypeMessage(task.type, task.multipleChoice),
-          id: task.id,
-          index: task.index,
-          prompt: task.label,
-          required: task.required,
-          level: task.addLoiTask
-            ? Pb.Task.DataCollectionLevel.LOI_DATA
-            : Pb.Task.DataCollectionLevel.LOI_METADATA,
-          conditions: toTaskConditionMessage(task.condition),
-        })
-    )
-    .toArray();
+function toTaskMessage(task: Task): Pb.ITask {
+  return new Pb.Task({
+    ...toTaskTypeMessage(task.type, task.multipleChoice),
+    id: task.id,
+    index: task.index,
+    prompt: task.label,
+    required: task.required,
+    level: task.addLoiTask
+      ? Pb.Task.DataCollectionLevel.LOI_DATA
+      : Pb.Task.DataCollectionLevel.LOI_METADATA,
+    conditions: toTaskConditionMessage(task.condition),
+  });
 }
