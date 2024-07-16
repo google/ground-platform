@@ -337,7 +337,9 @@ export class DataStoreService {
     return this.db
       .doc<User>(`users/${uid}`)
       .valueChanges()
-      .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
+      .pipe(
+        map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
+      );
   }
 
   private toLocationsOfInterest(
