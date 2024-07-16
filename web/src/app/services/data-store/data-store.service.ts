@@ -15,7 +15,10 @@
  */
 
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {
+  AngularFirestore,
+  CollectionReference,
+} from '@angular/fire/compat/firestore';
 import {
   DocumentData,
   FieldPath,
@@ -415,10 +418,9 @@ export class DataStoreService {
       .collection(
         `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`,
         ref => {
-          let q = ref.where('loiId', '==', loi.id);
-          if (!canManageSurvey)
-            q = q.where('lastModified.user.email', '==', userEmail);
-          return q;
+          return canManageSurvey
+            ? ref.where('loiId', '==', loi.id)
+            : this.canViewSubmissions(ref, loi.id, userEmail);
         }
       )
       .valueChanges({idField: 'id'})
@@ -566,5 +568,19 @@ export class DataStoreService {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Creates a new Query object to filter submissions based on two
+   * criteria: loi and user
+   */
+  private canViewSubmissions(
+    ref: CollectionReference,
+    loiId: string,
+    userEmail: string
+  ) {
+    return ref
+      .where('loiId', '==', loiId)
+      .where('lastModified.user.email', '==', userEmail);
   }
 }
