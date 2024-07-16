@@ -26,7 +26,7 @@
     }
 
    /**
-     * Returns the role of the specified email address in the given survey.
+     * Returns the current user's role in the given survey.
      */
     function getRole(survey) {
       // Get role from `acl` nested object.
