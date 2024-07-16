@@ -34,6 +34,7 @@ import {
   jobToDocument,
   newSurveyToDocument,
   partialSurveyToDocument,
+  tasksToDocument,
 } from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -336,7 +337,9 @@ export class DataStoreService {
     return this.db
       .doc<User>(`users/${uid}`)
       .valueChanges()
-      .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
+      .pipe(
+        map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
+      );
   }
 
   private toLocationsOfInterest(
@@ -527,9 +530,10 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJS(
-          this.convertTasksListToMap(tasks)
-        ),
+        [`jobs.${jobId}.tasks`]: {
+          ...FirebaseDataConverter.tasksToJS(this.convertTasksListToMap(tasks)),
+          ...tasksToDocument(tasks),
+        },
       });
   }
 
