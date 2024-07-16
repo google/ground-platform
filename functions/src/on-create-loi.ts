@@ -52,12 +52,9 @@ export async function onCreateLoiHandler(
       wkt
     );
 
-    Object.keys(properties).forEach(key => {
-      properties[key] =
-        typeof properties[key] === 'object'
-          ? JSON.stringify(properties[key])
-          : properties[key];
-    });
+    Object.keys(properties)
+      .filter(key => typeof properties[key] === 'object')
+      .forEach(key => (properties[key] = JSON.stringify(properties[key])));
   }
 
   await db.updateLoiProperties(surveyId, loiId, properties);
