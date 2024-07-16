@@ -29,7 +29,9 @@
      * Returns the role of the specified email address in the given survey.
      */
     function getRole(survey) {
-      return survey.acl[request.auth.token.email];
+      // Get role from `acl` nested object.
+      // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
+      return "4" in survey ? survey["4"][request.auth.token.email] : survey.acl[request.auth.token.email];
     }
 
     /**
@@ -63,28 +65,41 @@
     }
 
     /**
-     * Returns true iff the user with the given email has one of the specified
-     * roles in the given survey.
+     * Returns true if the current user has one of the specified roles in the
+     * given survey.
      */
     function isOneOf(survey, roles) {
-      return survey.acl[request.auth.token.email] in roles;
+      // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
+     return ("4" in survey ? survey["4"] : survey.acl)[request.auth.token.email] in roles;
     }
 
     /**
-     * Returns true iff the user with the given email can manage the specified
-     * survey (modify the survey document, edit user data, etc.).
+     * Returns true if the current user is passlisted and has the `SURVEY_ORGANIZER` role
+     * in the specified survey. Note that this include survey owners, since they are
+     * assigned this role by default.
      */
     function canManageSurvey(survey) {
-      return canAccess() && isOneOf(survey, ['OWNER', 'SURVEY_ORGANIZER']);
+      // TODO(#1858): Delete string role keys once migration is complete.
+      return canAccess() && isOneOf(survey, [
+        'OWNER',
+        'SURVEY_ORGANIZER',
+        3 /* SURVEY_ORGANIZER */
+      ]);
     }
 
     /**
-     * Returns true iff the user with the given email can contribute LOIs 
-     * and submissions to the specified survey (i.e., add/edit LOIs and
-     * submissions).
+     * Returns true iff the current user with the given email can contribute LOIs 
+     * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      return canAccess() && isOneOf(survey, ['OWNER', 'SURVEY_ORGANIZER', 'DATA_COLLECTOR']);
+      // TODO(#1858): Delete string role keys once migration is complete.
+      return canAccess() && isOneOf(survey, [
+        'OWNER',
+        'SURVEY_ORGANIZER',
+        'DATA_COLLECTOR',
+        2 /* DATA_COLLECTOR */,
+        3 /* SURVEY_ORGANIZER */
+      ]);
     }
 
     /**
