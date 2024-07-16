@@ -415,13 +415,8 @@ export class DataStoreService {
     canManageSurvey: boolean
   ): Observable<List<Submission>> {
     return this.db
-      .collection(
-        `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`,
-        ref => {
-          return canManageSurvey
-            ? ref.where('loiId', '==', loi.id)
-            : this.canViewSubmissions(ref, loi.id, userEmail);
-        }
+      .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
+        this.canViewSubmissions(ref, loi.id, userEmail, canManageSurvey)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -577,10 +572,13 @@ export class DataStoreService {
   private canViewSubmissions(
     ref: CollectionReference,
     loiId: string,
-    userEmail: string
+    userEmail: string,
+    canManageSurvey: boolean
   ) {
-    return ref
-      .where('loiId', '==', loiId)
-      .where('lastModified.user.email', '==', userEmail);
+    return canManageSurvey
+      ? ref.where('loiId', '==', loiId)
+      : ref
+          .where('loiId', '==', loiId)
+          .where('lastModified.user.email', '==', userEmail);
   }
 }
