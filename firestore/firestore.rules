@@ -29,7 +29,7 @@
      * Returns the current user's role in the given survey.
      */
     function getRole(survey) {
-      // Get role from `acl` nested object.
+      // Get role from `acl` nested object (field 4).
       // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
       return "4" in survey ? survey["4"][request.auth.token.email] : survey.acl[request.auth.token.email];
     }
