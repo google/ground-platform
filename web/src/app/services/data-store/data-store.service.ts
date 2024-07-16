@@ -352,7 +352,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits all the Location of Interests
+   * Returns an Observable that loads and emits all the locations of interest
    * based on provided parameters.
    *
    * @param survey the survey instance.
@@ -409,7 +409,6 @@ export class DataStoreService {
     userEmail: string,
     canManageSurvey: boolean
   ): Observable<List<Submission>> {
-    console.log('canManageSurvey', canManageSurvey);
     return this.db
       .collection(
         `${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`,
