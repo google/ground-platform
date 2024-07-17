@@ -96,9 +96,7 @@ export async function exportCsvHandler(
   const submissionsByLoi = await getSubmissionsByLoi(survey.id, jobId);
 
   lois.forEach(loi => {
-    const loiId = loi.id;
-    const submissions = submissionsByLoi[loiId] || [{}];
-    submissions.forEach(submission =>
+    submissionsByLoi[loi.id]?.forEach(submission =>
       writeRow(csvStream, loiProperties, tasks, loi, submission)
     );
   });
