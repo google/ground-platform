@@ -52,9 +52,9 @@ export class SubmissionService {
 
   constructor(
     private dataStore: DataStoreService,
-    surveyService: SurveyService,
-    loiService: LocationOfInterestService,
-    authService: AuthService
+    private surveyService: SurveyService,
+    private loiService: LocationOfInterestService,
+    private authService: AuthService
   ) {
     this.subscription.add(
       this.selectedSubmissionId$
@@ -125,7 +125,18 @@ export class SubmissionService {
     survey: Survey,
     loi: LocationOfInterest
   ): Observable<List<Submission>> {
-    return this.dataStore.submissions$(survey, loi);
+    return this.authService
+      .getUser$()
+      .pipe(
+        switchMap(user =>
+          this.dataStore.getAccessibleSubmissions$(
+            survey,
+            loi,
+            user.email,
+            this.surveyService.canManageSurvey()
+          )
+        )
+      );
   }
 
   selectSubmission(submissionId: string) {
