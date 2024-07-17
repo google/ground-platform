@@ -22,19 +22,15 @@ import Pb = GroundProtos.google.ground.v1beta1;
 /**
  * Returns the equivalent GeoJSON Geometry for the provided Geometry proto.
  */
-export function toGeoJsonGeometry(pb: Pb.Geometry): Geometry {
-  switch (pb.geometryType) {
-    case 'point':
-      if (!pb.point) throw new Error('Invalid Point');
-      return toGeoJsonPoint(pb.point);
-    case 'polygon':
-      if (!pb.polygon) throw new Error('Invalid Polygon');
-      return toGeoJsonPolygon(pb.polygon);
-    case 'multiPolygon':
-      if (!pb.multiPolygon) throw new Error('Invalid MultiPolygon');
-      return toGeoJsonMultiPolygon(pb.multiPolygon);
-    default:
-      throw new Error(`Invalid geometry type '${pb.geometryType}'`);
+export function toGeoJsonGeometry(pb: Pb.IGeometry): Geometry {
+  if (pb.point) {
+    return toGeoJsonPoint(pb.point);
+  } else if (pb.polygon) {
+    return toGeoJsonPolygon(pb.polygon);
+  } else if (pb.multiPolygon) {
+    return toGeoJsonMultiPolygon(pb.multiPolygon);
+  } else {
+    throw new Error('Unsupported or missing geometry');
   }
 }
 
