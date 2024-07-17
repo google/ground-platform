@@ -74,8 +74,8 @@ export async function exportCsvHandler(
   const jobName = job.name && (job.name['en'] as string);
   const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
-  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
-  const loiProperties = getPropertyNames(lois);
+  const loiDocs = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
+  const loiProperties = getPropertyNames(loiDocs);
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -95,9 +95,9 @@ export async function exportCsvHandler(
 
   const submissionsByLoi = await getSubmissionsByLoi(survey.id, jobId);
 
-  lois.forEach(loi => {
-    submissionsByLoi[loi.id]?.forEach(submission =>
-      writeRow(csvStream, loiProperties, tasks, loi, submission)
+  loiDocs.forEach(loiDoc => {
+    submissionsByLoi[loiDoc.id]?.forEach(submission =>
+      writeRow(csvStream, loiProperties, tasks, loiDoc, submission)
     );
   });
   csvStream.end();
