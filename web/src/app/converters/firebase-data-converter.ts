@@ -422,12 +422,12 @@ export class FirebaseDataConverter {
     };
   }
 
-  static toUser(data: DocumentData): User | undefined {
+  static toUser(data: DocumentData, uid: string): User | undefined {
     if (!data) {
       return;
     }
     return new User(
-      data.id,
+      uid,
       data.email,
       data.isAuthenticated || true,
       data.displayName,
