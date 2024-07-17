@@ -23,6 +23,7 @@ import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
+import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -36,7 +37,19 @@ type Task = {
   readonly hasOtherOption?: boolean;
 };
 
-// TODO: Refactor into meaningful pieces.
+type Dict = {[key: string]: any};
+
+/** A dictionary of submissions values (array) keyed by loi ID. */
+type SubmissionDict = {[key: string]: any[]};
+
+// TODO(#1277): Use a shared model with web
+type LoiDocument =
+  FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>;
+
+/**
+ * Iterates over all LOIs and submissions in a job, joining them
+ * into a single table written to the response as a quote CSV file.
+ */
 export async function exportCsvHandler(
   req: functions.Request,
   res: functions.Response<any>,
@@ -61,16 +74,9 @@ export async function exportCsvHandler(
   const jobName = job.name && (job.name['en'] as string);
   const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
-  const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
-
-  const headers = [];
-  headers.push('system:index');
-  headers.push('geometry');
-  const allLoiProperties = getPropertyNames(lois);
-  headers.push(...allLoiProperties);
-  tasks.forEach(task => headers.push('data:' + task.label));
-  headers.push('data:contributor_username');
-  headers.push('data:contributor_email');
+  const loiDocs = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
+  const loiProperties = getPropertyNames(loiDocs);
+  const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
   res.setHeader(
@@ -87,49 +93,83 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const submissions = await db.fetchSubmissionsByJobId(survey.id, jobId);
+  const submissionsByLoi = await getSubmissionsByLoi(survey.id, jobId);
 
-  // Index submissions by LOI id in memory. This consumes more
-  // memory than iterating over and streaming both LOI and submission`
-  // collections simultaneously, but it's easier to read and maintain. This will
-  // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
-  submissions.forEach(submission => {
-    const loiId = submission.get('loiId') as string;
-    const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
-    arr.push(submission.data());
-    submissionsByLocationOfInterest[loiId] = arr;
-  });
-
-  lois.forEach(loi => {
-    const loiId = loi.id;
-    const submissions = submissionsByLocationOfInterest[loiId] || [{}];
-    submissions.forEach(submission => {
-      const row = [];
-      // Header: system:index
-      row.push(loi.get('properties')?.id || '');
-      // Header: geometry
-      row.push(toWkt(loi.get('geometry')) || '');
-      // Header: One column for each loi property (merged over all properties across all LOIs)
-      row.push(...getPropertiesByName(loi, allLoiProperties));
-      // TODO(#1288): Clean up remaining references to old responses field
-      const data =
-        submission['data'] ||
-        submission['responses'] ||
-        submission['results'] ||
-        {};
-      // Header: One column for each task
-      tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
-      // Header: contributor_username, contributor_email
-      const contributor = submission['created']
-        ? submission['created']['user']
-        : [];
-      row.push(contributor['displayName'] || '');
-      row.push(contributor['email'] || '');
-      csvStream.write(row);
-    });
+  loiDocs.forEach(loiDoc => {
+    submissionsByLoi[loiDoc.id]?.forEach(submission =>
+      writeRow(csvStream, loiProperties, tasks, loiDoc, submission)
+    );
   });
   csvStream.end();
+}
+
+function getHeaders(
+  tasks: Map<string, Task>,
+  loiProperties: Set<string>
+): string[] {
+  const headers = [];
+  headers.push('system:index');
+  headers.push('geometry');
+  headers.push(...loiProperties);
+  tasks.forEach(task => headers.push('data:' + task.label));
+  headers.push('data:contributor_username');
+  headers.push('data:contributor_email');
+  return headers;
+}
+
+/**
+ * Returns all submissions in the specified job, indexed by LOI ID.
+ * Note: Indexes submissions by LOI id in memory. This consumes more
+ * memory than iterating over and streaming both LOI and submission
+ * collections simultaneously, but it's easier to read and maintain. This
+ * function will need to be optimized to scale to larger datasets than
+ * can fit in memory.
+ */
+async function getSubmissionsByLoi(
+  surveyId: string,
+  jobId: string
+): Promise<SubmissionDict> {
+  const db = getDatastore();
+  const submissions = await db.fetchSubmissionsByJobId(surveyId, jobId);
+  const submissionsByLoi: {[name: string]: any[]} = {};
+  submissions.forEach(submission => {
+    const loiId = submission.get('loiId') as string;
+    const arr: any[] = submissionsByLoi[loiId] || [];
+    arr.push(submission.data());
+    submissionsByLoi[loiId] = arr;
+  });
+  return submissionsByLoi;
+}
+
+function writeRow(
+  csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
+  loiProperties: Set<string>,
+  tasks: Map<string, Task>,
+  loiDoc: LoiDocument,
+  submission: SubmissionDict
+) {
+  const row = [];
+  // Header: system:index
+  row.push(loiDoc.get('properties')?.id || '');
+  // Header: geometry
+  row.push(toWkt(loiDoc.get('geometry')) || '');
+  // Header: One column for each loi property (merged over all properties across all LOIs)
+  row.push(...getPropertiesByName(loiDoc, loiProperties));
+  // TODO(#1288): Clean up remaining references to old responses field
+  const data =
+    submission['data'] ||
+    submission['responses'] ||
+    submission['results'] ||
+    {};
+  // Header: One column for each task
+  tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
+  // Header: contributor_username, contributor_email
+  const contributor = submission['created']
+    ? (submission['created'] as Dict)['user']
+    : [];
+  row.push(contributor['displayName'] || '');
+  row.push(contributor['email'] || '');
+  csvStream.write(row);
 }
 
 /**
@@ -211,9 +251,7 @@ function getFileName(jobName: string) {
   return `${fileBase}.csv`;
 }
 
-function getPropertyNames(
-  lois: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
-): Set<string> {
+function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
   return new Set(
     lois.docs
       .map(loi =>
@@ -226,11 +264,11 @@ function getPropertyNames(
 }
 
 function getPropertiesByName(
-  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
-  allLoiProperties: Set<string>
+  loiDoc: LoiDocument,
+  loiProperties: Set<string>
 ): List<string> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-  return List.of(...allLoiProperties).map(
-    prop => (loi.get('properties') || {})[prop] || ''
+  return List.of(...loiProperties).map(
+    prop => (loiDoc.get('properties') || {})[prop] || ''
   );
 }
