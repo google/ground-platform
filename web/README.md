@@ -4,7 +4,7 @@
 
 This page describes additional npm scripts for use when developing the Ground web console. Be sure to follow instructions in <../README.md> before proceeding.
 
-## Building
+## Build and run locally
 
 Install deps with:
 
@@ -12,18 +12,13 @@ Install deps with:
 npm run ci-all
 ```
 
-Then build web to run locally with:
+To build and run locally against a live Firebase project:
 
 ```shell
-npm run build-all --config=local
+npm run build-all-and-start --config=dev --project=<project-id>
 ```
 
-Or against a dev Firebase:
-```shell
-npm run build-all --config=dev --project=<project-d>
-```
-
-## Running tests
+## Run tests
 
 To run tests locally in a browser:
 
@@ -37,7 +32,7 @@ To execute the end-to-end tests:
 npm run e2e
 ```
 
-## Deploying web app only
+## Deploy web app
 
 To deploy the web app without updating Cloud Functions or Firebase config, from the current directory:
 
