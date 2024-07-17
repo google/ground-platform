@@ -36,10 +36,13 @@ type Task = {
   readonly hasOtherOption?: boolean;
 };
 
-/** 
-  * Iterates over all LOIs and submissions in a job, joining them
-  * into a single table written to the response as a quote CSV file.
-  */
+/** A dictionary of submissions values (array) keyed by loi ID. */
+type SubmissionDict = {[key: string]: any[]};
+
+/**
+ * Iterates over all LOIs and submissions in a job, joining them
+ * into a single table written to the response as a quote CSV file.
+ */
 export async function exportCsvHandler(
   req: functions.Request,
   res: functions.Response<any>,
@@ -65,15 +68,8 @@ export async function exportCsvHandler(
   const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
   const lois = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
-
-  const headers = [];
-  headers.push('system:index');
-  headers.push('geometry');
-  const allLoiProperties = getPropertyNames(lois);
-  headers.push(...allLoiProperties);
-  tasks.forEach(task => headers.push('data:' + task.label));
-  headers.push('data:contributor_username');
-  headers.push('data:contributor_email');
+  const loiProperties = getPropertyNames(lois);
+  const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
   res.setHeader(
@@ -90,19 +86,7 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const submissions = await db.fetchSubmissionsByJobId(survey.id, jobId);
-
-  // Index submissions by LOI id in memory. This consumes more
-  // memory than iterating over and streaming both LOI and submission`
-  // collections simultaneously, but it's easier to read and maintain. This will
-  // likely need to be optimized to scale to larger datasets.
-  const submissionsByLoi: {[name: string]: any[]} = {};
-  submissions.forEach(submission => {
-    const loiId = submission.get('loiId') as string;
-    const arr: any[] = submissionsByLoi[loiId] || [];
-    arr.push(submission.data());
-    submissionsByLoi[loiId] = arr;
-  });
+  const submissionsByLoi = await getSubmissionsByLoi(survey.id, jobId);
 
   lois.forEach(loi => {
     const loiId = loi.id;
@@ -114,7 +98,7 @@ export async function exportCsvHandler(
       // Header: geometry
       row.push(toWkt(loi.get('geometry')) || '');
       // Header: One column for each loi property (merged over all properties across all LOIs)
-      row.push(...getPropertiesByName(loi, allLoiProperties));
+      row.push(...getPropertiesByName(loi, loiProperties));
       // TODO(#1288): Clean up remaining references to old responses field
       const data =
         submission['data'] ||
@@ -135,6 +119,43 @@ export async function exportCsvHandler(
   csvStream.end();
 }
 
+function getHeaders(
+  tasks: Map<string, Task>,
+  loiProperties: Set<string>
+): string[] {
+  const headers = [];
+  headers.push('system:index');
+  headers.push('geometry');
+  headers.push(...loiProperties);
+  tasks.forEach(task => headers.push('data:' + task.label));
+  headers.push('data:contributor_username');
+  headers.push('data:contributor_email');
+  return headers;
+}
+
+/**
+ * Returns all submissions in the specified job, indexed by LOI ID.
+ * Note: Indexes submissions by LOI id in memory. This consumes more
+ * memory than iterating over and streaming both LOI and submission
+ * collections simultaneously, but it's easier to read and maintain. This
+ * function will need to be optimized to scale to larger datasets than
+ * can fit in memory.
+ */
+async function getSubmissionsByLoi(
+  surveyId: string,
+  jobId: string
+): Promise<SubmissionDict> {
+  const db = getDatastore();
+  const submissions = await db.fetchSubmissionsByJobId(surveyId, jobId);
+  const submissionsByLoi: {[name: string]: any[]} = {};
+  submissions.forEach(submission => {
+    const loiId = submission.get('loiId') as string;
+    const arr: any[] = submissionsByLoi[loiId] || [];
+    arr.push(submission.data());
+    submissionsByLoi[loiId] = arr;
+  });
+  return submissionsByLoi;
+}
 /**
  * Returns the WKT string converted from the given geometry object
  *
@@ -230,10 +251,10 @@ function getPropertyNames(
 
 function getPropertiesByName(
   loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
-  allLoiProperties: Set<string>
+  loiProperties: Set<string>
 ): List<string> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-  return List.of(...allLoiProperties).map(
+  return List.of(...loiProperties).map(
     prop => (loi.get('properties') || {})[prop] || ''
   );
 }
