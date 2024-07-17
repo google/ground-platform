@@ -23,6 +23,7 @@ import * as HttpStatus from 'http-status-codes';
 import {Datastore} from './common/datastore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
+import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -42,7 +43,8 @@ type Dict = {[key: string]: any};
 type SubmissionDict = {[key: string]: any[]};
 
 // TODO(#1277): Use a shared model with web
-type LoiDocument = FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>;
+type LoiDocument =
+  FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>;
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -250,9 +252,7 @@ function getFileName(jobName: string) {
   return `${fileBase}.csv`;
 }
 
-function getPropertyNames(
-  lois: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>
-): Set<string> {
+function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
   return new Set(
     lois.docs
       .map(loi =>
