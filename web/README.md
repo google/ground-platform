@@ -6,11 +6,13 @@ This page describes additional npm scripts for use when developing the Ground we
 
 ## Build and run locally
 
-Install deps with:
+Perform a clean install of all deps without modifying package-lock.json with:
 
 ```shell
 npm run ci-all
 ```
+
+NOTE: When adding new deps, using `npm install --save` or `--save-dev` to update and package.json package-lock.json accordingly.
 
 To build and run locally against a live Firebase project:
 
