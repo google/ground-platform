@@ -171,6 +171,7 @@ function writeRow(
   row.push(contributor['email'] || '');
   csvStream.write(row);
 }
+
 /**
  * Returns the WKT string converted from the given geometry object
  *
