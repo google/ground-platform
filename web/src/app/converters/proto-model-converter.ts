@@ -17,11 +17,15 @@
 import {DocumentData} from '@angular/fire/firestore';
 import {toDocumentData} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Cardinality} from 'app/models/task/multiple-choice.model';
+import {
+  Cardinality,
+  MultipleChoice,
+} from 'app/models/task/multiple-choice.model';
+import {TaskCondition} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
 import Pb = GroundProtos.google.ground.v1beta1;
@@ -45,7 +49,7 @@ export function roleToProtoRole(role: Role) {
 }
 
 /**
- * Creates a proto rapresentation of a Survey.
+ * Returns the proto representation of a Survey model object.
  */
 export function newSurveyToDocument(
   name: string,
@@ -64,7 +68,7 @@ export function newSurveyToDocument(
 }
 
 /**
- * Creates a proto rapresentation of a Survey.
+ * Returns the proto representation of a partial Survey model object.
  */
 export function partialSurveyToDocument(
   name: string,
@@ -79,7 +83,7 @@ export function partialSurveyToDocument(
 }
 
 /**
- * Creates a proto rapresentation of a survey access control list.
+ * Returns the proto representation of a Survey ACL model object.
  */
 export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
   return toDocumentData(
@@ -90,7 +94,7 @@ export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
 }
 
 /**
- * Creates a proto rapresentation of a Job.
+ * Returns the proto representation of a Job model object.
  */
 export function jobToDocument(job: Job): DocumentData {
   return toDocumentData(
@@ -99,32 +103,22 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks
-        ?.map(task => {
-          return new Pb.Task({
-            ...taskTypeToPartialMessage(task),
-            id: task.id,
-            index: task.index,
-            prompt: task.label,
-            required: task.required,
-            level: task.addLoiTask
-              ? Pb.Task.DataCollectionLevel.LOI_DATA
-              : Pb.Task.DataCollectionLevel.LOI_METADATA,
-            conditions: taskConditionToPartialMessage(task),
-          });
-        })
-        .toList()
-        .toArray(),
+      tasks: job.tasks?.toList().map(toTaskMessage).toArray(),
     })
   );
 }
 
-/**
- * Creates a partial rapresentation of a Task.
- */
-function taskTypeToPartialMessage(task: Task): Pb.ITask {
-  const {type: taskType, multipleChoice: taskMultipleChoice} = task;
+export function tasksToDocument(tasks: List<Task>): DocumentData {
+  return toDocumentData(tasks.toList().map(toTaskMessage).toArray());
+}
 
+/**
+ * Returns a Protobuf message representing a partial Task model.
+ */
+function toTaskTypeMessage(
+  taskType: TaskType,
+  taskMultipleChoice?: MultipleChoice
+): Pb.ITask {
   switch (taskType) {
     case TaskType.TEXT:
       return {
@@ -139,7 +133,7 @@ function taskTypeToPartialMessage(task: Task): Pb.ITask {
             taskMultipleChoice!.cardinality === Cardinality.SELECT_ONE
               ? Pb.Task.MultipleChoiceQuestion.Type.SELECT_ONE
               : Pb.Task.MultipleChoiceQuestion.Type.SELECT_MULTIPLE,
-          hasOtherOption: task.multipleChoice!.hasOtherOption,
+          hasOtherOption: taskMultipleChoice!.hasOtherOption,
           options: taskMultipleChoice!.options
             .map(
               option =>
@@ -207,11 +201,11 @@ function taskTypeToPartialMessage(task: Task): Pb.ITask {
 }
 
 /**
- * Creates a partial rapresentation of a Task.
+ * Returns a Protobuf message representing a TaskCondition model.
  */
-function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
-  const {condition: taskCondition} = task;
-
+function toTaskConditionMessage(
+  taskCondition?: TaskCondition
+): Pb.Task.ICondition[] {
   return (
     taskCondition?.expressions
       .map(
@@ -219,9 +213,27 @@ function taskConditionToPartialMessage(task: Task): Pb.Task.ICondition[] {
           new Pb.Task.Condition({
             multipleChoice: new Pb.Task.MultipleChoiceSelection({
               optionIds: expression.optionIds.toArray(),
+              taskId: expression.taskId,
             }),
           })
       )
       .toArray() || []
   );
+}
+
+/**
+ * Returns a Protobuf messager epresenting a Task model.
+ */
+function toTaskMessage(task: Task): Pb.ITask {
+  return new Pb.Task({
+    ...toTaskTypeMessage(task.type, task.multipleChoice),
+    id: task.id,
+    index: task.index,
+    prompt: task.label,
+    required: task.required,
+    level: task.addLoiTask
+      ? Pb.Task.DataCollectionLevel.LOI_DATA
+      : Pb.Task.DataCollectionLevel.LOI_METADATA,
+    conditions: toTaskConditionMessage(task.condition),
+  });
 }

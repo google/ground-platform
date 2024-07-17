@@ -243,5 +243,9 @@ message Task {
     // Required. List of multiple choice option IDs which trigger the associated
     // task. The task is shown if one or more of the related options are selected.
     repeated string option_ids = 1;
+
+    // Required. The system-defined unique identifier of the task to which this
+    // MultipleChoiceSelection refers.
+    string task_id = 2;
   }
 }

@@ -15,7 +15,10 @@
  */
 
 import {Injectable} from '@angular/core';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
+import {
+  AngularFirestore,
+  CollectionReference,
+} from '@angular/fire/compat/firestore';
 import {
   DocumentData,
   FieldPath,
@@ -34,6 +37,7 @@ import {
   jobToDocument,
   newSurveyToDocument,
   partialSurveyToDocument,
+  tasksToDocument,
 } from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -336,7 +340,9 @@ export class DataStoreService {
     return this.db
       .doc<User>(`users/${uid}`)
       .valueChanges()
-      .pipe(map(data => FirebaseDataConverter.toUser(data as DocumentData)));
+      .pipe(
+        map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
+      );
   }
 
   private toLocationsOfInterest(
@@ -351,10 +357,10 @@ export class DataStoreService {
   }
 
   /**
-   * Returns a stream containing all the Location of Interests based
-   * on provided parameters.
+   * Returns an Observable that loads and emits all the locations of interest
+   * based on provided parameters.
    *
-   * @param id the id of the survey instance.
+   * @param survey the survey instance.
    * @param userEmail the email of the user to filter the results.
    * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
    */
@@ -394,19 +400,23 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the submissions with the specified
-   * uuid.
+   * Returns an Observable that loads and emits all the Submissions
+   * based on provided parameters.
    *
-   * @param id the id of the requested survey (it should have tasks inside).
-   * @param loiId the id of the requested loi.
+   * @param survey the survey instance.
+   * @param loi the loi instance.
+   * @param userEmail the email of the user to filter the results.
+   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
    */
-  submissions$(
+  getAccessibleSubmissions$(
     survey: Survey,
-    loi: LocationOfInterest
+    loi: LocationOfInterest,
+    userEmail: string,
+    canManageSurvey: boolean
   ): Observable<List<Submission>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        ref.where('loiId', '==', loi.id)
+        this.canViewSubmissions(ref, loi.id, userEmail, canManageSurvey)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -527,9 +537,10 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({
-        [`jobs.${jobId}.tasks`]: FirebaseDataConverter.tasksToJS(
-          this.convertTasksListToMap(tasks)
-        ),
+        [`jobs.${jobId}.tasks`]: {
+          ...FirebaseDataConverter.tasksToJS(this.convertTasksListToMap(tasks)),
+          ...tasksToDocument(tasks),
+        },
       });
   }
 
@@ -552,5 +563,22 @@ export class DataStoreService {
       return false;
     }
     return true;
+  }
+
+  /**
+   * Creates a new Query object to filter submissions based on two
+   * criteria: loi and user
+   */
+  private canViewSubmissions(
+    ref: CollectionReference,
+    loiId: string,
+    userEmail: string,
+    canManageSurvey: boolean
+  ) {
+    return canManageSurvey
+      ? ref.where('loiId', '==', loiId)
+      : ref
+          .where('loiId', '==', loiId)
+          .where('lastModified.user.email', '==', userEmail);
   }
 }

@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
-import {DocumentData, GeoPoint} from 'firebase-admin/firestore';
+import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
 
 /**
  *
@@ -127,7 +127,10 @@ export class Datastore {
     return this.fetchDoc_(loi(surveyId, loiId));
   }
 
-  fetchLocationsOfInterestByJobId(surveyId: string, jobId: string) {
+  fetchLocationsOfInterestByJobId(
+    surveyId: string,
+    jobId: string
+  ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
     return this.db_
       .collection(lois(surveyId))
       .where('jobId', '==', jobId)
