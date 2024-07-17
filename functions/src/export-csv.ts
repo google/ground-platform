@@ -93,17 +93,17 @@ export async function exportCsvHandler(
   // memory than iterating over and streaming both LOI and submission`
   // collections simultaneously, but it's easier to read and maintain. This will
   // likely need to be optimized to scale to larger datasets.
-  const submissionsByLocationOfInterest: {[name: string]: any[]} = {};
+  const submissionsByLoi: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
     const loiId = submission.get('loiId') as string;
-    const arr: any[] = submissionsByLocationOfInterest[loiId] || [];
+    const arr: any[] = submissionsByLoi[loiId] || [];
     arr.push(submission.data());
-    submissionsByLocationOfInterest[loiId] = arr;
+    submissionsByLoi[loiId] = arr;
   });
 
   lois.forEach(loi => {
     const loiId = loi.id;
-    const submissions = submissionsByLocationOfInterest[loiId] || [{}];
+    const submissions = submissionsByLoi[loiId] || [{}];
     submissions.forEach(submission => {
       const row = [];
       // Header: system:index
