@@ -36,8 +36,13 @@ type Task = {
   readonly hasOtherOption?: boolean;
 };
 
+type Dict = {[key: string]: any};
+
 /** A dictionary of submissions values (array) keyed by loi ID. */
 type SubmissionDict = {[key: string]: any[]};
+
+// TODO(#1277): Use a shared model with web
+type LoiDocument = FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>;
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -91,30 +96,9 @@ export async function exportCsvHandler(
   lois.forEach(loi => {
     const loiId = loi.id;
     const submissions = submissionsByLoi[loiId] || [{}];
-    submissions.forEach(submission => {
-      const row = [];
-      // Header: system:index
-      row.push(loi.get('properties')?.id || '');
-      // Header: geometry
-      row.push(toWkt(loi.get('geometry')) || '');
-      // Header: One column for each loi property (merged over all properties across all LOIs)
-      row.push(...getPropertiesByName(loi, loiProperties));
-      // TODO(#1288): Clean up remaining references to old responses field
-      const data =
-        submission['data'] ||
-        submission['responses'] ||
-        submission['results'] ||
-        {};
-      // Header: One column for each task
-      tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
-      // Header: contributor_username, contributor_email
-      const contributor = submission['created']
-        ? submission['created']['user']
-        : [];
-      row.push(contributor['displayName'] || '');
-      row.push(contributor['email'] || '');
-      csvStream.write(row);
-    });
+    submissions.forEach(submission =>
+      writeRow(csvStream, loiProperties, tasks, loi, submission)
+    );
   });
   csvStream.end();
 }
@@ -155,6 +139,37 @@ async function getSubmissionsByLoi(
     submissionsByLoi[loiId] = arr;
   });
   return submissionsByLoi;
+}
+
+function writeRow(
+  csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
+  loiProperties: Set<string>,
+  tasks: Map<string, Task>,
+  loiDoc: LoiDocument,
+  submission: SubmissionDict
+) {
+  const row = [];
+  // Header: system:index
+  row.push(loiDoc.get('properties')?.id || '');
+  // Header: geometry
+  row.push(toWkt(loiDoc.get('geometry')) || '');
+  // Header: One column for each loi property (merged over all properties across all LOIs)
+  row.push(...getPropertiesByName(loiDoc, loiProperties));
+  // TODO(#1288): Clean up remaining references to old responses field
+  const data =
+    submission['data'] ||
+    submission['responses'] ||
+    submission['results'] ||
+    {};
+  // Header: One column for each task
+  tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
+  // Header: contributor_username, contributor_email
+  const contributor = submission['created']
+    ? (submission['created'] as Dict)['user']
+    : [];
+  row.push(contributor['displayName'] || '');
+  row.push(contributor['email'] || '');
+  csvStream.write(row);
 }
 /**
  * Returns the WKT string converted from the given geometry object
@@ -250,11 +265,11 @@ function getPropertyNames(
 }
 
 function getPropertiesByName(
-  loi: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>,
+  loiDoc: LoiDocument,
   loiProperties: Set<string>
 ): List<string> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
   return List.of(...loiProperties).map(
-    prop => (loi.get('properties') || {})[prop] || ''
+    prop => (loiDoc.get('properties') || {})[prop] || ''
   );
 }
