@@ -36,7 +36,10 @@ type Task = {
   readonly hasOtherOption?: boolean;
 };
 
-// TODO: Refactor into meaningful pieces.
+/** 
+  * Iterates over all LOIs and submissions in a job, joining them
+  * into a single table written to the response as a quote CSV file.
+  */
 export async function exportCsvHandler(
   req: functions.Request,
   res: functions.Response<any>,
