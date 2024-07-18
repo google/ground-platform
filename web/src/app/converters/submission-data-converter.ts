@@ -235,11 +235,9 @@ export class LegacySubmissionDataConverter {
     try {
       if (typeof resultValue === 'string') {
         return new Result(resultValue as string);
-      }
-      if (typeof resultValue === 'number') {
+      } else if (typeof resultValue === 'number') {
         return new Result(resultValue as number);
-      }
-      if (resultValue instanceof Array) {
+      } else if (resultValue instanceof Array) {
         return new Result(
           List(
             resultValue
@@ -251,17 +249,17 @@ export class LegacySubmissionDataConverter {
               )
           )
         );
-      }
-      if (resultValue instanceof Timestamp) {
+      } else if (resultValue instanceof Timestamp) {
         return new Result(resultValue.toDate());
-      }
-      const geometry = toGeometry(resultValue);
-      if (
-        geometry instanceof Point ||
-        geometry instanceof Polygon ||
-        geometry instanceof MultiPolygon
-      ) {
-        return new Result(geometry);
+      } else {
+        const geometry = toGeometry(resultValue);
+        if (
+          geometry instanceof Point ||
+          geometry instanceof Polygon ||
+          geometry instanceof MultiPolygon
+        ) {
+          return new Result(geometry);
+        }
       }
       return Error(
         `Error converting to Result: unknown value type ${typeof resultValue}`
