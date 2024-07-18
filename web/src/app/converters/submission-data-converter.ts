@@ -24,7 +24,6 @@ import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
 import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
 import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
@@ -32,13 +31,10 @@ import {
 } from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task} from 'app/models/task/task.model';
-
-import {geometryPbToModel} from './geometry-data-converter';
+import {User} from 'app/models/user.model';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import Pb = GroundProtos.google.ground.v1beta1;
-
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {User} from 'app/models/user.model';
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, returns an
