@@ -34,6 +34,11 @@ import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 
+import {
+  coordinatesPbToModel,
+  geometryPbToModel,
+} from './geometry-data-converter';
+
 import Pb = GroundProtos.google.ground.v1beta1;
 
 /**
@@ -63,7 +68,7 @@ export function submissionDocToModel(
     job,
     authInfoPbToModel(pb.created!),
     authInfoPbToModel(pb.lastModified!),
-    taskDataPbToModel(pb.taskData)
+    taskDataPbToModel(pb.taskData, job)
   );
 }
 
@@ -75,13 +80,48 @@ function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   );
 }
 
-function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
+function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
   const submissionData: {[k: string]: Result} = {};
+
   pb.forEach(taskData => {
-    submissionData[taskData.id!] = new Result(
-      taskData.numberResponse?.number || 0
-    );
+    const task = job.tasks?.get(taskData.taskId!);
+
+    if (!task) throw new Error(`Missing task`);
+
+    let value = null;
+
+    const {
+      textResponse,
+      numberResponse,
+      dateTimeResponse,
+      multipleChoiceResponses,
+      drawGeometryResult,
+      captureLocationResult,
+      takePhotoResult,
+    } = taskData;
+
+    if (textResponse) value = textResponse.text;
+    else if (numberResponse) value = numberResponse.number;
+    else if (dateTimeResponse)
+      value = new Date(dateTimeResponse.dateTime!.nanos!);
+    else if (multipleChoiceResponses)
+      value = List(
+        task.multipleChoice?.options.filter(({id: optionId}) =>
+          multipleChoiceResponses!.selectedOptionIds?.includes(optionId)
+        )
+      );
+    else if (drawGeometryResult)
+      value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
+    else if (captureLocationResult)
+      value = new Point(
+        coordinatesPbToModel(captureLocationResult.coordinates!)
+      );
+    else if (takePhotoResult) value = takePhotoResult.photoPath;
+    else throw new Error('Error converting to Submission: invalid task data');
+
+    submissionData[taskData.id!] = new Result(value!);
   });
+
   return Map(submissionData);
 }
 
