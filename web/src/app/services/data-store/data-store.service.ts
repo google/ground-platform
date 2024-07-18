@@ -39,6 +39,7 @@ import {
   partialSurveyToDocument,
   tasksToDocument,
 } from 'app/converters/proto-model-converter';
+import {submissionDocToModel} from 'app/converters/submission-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -424,11 +425,7 @@ export class DataStoreService {
           List(
             array
               .map(obj =>
-                FirebaseDataConverter.toSubmission(
-                  survey.getJob(loi.jobId)!,
-                  obj.id,
-                  obj
-                )
+                submissionDocToModel(survey.getJob(loi.jobId)!, obj.id, obj)
               )
               .filter(DataStoreService.filterAndLogError<Submission>)
               .map(submission => submission as Submission)
@@ -449,7 +446,7 @@ export class DataStoreService {
       .get()
       .pipe(
         map(doc =>
-          FirebaseDataConverter.toSubmission(
+          submissionDocToModel(
             survey.getJob(loi.jobId)!,
             doc.id,
             doc.data()! as DocumentData
