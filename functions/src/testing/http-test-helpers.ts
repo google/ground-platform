@@ -31,13 +31,31 @@ export async function createPostRequestSpy(
   });
 }
 
+export async function createGetRequestSpy(
+  args: object
+): Promise<functions.https.Request> {
+  return jasmine.createSpyObj<functions.https.Request>('request', ['unpipe'], {
+    ...args,
+    method: 'GET'
+  });
+}
+
 export function createResponseSpy(): functions.Response<any> {
   const res = jasmine.createSpyObj<functions.Response<any>>('response', [
     'send',
     'status',
     'end',
+    'write',
+    'type',
+    'setHeader',
+    'on',
+    'once',
+    'emit'
   ]);
-  res.status.and.returnValue(res);
-  res.end.and.returnValue(res);
+  res.status.and.callThrough();
+  res.end.and.callThrough();
+  res.write.and.callFake((chunk: any) => { console.log("=====write "+chunk); return true;});
+  res.on.and.callThrough();
+  // res.write.and.callFake((event: any, listener: any) => { console.log("=====on "+event); return res;});
   return res;
 }

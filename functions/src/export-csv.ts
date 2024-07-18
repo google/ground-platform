@@ -77,7 +77,7 @@ export async function exportCsvHandler(
   // TODO(#1779): Get job metadata from  `/surveys/{surveyId}/jobs` instead.
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
-  const jobName = job.name && (job.name['en'] as string);
+  const jobName = job.name;
   const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
   const loiDocs = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
@@ -128,6 +128,7 @@ export async function exportCsvHandler(
       }
     });
   });
+  res.status(HttpStatus.OK);
   csvStream.end();
 }
 
@@ -333,7 +334,7 @@ function extractOtherOption(submission: string): string {
 /**
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
-function getFileName(jobName: string) {
+function getFileName(jobName: string | null) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.csv`;
