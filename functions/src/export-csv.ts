@@ -176,7 +176,7 @@ function writeRow(
   loi: Pb.LocationOfInterest,
   submission: Pb.Submission
 ) {
-  // TODO(#1779): Remove migration is complete.
+  // TODO(#1779): Remove once migration is complete.
   console.debug('Writing data using new schema');
   const row = [];
   // Header: system:index
