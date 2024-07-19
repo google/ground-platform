@@ -17,6 +17,7 @@ import {DocumentData, Timestamp} from '@angular/fire/firestore';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
+import Long from 'long';
 
 import {toGeometry} from 'app/converters/geometry-converter';
 import {AuditInfo} from 'app/models/audit-info.model';
@@ -49,6 +50,16 @@ function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
 }
 
+function timestampToInt(
+  timestamp: GroundProtos.google.protobuf.ITimestamp | null | undefined
+): number {
+  if (!timestamp) return 0;
+
+  return Long.isLong(timestamp.seconds)
+    ? timestamp.seconds.toInt()
+    : timestamp.seconds || 0;
+}
+
 export function submissionDocToModel(
   job: Job,
   id: string,
@@ -74,9 +85,9 @@ export function submissionDocToModel(
 
 function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   return new AuditInfo(
-    new Date(pb.clientTimestamp?.nanos || 0),
-    new Date(pb.serverTimestamp?.nanos || 0)
     new User(pb.userId!, '', true, pb.displayName!, pb.photoUrl!),
+    new Date(timestampToInt(pb.clientTimestamp) * 1000),
+    new Date(timestampToInt(pb.serverTimestamp) * 1000)
   );
 }
 
