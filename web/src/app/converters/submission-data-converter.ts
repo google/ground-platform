@@ -74,9 +74,9 @@ export function submissionDocToModel(
 
 function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   return new AuditInfo(
-    new User(pb.userId!, pb.displayName!, true),
     new Date(pb.clientTimestamp?.nanos || 0),
     new Date(pb.serverTimestamp?.nanos || 0)
+    new User(pb.userId!, '', true, pb.displayName!, pb.photoUrl!),
   );
 }
 
