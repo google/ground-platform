@@ -117,6 +117,7 @@ function toFieldValue(
     case 'int64':
     case 'bool':
     case 'double':
+    case '.google.protobuf.Timestamp':
       return firestoreValue;
     default:
       return toMessageOrEnumValue(messageTypePath, fieldType, firestoreValue);
