@@ -229,30 +229,42 @@ export class LegacySubmissionDataConverter {
   }
 
   private static toResult(
-    resultValue: number | string | List<string>,
+    resultValue:
+      | number
+      | string
+      | string[]
+      | Timestamp
+      | {type?: string; geometry?: {type: string}},
     task?: Task
   ): Result | Error {
     try {
-      if (typeof resultValue === 'string') {
-        return new Result(resultValue as string);
-      } else if (typeof resultValue === 'number') {
+      if (typeof resultValue === 'number') {
         return new Result(resultValue as number);
+      } else if (typeof resultValue === 'string') {
+        return new Result(resultValue as string);
       } else if (resultValue instanceof Array) {
         return new Result(
           List(
-            resultValue
-              .filter(optionId => !optionId.startsWith('['))
-              .map(
-                optionId =>
+            resultValue.map(optionId => {
+              if (optionId.startsWith('['))
+                return new Option(
+                  'otherOption',
+                  'otherOption',
+                  optionId.slice(1, -1),
+                  resultValue.length
+                );
+              else
+                return (
                   task?.getMultipleChoiceOption(optionId) ||
                   new Option(optionId, optionId, optionId, -1)
-              )
+                );
+            })
           )
         );
       } else if (resultValue instanceof Timestamp) {
         return new Result(resultValue.toDate());
       } else {
-        const geometry = toGeometry(resultValue);
+        const geometry = toGeometry(resultValue.geometry || resultValue);
         if (
           geometry instanceof Point ||
           geometry instanceof Polygon ||
