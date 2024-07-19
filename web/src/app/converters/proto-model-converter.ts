@@ -103,13 +103,9 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks?.toList().map(toTaskMessage).toArray(),
+      tasks: job.tasks?.toList().map((task: Task) => toTaskMessage(task)).toArray(),
     })
   );
-}
-
-export function tasksToDocument(tasks: List<Task>): DocumentData {
-  return toDocumentData(tasks.toList().map(toTaskMessage).toArray());
 }
 
 /**
@@ -192,7 +188,7 @@ function toTaskTypeMessage(
     case TaskType.CAPTURE_LOCATION:
       return {
         captureLocation: new Pb.Task.CaptureLocation({
-          minAccuracyMeters: null,
+          minAccuracyMeters: 0,
         }),
       };
     default:
@@ -222,7 +218,7 @@ function toTaskConditionMessage(
 }
 
 /**
- * Returns a Protobuf messager epresenting a Task model.
+ * Returns a Protobuf message representing a Task model.
  */
 function toTaskMessage(task: Task): Pb.ITask {
   return new Pb.Task({
@@ -232,8 +228,8 @@ function toTaskMessage(task: Task): Pb.ITask {
     prompt: task.label,
     required: task.required,
     level: task.addLoiTask
-      ? Pb.Task.DataCollectionLevel.LOI_DATA
-      : Pb.Task.DataCollectionLevel.LOI_METADATA,
+      ? Pb.Task.DataCollectionLevel.LOI_METADATA
+      : Pb.Task.DataCollectionLevel.LOI_DATA,
     conditions: toTaskConditionMessage(task.condition),
   });
 }
