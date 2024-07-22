@@ -60,6 +60,10 @@ function timestampToInt(
     : timestamp.seconds || 0;
 }
 
+function createOtherOption(optionId: string, index: number) {
+  return new Option('otherOption', 'otherOption', optionId.slice(1, -1), index);
+}
+
 export function submissionDocToModel(
   job: Job,
   id: string,
@@ -115,13 +119,24 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
     else if (numberResponse) value = numberResponse.number;
     else if (dateTimeResponse)
       value = new Date(dateTimeResponse.dateTime!.nanos!);
-    else if (multipleChoiceResponses)
-      value = List(
+    else if (multipleChoiceResponses) {
+      value =
         task.multipleChoice?.options.filter(({id: optionId}) =>
           multipleChoiceResponses!.selectedOptionIds?.includes(optionId)
-        )
-      );
-    else if (drawGeometryResult)
+        ) || List([]);
+
+      if (
+        task.multipleChoice?.hasOtherOption &&
+        multipleChoiceResponses!.otherText
+      ) {
+        value = value.push(
+          createOtherOption(
+            multipleChoiceResponses!.otherText,
+            task.multipleChoice?.options.size
+          )
+        );
+      }
+    } else if (drawGeometryResult)
       value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
     else if (captureLocationResult)
       value = new Point(
@@ -258,12 +273,7 @@ export class LegacySubmissionDataConverter {
           List(
             resultValue.map(optionId => {
               if (optionId.startsWith('['))
-                return new Option(
-                  'otherOption',
-                  'otherOption',
-                  optionId.slice(1, -1),
-                  resultValue.length
-                );
+                return createOtherOption(optionId, resultValue.length);
               else
                 return (
                   task?.getMultipleChoiceOption(optionId) ||
