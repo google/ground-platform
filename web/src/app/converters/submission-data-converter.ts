@@ -130,7 +130,7 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
     else if (takePhotoResult) value = takePhotoResult.photoPath;
     else throw new Error('Error converting to Submission: invalid task data');
 
-    submissionData[taskData.id!] = new Result(value!);
+    submissionData[task.id] = new Result(value!);
   });
 
   return Map(submissionData);
