@@ -103,7 +103,7 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
   pb.forEach(taskData => {
     const task = job.tasks?.get(taskData.taskId!);
 
-    if (!task) throw new Error(`Missing task`);
+    if (!task) return;
 
     let value = null;
 
