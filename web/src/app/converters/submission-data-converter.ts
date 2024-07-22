@@ -55,9 +55,11 @@ function timestampToInt(
 ): number {
   if (!timestamp) return 0;
 
-  return Long.isLong(timestamp.seconds)
-    ? timestamp.seconds.toInt()
-    : timestamp.seconds || 0;
+  return (
+    (Long.isLong(timestamp.seconds)
+      ? timestamp.seconds.toInt()
+      : timestamp.seconds || 0) * 1000
+  );
 }
 
 function createOtherOption(optionId: string, index: number) {
@@ -90,8 +92,8 @@ export function submissionDocToModel(
 function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   return new AuditInfo(
     new User(pb.userId!, '', true, pb.displayName!, pb.photoUrl!),
-    new Date(timestampToInt(pb.clientTimestamp) * 1000),
-    new Date(timestampToInt(pb.serverTimestamp) * 1000)
+    new Date(timestampToInt(pb.clientTimestamp)),
+    new Date(timestampToInt(pb.serverTimestamp))
   );
 }
 
@@ -118,7 +120,7 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
     if (textResponse) value = textResponse.text;
     else if (numberResponse) value = numberResponse.number;
     else if (dateTimeResponse)
-      value = new Date(dateTimeResponse.dateTime!.nanos!);
+      value = new Date(timestampToInt(dateTimeResponse.dateTime));
     else if (multipleChoiceResponses) {
       value =
         task.multipleChoice?.options.filter(({id: optionId}) =>
