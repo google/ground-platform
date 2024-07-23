@@ -103,7 +103,10 @@ export function jobToDocument(job: Job): DocumentData {
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks?.toList().map((task: Task) => toTaskMessage(task)).toArray(),
+      tasks: job.tasks
+        ?.toList()
+        .map((task: Task) => toTaskMessage(task))
+        .toArray(),
     })
   );
 }
