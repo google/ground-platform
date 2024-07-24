@@ -18,7 +18,7 @@ import {Injectable} from '@angular/core';
 import {List, Map} from 'immutable';
 import {Observable, switchMap} from 'rxjs';
 
-import {DataCollectionStrategy} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {MultipleChoice} from 'app/models/task/multiple-choice.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -101,10 +101,10 @@ export class TaskService {
 
   addOrUpdateTasks(
     surveyId: string,
-    jobId: string,
+    job: Job,
     tasks: List<Task>
-  ): Promise<void> {
-    return this.dataStoreService.addOrUpdateTasks(surveyId, jobId, tasks);
+  ): Promise<[void, void]> {
+    return this.dataStoreService.addOrUpdateTasks(surveyId, job, tasks);
   }
 
   /**

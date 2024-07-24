@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Firestore } from "@google-cloud/firestore";
+import {Firestore} from '@google-cloud/firestore';
 
 const MockFirebase = require('mock-cloud-firestore');
 
@@ -30,9 +30,8 @@ export function createMockFirestore(): Firestore {
  * in tests to work around lack of support in MockFirebase lib.
  */
 export function TestGeoPoint(_latitude: number, _longitude: number) {
-    return {
-      _latitude,
-      _longitude,
-    };
-  }
-  
+  return {
+    _latitude,
+    _longitude,
+  };
+}
