@@ -244,7 +244,7 @@ export class DataStoreService {
   updateJob(
     surveyId: string,
     job: Job,
-    tasks: List<Task> | undefined = undefined
+    tasks: List<Task> | null = null
   ): Promise<void> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
