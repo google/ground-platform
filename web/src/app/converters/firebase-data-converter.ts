@@ -48,6 +48,7 @@ const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
   [TaskType.DATE, 'date'],
   [TaskType.MULTIPLE_CHOICE, 'multiple_choice'],
+  [TaskType.TIME, 'time'],
   [TaskType.DATE_TIME, 'date_time'],
   [TaskType.NUMBER, 'number'],
   [TaskType.PHOTO, 'photo'],
