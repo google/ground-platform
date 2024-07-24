@@ -37,7 +37,6 @@ import {
   jobToDocument,
   newSurveyToDocument,
   partialSurveyToDocument,
-  tasksToDocument,
 } from 'app/converters/proto-model-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -242,11 +241,15 @@ export class DataStoreService {
     ]);
   }
 
-  updateJob(surveyId: string, job: Job): Promise<void> {
+  updateJob(
+    surveyId: string,
+    job: Job,
+    tasks: List<Task> | null = null
+  ): Promise<void> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
       .doc(job.id)
-      .set(jobToDocument(job));
+      .set(jobToDocument(job, tasks));
   }
 
   async deleteSurvey(survey: Survey) {
@@ -530,18 +533,22 @@ export class DataStoreService {
 
   addOrUpdateTasks(
     surveyId: string,
-    jobId: string,
+    job: Job,
     tasks: List<Task>
-  ): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update({
-        [`jobs.${jobId}.tasks`]: {
-          ...FirebaseDataConverter.tasksToJS(this.convertTasksListToMap(tasks)),
-          ...tasksToDocument(tasks),
-        },
-      });
+  ): Promise<[void, void]> {
+    return Promise.all([
+      this.db
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId)
+        .update({
+          [`jobs.${job.id}.tasks`]: {
+            ...FirebaseDataConverter.tasksToJS(
+              this.convertTasksListToMap(tasks)
+            ),
+          },
+        }),
+      this.updateJob(surveyId, job, tasks),
+    ]);
   }
 
   /**
