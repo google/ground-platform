@@ -96,15 +96,17 @@ export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
 /**
  * Returns the proto representation of a Job model object.
  */
-export function jobToDocument(job: Job): DocumentData {
+export function jobToDocument(
+  job: Job,
+  taskOverride: List<Task> | null = null
+): DocumentData {
   return toDocumentData(
     new Pb.Job({
       id: job.id,
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks
-        ?.toList()
+      tasks: (taskOverride ?? job.tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
         .toArray(),
     })
