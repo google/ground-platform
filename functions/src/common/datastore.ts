@@ -119,7 +119,7 @@ export class Datastore {
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(submissions(surveyId))
-      .where('jobId', '==', jobId)
+      .where('4', '==', jobId)
       .get();
   }
 
@@ -133,7 +133,7 @@ export class Datastore {
   ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
     return this.db_
       .collection(lois(surveyId))
-      .where('jobId', '==', jobId)
+      .where('2', '==', jobId)
       .get();
   }
 
@@ -150,7 +150,7 @@ export class Datastore {
     loiId: string
   ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    const submissionsForLoiQuery = submissionsRef.where('loiId', '==', loiId);
+    const submissionsForLoiQuery = submissionsRef.where('2', '==', loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }

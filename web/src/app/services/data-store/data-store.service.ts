@@ -278,7 +278,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where('jobId', '==', jobId)
+      ref => ref.where('4', '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -290,7 +290,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where('loiId', '==', loiId)
+      ref => ref.where('2', '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -302,7 +302,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where('jobId', '==', jobId)
+      ref => ref.where('2', '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -382,15 +382,15 @@ export class DataStoreService {
 
     const predefinedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where('predefined', 'in', [true, null])
+      ref => ref.where('9', '==', 1)
     );
 
     const userLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
-          .where('predefined', '==', false)
-          .where('created.user.email', '==', userEmail)
+          .where('9', '==', 2)
+          .where('5', '==', userEmail)
     );
 
     return combineLatest([
@@ -580,9 +580,9 @@ export class DataStoreService {
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? ref.where('loiId', '==', loiId)
+      ? ref.where('2', '==', loiId)
       : ref
-          .where('loiId', '==', loiId)
-          .where('lastModified.user.email', '==', userEmail);
+          .where('2', '==', loiId)
+          .where('5', '==', userEmail);
   }
 }
