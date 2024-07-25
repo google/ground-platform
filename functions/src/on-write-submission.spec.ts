@@ -62,7 +62,7 @@ describe('onWriteSubmission()', () => {
       .and.returnValue({
         where: jasmine
           .createSpy('where')
-          .withArgs('loiId', '==', loiId)
+          .withArgs('2', '==', loiId)
           .and.returnValue(newCountQuery(count)),
       } as any);
   }

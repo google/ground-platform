@@ -131,7 +131,8 @@ export class DataStoreService {
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath('acl', userEmail), 'in', Object.keys(Role))
+        // Field number for Survey.acl.
+        ref.where(new FieldPath('4', userEmail), 'in', [1, 2, 3])
       )
       .snapshotChanges()
       .pipe(
@@ -278,6 +279,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
+      // Field number for Submission.job_id.
       ref => ref.where('4', '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
@@ -290,6 +292,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
+      // Field number for Submission.loi_id.
       ref => ref.where('2', '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
@@ -302,6 +305,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      // Field number for LocationOfInterest.job_id.
       ref => ref.where('2', '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
@@ -382,6 +386,7 @@ export class DataStoreService {
 
     const predefinedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
+      // Field number for LocationOfInterest.source and enum value Source.IMPORTED.
       ref => ref.where('9', '==', 1)
     );
 
@@ -389,7 +394,9 @@ export class DataStoreService {
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
+          // Field number for LocationOfInterest.source and enum value Source.FIELD_DATA.
           .where('9', '==', 2)
+          // Field number for LocationOfInterest.ownerId.
           .where('5', '==', userEmail)
     );
 
@@ -580,9 +587,12 @@ export class DataStoreService {
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? ref.where('2', '==', loiId)
+      ? // Field number for Submission.loi_id.
+        ref.where('2', '==', loiId)
       : ref
+          // Field number for Submission.loi_id.
           .where('2', '==', loiId)
+          // Field number for Submission.owner_id.
           .where('5', '==', userEmail);
   }
 }
