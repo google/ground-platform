@@ -12,6 +12,7 @@
     "start:local": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/local",
     "export:local": "firebase emulators:export data/local --project local --only firestore",
     "start:create": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/test-create",
+    "start:test": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/test",
     "start-and-export:create": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --export-on-exit data/test-create",
     "start:submit": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/test-submit",
     "start-and-export:verify": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/test-submit",
