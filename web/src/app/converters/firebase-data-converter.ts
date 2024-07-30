@@ -65,7 +65,7 @@ const TASK_TYPE_STRINGS_BY_ENUM = Map(
 );
 
 /**
- * Helper to return either the keys of a dictionary, or if missing, returns an
+ * Helper to return either the keys of a dictionary, or if missing, an
  * empty array.
  */
 function keys(dict?: {}): string[] {

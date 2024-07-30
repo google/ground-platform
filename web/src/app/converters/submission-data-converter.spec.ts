@@ -62,7 +62,7 @@ const submission001 = {
 };
 
 describe('toSubmission', () => {
-  it('Submission converts back and forth without loosing data.', () => {
+  it('Submission converts back and forth without losing data', () => {
     expect(
       FirebaseDataConverter.submissionToJS(
         LegacySubmissionDataConverter.toSubmission(

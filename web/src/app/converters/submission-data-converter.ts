@@ -43,7 +43,7 @@ import {
 import Pb = GroundProtos.google.ground.v1beta1;
 
 /**
- * Helper to return either the keys of a dictionary, or if missing, returns an
+ * Helper to return either the keys of a dictionary, or if missing, an
  * empty array.
  */
 function keys(dict?: {}): string[] {
