@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FieldNumbers} from '@ground/lib';
 import {
   stubAdminApi,
   newEventContext,
@@ -62,7 +63,7 @@ describe('onWriteSubmission()', () => {
       .and.returnValue({
         where: jasmine
           .createSpy('where')
-          .withArgs('2', '==', loiId)
+          .withArgs(FieldNumbers.Submission.loi_id, '==', loiId)
           .and.returnValue(newCountQuery(count)),
       } as any);
   }
