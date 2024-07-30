@@ -49,6 +49,34 @@ import {User} from 'app/models/user.model';
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
+// Field number for Survey.acl
+const SURVEY_ACL_FIELD = '4';
+
+// Field number for Submission.loi_id
+const SUBMISSION_JOB_ID_FIELD = '4';
+
+// Field number for Submission.loi_id
+const SUBMISSION_LOI_ID_FIELD = '2';
+
+// Field number for Submission.loi_id
+const SUBMISSION_OWNER_ID_FIELD = '5';
+
+// Field number for LocationOfInterest.job_id
+const LOI_JOB_ID_FIELD = '2';
+
+// Field number for LocationOfInterest.source and enum value Source.IMPORTED
+const LOI_SOURCE_FIELD = '9';
+
+// Field number for LocationOfInterest.ownerId
+const LOI_OWNER_ID_FIELD = '9';
+
+// Enum values for Source
+const enum Source {
+  SOURCE_UNSPECIFIED = 0,
+  IMPORTED = 1,
+  FIELD_DATA = 2,
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonBlob = {[field: string]: any};
 
@@ -131,8 +159,7 @@ export class DataStoreService {
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        // Field number for Survey.acl.
-        ref.where(new FieldPath('4', userEmail), 'in', [1, 2, 3])
+        ref.where(new FieldPath(SURVEY_ACL_FIELD, userEmail), 'in', [1, 2, 3])
       )
       .snapshotChanges()
       .pipe(
@@ -279,8 +306,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      // Field number for Submission.job_id.
-      ref => ref.where('4', '==', jobId)
+      ref => ref.where(SUBMISSION_JOB_ID_FIELD, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -292,8 +318,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      // Field number for Submission.loi_id.
-      ref => ref.where('2', '==', loiId)
+      ref => ref.where(SUBMISSION_LOI_ID_FIELD, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -305,8 +330,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      // Field number for LocationOfInterest.job_id.
-      ref => ref.where('2', '==', jobId)
+      ref => ref.where(LOI_JOB_ID_FIELD, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -386,18 +410,15 @@ export class DataStoreService {
 
     const predefinedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      // Field number for LocationOfInterest.source and enum value Source.IMPORTED.
-      ref => ref.where('9', '==', 1)
+      ref => ref.where(LOI_SOURCE_FIELD, '==', Source.IMPORTED)
     );
 
     const userLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
-          // Field number for LocationOfInterest.source and enum value Source.FIELD_DATA.
-          .where('9', '==', 2)
-          // Field number for LocationOfInterest.ownerId.
-          .where('5', '==', userEmail)
+          .where(LOI_SOURCE_FIELD, '==', Source.FIELD_DATA)
+          .where(LOI_OWNER_ID_FIELD, '==', userEmail)
     );
 
     return combineLatest([
@@ -587,12 +608,9 @@ export class DataStoreService {
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? // Field number for Submission.loi_id.
-        ref.where('2', '==', loiId)
+      ? ref.where(SUBMISSION_LOI_ID_FIELD, '==', loiId)
       : ref
-          // Field number for Submission.loi_id.
-          .where('2', '==', loiId)
-          // Field number for Submission.owner_id.
-          .where('5', '==', userEmail);
+          .where(SUBMISSION_LOI_ID_FIELD, '==', loiId)
+          .where(SUBMISSION_OWNER_ID_FIELD, '==', userEmail);
   }
 }

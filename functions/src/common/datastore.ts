@@ -69,6 +69,12 @@ export const submissions = (surveyId: string) =>
 export const submission = (surveyId: string, submissionId: string) =>
   submissions(surveyId) + '/' + submissionId;
 
+// Field number for Submission.job_id
+const SUBMISSION_JOB_ID_FIELD = '4';
+
+// Field number for LocationOfInterest.job_id
+const LOI_JOB_ID_FIELD = '2';
+
 export class Datastore {
   private db_: firestore.Firestore;
 
@@ -121,7 +127,7 @@ export class Datastore {
       this.db_
         .collection(submissions(surveyId))
         // Field number for Submission.job_id.
-        .where('4', '==', jobId)
+        .where(SUBMISSION_JOB_ID_FIELD, '==', jobId)
         .get()
     );
   }
@@ -134,13 +140,10 @@ export class Datastore {
     surveyId: string,
     jobId: string
   ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
-    return (
-      this.db_
-        .collection(lois(surveyId))
-        // Field number for LocationOfInterest.job_id.
-        .where('2', '==', jobId)
-        .get()
-    );
+    return this.db_
+      .collection(lois(surveyId))
+      .where(LOI_JOB_ID_FIELD, '==', jobId)
+      .get();
   }
 
   fetchSheetsConfig(surveyId: string) {
