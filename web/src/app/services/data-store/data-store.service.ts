@@ -25,6 +25,8 @@ import {
   deleteField,
   serverTimestamp,
 } from '@angular/fire/firestore';
+import {FieldNumbers} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom} from 'rxjs';
@@ -47,35 +49,11 @@ import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
+import Pb = GroundProtos.google.ground.v1beta1;
+
+const Source = Pb.LocationOfInterest.Source;
+
 const SURVEYS_COLLECTION_NAME = 'surveys';
-
-// Field number for Survey.acl
-const SURVEY_ACL_FIELD = '4';
-
-// Field number for Submission.loi_id
-const SUBMISSION_JOB_ID_FIELD = '4';
-
-// Field number for Submission.loi_id
-const SUBMISSION_LOI_ID_FIELD = '2';
-
-// Field number for Submission.loi_id
-const SUBMISSION_OWNER_ID_FIELD = '5';
-
-// Field number for LocationOfInterest.job_id
-const LOI_JOB_ID_FIELD = '2';
-
-// Field number for LocationOfInterest.source and enum value Source.IMPORTED
-const LOI_SOURCE_FIELD = '9';
-
-// Field number for LocationOfInterest.ownerId
-const LOI_OWNER_ID_FIELD = '9';
-
-// Enum values for Source
-const enum Source {
-  SOURCE_UNSPECIFIED = 0,
-  IMPORTED = 1,
-  FIELD_DATA = 2,
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonBlob = {[field: string]: any};
@@ -159,7 +137,11 @@ export class DataStoreService {
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath(SURVEY_ACL_FIELD, userEmail), 'in', [1, 2, 3])
+        ref.where(
+          new FieldPath(FieldNumbers.Survey.acl, userEmail),
+          'in',
+          [1, 2, 3]
+        )
       )
       .snapshotChanges()
       .pipe(
@@ -306,7 +288,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(SUBMISSION_JOB_ID_FIELD, '==', jobId)
+      ref => ref.where(FieldNumbers.Submission.job_id, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -318,7 +300,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(SUBMISSION_LOI_ID_FIELD, '==', loiId)
+      ref => ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -330,7 +312,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where(LOI_JOB_ID_FIELD, '==', jobId)
+      ref => ref.where(FieldNumbers.LocationOfInterest.job_id, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -410,15 +392,20 @@ export class DataStoreService {
 
     const predefinedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where(LOI_SOURCE_FIELD, '==', Source.IMPORTED)
+      ref =>
+        ref.where(FieldNumbers.LocationOfInterest.source, '==', Source.IMPORTED)
     );
 
     const userLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
-          .where(LOI_SOURCE_FIELD, '==', Source.FIELD_DATA)
-          .where(LOI_OWNER_ID_FIELD, '==', userEmail)
+          .where(
+            FieldNumbers.LocationOfInterest.source,
+            '==',
+            Source.FIELD_DATA
+          )
+          .where(FieldNumbers.LocationOfInterest.owner_id, '==', userEmail)
     );
 
     return combineLatest([
@@ -608,9 +595,9 @@ export class DataStoreService {
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? ref.where(SUBMISSION_LOI_ID_FIELD, '==', loiId)
+      ? ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
       : ref
-          .where(SUBMISSION_LOI_ID_FIELD, '==', loiId)
-          .where(SUBMISSION_OWNER_ID_FIELD, '==', userEmail);
+          .where(FieldNumbers.Submission.loi_id, '==', loiId)
+          .where(FieldNumbers.Submission.owner_id, '==', userEmail);
   }
 }
