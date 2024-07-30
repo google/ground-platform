@@ -299,8 +299,8 @@ export class LegacySubmissionDataConverter {
       return Error(
         `Error converting to Result: unknown value type ${typeof resultValue}`
       );
-    } catch (err: any) {
-      return err instanceof Error ? err : new Error(err);
+    } catch (err) {
+      return err instanceof Error ? err : new Error(err as string);
     }
   }
 }
