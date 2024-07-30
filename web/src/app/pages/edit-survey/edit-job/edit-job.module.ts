@@ -16,7 +16,10 @@
 
 import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
+import {
+  MatButtonToggle,
+  MatButtonToggleGroup,
+} from '@angular/material/button-toggle';
 import {MatIconModule} from '@angular/material/icon';
 
 import {LoiEditorModule} from 'app/components/loi-editor/loi-editor.module';
@@ -27,7 +30,8 @@ import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.componen
   declarations: [EditJobComponent],
   imports: [
     CommonModule,
-    MatButtonModule,
+    MatButtonToggleGroup,
+    MatButtonToggle,
     MatIconModule,
     LoiEditorModule,
     TasksEditorModule,

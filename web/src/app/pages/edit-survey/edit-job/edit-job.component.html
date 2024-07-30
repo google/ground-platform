@@ -18,25 +18,23 @@
   <div class="edit-job-header">
     <div class="edit-job-header-title">{{ job?.name }}</div>
 
-    <button
-      mat-flat-button
-      [color]="section === EditJobSection.TASKS ? 'primary' : 'basic'"
-      aria-label="tasks"
-      (click)="onSectionChange(EditJobSection.TASKS)"
+    <mat-button-toggle-group
+      (change)="onSectionChange($event.value)"
+      [value]="EditJobSection.TASKS"
+      class="edit-job-toggler"
+      name="section"
+      aria-label="Section"
     >
-      <mat-icon>{{ section === EditJobSection.TASKS ? 'checked_small' : 'list' }}</mat-icon>
-      <span>Tasks</span>
-    </button>
+      <mat-button-toggle [value]="EditJobSection.TASKS">
+        <mat-icon *ngIf="section !== EditJobSection.TASKS">list</mat-icon>
+        <span>Tasks</span>
+      </mat-button-toggle>
 
-    <button
-      mat-flat-button
-      [color]="section === EditJobSection.LOIS ? 'primary' : 'basic'"
-      aria-label="lois"
-      (click)="onSectionChange(EditJobSection.LOIS)"
-    >
-      <mat-icon>{{ section === EditJobSection.LOIS ? 'checked_small' : 'place' }}</mat-icon>
-      <span>Sites</span>
-    </button>
+      <mat-button-toggle [value]="EditJobSection.LOIS">
+        <mat-icon *ngIf="section !== EditJobSection.LOIS">place</mat-icon>
+        <span>Sites</span>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
   </div>
 
   <div [ngSwitch]="section">

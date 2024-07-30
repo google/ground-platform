@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-.task-condition-form {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+@use 'sass:map';
+@use '@angular/material' as mat;
 
-  .mat-mdc-form-field {
-    flex: 1;
+@mixin typography($theme) {
+  .task-condition-form {
+    font: mat.get-theme-typography($theme, body-medium, font);
   }
+}
 
-  > div {
-    margin-bottom: 20px;
-  }
+@mixin theme($theme) {
+  @include typography($theme);
 }
