@@ -52,6 +52,7 @@ import {User} from 'app/models/user.model';
 import Pb = GroundProtos.google.ground.v1beta1;
 
 const Source = Pb.LocationOfInterest.Source;
+const AclRole = Pb.Role;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -137,11 +138,15 @@ export class DataStoreService {
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(
-          new FieldPath(FieldNumbers.Survey.acl, userEmail),
-          'in',
-          [1, 2, 3]
-        )
+        ref.where(new FieldPath(FieldNumbers.Survey.acl, userEmail), 'in', [
+          AclRole.VIEWER,
+          AclRole.DATA_COLLECTOR,
+          AclRole.SURVEY_ORGANIZER,
+          Role.OWNER,
+          Role.SURVEY_ORGANIZER,
+          Role.DATA_COLLECTOR,
+          Role.VIEWER,
+        ])
       )
       .snapshotChanges()
       .pipe(
