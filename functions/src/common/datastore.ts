@@ -119,13 +119,10 @@ export class Datastore {
   }
 
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
-    return (
-      this.db_
-        .collection(submissions(surveyId))
-        // Field number for Submission.job_id.
-        .where(FieldNumbers.Submission.job_id, '==', jobId)
-        .get()
-    );
+    return this.db_
+      .collection(submissions(surveyId))
+      .where(FieldNumbers.Submission.job_id, '==', jobId)
+      .get();
   }
 
   fetchLocationOfInterest(surveyId: string, loiId: string) {
@@ -155,7 +152,6 @@ export class Datastore {
     loiId: string
   ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    // Field number for Submission.loi_id.
     const submissionsForLoiQuery = submissionsRef.where('2', '==', loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
