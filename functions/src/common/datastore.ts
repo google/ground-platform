@@ -18,8 +18,6 @@ import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
 import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
 
-import {FieldNumbers} from '@ground/lib';
-
 /**
  *
  */
@@ -121,7 +119,7 @@ export class Datastore {
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(submissions(surveyId))
-      .where(FieldNumbers.Submission.job_id, '==', jobId)
+      .where('4', '==', jobId)
       .get();
   }
 
@@ -133,10 +131,7 @@ export class Datastore {
     surveyId: string,
     jobId: string
   ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
-    return this.db_
-      .collection(lois(surveyId))
-      .where(FieldNumbers.LocationOfInterest.job_id, '==', jobId)
-      .get();
+    return this.db_.collection(lois(surveyId)).where('2', '==', jobId).get();
   }
 
   fetchSheetsConfig(surveyId: string) {
