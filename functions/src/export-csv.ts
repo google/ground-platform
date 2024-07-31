@@ -190,7 +190,6 @@ function writeRow(
   row.push(toWkt(loi.geometry));
   // Header: One column for each loi property (merged over all properties across all LOIs)
   row.push(...getPropertiesByName(loi, loiProperties));
-  // TODO(#1288): Clean up remaining references to old responses field
   const data = submission.taskData;
   // Header: One column for each task
   tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
@@ -354,13 +353,13 @@ function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
 
 function getPropertiesByName(
   loi: Pb.LocationOfInterest,
-  properties: Set<string>
-): List<string> {
+  properties: Set<string | number>
+): List<string | number> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
   return List.of(...properties).map(
     prop =>
       loi.properties[prop].stringValue ||
-      loi.properties[prop].numericValue?.toString() ||
+      loi.properties[prop].numericValue ||
       ''
   );
 }
