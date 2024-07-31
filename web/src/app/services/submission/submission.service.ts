@@ -132,7 +132,7 @@ export class SubmissionService {
           this.dataStore.getAccessibleSubmissions$(
             survey,
             loi,
-            user.email,
+            user.id,
             this.surveyService.canManageSurvey()
           )
         )

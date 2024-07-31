@@ -385,7 +385,7 @@ export class DataStoreService {
    */
   getAccessibleLois$(
     {id: surveyId}: Survey,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
     if (canManageSurvey) {
@@ -410,7 +410,7 @@ export class DataStoreService {
             '==',
             Source.FIELD_DATA
           )
-          .where(FieldNumbers.LocationOfInterest.owner_id, '==', userEmail)
+          .where(FieldNumbers.LocationOfInterest.owner_id, '==', userId)
     );
 
     return combineLatest([
@@ -435,12 +435,12 @@ export class DataStoreService {
   getAccessibleSubmissions$(
     survey: Survey,
     loi: LocationOfInterest,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ): Observable<List<Submission>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        this.canViewSubmissions(ref, loi.id, userEmail, canManageSurvey)
+        this.canViewSubmissions(ref, loi.id, userId, canManageSurvey)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -596,13 +596,13 @@ export class DataStoreService {
   private canViewSubmissions(
     ref: CollectionReference,
     loiId: string,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ) {
     return canManageSurvey
       ? ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
       : ref
           .where(FieldNumbers.Submission.loi_id, '==', loiId)
-          .where(FieldNumbers.Submission.owner_id, '==', userEmail);
+          .where(FieldNumbers.Submission.owner_id, '==', userId);
   }
 }
