@@ -25,6 +25,8 @@ import {
   deleteField,
   serverTimestamp,
 } from '@angular/fire/firestore';
+import {FieldNumbers} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom} from 'rxjs';
@@ -38,6 +40,7 @@ import {
   newSurveyToDocument,
   partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
+import {submissionDocToModel} from 'app/converters/submission-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -45,6 +48,11 @@ import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+
+import Pb = GroundProtos.google.ground.v1beta1;
+
+const Source = Pb.LocationOfInterest.Source;
+const AclRole = Pb.Role;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -130,7 +138,15 @@ export class DataStoreService {
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath('acl', userEmail), 'in', Object.keys(Role))
+        ref.where(new FieldPath(FieldNumbers.Survey.acl, userEmail), 'in', [
+          AclRole.VIEWER,
+          AclRole.DATA_COLLECTOR,
+          AclRole.SURVEY_ORGANIZER,
+          Role.OWNER,
+          Role.SURVEY_ORGANIZER,
+          Role.DATA_COLLECTOR,
+          Role.VIEWER,
+        ])
       )
       .snapshotChanges()
       .pipe(
@@ -277,7 +293,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where('jobId', '==', jobId)
+      ref => ref.where(FieldNumbers.Submission.job_id, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -289,7 +305,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where('loiId', '==', loiId)
+      ref => ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -301,7 +317,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where('jobId', '==', jobId)
+      ref => ref.where(FieldNumbers.LocationOfInterest.job_id, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -369,7 +385,7 @@ export class DataStoreService {
    */
   getAccessibleLois$(
     {id: surveyId}: Survey,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
     if (canManageSurvey) {
@@ -379,25 +395,30 @@ export class DataStoreService {
         .pipe(map(this.toLocationsOfInterest));
     }
 
-    const predefinedLois = this.db.collection(
+    const importedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where('predefined', 'in', [true, null])
+      ref =>
+        ref.where(FieldNumbers.LocationOfInterest.source, '==', Source.IMPORTED)
     );
 
-    const userLois = this.db.collection(
+    const fieldData = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
-          .where('predefined', '==', false)
-          .where('created.user.email', '==', userEmail)
+          .where(
+            FieldNumbers.LocationOfInterest.source,
+            '==',
+            Source.FIELD_DATA
+          )
+          .where(FieldNumbers.LocationOfInterest.owner_id, '==', userId)
     );
 
     return combineLatest([
-      predefinedLois.valueChanges({idField: 'id'}),
-      userLois.valueChanges({idField: 'id'}),
+      importedLois.valueChanges({idField: 'id'}),
+      fieldData.valueChanges({idField: 'id'}),
     ]).pipe(
-      map(([predefinedLois, userLois]) =>
-        this.toLocationsOfInterest(predefinedLois.concat(userLois))
+      map(([predefinedLois, fieldData]) =>
+        this.toLocationsOfInterest(predefinedLois.concat(fieldData))
       )
     );
   }
@@ -414,12 +435,12 @@ export class DataStoreService {
   getAccessibleSubmissions$(
     survey: Survey,
     loi: LocationOfInterest,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ): Observable<List<Submission>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        this.canViewSubmissions(ref, loi.id, userEmail, canManageSurvey)
+        this.canViewSubmissions(ref, loi.id, userId, canManageSurvey)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -427,11 +448,7 @@ export class DataStoreService {
           List(
             array
               .map(obj =>
-                FirebaseDataConverter.toSubmission(
-                  survey.getJob(loi.jobId)!,
-                  obj.id,
-                  obj
-                )
+                submissionDocToModel(survey.getJob(loi.jobId)!, obj.id, obj)
               )
               .filter(DataStoreService.filterAndLogError<Submission>)
               .map(submission => submission as Submission)
@@ -452,7 +469,7 @@ export class DataStoreService {
       .get()
       .pipe(
         map(doc =>
-          FirebaseDataConverter.toSubmission(
+          submissionDocToModel(
             survey.getJob(loi.jobId)!,
             doc.id,
             doc.data()! as DocumentData
@@ -579,13 +596,13 @@ export class DataStoreService {
   private canViewSubmissions(
     ref: CollectionReference,
     loiId: string,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? ref.where('loiId', '==', loiId)
+      ? ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
       : ref
-          .where('loiId', '==', loiId)
-          .where('lastModified.user.email', '==', userEmail);
+          .where(FieldNumbers.Submission.loi_id, '==', loiId)
+          .where(FieldNumbers.Submission.owner_id, '==', userId);
   }
 }
