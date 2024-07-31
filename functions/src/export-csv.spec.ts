@@ -45,23 +45,45 @@ import {exportCsvHandler} from './export-csv';
 
 fdescribe('exportCsv()', () => {
   let mockFirestore: Firestore;
-  const surveyId = 'survey001';
   const jobId = 'job123';
   const email = 'somebody@test.it';
-  const survey = {
-    name: 'Test survey',
+    // TODO(#1758): Use new proto-based survey and job representation.
+  const survey1 = {
+    id: 'survey001',
+    name: 'Test survey 1',
+    acl: {
+      [email]: OWNER_ROLE,
+    }
+  };
+  const survey2 = {
+    id: 'survey002',
+    name: 'Test survey 2',
     acl: {
       [email]: OWNER_ROLE,
     },
     jobs: {
       [jobId]: {
         name: 'Test job',
+        tasks: {
+          task001: {
+            type: 'text_field',
+            label: 'What is the meaning of life?',
+          },
+          task002: {
+            type: 'capture_location',
+            label: 'Where are you now?',
+          },
+          task003: {
+            type: 'draw_area',
+            label: 'Delimit plot boundaries',
+          },
+        },
       },
     },
   };
   const pointLoi1 = {
     id: 'loi100',
-    [$job_id]: 'job123',
+    [$job_id]: jobId,
     [$custom_tag]: 'POINT_001',
     [$geometry]: {
       [$point]: {[$coordinates]: {[$latitude]: 10.1, [$longitude]: 125.6}},
@@ -71,61 +93,56 @@ fdescribe('exportCsv()', () => {
     [$properties]: {
       name: {[$string_value]: 'Dinagat Islands'},
       area: {[$numeric_value]: 3.08},
-    }
+    },
   };
   const pointLoi2 = {
     id: 'loi200',
-    [$job_id]: 'job123',
+    [$job_id]: jobId,
     [$custom_tag]: 'POINT_002',
     [$geometry]: {
-      [$point]: {[$coordinates]: {[$latitude]: 47.05, [$longitude]: 8.30}},
+      [$point]: {[$coordinates]: {[$latitude]: 47.05, [$longitude]: 8.3}},
     },
     [$submission_count]: 0,
     [$source]: 2, // FIELD_DATA
     [$properties]: {
       name: {[$string_value]: 'Luzern'},
-    }
-  };  
-  //   const polygonLoi = {
-  //     [$job_id]: 'job123',
-  //     [$geometry]: {
-  //       [$polygon]: {
-  //         [$shell]: {
-  //           [$coordinates]: [
-  //             {[$latitude]: 0, [$longitude]: 100},
-  //             {[$latitude]: 0, [$longitude]: 101},
-  //             {[$latitude]: 1, [$longitude]: 101},
-  //             {[$latitude]: 0, [$longitude]: 100},
-  //           ],
-  //         },
-  //       },
-  //     },
-  //     [$submission_count]: 0,
-  //     [$source]: 1, // IMPORTED
-  //     jobId: 'job123',
-  //     predefined: true,
-  //     geometry: {
-  //       type: 'Polygon',
-  //       coordinates: {
-  //         0: {
-  //           0: TestGeoPoint(0, 100),
-  //           1: TestGeoPoint(0, 101),
-  //           2: TestGeoPoint(1, 101),
-  //           3: TestGeoPoint(0, 100),
-  //         },
-  //       },
-  //     },
-  //   };
-
+    },
+  };
+  const submission1a = {
+    id: '001a',
+    // TODO
+  };
+  const submission1b = {
+    id: '001b',
+    // TODO
+  };
+  const submission2a = {
+    id: '002a',
+    // TODO
+  };
   const testCases = [
     {
       desc: 'export points w/o submissions',
+      survey: survey1,
       lois: [pointLoi1, pointLoi2],
       submissions: [],
-      expected: [
+      expectedFilename: 'ground-export.csv',
+      expectedCsv: [
         `"system:index","geometry","name","area","data:contributor_name","data:contributor_email"`,
         `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,`,
         `"POINT_002","POINT (8.3 47.05)","Luzern",,,`,
+      ],
+    },
+    {
+      desc: 'export points w/submissions',
+      survey: survey2,
+      lois: [pointLoi1, pointLoi2],
+      submissions: [submission1a, submission1b, submission2a],
+      expectedFilename: 'test-job.csv',
+      expectedCsv: [
+        `"system:index","geometry","name","area","data:What is the meaning of life?","data:Where are you now?","data:Delimit plot boundaries","data:contributor_name","data:contributor_email"`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,,,,`,
+        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,`,
       ],
     },
   ];
@@ -139,24 +156,24 @@ fdescribe('exportCsv()', () => {
     resetDatastore();
   });
 
-  testCases.forEach(({desc, lois, submissions, expected}) =>
+  testCases.forEach(({desc, survey, lois, submissions, expectedFilename, expectedCsv}) =>
     it(desc, async () => {
       // Populate database.
-      mockFirestore.doc(`surveys/${surveyId}`).set(survey);
-      lois?.forEach(loi =>
-        mockFirestore.doc(`surveys/${surveyId}/lois/${loi.id}`).set(loi)
+      mockFirestore.doc(`surveys/${survey.id}`).set(survey);
+      lois?.forEach(({id, ...loi}) =>
+        mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
       );
-      // submissions?.forEach(submission =>
-      //   mockFirestore
-      //     .doc(`surveys/${surveyId}/submissions/${submissions.id}`)
-      //     .set(submission)
-      // );
+      submissions?.forEach(({id, ...submission}) =>
+        mockFirestore
+          .doc(`surveys/${survey.id}/submissions/${id}`)
+          .set(submission)
+      );
 
       // Build mock request and response.
       const req = await createGetRequestSpy({
         url: '/exportCsv',
         query: {
-          survey: surveyId,
+          survey: survey.id,
           job: jobId,
         },
       });
@@ -171,11 +188,11 @@ fdescribe('exportCsv()', () => {
       expect(res.type).toHaveBeenCalledOnceWith('text/csv');
       expect(res.setHeader).toHaveBeenCalledOnceWith(
         'Content-Disposition',
-        'attachment; filename=test-job.csv'
+        `attachment; filename=${expectedFilename}`
       );
       const output = chunks.join('').trim();
-      const lines = output.split('\n'); 
-      expect(lines).toEqual(expected);
+      const lines = output.split('\n');
+      expect(lines).toEqual(expectedCsv);
     })
   );
 });

@@ -123,6 +123,7 @@ function getHeaders(
   headers.push('system:index');
   headers.push('geometry');
   headers.push(...loiProperties);
+  // TODO(#1936): Use `index` field to export columns in correct order.
   tasks.forEach(task => headers.push('data:' + task.label));
   headers.push('data:contributor_name');
   headers.push('data:contributor_email');
