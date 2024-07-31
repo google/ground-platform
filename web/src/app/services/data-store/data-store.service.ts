@@ -395,13 +395,13 @@ export class DataStoreService {
         .pipe(map(this.toLocationsOfInterest));
     }
 
-    const predefinedLois = this.db.collection(
+    const importedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref.where(FieldNumbers.LocationOfInterest.source, '==', Source.IMPORTED)
     );
 
-    const userLois = this.db.collection(
+    const fieldData = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
@@ -414,11 +414,11 @@ export class DataStoreService {
     );
 
     return combineLatest([
-      predefinedLois.valueChanges({idField: 'id'}),
-      userLois.valueChanges({idField: 'id'}),
+      importedLois.valueChanges({idField: 'id'}),
+      fieldData.valueChanges({idField: 'id'}),
     ]).pipe(
-      map(([predefinedLois, userLois]) =>
-        this.toLocationsOfInterest(predefinedLois.concat(userLois))
+      map(([predefinedLois, fieldData]) =>
+        this.toLocationsOfInterest(predefinedLois.concat(fieldData))
       )
     );
   }
