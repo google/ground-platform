@@ -259,12 +259,12 @@ export class LegacySubmissionDataConverter {
     try {
       if (typeof resultValue === 'number' || typeof resultValue === 'string') {
         return new Result(resultValue);
-      } else if (resultValue instanceof Array) {
+      } else if (Array.isArray(resultValue)) {
         return new Result(
           new MultipleSelection(
             List(
               resultValue
-                .filter(optionId => optionId.startsWith('['))
+                .filter(optionId => !optionId.startsWith('['))
                 .map(
                   optionId =>
                     task?.getMultipleChoiceOption(optionId) ||
