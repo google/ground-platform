@@ -23,7 +23,7 @@ import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
 import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
-import {toMessage} from '@ground/lib';
+import {FieldNumbers, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
@@ -87,7 +87,7 @@ export async function exportCsvHandler(
     headers,
     rowDelimiter: '\n',
     includeEndRowDelimiter: true, // Add \n to last row in CSV
-    quote: false
+    quote: false,
   });
   csvStream.pipe(res);
 
@@ -145,7 +145,7 @@ async function getSubmissionsByLoi(
   const submissions = await db.fetchSubmissionsByJobId(surveyId, jobId);
   const submissionsByLoi: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
-    const loiId = submission.get('loiId') as string;
+    const loiId = submission.get(FieldNumbers.Submission.loi_id) as string;
     const arr: any[] = submissionsByLoi[loiId] || [];
     arr.push(submission.data());
     submissionsByLoi[loiId] = arr;
@@ -160,8 +160,6 @@ function writeRow(
   loi: Pb.LocationOfInterest,
   submission: Pb.Submission
 ) {
-  // TODO(#1779): Remove once migration is complete.
-  console.debug('Writing data using new schema');
   const row = [];
   // Header: system:index
   row.push(quote(loi.customTag));
@@ -184,11 +182,11 @@ function writeRow(
   csvStream.write(row);
 }
 
-function quote(value: any | null | undefined): string {
+function quote(value: any): string {
   if (value === null || value === undefined) {
-    return '""';
+    return '';
   }
-  if (typeof(value) === 'number') {
+  if (typeof value === 'number') {
     return value.toString();
   }
   const escaped = value.toString().replace('"', '""');
@@ -269,9 +267,7 @@ function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
   return new Set(
     lois.docs
       .map(loi =>
-        Object.keys(loi.get('properties') || {})
-          // Don't retrieve ID because we already store it in a separate column
-          .filter(prop => prop !== 'id')
+        Object.keys(loi.get(FieldNumbers.LocationOfInterest.properties) || {})
       )
       .flat()
   );
@@ -280,12 +276,9 @@ function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
 function getPropertiesByName(
   loi: Pb.LocationOfInterest,
   properties: Set<string | number>
-): List<string | number> {
+): List<string | number | null> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-  return List.of(...properties).map(
-    prop =>
-      loi.properties[prop].stringValue ||
-      loi.properties[prop].numericValue ||
-      ''
-  );
+  return List.of(...properties)
+    .map(prop => loi.properties[prop])
+    .map(value => value?.stringValue || value?.numericValue || null);
 }

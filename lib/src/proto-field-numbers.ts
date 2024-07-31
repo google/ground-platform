@@ -18,7 +18,8 @@ export const FieldNumbers = {
   LocationOfInterest: {
     job_id: '2',
     owner_id: '5',
-    source: '9'
+    source: '9',
+    properties: '10'
   },
   Submission: {
     loi_id: '2',

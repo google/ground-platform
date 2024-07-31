@@ -15,7 +15,6 @@
  */
 
 import {
-  TestGeoPoint,
   createMockFirestore,
   stubAdminApi,
 } from '@ground/lib/dist/testing/firestore';
@@ -60,12 +59,8 @@ fdescribe('exportCsv()', () => {
       },
     },
   };
-  const testProperties = {
-    name: 'Dinagat Islands',
-    area: 3.08,
-  };
-  const loiId = 'loi100';
-  const pointLoi = {
+  const pointLoi1 = {
+    id: 'loi100',
     [$job_id]: 'job123',
     [$custom_tag]: 'POINT_001',
     [$geometry]: {
@@ -76,12 +71,21 @@ fdescribe('exportCsv()', () => {
     [$properties]: {
       name: {[$string_value]: 'Dinagat Islands'},
       area: {[$numeric_value]: 3.08},
-    },
-    jobId: 'job123',
-    predefined: true,
-    geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
-    properties: testProperties,
+    }
   };
+  const pointLoi2 = {
+    id: 'loi200',
+    [$job_id]: 'job123',
+    [$custom_tag]: 'POINT_002',
+    [$geometry]: {
+      [$point]: {[$coordinates]: {[$latitude]: 47.05, [$longitude]: 8.30}},
+    },
+    [$submission_count]: 0,
+    [$source]: 2, // FIELD_DATA
+    [$properties]: {
+      name: {[$string_value]: 'Luzern'},
+    }
+  };  
   //   const polygonLoi = {
   //     [$job_id]: 'job123',
   //     [$geometry]: {
@@ -116,10 +120,12 @@ fdescribe('exportCsv()', () => {
   const testCases = [
     {
       desc: 'export points w/o submissions',
-      input: {},
+      lois: [pointLoi1, pointLoi2],
+      submissions: [],
       expected: [
         `"system:index","geometry","name","area","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"",""`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,`,
+        `"POINT_002","POINT (8.3 47.05)","Luzern",,,`,
       ],
     },
   ];
@@ -133,11 +139,18 @@ fdescribe('exportCsv()', () => {
     resetDatastore();
   });
 
-  testCases.forEach(({desc, input, expected}) =>
+  testCases.forEach(({desc, lois, submissions, expected}) =>
     it(desc, async () => {
-      // Add survey.
+      // Populate database.
       mockFirestore.doc(`surveys/${surveyId}`).set(survey);
-      mockFirestore.doc(`surveys/${surveyId}/lois/${loiId}`).set(pointLoi);
+      lois?.forEach(loi =>
+        mockFirestore.doc(`surveys/${surveyId}/lois/${loi.id}`).set(loi)
+      );
+      // submissions?.forEach(submission =>
+      //   mockFirestore
+      //     .doc(`surveys/${surveyId}/submissions/${submissions.id}`)
+      //     .set(submission)
+      // );
 
       // Build mock request and response.
       const req = await createGetRequestSpy({
@@ -161,7 +174,8 @@ fdescribe('exportCsv()', () => {
         'attachment; filename=test-job.csv'
       );
       const output = chunks.join('').trim();
-      expect(output.split('\n')).toEqual(expected);
+      const lines = output.split('\n'); 
+      expect(lines).toEqual(expected);
     })
   );
 });
