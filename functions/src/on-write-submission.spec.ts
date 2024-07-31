@@ -25,6 +25,7 @@ import * as functions from './index';
 import {loi} from './common/datastore';
 import {Firestore} from 'firebase-admin/firestore';
 import {resetDatastore} from './common/context';
+import {FieldNumbers} from '@ground/lib';
 
 const test = require('firebase-functions-test')();
 
@@ -62,7 +63,7 @@ describe('onWriteSubmission()', () => {
       .and.returnValue({
         where: jasmine
           .createSpy('where')
-          .withArgs('2', '==', loiId)
+          .withArgs(FieldNumbers.Submission.loi_id, '==', loiId)
           .and.returnValue(newCountQuery(count)),
       } as any);
   }
