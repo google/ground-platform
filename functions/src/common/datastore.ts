@@ -17,6 +17,7 @@
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
 import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
+import {FieldNumbers} from '@ground/lib/dist/proto-field-numbers';
 
 /**
  *
@@ -119,7 +120,7 @@ export class Datastore {
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
     return this.db_
       .collection(submissions(surveyId))
-      .where('jobId', '==', jobId)
+      .where(FieldNumbers.Submission.job_id, '==', jobId)
       .get();
   }
 
@@ -133,7 +134,7 @@ export class Datastore {
   ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
     return this.db_
       .collection(lois(surveyId))
-      .where('jobId', '==', jobId)
+      .where(FieldNumbers.LocationOfInterest.job_id, '==', jobId)
       .get();
   }
 
@@ -150,7 +151,11 @@ export class Datastore {
     loiId: string
   ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    const submissionsForLoiQuery = submissionsRef.where('loiId', '==', loiId);
+    const submissionsForLoiQuery = submissionsRef.where(
+      FieldNumbers.Submission.loi_id,
+      '==',
+      loiId
+    );
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }

@@ -65,7 +65,7 @@ const TASK_TYPE_STRINGS_BY_ENUM = Map(
 );
 
 /**
- * Helper to return either the keys of a dictionary, or if missing, returns an
+ * Helper to return either the keys of a dictionary, or if missing, an
  * empty array.
  */
 function keys(dict?: {}): string[] {
@@ -367,50 +367,6 @@ export class FirebaseDataConverter {
     return optionDoc;
   }
 
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Submission instance.
-   *
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *   loiId: 'loi123'
-   *   taskId: 'task001',
-   *   data: {
-   *     'task001': 'Result text',    // For 'text_field' tasks.
-   *     'task002': ['A', 'B'],       // For 'multiple_choice' tasks.
-   *      // ...
-   *   }
-   *   created: <AUDIT_INFO>,
-   *   lastModified: <AUDIT_INFO>
-   * }
-   * </code></pre>
-   */
-  static toSubmission(
-    job: Job,
-    id: string,
-    data: DocumentData
-  ): Submission | Error {
-    if (!job.tasks) {
-      return Error(
-        'Error converting to submission: job must contain at least once task'
-      );
-    }
-    if (!data) {
-      return Error(
-        `Error converting to submission: submission ${id} does not have document data.`
-      );
-    }
-    return new Submission(
-      id,
-      data.loiId,
-      job,
-      FirebaseDataConverter.toAuditInfo(data.created),
-      FirebaseDataConverter.toAuditInfo(data.lastModified),
-      FirebaseDataConverter.toResults(job, data)
-    );
-  }
-
   static submissionToJS(submission: Submission): {} {
     return {
       loiId: submission.loiId,
@@ -446,82 +402,6 @@ export class FirebaseDataConverter {
     );
   }
 
-  /**
-   * Extracts and converts from the raw Firebase object to a map of {@link Result}s keyed by task id.
-   * In case of error when converting from raw data to {@link Result}, logs the error and then ignores
-   * that one {@link Result}.
-   *
-   * @param job the job related to this submission data, {@link job.tasks} must not be null or undefined.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  private static toResults(job: Job, data: DocumentData): Map<string, Result> {
-    // TODO(#1288): Clean up remaining references to old responses field
-    // Support submissions that have results or responses fields instead of data
-    // before model change.
-    const submissionData = data.data ?? data.results ?? data.responses;
-    return Map<string, Result>(
-      keys(submissionData)
-        .map((taskId: string) => {
-          return [
-            taskId as string,
-            FirebaseDataConverter.toResult(
-              submissionData[taskId],
-              job.tasks!.get(taskId)
-            ),
-          ];
-        })
-        .filter(([_, resultOrError]) =>
-          DataStoreService.filterAndLogError<Result>(
-            resultOrError as Result | Error
-          )
-        )
-        .map(([k, v]) => [k, v] as [string, Result])
-    );
-  }
-
-  private static toResult(
-    resultValue: number | string | List<string>,
-    task?: Task
-  ): Result | Error {
-    try {
-      if (typeof resultValue === 'string') {
-        return new Result(resultValue as string);
-      }
-      if (typeof resultValue === 'number') {
-        return new Result(resultValue as number);
-      }
-      if (resultValue instanceof Array) {
-        return new Result(
-          List(
-            resultValue
-              .filter(optionId => !optionId.startsWith('['))
-              .map(
-                optionId =>
-                  task?.getMultipleChoiceOption(optionId) ||
-                  new Option(optionId, optionId, optionId, -1)
-              )
-          )
-        );
-      }
-      if (resultValue instanceof Timestamp) {
-        return new Result(resultValue.toDate());
-      }
-      const geometry = toGeometry(resultValue);
-      if (
-        geometry instanceof Point ||
-        geometry instanceof Polygon ||
-        geometry instanceof MultiPolygon
-      ) {
-        return new Result(geometry);
-      }
-      return Error(
-        `Error converting to Result: unknown value type ${typeof resultValue}`
-      );
-    } catch (err: any) {
-      return err instanceof Error ? err : new Error(err);
-    }
-  }
-
   private static resultToJS(result: Result): {} {
     if (typeof result.value === 'string') {
       return result.value;
@@ -536,31 +416,6 @@ export class FirebaseDataConverter {
       return Timestamp.fromDate(result.value);
     }
     throw Error(`Unknown value type of ${result.value}`);
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable AuditInfo instance.
-   *
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *   user: {
-   *     id: ...,
-   *     displayName: ...,
-   *     email: ...
-   *   },
-   *   clientTimestamp: ...,
-   *   serverTimestamp: ...
-   * }
-   * </code></pre>
-   */
-  private static toAuditInfo(data: DocumentData): AuditInfo {
-    return new AuditInfo(
-      data.user,
-      data.clientTimestamp?.toDate(),
-      data.serverTimestamp?.toDate()
-    );
   }
 
   private static auditInfoToJs(auditInfo: AuditInfo): {} {
