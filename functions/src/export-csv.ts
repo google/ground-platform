@@ -103,16 +103,16 @@ export async function exportCsvHandler(
 
   loiDocs.forEach(loiDoc => {
     const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
-    submissionsByLoi[loiDoc.id]?.forEach(submissionDict => {
+    const submissions = submissionsByLoi[loiDoc.id] || [{}];
+    submissions.forEach(submissionDict => {
       try {
         const submission = toMessage(submissionDict, Pb.Submission);
-        if (
-          loi instanceof Pb.LocationOfInterest &&
-          loi.jobId &&
-          submission instanceof Pb.Submission &&
-          submission.jobId
-        ) {
-          writeRow(csvStream, loiProperties, tasks, loi, submission);
+        const isValidLoi = loi instanceof Pb.LocationOfInterest && !!loi.jobId;
+        const isValidSubmission =
+          Object.keys(submissionDict).length === 0 ||
+          (submission instanceof Pb.Submission && !!submission.jobId);
+        if (isValidLoi && isValidSubmission) {
+          writeRow(csvStream, loiProperties, tasks, loi, submission as Pb.Submission);
         } else {
           // TODO(#1779): Delete once migration is complete.
           writeRowLegacy(

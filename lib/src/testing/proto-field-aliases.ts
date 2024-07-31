@@ -17,8 +17,8 @@
 // Survey fields:
 export const [$title, $description] = [2, 3];
 // LocationOfInterest fields:
-export const [$job_id, $geometry, $submission_count, $source, $properties] = [
-  2, 3, 4, 9, 10,
+export const [$job_id, $geometry, $submission_count, $custom_tag, $source, $properties] = [
+  2, 3, 4, 8, 9, 10,
 ];
 // Geometry fields:
 export const [$point, $polygon, $multi_polygon] = [1, 2, 3];

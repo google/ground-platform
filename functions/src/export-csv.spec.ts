@@ -29,6 +29,7 @@ import {
   $submission_count,
   $source,
   $properties,
+  $custom_tag,
   $point,
   $coordinates,
   $latitude,
@@ -52,17 +53,19 @@ fdescribe('exportCsv()', () => {
       [email]: OWNER_ROLE,
     },
     jobs: {
-        [jobId]: {
-            name: 'Test job'
-        }
-    }
+      [jobId]: {
+        name: 'Test job',
+      },
+    },
   };
   const testProperties = {
     name: 'Dinagat Islands',
     area: 3.08,
   };
+  const loiId = 'loi100';
   const pointLoi = {
     [$job_id]: 'job123',
+    [$custom_tag]: 'POINT_001',
     [$geometry]: {
       [$point]: {[$coordinates]: {[$latitude]: 10.1, [$longitude]: 125.6}},
     },
@@ -74,43 +77,46 @@ fdescribe('exportCsv()', () => {
     geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
     properties: testProperties,
   };
-//   const polygonLoi = {
-//     [$job_id]: 'job123',
-//     [$geometry]: {
-//       [$polygon]: {
-//         [$shell]: {
-//           [$coordinates]: [
-//             {[$latitude]: 0, [$longitude]: 100},
-//             {[$latitude]: 0, [$longitude]: 101},
-//             {[$latitude]: 1, [$longitude]: 101},
-//             {[$latitude]: 0, [$longitude]: 100},
-//           ],
-//         },
-//       },
-//     },
-//     [$submission_count]: 0,
-//     [$source]: 1, // IMPORTED
-//     jobId: 'job123',
-//     predefined: true,
-//     geometry: {
-//       type: 'Polygon',
-//       coordinates: {
-//         0: {
-//           0: TestGeoPoint(0, 100),
-//           1: TestGeoPoint(0, 101),
-//           2: TestGeoPoint(1, 101),
-//           3: TestGeoPoint(0, 100),
-//         },
-//       },
-//     },
-//   };
-  
+  //   const polygonLoi = {
+  //     [$job_id]: 'job123',
+  //     [$geometry]: {
+  //       [$polygon]: {
+  //         [$shell]: {
+  //           [$coordinates]: [
+  //             {[$latitude]: 0, [$longitude]: 100},
+  //             {[$latitude]: 0, [$longitude]: 101},
+  //             {[$latitude]: 1, [$longitude]: 101},
+  //             {[$latitude]: 0, [$longitude]: 100},
+  //           ],
+  //         },
+  //       },
+  //     },
+  //     [$submission_count]: 0,
+  //     [$source]: 1, // IMPORTED
+  //     jobId: 'job123',
+  //     predefined: true,
+  //     geometry: {
+  //       type: 'Polygon',
+  //       coordinates: {
+  //         0: {
+  //           0: TestGeoPoint(0, 100),
+  //           1: TestGeoPoint(0, 101),
+  //           2: TestGeoPoint(1, 101),
+  //           3: TestGeoPoint(0, 100),
+  //         },
+  //       },
+  //     },
+  //   };
+
   const testCases = [
     {
-      desc: 'imports points',
+      desc: 'export points w/o submissions',
       input: {},
-      expected: [pointLoi],
-    }
+      expected: [
+        `"system:index","geometry","name","area","data:contributor_username","data:contributor_email"`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"",""`,
+      ],
+    },
   ];
 
   beforeEach(() => {
@@ -126,6 +132,7 @@ fdescribe('exportCsv()', () => {
     it(desc, async () => {
       // Add survey.
       mockFirestore.doc(`surveys/${surveyId}`).set(survey);
+      mockFirestore.doc(`surveys/${surveyId}/lois/${loiId}`).set(pointLoi);
 
       // Build mock request and response.
       const req = await createGetRequestSpy({
@@ -135,15 +142,21 @@ fdescribe('exportCsv()', () => {
           job: jobId,
         },
       });
-      const res = createResponseSpy();
+      const chunks: string[] = [];
+      const res = createResponseSpy(chunks);
 
       // Run export CSV handler.
-      await  exportCsvHandler(req, res, {email} as DecodedIdToken);
+      await exportCsvHandler(req, res, {email} as DecodedIdToken);
 
       // Check post-conditions.
       expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
       expect(res.type).toHaveBeenCalledOnceWith('text/csv');
-      expect(res.setHeader).toHaveBeenCalledOnceWith('Content-Disposition', 'attachment; filename=test-job.csv');
+      expect(res.setHeader).toHaveBeenCalledOnceWith(
+        'Content-Disposition',
+        'attachment; filename=test-job.csv'
+      );
+      const output = chunks.join().trim();
+      expect(output.split('\n')).toEqual(expected);
     })
   );
 });

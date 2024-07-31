@@ -40,7 +40,7 @@ export async function createGetRequestSpy(
   });
 }
 
-export function createResponseSpy(): functions.Response<any> {
+export function createResponseSpy(chunks?: string[]): functions.Response<any> {
   const res = jasmine.createSpyObj<functions.Response<any>>('response', [
     'send',
     'status',
@@ -50,12 +50,14 @@ export function createResponseSpy(): functions.Response<any> {
     'setHeader',
     'on',
     'once',
-    'emit'
+    'emit',
+    'write'
   ]);
   res.status.and.callThrough();
   res.end.and.callThrough();
-  res.write.and.callFake((chunk: any) => { console.log("=====write "+chunk); return true;});
-  res.on.and.callThrough();
-  // res.write.and.callFake((event: any, listener: any) => { console.log("=====on "+event); return res;});
+  res.write.and.callFake((chunk: any): boolean => {
+    chunks?.push(chunk.toString());
+    return true;
+  });
   return res;
 }
