@@ -20,7 +20,6 @@ import {canExport} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
-import {Datastore} from './common/datastore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
 import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
@@ -42,14 +41,8 @@ type Task = {
   readonly hasOtherOption?: boolean;
 };
 
-type Dict = {[key: string]: any};
-
 /** A dictionary of submissions values (array) keyed by loi ID. */
 type SubmissionDict = {[key: string]: any[]};
-
-// TODO(#1277): Use a shared model with web
-type LoiDocument =
-  FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>;
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -92,10 +85,9 @@ export async function exportCsvHandler(
   const csvStream = csv.format({
     delimiter: ',',
     headers,
-    includeEndRowDelimiter: true,
     rowDelimiter: '\n',
-    quoteColumns: true,
-    quote: '"',
+    includeEndRowDelimiter: true, // Add \n to last row in CSV
+    quote: false
   });
   csvStream.pipe(res);
 
@@ -103,26 +95,17 @@ export async function exportCsvHandler(
 
   loiDocs.forEach(loiDoc => {
     const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
+    if (loi instanceof Error) {
+      throw loi;
+    }
     const submissions = submissionsByLoi[loiDoc.id] || [{}];
     submissions.forEach(submissionDict => {
       try {
         const submission = toMessage(submissionDict, Pb.Submission);
-        const isValidLoi = loi instanceof Pb.LocationOfInterest && !!loi.jobId;
-        const isValidSubmission =
-          Object.keys(submissionDict).length === 0 ||
-          (submission instanceof Pb.Submission && !!submission.jobId);
-        if (isValidLoi && isValidSubmission) {
-          writeRow(csvStream, loiProperties, tasks, loi, submission as Pb.Submission);
-        } else {
-          // TODO(#1779): Delete once migration is complete.
-          writeRowLegacy(
-            csvStream,
-            loiProperties,
-            tasks,
-            loiDoc,
-            submissionDict
-          );
+        if (submission instanceof Error) {
+          throw submission;
         }
+        writeRow(csvStream, loiProperties, tasks, loi, submission);
       } catch (e) {
         console.debug('Skipping row', e);
       }
@@ -141,9 +124,9 @@ function getHeaders(
   headers.push('geometry');
   headers.push(...loiProperties);
   tasks.forEach(task => headers.push('data:' + task.label));
-  headers.push('data:contributor_username');
+  headers.push('data:contributor_name');
   headers.push('data:contributor_email');
-  return headers;
+  return headers.map(quote);
 }
 
 /**
@@ -181,71 +164,35 @@ function writeRow(
   console.debug('Writing data using new schema');
   const row = [];
   // Header: system:index
-  row.push(loi.customTag || '');
+  row.push(quote(loi.customTag));
   // Header: geometry
   if (!loi.geometry) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
     return;
   }
-  row.push(toWkt(loi.geometry));
+  row.push(quote(toWkt(loi.geometry)));
   // Header: One column for each loi property (merged over all properties across all LOIs)
-  row.push(...getPropertiesByName(loi, loiProperties));
+  getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
   const data = submission.taskData;
   // Header: One column for each task
-  tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
+  tasks.forEach((task, taskId) =>
+    row.push(quote(getValue(taskId, task, data)))
+  );
   // Header: contributor_username, contributor_email
-  row.push(submission.created?.displayName || '');
-  row.push(submission.created?.emailAddress || '');
+  row.push(quote(submission.created?.displayName));
+  row.push(quote(submission.created?.emailAddress));
   csvStream.write(row);
 }
 
-// TODO(#1779): Delete once migration is complete.
-function writeRowLegacy(
-  csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
-  loiProperties: Set<string>,
-  tasks: Map<string, Task>,
-  loiDoc: LoiDocument,
-  submission: SubmissionDict
-) {
-  const row = [];
-  // Header: system:index
-  row.push(loiDoc.get('properties')?.id || '');
-  // Header: geometry
-  row.push(legacyFirestoreMapToWkt(loiDoc.get('geometry')) || '');
-  // Header: One column for each loi property (merged over all properties across all LOIs)
-  row.push(...getPropertiesByNameLegacy(loiDoc, loiProperties));
-  // TODO(#1288): Clean up remaining references to old responses field
-  const data =
-    submission['data'] ||
-    submission['responses'] ||
-    submission['results'] ||
-    {};
-  // Header: One column for each task
-  tasks.forEach((task, taskId) => row.push(getValueLegacy(taskId, task, data)));
-  // Header: contributor_username, contributor_email
-  const contributor = submission['created']
-    ? (submission['created'] as Dict)['user']
-    : [];
-  row.push(contributor['displayName'] || '');
-  row.push(contributor['email'] || '');
-  csvStream.write(row);
-}
-
-/**
- * Returns the WKT string converted from the given geometry object.
- *
- * @param geometryObject the geometry object extracted from the LOI. This should have format:
- *   {
- *      coordinates: any[],
- *      type: string
- *   }
- * @returns The WKT string version of the object
- * https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AnalyzingData/Geospatial/Spatial_Definitions/WellknownTextWKT.htm
- *
- * @beta
- */
-function legacyFirestoreMapToWkt(geometryObject: any): string {
-  return geojsonToWKT(Datastore.fromFirestoreMap(geometryObject));
+function quote(value: any | null | undefined): string {
+  if (value === null || value === undefined) {
+    return '""';
+  }
+  if (typeof(value) === 'number') {
+    return value.toString();
+  }
+  const escaped = value.toString().replace('"', '""');
+  return '"' + escaped + '"';
 }
 
 function toWkt(geometry: Pb.IGeometry): string {
@@ -255,7 +202,7 @@ function toWkt(geometry: Pb.IGeometry): string {
 /**
  * Returns the string representation of a specific task element result.
  */
-function getValue(taskId: string, task: Task, data: Pb.ITaskData[]) {
+function getValue(taskId: string, task: Task, data: Pb.ITaskData[]): any {
   const result = data.find(d => d.taskId === taskId);
   if (result?.multipleChoiceResponses) {
     return result.multipleChoiceResponses?.selectedOptionIds
@@ -272,27 +219,6 @@ function getValue(taskId: string, task: Task, data: Pb.ITaskData[]) {
     );
   } else if (result?.drawGeometryResult?.geometry) {
     return toWkt(result.drawGeometryResult.geometry);
-  } else {
-    return result;
-  }
-}
-
-/**
- * Returns the string representation of a specific task element result.
- */
-function getValueLegacy(taskId: string, task: Task, data: any) {
-  const result = data[taskId] || '';
-  if (
-    task.type === 'multiple_choice' &&
-    Array.isArray(result) &&
-    task.options
-  ) {
-    return result.map(id => getMultipleChoiceValues(id, task)).join(', ');
-  } else if (task.type === 'capture_location') {
-    if (!result) {
-      return '';
-    }
-    return legacyFirestoreMapToWkt(result.geometry || result);
   } else {
     return result;
   }
@@ -361,15 +287,5 @@ function getPropertiesByName(
       loi.properties[prop].stringValue ||
       loi.properties[prop].numericValue ||
       ''
-  );
-}
-
-function getPropertiesByNameLegacy(
-  loiDoc: LoiDocument,
-  loiProperties: Set<string>
-): List<string> {
-  // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-  return List.of(...loiProperties).map(
-    prop => (loiDoc.get('properties') || {})[prop] || ''
   );
 }

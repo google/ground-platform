@@ -118,7 +118,7 @@ fdescribe('exportCsv()', () => {
       desc: 'export points w/o submissions',
       input: {},
       expected: [
-        `"system:index","geometry","name","area","data:contributor_username","data:contributor_email"`,
+        `"system:index","geometry","name","area","data:contributor_name","data:contributor_email"`,
         `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"",""`,
       ],
     },
@@ -160,7 +160,7 @@ fdescribe('exportCsv()', () => {
         'Content-Disposition',
         'attachment; filename=test-job.csv'
       );
-      const output = chunks.join().trim();
+      const output = chunks.join('').trim();
       expect(output.split('\n')).toEqual(expected);
     })
   );
