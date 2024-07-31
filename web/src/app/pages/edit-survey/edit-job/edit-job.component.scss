@@ -23,6 +23,17 @@ h2 {
  font-size: 1.8ch;
 }
 
+.mat-button-toggle-group {
+  height: 40px;
+  align-items: center;
+
+  .mat-button-toggle {
+    .mat-icon {
+      margin-right: 6px;
+    }
+  }
+}
+
 task-button:hover {
  cursor: pointer;
 }

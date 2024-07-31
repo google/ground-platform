@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export * from "./firestore";
-export * from "./event-context";
-export * from "./document-snapshot";
-export * from "./query";
-export * from "./setup";
+export * from './firestore';
+export * from './event-context';
+export * from './document-snapshot';
+export * from './query';
+export * from './setup';

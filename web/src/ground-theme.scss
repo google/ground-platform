@@ -32,6 +32,7 @@
 @use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
 @use 'app/components/tasks-editor/_tasks-editor.component-theme' as tasks-editor;
+@use 'app/components/tasks-editor/task-condition-form/_task-condition-form-theme' as task-condition-form;
 @use 'app/components/tasks-editor/task-form/edit-option/_edit-option.component-theme' as edit-option;
 @use 'app/components/user-avatar/_user-avatar.component-theme' as user-avatar;
 @use 'app/pages/create-survey/_create-survey.component-theme' as create-survey;
@@ -74,6 +75,7 @@ html {
   @include sign-in-page.theme($theme);
   @include survey-list.theme($theme);
   @include tasks-editor.theme($theme);
+  @include task-condition-form.theme($theme);
   @include edit-option.theme($theme);
   @include user-avatar.theme($theme);
   @include create-survey.theme($theme);
