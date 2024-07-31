@@ -60,7 +60,7 @@ export class WebDriverHelper {
       chromeOptions.setChromeBinaryPath(chromePath);
     }
     chromeOptions.addArguments(
-      '--headless',
+      // '--headless',
       '--disable-gpu',
       '--window-size=1920,1200',
       '--ignore-certificate-errors',
