@@ -34,6 +34,8 @@ import {
   $coordinates,
   $latitude,
   $longitude,
+  $string_value,
+  $numeric_value,
 } from '@ground/lib/dist/testing/proto-field-aliases';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import HttpStatus from 'http-status-codes';
@@ -71,7 +73,10 @@ fdescribe('exportCsv()', () => {
     },
     [$submission_count]: 0,
     [$source]: 1, // IMPORTED
-    [$properties]: {name: 'Dinagat Islands', area: 3.08},
+    [$properties]: {
+      name: {[$string_value]: 'Dinagat Islands'},
+      area: {[$numeric_value]: 3.08},
+    },
     jobId: 'job123',
     predefined: true,
     geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},

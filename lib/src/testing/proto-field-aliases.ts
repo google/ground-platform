@@ -38,3 +38,5 @@ export const [$color] = [1];
 export const [$required, $level, $textQuestion] = [4, 5, 7];
 // DateTimeQuestion:
 export const [$dtq$type] = [1];
+// Property fields:
+export const [$string_value, $numeric_value] = [1, 2];
