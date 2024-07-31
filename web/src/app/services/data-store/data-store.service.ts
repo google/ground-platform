@@ -30,7 +30,7 @@ import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -41,6 +41,7 @@ import {
   partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
+import {surveyDocToModel} from 'app/converters/survey-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -80,7 +81,13 @@ export class DataStoreService {
       .valueChanges()
       .pipe(
         // Convert object to Survey instance.
-        map(data => FirebaseDataConverter.toSurvey(id, data as DocumentData))
+        map(data => {
+          const survey = surveyDocToModel(id, data as DocumentData);
+
+          if (survey instanceof Error) throw survey;
+
+          return survey;
+        })
       );
   }
 
@@ -99,14 +106,13 @@ export class DataStoreService {
       .pipe(
         // Convert object to Survey instance.
         map(data => {
-          const job = FirebaseDataConverter.toSurvey(
-            surveyId,
-            data as DocumentData
-          ).getJob(jobId);
+          const survey = surveyDocToModel(surveyId, data as DocumentData);
 
-          if (!job) {
-            throw Error(`Job $jobId not found`);
-          }
+          if (survey instanceof Error) throw survey;
+
+          const job = survey.getJob(jobId);
+
+          if (!job) throw Error(`Job ${jobId} not found`);
 
           return job;
         })
@@ -152,11 +158,14 @@ export class DataStoreService {
       .pipe(
         map(surveys =>
           List(
-            surveys.map(a => {
-              const docData = a.payload.doc.data() as DocumentData;
-              const id = a.payload.doc.id;
-              return FirebaseDataConverter.toSurvey(id, docData);
-            })
+            surveys
+              .map(a => {
+                const docData = a.payload.doc.data() as DocumentData;
+                const id = a.payload.doc.id;
+                return surveyDocToModel(id, docData);
+              })
+              .filter(DataStoreService.filterAndLogError<Survey>)
+              .map(survey => survey as Survey)
           )
         )
       );
@@ -489,7 +498,10 @@ export class DataStoreService {
             return List<Task>();
           }
           const data = doc.data() as DocumentData;
-          const survey = FirebaseDataConverter.toSurvey(surveyId, data);
+          const survey = surveyDocToModel(surveyId, data);
+          if (survey instanceof Error) {
+            return List<Task>();
+          }
           const tasks = survey.getJob(jobId)?.tasks;
           if (!tasks || typeof tasks === 'undefined') {
             return List<Task>();
@@ -538,7 +550,7 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set({
-        ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
+        // ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
         ...newSurveyToDocument(name, description, acl, ownerId),
       });
     return Promise.resolve(surveyId);
