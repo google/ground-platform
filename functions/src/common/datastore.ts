@@ -151,7 +151,11 @@ export class Datastore {
     loiId: string
   ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    const submissionsForLoiQuery = submissionsRef.where('2', '==', loiId);
+    const submissionsForLoiQuery = submissionsRef.where(
+      FieldNumbers.Submission.loi_id,
+      '==',
+      loiId
+    );
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }
