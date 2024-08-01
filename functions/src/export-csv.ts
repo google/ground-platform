@@ -23,11 +23,13 @@ import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
 import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
-import {FieldNumbers, toMessage} from '@ground/lib';
+import {registry, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
 import Pb = GroundProtos.google.ground.v1beta1;
+const sb = registry.getFieldIds(Pb.Submission);
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -146,7 +148,7 @@ async function getSubmissionsByLoi(
   const submissions = await db.fetchSubmissionsByJobId(surveyId, jobId);
   const submissionsByLoi: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
-    const loiId = submission.get(FieldNumbers.Submission.loi_id) as string;
+    const loiId = submission.get(sb.loiId) as string;
     const arr: any[] = submissionsByLoi[loiId] || [];
     arr.push(submission.data());
     submissionsByLoi[loiId] = arr;
@@ -266,11 +268,7 @@ function getFileName(jobName: string | null) {
 
 function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
   return new Set(
-    lois.docs
-      .map(loi =>
-        Object.keys(loi.get(FieldNumbers.LocationOfInterest.properties) || {})
-      )
-      .flat()
+    lois.docs.map(loi => Object.keys(loi.get(l.properties) || {})).flat()
   );
 }
 
