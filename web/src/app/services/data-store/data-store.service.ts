@@ -25,7 +25,7 @@ import {
   deleteField,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import {FieldNumbers} from '@ground/lib';
+import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
@@ -50,6 +50,9 @@ import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
 import Pb = GroundProtos.google.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+const s = registry.getFieldIds(Pb.Survey);
+const sb = registry.getFieldIds(Pb.Submission);
 
 const Source = Pb.LocationOfInterest.Source;
 const AclRole = Pb.Role;
@@ -138,7 +141,7 @@ export class DataStoreService {
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        ref.where(new FieldPath(FieldNumbers.Survey.acl, userEmail), 'in', [
+        ref.where(new FieldPath(s.acl, userEmail), 'in', [
           AclRole.VIEWER,
           AclRole.DATA_COLLECTOR,
           AclRole.SURVEY_ORGANIZER,
@@ -293,7 +296,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(FieldNumbers.Submission.job_id, '==', jobId)
+      ref => ref.where(s.jobId, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -305,7 +308,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
+      ref => ref.where(sb.loiId, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -317,7 +320,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where(FieldNumbers.LocationOfInterest.job_id, '==', jobId)
+      ref => ref.where(l.jobId, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -397,20 +400,15 @@ export class DataStoreService {
 
     const importedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref =>
-        ref.where(FieldNumbers.LocationOfInterest.source, '==', Source.IMPORTED)
+      ref => ref.where(l.source, '==', Source.IMPORTED)
     );
 
     const fieldData = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
-          .where(
-            FieldNumbers.LocationOfInterest.source,
-            '==',
-            Source.FIELD_DATA
-          )
-          .where(FieldNumbers.LocationOfInterest.owner_id, '==', userId)
+          .where(l.source, '==', Source.FIELD_DATA)
+          .where(l.ownerId, '==', userId)
     );
 
     return combineLatest([
@@ -600,9 +598,7 @@ export class DataStoreService {
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? ref.where(FieldNumbers.Submission.loi_id, '==', loiId)
-      : ref
-          .where(FieldNumbers.Submission.loi_id, '==', loiId)
-          .where(FieldNumbers.Submission.owner_id, '==', userId);
+      ? ref.where(s.loiId, '==', loiId)
+      : ref.where(sb.loiId, '==', loiId).where(sb.ownerId, '==', userId);
   }
 }
