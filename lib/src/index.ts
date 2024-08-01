@@ -17,5 +17,4 @@
 export {toDocumentData} from './proto-to-firestore';
 export {toMessage} from './firestore-to-proto';
 export {deleteEmpty, isEmpty} from './obj-util';
-export {FieldNumbers} from './proto-field-numbers';
 export {registry} from './message-registry';
