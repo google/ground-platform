@@ -27,15 +27,13 @@ import {MatRadioModule} from '@angular/material/radio';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Router} from '@angular/router';
-import {List, Map} from 'immutable';
-import {NEVER, of} from 'rxjs';
-
 import {JobListItemModule} from 'app/components/job-list-item/job-list-item.module';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
@@ -51,6 +49,8 @@ import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {List, Map} from 'immutable';
+import {NEVER, of} from 'rxjs';
 
 import {SubmissionFormComponent} from './submission-form.component';
 
@@ -128,7 +128,7 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
       task001: new Result('result'),
-      task003: new Result(List([MockModel.option001])),
+      task003: new Result(new MultipleSelection(List([MockModel.option001]))),
     })
   );
 }
