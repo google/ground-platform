@@ -24,14 +24,6 @@ import {
   createResponseSpy,
 } from './testing/http-test-helpers';
 import {
-  $job_id,
-  $geometry,
-  $submission_count,
-  $source,
-  $properties,
-  $point,
-  $polygon,
-  $multi_polygon,
   $shell,
   $coordinates,
   $polygons,
@@ -80,12 +72,15 @@ describe('importGeoJson()', () => {
     ],
   };
   const l = registry.getFieldIds(Pb.LocationOfInterest);
+  const g = registry.getFieldIds(Pb.Geometry);
+  const p = registry.getFieldIds(Pb.Point);
+  const c = registry.getFieldIds(Pb.Coordinates);
   const pointLoi = {
     [l.jobId]: 'job123',
     [l.geometry]: {
-      [$point]: {[$coordinates]: {[$latitude]: 10.1, [$longitude]: 125.6}},
+      [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
     },
-    [l.submission_count]: 0,
+    [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
     [l.properties]: {name: 'Dinagat Islands', area: 3.08},
     jobId: 'job123',
@@ -113,20 +108,20 @@ describe('importGeoJson()', () => {
     ],
   };
   const polygonLoi = {
-    [l.job_id]: 'job123',
+    [l.jobId]: 'job123',
     [l.geometry]: {
-      [$polygon]: {
+      [g.polygon]: {
         [$shell]: {
           [$coordinates]: [
-            {[$latitude]: 0, [$longitude]: 100},
-            {[$latitude]: 0, [$longitude]: 101},
-            {[$latitude]: 1, [$longitude]: 101},
-            {[$latitude]: 0, [$longitude]: 100},
+            {[c.latitude]: 0, [c.longitude]: 100},
+            {[c.latitude]: 0, [c.longitude]: 101},
+            {[c.latitude]: 1, [c.longitude]: 101},
+            {[c.latitude]: 0, [c.longitude]: 100},
           ],
         },
       },
     },
-    [l.submission_count]: 0,
+    [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
@@ -174,7 +169,7 @@ describe('importGeoJson()', () => {
   const multiPolygonLoi = {
     [l.job_id]: 'job123',
     [l.geometry]: {
-      [$multi_polygon]: {
+      [g.multiPolygon]: {
         [$polygons]: [
           // polygons[0]
           {
