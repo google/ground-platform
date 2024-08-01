@@ -79,9 +79,9 @@ export function surveyDocToModel(
   data: DocumentData,
   jobs?: DocumentData[]
 ): Survey | Error {
-  // Use old converter if document doesn't include `title` using the new
+  // Use old converter if document doesn't include `name` using the new
   // proto-based format.
-  if (!data['1']) {
+  if (!data['2']) {
     return LegacySurveyDataConverter.toSurvey(id, data);
   }
   const pb = toMessage(data, Pb.Survey) as Pb.Survey;
