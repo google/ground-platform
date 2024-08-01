@@ -14,8 +14,9 @@
   },
   "compileOnSave": true,
   "include": [
-    "src/**/*"
-, "../functions/src/testing/http.ts"  ],
+    "src/**/*",
+    "../functions/src/testing/http.ts"  
+  ],
   "exclude": [
     "src/generated"
   ]
