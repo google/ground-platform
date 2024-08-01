@@ -167,7 +167,7 @@ describe('importGeoJson()', () => {
     ],
   };
   const multiPolygonLoi = {
-    [l.job_id]: 'job123',
+    [l.jobId]: 'job123',
     [l.geometry]: {
       [g.multiPolygon]: {
         [$polygons]: [
