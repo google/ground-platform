@@ -157,11 +157,11 @@
     // Apply passlist and survey-level ACLs to job documents.
     match /surveys/{surveyId}/jobs/{jobId} {
       // Allow if user has has read access to the survey.
-      allow read: if canViewSurvey(getSurvey(surveyId));
-      // Allow if user is owner of the new submission and can collect data.
-      allow create: if canManageSurvey(getSurvey(surveyId)) || isCreator(request.resource);
-      // Allow if user is owner of the existing submission or can manage survey.
-      allow write: if canManageSurvey(getSurvey(surveyId)) || isCreator(resource);
+      allow read: if canViewSurvey(getSurvey(surveyId), getEmail());
+      // Allow if user can manage survey.
+      allow create: if canManageSurvey(getSurvey(surveyId), getEmail());
+      // Allow if user can manage survey.
+      allow write: if canManageSurvey(getSurvey(surveyId), getEmail());
     }
   }
 }
