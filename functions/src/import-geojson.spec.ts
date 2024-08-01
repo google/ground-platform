@@ -23,13 +23,6 @@ import {
   createPostRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import {
-  $shell,
-  $coordinates,
-  $polygons,
-  $latitude,
-  $longitude,
-} from '@ground/lib/dist/testing/proto-field-aliases';
 import {importGeoJsonCallback} from './import-geojson';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {Blob, FormData} from 'formdata-node';
@@ -42,6 +35,13 @@ import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.google.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+const g = registry.getFieldIds(Pb.Geometry);
+const p = registry.getFieldIds(Pb.Point);
+const c = registry.getFieldIds(Pb.Coordinates);
+const pg = registry.getFieldIds(Pb.Polygon);
+const lr = registry.getFieldIds(Pb.LinearRing);
+const mp = registry.getFieldIds(Pb.MultiPolygon);
 
 describe('importGeoJson()', () => {
   let mockFirestore: Firestore;
@@ -71,10 +71,6 @@ describe('importGeoJson()', () => {
       },
     ],
   };
-  const l = registry.getFieldIds(Pb.LocationOfInterest);
-  const g = registry.getFieldIds(Pb.Geometry);
-  const p = registry.getFieldIds(Pb.Point);
-  const c = registry.getFieldIds(Pb.Coordinates);
   const pointLoi = {
     [l.jobId]: 'job123',
     [l.geometry]: {
@@ -111,8 +107,8 @@ describe('importGeoJson()', () => {
     [l.jobId]: 'job123',
     [l.geometry]: {
       [g.polygon]: {
-        [$shell]: {
-          [$coordinates]: [
+        [pg.shell]: {
+          [lr.coordinates]: [
             {[c.latitude]: 0, [c.longitude]: 100},
             {[c.latitude]: 0, [c.longitude]: 101},
             {[c.latitude]: 1, [c.longitude]: 101},
@@ -170,26 +166,26 @@ describe('importGeoJson()', () => {
     [l.jobId]: 'job123',
     [l.geometry]: {
       [g.multiPolygon]: {
-        [$polygons]: [
+        [mp.polygons]: [
           // polygons[0]
           {
-            [$shell]: {
-              [$coordinates]: [
-                {[$latitude]: 0, [$longitude]: 100},
-                {[$latitude]: 0, [$longitude]: 101},
-                {[$latitude]: 1, [$longitude]: 101},
-                {[$latitude]: 0, [$longitude]: 100},
+            [pg.shell]: {
+              [lr.coordinates]: [
+                {[c.latitude]: 0, [c.longitude]: 100},
+                {[c.latitude]: 0, [c.longitude]: 101},
+                {[c.latitude]: 1, [c.longitude]: 101},
+                {[c.latitude]: 0, [c.longitude]: 100},
               ],
             },
           },
           // polygons[1]
           {
-            [$shell]: {
-              [$coordinates]: [
-                {[$latitude]: 1, [$longitude]: 120},
-                {[$latitude]: 1, [$longitude]: 121},
-                {[$latitude]: 2, [$longitude]: 121},
-                {[$latitude]: 1, [$longitude]: 120},
+            [pg.shell]: {
+              [lr.coordinates]: [
+                {[c.latitude]: 1, [c.longitude]: 120},
+                {[c.latitude]: 1, [c.longitude]: 121},
+                {[c.latitude]: 2, [c.longitude]: 121},
+                {[c.latitude]: 1, [c.longitude]: 120},
               ],
             },
           },

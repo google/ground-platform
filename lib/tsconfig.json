@@ -14,10 +14,10 @@
   },
   "compileOnSave": true,
   "include": [
-    "src/**/*",
-    "../functions/src/testing/http.ts"  
+    "src/**/*"
   ],
   "exclude": [
-    "src/generated"
+    "src/generated",
+    "dist"
   ]
 }
