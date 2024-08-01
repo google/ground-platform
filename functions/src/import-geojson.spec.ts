@@ -46,6 +46,10 @@ import {invokeCallbackAsync} from './handlers';
 import {OWNER_ROLE} from './common/auth';
 import {resetDatastore} from './common/context';
 import {Firestore} from 'firebase-admin/firestore';
+import {registry} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
+
+import Pb = GroundProtos.google.ground.v1beta1;
 
 describe('importGeoJson()', () => {
   let mockFirestore: Firestore;
@@ -75,14 +79,15 @@ describe('importGeoJson()', () => {
       },
     ],
   };
+  const l = registry.getFieldIds(Pb.LocationOfInterest);
   const pointLoi = {
-    [$job_id]: 'job123',
-    [$geometry]: {
+    [l.jobId]: 'job123',
+    [l.geometry]: {
       [$point]: {[$coordinates]: {[$latitude]: 10.1, [$longitude]: 125.6}},
     },
-    [$submission_count]: 0,
-    [$source]: 1, // IMPORTED
-    [$properties]: {name: 'Dinagat Islands', area: 3.08},
+    [l.submission_count]: 0,
+    [l.source]: 1, // IMPORTED
+    [l.properties]: {name: 'Dinagat Islands', area: 3.08},
     jobId: 'job123',
     predefined: true,
     geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
@@ -108,8 +113,8 @@ describe('importGeoJson()', () => {
     ],
   };
   const polygonLoi = {
-    [$job_id]: 'job123',
-    [$geometry]: {
+    [l.job_id]: 'job123',
+    [l.geometry]: {
       [$polygon]: {
         [$shell]: {
           [$coordinates]: [
@@ -121,8 +126,8 @@ describe('importGeoJson()', () => {
         },
       },
     },
-    [$submission_count]: 0,
-    [$source]: 1, // IMPORTED
+    [l.submission_count]: 0,
+    [l.source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
     geometry: {
@@ -167,8 +172,8 @@ describe('importGeoJson()', () => {
     ],
   };
   const multiPolygonLoi = {
-    [$job_id]: 'job123',
-    [$geometry]: {
+    [l.job_id]: 'job123',
+    [l.geometry]: {
       [$multi_polygon]: {
         [$polygons]: [
           // polygons[0]
@@ -196,8 +201,8 @@ describe('importGeoJson()', () => {
         ],
       },
     },
-    [$submission_count]: 0,
-    [$source]: 1, // IMPORTED
+    [l.submissionCount]: 0,
+    [l.source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
     geometry: {
