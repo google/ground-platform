@@ -41,10 +41,10 @@ message Survey {
   // Properties related to sharing of survey data.
   message DataSharing {
     // Type of data sharing agreement.
-    DataSharingAgreementType type = 0;
+    DataSharingAgreementType type = 1;
 
     // Text of custom data sharing agreement terms.
-    string custom_text = 1;
+    string custom_text = 2;
   }
 
   // Defines how data sharing agreement is displayed to users.
