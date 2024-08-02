@@ -37,6 +37,18 @@ message Survey {
 
   // Required. User id of the survey owner.
   string owner_id = 5;
+
+  // Properties related to sharing of survey data.
+  message DataSharing {
+    // Type of data sharing agreement.
+    DataSharingAgreementType type = 1;
+
+    // Text of custom data sharing agreement terms.
+    string custom_text = 2;
+  }
+
+  // Defines how data sharing agreement is displayed to users.
+  DataSharing dataSharingAgreement = 6;
 }
 
 // Defines a user's role in a survey.
@@ -52,4 +64,16 @@ enum Role {
 
   // User may also manage the survey, update locations of interest, etc.
   SURVEY_ORGANIZER = 3;
+}
+
+// Defines the type of data sharing agreement the user will see.
+enum DataSharingAgreementType {
+  // Data will only be shared with survey organizers.
+  PRIVATE = 0;
+
+  // Survey organizers can share data with no constraints.
+  PUBLIC = 1;
+
+  // Terms are defined by survey organizers.
+  CUSTOM = 2;
 }
