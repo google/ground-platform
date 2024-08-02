@@ -30,7 +30,7 @@ import {GroundProtos} from '@ground/proto';
 
 const test = require('firebase-functions-test')();
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
 
 describe('onWriteSubmission()', () => {

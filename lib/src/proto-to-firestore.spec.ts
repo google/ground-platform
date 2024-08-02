@@ -18,7 +18,7 @@ import {registry} from './message-registry';
 import {GroundProtos} from '@ground/proto';
 import {toDocumentData} from './proto-to-firestore';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 const s = registry.getFieldIds(Pb.Survey);
 const j = registry.getFieldIds(Pb.Job);
 const c = registry.getFieldIds(Pb.Coordinates);
@@ -28,7 +28,7 @@ const st = registry.getFieldIds(Pb.Style);
 const dtq = registry.getFieldIds(Pb.Task.DateTimeQuestion);
 
 const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
-  GroundProtos.google.ground.v1beta1;
+  GroundProtos.ground.v1beta1;
 
 describe('toDocumentData()', () => {
   [

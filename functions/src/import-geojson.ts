@@ -27,7 +27,7 @@ import {DocumentData} from 'firebase-admin/firestore';
 import {toDocumentData, deleteEmpty} from '@ground/lib';
 import {Feature, Geometry, Position} from 'geojson';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 import {ErrorHandler} from './handlers';
 
 /**
