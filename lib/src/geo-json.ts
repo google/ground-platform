@@ -17,7 +17,7 @@
 import {GroundProtos} from '@ground/proto';
 import {Geometry, MultiPolygon, Point, Polygon, Position} from 'geojson';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 
 /**
  * Returns the equivalent GeoJSON Geometry for the provided Geometry proto.

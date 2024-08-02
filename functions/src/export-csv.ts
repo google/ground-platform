@@ -27,7 +27,7 @@ import {registry, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 
@@ -192,7 +192,7 @@ function quote(value: any): string {
   if (typeof value === 'number') {
     return value.toString();
   }
-  const escaped = value.toString().replace('"', '""');
+  const escaped = value.toString().replaceAll('"', '""');
   return '"' + escaped + '"';
 }
 
