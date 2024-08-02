@@ -28,7 +28,7 @@ import {
 import {TaskCondition} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 
 const PB_ROLES = Map([
   [Role.OWNER, Pb.Role.SURVEY_ORGANIZER],

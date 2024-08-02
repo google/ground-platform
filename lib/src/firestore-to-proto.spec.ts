@@ -19,7 +19,7 @@ import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
 const {Coordinates, Job, LinearRing, Role, Style, Survey, Task, LocationOfInterest} =
-  GroundProtos.google.ground.v1beta1;
+  GroundProtos.ground.v1beta1;
 
 describe('toMessage()', () => {
   [

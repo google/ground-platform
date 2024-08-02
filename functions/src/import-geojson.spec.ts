@@ -34,7 +34,7 @@ import {Firestore} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const g = registry.getFieldIds(Pb.Geometry);
 const p = registry.getFieldIds(Pb.Point);

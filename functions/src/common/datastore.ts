@@ -20,7 +20,7 @@ import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
 
