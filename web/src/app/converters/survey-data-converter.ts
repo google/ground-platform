@@ -26,12 +26,21 @@ import {
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
-import {TaskCondition} from 'app/models/task/task-condition.model';
+import {
+  TaskCondition,
+  TaskConditionExpression,
+  TaskConditionExpressionType,
+  TaskConditionMatchType,
+} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 
 const DateTimeQuestionType = Pb.Task.DateTimeQuestion.Type;
+
+const DrawGeometryMethod = Pb.Task.DrawGeometry.Method;
+
+const MultipleChoiceQuestionType = Pb.Task.MultipleChoiceQuestion.Type;
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -98,6 +107,7 @@ function taskPbToModel(pb: Pb.ITask): Task {
     drawGeometry,
     captureLocation,
     takePhoto,
+    conditions,
   } = pb;
 
   if (textQuestion) taskType = TaskType.TEXT;
@@ -111,12 +121,58 @@ function taskPbToModel(pb: Pb.ITask): Task {
       taskType = TaskType.DATE_TIME;
     else throw new Error('Error converting to Task: invalid task data');
   } else if (multipleChoiceQuestion) taskType = TaskType.MULTIPLE_CHOICE;
-  else if (drawGeometry) taskType = TaskType.DRAW_AREA;
-  else if (captureLocation) taskType = TaskType.CAPTURE_LOCATION;
+  else if (drawGeometry) {
+    if (DrawGeometryMethod.DRAW_AREA in drawGeometry.allowedMethods!)
+      taskType = TaskType.DRAW_AREA;
+    else if (DrawGeometryMethod.DROP_PIN in drawGeometry.allowedMethods!)
+      taskType = TaskType.DROP_PIN;
+    else throw new Error('Error converting to Task: invalid task data');
+  } else if (captureLocation) taskType = TaskType.CAPTURE_LOCATION;
   else if (takePhoto) taskType = TaskType.PHOTO;
   else throw new Error('Error converting to Task: invalid task data');
 
-  return new Task(pb.id!, taskType, pb.prompt!, pb.required!, pb.index!);
+  let condition = undefined;
+  if (conditions && conditions.length > 0) {
+    const {multipleChoice} = conditions[0];
+
+    condition = new TaskCondition(
+      TaskConditionMatchType.MATCH_ALL,
+      List([
+        new TaskConditionExpression(
+          TaskConditionExpressionType.ONE_OF_SELECTED,
+          multipleChoice!.taskId!,
+          List(multipleChoice!.optionIds!)
+        ),
+      ])
+    );
+  }
+
+  let multipleChoice = undefined;
+  if (multipleChoiceQuestion) {
+    multipleChoice = new MultipleChoice(
+      multipleChoiceQuestion.type! ===
+      MultipleChoiceQuestionType.SELECT_MULTIPLE
+        ? Cardinality.SELECT_MULTIPLE
+        : Cardinality.SELECT_ONE,
+      List(
+        multipleChoiceQuestion.options!.map(
+          option =>
+            new Option(option.id!, option.id!, option.label!, option.index!)
+        )
+      ),
+      multipleChoiceQuestion.hasOtherOption!
+    );
+  }
+
+  return new Task(
+    pb.id!,
+    taskType,
+    pb.prompt!,
+    pb.required!,
+    pb.index!,
+    multipleChoice,
+    condition
+  );
 }
 
 export function surveyDocToModel(
