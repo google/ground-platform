@@ -527,7 +527,7 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set({
-        // ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
+        ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
         ...newSurveyToDocument(name, description, acl, ownerId),
       });
     return Promise.resolve(surveyId);
