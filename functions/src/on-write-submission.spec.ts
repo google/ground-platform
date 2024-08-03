@@ -25,9 +25,13 @@ import * as functions from './index';
 import {loi} from './common/datastore';
 import {Firestore} from 'firebase-admin/firestore';
 import {resetDatastore} from './common/context';
-import {FieldNumbers} from '@ground/lib';
+import {registry} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
 
 const test = require('firebase-functions-test')();
+
+import Pb = GroundProtos.ground.v1beta1;
+const sb = registry.getFieldIds(Pb.Submission);
 
 describe('onWriteSubmission()', () => {
   let mockFirestore: Firestore;
@@ -63,7 +67,7 @@ describe('onWriteSubmission()', () => {
       .and.returnValue({
         where: jasmine
           .createSpy('where')
-          .withArgs(FieldNumbers.Submission.loi_id, '==', loiId)
+          .withArgs(sb.loiId, '==', loiId)
           .and.returnValue(newCountQuery(count)),
       } as any);
   }

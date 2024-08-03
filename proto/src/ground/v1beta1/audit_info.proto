@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package google.ground.v1beta1;
+package ground.v1beta1;
 
 import "google/protobuf/timestamp.proto";
 
