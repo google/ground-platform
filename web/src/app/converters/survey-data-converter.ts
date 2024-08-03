@@ -42,6 +42,8 @@ const DrawGeometryMethod = Pb.Task.DrawGeometry.Method;
 
 const MultipleChoiceQuestionType = Pb.Task.MultipleChoiceQuestion.Type;
 
+const DataCollectionLevel = Pb.Task.DataCollectionLevel;
+
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
   [TaskType.DATE, 'date'],
@@ -171,7 +173,8 @@ function taskPbToModel(pb: Pb.ITask): Task {
     pb.required!,
     pb.index!,
     multipleChoice,
-    condition
+    condition,
+    pb.level! === DataCollectionLevel.LOI_DATA
   );
 }
 
