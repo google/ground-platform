@@ -29,8 +29,8 @@ import {FieldNumbers} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {filter, map} from 'rxjs/operators';
+import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
+import {filter, map, switchMap} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -75,48 +75,27 @@ export class DataStoreService {
    * @param id the id of the requested survey.
    */
   loadSurvey$(id: string) {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(id)
-      .valueChanges()
-      .pipe(
-        // Convert object to Survey instance.
-        map(data => {
-          const survey = surveyDocToModel(id, data as DocumentData);
+    return combineLatest([
+      this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).valueChanges(),
+      this.db
+        .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
+        .valueChanges(),
+    ]).pipe(
+      // Convert object to Survey instance.
+      switchMap(surveyAndJobs => {
+        const [s, jobs] = surveyAndJobs;
 
-          if (survey instanceof Error) throw survey;
+        const survey = surveyDocToModel(
+          id,
+          s as DocumentData,
+          jobs as DocumentData[]
+        );
 
-          return survey;
-        })
-      );
-  }
+        if (survey instanceof Error) throw survey;
 
-  /**
-   * Returns an Observable that loads and emits the job with the specified
-   * uuid and survey uuid.
-   *
-   * @param jobId the id of the requested job.
-   * @param surveyId the id of the requested survey.
-   */
-  loadJob$(jobId: string, surveyId: string) {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .valueChanges()
-      .pipe(
-        // Convert object to Survey instance.
-        map(data => {
-          const survey = surveyDocToModel(surveyId, data as DocumentData);
-
-          if (survey instanceof Error) throw survey;
-
-          const job = survey.getJob(jobId);
-
-          if (!job) throw Error(`Job ${jobId} not found`);
-
-          return job;
-        })
-      );
+        return of(survey);
+      })
+    );
   }
 
   /**
