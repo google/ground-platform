@@ -31,6 +31,8 @@ import {Task, TaskType} from 'app/models/task/task.model';
 
 import Pb = GroundProtos.google.ground.v1beta1;
 
+const DateTimeQuestionType = Pb.Task.DateTimeQuestion.Type;
+
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
   [TaskType.DATE, 'date'],
@@ -65,13 +67,56 @@ function keys(dict?: {}): string[] {
 }
 
 function jobDocsToModel(data: DocumentData[]): Map<string, Job> {
-  const pb = data.map(job => toMessage(job, Pb.Job) as Pb.Job);
+  const pbs = data.map(job => toMessage(job, Pb.Job) as Pb.Job);
 
   return Map<string, Job>(
-    pb.map(job => {
-      return [job.id, new Job(job.id, 1)];
+    pbs.map(pb => {
+      return [
+        pb.id,
+        new Job(
+          pb.id,
+          pb.index,
+          pb.style?.color || undefined,
+          pb.name,
+          Map<string, Task>(
+            pb.tasks.map(taskPb => [taskPb.id!, taskPbToModel(taskPb)])
+          )
+        ),
+      ];
     })
   );
+}
+
+function taskPbToModel(pb: Pb.ITask): Task {
+  let taskType = null;
+
+  const {
+    textQuestion,
+    numberQuestion,
+    dateTimeQuestion,
+    multipleChoiceQuestion,
+    drawGeometry,
+    captureLocation,
+    takePhoto,
+  } = pb;
+
+  if (textQuestion) taskType = TaskType.TEXT;
+  else if (numberQuestion) taskType = TaskType.NUMBER;
+  else if (dateTimeQuestion) {
+    if (dateTimeQuestion.type === DateTimeQuestionType.DATE_ONLY)
+      taskType = TaskType.DATE;
+    else if (dateTimeQuestion.type === DateTimeQuestionType.TIME_ONLY)
+      taskType = TaskType.TIME;
+    else if (dateTimeQuestion.type === DateTimeQuestionType.BOTH_DATE_AND_TIME)
+      taskType = TaskType.DATE_TIME;
+    else throw new Error('Error converting to Task: invalid task data');
+  } else if (multipleChoiceQuestion) taskType = TaskType.MULTIPLE_CHOICE;
+  else if (drawGeometry) taskType = TaskType.DRAW_AREA;
+  else if (captureLocation) taskType = TaskType.CAPTURE_LOCATION;
+  else if (takePhoto) taskType = TaskType.PHOTO;
+  else throw new Error('Error converting to Task: invalid task data');
+
+  return new Task(pb.id!, taskType, pb.prompt!, pb.required!, pb.index!);
 }
 
 export function surveyDocToModel(
