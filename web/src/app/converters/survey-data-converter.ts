@@ -124,9 +124,9 @@ function taskPbToModel(pb: Pb.ITask): Task {
     else throw new Error('Error converting to Task: invalid task data');
   } else if (multipleChoiceQuestion) taskType = TaskType.MULTIPLE_CHOICE;
   else if (drawGeometry) {
-    if (DrawGeometryMethod.DRAW_AREA in drawGeometry.allowedMethods!)
+    if (drawGeometry.allowedMethods!.includes(DrawGeometryMethod.DRAW_AREA))
       taskType = TaskType.DRAW_AREA;
-    else if (DrawGeometryMethod.DROP_PIN in drawGeometry.allowedMethods!)
+    else if (drawGeometry.allowedMethods!.includes(DrawGeometryMethod.DROP_PIN))
       taskType = TaskType.DROP_PIN;
     else throw new Error('Error converting to Task: invalid task data');
   } else if (captureLocation) taskType = TaskType.CAPTURE_LOCATION;
