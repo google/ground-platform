@@ -219,11 +219,7 @@ function getValue(
   } else if (result.dateTimeResponse) {
     return getDateTimeValue(result.dateTimeResponse);
   } else if (result.multipleChoiceResponses) {
-    return (
-      result.multipleChoiceResponses.selectedOptionIds
-        ?.map(id => getMultipleChoiceValues(id, task))
-        .join(', ') || null
-    );
+    return  getMultipleChoiceValues(task, result.multipleChoiceResponses);
   } else if (result.captureLocationResult) {
     // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
@@ -259,35 +255,17 @@ function getDateTimeValue(
 }
 
 /**
- * Returns the code associated with a specified multiple choice option, or if
- * the code is not defined, returns the label in English.
+ * Returns a comma-separated list of the labels of the 
+ * specified multiple choice option, or the raw text if "Other".
  */
-function getMultipleChoiceValues(id: any, task: Task) {
-  // "Other" options are encoded to be surrounded by square brakets, to let us
-  // distinguish them from the other pre-defined options.
-  if (isOtherOption(id)) {
-    return extractOtherOption(id);
-  }
-  const options = task.options || {};
-  const option = options[id] || {};
-  const label = option.label || {};
-  // TODO: i18n.
-  return option.code || label || '';
+function getMultipleChoiceValues(task: Task, responses: Pb.TaskData.IMultipleChoiceResponses) {
+  const values = responses.selectedOptionIds?.map(id => getMultipleChoiceLabel(task, id) || '#ERR') || [];
+  if (responses.otherText && responses.otherText.trim() !== '') values.push(responses.otherText);
+  return values.join(',');
 }
 
-function isOtherOption(submission: any): boolean {
-  // "Other" options are encoded to be surrounded by square brakets, to let us
-  // distinguish them from the other pre-defined options.
-  return (
-    typeof submission === 'string' &&
-    submission.startsWith('[ ') &&
-    submission.endsWith(' ]')
-  );
-}
-
-function extractOtherOption(submission: string): string {
-  const match = submission.match(/\[(.*?)\]/); // Match any text between []
-  return match ? match[1].trim() : ''; // Extract the match and remove spaces
+function getMultipleChoiceLabel(task: Task, id: string): string | null {
+  return task?.options?.find((o: any) => o.id === id)?.label;
 }
 
 /**

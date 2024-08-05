@@ -74,7 +74,22 @@ fdescribe('exportCsv()', () => {
           task003: {
             type: 'date_time_field',
             label: 'When?',
-          },          
+          },
+          task004: {
+            type: 'select_multiple',
+            label: 'Which ones?',
+            options: [
+              {
+                id: 'aaa',
+                label: 'AAA',
+              },
+              {
+                id: 'bbb',
+                label: 'BBB',
+              },
+            ],
+            hasOtherOption: true,
+          },
           task005: {
             type: 'capture_location',
             label: 'Where are you now?',
@@ -157,16 +172,28 @@ fdescribe('exportCsv()', () => {
         [d.taskId]: 'task003',
         [d.dateTimeResponse]: {
           '1': {
-            '1': 1331209044 // seconds
+            '1': 1331209044, // seconds
           },
         },
       },
     ],
-    // TODO
   };
   const submission2a = {
     id: '002a',
-    // TODO
+    [s.loiId]: pointLoi2.id,
+    [s.index]: 1,
+    [s.jobId]: jobId,
+    [s.ownerId]: userId,
+    [s.taskData]: [
+      {
+        [d.id]: 'data002a',
+        [d.taskId]: 'task004',
+        [d.multipleChoiceResponses]: {
+          '1': ['aaa', 'bbb'],
+          '2': 'Other'
+        },
+      }
+    ]
   };
   const testCases = [
     {
@@ -188,10 +215,10 @@ fdescribe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Where are you now?","data:Delimit plot boundaries","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,`,
-        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,,,`,
+        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Delimit plot boundaries","data:contributor_name","data:contributor_email"`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,`,
+        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other",,,,`,
       ],
     },
   ];
