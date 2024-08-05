@@ -23,21 +23,6 @@ import {
   createPostRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import {
-  $job_id,
-  $geometry,
-  $submission_count,
-  $source,
-  $properties,
-  $point,
-  $polygon,
-  $multi_polygon,
-  $shell,
-  $coordinates,
-  $polygons,
-  $latitude,
-  $longitude,
-} from '@ground/lib/dist/testing/proto-field-aliases';
 import {importGeoJsonCallback} from './import-geojson';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {Blob, FormData} from 'formdata-node';
@@ -46,6 +31,17 @@ import {invokeCallbackAsync} from './handlers';
 import {OWNER_ROLE} from './common/auth';
 import {resetDatastore} from './common/context';
 import {Firestore} from 'firebase-admin/firestore';
+import {registry} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
+
+import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+const g = registry.getFieldIds(Pb.Geometry);
+const p = registry.getFieldIds(Pb.Point);
+const c = registry.getFieldIds(Pb.Coordinates);
+const pg = registry.getFieldIds(Pb.Polygon);
+const lr = registry.getFieldIds(Pb.LinearRing);
+const mp = registry.getFieldIds(Pb.MultiPolygon);
 
 describe('importGeoJson()', () => {
   let mockFirestore: Firestore;
@@ -76,13 +72,13 @@ describe('importGeoJson()', () => {
     ],
   };
   const pointLoi = {
-    [$job_id]: 'job123',
-    [$geometry]: {
-      [$point]: {[$coordinates]: {[$latitude]: 10.1, [$longitude]: 125.6}},
+    [l.jobId]: 'job123',
+    [l.geometry]: {
+      [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
     },
-    [$submission_count]: 0,
-    [$source]: 1, // IMPORTED
-    [$properties]: {name: 'Dinagat Islands', area: 3.08},
+    [l.submissionCount]: 0,
+    [l.source]: 1, // IMPORTED
+    [l.properties]: {name: 'Dinagat Islands', area: 3.08},
     jobId: 'job123',
     predefined: true,
     geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
@@ -108,21 +104,21 @@ describe('importGeoJson()', () => {
     ],
   };
   const polygonLoi = {
-    [$job_id]: 'job123',
-    [$geometry]: {
-      [$polygon]: {
-        [$shell]: {
-          [$coordinates]: [
-            {[$latitude]: 0, [$longitude]: 100},
-            {[$latitude]: 0, [$longitude]: 101},
-            {[$latitude]: 1, [$longitude]: 101},
-            {[$latitude]: 0, [$longitude]: 100},
+    [l.jobId]: 'job123',
+    [l.geometry]: {
+      [g.polygon]: {
+        [pg.shell]: {
+          [lr.coordinates]: [
+            {[c.latitude]: 0, [c.longitude]: 100},
+            {[c.latitude]: 0, [c.longitude]: 101},
+            {[c.latitude]: 1, [c.longitude]: 101},
+            {[c.latitude]: 0, [c.longitude]: 100},
           ],
         },
       },
     },
-    [$submission_count]: 0,
-    [$source]: 1, // IMPORTED
+    [l.submissionCount]: 0,
+    [l.source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
     geometry: {
@@ -167,37 +163,37 @@ describe('importGeoJson()', () => {
     ],
   };
   const multiPolygonLoi = {
-    [$job_id]: 'job123',
-    [$geometry]: {
-      [$multi_polygon]: {
-        [$polygons]: [
+    [l.jobId]: 'job123',
+    [l.geometry]: {
+      [g.multiPolygon]: {
+        [mp.polygons]: [
           // polygons[0]
           {
-            [$shell]: {
-              [$coordinates]: [
-                {[$latitude]: 0, [$longitude]: 100},
-                {[$latitude]: 0, [$longitude]: 101},
-                {[$latitude]: 1, [$longitude]: 101},
-                {[$latitude]: 0, [$longitude]: 100},
+            [pg.shell]: {
+              [lr.coordinates]: [
+                {[c.latitude]: 0, [c.longitude]: 100},
+                {[c.latitude]: 0, [c.longitude]: 101},
+                {[c.latitude]: 1, [c.longitude]: 101},
+                {[c.latitude]: 0, [c.longitude]: 100},
               ],
             },
           },
           // polygons[1]
           {
-            [$shell]: {
-              [$coordinates]: [
-                {[$latitude]: 1, [$longitude]: 120},
-                {[$latitude]: 1, [$longitude]: 121},
-                {[$latitude]: 2, [$longitude]: 121},
-                {[$latitude]: 1, [$longitude]: 120},
+            [pg.shell]: {
+              [lr.coordinates]: [
+                {[c.latitude]: 1, [c.longitude]: 120},
+                {[c.latitude]: 1, [c.longitude]: 121},
+                {[c.latitude]: 2, [c.longitude]: 121},
+                {[c.latitude]: 1, [c.longitude]: 120},
               ],
             },
           },
         ],
       },
     },
-    [$submission_count]: 0,
-    [$source]: 1, // IMPORTED
+    [l.submissionCount]: 0,
+    [l.source]: 1, // IMPORTED
     jobId: 'job123',
     predefined: true,
     geometry: {
