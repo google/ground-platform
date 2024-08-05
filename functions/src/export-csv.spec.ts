@@ -39,6 +39,7 @@ const c = registry.getFieldIds(Pb.Coordinates);
 const g = registry.getFieldIds(Pb.Geometry);
 const s = registry.getFieldIds(Pb.Submission);
 const d = registry.getFieldIds(Pb.TaskData);
+const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
 
 fdescribe('exportCsv()', () => {
   let mockFirestore: Firestore;
@@ -94,10 +95,6 @@ fdescribe('exportCsv()', () => {
             type: 'capture_location',
             label: 'Where are you now?',
           },
-          task006: {
-            type: 'draw_area',
-            label: 'Delimit plot boundaries',
-          },
         },
       },
     },
@@ -151,7 +148,6 @@ fdescribe('exportCsv()', () => {
         },
       },
     ],
-    // TODO
   };
   const submission1b = {
     id: '001b',
@@ -190,10 +186,20 @@ fdescribe('exportCsv()', () => {
         [d.taskId]: 'task004',
         [d.multipleChoiceResponses]: {
           '1': ['aaa', 'bbb'],
-          '2': 'Other'
+          '2': 'Other',
         },
-      }
-    ]
+      },
+      {
+        [d.id]: 'data002a',
+        [d.taskId]: 'task005',
+        [d.captureLocationResult]: {
+          [cl.coordinates]: {
+            [c.latitude]: -123,
+            [c.longitude]: 45,
+          },
+        },
+      },
+    ],
   };
   const testCases = [
     {
@@ -215,10 +221,10 @@ fdescribe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Delimit plot boundaries","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,`,
-        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other",,,,`,
+        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:contributor_name","data:contributor_email"`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,`,
+        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other","POINT (45 -123)",,`,
       ],
     },
   ];
