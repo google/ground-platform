@@ -201,16 +201,31 @@ function toWkt(geometry: Pb.IGeometry): string {
 }
 
 /**
- * Returns the string representation of a specific task element result.
+ * Returns the string or number representation of a specific task element result.
  */
-function getValue(taskId: string, task: Task, data: Pb.ITaskData[]): any {
+function getValue(
+  taskId: string,
+  task: Task,
+  data: Pb.ITaskData[]
+): string | number | null {
   const result = data.find(d => d.taskId === taskId);
-  if (result?.multipleChoiceResponses) {
-    return result.multipleChoiceResponses?.selectedOptionIds
-      ?.map(id => getMultipleChoiceValues(id, task))
-      .join(', ');
-  } else if (result?.captureLocationResult) {
-    // TODO(): Include alitude and accuracy in separate columns.
+  if (!result) {
+    return null;
+  }
+  if (result.textResponse) {
+    return result.textResponse.text || null;
+  } else if (result.numberResponse) {
+    return getNumberValue(result.numberResponse);
+  } else if (result.dateTimeResponse) {
+    return getDateTimeValue(result.dateTimeResponse);
+  } else if (result.multipleChoiceResponses) {
+    return (
+      result.multipleChoiceResponses.selectedOptionIds
+        ?.map(id => getMultipleChoiceValues(id, task))
+        .join(', ') || null
+    );
+  } else if (result.captureLocationResult) {
+    // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
       new Pb.Geometry({
         point: new Pb.Point({
@@ -218,11 +233,29 @@ function getValue(taskId: string, task: Task, data: Pb.ITaskData[]): any {
         }),
       })
     );
-  } else if (result?.drawGeometryResult?.geometry) {
+  } else if (result.drawGeometryResult?.geometry) {
     return toWkt(result.drawGeometryResult.geometry);
   } else {
-    return result;
+    return null;
   }
+}
+
+function getNumberValue(response: Pb.TaskData.INumberResponse): number | null {
+  const number = response.number;
+  if (number === undefined || number === null) {
+    return null;
+  }
+  return number;
+}
+
+function getDateTimeValue(
+  response: Pb.TaskData.IDateTimeResponse
+): string | null {
+  const seconds = response.dateTime?.seconds;
+  if (seconds === undefined || seconds === null) {
+    return null;
+  }
+  return new Date(Number(seconds) * 1000).toISOString();
 }
 
 /**

@@ -37,11 +37,14 @@ const pr = registry.getFieldIds(Pb.LocationOfInterest.Property);
 const p = registry.getFieldIds(Pb.Point);
 const c = registry.getFieldIds(Pb.Coordinates);
 const g = registry.getFieldIds(Pb.Geometry);
+const s = registry.getFieldIds(Pb.Submission);
+const d = registry.getFieldIds(Pb.TaskData);
 
 fdescribe('exportCsv()', () => {
   let mockFirestore: Firestore;
   const jobId = 'job123';
   const email = 'somebody@test.it';
+  const userId = 'user5000';
   // TODO(#1758): Use new proto-based survey and job representation.
   const survey1 = {
     id: 'survey001',
@@ -65,10 +68,18 @@ fdescribe('exportCsv()', () => {
             label: 'What is the meaning of life?',
           },
           task002: {
+            type: 'number_field',
+            label: 'How much?',
+          },
+          task003: {
+            type: 'date_time_field',
+            label: 'When?',
+          },          
+          task005: {
             type: 'capture_location',
             label: 'Where are you now?',
           },
-          task003: {
+          task006: {
             type: 'draw_area',
             label: 'Delimit plot boundaries',
           },
@@ -86,8 +97,8 @@ fdescribe('exportCsv()', () => {
     [l.submission_count]: 0,
     [l.source]: Pb.LocationOfInterest.Source.IMPORTED,
     [l.properties]: {
-      'name': {[pr.stringValue]: 'Dinagat Islands'},
-      'area': {[pr.numericValue]: 3.08},
+      name: {[pr.stringValue]: 'Dinagat Islands'},
+      area: {[pr.numericValue]: 3.08},
     },
   };
   const pointLoi2 = {
@@ -100,15 +111,57 @@ fdescribe('exportCsv()', () => {
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      'name': {[pr.stringValue]: 'Luzern'},
+      name: {[pr.stringValue]: 'Luzern'},
     },
   };
   const submission1a = {
     id: '001a',
+    [s.loiId]: pointLoi1.id,
+    [s.index]: 1,
+    [s.jobId]: jobId,
+    [s.ownerId]: userId,
+    [s.taskData]: [
+      {
+        [d.id]: 'data001a',
+        [d.taskId]: 'task001',
+        [d.textResponse]: {
+          '1': 'Submission 1',
+        },
+      },
+      {
+        [d.id]: 'data002a',
+        [d.taskId]: 'task002',
+        [d.numberResponse]: {
+          '1': 42,
+        },
+      },
+    ],
     // TODO
   };
   const submission1b = {
     id: '001b',
+    [s.loiId]: pointLoi1.id,
+    [s.index]: 2,
+    [s.jobId]: jobId,
+    [s.ownerId]: userId,
+    [s.taskData]: [
+      {
+        [d.id]: 'data001b',
+        [d.taskId]: 'task001',
+        [d.textResponse]: {
+          '1': 'Submission 2',
+        },
+      },
+      {
+        [d.id]: 'data003a',
+        [d.taskId]: 'task003',
+        [d.dateTimeResponse]: {
+          '1': {
+            '1': 1331209044 // seconds
+          },
+        },
+      },
+    ],
     // TODO
   };
   const submission2a = {
@@ -135,9 +188,10 @@ fdescribe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        `"system:index","geometry","name","area","data:What is the meaning of life?","data:Where are you now?","data:Delimit plot boundaries","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,,,,`,
-        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,`,
+        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Where are you now?","data:Delimit plot boundaries","data:contributor_name","data:contributor_email"`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,`,
+        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,,,`,
       ],
     },
   ];
