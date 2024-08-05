@@ -230,6 +230,7 @@ function getValue(
       })
     );
   } else if (result.drawGeometryResult?.geometry) {
+    // TODO(#1248): Test when implementing other plot annotations feature.
     return toWkt(result.drawGeometryResult.geometry);
   } else {
     return null;
