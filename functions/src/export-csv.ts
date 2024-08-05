@@ -101,20 +101,30 @@ export async function exportCsvHandler(
       throw loi;
     }
     const submissions = submissionsByLoi[loiDoc.id] || [{}];
-    submissions.forEach(submissionDict => {
-      try {
-        const submission = toMessage(submissionDict, Pb.Submission);
-        if (submission instanceof Error) {
-          throw submission;
-        }
-        writeRow(csvStream, loiProperties, tasks, loi, submission);
-      } catch (e) {
-        console.debug('Skipping row', e);
-      }
-    });
+    submissions.forEach(submissionDict =>
+      writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
+    );
   });
   res.status(HttpStatus.OK);
   csvStream.end();
+}
+
+function writeSubmissions(
+  csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
+  loiProperties: Set<string>,
+  tasks: Map<string, Task>,
+  loi: Pb.LocationOfInterest,
+  submissionDict: SubmissionDict
+) {
+  try {
+    const submission = toMessage(submissionDict, Pb.Submission);
+    if (submission instanceof Error) {
+      throw submission;
+    }
+    writeRow(csvStream, loiProperties, tasks, loi, submission);
+  } catch (e) {
+    console.debug('Skipping row', e);
+  }
 }
 
 function getHeaders(
