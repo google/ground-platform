@@ -27,7 +27,7 @@ export async function createPostRequestSpy(
     ...args,
     method: 'POST',
     headers: encoder.headers,
-    rawBody: await buffer(encoder),
+    rawBody: await buffer(encoder)
   });
 }
 
@@ -53,8 +53,8 @@ export function createResponseSpy(chunks?: string[]): functions.Response<any> {
     'emit',
     'write'
   ]);
-  res.status.and.callThrough();
-  res.end.and.callThrough();
+  res.status.and.callThrough().and.returnValue(res);
+  res.end.and.callThrough().and.returnValue(res);
   res.write.and.callFake((chunk: any): boolean => {
     chunks?.push(chunk.toString());
     return true;

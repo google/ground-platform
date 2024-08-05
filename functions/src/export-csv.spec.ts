@@ -41,7 +41,7 @@ const s = registry.getFieldIds(Pb.Submission);
 const d = registry.getFieldIds(Pb.TaskData);
 const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
 
-fdescribe('exportCsv()', () => {
+describe('exportCsv()', () => {
   let mockFirestore: Firestore;
   const jobId = 'job123';
   const email = 'somebody@test.it';
