@@ -232,6 +232,8 @@ function getValue(
   } else if (result.drawGeometryResult?.geometry) {
     // TODO(#1248): Test when implementing other plot annotations feature.
     return toWkt(result.drawGeometryResult.geometry);
+  } else if (result.takePhotoResult) {
+    return getPhotoUrlValue(result.takePhotoResult);
   } else {
     return null;
   }
@@ -267,6 +269,10 @@ function getMultipleChoiceValues(task: Task, responses: Pb.TaskData.IMultipleCho
 
 function getMultipleChoiceLabel(task: Task, id: string): string | null {
   return task?.options?.find((o: any) => o.id === id)?.label;
+}
+
+function getPhotoUrlValue(result: Pb.TaskData.ITakePhotoResult): string | null {
+  return result?.photoPath || null;
 }
 
 /**

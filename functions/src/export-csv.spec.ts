@@ -64,19 +64,19 @@ fdescribe('exportCsv()', () => {
       [jobId]: {
         name: 'Test job',
         tasks: {
-          task001: {
+          'task001': {
             type: 'text_field',
             label: 'What is the meaning of life?',
           },
-          task002: {
+          'task002': {
             type: 'number_field',
             label: 'How much?',
           },
-          task003: {
+          'task003': {
             type: 'date_time_field',
             label: 'When?',
           },
-          task004: {
+          'task004': {
             type: 'select_multiple',
             label: 'Which ones?',
             options: [
@@ -91,10 +91,14 @@ fdescribe('exportCsv()', () => {
             ],
             hasOtherOption: true,
           },
-          task005: {
+          'task005': {
             type: 'capture_location',
             label: 'Where are you now?',
           },
+          'task006': {
+            type: 'take_photo',
+            label: 'Take a photo',
+          }          
         },
       },
     },
@@ -182,7 +186,7 @@ fdescribe('exportCsv()', () => {
     [s.ownerId]: userId,
     [s.taskData]: [
       {
-        [d.id]: 'data002a',
+        [d.id]: 'data004',
         [d.taskId]: 'task004',
         [d.multipleChoiceResponses]: {
           '1': ['aaa', 'bbb'],
@@ -190,7 +194,7 @@ fdescribe('exportCsv()', () => {
         },
       },
       {
-        [d.id]: 'data002a',
+        [d.id]: 'data005a',
         [d.taskId]: 'task005',
         [d.captureLocationResult]: {
           [cl.coordinates]: {
@@ -199,6 +203,13 @@ fdescribe('exportCsv()', () => {
           },
         },
       },
+      {
+        [d.id]: 'data006b',
+        [d.taskId]: 'task006',
+        [d.takePhotoResult]: {
+          '1': 'http://photo/url'
+        },
+      },      
     ],
   };
   const testCases = [
@@ -221,10 +232,10 @@ fdescribe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,`,
-        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other","POINT (45 -123)",,`,
+        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email"`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,`,
+        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,`,
+        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other","POINT (45 -123)","http://photo/url",,`,
       ],
     },
   ];
