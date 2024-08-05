@@ -102,7 +102,7 @@ message TaskData {
   // A manually entered number response.
   message NumberResponse {
     // The number provided by the user.
-    double number = 2;
+    double number = 1;
   }
 
   // A manually selected date and/or time response.
