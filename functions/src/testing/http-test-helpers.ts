@@ -27,7 +27,7 @@ export async function createPostRequestSpy(
     ...args,
     method: 'POST',
     headers: encoder.headers,
-    rawBody: await buffer(encoder)
+    rawBody: await buffer(encoder),
   });
 }
 
@@ -36,7 +36,7 @@ export async function createGetRequestSpy(
 ): Promise<functions.https.Request> {
   return jasmine.createSpyObj<functions.https.Request>('request', ['unpipe'], {
     ...args,
-    method: 'GET'
+    method: 'GET',
   });
 }
 
@@ -51,7 +51,7 @@ export function createResponseSpy(chunks?: string[]): functions.Response<any> {
     'on',
     'once',
     'emit',
-    'write'
+    'write',
   ]);
   res.status.and.callThrough().and.returnValue(res);
   res.end.and.callThrough().and.returnValue(res);

@@ -219,7 +219,7 @@ function getValue(
   } else if (result.dateTimeResponse) {
     return getDateTimeValue(result.dateTimeResponse);
   } else if (result.multipleChoiceResponses) {
-    return  getMultipleChoiceValues(task, result.multipleChoiceResponses);
+    return getMultipleChoiceValues(task, result.multipleChoiceResponses);
   } else if (result.captureLocationResult) {
     // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
@@ -258,12 +258,19 @@ function getDateTimeValue(
 }
 
 /**
- * Returns a comma-separated list of the labels of the 
+ * Returns a comma-separated list of the labels of the
  * specified multiple choice option, or the raw text if "Other".
  */
-function getMultipleChoiceValues(task: Task, responses: Pb.TaskData.IMultipleChoiceResponses) {
-  const values = responses.selectedOptionIds?.map(id => getMultipleChoiceLabel(task, id) || '#ERR') || [];
-  if (responses.otherText && responses.otherText.trim() !== '') values.push(responses.otherText);
+function getMultipleChoiceValues(
+  task: Task,
+  responses: Pb.TaskData.IMultipleChoiceResponses
+) {
+  const values =
+    responses.selectedOptionIds?.map(
+      id => getMultipleChoiceLabel(task, id) || '#ERR'
+    ) || [];
+  if (responses.otherText && responses.otherText.trim() !== '')
+    values.push(responses.otherText);
   return values.join(',');
 }
 

@@ -64,19 +64,19 @@ describe('exportCsv()', () => {
       [jobId]: {
         name: 'Test job',
         tasks: {
-          'task001': {
+          task001: {
             type: 'text_field',
             label: 'What is the meaning of life?',
           },
-          'task002': {
+          task002: {
             type: 'number_field',
             label: 'How much?',
           },
-          'task003': {
+          task003: {
             type: 'date_time_field',
             label: 'When?',
           },
-          'task004': {
+          task004: {
             type: 'select_multiple',
             label: 'Which ones?',
             options: [
@@ -91,14 +91,14 @@ describe('exportCsv()', () => {
             ],
             hasOtherOption: true,
           },
-          'task005': {
+          task005: {
             type: 'capture_location',
             label: 'Where are you now?',
           },
-          'task006': {
+          task006: {
             type: 'take_photo',
             label: 'Take a photo',
-          }          
+          },
         },
       },
     },
@@ -207,9 +207,9 @@ describe('exportCsv()', () => {
         [d.id]: 'data006b',
         [d.taskId]: 'task006',
         [d.takePhotoResult]: {
-          '1': 'http://photo/url'
+          '1': 'http://photo/url',
         },
-      },      
+      },
     ],
   };
   const testCases = [
@@ -220,9 +220,9 @@ describe('exportCsv()', () => {
       submissions: [],
       expectedFilename: 'ground-export.csv',
       expectedCsv: [
-        `"system:index","geometry","name","area","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,`,
-        `"POINT_002","POINT (8.3 47.05)","Luzern",,,`,
+        '"system:index","geometry","name","area","data:contributor_name","data:contributor_email"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,',
       ],
     },
     {
@@ -232,10 +232,10 @@ describe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        `"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email"`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,`,
-        `"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,`,
-        `"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other","POINT (45 -123)","http://photo/url",,`,
+        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other","POINT (45 -123)","http://photo/url",,',
       ],
     },
   ];
