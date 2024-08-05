@@ -91,7 +91,10 @@ function jobDocsToModel(data: DocumentData[]): Map<string, Job> {
           pb.name,
           Map<string, Task>(
             pb.tasks.map(taskPb => [taskPb.id!, taskPbToModel(taskPb)])
-          )
+          ),
+          pb.tasks.find(task => task.level === DataCollectionLevel.LOI_METADATA)
+            ? DataCollectionStrategy.MIXED
+            : DataCollectionStrategy.PREDEFINED
         ),
       ];
     })
@@ -174,7 +177,7 @@ function taskPbToModel(pb: Pb.ITask): Task {
     pb.index!,
     multipleChoice,
     condition,
-    pb.level! === DataCollectionLevel.LOI_DATA
+    pb.level! === DataCollectionLevel.LOI_METADATA
   );
 }
 
