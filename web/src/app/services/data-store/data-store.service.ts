@@ -30,7 +30,7 @@ import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
-import {filter, map, switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -84,7 +84,6 @@ export class DataStoreService {
         .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
         .valueChanges(),
     ]).pipe(
-      // Convert object to Survey instance.
       switchMap(surveyAndJobs => {
         const [s, jobs] = surveyAndJobs;
 
@@ -465,27 +464,30 @@ export class DataStoreService {
   }
 
   tasks$(surveyId: string, jobId: string): Observable<List<Task>> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .get()
-      .pipe(
-        map(doc => {
-          if (!doc.exists) {
-            return List<Task>();
-          }
-          const data = doc.data() as DocumentData;
-          const survey = surveyDocToModel(surveyId, data);
-          if (survey instanceof Error) {
-            return List<Task>();
-          }
-          const tasks = survey.getJob(jobId)?.tasks;
-          if (!tasks || typeof tasks === 'undefined') {
-            return List<Task>();
-          }
-          return tasks.toList()!;
-        })
-      );
+    return combineLatest([
+      this.db.collection(SURVEYS_COLLECTION_NAME).doc(surveyId).valueChanges(),
+      this.db
+        .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+        .valueChanges(),
+    ]).pipe(
+      switchMap(surveyAndJobs => {
+        const [s, jobs] = surveyAndJobs;
+
+        const survey = surveyDocToModel(
+          surveyId,
+          s as DocumentData,
+          jobs as DocumentData[]
+        );
+
+        if (survey instanceof Error) return of(List<Task>());
+
+        const tasks = survey.getJob(jobId)?.tasks;
+
+        if (!tasks) return of(List<Task>());
+
+        return of(tasks.toList());
+      })
+    );
   }
 
   /**
