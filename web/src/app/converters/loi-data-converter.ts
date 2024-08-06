@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
+import {registry, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {Map} from 'immutable';
 
@@ -25,6 +25,7 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {geometryPbToModel} from './geometry-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, an
@@ -40,7 +41,7 @@ export function loiDocToModel(
 ): LocationOfInterest | Error {
   // Use old converter if document doesn't include `job_id` using the new
   // proto-based format.
-  if (!data['2']) {
+  if (!data[l.jobId]) {
     return LegacyLoiDataConverter.toLocationOfInterest(id, data);
   }
   const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;

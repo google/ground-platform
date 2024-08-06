@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
+import {registry, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
 
@@ -35,13 +35,11 @@ import {
 import {Task, TaskType} from 'app/models/task/task.model';
 
 import Pb = GroundProtos.ground.v1beta1;
+const s = registry.getFieldIds(Pb.Survey);
 
 const DateTimeQuestionType = Pb.Task.DateTimeQuestion.Type;
-
 const DrawGeometryMethod = Pb.Task.DrawGeometry.Method;
-
 const MultipleChoiceQuestionType = Pb.Task.MultipleChoiceQuestion.Type;
-
 const DataCollectionLevel = Pb.Task.DataCollectionLevel;
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
@@ -188,7 +186,7 @@ export function surveyDocToModel(
 ): Survey | Error {
   // Use old converter if document doesn't include `name` using the new
   // proto-based format.
-  if (!data['2']) {
+  if (!data[s.name]) {
     return LegacySurveyDataConverter.toSurvey(id, data);
   }
   const pb = toMessage(data, Pb.Survey) as Pb.Survey;
