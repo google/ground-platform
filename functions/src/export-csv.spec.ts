@@ -48,25 +48,18 @@ const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
 
 describe('exportCsv()', () => {
   let mockFirestore: Firestore;
-  const jobId = 'job123';
   const email = 'somebody@test.it';
   const userId = 'user5000';
-  // TODO(#1758): Use new proto-based survey and job representation.
-  const survey1 = {
+  const survey = {
     id: 'survey001',
-    [sv.name]: 'Test survey 1',
+    [sv.name]: 'Test survey',
     [sv.acl]: {
       [email]: OWNER_ROLE,
     },
   };
-  const survey2 = {
-    id: 'survey002',
-    [sv.name]: 'Test survey 2',
-    [sv.acl]: {
-      [email]: OWNER_ROLE,
-    },
-  };
-  const job = {
+  const emptyJob = {id: 'job123'};
+  const job1 = {
+    id: 'job123',
     [j.name]: 'Test job',
     [j.tasks]: [
       {
@@ -129,7 +122,7 @@ describe('exportCsv()', () => {
   };
   const pointLoi1 = {
     id: 'loi100',
-    [l.jobId]: jobId,
+    [l.jobId]: job1.id,
     [l.customTag]: 'POINT_001',
     [l.geometry]: {
       [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
@@ -143,7 +136,7 @@ describe('exportCsv()', () => {
   };
   const pointLoi2 = {
     id: 'loi200',
-    [l.jobId]: jobId,
+    [l.jobId]: job1.id,
     [l.customTag]: 'POINT_002',
     [l.geometry]: {
       [g.point]: {[p.coordinates]: {[c.latitude]: 47.05, [c.longitude]: 8.3}},
@@ -158,7 +151,7 @@ describe('exportCsv()', () => {
     id: '001a',
     [s.loiId]: pointLoi1.id,
     [s.index]: 1,
-    [s.jobId]: jobId,
+    [s.jobId]: job1.id,
     [s.ownerId]: userId,
     [s.taskData]: [
       {
@@ -181,7 +174,7 @@ describe('exportCsv()', () => {
     id: '001b',
     [s.loiId]: pointLoi1.id,
     [s.index]: 2,
-    [s.jobId]: jobId,
+    [s.jobId]: job1.id,
     [s.ownerId]: userId,
     [s.taskData]: [
       {
@@ -206,7 +199,7 @@ describe('exportCsv()', () => {
     id: '002a',
     [s.loiId]: pointLoi2.id,
     [s.index]: 1,
-    [s.jobId]: jobId,
+    [s.jobId]: job1.id,
     [s.ownerId]: userId,
     [s.taskData]: [
       {
@@ -239,7 +232,9 @@ describe('exportCsv()', () => {
   const testCases = [
     {
       desc: 'export points w/o submissions',
-      survey: survey1,
+      jobId: emptyJob.id,
+      survey: survey,
+      jobs: [emptyJob],
       lois: [pointLoi1, pointLoi2],
       submissions: [],
       expectedFilename: 'ground-export.csv',
@@ -251,7 +246,9 @@ describe('exportCsv()', () => {
     },
     {
       desc: 'export points w/submissions',
-      survey: survey2,
+      jobId: job1.id,
+      survey: survey,
+      jobs: [job1],
       lois: [pointLoi1, pointLoi2],
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
@@ -274,11 +271,13 @@ describe('exportCsv()', () => {
   });
 
   testCases.forEach(
-    ({desc, survey, lois, submissions, expectedFilename, expectedCsv}) =>
+    ({desc, jobId, survey, jobs, lois, submissions, expectedFilename, expectedCsv}) =>
       it(desc, async () => {
         // Populate database.
         mockFirestore.doc(`surveys/${survey.id}`).set(survey);
-        mockFirestore.doc(`surveys/${survey.id}/jobs/${jobId}`).set(job);
+        jobs?.forEach(({id, ...job}) =>
+          mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
+        );
         lois?.forEach(({id, ...loi}) =>
           mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
         );
