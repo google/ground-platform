@@ -32,6 +32,9 @@ import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+const sv = registry.getFieldIds(Pb.Survey);
+const j = registry.getFieldIds(Pb.Job);
+const t = registry.getFieldIds(Pb.Task);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const pr = registry.getFieldIds(Pb.LocationOfInterest.Property);
 const p = registry.getFieldIds(Pb.Point);
@@ -39,6 +42,8 @@ const c = registry.getFieldIds(Pb.Coordinates);
 const g = registry.getFieldIds(Pb.Geometry);
 const s = registry.getFieldIds(Pb.Submission);
 const d = registry.getFieldIds(Pb.TaskData);
+const mq = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion);
+const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
 
 describe('exportCsv()', () => {
@@ -49,59 +54,78 @@ describe('exportCsv()', () => {
   // TODO(#1758): Use new proto-based survey and job representation.
   const survey1 = {
     id: 'survey001',
-    name: 'Test survey 1',
-    acl: {
+    [sv.name]: 'Test survey 1',
+    [sv.acl]: {
       [email]: OWNER_ROLE,
     },
   };
   const survey2 = {
     id: 'survey002',
-    name: 'Test survey 2',
-    acl: {
+    [sv.name]: 'Test survey 2',
+    [sv.acl]: {
       [email]: OWNER_ROLE,
     },
-    jobs: {
-      [jobId]: {
-        name: 'Test job',
-        tasks: {
-          task001: {
-            type: 'text_field',
-            label: 'What is the meaning of life?',
-          },
-          task002: {
-            type: 'number_field',
-            label: 'How much?',
-          },
-          task003: {
-            type: 'date_time_field',
-            label: 'When?',
-          },
-          task004: {
-            type: 'select_multiple',
-            label: 'Which ones?',
-            options: [
-              {
-                id: 'aaa',
-                label: 'AAA',
-              },
-              {
-                id: 'bbb',
-                label: 'BBB',
-              },
-            ],
-            hasOtherOption: true,
-          },
-          task005: {
-            type: 'capture_location',
-            label: 'Where are you now?',
-          },
-          task006: {
-            type: 'take_photo',
-            label: 'Take a photo',
-          },
+  };
+  const job = {
+    [j.name]: 'Test job',
+    [j.tasks]: [
+      {
+        [t.id]: 'task001',
+        [t.prompt]: 'What is the meaning of life?',
+        [t.textQuestion]:  {
+          ['1' /* type */]: Pb.Task.TextQuestion.Type.SHORT_TEXT
+        }
+      },
+      {
+        [t.id]: 'task002',
+        [t.prompt]: 'How much?',
+        [t.numberQuestion]: {
+          ['1' /* type */]: Pb.Task.NumberQuestion.Type.FLOAT
+        }
+      },
+      {
+        [t.id]: 'task003',
+        [t.prompt]: 'When?',
+        [t.dateTimeQuestion]: {
+          ['1' /* type */]: Pb.Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME
+        }
+      },
+      {
+        [t.id]: 'task004',
+        [t.prompt]: 'Which ones?',
+        [t.multipleChoiceQuestion]: {
+          [mq.type]: Pb.Task.MultipleChoiceQuestion.Type.SELECT_MULTIPLE,
+          [mq.options]: [
+            {
+              [op.id]: 'aaa',
+              [op.index]: 1,
+              [op.label]: 'AAA',
+            },
+            {
+              [op.id]: 'bbb',
+              [op.index]: 2,
+              [op.label]: 'BBB',
+            },
+          ],
+          [mq.hasOtherOption]: true,
         },
       },
-    },
+      {
+        [t.id]: 'task005',
+        [t.prompt]: 'Where are you now?',
+        [t.captureLocation]: {
+          ['1' /* min_accuracy_meters */]: 999999,
+        }
+      },
+      {
+        [t.id]: 'task006',
+        [t.prompt]: 'Take a photo',
+        [t.takePhoto]: {
+          ['1' /* min_heading_degrees */]: 0,
+          ['2' /* max_heading_degrees */]: 360,
+        }
+      },
+    ],
   };
   const pointLoi1 = {
     id: 'loi100',
@@ -254,6 +278,7 @@ describe('exportCsv()', () => {
       it(desc, async () => {
         // Populate database.
         mockFirestore.doc(`surveys/${survey.id}`).set(survey);
+        mockFirestore.doc(`surveys/${survey.id}/jobs/${jobId}`).set(job);
         lois?.forEach(({id, ...loi}) =>
           mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
         );
