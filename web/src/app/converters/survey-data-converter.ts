@@ -76,26 +76,27 @@ function keys(dict?: {}): string[] {
 }
 
 function jobDocsToModel(data: DocumentData[]): Map<string, Job> {
-  const pbs = data.map(job => toMessage(job, Pb.Job) as Pb.Job);
-
   return Map<string, Job>(
-    pbs.map(pb => {
-      return [
-        pb.id,
-        new Job(
-          pb.id,
-          pb.index,
-          pb.style?.color || undefined,
-          pb.name,
-          Map<string, Task>(
-            pb.tasks.map(taskPb => [taskPb.id!, taskPbToModel(taskPb)])
-          ),
-          pb.tasks.find(task => task.level === DataCollectionLevel.LOI_METADATA)
-            ? DataCollectionStrategy.MIXED
-            : DataCollectionStrategy.PREDEFINED
-        ),
-      ];
+    data.map(job => {
+      const pb = toMessage(job, Pb.Job) as Pb.Job;
+
+      return [pb.id, jobPbToModel(pb)];
     })
+  );
+}
+
+function jobPbToModel(pb: Pb.IJob): Job {
+  return new Job(
+    pb.id!,
+    pb.index!,
+    pb.style?.color || undefined,
+    pb.name!,
+    Map<string, Task>(
+      pb.tasks!.map(taskPb => [taskPb.id!, taskPbToModel(taskPb)])
+    ),
+    pb.tasks!.find(task => task.level === DataCollectionLevel.LOI_METADATA)
+      ? DataCollectionStrategy.MIXED
+      : DataCollectionStrategy.PREDEFINED
   );
 }
 
