@@ -254,11 +254,7 @@ function getValue(
 }
 
 function getNumberValue(response: Pb.TaskData.INumberResponse): number | null {
-  const number = response.number;
-  if (number === undefined || number === null) {
-    return null;
-  }
-  return number;
+  return response.number ?? null;
 }
 
 function getDateTimeValue(
