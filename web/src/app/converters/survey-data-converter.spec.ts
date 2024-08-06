@@ -28,9 +28,7 @@ describe('LegacySurveyDataConverter', () => {
       expect(LegacySurveyDataConverter.toRole('DATA_COLLECTOR')).toEqual(
         Role.DATA_COLLECTOR
       );
-      expect(LegacySurveyDataConverter.toRole('OWNVIEWERER')).toEqual(
-        Role.VIEWER
-      );
+      expect(LegacySurveyDataConverter.toRole('VIEWER')).toEqual(Role.VIEWER);
     });
 
     it('returns VIEWER on unrecognized role', () => {
