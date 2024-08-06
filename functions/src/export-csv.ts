@@ -227,7 +227,7 @@ function getValue(
     return null;
   }
   if (result.textResponse) {
-    return result.textResponse.text || null;
+    return result.textResponse.text ?? null;
   } else if (result.numberResponse) {
     return getNumberValue(result.numberResponse);
   } else if (result.dateTimeResponse) {
