@@ -25,6 +25,7 @@ import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
 import {Job} from 'app/models/job.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
@@ -122,22 +123,12 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
     else if (dateTimeResponse)
       value = new Date(timestampToInt(dateTimeResponse.dateTime));
     else if (multipleChoiceResponses) {
-      value =
+      value = new MultipleSelection(
         task.multipleChoice?.options.filter(({id: optionId}) =>
           multipleChoiceResponses!.selectedOptionIds?.includes(optionId)
-        ) || List([]);
-
-      if (
-        task.multipleChoice?.hasOtherOption &&
-        multipleChoiceResponses!.otherText
-      ) {
-        value = value.push(
-          createOtherOption(
-            multipleChoiceResponses!.otherText,
-            task.multipleChoice?.options.size
-          )
-        );
-      }
+        ) || List([]),
+        multipleChoiceResponses.otherText
+      );
     } else if (drawGeometryResult)
       value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
     else if (captureLocationResult)
@@ -266,22 +257,21 @@ export class LegacySubmissionDataConverter {
     task?: Task
   ): Result | Error {
     try {
-      if (typeof resultValue === 'number') {
-        return new Result(resultValue as number);
-      } else if (typeof resultValue === 'string') {
-        return new Result(resultValue as string);
-      } else if (resultValue instanceof Array) {
+      if (typeof resultValue === 'number' || typeof resultValue === 'string') {
+        return new Result(resultValue);
+      } else if (Array.isArray(resultValue)) {
         return new Result(
-          List(
-            resultValue.map(optionId => {
-              if (optionId.startsWith('['))
-                return createOtherOption(optionId, resultValue.length);
-              else
-                return (
-                  task?.getMultipleChoiceOption(optionId) ||
-                  new Option(optionId, optionId, optionId, -1)
-                );
-            })
+          new MultipleSelection(
+            List(
+              resultValue
+                .filter(optionId => !optionId.startsWith('['))
+                .map(
+                  optionId =>
+                    task?.getMultipleChoiceOption(optionId) ||
+                    new Option(optionId, optionId, optionId, -1)
+                )
+            ),
+            resultValue.find(optionId => optionId.startsWith('['))
           )
         );
       } else if (resultValue instanceof Timestamp) {

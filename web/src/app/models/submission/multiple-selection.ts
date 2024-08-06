@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
+import {List} from 'immutable';
 
-import {MultipleSelection} from './multiple-selection';
-import {Point} from '../geometry/point';
-import {Polygon} from '../geometry/polygon';
+import {Option} from 'app/models/task/option.model';
 
-export class Result {
+export class MultipleSelection {
   constructor(
-    readonly value:
-      | number
-      | string
-      | MultipleSelection
-      | Date
-      | Point
-      | Polygon
-      | MultiPolygon
+    readonly values: List<Option>,
+    readonly otherValue?: string | null
   ) {}
 }

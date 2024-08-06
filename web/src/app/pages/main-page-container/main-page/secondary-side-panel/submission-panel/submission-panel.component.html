@@ -41,8 +41,12 @@ limitations under the License.
           <div *ngIf="getTaskSubmissionResult(task) !== undefined">
             <!-- Multiple choice task types -->
             <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
-              <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task)">
+              <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task).values">
                 {{option.label}}
+              </mat-checkbox>
+
+              <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherOption">
+                Other: {{option.label}}
               </mat-checkbox>
             </div>
             <!-- Photo task types -->
