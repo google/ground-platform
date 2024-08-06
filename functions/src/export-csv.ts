@@ -200,7 +200,7 @@ function writeRow(
 }
 
 function quote(value: any): string {
-  if (value === null || value === undefined) {
+  if (value == null) {
     return '';
   }
   if (typeof value === 'number') {
@@ -261,7 +261,7 @@ function getDateTimeValue(
   response: Pb.TaskData.IDateTimeResponse
 ): string | null {
   const seconds = response.dateTime?.seconds;
-  if (seconds === undefined || seconds === null) {
+  if (seconds == null) {
     return null;
   }
   return new Date(Number(seconds) * 1000).toISOString();
