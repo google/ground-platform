@@ -100,6 +100,10 @@ export async function exportCsvHandler(
     if (loi instanceof Error) {
       throw loi;
     }
+    // Submissions to be joined with the current LOI, resulting in one row
+    // per submission. For LOIs with no submissions, a single empty submission
+    // is added to ensure the LOI is represented in the output as a row with
+    // LOI fields, but no submission data.
     const submissions = submissionsByLoi[loiDoc.id] || [{}];
     submissions.forEach(submissionDict =>
       writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
