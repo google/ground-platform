@@ -303,7 +303,7 @@ function getFileName(jobName: string | null) {
 
 function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
   return new Set(
-    lois.docs.map(loi => Object.keys(loi.get(l.properties) || {})).flat()
+    lois.docs.flatMap(loi => Object.keys(loi.get(l.properties) || {}))
   );
 }
 
