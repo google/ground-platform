@@ -31,18 +31,6 @@ import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 
-// TODO(#1277): Use a shared model with web
-type Task = {
-  readonly id: string;
-  readonly type: string;
-  readonly label: string;
-  readonly required: boolean;
-  readonly index: number;
-  readonly multipleChoice?: any;
-  readonly options?: any;
-  readonly hasOtherOption?: boolean;
-};
-
 /** A dictionary of submissions values (array) keyed by loi ID. */
 type SubmissionDict = {[key: string]: any[]};
 
@@ -58,26 +46,33 @@ export async function exportCsvHandler(
   const db = getDatastore();
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
-  const survey = await db.fetchSurvey(surveyId);
-  if (!survey.exists) {
+  const surveyDoc = await db.fetchSurvey(surveyId);
+  if (!surveyDoc.exists) {
     res.status(HttpStatus.NOT_FOUND).send('Survey not found');
     return;
   }
-  if (!canExport(user, survey)) {
+  if (!canExport(user, surveyDoc)) {
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
-  // TODO(#1779): Get job metadata from  `/surveys/{surveyId}/jobs` instead.
-  const jobs = survey.get('jobs') || {};
-  const job = jobs[jobId] || {};
+  const jobDoc = await db.fetchJob(surveyId, jobId);
+  if (!jobDoc.exists || !jobDoc.data()) {
+    res.status(HttpStatus.NOT_FOUND).send('Job not found');
+    return;
+  }
+  const job = toMessage(jobDoc.data()!, Pb.Job);
+  if (job instanceof Error) {
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .send('Unsupported or corrupt job');
+    return;
+  }
   const jobName = job.name;
-  const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
-  const tasks = new Map(Object.entries(tasksObject));
-  const loiDocs = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
+  const loiDocs = await db.fetchLocationsOfInterestByJobId(surveyId, jobId);
   const loiProperties = getPropertyNames(loiDocs);
-  const headers = getHeaders(tasks, loiProperties);
+  const headers = getHeaders(job.tasks, loiProperties);
 
   res.type('text/csv');
   res.setHeader(
@@ -93,7 +88,7 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const submissionsByLoi = await getSubmissionsByLoi(survey.id, jobId);
+  const submissionsByLoi = await getSubmissionsByLoi(surveyId, jobId);
 
   loiDocs.forEach(loiDoc => {
     const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
@@ -106,7 +101,7 @@ export async function exportCsvHandler(
     // LOI fields, but no submission data.
     const submissions = submissionsByLoi[loiDoc.id] || [{}];
     submissions.forEach(submissionDict =>
-      writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
+      writeSubmissions(csvStream, loiProperties, job.tasks, loi, submissionDict)
     );
   });
   res.status(HttpStatus.OK);
@@ -116,7 +111,7 @@ export async function exportCsvHandler(
 function writeSubmissions(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
-  tasks: Map<string, Task>,
+  tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
   submissionDict: SubmissionDict
 ) {
@@ -131,16 +126,13 @@ function writeSubmissions(
   }
 }
 
-function getHeaders(
-  tasks: Map<string, Task>,
-  loiProperties: Set<string>
-): string[] {
+function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
   const headers = [];
   headers.push('system:index');
   headers.push('geometry');
   headers.push(...loiProperties);
   // TODO(#1936): Use `index` field to export columns in correct order.
-  tasks.forEach(task => headers.push('data:' + task.label));
+  tasks.forEach(task => headers.push('data:' + (task.prompt || '')));
   headers.push('data:contributor_name');
   headers.push('data:contributor_email');
   return headers.map(quote);
@@ -173,7 +165,7 @@ async function getSubmissionsByLoi(
 function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
-  tasks: Map<string, Task>,
+  tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
   submission: Pb.Submission
 ) {
@@ -190,9 +182,7 @@ function writeRow(
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
   const data = submission.taskData;
   // Header: One column for each task
-  tasks.forEach((task, taskId) =>
-    row.push(quote(getValue(taskId, task, data)))
-  );
+  tasks.forEach(task => row.push(quote(getValue(task, data))));
   // Header: contributor_username, contributor_email
   row.push(quote(submission.created?.displayName));
   row.push(quote(submission.created?.emailAddress));
@@ -218,11 +208,10 @@ function toWkt(geometry: Pb.IGeometry): string {
  * Returns the string or number representation of a specific task element result.
  */
 function getValue(
-  taskId: string,
-  task: Task,
+  task: Pb.ITask,
   data: Pb.ITaskData[]
 ): string | number | null {
-  const result = data.find(d => d.taskId === taskId);
+  const result = data.find(d => d.taskId === task.id);
   if (!result) {
     return null;
   }
@@ -272,7 +261,7 @@ function getDateTimeValue(
  * specified multiple choice option, or the raw text if "Other".
  */
 function getMultipleChoiceValues(
-  task: Task,
+  task: Pb.ITask,
   responses: Pb.TaskData.IMultipleChoiceResponses
 ) {
   const values =
@@ -284,8 +273,11 @@ function getMultipleChoiceValues(
   return values.join(',');
 }
 
-function getMultipleChoiceLabel(task: Task, id: string): string | null {
-  return task?.options?.find((o: any) => o.id === id)?.label;
+function getMultipleChoiceLabel(task: Pb.ITask, id: string): string | null {
+  return (
+    task?.multipleChoiceQuestion?.options?.find((o: any) => o.id === id)
+      ?.label ?? null
+  );
 }
 
 function getPhotoUrlValue(result: Pb.TaskData.ITakePhotoResult): string | null {

@@ -53,6 +53,12 @@ export const surveys = () => 'surveys';
 export const survey = (surveyId: string) => surveys() + '/' + surveyId;
 
 /**
+ * Returns the path of job doc with the specified id.
+ */
+export const job = (surveyId: string, jobId: string) =>
+  `${survey(surveyId)}/jobs/${jobId}`;
+
+/**
  * Returns the path of the survey collection in the survey with the specified id.
  */
 export const lois = (surveyId: string) => survey(surveyId) + '/lois';
@@ -120,6 +126,10 @@ export class Datastore {
 
   fetchSurvey(surveyId: string) {
     return this.db_.doc(survey(surveyId)).get();
+  }
+
+  fetchJob(surveyId: string, jobId: string) {
+    return this.db_.doc(job(surveyId, jobId)).get();
   }
 
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
