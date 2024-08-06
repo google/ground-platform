@@ -152,7 +152,7 @@ function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
   } else return undefined;
 }
 
-function multipleChoicePbToModel(pb: Pb.ITask): MultipleChoice | undefined {
+function taskMultipleChoicePbToModel(pb: Pb.ITask): MultipleChoice | undefined {
   const {multipleChoiceQuestion} = pb;
 
   if (multipleChoiceQuestion) {
@@ -179,7 +179,7 @@ function taskPbToModel(pb: Pb.ITask): Task {
     pb.prompt!,
     pb.required!,
     pb.index!,
-    multipleChoicePbToModel(pb),
+    taskMultipleChoicePbToModel(pb),
     taskConditionPbToModel(pb),
     pb.level! === DataCollectionLevel.LOI_METADATA
   );
