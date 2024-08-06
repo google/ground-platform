@@ -100,9 +100,7 @@ function jobPbToModel(pb: Pb.IJob): Job {
   );
 }
 
-function taskPbToModel(pb: Pb.ITask): Task {
-  let taskType = null;
-
+function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
   const {
     textQuestion,
     numberQuestion,
@@ -111,29 +109,32 @@ function taskPbToModel(pb: Pb.ITask): Task {
     drawGeometry,
     captureLocation,
     takePhoto,
-    conditions,
   } = pb;
 
-  if (textQuestion) taskType = TaskType.TEXT;
-  else if (numberQuestion) taskType = TaskType.NUMBER;
+  if (textQuestion) return TaskType.TEXT;
+  else if (numberQuestion) return TaskType.NUMBER;
   else if (dateTimeQuestion) {
     if (dateTimeQuestion.type === DateTimeQuestionType.DATE_ONLY)
-      taskType = TaskType.DATE;
+      return TaskType.DATE;
     else if (dateTimeQuestion.type === DateTimeQuestionType.TIME_ONLY)
-      taskType = TaskType.TIME;
+      return TaskType.TIME;
     else if (dateTimeQuestion.type === DateTimeQuestionType.BOTH_DATE_AND_TIME)
-      taskType = TaskType.DATE_TIME;
+      return TaskType.DATE_TIME;
     else throw new Error('Error converting to Task: invalid task data');
-  } else if (multipleChoiceQuestion) taskType = TaskType.MULTIPLE_CHOICE;
+  } else if (multipleChoiceQuestion) return TaskType.MULTIPLE_CHOICE;
   else if (drawGeometry) {
     if (drawGeometry.allowedMethods!.includes(DrawGeometryMethod.DRAW_AREA))
-      taskType = TaskType.DRAW_AREA;
+      return TaskType.DRAW_AREA;
     else if (drawGeometry.allowedMethods!.includes(DrawGeometryMethod.DROP_PIN))
-      taskType = TaskType.DROP_PIN;
+      return TaskType.DROP_PIN;
     else throw new Error('Error converting to Task: invalid task data');
-  } else if (captureLocation) taskType = TaskType.CAPTURE_LOCATION;
-  else if (takePhoto) taskType = TaskType.PHOTO;
+  } else if (captureLocation) return TaskType.CAPTURE_LOCATION;
+  else if (takePhoto) return TaskType.PHOTO;
   else throw new Error('Error converting to Task: invalid task data');
+}
+
+function taskPbToModel(pb: Pb.ITask): Task {
+  const {multipleChoiceQuestion, conditions} = pb;
 
   let condition = undefined;
   if (conditions && conditions.length > 0) {
@@ -170,7 +171,7 @@ function taskPbToModel(pb: Pb.ITask): Task {
 
   return new Task(
     pb.id!,
-    taskType,
+    taskPbToModelTaskType(pb),
     pb.prompt!,
     pb.required!,
     pb.index!,
