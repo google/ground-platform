@@ -133,6 +133,25 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
   else throw new Error('Error converting to Task: invalid task data');
 }
 
+function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
+  const {conditions} = pb;
+
+  if (Array.isArray(conditions) && conditions.length > 0) {
+    const {multipleChoice} = conditions[0];
+
+    return new TaskCondition(
+      TaskConditionMatchType.MATCH_ALL,
+      List([
+        new TaskConditionExpression(
+          TaskConditionExpressionType.ONE_OF_SELECTED,
+          multipleChoice!.taskId!,
+          List(multipleChoice!.optionIds!)
+        ),
+      ])
+    );
+  } else return undefined;
+}
+
 function taskPbToModel(pb: Pb.ITask): Task {
   const {multipleChoiceQuestion, conditions} = pb;
 
@@ -176,7 +195,7 @@ function taskPbToModel(pb: Pb.ITask): Task {
     pb.required!,
     pb.index!,
     multipleChoice,
-    condition,
+    taskConditionPbToModel(pb),
     pb.level! === DataCollectionLevel.LOI_METADATA
   );
 }
