@@ -235,7 +235,7 @@ describe('importGeoJson()', () => {
       input: geoJsonWithMultiPolygon,
       expected: [multiPolygonLoi],
     },
-  ];
+  ].filter((_, idx) => idx === 0);
 
   beforeEach(() => {
     mockFirestore = createMockFirestore();

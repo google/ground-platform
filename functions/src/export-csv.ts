@@ -20,10 +20,16 @@ import {canExport} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
-import {Datastore} from './common/datastore';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
 import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
+import {registry, toMessage} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
+import {toGeoJsonGeometry} from '@ground/lib';
+
+import Pb = GroundProtos.ground.v1beta1;
+const sb = registry.getFieldIds(Pb.Submission);
+const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 // TODO(#1277): Use a shared model with web
 type Task = {
@@ -37,14 +43,8 @@ type Task = {
   readonly hasOtherOption?: boolean;
 };
 
-type Dict = {[key: string]: any};
-
 /** A dictionary of submissions values (array) keyed by loi ID. */
 type SubmissionDict = {[key: string]: any[]};
-
-// TODO(#1277): Use a shared model with web
-type LoiDocument =
-  FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>;
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -69,9 +69,10 @@ export async function exportCsvHandler(
   }
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
+  // TODO(#1779): Get job metadata from  `/surveys/{surveyId}/jobs` instead.
   const jobs = survey.get('jobs') || {};
   const job = jobs[jobId] || {};
-  const jobName = job.name && (job.name['en'] as string);
+  const jobName = job.name;
   const tasksObject = (job['tasks'] as {[id: string]: Task}) || {};
   const tasks = new Map(Object.entries(tasksObject));
   const loiDocs = await db.fetchLocationsOfInterestByJobId(survey.id, jobId);
@@ -86,21 +87,48 @@ export async function exportCsvHandler(
   const csvStream = csv.format({
     delimiter: ',',
     headers,
-    includeEndRowDelimiter: true,
     rowDelimiter: '\n',
-    quoteColumns: true,
-    quote: '"',
+    includeEndRowDelimiter: true, // Add \n to last row in CSV
+    quote: false,
   });
   csvStream.pipe(res);
 
   const submissionsByLoi = await getSubmissionsByLoi(survey.id, jobId);
 
   loiDocs.forEach(loiDoc => {
-    submissionsByLoi[loiDoc.id]?.forEach(submission =>
-      writeRow(csvStream, loiProperties, tasks, loiDoc, submission)
+    const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
+    if (loi instanceof Error) {
+      throw loi;
+    }
+    // Submissions to be joined with the current LOI, resulting in one row
+    // per submission. For LOIs with no submissions, a single empty submission
+    // is added to ensure the LOI is represented in the output as a row with
+    // LOI fields, but no submission data.
+    const submissions = submissionsByLoi[loiDoc.id] || [{}];
+    submissions.forEach(submissionDict =>
+      writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
     );
   });
+  res.status(HttpStatus.OK);
   csvStream.end();
+}
+
+function writeSubmissions(
+  csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
+  loiProperties: Set<string>,
+  tasks: Map<string, Task>,
+  loi: Pb.LocationOfInterest,
+  submissionDict: SubmissionDict
+) {
+  try {
+    const submission = toMessage(submissionDict, Pb.Submission);
+    if (submission instanceof Error) {
+      throw submission;
+    }
+    writeRow(csvStream, loiProperties, tasks, loi, submission);
+  } catch (e) {
+    console.debug('Skipping row', e);
+  }
 }
 
 function getHeaders(
@@ -111,10 +139,11 @@ function getHeaders(
   headers.push('system:index');
   headers.push('geometry');
   headers.push(...loiProperties);
+  // TODO(#1936): Use `index` field to export columns in correct order.
   tasks.forEach(task => headers.push('data:' + task.label));
-  headers.push('data:contributor_username');
+  headers.push('data:contributor_name');
   headers.push('data:contributor_email');
-  return headers;
+  return headers.map(quote);
 }
 
 /**
@@ -133,7 +162,7 @@ async function getSubmissionsByLoi(
   const submissions = await db.fetchSubmissionsByJobId(surveyId, jobId);
   const submissionsByLoi: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
-    const loiId = submission.get('loiId') as string;
+    const loiId = submission.get(sb.loiId) as string;
     const arr: any[] = submissionsByLoi[loiId] || [];
     arr.push(submission.data());
     submissionsByLoi[loiId] = arr;
@@ -145,107 +174,128 @@ function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
   tasks: Map<string, Task>,
-  loiDoc: LoiDocument,
-  submission: SubmissionDict
+  loi: Pb.LocationOfInterest,
+  submission: Pb.Submission
 ) {
   const row = [];
   // Header: system:index
-  row.push(loiDoc.get('properties')?.id || '');
+  row.push(quote(loi.customTag));
   // Header: geometry
-  row.push(toWkt(loiDoc.get('geometry')) || '');
+  if (!loi.geometry) {
+    console.debug(`Skipping LOI ${loi.id} - missing geometry`);
+    return;
+  }
+  row.push(quote(toWkt(loi.geometry)));
   // Header: One column for each loi property (merged over all properties across all LOIs)
-  row.push(...getPropertiesByName(loiDoc, loiProperties));
-  // TODO(#1288): Clean up remaining references to old responses field
-  const data =
-    submission['data'] ||
-    submission['responses'] ||
-    submission['results'] ||
-    {};
+  getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
+  const data = submission.taskData;
   // Header: One column for each task
-  tasks.forEach((task, taskId) => row.push(getValue(taskId, task, data)));
+  tasks.forEach((task, taskId) =>
+    row.push(quote(getValue(taskId, task, data)))
+  );
   // Header: contributor_username, contributor_email
-  const contributor = submission['created']
-    ? (submission['created'] as Dict)['user']
-    : [];
-  row.push(contributor['displayName'] || '');
-  row.push(contributor['email'] || '');
+  row.push(quote(submission.created?.displayName));
+  row.push(quote(submission.created?.emailAddress));
   csvStream.write(row);
 }
 
-/**
- * Returns the WKT string converted from the given geometry object
- *
- * @param geometryObject - the GeoJSON geometry object extracted from the LOI. This should have format:
- *   {
- *      coordinates: any[],
- *      type: string
- *   }
- * @returns The WKT string version of the object
- * https://www.vertica.com/docs/9.3.x/HTML/Content/Authoring/AnalyzingData/Geospatial/Spatial_Definitions/WellknownTextWKT.htm
- *
- * @beta
- */
-function toWkt(geometryObject: any): string {
-  return geojsonToWKT(Datastore.fromFirestoreMap(geometryObject));
+function quote(value: any): string {
+  if (value == null) {
+    return '';
+  }
+  if (typeof value === 'number') {
+    return value.toString();
+  }
+  const escaped = value.toString().replaceAll('"', '""');
+  return `"${escaped}"`;
+}
+
+function toWkt(geometry: Pb.IGeometry): string {
+  return geojsonToWKT(toGeoJsonGeometry(geometry));
 }
 
 /**
- * Returns the string representation of a specific task element result.
+ * Returns the string or number representation of a specific task element result.
  */
-function getValue(taskId: string, task: Task, data: any) {
-  const result = data[taskId] || '';
-  if (
-    task.type === 'multiple_choice' &&
-    Array.isArray(result) &&
-    task.options
-  ) {
-    return result.map(id => getMultipleChoiceValues(id, task)).join(', ');
-  } else if (task.type === 'capture_location') {
-    if (!result) {
-      return '';
-    }
-    return toWkt(result.geometry || result);
+function getValue(
+  taskId: string,
+  task: Task,
+  data: Pb.ITaskData[]
+): string | number | null {
+  const result = data.find(d => d.taskId === taskId);
+  if (!result) {
+    return null;
+  }
+  if (result.textResponse) {
+    return result.textResponse.text ?? null;
+  } else if (result.numberResponse) {
+    return getNumberValue(result.numberResponse);
+  } else if (result.dateTimeResponse) {
+    return getDateTimeValue(result.dateTimeResponse);
+  } else if (result.multipleChoiceResponses) {
+    return getMultipleChoiceValues(task, result.multipleChoiceResponses);
+  } else if (result.captureLocationResult) {
+    // TODO(#1916): Include altitude and accuracy in separate columns.
+    return toWkt(
+      new Pb.Geometry({
+        point: new Pb.Point({
+          coordinates: result.captureLocationResult.coordinates,
+        }),
+      })
+    );
+  } else if (result.drawGeometryResult?.geometry) {
+    // TODO(#1248): Test when implementing other plot annotations feature.
+    return toWkt(result.drawGeometryResult.geometry);
+  } else if (result.takePhotoResult) {
+    return getPhotoUrlValue(result.takePhotoResult);
   } else {
-    return result;
+    return null;
   }
+}
+
+function getNumberValue(response: Pb.TaskData.INumberResponse): number | null {
+  return response.number ?? null;
+}
+
+function getDateTimeValue(
+  response: Pb.TaskData.IDateTimeResponse
+): string | null {
+  const seconds = response.dateTime?.seconds;
+  if (seconds == null) {
+    return null;
+  }
+  return new Date(Number(seconds) * 1000).toISOString();
 }
 
 /**
- * Returns the code associated with a specified multiple choice option, or if
- * the code is not defined, returns the label in English.
+ * Returns a comma-separated list of the labels of the
+ * specified multiple choice option, or the raw text if "Other".
  */
-function getMultipleChoiceValues(id: any, task: Task) {
-  // "Other" options are encoded to be surrounded by square brakets, to let us
-  // distinguish them from the other pre-defined options.
-  if (isOtherOption(id)) {
-    return extractOtherOption(id);
-  }
-  const options = task.options || {};
-  const option = options[id] || {};
-  const label = option.label || {};
-  // TODO: i18n.
-  return option.code || label || '';
+function getMultipleChoiceValues(
+  task: Task,
+  responses: Pb.TaskData.IMultipleChoiceResponses
+) {
+  const values =
+    responses.selectedOptionIds?.map(
+      id => getMultipleChoiceLabel(task, id) || '#ERR'
+    ) || [];
+  if (responses.otherText && responses.otherText.trim() !== '')
+    values.push(responses.otherText);
+  return values.join(',');
 }
 
-function isOtherOption(submission: any): boolean {
-  // "Other" options are encoded to be surrounded by square brakets, to let us
-  // distinguish them from the other pre-defined options.
-  return (
-    typeof submission === 'string' &&
-    submission.startsWith('[ ') &&
-    submission.endsWith(' ]')
-  );
+function getMultipleChoiceLabel(task: Task, id: string): string | null {
+  return task?.options?.find((o: any) => o.id === id)?.label;
 }
 
-function extractOtherOption(submission: string): string {
-  const match = submission.match(/\[(.*?)\]/); // Match any text between []
-  return match ? match[1].trim() : ''; // Extract the match and remove spaces
+function getPhotoUrlValue(result: Pb.TaskData.ITakePhotoResult): string | null {
+  return result?.photoPath || null;
 }
 
 /**
  * Returns the file name in lowercase (replacing any special characters with '-') for csv export
  */
-function getFileName(jobName: string) {
+function getFileName(jobName: string | null) {
   jobName = jobName || 'ground-export';
   const fileBase = jobName.toLowerCase().replace(/[^a-z0-9]/gi, '-');
   return `${fileBase}.csv`;
@@ -253,22 +303,16 @@ function getFileName(jobName: string) {
 
 function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
   return new Set(
-    lois.docs
-      .map(loi =>
-        Object.keys(loi.get('properties') || {})
-          // Don't retrieve ID because we already store it in a separate column
-          .filter(prop => prop !== 'id')
-      )
-      .flat()
+    lois.docs.flatMap(loi => Object.keys(loi.get(l.properties) || {}))
   );
 }
 
 function getPropertiesByName(
-  loiDoc: LoiDocument,
-  loiProperties: Set<string>
-): List<string> {
+  loi: Pb.LocationOfInterest,
+  properties: Set<string | number>
+): List<string | number | null> {
   // Fill the list with the value associated with a prop, if the LOI has it, otherwise leave empty.
-  return List.of(...loiProperties).map(
-    prop => (loiDoc.get('properties') || {})[prop] || ''
-  );
+  return List.of(...properties)
+    .map(prop => loi.properties[prop])
+    .map(value => value?.stringValue || value?.numericValue || null);
 }
