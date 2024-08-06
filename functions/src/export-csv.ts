@@ -62,7 +62,7 @@ export async function exportCsvHandler(
     res.status(HttpStatus.NOT_FOUND).send('Job not found');
     return;
   }
-  const job = toMessage(jobDoc.data()!!, Pb.Job);
+  const job = toMessage(jobDoc.data()!, Pb.Job);
   if (job instanceof Error) {
     res
       .status(HttpStatus.INTERNAL_SERVER_ERROR)

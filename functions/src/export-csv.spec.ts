@@ -65,23 +65,23 @@ describe('exportCsv()', () => {
       {
         [t.id]: 'task001',
         [t.prompt]: 'What is the meaning of life?',
-        [t.textQuestion]:  {
-          ['1' /* type */]: Pb.Task.TextQuestion.Type.SHORT_TEXT
-        }
+        [t.textQuestion]: {
+          ['1' /* type */]: Pb.Task.TextQuestion.Type.SHORT_TEXT,
+        },
       },
       {
         [t.id]: 'task002',
         [t.prompt]: 'How much?',
         [t.numberQuestion]: {
-          ['1' /* type */]: Pb.Task.NumberQuestion.Type.FLOAT
-        }
+          ['1' /* type */]: Pb.Task.NumberQuestion.Type.FLOAT,
+        },
       },
       {
         [t.id]: 'task003',
         [t.prompt]: 'When?',
         [t.dateTimeQuestion]: {
-          ['1' /* type */]: Pb.Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME
-        }
+          ['1' /* type */]: Pb.Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
+        },
       },
       {
         [t.id]: 'task004',
@@ -108,7 +108,7 @@ describe('exportCsv()', () => {
         [t.prompt]: 'Where are you now?',
         [t.captureLocation]: {
           ['1' /* min_accuracy_meters */]: 999999,
-        }
+        },
       },
       {
         [t.id]: 'task006',
@@ -116,7 +116,7 @@ describe('exportCsv()', () => {
         [t.takePhoto]: {
           ['1' /* min_heading_degrees */]: 0,
           ['2' /* max_heading_degrees */]: 360,
-        }
+        },
       },
     ],
   };
@@ -271,7 +271,16 @@ describe('exportCsv()', () => {
   });
 
   testCases.forEach(
-    ({desc, jobId, survey, jobs, lois, submissions, expectedFilename, expectedCsv}) =>
+    ({
+      desc,
+      jobId,
+      survey,
+      jobs,
+      lois,
+      submissions,
+      expectedFilename,
+      expectedCsv,
+    }) =>
       it(desc, async () => {
         // Populate database.
         mockFirestore.doc(`surveys/${survey.id}`).set(survey);

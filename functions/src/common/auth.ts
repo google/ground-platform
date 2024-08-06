@@ -108,5 +108,8 @@ export function canImport(
 ): boolean {
   const role = getRole(user, survey);
   // TODO(#1858): Remove old roles.
-  return !!role && [OWNER_ROLE, SURVEY_ORGANIZER_ROLE, Pb.Role.SURVEY_ORGANIZER].includes(role);
+  return (
+    !!role &&
+    [OWNER_ROLE, SURVEY_ORGANIZER_ROLE, Pb.Role.SURVEY_ORGANIZER].includes(role)
+  );
 }
