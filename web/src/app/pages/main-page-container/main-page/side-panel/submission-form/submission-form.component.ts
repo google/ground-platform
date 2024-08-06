@@ -23,6 +23,7 @@ import {first, map, switchMap} from 'rxjs/operators';
 import {JobListItemActionsType} from 'app/components/job-list-item/job-list-item.component';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Job} from 'app/models/job.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
@@ -267,7 +268,7 @@ export class SubmissionFormComponent {
     result?: Result
   ): void {
     const selectedOptionId = (
-      (result?.value as List<Option>)?.first() as Option
+      (result?.value as MultipleSelection)?.values.first() as Option
     )?.id;
     group[task.id] = task.required
       ? new FormControl(selectedOptionId, Validators.required)
@@ -278,7 +279,7 @@ export class SubmissionFormComponent {
     const selectedOption: Option = task.getMultipleChoiceOption(
       this.submissionForm?.value[task.id]
     );
-    return new Result(List([selectedOption]));
+    return new Result(new MultipleSelection(List([selectedOption])));
   }
 
   private addControlsForSelectMultipleTask(
@@ -286,15 +287,17 @@ export class SubmissionFormComponent {
     task: Task,
     result?: Result
   ): void {
-    const selectedOptions = result?.value as List<Option>;
+    const {values: selectedOptions} = result?.value as MultipleSelection;
     for (const option of task.multipleChoice!.options) {
       group[option.id] = new FormControl(selectedOptions?.contains(option));
     }
   }
 
   private extractDataForSelectMultipleTask(task: Task): Result {
-    const selectedOptions: List<Option> = task.multipleChoice!.options!.filter(
-      (option: Option) => this.submissionForm?.value[option.id]
+    const selectedOptions: MultipleSelection = new MultipleSelection(
+      task.multipleChoice!.options!.filter(
+        (option: Option) => this.submissionForm?.value[option.id]
+      )
     );
     return new Result(selectedOptions);
   }

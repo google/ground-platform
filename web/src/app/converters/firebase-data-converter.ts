@@ -20,6 +20,7 @@ import {List, Map} from 'immutable';
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
@@ -180,14 +181,11 @@ export class FirebaseDataConverter {
   }
 
   private static resultToJS(result: Result): {} {
-    if (typeof result.value === 'string') {
+    if (typeof result.value === 'string' || typeof result.value === 'number') {
       return result.value;
     }
-    if (typeof result.value === 'number') {
-      return result.value;
-    }
-    if (result.value instanceof List) {
-      return (result.value as List<Option>).map(option => option.id).toArray();
+    if (result.value instanceof MultipleSelection) {
+      return result.value.values.map(option => option.id).toArray();
     }
     if (result.value instanceof Date) {
       return Timestamp.fromDate(result.value);

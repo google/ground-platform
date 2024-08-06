@@ -20,6 +20,7 @@ import {Observable, Subscription, combineLatest} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {Job} from 'app/models/job.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
@@ -121,7 +122,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   getOptions(task: Task, submission: Submission): List<Option> {
     const result = submission.data?.get(task.id);
     if (result && result instanceof List) {
-      return result.value as List<Option>;
+      return (result.value as MultipleSelection).values;
     } else {
       return List.of();
     }
