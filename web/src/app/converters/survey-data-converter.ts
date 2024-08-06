@@ -152,28 +152,11 @@ function taskConditionPbToModel(pb: Pb.ITask): TaskCondition | undefined {
   } else return undefined;
 }
 
-function taskPbToModel(pb: Pb.ITask): Task {
-  const {multipleChoiceQuestion, conditions} = pb;
+function multipleChoicePbToModel(pb: Pb.ITask): MultipleChoice | undefined {
+  const {multipleChoiceQuestion} = pb;
 
-  let condition = undefined;
-  if (conditions && conditions.length > 0) {
-    const {multipleChoice} = conditions[0];
-
-    condition = new TaskCondition(
-      TaskConditionMatchType.MATCH_ALL,
-      List([
-        new TaskConditionExpression(
-          TaskConditionExpressionType.ONE_OF_SELECTED,
-          multipleChoice!.taskId!,
-          List(multipleChoice!.optionIds!)
-        ),
-      ])
-    );
-  }
-
-  let multipleChoice = undefined;
   if (multipleChoiceQuestion) {
-    multipleChoice = new MultipleChoice(
+    return new MultipleChoice(
       multipleChoiceQuestion.type! ===
       MultipleChoiceQuestionType.SELECT_MULTIPLE
         ? Cardinality.SELECT_MULTIPLE
@@ -186,15 +169,17 @@ function taskPbToModel(pb: Pb.ITask): Task {
       ),
       multipleChoiceQuestion.hasOtherOption!
     );
-  }
+  } else return undefined;
+}
 
+function taskPbToModel(pb: Pb.ITask): Task {
   return new Task(
     pb.id!,
     taskPbToModelTaskType(pb),
     pb.prompt!,
     pb.required!,
     pb.index!,
-    multipleChoice,
+    multipleChoicePbToModel(pb),
     taskConditionPbToModel(pb),
     pb.level! === DataCollectionLevel.LOI_METADATA
   );
