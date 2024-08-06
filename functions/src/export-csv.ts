@@ -207,7 +207,7 @@ function quote(value: any): string {
     return value.toString();
   }
   const escaped = value.toString().replaceAll('"', '""');
-  return '"' + escaped + '"';
+  return `"${escaped}"`;
 }
 
 function toWkt(geometry: Pb.IGeometry): string {
