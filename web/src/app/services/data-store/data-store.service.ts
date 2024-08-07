@@ -30,7 +30,7 @@ import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {filter, find, map, switchMap} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -41,7 +41,10 @@ import {
   partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
-import {surveyDocToModel} from 'app/converters/survey-data-converter';
+import {
+  jobDocsToModel,
+  surveyDocToModel,
+} from 'app/converters/survey-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -77,27 +80,34 @@ export class DataStoreService {
    *
    * @param id the id of the requested survey.
    */
-  loadSurvey$(id: string) {
+  loadSurvey$(id: string): Observable<Survey> {
     return combineLatest([
       this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).valueChanges(),
-      this.db
-        .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
-        .valueChanges(),
+      this.loadJobs$(id),
     ]).pipe(
-      switchMap(surveyAndJobs => {
+      map(surveyAndJobs => {
         const [s, jobs] = surveyAndJobs;
 
-        const survey = surveyDocToModel(
-          id,
-          s as DocumentData,
-          jobs as DocumentData[]
-        );
+        const survey = surveyDocToModel(id, s as DocumentData, jobs);
 
         if (survey instanceof Error) throw survey;
 
-        return of(survey);
+        return survey;
       })
     );
+  }
+
+  /**
+   * Returns an Observable that loads and emits all the jobs
+   * based on provided parameters.
+   *
+   * @param id the id of the requested survey.
+   */
+  loadJobs$(id: string): Observable<List<Job>> {
+    return this.db
+      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
+      .valueChanges()
+      .pipe(map(data => jobDocsToModel(data as DocumentData[])));
   }
 
   /**
@@ -119,7 +129,8 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
+   * Returns an Observable that loads and emits the list of surveys accessible
+   * to the specified user.
    *
    */
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
@@ -409,7 +420,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits all the Submissions
+   * Returns an Observable that loads and emits all the submissions
    * based on provided parameters.
    *
    * @param survey the survey instance.
@@ -464,28 +475,11 @@ export class DataStoreService {
   }
 
   tasks$(surveyId: string, jobId: string): Observable<List<Task>> {
-    return combineLatest([
-      this.db.collection(SURVEYS_COLLECTION_NAME).doc(surveyId).valueChanges(),
-      this.db
-        .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
-        .valueChanges(),
-    ]).pipe(
-      switchMap(surveyAndJobs => {
-        const [s, jobs] = surveyAndJobs;
+    return this.loadJobs$(surveyId).pipe(
+      map(jobs => {
+        const job = jobs.find(job => job.id === jobId);
 
-        const survey = surveyDocToModel(
-          surveyId,
-          s as DocumentData,
-          jobs as DocumentData[]
-        );
-
-        if (survey instanceof Error) return of(List<Task>());
-
-        const tasks = survey.getJob(jobId)?.tasks;
-
-        if (!tasks) return of(List<Task>());
-
-        return of(tasks.toList());
+        return job && job.tasks ? job.tasks?.toList() : List<Task>();
       })
     );
   }

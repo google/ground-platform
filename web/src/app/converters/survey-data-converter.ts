@@ -75,13 +75,9 @@ function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
 }
 
-function jobDocsToModel(data: DocumentData[]): Map<string, Job> {
-  return Map<string, Job>(
-    data.map(job => {
-      const pb = toMessage(job, Pb.Job) as Pb.Job;
-
-      return [pb.id, jobPbToModel(pb)];
-    })
+export function jobDocsToModel(data: DocumentData[]): List<Job> {
+  return List<Job>(
+    data.map(job => jobPbToModel(toMessage(job, Pb.Job) as Pb.Job))
   );
 }
 
@@ -188,7 +184,7 @@ function taskPbToModel(pb: Pb.ITask): Task {
 export function surveyDocToModel(
   id: string,
   data: DocumentData,
-  jobs?: DocumentData[]
+  jobs?: List<Job>
 ): Survey | Error {
   // Use old converter if document doesn't include `name` using the new
   // proto-based format.
@@ -200,7 +196,9 @@ export function surveyDocToModel(
     id,
     pb.name,
     pb.description,
-    jobs ? jobDocsToModel(jobs) : Map<string, Job>(),
+    jobs
+      ? Map<string, Job>(jobs.map((job: Job) => [job.id, job]))
+      : Map<string, Job>(),
     Map<string, Role>(
       keys(pb.acl).map((id: string) => [
         id as string,
