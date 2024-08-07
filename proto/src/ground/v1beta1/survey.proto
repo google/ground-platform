@@ -42,14 +42,17 @@ message Survey {
   message DataSharingTerms {
     // Defines the type of data sharing terms the user will see.
     enum Type {
+      // Default value when the type is missing.
+      TYPE_UNSPECIFIED = 0;
+
       // Data will only be shared with survey organizers.
-      PRIVATE = 0;
+      PRIVATE = 1;
 
       // Survey organizers can share data with no constraints.
-      PUBLIC = 1;
+      PUBLIC = 2;
 
       // Terms are defined by survey organizers.
-      CUSTOM = 2;
+      CUSTOM = 3;
     }
 
     // Type of data sharing consent terms the user will see.
