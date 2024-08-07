@@ -479,7 +479,7 @@ export class DataStoreService {
       map(jobs => {
         const job = jobs.find(job => job.id === jobId);
 
-        return job && job.tasks ? job.tasks?.toList() : List<Task>();
+        return job?.tasks?.toList() ?? List<Task>();
       })
     );
   }
