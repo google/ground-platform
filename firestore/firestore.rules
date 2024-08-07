@@ -144,8 +144,7 @@
       // Allow if user has has read access to the survey.
       allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the new LOI and can collect data.
-      // TODO(#1154): Require owner as well.
-      allow create: if canCollectData(getSurvey(surveyId));
+      allow create: if isLoiOwner(request.resource) && canCollectData(getSurvey(surveyId));
       // Allow if user is owner of the existing LOI or can manage survey.
       allow write: if isLoiOwner(resource) || canManageSurvey(getSurvey(surveyId));
     }
