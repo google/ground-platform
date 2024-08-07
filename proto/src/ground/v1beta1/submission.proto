@@ -16,11 +16,11 @@
 
 syntax = "proto3";
 
-package google.ground.v1beta1;
+package ground.v1beta1;
 
-import "google/ground/v1beta1/audit_info.proto";
-import "google/ground/v1beta1/geometry.proto";
-import "google/ground/v1beta1/survey.proto";
+import "ground/v1beta1/audit_info.proto";
+import "ground/v1beta1/geometry.proto";
+import "ground/v1beta1/survey.proto";
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
@@ -106,7 +106,7 @@ message TaskData {
   // A manually entered number response.
   message NumberResponse {
     // The number provided by the user.
-    double number = 2;
+    double number = 1;
   }
 
   // A manually selected date and/or time response.

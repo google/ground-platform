@@ -24,7 +24,7 @@ import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 
 export function geometryPbToModel(pb: Pb.IGeometry): Geometry {
   if (pb.point) {
@@ -62,7 +62,7 @@ function linearRingPbToModel(pb: Pb.ILinearRing): LinearRing {
   return new LinearRing(List(coordinates));
 }
 
-function coordinatesPbToModel(pb: Pb.ICoordinates): Coordinate {
+export function coordinatesPbToModel(pb: Pb.ICoordinates): Coordinate {
   if (!pb.longitude || !pb.latitude) throw new Error(`Incomplete coordinate`);
   return new Coordinate(pb.longitude, pb.latitude);
 }

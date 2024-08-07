@@ -36,6 +36,7 @@ import {Coordinate} from 'app/models/geometry/coordinate';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
@@ -128,7 +129,7 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
       task001: new Result('result'),
-      task003: new Result(List([MockModel.option001])),
+      task003: new Result(new MultipleSelection(List([MockModel.option001]))),
     })
   );
 }

@@ -53,7 +53,7 @@ export class LocationOfInterestService {
                   ? of(List<LocationOfInterest>())
                   : dataStore.getAccessibleLois$(
                       survey,
-                      user.email,
+                      user.id,
                       this.surveyService.canManageSurvey()
                     )
               )

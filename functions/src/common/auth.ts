@@ -18,6 +18,11 @@ import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
 import {DocumentSnapshot} from 'firebase-admin/firestore';
 import {https, Response} from 'firebase-functions/v1';
 import {EmulatorIdToken} from '../handlers';
+import {GroundProtos} from '@ground/proto';
+import {registry} from '@ground/lib';
+
+import Pb = GroundProtos.ground.v1beta1;
+const s = registry.getFieldIds(Pb.Survey);
 
 // This is the only cookie not stripped by Firebase CDN.
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
@@ -81,12 +86,13 @@ function isEmulatorIdToken(user: DecodedIdToken): boolean {
 function getRole(
   user: DecodedIdToken,
   survey: DocumentSnapshot
-): string | null {
+): string | number | null {
   if (isEmulatorIdToken(user)) {
     return OWNER_ROLE;
   }
-  const acl = survey.get('acl');
-  return user.email ? acl?.[user.email] : null;
+  // TODO(#1858): Remove reference to "acl" field.
+  const acl = survey.get(s.acl) || survey.get('acl');
+  return acl && user.email ? acl[user.email] : null;
 }
 
 export function canExport(
@@ -101,5 +107,9 @@ export function canImport(
   survey: DocumentSnapshot
 ): boolean {
   const role = getRole(user, survey);
-  return role === OWNER_ROLE || role === SURVEY_ORGANIZER_ROLE;
+  // TODO(#1858): Remove old roles.
+  return (
+    !!role &&
+    [OWNER_ROLE, SURVEY_ORGANIZER_ROLE, Pb.Role.SURVEY_ORGANIZER].includes(role)
+  );
 }

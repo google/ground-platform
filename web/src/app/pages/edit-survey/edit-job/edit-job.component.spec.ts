@@ -15,6 +15,10 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {
+  MatButtonToggle,
+  MatButtonToggleGroup,
+} from '@angular/material/button-toggle';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
@@ -50,7 +54,12 @@ describe('EditJobComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent],
-      imports: [MatDialogModule, TasksEditorModule],
+      imports: [
+        MatButtonToggleGroup,
+        MatButtonToggle,
+        MatDialogModule,
+        TasksEditorModule,
+      ],
       providers: [
         {provide: AuthService, useValue: {getUser$: () => user$}},
         {provide: DataStoreService, useValue: {generateId: () => '123'}},
@@ -93,10 +102,10 @@ describe('EditJobComponent', () => {
   });
 
   it('displays the loi editor component', () => {
-    const loiButton = fixture.debugElement.query(
-      By.css('.edit-job-header :nth-child(3)')
+    const sitesButton = fixture.debugElement.query(
+      By.css('.edit-job-toggler :nth-child(2) button')
     ).nativeElement as HTMLElement;
-    loiButton.click();
+    sitesButton.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.loiEditor).toBeDefined();
   });

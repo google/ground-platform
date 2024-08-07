@@ -16,10 +16,14 @@
 
 .task-condition-form {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
 
   .mat-mdc-form-field {
     flex: 1;
+  }
+
+  > div {
+    margin-bottom: 20px;
   }
 }
