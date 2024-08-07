@@ -103,11 +103,17 @@
     }
 
     /**
-     * Returns true iff the user with the provided email created the specified resource.
+     * Returns true iff the current user is the owner of the specified LOI.
      */
-    function isCreator(resource) {
-      // TODO(#1154): Make `owner` its own field and stop assuming `creator==owner`.
-      return resource.data.created.user.email == request.auth.token.email;     
+    function isLoiOwner(loi) {
+      return loi.data['5'] == request.auth.uid;     
+    }
+
+    /**
+     * Returns true iff the current user is the owner of the specified submission.
+     */
+    function isSubmissionOwner(submission) {
+      return submission.data['5'] == request.auth.uid;     
     }
 
     // Allow users to read, create, and write their own profiles in the db.
@@ -141,7 +147,7 @@
       // TODO(#1154): Require owner as well.
       allow create: if canCollectData(getSurvey(surveyId));
       // Allow if user is owner of the existing LOI or can manage survey.
-      allow write: if isCreator(resource) || canManageSurvey(getSurvey(surveyId));
+      allow write: if isLoiOwner(resource) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply passlist and survey-level ACLs to submission documents.
@@ -149,9 +155,9 @@
       // Allow if user has has read access to the survey.
       allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the new submission and can collect data.
-      allow create: if isCreator(request.resource) && canCollectData(getSurvey(surveyId));
+      allow create: if isSubmissionOwner(request.resource) && canCollectData(getSurvey(surveyId));
       // Allow if user is owner of the existing submission or can manage survey.
-      allow write: if isCreator(resource) || canManageSurvey(getSurvey(surveyId));
+      allow write: if isSubmissionOwner(resource) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply passlist and survey-level ACLs to job documents.
