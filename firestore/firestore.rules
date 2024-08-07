@@ -159,9 +159,7 @@
       // Allow if user has has read access to the survey.
       allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user can manage survey.
-      allow create: if canManageSurvey(getSurvey(surveyId));
-      // Allow if user can manage survey.
-      allow write: if canManageSurvey(getSurvey(surveyId));
+      allow create, write: if canManageSurvey(getSurvey(surveyId));
     }
   }
 }
