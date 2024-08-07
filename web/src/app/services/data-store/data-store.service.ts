@@ -29,8 +29,8 @@ import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
+import {filter, find, map, switchMap} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -41,6 +41,10 @@ import {
   partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
+import {
+  jobDocsToModel,
+  surveyDocToModel,
+} from 'app/converters/survey-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -76,44 +80,34 @@ export class DataStoreService {
    *
    * @param id the id of the requested survey.
    */
-  loadSurvey$(id: string) {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(id)
-      .valueChanges()
-      .pipe(
-        // Convert object to Survey instance.
-        map(data => FirebaseDataConverter.toSurvey(id, data as DocumentData))
-      );
+  loadSurvey$(id: string): Observable<Survey> {
+    return combineLatest([
+      this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).valueChanges(),
+      this.loadJobs$(id),
+    ]).pipe(
+      map(surveyAndJobs => {
+        const [s, jobs] = surveyAndJobs;
+
+        const survey = surveyDocToModel(id, s as DocumentData, jobs);
+
+        if (survey instanceof Error) throw survey;
+
+        return survey;
+      })
+    );
   }
 
   /**
-   * Returns an Observable that loads and emits the job with the specified
-   * uuid and survey uuid.
+   * Returns an Observable that loads and emits all the jobs
+   * based on provided parameters.
    *
-   * @param jobId the id of the requested job.
-   * @param surveyId the id of the requested survey.
+   * @param id the id of the requested survey.
    */
-  loadJob$(jobId: string, surveyId: string) {
+  loadJobs$(id: string): Observable<List<Job>> {
     return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
       .valueChanges()
-      .pipe(
-        // Convert object to Survey instance.
-        map(data => {
-          const job = FirebaseDataConverter.toSurvey(
-            surveyId,
-            data as DocumentData
-          ).getJob(jobId);
-
-          if (!job) {
-            throw Error(`Job $jobId not found`);
-          }
-
-          return job;
-        })
-      );
+      .pipe(map(data => jobDocsToModel(data as DocumentData[])));
   }
 
   /**
@@ -135,7 +129,8 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
+   * Returns an Observable that loads and emits the list of surveys accessible
+   * to the specified user.
    *
    */
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
@@ -155,11 +150,14 @@ export class DataStoreService {
       .pipe(
         map(surveys =>
           List(
-            surveys.map(a => {
-              const docData = a.payload.doc.data() as DocumentData;
-              const id = a.payload.doc.id;
-              return FirebaseDataConverter.toSurvey(id, docData);
-            })
+            surveys
+              .map(a => {
+                const docData = a.payload.doc.data() as DocumentData;
+                const id = a.payload.doc.id;
+                return surveyDocToModel(id, docData);
+              })
+              .filter(DataStoreService.filterAndLogError<Survey>)
+              .map(survey => survey as Survey)
           )
         )
       );
@@ -422,7 +420,7 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits all the Submissions
+   * Returns an Observable that loads and emits all the submissions
    * based on provided parameters.
    *
    * @param survey the survey instance.
@@ -477,24 +475,13 @@ export class DataStoreService {
   }
 
   tasks$(surveyId: string, jobId: string): Observable<List<Task>> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .get()
-      .pipe(
-        map(doc => {
-          if (!doc.exists) {
-            return List<Task>();
-          }
-          const data = doc.data() as DocumentData;
-          const survey = FirebaseDataConverter.toSurvey(surveyId, data);
-          const tasks = survey.getJob(jobId)?.tasks;
-          if (!tasks || typeof tasks === 'undefined') {
-            return List<Task>();
-          }
-          return tasks.toList()!;
-        })
-      );
+    return this.loadJobs$(surveyId).pipe(
+      map(jobs => {
+        const job = jobs.find(job => job.id === jobId);
+
+        return job?.tasks?.toList() ?? List<Task>();
+      })
+    );
   }
 
   /**

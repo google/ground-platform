@@ -19,7 +19,7 @@ import {Role} from 'app/models/role.model';
 import {FirebaseDataConverter} from './firebase-data-converter';
 
 describe('FirebaseDataConverter', () => {
-  describe('toRole()', () => {
+  describe('toRoleId()', () => {
     it('converts enums to strings', () => {
       expect(FirebaseDataConverter.toRoleId(Role.OWNER)).toEqual('OWNER');
       expect(FirebaseDataConverter.toRoleId(Role.SURVEY_ORGANIZER)).toEqual(
@@ -29,23 +29,6 @@ describe('FirebaseDataConverter', () => {
         'DATA_COLLECTOR'
       );
       expect(FirebaseDataConverter.toRoleId(Role.VIEWER)).toEqual('VIEWER');
-    });
-
-    it('converts strings to enums', () => {
-      expect(FirebaseDataConverter.toRole('OWNER')).toEqual(Role.OWNER);
-      expect(FirebaseDataConverter.toRole('SURVEY_ORGANIZER')).toEqual(
-        Role.SURVEY_ORGANIZER
-      );
-      expect(FirebaseDataConverter.toRole('DATA_COLLECTOR')).toEqual(
-        Role.DATA_COLLECTOR
-      );
-      expect(FirebaseDataConverter.toRole('OWNVIEWERER')).toEqual(Role.VIEWER);
-    });
-
-    it('returns VIEWER on unrecognized role', () => {
-      expect(
-        FirebaseDataConverter.toRole('some_rule_i_dont_recognize')
-      ).toEqual(Role.VIEWER);
     });
   });
 });

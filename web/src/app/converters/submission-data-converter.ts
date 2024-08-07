@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
+import {registry, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
 import Long from 'long';
@@ -42,6 +42,7 @@ import {
 } from './geometry-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
+const sb = registry.getFieldIds(Pb.Submission);
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, an
@@ -74,7 +75,7 @@ export function submissionDocToModel(
 ): Submission | Error {
   // Use old converter if document doesn't include `job_id` using the new
   // proto-based format.
-  if (!data['4']) {
+  if (!data[sb.jobId]) {
     return LegacySubmissionDataConverter.toSubmission(job, id, data);
   }
   const pb = toMessage(data, Pb.Submission) as Pb.Submission;
