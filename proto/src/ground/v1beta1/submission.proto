@@ -20,7 +20,6 @@ package ground.v1beta1;
 
 import "ground/v1beta1/audit_info.proto";
 import "ground/v1beta1/geometry.proto";
-import "ground/v1beta1/survey.proto";
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
@@ -55,9 +54,6 @@ message Submission {
 
   // The data collector's responses to tasks in this job.
   repeated TaskData task_data = 8;
-
-  // The type of terms that the user agreed to.
-  Survey.DataSharingTerms.Type data_sharing_consent_type = 9;
 }
 
 // Data provided by data collectors for a specific task and LOI.
