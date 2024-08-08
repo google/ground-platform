@@ -33,9 +33,9 @@ import {Geometry, GeometryType} from 'app/models/geometry/geometry';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {TaskType} from 'app/models/task/task.model';
 import {
@@ -64,9 +64,9 @@ const enlargedPolygonStrokeWeight = 6;
 })
 export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
-  private selectedJob$: BehaviorSubject<Job | undefined> = new BehaviorSubject<Job | undefined>(
-    undefined
-  );
+  private selectedJob$: BehaviorSubject<Job | undefined> = new BehaviorSubject<
+    Job | undefined
+  >(undefined);
   lois$: Observable<List<LocationOfInterest>>;
   loisMap: ImmutableMap<string, LocationOfInterest> = ImmutableMap();
   activeSurvey$: Observable<Survey>;
@@ -141,16 +141,16 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       ]).subscribe(([survey, lois, locationOfInterestId, selectedJob]) => {
         const loisMap = ImmutableMap(
           lois
-            .filter(
-              loi => {
-                if (this.showPredefinedLoisOnly) {
-                  return loi.predefined;
-                } else {
-                  return true;
-                }
+            .filter(loi => {
+              if (this.showPredefinedLoisOnly) {
+                return loi.predefined;
+              } else {
+                return true;
               }
+            })
+            .filter(
+              loi => selectedJob === undefined || loi.jobId === selectedJob.id
             )
-            .filter(loi => selectedJob === undefined || loi.jobId === selectedJob.id)
             .map(loi => [loi.id, loi])
         );
 
@@ -358,8 +358,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         console.debug(`Ignoring loi ${loi.id} with missing job ${loi.jobId}`);
         return;
       }
-      const color = this.showPredefinedLoisOnly ? this.selectedJob?.color : survey.getJob(loi.jobId)?.color;
-      const jobName = this.showPredefinedLoisOnly ? this.selectedJob?.name : survey.getJob(loi.jobId)?.name;
+      const color = this.showPredefinedLoisOnly
+        ? this.selectedJob?.color
+        : survey.getJob(loi.jobId)?.color;
+      const jobName = this.showPredefinedLoisOnly
+        ? this.selectedJob?.name
+        : survey.getJob(loi.jobId)?.name;
 
       if (loi.geometry instanceof Point) {
         const {id, jobId, geometry} = loi;
