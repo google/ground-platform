@@ -49,8 +49,10 @@ message Survey {
       // Data will only be shared with survey organizers.
       PRIVATE = 1;
 
-      // Survey organizers can share data with no constraints.
-      PUBLIC = 2;
+      // Data can be made public with no constraints. Data
+      // collectors waive all rights to collected data, making
+      // it available under the CC0 "No Rights Reserved" license.
+      PUBLIC_CC0 = 2;
 
       // Terms are defined by survey organizers.
       CUSTOM = 3;
