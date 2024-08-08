@@ -20,6 +20,7 @@ import {List} from 'immutable';
 import {Subscription, firstValueFrom} from 'rxjs';
 
 import {Point} from 'app/models/geometry/point';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
@@ -97,8 +98,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     return this.submission?.data.get(taskId);
   }
 
-  getTaskMultipleChoiceSelections(task: Task): List<Option> {
-    return this.getTaskSubmissionResult(task)!.value as List<Option>;
+  getTaskMultipleChoiceSelections(task: Task): MultipleSelection {
+    return this.getTaskSubmissionResult(task)!.value as MultipleSelection;
   }
 
   getCaptureLocationCoord(task: Task): string {

@@ -25,10 +25,12 @@ import {
   deleteField,
   serverTimestamp,
 } from '@angular/fire/firestore';
+import {registry} from '@ground/lib/dist/message-registry';
+import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
+import {filter, find, map, switchMap} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -39,6 +41,10 @@ import {
   partialSurveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
+import {
+  jobDocsToModel,
+  surveyDocToModel,
+} from 'app/converters/survey-data-converter';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
@@ -46,6 +52,14 @@ import {Submission} from 'app/models/submission/submission.model';
 import {Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
+
+import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+const s = registry.getFieldIds(Pb.Survey);
+const sb = registry.getFieldIds(Pb.Submission);
+
+const Source = Pb.LocationOfInterest.Source;
+const AclRole = Pb.Role;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -66,44 +80,34 @@ export class DataStoreService {
    *
    * @param id the id of the requested survey.
    */
-  loadSurvey$(id: string) {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(id)
-      .valueChanges()
-      .pipe(
-        // Convert object to Survey instance.
-        map(data => FirebaseDataConverter.toSurvey(id, data as DocumentData))
-      );
+  loadSurvey$(id: string): Observable<Survey> {
+    return combineLatest([
+      this.db.collection(SURVEYS_COLLECTION_NAME).doc(id).valueChanges(),
+      this.loadJobs$(id),
+    ]).pipe(
+      map(surveyAndJobs => {
+        const [s, jobs] = surveyAndJobs;
+
+        const survey = surveyDocToModel(id, s as DocumentData, jobs);
+
+        if (survey instanceof Error) throw survey;
+
+        return survey;
+      })
+    );
   }
 
   /**
-   * Returns an Observable that loads and emits the job with the specified
-   * uuid and survey uuid.
+   * Returns an Observable that loads and emits all the jobs
+   * based on provided parameters.
    *
-   * @param jobId the id of the requested job.
-   * @param surveyId the id of the requested survey.
+   * @param id the id of the requested survey.
    */
-  loadJob$(jobId: string, surveyId: string) {
+  loadJobs$(id: string): Observable<List<Job>> {
     return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
+      .collection(`${SURVEYS_COLLECTION_NAME}/${id}/jobs`)
       .valueChanges()
-      .pipe(
-        // Convert object to Survey instance.
-        map(data => {
-          const job = FirebaseDataConverter.toSurvey(
-            surveyId,
-            data as DocumentData
-          ).getJob(jobId);
-
-          if (!job) {
-            throw Error(`Job $jobId not found`);
-          }
-
-          return job;
-        })
-      );
+      .pipe(map(data => jobDocsToModel(data as DocumentData[])));
   }
 
   /**
@@ -125,24 +129,35 @@ export class DataStoreService {
   }
 
   /**
-   * Returns an Observable that loads and emits the list of surveys accessible to the specified user.
+   * Returns an Observable that loads and emits the list of surveys accessible
+   * to the specified user.
    *
    */
   loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
-        // Field number for Survey.acl.
-        ref.where(new FieldPath('4', userEmail), 'in', [1, 2, 3])
+        ref.where(new FieldPath(s.acl, userEmail), 'in', [
+          AclRole.VIEWER,
+          AclRole.DATA_COLLECTOR,
+          AclRole.SURVEY_ORGANIZER,
+          Role.OWNER,
+          Role.SURVEY_ORGANIZER,
+          Role.DATA_COLLECTOR,
+          Role.VIEWER,
+        ])
       )
       .snapshotChanges()
       .pipe(
         map(surveys =>
           List(
-            surveys.map(a => {
-              const docData = a.payload.doc.data() as DocumentData;
-              const id = a.payload.doc.id;
-              return FirebaseDataConverter.toSurvey(id, docData);
-            })
+            surveys
+              .map(a => {
+                const docData = a.payload.doc.data() as DocumentData;
+                const id = a.payload.doc.id;
+                return surveyDocToModel(id, docData);
+              })
+              .filter(DataStoreService.filterAndLogError<Survey>)
+              .map(survey => survey as Survey)
           )
         )
       );
@@ -279,8 +294,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      // Field number for Submission.job_id.
-      ref => ref.where('4', '==', jobId)
+      ref => ref.where(s.jobId, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -292,8 +306,7 @@ export class DataStoreService {
   ) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      // Field number for Submission.loi_id.
-      ref => ref.where('2', '==', loiId)
+      ref => ref.where(sb.loiId, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -305,8 +318,7 @@ export class DataStoreService {
   ) {
     const loisInJob = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      // Field number for LocationOfInterest.job_id.
-      ref => ref.where('2', '==', jobId)
+      ref => ref.where(l.jobId, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(loisInJob.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -374,7 +386,7 @@ export class DataStoreService {
    */
   getAccessibleLois$(
     {id: surveyId}: Survey,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ): Observable<List<LocationOfInterest>> {
     if (canManageSurvey) {
@@ -384,34 +396,31 @@ export class DataStoreService {
         .pipe(map(this.toLocationsOfInterest));
     }
 
-    const predefinedLois = this.db.collection(
+    const importedLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      // Field number for LocationOfInterest.source and enum value Source.IMPORTED.
-      ref => ref.where('9', '==', 1)
+      ref => ref.where(l.source, '==', Source.IMPORTED)
     );
 
-    const userLois = this.db.collection(
+    const fieldData = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
-          // Field number for LocationOfInterest.source and enum value Source.FIELD_DATA.
-          .where('9', '==', 2)
-          // Field number for LocationOfInterest.ownerId.
-          .where('5', '==', userEmail)
+          .where(l.source, '==', Source.FIELD_DATA)
+          .where(l.ownerId, '==', userId)
     );
 
     return combineLatest([
-      predefinedLois.valueChanges({idField: 'id'}),
-      userLois.valueChanges({idField: 'id'}),
+      importedLois.valueChanges({idField: 'id'}),
+      fieldData.valueChanges({idField: 'id'}),
     ]).pipe(
-      map(([predefinedLois, userLois]) =>
-        this.toLocationsOfInterest(predefinedLois.concat(userLois))
+      map(([predefinedLois, fieldData]) =>
+        this.toLocationsOfInterest(predefinedLois.concat(fieldData))
       )
     );
   }
 
   /**
-   * Returns an Observable that loads and emits all the Submissions
+   * Returns an Observable that loads and emits all the submissions
    * based on provided parameters.
    *
    * @param survey the survey instance.
@@ -422,12 +431,12 @@ export class DataStoreService {
   getAccessibleSubmissions$(
     survey: Survey,
     loi: LocationOfInterest,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ): Observable<List<Submission>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        this.canViewSubmissions(ref, loi.id, userEmail, canManageSurvey)
+        this.canViewSubmissions(ref, loi.id, userId, canManageSurvey)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -466,24 +475,13 @@ export class DataStoreService {
   }
 
   tasks$(surveyId: string, jobId: string): Observable<List<Task>> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .get()
-      .pipe(
-        map(doc => {
-          if (!doc.exists) {
-            return List<Task>();
-          }
-          const data = doc.data() as DocumentData;
-          const survey = FirebaseDataConverter.toSurvey(surveyId, data);
-          const tasks = survey.getJob(jobId)?.tasks;
-          if (!tasks || typeof tasks === 'undefined') {
-            return List<Task>();
-          }
-          return tasks.toList()!;
-        })
-      );
+    return this.loadJobs$(surveyId).pipe(
+      map(jobs => {
+        const job = jobs.find(job => job.id === jobId);
+
+        return job?.tasks?.toList() ?? List<Task>();
+      })
+    );
   }
 
   /**
@@ -583,16 +581,11 @@ export class DataStoreService {
   private canViewSubmissions(
     ref: CollectionReference,
     loiId: string,
-    userEmail: string,
+    userId: string,
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? // Field number for Submission.loi_id.
-        ref.where('2', '==', loiId)
-      : ref
-          // Field number for Submission.loi_id.
-          .where('2', '==', loiId)
-          // Field number for Submission.owner_id.
-          .where('5', '==', userEmail);
+      ? ref.where(s.loiId, '==', loiId)
+      : ref.where(sb.loiId, '==', loiId).where(sb.ownerId, '==', userId);
   }
 }

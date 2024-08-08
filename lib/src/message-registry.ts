@@ -73,6 +73,20 @@ export class MessageRegistry {
   }
 
   /**
+   * Returns a dictionary containing the numbers of all fields in a
+   * message definition, keyed by field name. Throws an error if not found.
+   */
+  getFieldIds(constructor: any): {[key: string]: string} {
+    const desc = this.getMessageDescriptor(constructor);
+    if (!desc) throw new Error(`Unknown constructor ${constructor.name}`);
+    const map: {[key: string]: string} = {};
+    if (desc.fields) {
+      Object.keys(desc.fields).forEach(name => map[name] = desc.fields![name].id?.toString());
+    }
+    return map;
+  }
+
+  /**
    * Searches the descriptor hierarchy starting for the specified `typeName`,
    * starting from the specified containing `messageTypePath`. If the type
    * is not found there, the parent containing type is checked, recursively

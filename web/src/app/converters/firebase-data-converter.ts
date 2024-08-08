@@ -18,19 +18,15 @@ import {DocumentData, Timestamp} from '@angular/fire/firestore';
 import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
   SubmissionData,
 } from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
-import {
-  Cardinality,
-  MultipleChoice,
-} from 'app/models/task/multiple-choice.model';
+import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
 import {
   TaskCondition,
@@ -38,11 +34,6 @@ import {
 } from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-
-import {toGeometry} from './geometry-converter';
-import {Point} from '../models/geometry/point';
-import {Polygon} from '../models/geometry/polygon';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -57,60 +48,7 @@ const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.CAPTURE_LOCATION, 'capture_location'],
 ]);
 
-const TASK_TYPE_STRINGS_BY_ENUM = Map(
-  Array.from(
-    TASK_TYPE_ENUMS_BY_STRING.toArray(),
-    el => el.reverse() as [string, TaskType]
-  )
-);
-
-/**
- * Helper to return either the keys of a dictionary, or if missing, returns an
- * empty array.
- */
-function keys(dict?: {}): string[] {
-  return Object.keys(dict || {});
-}
-
 export class FirebaseDataConverter {
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Survey instance.
-   *
-   * @param id the uuid of the survey instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  static toSurvey(id: string, data: DocumentData): Survey {
-    return new Survey(
-      id,
-      data.title,
-      data.description,
-      Map<string, Job>(
-        keys(data.jobs).map((id: string) => [
-          id as string,
-          FirebaseDataConverter.toJob(id, data.jobs[id]),
-        ])
-      ),
-      Map<string, Role>(
-        keys(data.acl).map((id: string) => [
-          id as string,
-          FirebaseDataConverter.toRole(data.acl[id]),
-        ])
-      )
-    );
-  }
-
-  static toRole(roleString: string): Role {
-    // Compatibility for older versions of Ground db.
-    roleString = roleString.replace(/-/g, '_').toUpperCase();
-    let role: Role | undefined = Role[roleString as keyof typeof Role];
-    if (!role) {
-      console.log('User has unsupported role: ', roleString);
-      role = Role.VIEWER;
-    }
-    return role;
-  }
-
   static newSurveyToJS(
     title: string,
     description: string,
@@ -121,31 +59,6 @@ export class FirebaseDataConverter {
       description,
       acl: FirebaseDataConverter.aclToJs(acl),
     };
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Job instance.
-   *
-   * @param id the uuid of the job instance.
-   * @param data the source data in a dictionary keyed by string.
-   */
-  private static toJob(id: string, data: DocumentData): Job {
-    return new Job(
-      id,
-      // Fall back to constant so old dev databases do not break.
-      data.index || -1,
-      data.defaultStyle?.color || data.color,
-      data.name,
-      this.toTasks(data),
-      this.toStrategy(data.strategy)
-    );
-  }
-
-  static toStrategy(strategy: string): DataCollectionStrategy {
-    if (!strategy) return DataCollectionStrategy.PREDEFINED;
-    if (strategy === 'AD_HOC') return DataCollectionStrategy.MIXED;
-    return strategy as DataCollectionStrategy;
   }
 
   static jobToJS(job: Job): {} {
@@ -159,103 +72,11 @@ export class FirebaseDataConverter {
     };
   }
 
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Map of id to Task.
-   *
-   * @param data the source tasks in a dictionary keyed by string.
-   */
-  private static toTasks(data: DocumentData): Map<string, Task> {
-    return Map<string, Task>(
-      keys(data.tasks)
-        .map(id => FirebaseDataConverter.toTask(id, data.tasks[id]))
-        .filter(task => task !== null)
-        .map(task => [task!.id, task!])
-    );
-  }
-
   static tasksToJS(tasks: Map<string, Task> | undefined): {} {
     if (!tasks) {
       return {};
     }
-
     return tasks?.map(task => this.taskToJS(task)).toJS();
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Task instance.
-   *
-   * @param id the uuid of the survey instance.
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *   index: 0,
-   *   label: 'Question 1',
-   *   required: true,
-   *   type: 'text_field'
-   * }
-   * </code></pre>
-   * or
-   * <pre><code>
-   * {
-   *   index: 1,
-   *   label: 'Question 2',
-   *   required: false,
-   *   type: 'multiple_choice',
-   *   cardinality: 'select_one',
-   *   options: {
-   *     option001: {
-   *       index: 0,
-   *       code: 'A',
-   *       label: 'Option A'
-   *     },
-   *     // ...
-   *   }
-   * </code></pre>
-   */
-  private static toTask(id: string, data: DocumentData): Task | null {
-    try {
-      return new Task(
-        id,
-        // TODO: Move private static functions out to top-level of file so that
-        // they don't need to be qualified with full class name.
-        FirebaseDataConverter.stringToTaskType(data.type),
-        data.label,
-        data.required,
-        // Fall back to constant so old dev databases do not break.
-        data.index || -1,
-        data.options &&
-          new MultipleChoice(
-            FirebaseDataConverter.stringToCardinality(data.cardinality),
-            List(
-              keys(data.options).map((id: string) =>
-                FirebaseDataConverter.toOption(id, data.options[id])
-              )
-            ),
-            data.hasOtherOption || false
-          ),
-        FirebaseDataConverter.toCondition(data.condition),
-        data.addLoiTask
-      );
-    } catch (e) {
-      console.error(e);
-      return null;
-    }
-  }
-
-  private static toCondition(map?: DocumentData): TaskCondition | undefined {
-    if (!map) return undefined;
-    return new TaskCondition(
-      map?.matchType,
-      List(
-        map?.expressions?.map((expression: any) => ({
-          expressionType: expression.expressionType,
-          taskId: expression.taskId,
-          optionIds: List(expression.optionIds),
-        }))
-      ) || []
-    );
   }
 
   private static taskToJS(task: Task): {} {
@@ -300,17 +121,6 @@ export class FirebaseDataConverter {
     }
   }
 
-  private static stringToCardinality(cardinality: string): Cardinality {
-    switch (cardinality) {
-      case 'select_one':
-        return Cardinality.SELECT_ONE;
-      case 'select_multiple':
-        return Cardinality.SELECT_MULTIPLE;
-      default:
-        throw Error(`Unsupported cardinality ${cardinality}`);
-    }
-  }
-
   private static cardinalityToString(cardinality: Cardinality): string {
     switch (cardinality) {
       case Cardinality.SELECT_ONE:
@@ -322,44 +132,12 @@ export class FirebaseDataConverter {
     }
   }
 
-  private static stringToTaskType(taskType: string): TaskType {
-    const type = TASK_TYPE_STRINGS_BY_ENUM.get(taskType);
-    if (!type) {
-      throw new Error(`Ignoring unsupported task of type: ${taskType}`);
-    }
-    return type;
-  }
-
   private static taskTypeToString(taskType: TaskType): string {
     const str = TASK_TYPE_ENUMS_BY_STRING.get(taskType);
     if (!str) {
       throw Error(`Unsupported task type ${taskType}`);
     }
     return str;
-  }
-
-  /**
-   * Converts the raw object representation deserialized from Firebase into an
-   * immutable Task instance.
-   *
-   * @param id the uuid of the survey instance.
-   * @param data the source data in a dictionary keyed by string.
-   * <pre><code>
-   * {
-   *    index: 0,
-   *    code: 'A',
-   *    label: 'Option A'
-   *  }
-   * </code></pre>
-   */
-  private static toOption(id: string, data: DocumentData): Option {
-    return new Option(
-      id,
-      data.code,
-      data.label,
-      // Fall back to constant so old dev databases do not break.
-      data.index || -1
-    );
   }
 
   private static optionToJS(option: Option): {} {
@@ -403,14 +181,11 @@ export class FirebaseDataConverter {
   }
 
   private static resultToJS(result: Result): {} {
-    if (typeof result.value === 'string') {
+    if (typeof result.value === 'string' || typeof result.value === 'number') {
       return result.value;
     }
-    if (typeof result.value === 'number') {
-      return result.value;
-    }
-    if (result.value instanceof List) {
-      return (result.value as List<Option>).map(option => option.id).toArray();
+    if (result.value instanceof MultipleSelection) {
+      return result.value.values.map(option => option.id).toArray();
     }
     if (result.value instanceof Date) {
       return Timestamp.fromDate(result.value);

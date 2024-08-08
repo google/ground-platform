@@ -16,15 +16,14 @@
 
 syntax = "proto3";
 
-package google.ground.v1beta1;
+package ground.v1beta1;
 
 import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
 option java_package = "com.google.android.ground.proto";
 
-// Audit info about *who* performed a particular action and *when*. User email
-// addresses are omitted for privacy reasons.
+// Audit info about *who* performed a particular action and *when*.
 message AuditInfo {
   // Required. The id of the user performing the action.
   string user_id = 1;
@@ -40,4 +39,7 @@ message AuditInfo {
 
   // URL of the user's profile picture.
   string photo_url = 5;
+
+  // The user's email address.
+  string email_address = 6;
 }

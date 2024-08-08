@@ -17,6 +17,12 @@
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
 import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
+import {registry} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
+
+import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+const sb = registry.getFieldIds(Pb.Submission);
 
 /**
  *
@@ -45,6 +51,12 @@ export const surveys = () => 'surveys';
  * Returns the path of survey doc with the specified id.
  */
 export const survey = (surveyId: string) => surveys() + '/' + surveyId;
+
+/**
+ * Returns the path of job doc with the specified id.
+ */
+export const job = (surveyId: string, jobId: string) =>
+  `${survey(surveyId)}/jobs/${jobId}`;
 
 /**
  * Returns the path of the survey collection in the survey with the specified id.
@@ -116,14 +128,15 @@ export class Datastore {
     return this.db_.doc(survey(surveyId)).get();
   }
 
+  fetchJob(surveyId: string, jobId: string) {
+    return this.db_.doc(job(surveyId, jobId)).get();
+  }
+
   fetchSubmissionsByJobId(surveyId: string, jobId: string) {
-    return (
-      this.db_
-        .collection(submissions(surveyId))
-        // Field number for Submission.job_id.
-        .where('4', '==', jobId)
-        .get()
-    );
+    return this.db_
+      .collection(submissions(surveyId))
+      .where(sb.jobId, '==', jobId)
+      .get();
   }
 
   fetchLocationOfInterest(surveyId: string, loiId: string) {
@@ -134,13 +147,10 @@ export class Datastore {
     surveyId: string,
     jobId: string
   ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
-    return (
-      this.db_
-        .collection(lois(surveyId))
-        // Field number for LocationOfInterest.job_id.
-        .where('2', '==', jobId)
-        .get()
-    );
+    return this.db_
+      .collection(lois(surveyId))
+      .where(l.jobId, '==', jobId)
+      .get();
   }
 
   fetchSheetsConfig(surveyId: string) {
@@ -156,8 +166,7 @@ export class Datastore {
     loiId: string
   ): Promise<number> {
     const submissionsRef = this.db_.collection(submissions(surveyId));
-    // Field number for Submission.loi_id.
-    const submissionsForLoiQuery = submissionsRef.where('2', '==', loiId);
+    const submissionsForLoiQuery = submissionsRef.where(sb.loiId, '==', loiId);
     const snapshot = await submissionsForLoiQuery.count().get();
     return snapshot.data().count;
   }
