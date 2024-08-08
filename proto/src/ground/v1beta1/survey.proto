@@ -38,7 +38,8 @@ message Survey {
   // Required. User id of the survey owner.
   string owner_id = 5;
 
-  // Properties related to data sharing terms.
+  // Defines the terms data collectors must agree to before
+  // collecting data.
   message DataSharingTerms {
     // Defines the type of data sharing terms the user will see.
     enum Type {
@@ -55,14 +56,17 @@ message Survey {
       CUSTOM = 3;
     }
 
-    // Type of data sharing consent terms the user will see.
+    // Required. Type of data sharing terms the data collectors must
+    // agree to before collecting data.
     Type type = 1;
 
-    // Text of custom data sharing consent terms.
+    // If type is CUSTOM, this field contains the custom data sharing
+    // terms text specified by the survey organizer.
     string custom_text = 2;
   }
 
-  // Defines how data sharing terms are displayed users.
+  // Defines the terms data collectors must agree to before
+  // collecting data.
   DataSharingTerms data_sharing_terms = 6;
 }
 
