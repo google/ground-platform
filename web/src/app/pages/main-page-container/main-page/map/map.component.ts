@@ -141,13 +141,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       ]).subscribe(([survey, lois, locationOfInterestId, selectedJob]) => {
         const loisMap = ImmutableMap(
           lois
-            .filter(loi => {
-              if (this.showPredefinedLoisOnly) {
-                return loi.predefined;
-              } else {
-                return true;
-              }
-            })
+            .filter(loi => this.showPredefinedLoisOnly ? loi.predefined : true)
             .filter(
               loi => selectedJob === undefined || loi.jobId === selectedJob.id
             )
