@@ -21,6 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {DataSharingType} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -46,6 +47,22 @@ export function roleToProtoRole(role: Role) {
   if (!pbRole) throw new Error(`Invalid role encountered: ${role}`);
 
   return pbRole;
+}
+
+const PB_DATA_SHARING_TYPE = Map([
+  [DataSharingType.PRIVATE, Pb.Survey.DataSharingTerms.Type.PRIVATE],
+  [DataSharingType.PUBLIC, Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0],
+  [DataSharingType.CUSTOM, Pb.Survey.DataSharingTerms.Type.CUSTOM],
+]);
+
+export function dataSharingTypeToProto(type: DataSharingType) {
+  const pbType = PB_DATA_SHARING_TYPE.get(type);
+
+  if (!pbType) {
+    throw new Error(`Invalid data sharing type encountered: ${type}`);
+  }
+
+  return pbType;
 }
 
 /**
@@ -89,6 +106,23 @@ export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
       acl: acl.map(role => roleToProtoRole(role)).toObject(),
+    })
+  );
+}
+
+/**
+ * Returns the proto representation of a Survey DataSharingTerms model object.
+ */
+export function dataSharingTermsToDocument(
+  type: DataSharingType,
+  customText?: string
+): DocumentData | Error {
+  return toDocumentData(
+    new Pb.Survey({
+      dataSharingTerms: new Pb.Survey.DataSharingTerms({
+        type: dataSharingTypeToProto(type),
+        customText,
+      }),
     })
   );
 }
