@@ -30,7 +30,7 @@ import {BehaviorSubject, of} from 'rxjs';
 
 import {LoiSelectionModule} from 'app/components/loi-selection/loi-selection.module';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -52,7 +52,9 @@ describe('SurveyLoiComponent', () => {
     ])
   );
 
-  const mockSurvey = new Survey('id1', 'title1', 'description1', Map(), Map());
+  const mockSurvey = new Survey('id1', 'title1', 'description1', Map(), Map(), {
+    type: DataSharingType.PRIVATE,
+  });
 
   const mockSurvey$ = of(mockSurvey);
 

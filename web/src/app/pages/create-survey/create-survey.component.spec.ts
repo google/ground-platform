@@ -30,7 +30,7 @@ import {Observable, Subject} from 'rxjs';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
@@ -71,14 +71,16 @@ describe('CreateSurveyComponent', () => {
     '',
     '',
     /* jobs= */ Map(),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
   const surveyWithoutJob = new Survey(
     surveyId,
     title,
     description,
     /* jobs= */ Map(),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
   const job = new Job(jobId, /* index */ 0, 'red', name, /* tasks= */ Map());
   const newJob = new Job(jobId, -1);
@@ -89,7 +91,8 @@ describe('CreateSurveyComponent', () => {
     /* jobs= */ Map({
       job001: job,
     }),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
   const jobWithTask = new Job(
     jobId,
@@ -113,7 +116,8 @@ describe('CreateSurveyComponent', () => {
     /* jobs= */ Map({
       job001: jobWithTask,
     }),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(

@@ -29,7 +29,7 @@ import {Map} from 'immutable';
 import {BehaviorSubject, Subject, of} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
@@ -88,7 +88,8 @@ describe('EditSurveyComponent', () => {
       [jobId1, job1],
       [jobId2, job2],
     ]),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(

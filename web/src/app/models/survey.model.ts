@@ -20,6 +20,13 @@ import {Copiable} from './copiable';
 import {Job} from './job.model';
 import {Role} from './role.model';
 
+/** Enum for type of data sharing terms. */
+export enum DataSharingType {
+  PRIVATE = 1,
+  PUBLIC = 2,
+  CUSTOM = 3,
+}
+
 export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
@@ -31,7 +38,9 @@ export class Survey extends Copiable {
     /* jobs= */
     Map<string, Job>(),
     /* acl= */
-    Map<string, Role>()
+    Map<string, Role>(),
+    /* dataSharingTerms= */
+    {type: DataSharingType.PRIVATE}
   );
 
   constructor(
@@ -39,7 +48,8 @@ export class Survey extends Copiable {
     readonly title: string,
     readonly description: string,
     readonly jobs: Map<string, Job>,
-    readonly acl: Map<string, Role>
+    readonly acl: Map<string, Role>,
+    readonly dataSharingTerms: {type: DataSharingType; customText?: string}
   ) {
     super();
   }
