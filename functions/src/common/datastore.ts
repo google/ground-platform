@@ -173,7 +173,7 @@ export class Datastore {
 
   async updateSubmissionCount(surveyId: string, loiId: string, count: number) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({submissionCount: count});
+    await loiRef.update({[l.submissionCount]: count});
   }
 
   async updateLoiProperties(
