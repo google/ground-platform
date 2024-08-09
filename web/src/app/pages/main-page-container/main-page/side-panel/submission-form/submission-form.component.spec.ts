@@ -39,7 +39,7 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -105,7 +105,8 @@ class MockModel {
     'title',
     'description',
     Map({job001: MockModel.job001}),
-    /*acl=*/ Map({})
+    /*acl=*/ Map({}),
+    {type: DataSharingType.PRIVATE}
   );
 
   static loi001 = new LocationOfInterest(

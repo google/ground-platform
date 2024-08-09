@@ -21,7 +21,7 @@ import {of} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -36,7 +36,8 @@ describe('TaskDetailsComponent', () => {
     'title',
     'description',
     Map<string, Job>(),
-    Map<string, Role>()
+    Map<string, Role>(),
+    {type: DataSharingType.PRIVATE}
   );
 
   beforeEach(async () => {

@@ -23,7 +23,7 @@ import {Map} from 'immutable';
 import {Subject, of} from 'rxjs';
 
 import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {ShareListComponent} from './share-list.component';
@@ -47,7 +47,8 @@ describe('ShareListComponent', () => {
     surveyTitle,
     surveyDescription,
     /* jobs= */ Map(),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
 
   beforeEach(waitForAsync(() => {
@@ -88,7 +89,8 @@ describe('ShareListComponent', () => {
         surveyTitle,
         surveyDescription,
         /* jobs= */ Map(),
-        /* acl= */ Map({a: Role.OWNER, b: Role.OWNER})
+        /* acl= */ Map({a: Role.OWNER, b: Role.OWNER}),
+        {type: DataSharingType.PRIVATE}
       )
     );
 
