@@ -21,6 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {DataSharingType} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -29,7 +30,6 @@ import {TaskCondition} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
 import Pb = GroundProtos.ground.v1beta1;
-import {DataSharingType} from 'app/models/survey.model';
 
 const PB_ROLES = Map([
   [Role.OWNER, Pb.Role.SURVEY_ORGANIZER],
