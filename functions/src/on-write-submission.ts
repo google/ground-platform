@@ -23,7 +23,6 @@ import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const l = registry.getFieldIds(Pb.LocationOfInterest);
-const sb = registry.getFieldIds(Pb.Submission);
 
 export async function onWriteSubmissionHandler(
   change: Change<DocumentSnapshot>,
