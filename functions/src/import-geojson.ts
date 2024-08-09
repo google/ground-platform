@@ -59,6 +59,8 @@ export function importGeoJsonCallback(
 
   const db = getDatastore();
 
+  const ownerId = user.uid;
+
   // This code will process each file uploaded.
   busboy.on('file', async (_field, file, _filename) => {
     const {survey: surveyId, job: jobId} = params;
@@ -101,7 +103,9 @@ export function importGeoJsonCallback(
             return;
           }
           try {
-            const data = toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId));
+            const data = toDocumentData(
+              toLoiPb(geoJsonLoi as Feature, jobId, ownerId)
+            );
             const loi = {
               ...data,
               ...geoJsonToLoiLegacy(geoJsonLoi, jobId),
@@ -169,12 +173,17 @@ function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
+function toLoiPb(
+  feature: Feature,
+  jobId: string,
+  ownerId: string
+): Pb.LocationOfInterest {
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = feature;
   const geometryPb = toGeometryPb(geometry);
   return new Pb.LocationOfInterest({
     jobId,
+    ownerId,
     customTag: id?.toString(),
     source: Pb.LocationOfInterest.Source.IMPORTED,
     geometry: geometryPb,
