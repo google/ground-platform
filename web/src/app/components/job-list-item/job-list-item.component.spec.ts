@@ -36,7 +36,7 @@ import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {GroundIconModule} from 'app/modules/ground-icon.module';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -91,7 +91,8 @@ describe('JobListItemComponent', () => {
     /* jobs= */ Map({
       job001: job,
     }),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
 
   function createLois(count: number): List<LocationOfInterest> {

@@ -36,6 +36,7 @@ import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
 import {
   aclToDocument,
+  dataSharingTermsToDocument,
   jobToDocument,
   newSurveyToDocument,
   partialSurveyToDocument,
@@ -49,7 +50,7 @@ import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
@@ -496,6 +497,26 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update({acl: FirebaseDataConverter.aclToJs(acl), ...aclToDocument(acl)});
+  }
+
+  /**
+   * Adds or overwrites the dataSharingTerms in the survey of the specified id.
+   * @param surveyId the id of the survey to be updated.
+   * @param type the type of the DataSharingTerms.
+   * @param customText the text of the DataSharingTerms.
+   */
+  updateDataSharingTerms(
+    surveyId: string,
+    type: DataSharingType,
+    customText?: string
+  ): Promise<void> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .update({
+        dataSharingTerms: {type, customText},
+        ...dataSharingTermsToDocument(type, customText),
+      });
   }
 
   generateId() {

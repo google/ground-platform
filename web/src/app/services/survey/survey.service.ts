@@ -21,7 +21,7 @@ import {shareReplay, switchMap} from 'rxjs/operators';
 
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -112,6 +112,18 @@ export class SurveyService {
 
   updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
     return this.dataStore.updateAcl(surveyId, acl);
+  }
+
+  updateDataSharingTerms(
+    surveyId: string,
+    dataSharingType: DataSharingType,
+    customText?: string
+  ): Promise<void> {
+    return this.dataStore.updateDataSharingTerms(
+      surveyId,
+      dataSharingType,
+      customText
+    );
   }
 
   async createSurvey(name: string, description?: string): Promise<string> {

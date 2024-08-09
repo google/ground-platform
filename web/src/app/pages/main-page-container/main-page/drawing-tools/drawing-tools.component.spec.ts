@@ -28,7 +28,7 @@ import {Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
@@ -78,7 +78,8 @@ describe('DrawingToolsComponent', () => {
         /* tasks= */ Map()
       ),
     }),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
 
   beforeEach(waitForAsync(() => {

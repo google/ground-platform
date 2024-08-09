@@ -29,7 +29,7 @@ import {Subject, from, of} from 'rxjs';
 import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -46,7 +46,8 @@ describe('EditJobComponent', () => {
     'title',
     'description',
     Map<string, Job>(),
-    Map<string, Role>()
+    Map<string, Role>(),
+    {type: DataSharingType.PRIVATE}
   );
   const jobId = 'job-123';
   const user$ = new Subject<User | null>();
