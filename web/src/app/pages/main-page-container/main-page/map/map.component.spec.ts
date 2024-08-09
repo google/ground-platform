@@ -71,25 +71,27 @@ describe('MapComponent', () => {
   const jobId2 = 'job002';
   const jobColor1 = 'red';
   const jobColor2 = 'green';
+  const job1 = new Job(
+    jobId1,
+    /* index */ -1,
+    jobColor1,
+    'job001 name',
+    /* tasks= */ Map()
+  );
+  const job2 = new Job(
+    jobId2,
+    /* index */ -1,
+    jobColor2,
+    'job002 name',
+    /* tasks= */ Map()
+  );
   const mockSurvey = new Survey(
     'survey001',
     'title1',
     'description1',
     /* jobs= */ Map({
-      job001: new Job(
-        jobId1,
-        /* index */ -1,
-        jobColor1,
-        'job001 name',
-        /* tasks= */ Map()
-      ),
-      job002: new Job(
-        jobId2,
-        /* index */ -1,
-        jobColor2,
-        'job002 name',
-        /* tasks= */ Map()
-      ),
+      job001: job1,
+      job002: job2,
     }),
     /* acl= */ Map(),
     {type: DataSharingType.PRIVATE}
@@ -314,7 +316,7 @@ describe('MapComponent', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MapComponent);
       component = fixture.componentInstance;
-      component.selectedJobId = jobId1;
+      component.selectedJob = job1;
       fixture.detectChanges();
     });
 
@@ -330,7 +332,7 @@ describe('MapComponent', () => {
 
     it('should fit the map when survey changed', fakeAsync(() => {
       spyOn(component.map, 'fitBounds');
-      component.selectedJobId = jobId2;
+      component.selectedJob = job2;
       component.ngOnChanges();
 
       expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
