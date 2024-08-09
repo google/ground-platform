@@ -20,7 +20,7 @@ import {List, Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -66,6 +66,28 @@ const MODEL_ROLES = Map([
   [Pb.Role.DATA_COLLECTOR, Role.DATA_COLLECTOR],
   [Pb.Role.VIEWER, Role.VIEWER],
 ]);
+
+const DATA_SHARING_MODEL_TYPE = Map([
+  [Pb.Survey.DataSharingTerms.Type.PRIVATE, DataSharingType.PRIVATE],
+  [Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0, DataSharingType.PUBLIC],
+  [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
+]);
+
+function dataSharingTypeFromProto(
+  protoType?: Pb.Survey.DataSharingTerms.Type | null
+) {
+  if (!protoType) {
+    return DataSharingType.PRIVATE;
+  }
+
+  const dataSharingType = DATA_SHARING_MODEL_TYPE.get(protoType);
+
+  if (!dataSharingType) {
+    return DataSharingType.PRIVATE;
+  }
+
+  return dataSharingType;
+}
 
 /**
  * Helper to return either the keys of a dictionary, or if missing, an
@@ -204,7 +226,11 @@ export function surveyDocToModel(
         id as string,
         MODEL_ROLES.get(pb.acl[id])!,
       ])
-    )
+    ),
+    {
+      type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
+      customText: pb.dataSharingTerms?.customText ?? undefined,
+    }
   );
 }
 
@@ -232,7 +258,11 @@ export class LegacySurveyDataConverter {
           id as string,
           LegacySurveyDataConverter.toRole(data.acl[id]),
         ])
-      )
+      ),
+      {
+        type: dataSharingTypeFromProto(data.dataSharingTerms.type),
+        customText: data.dataSharingTerms.customText,
+      }
     );
   }
 

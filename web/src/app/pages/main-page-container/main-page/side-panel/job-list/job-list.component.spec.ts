@@ -24,7 +24,7 @@ import {Map} from 'immutable';
 import {of} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -44,7 +44,8 @@ const mockSurvey = new Survey(
       /* tasks= */ Map()
     ),
   }),
-  /* acl= */ Map()
+  /* acl= */ Map(),
+  {type: DataSharingType.PRIVATE}
 );
 
 const authState = {

@@ -33,7 +33,7 @@ import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
@@ -91,7 +91,8 @@ describe('MapComponent', () => {
         /* tasks= */ Map()
       ),
     }),
-    /* acl= */ Map()
+    /* acl= */ Map(),
+    {type: DataSharingType.PRIVATE}
   );
   const poi1 = new LocationOfInterest(
     poiId1,
