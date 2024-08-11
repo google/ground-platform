@@ -36,6 +36,7 @@ import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const l = registry.getFieldIds(Pb.LocationOfInterest);
+const pr = registry.getFieldIds(Pb.LocationOfInterest.Property);
 const g = registry.getFieldIds(Pb.Geometry);
 const p = registry.getFieldIds(Pb.Point);
 const c = registry.getFieldIds(Pb.Coordinates);
@@ -78,7 +79,10 @@ describe('importGeoJson()', () => {
     },
     [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
-    [l.properties]: {name: 'Dinagat Islands', area: 3.08},
+    [l.properties]: {
+      name: {[pr.stringValue]: 'Dinagat Islands'},
+      area: {[pr.numericValue]: 3.08},
+    },
     jobId: 'job123',
     predefined: true,
     geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},

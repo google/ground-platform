@@ -25,10 +25,10 @@ import {GroundProtos} from '@ground/proto';
 import {Datastore} from './common/datastore';
 import {DocumentData} from 'firebase-admin/firestore';
 import {toDocumentData, deleteEmpty} from '@ground/lib';
-import {Feature, Geometry, Position} from 'geojson';
+import {Feature, GeoJsonProperties, Geometry, Position} from 'geojson';
+import {ErrorHandler} from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
-import {ErrorHandler} from './handlers';
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
@@ -187,8 +187,24 @@ function toLoiPb(
     customTag: id?.toString(),
     source: Pb.LocationOfInterest.Source.IMPORTED,
     geometry: geometryPb,
-    properties,
+    properties: toLoiPbProperties(properties),
   });
+}
+
+function toLoiPbProperties(properties: GeoJsonProperties): {
+  [k: string]: Pb.LocationOfInterest.Property;
+} {
+  return Object.fromEntries(
+    Object.entries(properties ?? {}).map(([k, v]) => [k, toLoiPbProperty(v)])
+  );
+}
+
+function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
+  return new Pb.LocationOfInterest.Property(
+    typeof value === 'number'
+      ? {numericValue: value}
+      : {stringValue: value.toString()}
+  );
 }
 
 function toGeometryPb(geometry: Geometry): Pb.Geometry {
