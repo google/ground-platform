@@ -24,9 +24,31 @@
     >
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
-          <span class="data-sharing-type-label">{{ option.label }}</span>
+          <span class="data-sharing-label">{{ option.label }}</span>
           <p>{{ option.description }}</p>
         </mat-radio-button>
+        <div *ngIf="shouldShowCustomizeAgreementSection(option.value)">
+          <h3 id="customize-agreement-header"
+            class="field-header">
+            Customize agreement
+          </h3>
+          <p class="field-description">
+            Create a custom agreement which will be shown to data collectors before they can
+            collect data. Data collectors must agree to the terms of this agreement.
+          </p>
+          <mat-form-field class="custom-terms">
+            <textarea matInput
+              formControlName="customText"
+              placeholder="Enter the terms of your custom agreement..."
+              aria-labelledby="customize-agreement-header">
+            </textarea>
+            <mat-error *ngIf="customTextControl.touched && customTextControl.invalid">
+              <ng-container *ngIf="customTextControl.getError('required')">
+                Required
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+        </div>
       </mat-card-content>
     </mat-card>
   </mat-radio-group>

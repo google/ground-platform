@@ -99,6 +99,13 @@ export class DataSharingTermsComponent implements OnInit {
     }
   }
 
+  shouldShowCustomizeAgreementSection(type: DataSharingType): boolean {
+    return (
+      type === DataSharingType.CUSTOM &&
+      this.typeControl.value === DataSharingType.CUSTOM
+    );
+  }
+
   typeSelected(value: DataSharingType) {
     this.typeControl.setValue(value);
   }

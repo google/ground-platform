@@ -32,6 +32,7 @@ import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-te
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatInputModule,
     MatRadioModule,
     ReactiveFormsModule,
   ],

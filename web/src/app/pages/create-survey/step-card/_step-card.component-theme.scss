@@ -22,13 +22,23 @@
     .title div {
       color: mat.get-theme-color($theme, outline);
     }
-  
+
     .description {
       color: mat.get-theme-color($theme, on-surface-variant);
     }
   }
 }
 
+@mixin typography($theme) {
+  .field-header {
+    font: mat.get-theme-typography($theme, title-medium, font);
+  }
+  .field-description {
+    font: mat.get-theme-typography($theme, body-medium, font);
+  }
+ }
+
 @mixin theme($theme) {
   @include color($theme);
+  @include typography($theme);
 }
