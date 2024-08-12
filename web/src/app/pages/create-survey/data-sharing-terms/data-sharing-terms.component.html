@@ -15,21 +15,18 @@
 -->
 
 <form [formGroup]="formGroup">
-  <mat-radio-group
+  <mat-radio-group class="data-sharing-terms"
     [id]="typeControlKey"
     [formControlName]="typeControlKey"
   >
-    <ng-container *ngIf="somethingThatIsTrue">
-      <h2>Ayo dude</h2>
-    </ng-container>
     <mat-card *ngFor="let option of dataSharingTermsOptions"
-      class="data-sharing-terms-option"
+      class="data-sharing-terms-card"
     >
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
-          {{ option.label }}
+          <span class="data-sharing-type-label">{{ option.label }}</span>
+          <p>{{ option.description }}</p>
         </mat-radio-button>
-        <p class="option-description">{{ option.description }}</p>
       </mat-card-content>
     </mat-card>
   </mat-radio-group>
