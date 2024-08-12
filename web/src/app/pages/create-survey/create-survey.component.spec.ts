@@ -36,6 +36,7 @@ import {
   CreateSurveyComponent,
   SetupPhase,
 } from 'app/pages/create-survey/create-survey.component';
+import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {JobService} from 'app/services/job/job.service';
@@ -46,7 +47,6 @@ import {TaskService} from 'app/services/task/task.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 
 import {SurveyReviewComponent} from './survey-review/survey-review.component';
-import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;

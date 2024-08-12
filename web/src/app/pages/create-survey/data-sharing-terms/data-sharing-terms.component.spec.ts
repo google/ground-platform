@@ -16,8 +16,8 @@
 
 import {CommonModule} from '@angular/common';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {DataSharingType} from 'app/models/survey.model';
 
+import {DataSharingType} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 
 describe('DataSharingTermsComponent', () => {

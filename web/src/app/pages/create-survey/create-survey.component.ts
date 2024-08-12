@@ -21,6 +21,7 @@ import {filter, first, firstValueFrom} from 'rxjs';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
@@ -31,7 +32,6 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 
 import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
-import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 
 @Component({
   selector: 'create-survey',
