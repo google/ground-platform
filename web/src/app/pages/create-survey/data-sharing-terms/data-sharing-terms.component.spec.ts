@@ -40,12 +40,14 @@ describe('DataSharingTermsComponent', () => {
   it('displays mat-cards for each of the three data sharing types', () => {
     const matCards: HTMLElement[] =
       fixture.debugElement.nativeElement.querySelectorAll(
-        '.data-sharing-terms-option'
+        '.data-sharing-terms-card'
       );
     const contentValues = Array.from(matCards).map((card: HTMLElement) => ({
-      label: card.querySelector('.option-radio-button')!.textContent!.trim(),
+      label: card
+        .querySelector('.option-radio-button .data-sharing-label')!
+        .textContent!.trim(),
       description: card
-        .querySelector('.option-description')!
+        .querySelector('.option-radio-button p')!
         .textContent!.trim(),
     }));
     expect(contentValues).toEqual([
