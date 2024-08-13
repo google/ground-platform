@@ -23,9 +23,9 @@ import {Component} from '@angular/core';
   styleUrls: ['./about.component.scss'],
 })
 export class AboutComponent {
-  constructor(private _location: Location) {}
+  constructor(private location: Location) {}
 
   onBackButtonClick() {
-    this._location.back();
+    this.location.back();
   }
 }

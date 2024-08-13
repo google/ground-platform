@@ -35,7 +35,7 @@ export class TermsComponent implements OnInit {
     private authService: AuthService,
     private dataStore: DataStoreService,
     private navigationService: NavigationService,
-    private _location: Location
+    private location: Location
   ) {
     this.hasAcceptedTos = this.authService.getHasAcceptedTos();
   }
@@ -50,6 +50,6 @@ export class TermsComponent implements OnInit {
   }
 
   onBackButtonClick() {
-    this._location.back();
+    this.location.back();
   }
 }
