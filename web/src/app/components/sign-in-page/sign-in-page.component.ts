@@ -40,7 +40,7 @@ export class SignInPageComponent implements OnInit, OnDestroy {
       this.authService
         .isAuthenticated$()
         .pipe(filter(isAuth => isAuth || environment.useEmulators))
-        .subscribe(() => this.navigationService.navigateToSurveyList())
+        .subscribe(() => this.navigationService.navigateToTermsOfService())
     );
   }
 
