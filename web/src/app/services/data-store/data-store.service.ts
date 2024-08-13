@@ -601,8 +601,9 @@ export class DataStoreService {
   }
 
   /**
-   * Creates a new Query object to filter submissions based on two
-   * criteria: loi and user
+   * Creates a new Query object to filter submissions based on
+   * LOI and user IDs. User ID is ignored if user can manage this
+   * survey (i.e., they can view all submissions by default).
    */
   private canViewSubmissions(
     ref: CollectionReference,
@@ -611,7 +612,7 @@ export class DataStoreService {
     canManageSurvey: boolean
   ) {
     return canManageSurvey
-      ? ref.where(s.loiId, '==', loiId)
+      ? ref.where(sb.loiId, '==', loiId)
       : ref.where(sb.loiId, '==', loiId).where(sb.ownerId, '==', userId);
   }
 }
