@@ -27,7 +27,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
   styleUrls: ['./terms.component.scss'],
 })
 export class TermsComponent implements OnInit {
-  hasApprovedTermsOfService: boolean;
+  hasAcceptedTos: boolean;
   isTermsOfServiceChecked = false;
   termsOfServiceText = '';
 
@@ -37,8 +37,7 @@ export class TermsComponent implements OnInit {
     private navigationService: NavigationService,
     private _location: Location
   ) {
-    this.hasApprovedTermsOfService =
-      this.authService.getHasApprovedTermsOfService();
+    this.hasAcceptedTos = this.authService.getHasAcceptedTos();
   }
 
   async ngOnInit() {
@@ -46,7 +45,7 @@ export class TermsComponent implements OnInit {
   }
 
   onContinueButtonClick() {
-    this.authService.approveTermsOfService();
+    this.authService.approveTos();
     this.navigationService.navigateToSurveyList();
   }
 

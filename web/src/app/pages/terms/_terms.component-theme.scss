@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
- @use 'sass:map';
- @use '@angular/material' as mat;
+@use 'sass:map';
+@use '@angular/material' as mat;
  
- @mixin color($theme) {
+@mixin color($theme) {
   .terms-text-container {
     background-color: mat.get-theme-color($theme, surface-container-low);
     border: 1px solid mat.get-theme-color($theme, outline-variant);
@@ -26,16 +26,16 @@
   .page ::-webkit-scrollbar-thumb {
     background: mat.get-theme-color($theme, surface-dim);
   }
- }
- 
- @mixin typography($theme) {
+}
+
+@mixin typography($theme) {
   .terms-text-container {
     font: mat.get-theme-typography($theme, title-medium, font);
   }
- }
- 
- @mixin theme($theme) {
+}
+
+@mixin theme($theme) {
   @include color($theme);
   @include typography($theme);
- }
+}
  

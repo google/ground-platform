@@ -53,7 +53,7 @@ export const ROLE_OPTIONS = [
 export class AuthService {
   private user$: Observable<User>;
   private currentUser!: User;
-  private hasApprovedTermsOfService = false;
+  private hasAcceptedTos = false;
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -120,12 +120,12 @@ export class AuthService {
     return this.currentUser;
   }
 
-  getHasApprovedTermsOfService(): boolean {
-    return this.hasApprovedTermsOfService;
+  getHasAcceptedTos(): boolean {
+    return this.hasAcceptedTos;
   }
 
-  approveTermsOfService(): void {
-    this.hasApprovedTermsOfService = true;
+  approveTos(): void {
+    this.hasAcceptedTos = true;
   }
 
   async signIn() {

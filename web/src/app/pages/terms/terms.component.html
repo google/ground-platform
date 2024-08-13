@@ -22,7 +22,7 @@
       {{termsOfServiceText}}
     </div>
     <div class="action-buttons">
-      @if(!hasApprovedTermsOfService) {
+      @if(!hasAcceptedTos) {
         <mat-checkbox [(ngModel)]="isTermsOfServiceChecked">
           I have read and agree with terms of service.
         </mat-checkbox>
