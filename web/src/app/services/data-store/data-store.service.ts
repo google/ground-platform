@@ -554,6 +554,11 @@ export class DataStoreService {
     return getDownloadURL(ref(getStorage(), path));
   }
 
+  async getTermsOfService(): Promise<string> {
+    const tos = await this.db.collection('config').doc('tos').ref.get();
+    return tos.get('text');
+  }
+
   addOrUpdateTasks(
     surveyId: string,
     job: Job,
