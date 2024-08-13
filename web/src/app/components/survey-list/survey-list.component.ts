@@ -71,7 +71,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
 
   private isSetupFinished(survey: Survey): boolean {
     // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
-    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
+    return this.hasTitle(survey);
   }
 
   private hasTitle(survey: Survey): boolean {
