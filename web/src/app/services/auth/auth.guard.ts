@@ -56,6 +56,15 @@ export class AuthGuard {
       this.navigationService.navigateToSurveyList();
       return false;
     }
+
+    if (url.includes(NavigationService.TERMS)) {
+      if (user.isAuthenticated) {
+        return true;
+      }
+      this.navigationService.signIn();
+      return false;
+    }
+
     if (user.isAuthenticated) {
       return true;
     }
