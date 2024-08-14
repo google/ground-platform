@@ -55,6 +55,7 @@ import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
 import Pb = GroundProtos.ground.v1beta1;
+
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const s = registry.getFieldIds(Pb.Survey);
 const sb = registry.getFieldIds(Pb.Submission);
@@ -557,6 +558,17 @@ export class DataStoreService {
   async getTermsOfService(): Promise<string> {
     const tos = await this.db.collection('config').doc('tos').ref.get();
     return tos.get('text');
+  }
+
+  async getAccessDeniedMessage(): Promise<{message?: string; link?: string}> {
+    const accessDeniedMessage = await this.db
+      .collection('config')
+      .doc('accessDenied')
+      .ref.get();
+    return {
+      message: accessDeniedMessage.get('message'),
+      link: accessDeniedMessage.get('link'),
+    };
   }
 
   addOrUpdateTasks(
