@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package google.ground.v1beta1;
+package ground.v1beta1;
 
 option java_multiple_files = true;
 option java_package = "com.google.android.ground.proto";
@@ -37,6 +37,39 @@ message Survey {
 
   // Required. User id of the survey owner.
   string owner_id = 5;
+
+  // Defines the terms data collectors must agree to before
+  // collecting data.
+  message DataSharingTerms {
+    // Defines the type of data sharing terms the user will see.
+    enum Type {
+      // Default value when the type is missing.
+      TYPE_UNSPECIFIED = 0;
+
+      // Data will only be shared with survey organizers.
+      PRIVATE = 1;
+
+      // Data can be made public with no constraints. Data
+      // collectors waive all rights to collected data, making
+      // it available under the CC0 "No Rights Reserved" license.
+      PUBLIC_CC0 = 2;
+
+      // Terms are defined by survey organizers.
+      CUSTOM = 3;
+    }
+
+    // Required. Type of data sharing terms the data collectors must
+    // agree to before collecting data.
+    Type type = 1;
+
+    // If type is CUSTOM, this field contains the custom data sharing
+    // terms text specified by the survey organizer.
+    string custom_text = 2;
+  }
+
+  // Defines the terms data collectors must agree to before
+  // collecting data.
+  DataSharingTerms data_sharing_terms = 6;
 }
 
 // Defines a user's role in a survey.

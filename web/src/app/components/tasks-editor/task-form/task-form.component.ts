@@ -90,7 +90,7 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
   {
     icon: 'access_time',
     label: 'Time',
-    type: TaskType.DATE_TIME,
+    type: TaskType.TIME,
   },
 ];
 

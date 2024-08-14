@@ -15,6 +15,10 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {
+  MatButtonToggle,
+  MatButtonToggleGroup,
+} from '@angular/material/button-toggle';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
@@ -25,7 +29,7 @@ import {Subject, from, of} from 'rxjs';
 import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -42,7 +46,8 @@ describe('EditJobComponent', () => {
     'title',
     'description',
     Map<string, Job>(),
-    Map<string, Role>()
+    Map<string, Role>(),
+    {type: DataSharingType.PRIVATE}
   );
   const jobId = 'job-123';
   const user$ = new Subject<User | null>();
@@ -50,7 +55,12 @@ describe('EditJobComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent],
-      imports: [MatDialogModule, TasksEditorModule],
+      imports: [
+        MatButtonToggleGroup,
+        MatButtonToggle,
+        MatDialogModule,
+        TasksEditorModule,
+      ],
       providers: [
         {provide: AuthService, useValue: {getUser$: () => user$}},
         {provide: DataStoreService, useValue: {generateId: () => '123'}},
@@ -93,10 +103,10 @@ describe('EditJobComponent', () => {
   });
 
   it('displays the loi editor component', () => {
-    const loiButton = fixture.debugElement.query(
-      By.css('.edit-job-header :nth-child(3)')
+    const sitesButton = fixture.debugElement.query(
+      By.css('.edit-job-toggler :nth-child(2) button')
     ).nativeElement as HTMLElement;
-    loiButton.click();
+    sitesButton.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.loiEditor).toBeDefined();
   });

@@ -21,6 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
+import {DataSharingType} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -28,7 +29,7 @@ import {
 import {TaskCondition} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 
-import Pb = GroundProtos.google.ground.v1beta1;
+import Pb = GroundProtos.ground.v1beta1;
 
 const PB_ROLES = Map([
   [Role.OWNER, Pb.Role.SURVEY_ORGANIZER],
@@ -46,6 +47,22 @@ export function roleToProtoRole(role: Role) {
   if (!pbRole) throw new Error(`Invalid role encountered: ${role}`);
 
   return pbRole;
+}
+
+const PB_DATA_SHARING_TYPE = Map([
+  [DataSharingType.PRIVATE, Pb.Survey.DataSharingTerms.Type.PRIVATE],
+  [DataSharingType.PUBLIC, Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0],
+  [DataSharingType.CUSTOM, Pb.Survey.DataSharingTerms.Type.CUSTOM],
+]);
+
+export function dataSharingTypeToProto(type: DataSharingType) {
+  const pbType = PB_DATA_SHARING_TYPE.get(type);
+
+  if (!pbType) {
+    throw new Error(`Invalid data sharing type encountered: ${type}`);
+  }
+
+  return pbType;
 }
 
 /**
@@ -94,22 +111,40 @@ export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
 }
 
 /**
+ * Returns the proto representation of a Survey DataSharingTerms model object.
+ */
+export function dataSharingTermsToDocument(
+  type: DataSharingType,
+  customText?: string
+): DocumentData | Error {
+  return toDocumentData(
+    new Pb.Survey({
+      dataSharingTerms: new Pb.Survey.DataSharingTerms({
+        type: dataSharingTypeToProto(type),
+        customText,
+      }),
+    })
+  );
+}
+
+/**
  * Returns the proto representation of a Job model object.
  */
-export function jobToDocument(job: Job): DocumentData {
+export function jobToDocument(
+  job: Job,
+  taskOverride: List<Task> | null = null
+): DocumentData {
   return toDocumentData(
     new Pb.Job({
       id: job.id,
       index: job.index,
       name: job.name,
       style: new Pb.Style({color: job.color}),
-      tasks: job.tasks?.toList().map(toTaskMessage).toArray(),
+      tasks: (taskOverride ?? job.tasks?.toList() ?? List())
+        .map((task: Task) => toTaskMessage(task))
+        .toArray(),
     })
   );
-}
-
-export function tasksToDocument(tasks: List<Task>): DocumentData {
-  return toDocumentData(tasks.toList().map(toTaskMessage).toArray());
 }
 
 /**
@@ -192,7 +227,7 @@ function toTaskTypeMessage(
     case TaskType.CAPTURE_LOCATION:
       return {
         captureLocation: new Pb.Task.CaptureLocation({
-          minAccuracyMeters: null,
+          minAccuracyMeters: 0,
         }),
       };
     default:
@@ -222,7 +257,7 @@ function toTaskConditionMessage(
 }
 
 /**
- * Returns a Protobuf messager epresenting a Task model.
+ * Returns a Protobuf message representing a Task model.
  */
 function toTaskMessage(task: Task): Pb.ITask {
   return new Pb.Task({
@@ -232,8 +267,8 @@ function toTaskMessage(task: Task): Pb.ITask {
     prompt: task.label,
     required: task.required,
     level: task.addLoiTask
-      ? Pb.Task.DataCollectionLevel.LOI_DATA
-      : Pb.Task.DataCollectionLevel.LOI_METADATA,
+      ? Pb.Task.DataCollectionLevel.LOI_METADATA
+      : Pb.Task.DataCollectionLevel.LOI_DATA,
     conditions: toTaskConditionMessage(task.condition),
   });
 }

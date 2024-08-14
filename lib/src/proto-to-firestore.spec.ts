@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
+import {registry} from './message-registry';
 import {GroundProtos} from '@ground/proto';
 import {toDocumentData} from './proto-to-firestore';
-import {
-  $title,
-  $description,
-  $style,
-  $coordinates,
-  $latitude,
-  $longitude,
-  $color,
-  $index,
-  $dtq$type,
-  $required,
-  $level,
-  $textQuestion,
-} from './testing/proto-field-aliases';
+
+import Pb = GroundProtos.ground.v1beta1;
+const s = registry.getFieldIds(Pb.Survey);
+const j = registry.getFieldIds(Pb.Job);
+const c = registry.getFieldIds(Pb.Coordinates);
+const lr = registry.getFieldIds(Pb.LinearRing);
+const t = registry.getFieldIds(Pb.Task);
+const st = registry.getFieldIds(Pb.Style);
+const dtq = registry.getFieldIds(Pb.Task.DateTimeQuestion);
 
 const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
-  GroundProtos.google.ground.v1beta1;
+  GroundProtos.ground.v1beta1;
 
 describe('toDocumentData()', () => {
   [
@@ -43,8 +39,8 @@ describe('toDocumentData()', () => {
         description: 'Survey desc',
       }),
       expected: {
-        [$title]: 'Survey name',
-        [$description]: 'Survey desc',
+        [s.name]: 'Survey name',
+        [s.description]: 'Survey desc',
       },
     },
     {
@@ -57,10 +53,10 @@ describe('toDocumentData()', () => {
         ],
       }),
       expected: {
-        [$coordinates]: [
-          {[$latitude]: 5, [$longitude]: 7},
-          {[$latitude]: 12, [$longitude]: 23},
-          {[$latitude]: 9, [$longitude]: 2},
+        [lr.coordinates]: [
+          {[c.latitude]: 5, [c.longitude]: 7},
+          {[c.latitude]: 12, [c.longitude]: 23},
+          {[c.latitude]: 9, [c.longitude]: 2},
         ],
       },
     },
@@ -70,8 +66,8 @@ describe('toDocumentData()', () => {
         style: new Style({color: '#112233'}),
       }),
       expected: {
-        [$index]: 0,
-        [$style]: {[$color]: '#112233'},
+        [j.index]: 0,
+        [j.style]: {[st.color]: '#112233'},
       },
     },
     {
@@ -83,7 +79,7 @@ describe('toDocumentData()', () => {
         },
       }),
       expected: {
-        '4': {
+        [s.acl]: {
           email1: 2, // DATA_COLLECTOR
           email2: 3, // SURVEY_ORGANIZER
         },
@@ -95,7 +91,7 @@ describe('toDocumentData()', () => {
         type: Task.DateTimeQuestion.Type.BOTH_DATE_AND_TIME,
       }),
       expected: {
-        '1': 3,
+        [dtq.type]: 3,
       },
     },
     {
@@ -104,7 +100,7 @@ describe('toDocumentData()', () => {
         type: Task.DateTimeQuestion.Type.TYPE_UNSPECIFIED,
       }),
       expected: {
-        [$dtq$type]: 0, // UNSPECIFIED
+        [dtq.type]: 0, // UNSPECIFIED
       },
     },
     {
@@ -117,10 +113,10 @@ describe('toDocumentData()', () => {
         ],
       }),
       expected: {
-        [$coordinates]: [
-          {[$latitude]: 5, [$longitude]: 7},
-          {[$latitude]: 12, [$longitude]: 23},
-          {[$latitude]: 9, [$longitude]: 2},
+        [lr.coordinates]: [
+          {[c.latitude]: 5, [c.longitude]: 7},
+          {[c.latitude]: 12, [c.longitude]: 23},
+          {[c.latitude]: 9, [c.longitude]: 2},
         ],
       },
     },
@@ -132,10 +128,10 @@ describe('toDocumentData()', () => {
         }),
       }),
       expected: {
-        [$index]: 0,
-        [$required]: false,
-        [$level]: 0,
-        [$textQuestion]: {'1': 1},
+        [t.index]: 0,
+        [t.required]: false,
+        [t.level]: 0,
+        [t.textQuestion]: {'1': 1},
       },
     },
   ].forEach(({desc, input, expected}) =>

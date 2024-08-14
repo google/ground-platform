@@ -18,8 +18,8 @@ import {GroundProtos} from '@ground/proto';
 import {toMessage} from './firestore-to-proto';
 import {Constructor} from 'protobufjs';
 
-const {Coordinates, Job, LinearRing, Role, Style, Survey, Task} =
-  GroundProtos.google.ground.v1beta1;
+const {Coordinates, Job, LinearRing, Role, Style, Survey, Task, LocationOfInterest} =
+  GroundProtos.ground.v1beta1;
 
 describe('toMessage()', () => {
   [
@@ -72,6 +72,21 @@ describe('toMessage()', () => {
         acl: {
           email1: Role.DATA_COLLECTOR,
           email2: Role.SURVEY_ORGANIZER,
+        },
+      }),
+    },
+    {
+      desc: 'converts map<string, Message>',
+      input: {
+        '10': {
+          'stringProperty': {'1': 'aaa'},
+          'numberProperty': {'2': 123.4},
+        },
+      },
+      expected: new LocationOfInterest({
+        properties: {
+          'stringProperty': new LocationOfInterest.Property({stringValue: 'aaa'}),
+          'numberProperty': new LocationOfInterest.Property({numericValue: 123.4}),
         },
       }),
     },

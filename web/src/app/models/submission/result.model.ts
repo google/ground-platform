@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
-
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Option} from 'app/models/task/option.model';
 
+import {MultipleSelection} from './multiple-selection';
 import {Point} from '../geometry/point';
 import {Polygon} from '../geometry/polygon';
 
@@ -27,7 +25,7 @@ export class Result {
     readonly value:
       | number
       | string
-      | List<Option>
+      | MultipleSelection
       | Date
       | Point
       | Polygon

@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "main": "dist/index.js",
   "description": "Ground shared lib",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rm -rf dist *.log src/generated",
     "lint": "eslint --ext .js,.ts src/",
@@ -29,6 +31,7 @@
     "protobufjs": "^7.3.0"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.14",
     "@types/jasmine": "^4.3.5",
     "@types/source-map-support": "^0.5.10",
     "@typescript-eslint/eslint-plugin": "^5.39.0",

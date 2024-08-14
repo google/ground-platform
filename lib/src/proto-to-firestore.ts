@@ -23,7 +23,10 @@ import {DocumentData, DocumentFieldValue} from '@google-cloud/firestore';
  * The map is keyed by message field numbers represented as strings, while field values are
  * converted to corresponding Firestore data types.
  */
-export function toDocumentData(message: object): DocumentData {
+export function toDocumentData(message: object): DocumentData | DocumentData[] {
+  if (Array.isArray(message)) {
+    return message.map(messageEl => toDocumentData(messageEl));
+  }
   if (Object.keys(message).length === 0) {
     return {};
   }

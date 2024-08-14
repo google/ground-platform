@@ -25,10 +25,10 @@ import {GroundProtos} from '@ground/proto';
 import {Datastore} from './common/datastore';
 import {DocumentData} from 'firebase-admin/firestore';
 import {toDocumentData, deleteEmpty} from '@ground/lib';
-import {Feature, Geometry, Position} from 'geojson';
-
-import Pb = GroundProtos.google.ground.v1beta1;
+import {Feature, GeoJsonProperties, Geometry, Position} from 'geojson';
 import {ErrorHandler} from './handlers';
+
+import Pb = GroundProtos.ground.v1beta1;
 
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
@@ -58,6 +58,8 @@ export function importGeoJsonCallback(
   const inserts: any[] = [];
 
   const db = getDatastore();
+
+  const ownerId = user.uid;
 
   // This code will process each file uploaded.
   busboy.on('file', async (_field, file, _filename) => {
@@ -101,7 +103,9 @@ export function importGeoJsonCallback(
             return;
           }
           try {
-            const data = toDocumentData(toLoiPb(geoJsonLoi as Feature, jobId));
+            const data = toDocumentData(
+              toLoiPb(geoJsonLoi as Feature, jobId, ownerId)
+            );
             const loi = {
               ...data,
               ...geoJsonToLoiLegacy(geoJsonLoi, jobId),
@@ -169,17 +173,38 @@ function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
  * Convert the provided GeoJSON LocationOfInterest and jobId into a
  * LocationOfInterest for insertion into the data store.
  */
-function toLoiPb(feature: Feature, jobId: string): Pb.LocationOfInterest {
+function toLoiPb(
+  feature: Feature,
+  jobId: string,
+  ownerId: string
+): Pb.LocationOfInterest {
   // TODO: Add created/modified metadata.
   const {id, geometry, properties} = feature;
   const geometryPb = toGeometryPb(geometry);
   return new Pb.LocationOfInterest({
     jobId,
+    ownerId,
     customTag: id?.toString(),
     source: Pb.LocationOfInterest.Source.IMPORTED,
     geometry: geometryPb,
-    properties,
+    properties: toLoiPbProperties(properties),
   });
+}
+
+function toLoiPbProperties(properties: GeoJsonProperties): {
+  [k: string]: Pb.LocationOfInterest.Property;
+} {
+  return Object.fromEntries(
+    Object.entries(properties ?? {}).map(([k, v]) => [k, toLoiPbProperty(v)])
+  );
+}
+
+function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
+  return new Pb.LocationOfInterest.Property(
+    typeof value === 'number'
+      ? {numericValue: value}
+      : {stringValue: value.toString()}
+  );
 }
 
 function toGeometryPb(geometry: Geometry): Pb.Geometry {

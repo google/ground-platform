@@ -25,13 +25,19 @@ import * as functions from './index';
 import {loi} from './common/datastore';
 import {Firestore} from 'firebase-admin/firestore';
 import {resetDatastore} from './common/context';
+import {registry} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
 
 const test = require('firebase-functions-test')();
+
+import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+const sb = registry.getFieldIds(Pb.Submission);
 
 describe('onWriteSubmission()', () => {
   let mockFirestore: Firestore;
   const SURVEY_ID = 'survey1';
-  const SUBMISSION = newDocumentSnapshot({loiId: 'loi1'});
+  const SUBMISSION = newDocumentSnapshot({loiId: 'loi1', [sb.loiId]: 'loi1'});
   const CONTEXT = newEventContext({surveyId: SURVEY_ID});
   const SURVEY_PATH = `surveys/${SURVEY_ID}`;
   const SUBMISSIONS_PATH = `${SURVEY_PATH}/submissions`;
@@ -62,7 +68,7 @@ describe('onWriteSubmission()', () => {
       .and.returnValue({
         where: jasmine
           .createSpy('where')
-          .withArgs('loiId', '==', loiId)
+          .withArgs(sb.loiId, '==', loiId)
           .and.returnValue(newCountQuery(count)),
       } as any);
   }
@@ -76,7 +82,7 @@ describe('onWriteSubmission()', () => {
     );
 
     const loi = await mockFirestore.doc(LOI_PATH).get();
-    expect(loi.data()).toEqual({submissionCount: 2});
+    expect(loi.data()).toEqual({[l.submissionCount]: 2});
   });
 
   it('update submission count on delete', async () => {
@@ -88,7 +94,7 @@ describe('onWriteSubmission()', () => {
     );
 
     const loi = await mockFirestore.doc(LOI_PATH).get();
-    expect(loi.data()).toEqual({submissionCount: 1});
+    expect(loi.data()).toEqual({[l.submissionCount]: 1});
   });
 
   it('do nothing on invalid change', async () => {
