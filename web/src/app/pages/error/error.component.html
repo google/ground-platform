@@ -27,7 +27,9 @@
       </ng-container>
 
       <ng-container *ngIf="errorType == ErrorType.ACCESS_DENIED">
-        <h1>{{accessDeniedMessage.message || 'Access denied'}}</h1>
+        <h1>Access denied</h1>
+
+        <h2 *ngIf="accessDeniedMessage.message">{{accessDeniedMessage.message}}</h2>
 
         <a *ngIf="accessDeniedMessage.link" mat-flat-button color="primary" href="{{accessDeniedMessage.link}}" target="_blank">
           Click here for registration
