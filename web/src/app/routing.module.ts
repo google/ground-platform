@@ -37,6 +37,7 @@ import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
 import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
+import {TermsComponent} from './pages/terms/terms.component';
 
 const routes: Routes = [
   {
@@ -88,6 +89,11 @@ const routes: Routes = [
   {
     path: NavigationService.ABOUT,
     component: AboutComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: NavigationService.TERMS,
+    component: TermsComponent,
     canActivate: [AuthGuard],
   },
 ];

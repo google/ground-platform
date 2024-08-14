@@ -49,6 +49,7 @@
 @use 'app/pages/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
 @use 'app/pages/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
 @use 'app/pages/main-page-container/main-page/secondary-side-panel/_secondary-side-panel.component-theme' as secondary-side-panel;
+@use 'app/pages/terms/_terms.component-theme.scss' as terms;
 
 @import 'firebaseui/dist/firebaseui.css';
 
@@ -92,6 +93,7 @@ html {
   @include survey-header.theme($theme);
   @include title-dialog.theme($theme);
   @include secondary-side-panel.theme($theme);
+  @include terms.theme($theme);
 }
 
 // Global styles

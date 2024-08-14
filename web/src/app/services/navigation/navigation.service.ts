@@ -50,6 +50,7 @@ export class NavigationService {
   static readonly JOB_SEGMENT = 'job';
   static readonly ERROR = 'error';
   static readonly ABOUT = 'about';
+  static readonly TERMS = 'terms';
 
   private sidePanelExpanded = true;
 
@@ -278,6 +279,13 @@ export class NavigationService {
       NavigationService.SURVEY_SEGMENT,
       NavigationService.SURVEY_ID_NEW,
     ]);
+  }
+
+  /**
+   * Navigate to the terms of service page
+   */
+  navigateToTermsOfService() {
+    this.router.navigate([NavigationService.TERMS]);
   }
 
   /**
