@@ -40,7 +40,6 @@ export class DataSharingTermsComponent implements OnInit {
   readonly customTextControlKey = 'customText';
   formGroup!: FormGroup;
 
-  somethingThatIsTrue = true;
   dataSharingTermsOptions: DataSharingTermsOption[] = [
     {
       value: DataSharingType.PRIVATE,
@@ -105,9 +104,5 @@ export class DataSharingTermsComponent implements OnInit {
       type === DataSharingType.CUSTOM &&
       this.typeControl.value === DataSharingType.CUSTOM
     );
-  }
-
-  typeSelected(value: DataSharingType) {
-    this.typeControl.setValue(value);
   }
 }
