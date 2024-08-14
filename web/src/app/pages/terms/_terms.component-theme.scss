@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-import {Location} from '@angular/common';
-import {Component} from '@angular/core';
-
-@Component({
-  selector: 'ground-about-page',
-  templateUrl: './about.component.html',
-  styleUrls: ['./about.component.scss'],
-})
-export class AboutComponent {
-  constructor(private location: Location) {}
-
-  onBackButtonClick() {
-    this.location.back();
+@use 'sass:map';
+@use '@angular/material' as mat;
+ 
+@mixin color($theme) {
+  .terms-text-container {
+    background-color: mat.get-theme-color($theme, surface-container-low);
+    border: 1px solid mat.get-theme-color($theme, outline-variant);
   }
+
+  .page ::-webkit-scrollbar-thumb {
+    background: mat.get-theme-color($theme, surface-dim);
+  }
+}
+
+@mixin typography($theme) {
+  .terms-text-container {
+    font: mat.get-theme-typography($theme, title-medium, font);
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+  @include typography($theme);
 }

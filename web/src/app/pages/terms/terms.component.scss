@@ -14,18 +14,36 @@
  * limitations under the License.
  */
 
-import {Location} from '@angular/common';
-import {Component} from '@angular/core';
+.page {
+  min-height: 100%;
+  padding-bottom: 40px;
 
-@Component({
-  selector: 'ground-about-page',
-  templateUrl: './about.component.html',
-  styleUrls: ['./about.component.scss'],
-})
-export class AboutComponent {
-  constructor(private location: Location) {}
+  .page-content {
+    display: flex;
+    flex-direction: column;
+    margin: 30px 160px 24px 160px;
+    height: calc(100vh - 220px);
+  }
 
-  onBackButtonClick() {
-    this.location.back();
+  .terms-text-container {
+    padding: 24px;
+    overflow-y: scroll;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 24px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    width: 8px;
   }
 }

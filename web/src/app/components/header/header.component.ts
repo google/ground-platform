@@ -80,6 +80,10 @@ export class HeaderComponent {
     this.router.navigate([NavigationService.ABOUT]);
   }
 
+  onTermsOfServiceClick() {
+    this.navigationService.navigateToTermsOfService();
+  }
+
   onCancelEditSurveyClick() {
     if (!this.draftSurveyService.dirty) {
       this.navigationService.selectSurvey(this.surveyId);
