@@ -36,6 +36,7 @@ import {
   CreateSurveyComponent,
   SetupPhase,
 } from 'app/pages/create-survey/create-survey.component';
+import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {JobService} from 'app/services/job/job.service';
@@ -92,7 +93,7 @@ describe('CreateSurveyComponent', () => {
       job001: job,
     }),
     /* acl= */ Map(),
-    {type: DataSharingType.PRIVATE}
+    {type: DataSharingType.CUSTOM, customText: 'Good day, sir'}
   );
   const jobWithTask = new Job(
     jobId,
@@ -141,12 +142,16 @@ describe('CreateSurveyComponent', () => {
       'updateTitleAndDescription',
       'createSurvey',
       'getActiveSurvey',
+      'updateDataSharingTerms',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
     );
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.updateDataSharingTerms.and.returnValue(
+      new Promise(resolve => resolve(undefined))
+    );
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'addOrUpdateJob',
@@ -178,6 +183,7 @@ describe('CreateSurveyComponent', () => {
         CreateSurveyComponent,
         SurveyDetailsComponent,
         JobDetailsComponent,
+        DataSharingTermsComponent,
         SurveyReviewComponent,
       ],
       providers: [
@@ -437,6 +443,33 @@ describe('CreateSurveyComponent', () => {
     });
   });
 
+  describe('Data Sharing Terms', () => {
+    beforeEach(fakeAsync(() => {
+      surveyId$.next(surveyId);
+      activeSurvey$.next(surveyWithJob);
+      tick();
+      // Forcibly set phase to DEFINE_DATA_SHARING_TERMS
+      component.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
+      fixture.detectChanges();
+    }));
+
+    it('updates data sharing agreement after clicking continue', () => {
+      clickContinueButton(fixture);
+
+      expect(surveyServiceSpy.updateDataSharingTerms).toHaveBeenCalledOnceWith(
+        surveyId,
+        DataSharingType.CUSTOM,
+        'Good day, sir'
+      );
+    });
+
+    it('goes back to task definition component after back button is clicked', () => {
+      clickBackButton(fixture);
+
+      expect(component.setupPhase).toBe(SetupPhase.DEFINE_TASKS);
+    });
+  });
+
   describe('Review', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
@@ -447,10 +480,10 @@ describe('CreateSurveyComponent', () => {
       fixture.detectChanges();
     }));
 
-    it('goes back to task definition component after back button is clicked', () => {
+    it('goes back to data sharing component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.setupPhase).toBe(SetupPhase.DEFINE_TASKS);
+      expect(component.setupPhase).toBe(SetupPhase.DEFINE_DATA_SHARING_TERMS);
     });
   });
 });

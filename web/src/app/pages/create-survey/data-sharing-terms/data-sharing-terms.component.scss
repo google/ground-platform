@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2024 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,23 @@
  * limitations under the License.
  */
 
-@use 'sass:map';
-@use '@angular/material' as mat;
+.data-sharing-terms {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-@mixin color($theme) {
-  .step-card {
-    .title div {
-      color: mat.get-theme-color($theme, outline);
+  .data-sharing-terms-card {
+    color: #202124;
+    font-size: 14px;
+    font-weight: 500;
+
+    .data-sharing-label {
+      font-size: 16px;
+      font-weight: 700;
     }
-
-    .description {
-      color: mat.get-theme-color($theme, on-surface-variant);
-    }
   }
-}
 
-@mixin typography($theme) {
-  .field-header {
-    font: mat.get-theme-typography($theme, title-medium, font);
+  .custom-terms {
+    display: block;
   }
-  .field-description {
-    font: mat.get-theme-typography($theme, body-medium, font);
-  }
- }
-
-@mixin theme($theme) {
-  @include color($theme);
-  @include typography($theme);
 }
