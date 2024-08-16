@@ -17,7 +17,10 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
-import {DataSharingType} from 'app/models/survey.model';
+import {
+  DATA_SHARING_TYPE_DESCRIPTION,
+  DataSharingType,
+} from 'app/models/survey.model';
 
 type DataSharingTermsOption = {
   value: DataSharingType;
@@ -44,19 +47,17 @@ export class DataSharingTermsComponent implements OnInit {
     {
       value: DataSharingType.PRIVATE,
       label: 'Private',
-      description: 'Data will be shared with survey organizers only',
+      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PRIVATE)!,
     },
     {
       value: DataSharingType.PUBLIC,
       label: 'Public',
-      description:
-        'Survey organizers may share and use data publicly with no constraints',
+      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PUBLIC)!,
     },
     {
       value: DataSharingType.CUSTOM,
       label: 'Custom agreement',
-      description:
-        'Survey organizers create terms which must be accepted by data collectors before collecting data',
+      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.CUSTOM)!,
     },
   ];
 

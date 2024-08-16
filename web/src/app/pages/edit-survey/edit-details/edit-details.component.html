@@ -31,6 +31,21 @@
     </mat-card-content>
   </mat-card>
 
+  <mat-card class="survey-detail-card" *ngIf="survey?.dataSharingTerms as terms">
+    <mat-card-content>
+      <div class="card-title">Data sharing consent</div>
+      <div class="card-row">
+        <p>{{ dataSharingTermsDetails.description }}</p>
+        <div *ngIf="dataSharingTermsDetails.customText as customText">
+          <div class="card-subtitle">Custom terms</div>
+          <p>
+            {{ customText }}
+          </p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="survey-detail-card">
     <mat-card-content>
       <div class="card-title">Delete survey</div>
@@ -42,5 +57,5 @@
         </button>
       </div>
     </mat-card-content>
-  </mat-card>    
+  </mat-card>
 </div>
