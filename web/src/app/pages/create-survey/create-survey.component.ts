@@ -21,6 +21,7 @@ import {filter, first, firstValueFrom} from 'rxjs';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey} from 'app/models/survey.model';
+import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
@@ -107,6 +108,9 @@ export class CreateSurveyComponent implements OnInit {
     survey: Survey,
     lois: Immutable.List<LocationOfInterest>
   ): SetupPhase {
+    if (this.hasTask(survey)) {
+      return SetupPhase.DEFINE_DATA_SHARING_TERMS;
+    }
     if (!lois.isEmpty()) {
       return SetupPhase.DEFINE_TASKS;
     }
@@ -136,6 +140,7 @@ export class CreateSurveyComponent implements OnInit {
     [SetupPhase.JOB_DETAILS, 'Add a job'],
     [SetupPhase.DEFINE_LOIS, 'Data collection strategy'],
     [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
+    [SetupPhase.DEFINE_DATA_SHARING_TERMS, 'Define data sharing terms'],
     [SetupPhase.REVIEW, 'Review and share survey'],
   ]);
 
@@ -179,8 +184,11 @@ export class CreateSurveyComponent implements OnInit {
         this.canContinue = true;
         this.setupPhase = SetupPhase.DEFINE_LOIS;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.DEFINE_DATA_SHARING_TERMS:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
+        break;
+      case SetupPhase.REVIEW:
+        this.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
         break;
       default:
         break;
@@ -207,6 +215,10 @@ export class CreateSurveyComponent implements OnInit {
         break;
       case SetupPhase.DEFINE_TASKS:
         await this.saveTasks();
+        this.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
+        break;
+      case SetupPhase.DEFINE_DATA_SHARING_TERMS:
+        await this.saveDataSharingTerms();
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
@@ -273,11 +285,25 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
+  private async saveDataSharingTerms() {
+    const type = this.dataSharingTerms?.formGroup.controls.type.value;
+    const customText =
+      this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
+    await this.surveyService.updateDataSharingTerms(
+      this.survey!.id,
+      type,
+      customText
+    );
+  }
+
   @ViewChild('surveyLoi')
   surveyLoi?: SurveyLoiComponent;
 
   @ViewChild('taskDetails')
   taskDetails?: TaskDetailsComponent;
+
+  @ViewChild('dataSharingTerms')
+  dataSharingTerms?: DataSharingTermsComponent;
 }
 
 export enum SetupPhase {
@@ -285,5 +311,6 @@ export enum SetupPhase {
   JOB_DETAILS,
   DEFINE_LOIS,
   DEFINE_TASKS,
+  DEFINE_DATA_SHARING_TERMS,
   REVIEW,
 }

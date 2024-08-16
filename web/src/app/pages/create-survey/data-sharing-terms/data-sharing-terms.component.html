@@ -1,0 +1,55 @@
+<!--
+  Copyright 2024 The Ground Authors.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<form [formGroup]="formGroup">
+  <mat-radio-group class="data-sharing-terms"
+    [id]="typeControlKey"
+    [formControlName]="typeControlKey"
+  >
+    <mat-card *ngFor="let option of dataSharingTermsOptions"
+      class="data-sharing-terms-card"
+    >
+      <mat-card-content>
+        <mat-radio-button class="option-radio-button" [value]="option.value">
+          <span class="data-sharing-label">{{ option.label }}</span>
+          <p>{{ option.description }}</p>
+        </mat-radio-button>
+        <div *ngIf="shouldShowCustomizeAgreementSection(option.value)">
+          <h3 id="customize-agreement-header"
+            class="field-header">
+            Customize agreement
+          </h3>
+          <p class="field-description">
+            Create a custom agreement which will be shown to data collectors before they can
+            collect data. Data collectors must agree to the terms of this agreement.
+          </p>
+          <mat-form-field class="custom-terms">
+            <textarea matInput
+              formControlName="customText"
+              placeholder="Enter the terms of your custom agreement..."
+              aria-labelledby="customize-agreement-header">
+            </textarea>
+            <mat-error *ngIf="customTextControl.touched && customTextControl.invalid">
+              <ng-container *ngIf="customTextControl.getError('required')">
+                Required
+              </ng-container>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </mat-radio-group>
+</form>
