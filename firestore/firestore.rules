@@ -139,7 +139,7 @@
       allow read: if canAccess();
     }
 
-    // Allow not passlisted users to access Access Denied config.
+    // Allow all users to access Access Denied config.
     match /config/accessDenied {
       allow read: if request.auth != null;
     }
