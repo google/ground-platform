@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {List, Map as ImmutableMap} from 'immutable';
+import {Map as ImmutableMap, List} from 'immutable';
 
 import {Copiable} from './copiable';
 import {Job} from './job.model';
