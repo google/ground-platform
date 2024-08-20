@@ -64,7 +64,7 @@ function propertiesPbToModel(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Map<string, string | number> {
   const properties: {[k: string]: string | number} = {};
-  for (const k in pb.keys) {
+  for (const k of Object.keys(pb)) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {
       properties[k] = v;

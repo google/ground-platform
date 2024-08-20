@@ -45,8 +45,8 @@ limitations under the License.
                 {{option.label}}
               </mat-checkbox>
 
-              <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherOption">
-                Other: {{option.label}}
+              <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherValue as otherValue">
+                Other: {{otherValue}}
               </mat-checkbox>
             </div>
             <!-- Photo task types -->
