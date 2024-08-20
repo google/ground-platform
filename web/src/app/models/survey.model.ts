@@ -27,6 +27,13 @@ export enum DataSharingType {
   CUSTOM = 3,
 }
 
+/** Enum for survey's completation status. */
+export enum SurveyStatus {
+  UNSAVED = 1,
+  DRAFT = 2,
+  READY = 3,
+}
+
 export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
@@ -49,23 +56,14 @@ export class Survey extends Copiable {
     readonly description: string,
     readonly jobs: Map<string, Job>,
     readonly acl: Map<string, Role>,
-    readonly dataSharingTerms: {type: DataSharingType; customText?: string}
+    readonly dataSharingTerms: {type: DataSharingType; customText?: string},
+    readonly status?: SurveyStatus
   ) {
     super();
   }
 
   getJob(jobId: string): Job | undefined {
     return this.jobs.get(jobId);
-  }
-
-  isUnsavedNew() {
-    return (
-      !this.id &&
-      !this.title &&
-      !this.description &&
-      !this.jobs.size &&
-      !this.acl.size
-    );
   }
 
   getJobsSorted(): List<Job> {
