@@ -179,7 +179,7 @@ export class DataStoreService {
     survey: Survey,
     jobIdsToDelete: List<string>
   ): Promise<void> {
-    const {title, description, id: surveyId, jobs} = survey;
+    const {id: surveyId, title, description, status, jobs} = survey;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const surveyJS: {[key: string]: any} = {
       title: title,
@@ -200,7 +200,7 @@ export class DataStoreService {
       .doc(surveyId)
       .update({
         ...surveyJS,
-        ...partialSurveyToDocument({name: title, description}),
+        ...partialSurveyToDocument({name: title, description, status}),
       });
 
     await Promise.all(jobs.map(job => this.updateJob(surveyId, job)));
