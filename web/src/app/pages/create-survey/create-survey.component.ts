@@ -268,27 +268,29 @@ export class CreateSurveyComponent implements OnInit {
     // Assume the survey exists.
     const survey = this.survey!;
 
-    await Promise.all([
-      this.taskService.addOrUpdateTasks(
-        survey.id,
-        // Assume there is at least one job.
-        survey.jobs.first(),
-        tasks!
-      ),
-
-      this.surveyService.updateStatus(survey.id, SurveyStatus.READY),
-    ]);
+    await this.taskService.addOrUpdateTasks(
+      survey.id,
+      // Assume there is at least one job.
+      survey.jobs.first(),
+      tasks!
+    );
   }
 
   private async saveDataSharingTerms() {
     const type = this.dataSharingTerms?.formGroup.controls.type.value;
+
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
-    await this.surveyService.updateDataSharingTerms(
-      this.survey!.id,
-      type,
-      customText
-    );
+
+    await Promise.all([
+      this.surveyService.updateDataSharingTerms(
+        this.survey!.id,
+        type,
+        customText
+      ),
+
+      this.surveyService.updateStatus(this.survey!.id, SurveyStatus.READY),
+    ]);
   }
 
   @ViewChild('surveyLoi')

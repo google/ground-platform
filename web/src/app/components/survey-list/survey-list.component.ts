@@ -62,6 +62,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   onNewSurvey() {
     this.navigationService.navigateToCreateSurvey(null);
   }
+
   /**
    * Clean up Rx subscription when cleaning up the component.
    */
