@@ -294,6 +294,10 @@ export class DataStoreService {
   async deleteJob(surveyId: string, jobId: string) {
     await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
     await this.deleteAllSubmissionsInJob(surveyId, jobId);
+    await this.db
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+      .doc(jobId)
+      .delete();
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
