@@ -30,7 +30,7 @@ import {Observable, Subject} from 'rxjs';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyStatus} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
@@ -118,7 +118,8 @@ describe('CreateSurveyComponent', () => {
       job001: jobWithTask,
     }),
     /* acl= */ Map(),
-    {type: DataSharingType.PRIVATE}
+    {type: DataSharingType.PRIVATE},
+    SurveyStatus.READY
   );
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
