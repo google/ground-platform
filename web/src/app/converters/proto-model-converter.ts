@@ -109,7 +109,7 @@ export function partialSurveyToDocument({
       ...(name && {name}),
       ...(description && {description}),
       ...(status && {
-        status: PB_STATUSES.get(status) || Pb.SurveyStatus.UNSPECIFIED,
+        status: PB_STATUSES.get(status) || Pb.SurveyStatus.STATUS_UNSPECIFIED,
       }),
     })
   );

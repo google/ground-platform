@@ -93,7 +93,7 @@ enum Role {
 // Defines the survey's completation status.
 enum SurveyStatus {
   // Default value when status is missing.
-  UNSPECIFIED = 0;
+  STATUS_UNSPECIFIED = 0;
 
   // Survey doesn't exists yet.
   UNSAVED = 1;
