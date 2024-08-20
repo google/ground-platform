@@ -29,8 +29,8 @@ import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom, of} from 'rxjs';
-import {filter, find, map, switchMap} from 'rxjs/operators';
+import {Observable, combineLatest, firstValueFrom} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
@@ -50,7 +50,7 @@ import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyStatus} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
@@ -200,7 +200,7 @@ export class DataStoreService {
       .doc(surveyId)
       .update({
         ...surveyJS,
-        ...partialSurveyToDocument(title, description),
+        ...partialSurveyToDocument({name: title, description}),
       });
 
     await Promise.all(jobs.map(job => this.updateJob(surveyId, job)));
@@ -210,41 +210,51 @@ export class DataStoreService {
    * Updates the survey with new name.
    *
    * @param surveyId the id of the survey.
-   * @param newName the new name of the survey.
+   * @param name the new name of the survey.
    */
-  updateSurveyTitle(surveyId: string, newName: string): Promise<void> {
+  updateSurveyTitle(surveyId: string, name: string): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(
-        {title: newName, ...partialSurveyToDocument(newName)},
-        {merge: true}
-      );
+      .set({title: name, ...partialSurveyToDocument({name})}, {merge: true});
   }
 
   /**
    * Updates the survey with new name and new description.
    *
    * @param surveyId the id of the survey.
-   * @param newName the new name of the survey.
-   * @param newDescription the new description of the survey.
+   * @param name the new name of the survey.
+   * @param description the new description of the survey.
    */
   updateSurveyTitleAndDescription(
     surveyId: string,
-    newName: string,
-    newDescription: string
+    name: string,
+    description: string
   ): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set(
         {
-          title: newName,
-          description: newDescription,
-          ...partialSurveyToDocument(newName, newDescription),
+          title: name,
+          description,
+          ...partialSurveyToDocument({name, description}),
         },
         {merge: true}
       );
+  }
+
+  /**
+   * Updates the survey status.
+   *
+   * @param surveyId the id of the survey.
+   * @param status the new status of the survey.
+   */
+  updateSurveyStatus(surveyId: string, status: SurveyStatus): Promise<void> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .set({status, ...partialSurveyToDocument({status})}, {merge: true});
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<[void, void]> {
@@ -545,7 +555,13 @@ export class DataStoreService {
       .doc(surveyId)
       .set({
         ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
-        ...newSurveyToDocument(name, description, acl, ownerId),
+        ...newSurveyToDocument(
+          name,
+          description,
+          acl,
+          ownerId,
+          SurveyStatus.DRAFT
+        ),
       });
     return Promise.resolve(surveyId);
   }
