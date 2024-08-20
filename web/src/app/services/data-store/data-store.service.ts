@@ -309,7 +309,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(s.jobId, '==', jobId)
+      ref => ref.where(sb.jobId, '==', jobId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
@@ -331,11 +331,11 @@ export class DataStoreService {
     surveyId: string,
     jobId: string
   ) {
-    const loisInJob = this.db.collection(
+    const lois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref => ref.where(l.jobId, '==', jobId)
     );
-    const querySnapshot = await firstValueFrom(loisInJob.get());
+    const querySnapshot = await firstValueFrom(lois.get());
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
