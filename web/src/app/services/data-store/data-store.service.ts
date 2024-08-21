@@ -254,7 +254,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({status, ...partialSurveyToDocument({state})}, {merge: true});
+      .set(surveyToDocument(surveyId, {state}), {merge: true});
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
@@ -502,7 +502,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update({acl: FirebaseDataConverter.aclToJs(acl), ...aclToDocument(acl)});
+      .update(aclToDocument(acl));
   }
 
   /**
@@ -519,10 +519,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update({
-        dataSharingTerms: {type, customText},
-        ...dataSharingTermsToDocument(type, customText),
-      });
+      .update(dataSharingTermsToDocument(type, customText));
   }
 
   generateId() {
