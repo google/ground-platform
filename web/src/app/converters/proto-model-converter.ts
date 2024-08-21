@@ -39,7 +39,6 @@ const PB_ROLES = Map([
 ]);
 
 const PB_STATES = Map([
-  [SurveyState.UNSAVED, Pb.Survey.State.UNSAVED],
   [SurveyState.DRAFT, Pb.Survey.State.DRAFT],
   [SurveyState.READY, Pb.Survey.State.READY],
 ]);

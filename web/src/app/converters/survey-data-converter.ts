@@ -74,7 +74,6 @@ const DATA_SHARING_MODEL_TYPE = Map([
 ]);
 
 const MODEL_STATES = Map([
-  [Pb.Survey.State.UNSAVED, SurveyState.UNSAVED],
   [Pb.Survey.State.DRAFT, SurveyState.DRAFT],
   [Pb.Survey.State.READY, SurveyState.READY],
 ]);
@@ -269,7 +268,9 @@ export class LegacySurveyDataConverter {
       {
         type: dataSharingTypeFromProto(data.dataSharingTerms.type),
         customText: data.dataSharingTerms.customText,
-      }
+      },
+      '',
+      data.state
     );
   }
 

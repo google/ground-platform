@@ -73,8 +73,8 @@ message Survey {
 
   // Defines the survey's current state.
   enum State {
-    // Survey doesn't exists yet.
-    UNSAVED = 0;
+    // Default value when status is missing.
+    STATE_UNSPECIFIED = 0;
 
     // Indicates the survey organizer has not yet completed the survey creation flow.
     DRAFT = 1;

@@ -29,9 +29,9 @@ export enum DataSharingType {
 
 /** Enum for survey's current state. */
 export enum SurveyState {
-  UNSAVED = 1,
-  DRAFT = 2,
-  READY = 3,
+  UNSAVED = 0,
+  DRAFT = 1,
+  READY = 2,
 }
 
 export class Survey extends Copiable {
