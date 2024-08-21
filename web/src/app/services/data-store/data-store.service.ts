@@ -257,16 +257,8 @@ export class DataStoreService {
       .set({status, ...partialSurveyToDocument({state})}, {merge: true});
   }
 
-  addOrUpdateJob(surveyId: string, job: Job): Promise<[void, void]> {
-    return Promise.all([
-      this.db
-        .collection(SURVEYS_COLLECTION_NAME)
-        .doc(surveyId)
-        .update({
-          [`jobs.${job.id}`]: FirebaseDataConverter.jobToJS(job),
-        }),
-      this.updateJob(surveyId, job),
-    ]);
+  addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
+    return this.updateJob(surveyId, job);
   }
 
   updateJob(

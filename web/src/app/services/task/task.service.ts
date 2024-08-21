@@ -103,7 +103,7 @@ export class TaskService {
     surveyId: string,
     job: Job,
     tasks: List<Task>
-  ): Promise<[void, void]> {
+  ): Promise<void> {
     return this.dataStoreService.addOrUpdateTasks(surveyId, job, tasks);
   }
 

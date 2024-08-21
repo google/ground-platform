@@ -117,7 +117,7 @@ export class JobService {
   /**
    * Adds/Updates the job of a survey with a given job value.
    */
-  async addOrUpdateJob(surveyId: string, job: Job): Promise<[void, void]> {
+  async addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     if (job.index === -1) {
       const index = await this.getJobCount();
       job = job.copyWith({index});
