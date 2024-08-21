@@ -250,7 +250,7 @@ export class DataStoreService {
    * @param surveyId the id of the survey.
    * @param state the new state of the survey.
    */
-  updateSurveyStatus(surveyId: string, state: SurveyState): Promise<void> {
+  updateSurveyState(surveyId: string, state: SurveyState): Promise<void> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
