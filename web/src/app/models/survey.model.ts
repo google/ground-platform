@@ -69,8 +69,8 @@ export class Survey extends Copiable {
     readonly id: string,
     readonly title: string,
     readonly description: string,
-    readonly jobs: Map<string, Job>,
-    readonly acl: Map<string, Role>,
+    readonly jobs: ImmutableMap<string, Job>,
+    readonly acl: ImmutableMap<string, Role>,
     readonly ownerId: string,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
     readonly state?: SurveyState
