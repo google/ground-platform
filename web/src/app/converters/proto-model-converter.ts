@@ -143,6 +143,29 @@ export function dataSharingTermsToDocument(
 }
 
 /**
+ * Returns the proto representation of a Survey model object.
+ */
+export function surveyToDocument(
+  surveyId: string,
+  survey: Partial<Survey>
+): DocumentData {
+  const {title: name, description, acl, ownerId, state} = survey;
+
+  return toDocumentData(
+    new Pb.Survey({
+      id: surveyId,
+      name,
+      ...(description && {description}),
+      ...(acl && {acl: acl.map(role => roleToProtoRole(role)).toObject()}),
+      ...(ownerId && {ownerId}),
+      ...(state && {
+        state: PB_STATES.get(state),
+      }),
+    })
+  );
+}
+
+/**
  * Returns the proto representation of a Job model object.
  */
 export function jobToDocument(
