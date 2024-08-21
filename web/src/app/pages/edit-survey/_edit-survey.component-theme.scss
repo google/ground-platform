@@ -16,7 +16,7 @@
 
  @use 'sass:map';
  @use '@angular/material' as mat;
- 
+
  @mixin color($theme) {
   .edit-survey-title {
     color: mat.get-theme-color($theme, on-background);
@@ -32,7 +32,7 @@
     }
   }
  }
- 
+
  @mixin typography($theme) {
   .edit-survey-title {
     font: mat.get-theme-typography($theme, headline-small, font);
@@ -47,14 +47,18 @@
       font: mat.get-theme-typography($theme, title-medium, font);
     }
 
+    .card-subtitle {
+      font: mat.get-theme-typography($theme, title-small, font);
+      text-decoration: underline;
+    }
+
     .card-row {
       font: mat.get-theme-typography($theme, body-medium, font);
     }
   }
  }
- 
+
  @mixin theme($theme) {
   @include color($theme);
   @include typography($theme);
  }
- 

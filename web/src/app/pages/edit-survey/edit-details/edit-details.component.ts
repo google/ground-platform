@@ -18,7 +18,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
-import {Survey} from 'app/models/survey.model';
+import {DATA_SHARING_TYPE_DESCRIPTION, Survey} from 'app/models/survey.model';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -29,6 +29,11 @@ import {
   DialogType,
   JobDialogComponent,
 } from '../job-dialog/job-dialog.component';
+
+interface DataSharingTermsDetails {
+  descriptionHtml: string;
+  customText?: string;
+}
 
 @Component({
   selector: 'ground-edit-details',
@@ -43,6 +48,8 @@ export class EditDetailsComponent implements OnInit {
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
 
+  dataSharingTermsDetails?: DataSharingTermsDetails;
+
   constructor(
     public dialog: MatDialog,
     public draftSurveyService: DraftSurveyService,
@@ -52,9 +59,16 @@ export class EditDetailsComponent implements OnInit {
 
   ngOnInit() {
     this.subscription.add(
-      this.draftSurveyService
-        .getSurvey$()
-        .subscribe(survey => (this.survey = survey))
+      this.draftSurveyService.getSurvey$().subscribe(survey => {
+        this.survey = survey;
+        if (this.survey.dataSharingTerms) {
+          const {type, customText} = this.survey.dataSharingTerms;
+          this.dataSharingTermsDetails = {
+            descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
+            customText,
+          };
+        }
+      })
     );
   }
 
