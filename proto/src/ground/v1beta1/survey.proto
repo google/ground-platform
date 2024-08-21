@@ -70,6 +70,21 @@ message Survey {
   // Defines the terms data collectors must agree to before
   // collecting data.
   DataSharingTerms data_sharing_terms = 6;
+
+  // Defines the survey's current state.
+  enum State {
+    // Default value when status is missing.
+    STATE_UNSPECIFIED = 0;
+
+    // Indicates the survey organizer has not yet completed the survey creation flow.
+    DRAFT = 1;
+
+    // Survey is ready to be used/edited.
+    READY = 2;
+  }
+
+  // Defines the survey's current state.
+  State state = 7;
 }
 
 // Defines a user's role in a survey.

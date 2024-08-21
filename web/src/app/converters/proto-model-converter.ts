@@ -21,7 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType} from 'app/models/survey.model';
+import {DataSharingType, SurveyState} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -36,6 +36,11 @@ const PB_ROLES = Map([
   [Role.SURVEY_ORGANIZER, Pb.Role.SURVEY_ORGANIZER],
   [Role.DATA_COLLECTOR, Pb.Role.DATA_COLLECTOR],
   [Role.VIEWER, Pb.Role.VIEWER],
+]);
+
+const PB_STATES = Map([
+  [SurveyState.DRAFT, Pb.Survey.State.DRAFT],
+  [SurveyState.READY, Pb.Survey.State.READY],
 ]);
 
 /**
@@ -72,7 +77,8 @@ export function newSurveyToDocument(
   name: string,
   description: string,
   acl: Map<string, Role>,
-  ownerId: string
+  ownerId: string,
+  state: SurveyState
 ): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
@@ -80,6 +86,7 @@ export function newSurveyToDocument(
       description,
       acl: acl.map(role => roleToProtoRole(role)).toObject(),
       ownerId,
+      state: PB_STATES.get(state),
     })
   );
 }
@@ -87,14 +94,22 @@ export function newSurveyToDocument(
 /**
  * Returns the proto representation of a partial Survey model object.
  */
-export function partialSurveyToDocument(
-  name: string,
-  description?: string
-): DocumentData | Error {
+export function partialSurveyToDocument({
+  name,
+  description,
+  state,
+}: {
+  name?: string;
+  description?: string;
+  state?: SurveyState;
+}): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
-      name,
+      ...(name && {name}),
       ...(description && {description}),
+      ...(state && {
+        state: PB_STATES.get(state),
+      }),
     })
   );
 }
