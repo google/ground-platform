@@ -21,7 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, SurveyState} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -172,13 +172,15 @@ export function jobToDocument(
   job: Job,
   taskOverride: List<Task> | null = null
 ): DocumentData {
+  const {id, index, name, color, tasks} = job;
+
   return toDocumentData(
     new Pb.Job({
-      id: job.id,
-      index: job.index,
-      name: job.name,
-      style: new Pb.Style({color: job.color}),
-      tasks: (taskOverride ?? job.tasks?.toList() ?? List())
+      id,
+      index,
+      name,
+      style: new Pb.Style({color}),
+      tasks: (taskOverride ?? tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
         .toArray(),
     })
