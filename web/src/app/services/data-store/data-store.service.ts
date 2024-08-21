@@ -575,20 +575,8 @@ export class DataStoreService {
     surveyId: string,
     job: Job,
     tasks: List<Task>
-  ): Promise<[void, void]> {
-    return Promise.all([
-      this.db
-        .collection(SURVEYS_COLLECTION_NAME)
-        .doc(surveyId)
-        .update({
-          [`jobs.${job.id}.tasks`]: {
-            ...FirebaseDataConverter.tasksToJS(
-              this.convertTasksListToMap(tasks)
-            ),
-          },
-        }),
-      this.updateJob(surveyId, job, tasks),
-    ]);
+  ): Promise<void> {
+    return this.updateJob(surveyId, job, tasks);
   }
 
   /**
