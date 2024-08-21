@@ -39,6 +39,13 @@ export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
   ],
 ]);
 
+/** Enum for survey's current state. */
+export enum SurveyState {
+  UNSAVED = 0,
+  DRAFT = 1,
+  READY = 2,
+}
+
 export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
@@ -52,7 +59,8 @@ export class Survey extends Copiable {
     /* acl= */
     ImmutableMap<string, Role>(),
     /* dataSharingTerms= */
-    {type: DataSharingType.PRIVATE}
+    {type: DataSharingType.PRIVATE},
+    SurveyState.UNSAVED
   );
 
   constructor(
@@ -61,23 +69,14 @@ export class Survey extends Copiable {
     readonly description: string,
     readonly jobs: ImmutableMap<string, Job>,
     readonly acl: ImmutableMap<string, Role>,
-    readonly dataSharingTerms: {type: DataSharingType; customText?: string}
+    readonly dataSharingTerms: {type: DataSharingType; customText?: string},
+    readonly state?: SurveyState
   ) {
     super();
   }
 
   getJob(jobId: string): Job | undefined {
     return this.jobs.get(jobId);
-  }
-
-  isUnsavedNew() {
-    return (
-      !this.id &&
-      !this.title &&
-      !this.description &&
-      !this.jobs.size &&
-      !this.acl.size
-    );
   }
 
   getJobsSorted(): List<Job> {

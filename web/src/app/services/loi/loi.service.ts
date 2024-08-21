@@ -15,15 +15,13 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Map as ImmutableMap, List} from 'immutable';
-import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
+import {List} from 'immutable';
+import {Observable, ReplaySubject, of} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
 
-import {Coordinate} from 'app/models/geometry/coordinate';
 import {GeometryType} from 'app/models/geometry/geometry';
-import {Point} from 'app/models/geometry/point';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
+import {SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -49,7 +47,7 @@ export class LocationOfInterestService {
             .getActiveSurvey$()
             .pipe(
               switchMap(survey =>
-                survey.isUnsavedNew()
+                survey.state === SurveyState.UNSAVED
                   ? of(List<LocationOfInterest>())
                   : dataStore.getAccessibleLois$(
                       survey,

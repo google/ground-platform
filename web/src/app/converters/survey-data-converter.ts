@@ -20,7 +20,7 @@ import {List, Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -71,6 +71,11 @@ const DATA_SHARING_MODEL_TYPE = Map([
   [Pb.Survey.DataSharingTerms.Type.PRIVATE, DataSharingType.PRIVATE],
   [Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0, DataSharingType.PUBLIC],
   [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
+]);
+
+const MODEL_STATES = Map([
+  [Pb.Survey.State.DRAFT, SurveyState.DRAFT],
+  [Pb.Survey.State.READY, SurveyState.READY],
 ]);
 
 function dataSharingTypeFromProto(
@@ -230,7 +235,8 @@ export function surveyDocToModel(
     {
       type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
       customText: pb.dataSharingTerms?.customText ?? undefined,
-    }
+    },
+    MODEL_STATES.get(pb.state)
   );
 }
 
@@ -262,7 +268,8 @@ export class LegacySurveyDataConverter {
       {
         type: dataSharingTypeFromProto(data.dataSharingTerms.type),
         customText: data.dataSharingTerms.customText,
-      }
+      },
+      data.state
     );
   }
 
