@@ -45,6 +45,7 @@ const mockSurvey = new Survey(
     ),
   }),
   /* acl= */ Map(),
+  /* ownerId= */ '',
   {type: DataSharingType.PRIVATE}
 );
 
