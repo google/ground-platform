@@ -20,7 +20,7 @@ import {List, Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyStatus} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -73,10 +73,10 @@ const DATA_SHARING_MODEL_TYPE = Map([
   [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
 ]);
 
-const MODEL_STATUSES = Map([
-  [Pb.SurveyStatus.UNSAVED, SurveyStatus.UNSAVED],
-  [Pb.SurveyStatus.DRAFT, SurveyStatus.DRAFT],
-  [Pb.SurveyStatus.READY, SurveyStatus.READY],
+const MODEL_STATES = Map([
+  [Pb.Survey.State.UNSAVED, SurveyState.UNSAVED],
+  [Pb.Survey.State.DRAFT, SurveyState.DRAFT],
+  [Pb.Survey.State.READY, SurveyState.READY],
 ]);
 
 function dataSharingTypeFromProto(
@@ -237,7 +237,7 @@ export function surveyDocToModel(
       type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
       customText: pb.dataSharingTerms?.customText ?? undefined,
     },
-    MODEL_STATUSES.get(pb.status)
+    MODEL_STATES.get(pb.state)
   );
 }
 

@@ -18,7 +18,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {Survey, SurveyStatus} from 'app/models/survey.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -71,6 +71,6 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   }
 
   private isSetupFinished(survey: Survey): boolean {
-    return survey.status === SurveyStatus.READY;
+    return survey.state === SurveyState.READY;
   }
 }

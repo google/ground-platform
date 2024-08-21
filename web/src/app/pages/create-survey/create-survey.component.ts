@@ -20,7 +20,7 @@ import {filter, first, firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey, SurveyStatus} from 'app/models/survey.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
@@ -100,14 +100,14 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private isSetupFinished(survey: Survey): boolean {
-    return survey.status === SurveyStatus.READY;
+    return survey.state === SurveyState.READY;
   }
 
   private getSetupPhase(
     survey: Survey,
     lois: Immutable.List<LocationOfInterest>
   ): SetupPhase {
-    if (survey.status === SurveyStatus.READY) {
+    if (survey.state === SurveyState.READY) {
       return SetupPhase.DEFINE_DATA_SHARING_TERMS;
     }
     if (!lois.isEmpty()) {
@@ -289,7 +289,7 @@ export class CreateSurveyComponent implements OnInit {
         customText
       ),
 
-      this.surveyService.updateStatus(this.survey!.id, SurveyStatus.READY),
+      this.surveyService.updateStatus(this.survey!.id, SurveyState.READY),
     ]);
   }
 

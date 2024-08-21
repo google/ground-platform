@@ -71,8 +71,20 @@ message Survey {
   // collecting data.
   DataSharingTerms data_sharing_terms = 6;
 
-  // Required. Defines the survey's completation status.
-  SurveyStatus status = 7;
+  // Defines the survey's current state.
+  enum State {
+    // Survey doesn't exists yet.
+    UNSAVED = 1;
+
+    // Indicates the survey organizer has not yet completed the survey creation flow.
+    DRAFT = 2;
+
+    // Survey is ready to be used/edited.
+    READY = 3;
+  }
+
+  // Defines the survey's current state.
+  State state = 7;
 }
 
 // Defines a user's role in a survey.
@@ -88,19 +100,4 @@ enum Role {
 
   // User may also manage the survey, update locations of interest, etc.
   SURVEY_ORGANIZER = 3;
-}
-
-// Defines the survey's completation status.
-enum SurveyStatus {
-  // Default value when status is missing.
-  STATUS_UNSPECIFIED = 0;
-
-  // Survey doesn't exists yet.
-  UNSAVED = 1;
-
-  // Survey exists but a job or some tasks are missing.
-  DRAFT = 2;
-
-  // Survey is ready to be used/edited.
-  READY = 3;
 }

@@ -21,7 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, SurveyStatus} from 'app/models/survey.model';
+import {DataSharingType, SurveyState} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -38,10 +38,10 @@ const PB_ROLES = Map([
   [Role.VIEWER, Pb.Role.VIEWER],
 ]);
 
-const PB_STATUSES = Map([
-  [SurveyStatus.UNSAVED, Pb.SurveyStatus.UNSAVED],
-  [SurveyStatus.DRAFT, Pb.SurveyStatus.DRAFT],
-  [SurveyStatus.READY, Pb.SurveyStatus.READY],
+const PB_STATES = Map([
+  [SurveyState.UNSAVED, Pb.Survey.State.UNSAVED],
+  [SurveyState.DRAFT, Pb.Survey.State.DRAFT],
+  [SurveyState.READY, Pb.Survey.State.READY],
 ]);
 
 /**
@@ -79,7 +79,7 @@ export function newSurveyToDocument(
   description: string,
   acl: Map<string, Role>,
   ownerId: string,
-  status: SurveyStatus
+  state: SurveyState
 ): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
@@ -87,7 +87,7 @@ export function newSurveyToDocument(
       description,
       acl: acl.map(role => roleToProtoRole(role)).toObject(),
       ownerId,
-      status,
+      state: PB_STATES.get(state),
     })
   );
 }
@@ -98,18 +98,18 @@ export function newSurveyToDocument(
 export function partialSurveyToDocument({
   name,
   description,
-  status,
+  state,
 }: {
   name?: string;
   description?: string;
-  status?: SurveyStatus;
+  state?: SurveyState;
 }): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
       ...(name && {name}),
       ...(description && {description}),
-      ...(status && {
-        status: PB_STATUSES.get(status) || Pb.SurveyStatus.STATUS_UNSPECIFIED,
+      ...(state && {
+        state: PB_STATES.get(state),
       }),
     })
   );

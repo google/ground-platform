@@ -27,8 +27,8 @@ export enum DataSharingType {
   CUSTOM = 3,
 }
 
-/** Enum for survey's completation status. */
-export enum SurveyStatus {
+/** Enum for survey's current state. */
+export enum SurveyState {
   UNSAVED = 1,
   DRAFT = 2,
   READY = 3,
@@ -48,7 +48,7 @@ export class Survey extends Copiable {
     Map<string, Role>(),
     /* dataSharingTerms= */
     {type: DataSharingType.PRIVATE},
-    SurveyStatus.UNSAVED
+    SurveyState.UNSAVED
   );
 
   constructor(
@@ -58,7 +58,7 @@ export class Survey extends Copiable {
     readonly jobs: Map<string, Job>,
     readonly acl: Map<string, Role>,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
-    readonly status?: SurveyStatus
+    readonly state?: SurveyState
   ) {
     super();
   }

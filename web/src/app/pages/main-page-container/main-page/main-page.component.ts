@@ -19,7 +19,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {Observable, Subscription} from 'rxjs';
 import {take} from 'rxjs/operators';
 
-import {Survey, SurveyStatus} from 'app/models/survey.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -110,7 +110,7 @@ export class MainPageComponent implements OnInit {
         autoFocus: jobId === NavigationService.JOB_ID_NEW,
         data: {
           surveyId:
-            survey.status === SurveyStatus.UNSAVED
+            survey.state === SurveyState.UNSAVED
               ? NavigationService.SURVEY_ID_NEW
               : survey.id,
           createJob: jobId === NavigationService.SURVEY_ID_NEW,
