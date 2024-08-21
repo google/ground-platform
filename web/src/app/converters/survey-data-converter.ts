@@ -269,7 +269,6 @@ export class LegacySurveyDataConverter {
         type: dataSharingTypeFromProto(data.dataSharingTerms.type),
         customText: data.dataSharingTerms.customText,
       },
-      '',
       data.state
     );
   }

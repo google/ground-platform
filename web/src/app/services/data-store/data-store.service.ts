@@ -564,7 +564,7 @@ export class DataStoreService {
           description,
           acl,
           ownerId,
-          SurveyStatus.DRAFT
+          SurveyState.DRAFT
         ),
       });
     return Promise.resolve(surveyId);
