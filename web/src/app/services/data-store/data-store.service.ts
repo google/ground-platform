@@ -22,7 +22,6 @@ import {
 import {
   DocumentData,
   FieldPath,
-  deleteField,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {registry} from '@ground/lib/dist/message-registry';
@@ -38,8 +37,7 @@ import {
   aclToDocument,
   dataSharingTermsToDocument,
   jobToDocument,
-  newSurveyToDocument,
-  partialSurveyToDocument,
+  surveyToDocument,
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
 import {
@@ -177,33 +175,28 @@ export class DataStoreService {
 
   async updateSurvey(
     survey: Survey,
-    jobIdsToDelete: List<string>
+    jobIdsToDelete?: List<string>
   ): Promise<void> {
-    const {id: surveyId, title, description, state, jobs} = survey;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const surveyJS: {[key: string]: any} = {
-      title: title,
-      description: description,
-    };
-    jobs.forEach(job => {
-      const {id: jobId} = job;
-      if (jobIdsToDelete.includes(jobId)) {
-        this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-        this.deleteAllSubmissionsInJob(surveyId, jobId);
-        surveyJS[`jobs.${jobId}`] = deleteField();
-      } else {
-        surveyJS[`jobs.${jobId}`] = FirebaseDataConverter.jobToJS(job);
-      }
-    });
+    const {id: surveyId, title: name, description, state, jobs} = survey;
+
+    jobIdsToDelete?.forEach(jobId => this.deleteJob(surveyId!, jobId));
+
+    await Promise.all(
+      jobs
+        .filter(({id}) => !jobIdsToDelete?.includes(id))
+        .map(job => this.updateJob(surveyId!, job))
+    );
+
     await this.db.firestore
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update({
-        ...surveyJS,
-        ...partialSurveyToDocument({name: title, description, state}),
-      });
-
-    await Promise.all(jobs.map(job => this.updateJob(surveyId, job)));
+      .update(
+        surveyToDocument(surveyId, {
+          title: name,
+          description,
+          state,
+        })
+      );
   }
 
   /**
@@ -216,7 +209,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({title: name, ...partialSurveyToDocument({name})}, {merge: true});
+      .set(surveyToDocument(surveyId, {title: name}), {merge: true});
   }
 
   /**
@@ -234,14 +227,9 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(
-        {
-          title: name,
-          description,
-          ...partialSurveyToDocument({name, description}),
-        },
-        {merge: true}
-      );
+      .set(surveyToDocument(surveyId, {title: name, description}), {
+        merge: true,
+      });
   }
 
   /**
@@ -286,16 +274,10 @@ export class DataStoreService {
   async deleteJob(surveyId: string, jobId: string) {
     await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
     await this.deleteAllSubmissionsInJob(surveyId, jobId);
-    await this.db
+    return await this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
       .doc(jobId)
       .delete();
-    return await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update({
-        [`jobs.${jobId}`]: deleteField(),
-      });
   }
 
   private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
@@ -546,16 +528,15 @@ export class DataStoreService {
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set({
-        ...FirebaseDataConverter.newSurveyToJS(name, description, acl),
-        ...newSurveyToDocument(
-          name,
+      .set(
+        surveyToDocument(surveyId, {
+          title: name,
           description,
           acl,
           ownerId,
-          SurveyState.DRAFT
-        ),
-      });
+          state: SurveyState.DRAFT,
+        })
+      );
     return Promise.resolve(surveyId);
   }
 

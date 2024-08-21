@@ -71,50 +71,6 @@ export function dataSharingTypeToProto(type: DataSharingType) {
 }
 
 /**
- * Returns the proto representation of a Survey model object.
- */
-export function newSurveyToDocument(
-  name: string,
-  description: string,
-  acl: Map<string, Role>,
-  ownerId: string,
-  state: SurveyState
-): DocumentData | Error {
-  return toDocumentData(
-    new Pb.Survey({
-      name,
-      description,
-      acl: acl.map(role => roleToProtoRole(role)).toObject(),
-      ownerId,
-      state: PB_STATES.get(state),
-    })
-  );
-}
-
-/**
- * Returns the proto representation of a partial Survey model object.
- */
-export function partialSurveyToDocument({
-  name,
-  description,
-  state,
-}: {
-  name?: string;
-  description?: string;
-  state?: SurveyState;
-}): DocumentData | Error {
-  return toDocumentData(
-    new Pb.Survey({
-      ...(name && {name}),
-      ...(description && {description}),
-      ...(state && {
-        state: PB_STATES.get(state),
-      }),
-    })
-  );
-}
-
-/**
  * Returns the proto representation of a Survey ACL model object.
  */
 export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
