@@ -89,6 +89,7 @@ describe('EditSurveyComponent', () => {
       [jobId2, job2],
     ]),
     /* acl= */ Map(),
+    '',
     {type: DataSharingType.PRIVATE}
   );
   beforeEach(waitForAsync(() => {

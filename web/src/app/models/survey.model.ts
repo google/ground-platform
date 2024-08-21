@@ -47,6 +47,7 @@ export class Survey extends Copiable {
     /* acl= */
     Map<string, Role>(),
     /* dataSharingTerms= */
+    '',
     {type: DataSharingType.PRIVATE},
     SurveyState.UNSAVED
   );
@@ -57,6 +58,7 @@ export class Survey extends Copiable {
     readonly description: string,
     readonly jobs: Map<string, Job>,
     readonly acl: Map<string, Role>,
+    readonly ownerId: string,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
     readonly state?: SurveyState
   ) {

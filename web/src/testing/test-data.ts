@@ -52,10 +52,10 @@ export class TestData {
       description,
       Map(jobs),
       Map(acl),
+      '',
       {
         type: DataSharingType.PRIVATE,
       },
-      '',
       SurveyState.DRAFT
     );
   }
