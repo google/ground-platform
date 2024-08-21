@@ -35,7 +35,7 @@
     <mat-card-content>
       <div class="card-title">Data sharing consent</div>
       <div class="card-row">
-        <p>{{ dataSharingTermsDetails.description }}</p>
+        <p [innerHtml]="dataSharingTermsDetails.descriptionHtml"></p>
         <div *ngIf="dataSharingTermsDetails.customText as customText">
           <div class="card-subtitle">Custom terms</div>
           <p>

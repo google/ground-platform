@@ -25,7 +25,7 @@ import {
 type DataSharingTermsOption = {
   value: DataSharingType;
   label: string;
-  description: string;
+  descriptionHtml: string;
 };
 
 @Component({
@@ -47,17 +47,23 @@ export class DataSharingTermsComponent implements OnInit {
     {
       value: DataSharingType.PRIVATE,
       label: 'Private',
-      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PRIVATE)!,
+      descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
+        DataSharingType.PRIVATE
+      )!,
     },
     {
       value: DataSharingType.PUBLIC,
       label: 'Public',
-      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PUBLIC)!,
+      descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
+        DataSharingType.PUBLIC
+      )!,
     },
     {
       value: DataSharingType.CUSTOM,
       label: 'Custom agreement',
-      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.CUSTOM)!,
+      descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
+        DataSharingType.CUSTOM
+      )!,
     },
   ];
 

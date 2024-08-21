@@ -31,7 +31,7 @@ export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
   [DataSharingType.PRIVATE, 'Data will be shared with survey organizers only'],
   [
     DataSharingType.PUBLIC,
-    'Survey organizers may share and use data publicly with no constraints',
+    'Survey organizers may share and use data publicly under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>',
   ],
   [
     DataSharingType.CUSTOM,
