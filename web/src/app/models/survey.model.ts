@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {List, Map} from 'immutable';
+import {Map as ImmutableMap, List} from 'immutable';
 
 import {Copiable} from './copiable';
 import {Job} from './job.model';
@@ -26,6 +26,18 @@ export enum DataSharingType {
   PUBLIC = 2,
   CUSTOM = 3,
 }
+
+export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
+  [DataSharingType.PRIVATE, 'Data will be shared with survey organizers only'],
+  [
+    DataSharingType.PUBLIC,
+    'Survey organizers may share and use data publicly under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>',
+  ],
+  [
+    DataSharingType.CUSTOM,
+    'Survey organizers create terms which must be accepted by data collectors before collecting data',
+  ],
+]);
 
 /** Enum for survey's current state. */
 export enum SurveyState {
@@ -43,9 +55,9 @@ export class Survey extends Copiable {
     /* description= */
     '',
     /* jobs= */
-    Map<string, Job>(),
+    ImmutableMap<string, Job>(),
     /* acl= */
-    Map<string, Role>(),
+    ImmutableMap<string, Role>(),
     /* ownerId= */
     '',
     /* dataSharingTerms= */

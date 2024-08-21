@@ -58,7 +58,7 @@ describe('DataSharingTermsComponent', () => {
       {
         label: 'Public',
         description:
-          'Survey organizers may share and use data publicly with no constraints',
+          'Survey organizers may share and use data publicly under the CC0 license',
       },
       {
         label: 'Custom agreement',
