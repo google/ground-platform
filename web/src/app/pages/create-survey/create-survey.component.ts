@@ -289,7 +289,7 @@ export class CreateSurveyComponent implements OnInit {
         customText
       ),
 
-      this.surveyService.updateStatus(this.survey!.id, SurveyState.READY),
+      this.surveyService.updateState(this.survey!.id, SurveyState.READY),
     ]);
   }
 

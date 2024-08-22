@@ -111,13 +111,13 @@ export class SurveyService {
   }
 
   /**
-   * Updates the survey with new status by calling the data-store service.
+   * Updates the survey with new state by calling the data-store service.
    *
    * @param surveyId the id of the survey.
-   * @param status the new status of the survey.
+   * @param state the new status of the survey.
    */
-  updateStatus(surveyId: string, status: SurveyState): Promise<void> {
-    return this.dataStore.updateSurveyState(surveyId, status);
+  updateState(surveyId: string, state: SurveyState): Promise<void> {
+    return this.dataStore.updateSurveyState(surveyId, state);
   }
 
   updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
