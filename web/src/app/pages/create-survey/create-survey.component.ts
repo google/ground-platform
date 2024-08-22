@@ -213,6 +213,7 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
+        await this.setSurveyStateToReady();
         !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
         break;
       default:
@@ -229,6 +230,7 @@ export class CreateSurveyComponent implements OnInit {
     if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
       return await this.surveyService.createSurvey(name, description);
     }
+
     return await this.surveyService.updateTitleAndDescription(
       this.surveyId!,
       name,
@@ -282,15 +284,15 @@ export class CreateSurveyComponent implements OnInit {
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
-    await Promise.all([
-      this.surveyService.updateDataSharingTerms(
-        this.survey!.id,
-        type,
-        customText
-      ),
+    await this.surveyService.updateDataSharingTerms(
+      this.survey!.id,
+      type,
+      customText
+    );
+  }
 
-      this.surveyService.updateState(this.survey!.id, SurveyState.READY),
-    ]);
+  private async setSurveyStateToReady() {
+    await this.surveyService.updateState(this.survey!.id, SurveyState.READY);
   }
 
   @ViewChild('surveyLoi')
