@@ -172,31 +172,24 @@ export class DataStoreService {
    * @param jobIdsToDelete List of job ids to delete. This is used to delete all the lois and
    *  submissions that are related to the jobs to be deleted.
    */
-
   async updateSurvey(
     survey: Survey,
     jobIdsToDelete?: List<string>
   ): Promise<void> {
-    const {id: surveyId, title: name, description, state, jobs} = survey;
+    const {id: surveyId, jobs} = survey;
 
-    jobIdsToDelete?.forEach(jobId => this.deleteJob(surveyId!, jobId));
+    jobIdsToDelete?.forEach(jobId => this.deleteJob(surveyId, jobId));
 
     await Promise.all(
       jobs
         .filter(({id}) => !jobIdsToDelete?.includes(id))
-        .map(job => this.updateJob(surveyId!, job))
+        .map(job => this.addOrUpdateJob(surveyId, job))
     );
 
     await this.db.firestore
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .update(
-        surveyToDocument(surveyId, {
-          title: name,
-          description,
-          state,
-        })
-      );
+      .update(surveyToDocument(surveyId, survey));
   }
 
   /**
@@ -245,8 +238,11 @@ export class DataStoreService {
       .set(surveyToDocument(surveyId, {state}), {merge: true});
   }
 
-  addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
-    return this.updateJob(surveyId, job);
+  addOrUpdateSurvey(survey: Survey): Promise<void> {
+    return this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(survey.id)
+      .set(surveyToDocument(survey.id, survey));
   }
 
   addOrUpdateJob(surveyId: string, job: Job): Promise<void> {

@@ -38,6 +38,12 @@ const PB_ROLES = Map([
   [Role.VIEWER, Pb.Role.VIEWER],
 ]);
 
+const PB_DATA_SHARING_TYPE = Map([
+  [DataSharingType.PRIVATE, Pb.Survey.DataSharingTerms.Type.PRIVATE],
+  [DataSharingType.PUBLIC, Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0],
+  [DataSharingType.CUSTOM, Pb.Survey.DataSharingTerms.Type.CUSTOM],
+]);
+
 const PB_STATES = Map([
   [SurveyState.DRAFT, Pb.Survey.State.DRAFT],
   [SurveyState.READY, Pb.Survey.State.READY],
@@ -49,16 +55,12 @@ const PB_STATES = Map([
 export function roleToProtoRole(role: Role) {
   const pbRole = PB_ROLES.get(role);
 
-  if (!pbRole) throw new Error(`Invalid role encountered: ${role}`);
+  if (!pbRole) {
+    throw new Error(`Invalid role encountered: ${role}`);
+  }
 
   return pbRole;
 }
-
-const PB_DATA_SHARING_TYPE = Map([
-  [DataSharingType.PRIVATE, Pb.Survey.DataSharingTerms.Type.PRIVATE],
-  [DataSharingType.PUBLIC, Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0],
-  [DataSharingType.CUSTOM, Pb.Survey.DataSharingTerms.Type.CUSTOM],
-]);
 
 export function dataSharingTypeToProto(type: DataSharingType) {
   const pbType = PB_DATA_SHARING_TYPE.get(type);
@@ -90,10 +92,7 @@ export function dataSharingTermsToDocument(
 ): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
-      dataSharingTerms: new Pb.Survey.DataSharingTerms({
-        type: dataSharingTypeToProto(type),
-        customText,
-      }),
+      dataSharingTerms: toDataSharingTermsMessage({type, customText}),
     })
   );
 }
@@ -105,7 +104,14 @@ export function surveyToDocument(
   surveyId: string,
   survey: Partial<Survey>
 ): DocumentData {
-  const {title: name, description, acl, ownerId, state} = survey;
+  const {
+    title: name,
+    description,
+    acl,
+    ownerId,
+    dataSharingTerms,
+    state,
+  } = survey;
 
   return toDocumentData(
     new Pb.Survey({
@@ -113,7 +119,10 @@ export function surveyToDocument(
       name,
       ...(description && {description}),
       ...(acl && {acl: acl.map(role => roleToProtoRole(role)).toObject()}),
-      ...(ownerId && {ownerId}),
+      ownerId,
+      ...(dataSharingTerms && {
+        dataSharingTerms: toDataSharingTermsMessage(dataSharingTerms),
+      }),
       ...(state && {
         state: PB_STATES.get(state),
       }),
@@ -263,5 +272,18 @@ function toTaskMessage(task: Task): Pb.ITask {
       ? Pb.Task.DataCollectionLevel.LOI_METADATA
       : Pb.Task.DataCollectionLevel.LOI_DATA,
     conditions: toTaskConditionMessage(task.condition),
+  });
+}
+
+/**
+ * Returns a Protobuf message representing a DataSharingTerms model.
+ */
+function toDataSharingTermsMessage(dataSharingTerms: {
+  type: DataSharingType;
+  customText?: string;
+}): Pb.Survey.IDataSharingTerms {
+  return new Pb.Survey.DataSharingTerms({
+    type: dataSharingTypeToProto(dataSharingTerms.type),
+    customText: dataSharingTerms.customText,
   });
 }
