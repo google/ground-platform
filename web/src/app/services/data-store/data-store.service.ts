@@ -249,15 +249,11 @@ export class DataStoreService {
     return this.updateJob(surveyId, job);
   }
 
-  updateJob(
-    surveyId: string,
-    job: Job,
-    tasks: List<Task> | null = null
-  ): Promise<void> {
+  addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
       .doc(job.id)
-      .set(jobToDocument(job, tasks));
+      .set(jobToDocument(job));
   }
 
   async deleteSurvey(survey: Survey) {
@@ -547,14 +543,6 @@ export class DataStoreService {
   async getTermsOfService(): Promise<string> {
     const tos = await this.db.collection('config').doc('tos').ref.get();
     return tos.get('text');
-  }
-
-  addOrUpdateTasks(
-    surveyId: string,
-    job: Job,
-    tasks: List<Task>
-  ): Promise<void> {
-    return this.updateJob(surveyId, job, tasks);
   }
 
   /**

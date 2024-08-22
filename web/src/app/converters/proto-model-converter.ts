@@ -124,10 +124,7 @@ export function surveyToDocument(
 /**
  * Returns the proto representation of a Job model object.
  */
-export function jobToDocument(
-  job: Job,
-  taskOverride: List<Task> | null = null
-): DocumentData {
+export function jobToDocument(job: Job): DocumentData {
   const {id, index, name, color, tasks} = job;
 
   return toDocumentData(
@@ -136,7 +133,7 @@ export function jobToDocument(
       index,
       name,
       style: new Pb.Style({color}),
-      tasks: (taskOverride ?? tasks?.toList() ?? List())
+      tasks: (tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
         .toArray(),
     })
