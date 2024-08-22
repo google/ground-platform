@@ -123,9 +123,7 @@ export function surveyToDocument(
       ...(dataSharingTerms && {
         dataSharingTerms: toDataSharingTermsMessage(dataSharingTerms),
       }),
-      ...(state && {
-        state: PB_STATES.get(state),
-      }),
+      state: PB_STATES.get(state || SurveyState.DRAFT),
     })
   );
 }
