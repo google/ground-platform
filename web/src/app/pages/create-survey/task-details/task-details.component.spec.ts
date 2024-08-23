@@ -37,6 +37,7 @@ describe('TaskDetailsComponent', () => {
     'description',
     Map<string, Job>(),
     Map<string, Role>(),
+    '',
     {type: DataSharingType.PRIVATE}
   );
 

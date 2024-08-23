@@ -232,6 +232,7 @@ export function surveyDocToModel(
         MODEL_ROLES.get(pb.acl[id])!,
       ])
     ),
+    pb.ownerId,
     {
       type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
       customText: pb.dataSharingTerms?.customText ?? undefined,
@@ -265,6 +266,7 @@ export class LegacySurveyDataConverter {
           LegacySurveyDataConverter.toRole(data.acl[id]),
         ])
       ),
+      data.ownerId,
       {
         type: dataSharingTypeFromProto(data.dataSharingTerms.type),
         customText: data.dataSharingTerms.customText,
