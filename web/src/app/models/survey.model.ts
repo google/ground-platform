@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {List, Map} from 'immutable';
+import {Map as ImmutableMap, List} from 'immutable';
 
 import {Copiable} from './copiable';
 import {Job} from './job.model';
@@ -27,6 +27,25 @@ export enum DataSharingType {
   CUSTOM = 3,
 }
 
+export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
+  [DataSharingType.PRIVATE, 'Data will be shared with survey organizers only'],
+  [
+    DataSharingType.PUBLIC,
+    'Survey organizers may share and use data publicly under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>',
+  ],
+  [
+    DataSharingType.CUSTOM,
+    'Survey organizers create terms which must be accepted by data collectors before collecting data',
+  ],
+]);
+
+/** Enum for survey's current state. */
+export enum SurveyState {
+  UNSAVED = 0,
+  DRAFT = 1,
+  READY = 2,
+}
+
 export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
@@ -36,36 +55,31 @@ export class Survey extends Copiable {
     /* description= */
     '',
     /* jobs= */
-    Map<string, Job>(),
+    ImmutableMap<string, Job>(),
     /* acl= */
-    Map<string, Role>(),
+    ImmutableMap<string, Role>(),
+    /* ownerId= */
+    '',
     /* dataSharingTerms= */
-    {type: DataSharingType.PRIVATE}
+    {type: DataSharingType.PRIVATE},
+    SurveyState.UNSAVED
   );
 
   constructor(
     readonly id: string,
     readonly title: string,
     readonly description: string,
-    readonly jobs: Map<string, Job>,
-    readonly acl: Map<string, Role>,
-    readonly dataSharingTerms: {type: DataSharingType; customText?: string}
+    readonly jobs: ImmutableMap<string, Job>,
+    readonly acl: ImmutableMap<string, Role>,
+    readonly ownerId: string,
+    readonly dataSharingTerms: {type: DataSharingType; customText?: string},
+    readonly state?: SurveyState
   ) {
     super();
   }
 
   getJob(jobId: string): Job | undefined {
     return this.jobs.get(jobId);
-  }
-
-  isUnsavedNew() {
-    return (
-      !this.id &&
-      !this.title &&
-      !this.description &&
-      !this.jobs.size &&
-      !this.acl.size
-    );
   }
 
   getJobsSorted(): List<Job> {

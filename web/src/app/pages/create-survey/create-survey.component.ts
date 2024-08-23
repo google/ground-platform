@@ -20,7 +20,7 @@ import {filter, first, firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
@@ -100,15 +100,14 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private isSetupFinished(survey: Survey): boolean {
-    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
-    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
+    return survey.state === SurveyState.READY;
   }
 
   private getSetupPhase(
     survey: Survey,
     lois: Immutable.List<LocationOfInterest>
   ): SetupPhase {
-    if (this.hasTask(survey)) {
+    if (survey.state === SurveyState.READY) {
       return SetupPhase.DEFINE_DATA_SHARING_TERMS;
     }
     if (!lois.isEmpty()) {
@@ -125,14 +124,6 @@ export class CreateSurveyComponent implements OnInit {
 
   private hasTitle(survey: Survey): boolean {
     return survey.title.trim().length > 0;
-  }
-
-  private hasJob(survey: Survey): boolean {
-    return survey.jobs.size > 0;
-  }
-
-  private hasTask(survey: Survey): boolean {
-    return survey.jobs.valueSeq().some(job => (job.tasks?.size || 0) > 0);
   }
 
   readonly setupPhaseToTitle = new Map<SetupPhase, String>([
@@ -222,6 +213,7 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
+        await this.setSurveyStateToReady();
         !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
         break;
       default:
@@ -238,6 +230,7 @@ export class CreateSurveyComponent implements OnInit {
     if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
       return await this.surveyService.createSurvey(name, description);
     }
+
     return await this.surveyService.updateTitleAndDescription(
       this.surveyId!,
       name,
@@ -287,13 +280,19 @@ export class CreateSurveyComponent implements OnInit {
 
   private async saveDataSharingTerms() {
     const type = this.dataSharingTerms?.formGroup.controls.type.value;
+
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
+
     await this.surveyService.updateDataSharingTerms(
       this.survey!.id,
       type,
       customText
     );
+  }
+
+  private async setSurveyStateToReady() {
+    await this.surveyService.updateState(this.survey!.id, SurveyState.READY);
   }
 
   @ViewChild('surveyLoi')

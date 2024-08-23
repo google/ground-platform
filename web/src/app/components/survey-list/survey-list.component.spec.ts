@@ -30,7 +30,7 @@ import {of} from 'rxjs';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -62,6 +62,7 @@ describe('SurveyListComponent', () => {
       ),
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 
@@ -88,7 +89,9 @@ describe('SurveyListComponent', () => {
       ),
     }),
     /* acl= */ Map(),
-    {type: DataSharingType.PRIVATE}
+    /* ownerId= */ '',
+    {type: DataSharingType.PRIVATE},
+    SurveyState.READY
   );
 
   const surveyServiceSpy = jasmine.createSpyObj('SurveyService', [

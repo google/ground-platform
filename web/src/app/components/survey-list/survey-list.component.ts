@@ -18,7 +18,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {Survey} from 'app/models/survey.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -62,6 +62,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   onNewSurvey() {
     this.navigationService.navigateToCreateSurvey(null);
   }
+
   /**
    * Clean up Rx subscription when cleaning up the component.
    */
@@ -70,19 +71,6 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   }
 
   private isSetupFinished(survey: Survey): boolean {
-    // To make it simple we are not checking the LOIs here since defining tasks is the step after defining LOIs.
-    return this.hasTitle(survey) && this.hasJob(survey) && this.hasTask(survey);
-  }
-
-  private hasTitle(survey: Survey): boolean {
-    return survey.title.trim().length > 0;
-  }
-
-  private hasJob(survey: Survey): boolean {
-    return survey.jobs.size > 0;
-  }
-
-  private hasTask(survey: Survey): boolean {
-    return survey.jobs.valueSeq().some(job => (job.tasks?.size || 0) > 0);
+    return survey.state === SurveyState.READY;
   }
 }

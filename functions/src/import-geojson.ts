@@ -22,9 +22,7 @@ import JSONStream from 'jsonstream-ts';
 import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
-import {Datastore} from './common/datastore';
-import {DocumentData} from 'firebase-admin/firestore';
-import {toDocumentData, deleteEmpty} from '@ground/lib';
+import {toDocumentData} from '@ground/lib';
 import {Feature, GeoJsonProperties, Geometry, Position} from 'geojson';
 import {ErrorHandler} from './handlers';
 
@@ -103,13 +101,9 @@ export function importGeoJsonCallback(
             return;
           }
           try {
-            const data = toDocumentData(
+            const loi = toDocumentData(
               toLoiPb(geoJsonLoi as Feature, jobId, ownerId)
             );
-            const loi = {
-              ...data,
-              ...geoJsonToLoiLegacy(geoJsonLoi, jobId),
-            };
             inserts.push(db.insertLocationOfInterest(surveyId, loi));
           } catch (loiErr) {
             console.debug('Skipping LOI', loiErr);
@@ -151,22 +145,6 @@ export function importGeoJsonCallback(
   // Use this for Cloud Functions rather than `req.pipe(busboy)`:
   // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
   busboy.end(req.rawBody);
-}
-
-/**
- * Convert the provided GeoJSON LocationOfInterest and jobId into a
- * LocationOfInterest for insertion into the data store.
- */
-function geoJsonToLoiLegacy(geoJsonLoi: Feature, jobId: string): DocumentData {
-  // TODO: Add created/modified metadata.
-  const {id, geometry, properties} = geoJsonLoi;
-  return deleteEmpty({
-    jobId,
-    customId: id,
-    predefined: true,
-    geometry: Datastore.toFirestoreMap(geometry),
-    properties,
-  });
 }
 
 /**

@@ -106,6 +106,7 @@ class MockModel {
     'description',
     Map({job001: MockModel.job001}),
     /*acl=*/ Map({}),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 

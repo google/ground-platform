@@ -92,6 +92,7 @@ describe('JobListItemComponent', () => {
       job001: job,
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 

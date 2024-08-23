@@ -25,7 +25,7 @@
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
           <span class="data-sharing-label">{{ option.label }}</span>
-          <p>{{ option.description }}</p>
+          <p [innerHtml]="option.descriptionHtml"></p>
         </mat-radio-button>
         <div *ngIf="shouldShowCustomizeAgreementSection(option.value)">
           <h3 id="customize-agreement-header"

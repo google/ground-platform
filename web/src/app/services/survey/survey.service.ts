@@ -21,7 +21,7 @@ import {shareReplay, switchMap} from 'rxjs/operators';
 
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -108,6 +108,16 @@ export class SurveyService {
       newTitle,
       newDescription
     );
+  }
+
+  /**
+   * Updates the survey with new state by calling the data-store service.
+   *
+   * @param surveyId the id of the survey.
+   * @param state the new status of the survey.
+   */
+  updateState(surveyId: string, state: SurveyState): Promise<void> {
+    return this.dataStore.updateSurveyState(surveyId, state);
   }
 
   updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {

@@ -21,7 +21,7 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -38,22 +38,29 @@ const PB_ROLES = Map([
   [Role.VIEWER, Pb.Role.VIEWER],
 ]);
 
+const PB_DATA_SHARING_TYPE = Map([
+  [DataSharingType.PRIVATE, Pb.Survey.DataSharingTerms.Type.PRIVATE],
+  [DataSharingType.PUBLIC, Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0],
+  [DataSharingType.CUSTOM, Pb.Survey.DataSharingTerms.Type.CUSTOM],
+]);
+
+const PB_STATES = Map([
+  [SurveyState.DRAFT, Pb.Survey.State.DRAFT],
+  [SurveyState.READY, Pb.Survey.State.READY],
+]);
+
 /**
  * Converts Role instance to its proto message type.
  */
 export function roleToProtoRole(role: Role) {
   const pbRole = PB_ROLES.get(role);
 
-  if (!pbRole) throw new Error(`Invalid role encountered: ${role}`);
+  if (!pbRole) {
+    throw new Error(`Invalid role encountered: ${role}`);
+  }
 
   return pbRole;
 }
-
-const PB_DATA_SHARING_TYPE = Map([
-  [DataSharingType.PRIVATE, Pb.Survey.DataSharingTerms.Type.PRIVATE],
-  [DataSharingType.PUBLIC, Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0],
-  [DataSharingType.CUSTOM, Pb.Survey.DataSharingTerms.Type.CUSTOM],
-]);
 
 export function dataSharingTypeToProto(type: DataSharingType) {
   const pbType = PB_DATA_SHARING_TYPE.get(type);
@@ -63,40 +70,6 @@ export function dataSharingTypeToProto(type: DataSharingType) {
   }
 
   return pbType;
-}
-
-/**
- * Returns the proto representation of a Survey model object.
- */
-export function newSurveyToDocument(
-  name: string,
-  description: string,
-  acl: Map<string, Role>,
-  ownerId: string
-): DocumentData | Error {
-  return toDocumentData(
-    new Pb.Survey({
-      name,
-      description,
-      acl: acl.map(role => roleToProtoRole(role)).toObject(),
-      ownerId,
-    })
-  );
-}
-
-/**
- * Returns the proto representation of a partial Survey model object.
- */
-export function partialSurveyToDocument(
-  name: string,
-  description?: string
-): DocumentData | Error {
-  return toDocumentData(
-    new Pb.Survey({
-      name,
-      ...(description && {description}),
-    })
-  );
 }
 
 /**
@@ -119,10 +92,38 @@ export function dataSharingTermsToDocument(
 ): DocumentData | Error {
   return toDocumentData(
     new Pb.Survey({
-      dataSharingTerms: new Pb.Survey.DataSharingTerms({
-        type: dataSharingTypeToProto(type),
-        customText,
+      dataSharingTerms: toDataSharingTermsMessage({type, customText}),
+    })
+  );
+}
+
+/**
+ * Returns the proto representation of a Survey model object.
+ */
+export function surveyToDocument(
+  surveyId: string,
+  survey: Partial<Survey>
+): DocumentData {
+  const {
+    title: name,
+    description,
+    acl,
+    ownerId,
+    dataSharingTerms,
+    state,
+  } = survey;
+
+  return toDocumentData(
+    new Pb.Survey({
+      id: surveyId,
+      name,
+      ...(description && {description}),
+      ...(acl && {acl: acl.map(role => roleToProtoRole(role)).toObject()}),
+      ownerId,
+      ...(dataSharingTerms && {
+        dataSharingTerms: toDataSharingTermsMessage(dataSharingTerms),
       }),
+      state: PB_STATES.get(state || SurveyState.DRAFT),
     })
   );
 }
@@ -130,17 +131,16 @@ export function dataSharingTermsToDocument(
 /**
  * Returns the proto representation of a Job model object.
  */
-export function jobToDocument(
-  job: Job,
-  taskOverride: List<Task> | null = null
-): DocumentData {
+export function jobToDocument(job: Job): DocumentData {
+  const {id, index, name, color, tasks} = job;
+
   return toDocumentData(
     new Pb.Job({
-      id: job.id,
-      index: job.index,
-      name: job.name,
-      style: new Pb.Style({color: job.color}),
-      tasks: (taskOverride ?? job.tasks?.toList() ?? List())
+      id,
+      index,
+      name,
+      style: new Pb.Style({color}),
+      tasks: (tasks?.toList() ?? List())
         .map((task: Task) => toTaskMessage(task))
         .toArray(),
     })
@@ -270,5 +270,18 @@ function toTaskMessage(task: Task): Pb.ITask {
       ? Pb.Task.DataCollectionLevel.LOI_METADATA
       : Pb.Task.DataCollectionLevel.LOI_DATA,
     conditions: toTaskConditionMessage(task.condition),
+  });
+}
+
+/**
+ * Returns a Protobuf message representing a DataSharingTerms model.
+ */
+function toDataSharingTermsMessage(dataSharingTerms: {
+  type: DataSharingType;
+  customText?: string;
+}): Pb.Survey.IDataSharingTerms {
+  return new Pb.Survey.DataSharingTerms({
+    type: dataSharingTypeToProto(dataSharingTerms.type),
+    customText: dataSharingTerms.customText,
   });
 }

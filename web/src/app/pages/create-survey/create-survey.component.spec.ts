@@ -28,9 +28,9 @@ import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
 import {Observable, Subject} from 'rxjs';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
@@ -73,6 +73,7 @@ describe('CreateSurveyComponent', () => {
     '',
     /* jobs= */ Map(),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
   const surveyWithoutJob = new Survey(
@@ -81,6 +82,7 @@ describe('CreateSurveyComponent', () => {
     description,
     /* jobs= */ Map(),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
   const job = new Job(jobId, /* index */ 0, 'red', name, /* tasks= */ Map());
@@ -93,6 +95,7 @@ describe('CreateSurveyComponent', () => {
       job001: job,
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.CUSTOM, customText: 'Good day, sir'}
   );
   const jobWithTask = new Job(
@@ -118,7 +121,9 @@ describe('CreateSurveyComponent', () => {
       job001: jobWithTask,
     }),
     /* acl= */ Map(),
-    {type: DataSharingType.PRIVATE}
+    /* ownerId= */ '',
+    {type: DataSharingType.PRIVATE},
+    SurveyState.READY
   );
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(

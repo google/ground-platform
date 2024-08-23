@@ -15,7 +15,6 @@
  */
 
 import {
-  TestGeoPoint,
   createMockFirestore,
   stubAdminApi,
 } from '@ground/lib/dist/testing/firestore';
@@ -83,10 +82,6 @@ describe('importGeoJson()', () => {
       name: {[pr.stringValue]: 'Dinagat Islands'},
       area: {[pr.numericValue]: 3.08},
     },
-    jobId: 'job123',
-    predefined: true,
-    geometry: {type: 'Point', coordinates: TestGeoPoint(10.1, 125.6)},
-    properties: testProperties,
   };
   const geoJsonWithPolygon = {
     type: 'FeatureCollection',
@@ -123,19 +118,6 @@ describe('importGeoJson()', () => {
     },
     [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
-    jobId: 'job123',
-    predefined: true,
-    geometry: {
-      type: 'Polygon',
-      coordinates: {
-        0: {
-          0: TestGeoPoint(0, 100),
-          1: TestGeoPoint(0, 101),
-          2: TestGeoPoint(1, 101),
-          3: TestGeoPoint(0, 100),
-        },
-      },
-    },
   };
   const geoJsonWithMultiPolygon = {
     type: 'FeatureCollection',
@@ -198,29 +180,6 @@ describe('importGeoJson()', () => {
     },
     [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
-    jobId: 'job123',
-    predefined: true,
-    geometry: {
-      type: 'MultiPolygon',
-      coordinates: {
-        0: {
-          0: {
-            0: TestGeoPoint(0, 100),
-            1: TestGeoPoint(0, 101),
-            2: TestGeoPoint(1, 101),
-            3: TestGeoPoint(0, 100),
-          },
-        },
-        1: {
-          0: {
-            0: TestGeoPoint(1, 120),
-            1: TestGeoPoint(1, 121),
-            2: TestGeoPoint(2, 121),
-            3: TestGeoPoint(1, 120),
-          },
-        },
-      },
-    },
   };
 
   const testCases = [

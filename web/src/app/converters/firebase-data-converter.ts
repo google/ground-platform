@@ -15,7 +15,7 @@
  */
 
 import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {List, Map} from 'immutable';
+import {Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Job} from 'app/models/job.model';
