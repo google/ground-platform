@@ -62,6 +62,7 @@ describe('SurveyListComponent', () => {
       ),
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 
@@ -88,6 +89,7 @@ describe('SurveyListComponent', () => {
       ),
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE},
     SurveyState.READY
   );

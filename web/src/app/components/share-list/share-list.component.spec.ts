@@ -20,7 +20,7 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatListModule} from '@angular/material/list';
 import {MatListHarness} from '@angular/material/list/testing';
 import {Map} from 'immutable';
-import {Subject, of} from 'rxjs';
+import {Subject} from 'rxjs';
 
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
@@ -48,6 +48,7 @@ describe('ShareListComponent', () => {
     surveyDescription,
     /* jobs= */ Map(),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 
@@ -90,6 +91,7 @@ describe('ShareListComponent', () => {
         surveyDescription,
         /* jobs= */ Map(),
         /* acl= */ Map({a: Role.OWNER, b: Role.OWNER}),
+        /* ownerId= */ '',
         {type: DataSharingType.PRIVATE}
       )
     );

@@ -94,6 +94,7 @@ describe('MapComponent', () => {
       job002: job2,
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
   const poi1 = new LocationOfInterest(

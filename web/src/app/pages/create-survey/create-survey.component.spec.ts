@@ -73,6 +73,7 @@ describe('CreateSurveyComponent', () => {
     '',
     /* jobs= */ Map(),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
   const surveyWithoutJob = new Survey(
@@ -81,6 +82,7 @@ describe('CreateSurveyComponent', () => {
     description,
     /* jobs= */ Map(),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
   const job = new Job(jobId, /* index */ 0, 'red', name, /* tasks= */ Map());
@@ -93,6 +95,7 @@ describe('CreateSurveyComponent', () => {
       job001: job,
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.CUSTOM, customText: 'Good day, sir'}
   );
   const jobWithTask = new Job(
@@ -118,6 +121,7 @@ describe('CreateSurveyComponent', () => {
       job001: jobWithTask,
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE},
     SurveyState.READY
   );

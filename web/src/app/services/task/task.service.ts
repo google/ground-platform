@@ -103,8 +103,12 @@ export class TaskService {
     surveyId: string,
     job: Job,
     tasks: List<Task>
-  ): Promise<[void, void]> {
-    return this.dataStoreService.addOrUpdateTasks(surveyId, job, tasks);
+  ): Promise<void> {
+    const newJob = job.copyWith({
+      tasks: this.dataStoreService.convertTasksListToMap(tasks),
+    });
+
+    return this.dataStoreService.addOrUpdateJob(surveyId, newJob);
   }
 
   /**

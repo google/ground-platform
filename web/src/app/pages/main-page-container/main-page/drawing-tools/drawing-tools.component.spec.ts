@@ -79,6 +79,7 @@ describe('DrawingToolsComponent', () => {
       ),
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 

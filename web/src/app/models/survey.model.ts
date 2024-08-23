@@ -58,6 +58,8 @@ export class Survey extends Copiable {
     ImmutableMap<string, Job>(),
     /* acl= */
     ImmutableMap<string, Role>(),
+    /* ownerId= */
+    '',
     /* dataSharingTerms= */
     {type: DataSharingType.PRIVATE},
     SurveyState.UNSAVED
@@ -69,6 +71,7 @@ export class Survey extends Copiable {
     readonly description: string,
     readonly jobs: ImmutableMap<string, Job>,
     readonly acl: ImmutableMap<string, Role>,
+    readonly ownerId: string,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
     readonly state?: SurveyState
   ) {

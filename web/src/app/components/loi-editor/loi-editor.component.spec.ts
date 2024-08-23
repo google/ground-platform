@@ -67,6 +67,7 @@ describe('LoiEditorComponent', () => {
       [jobId2]: job2,
     }),
     /* acl= */ Map(),
+    /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
 
