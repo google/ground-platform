@@ -22,7 +22,8 @@ import {Subscription} from 'rxjs';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
-import {ROLE_OPTIONS} from 'app/services/auth/auth.service';
+import {User} from 'app/models/user.model';
+import {AuthService, ROLE_OPTIONS} from 'app/services/auth/auth.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
@@ -31,15 +32,20 @@ import {SurveyService} from 'app/services/survey/survey.service';
   styleUrls: ['./share-list.component.scss'],
 })
 export class ShareListComponent {
-  surveyId?: string;
   acl?: Array<AclEntry>;
+  surveyId?: string;
+  surveyOwnerEmail?: string;
 
   private subscription = new Subscription();
+
   readonly roleOptions = ROLE_OPTIONS;
 
   roles = Role;
 
-  constructor(readonly surveyService: SurveyService) {
+  constructor(
+    readonly surveyService: SurveyService,
+    readonly authService: AuthService
+  ) {
     this.subscription.add(
       this.surveyService
         .getActiveSurvey$()
@@ -47,13 +53,18 @@ export class ShareListComponent {
     );
   }
 
-  private onSurveyLoaded(survey: Survey): void {
-    this.surveyId = survey.id;
-
+  private async onSurveyLoaded(survey: Survey): Promise<void> {
     this.acl = survey.acl
+      .sortBy(([key]) => key)
       .entrySeq()
       .map(([key, value]) => new AclEntry(key, value))
       .toArray();
+
+    this.surveyId = survey.id;
+
+    const owner = await this.authService.getUser(survey.ownerId);
+
+    this.surveyOwnerEmail = owner?.email;
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
