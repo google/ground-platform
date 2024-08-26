@@ -106,14 +106,14 @@
      * Returns true iff the current user is the owner of the specified LOI.
      */
     function isLoiOwner(loi) {
-      return loi.data['5'] == request.auth.uid;     
+      return loi.data['5'] == request.auth.uid;
     }
 
     /**
      * Returns true iff the current user is the owner of the specified submission.
      */
     function isSubmissionOwner(submission) {
-      return submission.data['5'] == request.auth.uid;     
+      return submission.data['5'] == request.auth.uid;
     }
 
     // Allow users to read, create, and write their own profiles in the db.
@@ -137,6 +137,11 @@
     // Allow passlisted users to access Terms of Service and other config.
     match /config/{id} {
       allow read: if canAccess();
+    }
+
+    // Allow all users to access Access Denied config.
+    match /config/accessDenied {
+      allow read: if request.auth != null;
     }
 
     // Apply passlist and survey-level ACLs to LOI documents.
