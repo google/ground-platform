@@ -19,13 +19,14 @@ import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatListModule} from '@angular/material/list';
 import {MatListHarness} from '@angular/material/list/testing';
+import {Map} from 'immutable';
+import {Subject, firstValueFrom, of} from 'rxjs';
+
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Map} from 'immutable';
-import {Subject, firstValueFrom, of} from 'rxjs';
 
 import {ShareListComponent} from './share-list.component';
 
