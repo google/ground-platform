@@ -19,12 +19,13 @@ import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatListModule} from '@angular/material/list';
 import {MatListHarness} from '@angular/material/list/testing';
-import {Map} from 'immutable';
-import {Subject} from 'rxjs';
-
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
+import {User} from 'app/models/user.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {Map} from 'immutable';
+import {Subject, firstValueFrom, of} from 'rxjs';
 
 import {ShareListComponent} from './share-list.component';
 
@@ -34,6 +35,7 @@ describe('ShareListComponent', () => {
   let loader: HarnessLoader;
 
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
   let activeSurvey$: Subject<Survey>;
 
   const [surveyId, surveyTitle, surveyDescription] = [
@@ -52,19 +54,29 @@ describe('ShareListComponent', () => {
     {type: DataSharingType.PRIVATE}
   );
 
+  const user = new User('', '', true);
+
   beforeEach(waitForAsync(() => {
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'getActiveSurvey$',
     ]);
 
+    authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
+      'getUser',
+    ]);
+
     activeSurvey$ = new Subject<Survey>();
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    authServiceSpy.getUser.and.returnValue(firstValueFrom(of(user)));
 
     TestBed.configureTestingModule({
       declarations: [ShareListComponent],
       imports: [MatListModule],
-      providers: [{provide: SurveyService, useValue: surveyServiceSpy}],
+      providers: [
+        {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: AuthService, useValue: authServiceSpy},
+      ],
     }).compileComponents();
   }));
 
@@ -82,7 +94,9 @@ describe('ShareListComponent', () => {
   it('updates itself when acl changes', async () => {
     activeSurvey$.next(survey);
 
-    expect(component.acl?.length).toBe(0);
+    fixture.whenStable().then(async () => {
+      expect(component.acl?.length).toBe(0);
+    });
 
     activeSurvey$.next(
       new Survey(
@@ -96,11 +110,13 @@ describe('ShareListComponent', () => {
       )
     );
 
-    expect(component.acl?.length).toBe(2);
+    fixture.whenStable().then(async () => {
+      expect(component.acl?.length).toBe(2);
 
-    const aclList = await loader.getHarness(MatListHarness);
-    const aclListItems = await aclList.getItems();
+      const aclList = await loader.getHarness(MatListHarness);
+      const aclListItems = await aclList.getItems();
 
-    expect(aclListItems.length).toBe(2);
+      expect(aclListItems.length).toBe(2);
+    });
   });
 });
