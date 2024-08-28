@@ -86,6 +86,10 @@ export class Survey extends Copiable {
     return this.jobs.sortBy(job => job.index).toList();
   }
 
+  getAclSorted(): ImmutableMap<string, Role> {
+    return this.acl.sortBy(([key]) => key);
+  }
+
   getPreviousJob(job: Job): Job | undefined {
     const jobs = this.getJobsSorted();
 

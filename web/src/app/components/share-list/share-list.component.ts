@@ -22,7 +22,6 @@ import {Subscription} from 'rxjs';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
-import {User} from 'app/models/user.model';
 import {AuthService, ROLE_OPTIONS} from 'app/services/auth/auth.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -54,31 +53,34 @@ export class ShareListComponent {
   }
 
   private async onSurveyLoaded(survey: Survey): Promise<void> {
-    this.acl = survey.acl
-      .sortBy(([key]) => key)
-      .entrySeq()
-      .map(([key, value]) => new AclEntry(key, value))
-      .toArray();
-
     this.surveyId = survey.id;
 
     const owner = await this.authService.getUser(survey.ownerId);
 
     this.surveyOwnerEmail = owner?.email;
+
+    this.acl = survey
+      .getAclSorted()
+      .entrySeq()
+      .filter(([key]) => key !== this.surveyOwnerEmail)
+      .map(([key, value]) => new AclEntry(key, value))
+      .toArray();
   }
 
   onRoleChange(event: MatSelectChange, index: number) {
     if (!this.acl) {
       return;
     }
-    // value holds the selected Role enum value, or -1 if "Remove" was selected.
+    // Value holds the selected Role enum value, or -1 if "Remove" was selected.
     if (event.value < 0) {
-      // Remove data collector.
+      // Remove user.
       this.acl.splice(index, 1);
     } else {
-      // Update data collector role.
+      // Update user role.
       this.acl[index] = new AclEntry(this.acl[index].email, event.value);
     }
+    // Add user owner.
+    this.acl.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
 
     this.surveyService.updateAcl(
       this.surveyId!,
