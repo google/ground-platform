@@ -30,8 +30,7 @@
      */
     function getRole(survey) {
       // Get role from `acl` nested object (field 4).
-      // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
-      return ("4" in survey ? survey["4"] : survey.acl)[request.auth.token.email];
+      return survey["4"][request.auth.token.email];
     }
 
     /**
@@ -69,8 +68,7 @@
      * given survey.
      */
     function isOneOf(survey, roles) {
-      // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
-     return ("4" in survey ? survey["4"] : survey.acl)[request.auth.token.email] in roles;
+     return survey["4"][request.auth.token.email] in roles;
     }
 
     /**
@@ -79,10 +77,7 @@
      * assigned this role by default.
      */
     function canManageSurvey(survey) {
-      // TODO(#1858): Delete string role keys once migration is complete.
       return canAccess() && isOneOf(survey, [
-        'OWNER',
-        'SURVEY_ORGANIZER',
         3 /* SURVEY_ORGANIZER */
       ]);
     }
@@ -92,11 +87,7 @@
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      // TODO(#1858): Delete string role keys once migration is complete.
       return canAccess() && isOneOf(survey, [
-        'OWNER',
-        'SURVEY_ORGANIZER',
-        'DATA_COLLECTOR',
         2 /* DATA_COLLECTOR */,
         3 /* SURVEY_ORGANIZER */
       ]);
