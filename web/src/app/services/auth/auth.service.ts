@@ -96,7 +96,7 @@ export class AuthService {
       return undefined;
     }
     await this.callProfileRefresh();
-    return await firstValueFrom(this.dataStore.user$(user.uid));
+    return firstValueFrom(this.dataStore.user$(user.uid));
   }
 
   async callProfileRefresh() {
@@ -110,6 +110,10 @@ export class AuthService {
 
   getUser$(): Observable<User> {
     return this.user$;
+  }
+
+  async getUser(userId: string): Promise<User | undefined> {
+    return firstValueFrom(this.dataStore.user$(userId));
   }
 
   isAuthenticated$(): Observable<boolean> {
