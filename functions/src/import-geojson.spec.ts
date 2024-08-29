@@ -27,13 +27,14 @@ import {DecodedIdToken} from 'firebase-admin/auth';
 import {Blob, FormData} from 'formdata-node';
 import HttpStatus from 'http-status-codes';
 import {invokeCallbackAsync} from './handlers';
-import {OWNER_ROLE} from './common/auth';
+import {SURVEY_ORGANIZER_ROLE} from './common/auth';
 import {resetDatastore} from './common/context';
 import {Firestore} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+const sv = registry.getFieldIds(Pb.Survey);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const pr = registry.getFieldIds(Pb.LocationOfInterest.Property);
 const g = registry.getFieldIds(Pb.Geometry);
@@ -49,9 +50,9 @@ describe('importGeoJson()', () => {
   const jobId = 'job123';
   const email = 'somebody@test.it';
   const survey = {
-    name: 'Test',
-    acl: {
-      [email]: OWNER_ROLE,
+    [sv.name]: 'Test',
+    [sv.acl]: {
+      [email]: SURVEY_ORGANIZER_ROLE,
     },
   };
   const testProperties = {
