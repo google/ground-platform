@@ -27,8 +27,7 @@ const s = registry.getFieldIds(Pb.Survey);
 // This is the only cookie not stripped by Firebase CDN.
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
 export const SESSION_COOKIE_NAME = '__session';
-export const OWNER_ROLE = 'OWNER';
-const SURVEY_ORGANIZER_ROLE = 'SURVEY_ORGANIZER';
+export const SURVEY_ORGANIZER_ROLE = Pb.Role.SURVEY_ORGANIZER;
 
 /**
  * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
@@ -86,12 +85,11 @@ function isEmulatorIdToken(user: DecodedIdToken): boolean {
 function getRole(
   user: DecodedIdToken,
   survey: DocumentSnapshot
-): string | number | null {
+): number | null {
   if (isEmulatorIdToken(user)) {
-    return OWNER_ROLE;
+    return Pb.Role.SURVEY_ORGANIZER;
   }
-  // TODO(#1858): Remove reference to "acl" field.
-  const acl = survey.get(s.acl) || survey.get('acl');
+  const acl = survey.get(s.acl);
   return acl && user.email ? acl[user.email] : null;
 }
 
@@ -107,9 +105,5 @@ export function canImport(
   survey: DocumentSnapshot
 ): boolean {
   const role = getRole(user, survey);
-  // TODO(#1858): Remove old roles.
-  return (
-    !!role &&
-    [OWNER_ROLE, SURVEY_ORGANIZER_ROLE, Pb.Role.SURVEY_ORGANIZER].includes(role)
-  );
+  return !!role && [Pb.Role.SURVEY_ORGANIZER].includes(role);
 }
