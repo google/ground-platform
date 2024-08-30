@@ -20,13 +20,12 @@ import {Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Submission} from 'app/models/submission/submission.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 
 import {FirebaseDataConverter} from './firebase-data-converter';
 import {submissionDocToModel} from './submission-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
-
-import {Task, TaskType} from 'app/models/task/task.model';
 
 const sb = registry.getFieldIds(Pb.Submission);
 const ai = registry.getFieldIds(Pb.AuditInfo);
