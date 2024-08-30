@@ -93,7 +93,7 @@ export function submissionDocToModel(
 
 function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   return new AuditInfo(
-    new User(pb.userId!, '', true, pb.displayName!, pb.photoUrl!),
+    new User(pb.userId!, pb.emailAddress!, true, pb.displayName!, pb.photoUrl!),
     new Date(timestampToInt(pb.clientTimestamp)),
     new Date(timestampToInt(pb.serverTimestamp))
   );
