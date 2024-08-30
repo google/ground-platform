@@ -51,6 +51,7 @@ export class EditJobComponent {
 
   job?: Job;
   tasks?: List<Task>;
+  addLoiTaskId?: string;
   lois!: List<LocationOfInterest>;
 
   EditJobSection = EditJobSection;
@@ -122,17 +123,23 @@ export class EditJobComponent {
   }
 
   onStrategyChange(strategy: DataCollectionStrategy) {
-    if (this.job) {
-      const tasks = this.taskService.updateLoiTasks(this.job?.tasks, strategy);
+    const addLoiTask = this.job?.tasks?.find(task => !!task.addLoiTask);
 
-      this.draftSurveyService.addOrUpdateJob(
-        this.job.copyWith({tasks, strategy})
-      );
+    if (addLoiTask) this.addLoiTaskId = addLoiTask.id;
 
-      this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+    const tasks = this.taskService.updateLoiTasks(
+      this.job?.tasks,
+      strategy,
+      this.addLoiTaskId
+    );
 
-      this.tasks = tasks?.toList().sortBy(task => task.index);
-    }
+    this.draftSurveyService.addOrUpdateJob(
+      this.job!.copyWith({tasks, strategy})
+    );
+
+    this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
+
+    this.tasks = tasks?.toList().sortBy(task => task.index);
   }
 
   ngOnDestroy() {
