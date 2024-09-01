@@ -143,7 +143,7 @@ const submission001 = {
   },
 };
 
-describe('toSubmission', () => {
+describe('submissionDocToModel', () => {
   it('Submission converts back and forth without losing data', () => {
     const submission001JS = FirebaseDataConverter.submissionToJS(
       submissionDocToModel(
