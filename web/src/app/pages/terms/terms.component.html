@@ -18,9 +18,7 @@
   <ground-header></ground-header>
   <div class="page-content">
     <h1 class="page-title">Terms Of Service</h1>
-    <div class="terms-text-container">
-      {{termsOfServiceText}}
-    </div>
+    <div class="terms-text-container" [innerHTML]="termsOfServiceText"></div>
     <div class="action-buttons">
       @if(!hasAcceptedTos) {
         <mat-checkbox [(ngModel)]="isTermsOfServiceChecked">
