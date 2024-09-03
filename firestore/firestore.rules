@@ -109,7 +109,7 @@
 
     // Allow users to read, create, and write their own profiles in the db.
     match /users/{userId} {
-      allow read: if canAccess();
+      allow read: if request.auth != null;
       allow create, write: if userId == request.auth.uid;
     }
 
