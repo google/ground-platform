@@ -110,6 +110,18 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     return lat + ', ' + long;
   }
 
+  getDate(task: Task): string {
+    return (
+      this.getTaskSubmissionResult(task)?.value as Date
+    ).toLocaleDateString();
+  }
+
+  getTime(task: Task): string {
+    return (
+      this.getTaskSubmissionResult(task)?.value as Date
+    ).toLocaleTimeString([], {hour: 'numeric', minute: 'numeric'});
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
