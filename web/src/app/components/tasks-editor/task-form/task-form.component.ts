@@ -167,6 +167,8 @@ export class TaskFormComponent {
 
   otherOption?: FormGroup;
 
+  Cardinality = Cardinality;
+
   taskGroup!: TaskGroup;
 
   taskTypeOption?: TaskTypeOption;
