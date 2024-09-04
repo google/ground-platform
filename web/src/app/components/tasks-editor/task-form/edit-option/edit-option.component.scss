@@ -18,6 +18,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 16px;
+  color: #444746;
 
   &:has(mat-form-field.mat-focused) {
     .option-icon {
@@ -26,7 +27,6 @@
   }
 
   .option-icon {
-    color: #424940;
     margin-right: 12px;
     min-width: 24px
   }
@@ -35,7 +35,6 @@
     display: block;
     margin: 0px auto;
     cursor: move;
-    margin-right: 5px !important;
     visibility: hidden;
   }
 

@@ -134,7 +134,11 @@
     >
     </ground-edit-option>
 
-    <div class="add-buttons">
+    <div class="option-add-buttons">
+      <mat-icon class="option-icon material-symbols-outlined">
+        {{ cardinalityControl.value === Cardinality.SELECT_ONE ? 'radio_button_unchecked' : 'check_box_outline_blank'}}
+      </mat-icon>
+
       <button
         mat-button
         type="button"
@@ -144,8 +148,9 @@
         Add option
       </button>
 
-      <div *ngIf="!hasOtherOptionControl.value" class="add-other-button">
-        or
+      <ng-container *ngIf="!hasOtherOptionControl.value">
+        <div>or</div>
+
         <button
           mat-button
           type="button"
@@ -153,9 +158,9 @@
           color="primary"
           class="add-option"
         >
-          add "other"
+          add "Other"
         </button>
-      </div>
+      </ng-container>
     </div>
   </div>
 </form>
