@@ -83,21 +83,25 @@
   padding-right: 8px;
 }
 
-.question-actions {
-  margin-bottom: 20px;
-  margin-right: 10px;
-}
-
-.vertical-divider {
-  height: 30px;
-  margin: 3px 20px;
-}
-
-.add-buttons {
+.option-add-buttons {
   display: flex;
-  .add-other-button {
-    display: flex;
-    align-items: baseline;
-    font-size: 14px;
+  align-items: center;
+  margin-left: 24px;
+  padding-top: 8px;
+  color: #727970;
+
+  font-family: Manrope;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: left;
+
+  .mat-mdc-button {
+    padding: 6px;
+  }
+
+  .option-icon {
+    margin-right: 12px;
+    min-width: 24px
   }
 }
