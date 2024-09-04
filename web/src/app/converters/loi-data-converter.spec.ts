@@ -15,24 +15,40 @@
  */
 
 import {DocumentData} from '@angular/fire/firestore';
-import {GeoPoint} from 'firebase/firestore';
+import {registry} from '@ground/lib';
+import {GroundProtos} from '@ground/proto';
 import {Map} from 'immutable';
 
-import {GEOMETRY_TYPES, toGeometry} from 'app/converters/geometry-converter';
-import {Geometry, GeometryType} from 'app/models/geometry/geometry';
+import {toGeometry} from 'app/converters/geometry-converter';
+import {Geometry} from 'app/models/geometry/geometry';
 import {LocationOfInterest} from 'app/models/loi.model';
 
-import {LegacyLoiDataConverter} from './loi-data-converter';
+import {geometryPbToModel} from './geometry-data-converter';
+import {loiDocToModel} from './loi-data-converter';
+
+import Pb = GroundProtos.ground.v1beta1;
+
+const lo = registry.getFieldIds(Pb.LocationOfInterest);
+const ge = registry.getFieldIds(Pb.Geometry);
+const po = registry.getFieldIds(Pb.Point);
+const co = registry.getFieldIds(Pb.Coordinates);
+const pr = registry.getFieldIds(Pb.LocationOfInterest.Property);
 
 const x = -42.121;
 const y = 28.482;
+
 const geoPointData = {
-  type: GEOMETRY_TYPES.get(GeometryType.POINT),
-  coordinates: new GeoPoint(x, y),
+  point: {
+    coordinates: {latitude: x, longitude: y},
+  },
+  [ge.point]: {
+    [po.coordinates]: {[co.latitude]: x, [co.longitude]: y},
+  },
 };
 
-describe('toLocationOfInterest', () => {
-  const geoPointDataWithError = toGeometry(geoPointData);
+describe('loiDocToModel', () => {
+  const geoPointDataWithError = geometryPbToModel(geoPointData);
+
   if (geoPointData instanceof Error) {
     throw new Error(
       `got unexpected error in geometry conversion ${geoPointDataWithError}`
@@ -50,9 +66,10 @@ describe('toLocationOfInterest', () => {
       expectation: 'converts geometry with no properties',
       inputId: 'id0',
       inputData: {
-        jobId: 'jobId0',
-        geometry: geoPointData,
-        properties: {},
+        [lo.jobId]: 'jobId0',
+        [lo.geometry]: geoPointData,
+        [lo.properties]: {},
+        [lo.source]: Pb.LocationOfInterest.Source.IMPORTED,
       },
       want: new LocationOfInterest(
         'id0',
@@ -65,13 +82,14 @@ describe('toLocationOfInterest', () => {
       expectation: 'converts geometry with properties',
       inputId: 'id0',
       inputData: {
-        jobId: 'jobId0',
-        geometry: geoPointData,
-        properties: {
-          prop0: 'value0',
-          prop1: 1,
-          prop2: '',
+        [lo.jobId]: 'jobId0',
+        [lo.geometry]: geoPointData,
+        [lo.properties]: {
+          prop0: {[pr.stringValue]: 'value0'},
+          prop1: {[pr.numericValue]: 1},
+          prop2: {[pr.stringValue]: ''},
         },
+        [lo.source]: Pb.LocationOfInterest.Source.IMPORTED,
       },
       want: new LocationOfInterest(
         'id0',
@@ -80,17 +98,13 @@ describe('toLocationOfInterest', () => {
         Map<string, string | number>([
           ['prop0', 'value0'],
           ['prop1', 1],
-          ['prop2', ''],
         ])
       ),
     },
   ];
 
   for (const t of testData) {
-    const got = LegacyLoiDataConverter.toLocationOfInterest(
-      t.inputId,
-      t.inputData
-    );
+    const got = loiDocToModel(t.inputId, t.inputData);
     if (got instanceof Error) {
       throw new Error(`got unexpected error: ${got}`);
     }
@@ -110,19 +124,16 @@ describe('toLocationOfInterest_Error', () => {
       expectation: 'Missing job ID in UI data',
       inputId: 'id0',
       inputData: {
-        jobId: '',
-        geometry: geoPointData,
-        properties: {},
+        [lo.jobId]: '',
+        [lo.geometry]: geoPointData,
+        [lo.properties]: {},
       },
-      wantErrorMessage: 'missing job id',
+      wantErrorMessage: 'Missing job_id in loi id0',
     },
   ];
 
   for (const t of testData) {
-    const got = LegacyLoiDataConverter.toLocationOfInterest(
-      t.inputId,
-      t.inputData
-    );
+    const got = loiDocToModel(t.inputId, t.inputData);
     if (!(got instanceof Error)) {
       throw new Error(`expected error but instead got ${got}`);
     }

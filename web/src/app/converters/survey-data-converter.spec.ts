@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
+import {GroundProtos} from '@ground/proto';
+
 import {Role} from 'app/models/role.model';
 
-import {LegacySurveyDataConverter} from './survey-data-converter';
+import {MODEL_ROLES} from './survey-data-converter';
 
-describe('LegacySurveyDataConverter', () => {
-  describe('toRole()', () => {
+import Pb = GroundProtos.ground.v1beta1;
+
+describe('surveyDocToModel', () => {
+  describe('MODEL_ROLES', () => {
     it('converts strings to enums', () => {
-      expect(LegacySurveyDataConverter.toRole('OWNER')).toEqual(Role.OWNER);
-      expect(LegacySurveyDataConverter.toRole('SURVEY_ORGANIZER')).toEqual(
+      expect(MODEL_ROLES.get(Pb.Role.SURVEY_ORGANIZER)).toEqual(
         Role.SURVEY_ORGANIZER
       );
-      expect(LegacySurveyDataConverter.toRole('DATA_COLLECTOR')).toEqual(
+      expect(MODEL_ROLES.get(Pb.Role.DATA_COLLECTOR)).toEqual(
         Role.DATA_COLLECTOR
       );
-      expect(LegacySurveyDataConverter.toRole('VIEWER')).toEqual(Role.VIEWER);
-    });
-
-    it('returns VIEWER on unrecognized role', () => {
-      expect(
-        LegacySurveyDataConverter.toRole('some_rule_i_dont_recognize')
-      ).toEqual(Role.VIEWER);
+      expect(MODEL_ROLES.get(Pb.Role.VIEWER)).toEqual(Role.VIEWER);
     });
   });
 });
