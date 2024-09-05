@@ -39,6 +39,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   icon!: string;
   iconColor!: string;
   submissions!: List<Submission>;
+  isLoading = true;
 
   constructor(
     private loiService: LocationOfInterestService,
@@ -65,7 +66,10 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
             )
           )
         )
-        .subscribe(submissions => (this.submissions = submissions))
+        .subscribe(submissions => {
+          this.submissions = submissions;
+          this.isLoading = false;
+        })
     );
   }
 
