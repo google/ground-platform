@@ -72,8 +72,16 @@ limitations under the License.
                   </div>
                 </div>
               </div>
+              <!-- Date task types -->
+              <div *ngIf="task.type === taskType.DATE">
+                {{getDate(task)}}
+              </div>
+              <!-- Time task types -->
+              <div *ngIf="task.type === taskType.TIME">
+                {{getTime(task)}}
+              </div>
               <!-- Remaining task types -->
-              <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE || task.type === taskType.TIME || task.type === taskType.DATE_TIME">
+              <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE_TIME">
                 {{getTaskSubmissionResult(task)!.value.toString()}}
               </div>
             </div>
