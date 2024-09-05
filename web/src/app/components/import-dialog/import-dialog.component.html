@@ -16,7 +16,11 @@
 
 <div *ngIf="isImporting; else defaultView">
   <h2 mat-dialog-title>Importing sites...</h2>
-  <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
+  <mat-dialog-content>
+    <div class="progress-spinner">
+      <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
+    </div>
+  </mat-dialog-content>
 </div>
 <ng-template #defaultView>
   <h2 mat-dialog-title>Import data collection sites (.geojson)</h2>
