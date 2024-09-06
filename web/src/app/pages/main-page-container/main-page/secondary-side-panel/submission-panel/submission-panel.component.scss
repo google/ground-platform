@@ -14,63 +14,73 @@
  * limitations under the License.
  */
 
-.submission-title, .submission-title-left {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.submission-subtitle { 
-  padding-left: var(--mdc-icon-button-state-layer-size);
-}
-
-.submission-tasks-container {
-  padding: 0 8px;
-}
-
-.submission-task {
-  padding: 16px 0;
-}
-
-.submission-response {
-  padding-top: 8px;
-}
-
-.submission-img {
-  border-radius: 4px;
-  width: 100%;
-}
-
-.submission-response-multiple-choice {
-  display: flex;
-  flex-direction: column;
-
-  ::ng-deep .mat-mdc-checkbox-disabled label {
-    color: inherit;
+.submission-panel {
+  &.loading {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
-}
 
-.submission-response-geometry {
-  display: flex;
-  align-items: center;
-  height: 40px;
-  padding-inline-start: 8px;
-  margin-top: 8px;
-}
+  .submission-title, .submission-title-left {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.submission-response-geometry-number {
-  display: flex;
-  border-radius: 6px;     
-  width: 24px;
-  height: 24px;
-  justify-content: center;
-  align-items: center;
-  font-weight: 800;
-  font-size: 15px;
-  color: white;
-}
+  .submission-subtitle {
+    padding-left: var(--mdc-icon-button-state-layer-size);
+  }
 
-.submission-response-geometry-label {
-  padding-left: 16px;
-  font-weight: 500;
+  .submission-tasks-container {
+    padding: 0 8px;
+  }
+
+  .submission-task {
+    padding: 16px 0;
+  }
+
+  .submission-response {
+    padding-top: 8px;
+  }
+
+  .submission-img {
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .submission-response-multiple-choice {
+    display: flex;
+    flex-direction: column;
+  
+    ::ng-deep .mat-mdc-checkbox-disabled label {
+      color: inherit;
+    }
+  }
+
+  .submission-response-geometry {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding-inline-start: 8px;
+    margin-top: 8px;
+  }
+
+  .submission-response-geometry-number {
+    display: flex;
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    justify-content: center;
+    align-items: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: white;
+  }
+
+  .submission-response-geometry-label {
+    padding-left: 16px;
+    font-weight: 500;
+  }
 }

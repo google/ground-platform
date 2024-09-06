@@ -23,7 +23,6 @@ import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -41,6 +40,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
   firebaseURLs = new Map<string, string>();
+  isLoading = true;
 
   public taskType = TaskType;
 
@@ -61,6 +61,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
             .filter(task => !task.addLoiTask);
           // Get image URL upon initialization to not send Firebase requests multiple times
           this.getFirebaseImageURLs();
+          this.isLoading = false;
         }
       })
     );
