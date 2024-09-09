@@ -29,6 +29,7 @@ import {toGeoJsonGeometry} from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
+const t = registry.getFieldIds(Pb.Task);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 /** A dictionary of submissions values (array) keyed by loi ID. */
@@ -70,7 +71,7 @@ export async function exportCsvHandler(
     return;
   }
   const {name: jobName} = job;
-  const tasks = job.tasks.sort((a, b) => (a.prompt! < b.prompt! ? -1 : 1));
+  const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
   const loiDocs = await db.fetchLocationsOfInterestByJobId(surveyId, jobId);
   const loiProperties = getPropertyNames(loiDocs);
   const headers = getHeaders(tasks, loiProperties);
