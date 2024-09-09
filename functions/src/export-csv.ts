@@ -29,7 +29,6 @@ import {toGeoJsonGeometry} from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);
-const t = registry.getFieldIds(Pb.Task);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 /** A dictionary of submissions values (array) keyed by loi ID. */
