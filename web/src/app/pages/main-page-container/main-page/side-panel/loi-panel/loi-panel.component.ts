@@ -17,7 +17,6 @@
 import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Observable, Subscription, combineLatest} from 'rxjs';
-import {switchMap} from 'rxjs/operators';
 
 import {Job} from 'app/models/job.model';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
@@ -55,15 +54,8 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     private dialogService: DialogService,
     private zone: NgZone
   ) {
-    this.submissions$ = surveyService
-      .getActiveSurvey$()
-      .pipe(
-        switchMap(survey =>
-          loiService
-            .getSelectedLocationOfInterest$()
-            .pipe(switchMap(loi => submissionService.submissions$(survey, loi)))
-        )
-      );
+    this.submissions$ = submissionService.getSubmissions$();
+
     combineLatest([
       surveyService.getActiveSurvey$(),
       loiService.getSelectedLocationOfInterest$(),
