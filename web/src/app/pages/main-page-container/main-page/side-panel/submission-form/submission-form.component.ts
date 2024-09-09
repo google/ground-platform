@@ -122,7 +122,7 @@ export class SubmissionFormComponent {
   }
 
   private onSelectSubmission(submission?: Submission | LoadingState) {
-    if (submission === LoadingState.NOT_LOADED && this.submissionForm?.dirty) {
+    if (this.submissionForm?.dirty) {
       if (
         confirm(
           'You have unsaved changes in submission form, do you want to save them?'

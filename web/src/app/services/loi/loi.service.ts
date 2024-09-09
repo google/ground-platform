@@ -47,9 +47,9 @@ export class LocationOfInterestService {
             .getActiveSurvey$()
             .pipe(
               switchMap(survey =>
-                survey.state === SurveyState.UNSAVED
+                !survey || survey.state === SurveyState.UNSAVED
                   ? of(List<LocationOfInterest>())
-                  : dataStore.getAccessibleLois$(
+                  : this.dataStore.getAccessibleLois$(
                       survey,
                       user.id,
                       this.surveyService.canManageSurvey()
@@ -61,7 +61,7 @@ export class LocationOfInterestService {
 
     this.selectedLoi$ = this.selectedLoiId$.pipe(
       switchMap(loiId =>
-        this.lois$.pipe(map(lois => lois.find(loi => loi.id === loiId)!))
+        this.lois$.pipe(map(lois => lois.find(({id}) => id === loiId)!))
       )
     );
   }
@@ -76,6 +76,14 @@ export class LocationOfInterestService {
         )
       )
     );
+  }
+
+  selectLocationOfInterest(loiId: string) {
+    this.selectedLoiId$.next(loiId);
+  }
+
+  getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
+    return this.selectedLoi$;
   }
 
   getPredefinedLoisByJobId$(
@@ -141,14 +149,6 @@ export class LocationOfInterestService {
     }
 
     return bounds;
-  }
-
-  selectLocationOfInterest(loiId: string) {
-    this.selectedLoiId$.next(loiId);
-  }
-
-  getSelectedLocationOfInterest$(): Observable<LocationOfInterest> {
-    return this.selectedLoi$;
   }
 
   async addPoint(
