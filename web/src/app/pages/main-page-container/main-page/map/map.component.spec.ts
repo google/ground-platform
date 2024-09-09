@@ -197,9 +197,6 @@ describe('MapComponent', () => {
       'SubmissionService',
       ['getSelectedSubmission$']
     );
-    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
-      new BehaviorSubject<Submission | LoadingState>(LoadingState.LOADING)
-    );
 
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);
     drawingToolsServiceSpy = jasmine.createSpyObj<DrawingToolsService>(
@@ -244,10 +241,10 @@ describe('MapComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should fit the map when survey changed', fakeAsync(() => {
+  it('should fit the map when survey changed 2', fakeAsync(() => {
     spyOn(component.map, 'fitBounds');
     component.lastFitSurveyId = '0';
-    component.ngAfterViewInit();
+    component.ngOnChanges();
 
     expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
       new google.maps.LatLngBounds(
