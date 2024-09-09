@@ -49,7 +49,7 @@ export class LocationOfInterestService {
               switchMap(survey =>
                 survey.state === SurveyState.UNSAVED
                   ? of(List<LocationOfInterest>())
-                  : dataStore.getAccessibleLois$(
+                  : this.dataStore.getAccessibleLois$(
                       survey,
                       user.id,
                       this.surveyService.canManageSurvey()
