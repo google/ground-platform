@@ -16,14 +16,8 @@
 
 import {Injectable} from '@angular/core';
 import {List, Map} from 'immutable';
-import {
-  BehaviorSubject,
-  Observable,
-  ReplaySubject,
-  Subscription,
-  of,
-} from 'rxjs';
-import {filter, switchMap} from 'rxjs/operators';
+import {Observable, ReplaySubject, of} from 'rxjs';
+import {map, switchMap} from 'rxjs/operators';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -35,62 +29,68 @@ import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SubmissionService {
-  // TODO: Move selected submission into side panel component where it is
-  // used.
+  private submissions$: Observable<List<Submission>>;
   private selectedSubmissionId$ = new ReplaySubject<string>(1);
-  private selectedSubmission$ = new BehaviorSubject<Submission | LoadingState>(
-    LoadingState.NOT_LOADED
-  );
-  private subscription = new Subscription();
+  private selectedSubmission$ = new Observable<Submission>();
 
   constructor(
+    private authService: AuthService,
     private dataStore: DataStoreService,
-    private surveyService: SurveyService,
     private loiService: LocationOfInterestService,
-    private authService: AuthService
+    private surveyService: SurveyService
   ) {
-    this.subscription.add(
-      this.selectedSubmissionId$
-        .pipe(
-          switchMap(submissionId =>
-            surveyService.getActiveSurvey$().pipe(
+    this.submissions$ = this.authService
+      .getUser$()
+      .pipe(
+        switchMap(user =>
+          surveyService
+            .getActiveSurvey$()
+            .pipe(
               switchMap(survey =>
-                loiService.getSelectedLocationOfInterest$().pipe(
-                  switchMap(loi =>
-                    authService.getUser$().pipe(
-                      switchMap(user => {
-                        if (
-                          submissionId === NavigationService.SUBMISSION_ID_NEW
-                        ) {
-                          return of(
-                            this.createNewSubmission(user, survey, loi)
-                          );
-                        }
-                        return this.dataStore.loadSubmission$(
-                          survey,
-                          loi,
-                          submissionId
-                        );
-                      })
+                this.loiService
+                  .getSelectedLocationOfInterest$()
+                  .pipe(
+                    switchMap(loi =>
+                      !survey || !loi || !user
+                        ? of(List<Submission>())
+                        : this.dataStore.getAccessibleSubmissions$(
+                            survey,
+                            loi,
+                            user.id,
+                            this.surveyService.canManageSurvey()
+                          )
                     )
                   )
-                )
               )
             )
-          ),
-          filter(DataStoreService.filterAndLogError<Submission | LoadingState>)
         )
-        .subscribe(o =>
-          this.selectedSubmission$.next(o as Submission | LoadingState)
+      );
+
+    this.selectedSubmission$ = this.selectedSubmissionId$.pipe(
+      switchMap(submissionId =>
+        this.submissions$.pipe(
+          map(submissions => submissions.find(({id}) => id === submissionId)!)
         )
+      )
     );
+  }
+
+  getSubmissions$(): Observable<List<Submission>> {
+    return this.submissions$;
+  }
+
+  selectSubmission(submissionId: string) {
+    this.selectedSubmissionId$.next(submissionId);
+  }
+
+  getSelectedSubmission$(): Observable<Submission> {
+    return this.selectedSubmission$;
   }
 
   createNewSubmission(
@@ -119,40 +119,5 @@ export class SubmissionService {
       auditInfo,
       Map<string, Result>([])
     );
-  }
-
-  submissions$(
-    survey: Survey,
-    loi: LocationOfInterest
-  ): Observable<List<Submission>> {
-    return this.authService
-      .getUser$()
-      .pipe(
-        switchMap(user =>
-          this.dataStore.getAccessibleSubmissions$(
-            survey,
-            loi,
-            user.id,
-            this.surveyService.canManageSurvey()
-          )
-        )
-      );
-  }
-
-  selectSubmission(submissionId: string) {
-    this.selectedSubmission$.next(LoadingState.LOADING);
-    this.selectedSubmissionId$.next(submissionId);
-  }
-
-  deselectSubmission() {
-    this.selectedSubmission$.next(LoadingState.NOT_LOADED);
-  }
-
-  getSelectedSubmission$(): BehaviorSubject<Submission | LoadingState> {
-    return this.selectedSubmission$;
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }
