@@ -70,7 +70,7 @@ export async function exportCsvHandler(
     return;
   }
   const {name: jobName} = job;
-  const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
+  const tasks = job.tasks.sort((a, b) => (a.prompt! < b.prompt! ? -1 : 1));
   const loiDocs = await db.fetchLocationsOfInterestByJobId(surveyId, jobId);
   const loiProperties = getPropertyNames(loiDocs);
   const headers = getHeaders(tasks, loiProperties);
