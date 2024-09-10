@@ -75,7 +75,7 @@ class MockLocationOfInterestService {
 }
 
 class MockSubmissionService {
-  submissions$() {
+  getSubmissions$() {
     return of<List<Submission>>(mockSubmissions);
   }
 }

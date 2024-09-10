@@ -37,7 +37,7 @@ describe('SubmissionService', () => {
         {
           provide: AuthService,
           useValue: {
-            user$,
+            getUser$: () => user$,
           },
         },
       ],

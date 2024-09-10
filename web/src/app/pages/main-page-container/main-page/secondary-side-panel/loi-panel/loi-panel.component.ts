@@ -39,6 +39,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   icon!: string;
   iconColor!: string;
   submissions!: List<Submission>;
+  isLoading = true;
 
   constructor(
     private loiService: LocationOfInterestService,
@@ -60,12 +61,15 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
                 this.name = LocationOfInterestService.getDisplayName(loi);
                 this.icon = getLoiIcon(loi);
 
-                return this.submissionService.submissions$(survey, loi);
+                return this.submissionService.getSubmissions$();
               })
             )
           )
         )
-        .subscribe(submissions => (this.submissions = submissions))
+        .subscribe(submissions => {
+          this.submissions = submissions;
+          this.isLoading = false;
+        })
     );
   }
 
