@@ -16,9 +16,10 @@
 
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {filter, first, firstValueFrom} from 'rxjs';
+import {List} from 'immutable';
+import {Subscription, combineLatest, filter} from 'rxjs';
 
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey, SurveyState} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
@@ -39,14 +40,14 @@ import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
   styleUrls: ['./create-survey.component.scss'],
 })
 export class CreateSurveyComponent implements OnInit {
+  subscription: Subscription = new Subscription();
   surveyId?: string;
   survey?: Survey;
+  lois?: List<LocationOfInterest>;
   canContinue = true;
   skipLoiSelection = false;
-  // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
-  // We should display a loading bar while we are waiting for the data to make a decision
-  // about which phase we are in.
-  setupPhase = SetupPhase.SURVEY_DETAILS;
+  setupPhase = SetupPhase.LOADING;
+
   readonly SetupPhase = SetupPhase;
 
   constructor(
@@ -65,34 +66,42 @@ export class CreateSurveyComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  async ngOnInit(): Promise<void> {
-    this.navigationService.getSurveyId$().subscribe(surveyId => {
-      this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
-      this.surveyService.activateSurvey(this.surveyId);
-    });
+  ngOnInit(): void {
+    this.subscription.add(
+      this.navigationService.getSurveyId$().subscribe(surveyId => {
+        this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
+        this.surveyService.activateSurvey(this.surveyId);
+      })
+    );
 
-    const survey = await firstValueFrom(
-      this.surveyService
-        .getActiveSurvey$()
+    this.subscription.add(
+      combineLatest([
+        this.surveyService.getActiveSurvey$(),
+        this.loiService.getLocationsOfInterest$(),
+      ])
         .pipe(
           filter(
-            survey =>
+            ([survey]) =>
               this.surveyId === NavigationService.SURVEY_ID_NEW ||
               survey.id === this.surveyId
           )
         )
+        .subscribe(([survey, lois]) => {
+          this.survey = survey;
+          if (this.isSetupFinished(this.survey)) {
+            this.navigationService.navigateToEditSurvey(this.survey.id);
+          }
+          this.lois = lois;
+          if (this.setupPhase === SetupPhase.LOADING) {
+            this.setupPhase = this.getSetupPhase(survey, lois);
+          }
+          if (this.setupPhase === SetupPhase.DEFINE_LOIS) {
+            this.canContinue =
+              !this.lois.isEmpty() ||
+              this.job()?.strategy === DataCollectionStrategy.MIXED;
+          }
+        })
     );
-    if (this.isSetupFinished(survey)) {
-      this.navigationService.navigateToEditSurvey(survey.id);
-      return;
-    }
-    this.loiService
-      .getLocationsOfInterest$()
-      .pipe(first())
-      .subscribe(lois => {
-        this.setupPhase = this.getSetupPhase(survey, lois);
-        this.survey = survey;
-      });
   }
 
   onValidationChange(valid: boolean) {
@@ -110,7 +119,10 @@ export class CreateSurveyComponent implements OnInit {
     if (survey.state === SurveyState.READY) {
       return SetupPhase.DEFINE_DATA_SHARING_TERMS;
     }
-    if (!lois.isEmpty()) {
+    if (
+      !lois.isEmpty() ||
+      this.job()?.strategy === DataCollectionStrategy.MIXED
+    ) {
       return SetupPhase.DEFINE_TASKS;
     }
     if (survey.jobs.size > 0) {
@@ -303,9 +315,14 @@ export class CreateSurveyComponent implements OnInit {
 
   @ViewChild('dataSharingTerms')
   dataSharingTerms?: DataSharingTermsComponent;
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 }
 
 export enum SetupPhase {
+  LOADING,
   SURVEY_DETAILS,
   JOB_DETAILS,
   DEFINE_LOIS,

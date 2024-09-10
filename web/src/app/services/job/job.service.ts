@@ -18,9 +18,10 @@ import {Injectable} from '@angular/core';
 import {List, Map} from 'immutable';
 import {firstValueFrom} from 'rxjs';
 
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {MultipleChoice} from 'app/models/task/multiple-choice.model';
 import {Option} from 'app/models/task/option.model';
+import {TaskCondition} from 'app/models/task/task-condition.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -63,13 +64,14 @@ export class JobService {
    */
   createNewJob(): Job {
     const jobId = this.dataStoreService.generateId();
-    const task = this.createTask(TaskType.CAPTURE_LOCATION, '', true, 0);
+    const tasks = this.taskService.addLoiTask(Map());
     return new Job(
       jobId,
       /* index */ -1,
       undefined,
       undefined,
-      Map([[task.id, task]])
+      tasks,
+      DataCollectionStrategy.MIXED
     );
   }
 
