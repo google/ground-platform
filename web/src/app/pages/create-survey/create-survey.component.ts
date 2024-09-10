@@ -297,14 +297,14 @@ export class CreateSurveyComponent implements OnInit {
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
     await this.surveyService.updateDataSharingTerms(
-      this.survey!.id,
+      this.survey!,
       type,
       customText
     );
   }
 
   private async setSurveyStateToReady() {
-    await this.surveyService.updateState(this.survey!.id, SurveyState.READY);
+    await this.surveyService.updateState(this.survey!, SurveyState.READY);
   }
 
   @ViewChild('surveyLoi')

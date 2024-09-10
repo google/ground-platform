@@ -113,27 +113,38 @@ export class SurveyService {
   /**
    * Updates the survey with new state by calling the data-store service.
    *
-   * @param surveyId the id of the survey.
+   * @param survey the survey instance.
    * @param state the new status of the survey.
    */
-  updateState(surveyId: string, state: SurveyState): Promise<void> {
-    return this.dataStore.updateSurveyState(surveyId, state);
+  updateState(survey: Survey, state: SurveyState): Promise<void> {
+    return this.dataStore.updateSurvey({...survey, state} as Survey);
   }
 
-  updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateAcl(surveyId, acl);
+  /**
+   * Updates the survey with new acl by calling the data-store service.
+   *
+   * @param survey the survey instance.
+   * @param acl the new access control list of the survey.
+   */
+  updateAcl(survey: Survey, acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateSurvey({...survey, acl} as Survey);
   }
 
+  /**
+   * Adds or overwrites the dataSharingTerms in the survey of the specified id.
+   * @param survey the survey instance.
+   * @param type the type of the DataSharingTerms.
+   * @param customText the text of the DataSharingTerms.
+   */
   updateDataSharingTerms(
-    surveyId: string,
-    dataSharingType: DataSharingType,
+    survey: Survey,
+    type: DataSharingType,
     customText?: string
   ): Promise<void> {
-    return this.dataStore.updateDataSharingTerms(
-      surveyId,
-      dataSharingType,
-      customText
-    );
+    return this.dataStore.updateSurvey({
+      ...survey,
+      dataSharingTerms: {type, ...(customText && {customText})},
+    } as Survey);
   }
 
   async createSurvey(name: string, description?: string): Promise<string> {
