@@ -25,16 +25,6 @@ limitations under the License.
       <div class="loi-name" *ngIf="isSidePanelExpanded()">
         {{ node.name }}
       </div>
-      <button
-        mat-icon-button
-        *ngIf="isSidePanelExpanded() && hasJobProperties(node)"
-        aria-label="properties"
-        (click)="openPropertiesDialog($event, node)"
-      >
-        <mat-icon class="material-symbols-outlined show-properties-icon">
-          data_info_alert
-        </mat-icon>
-      </button>
     </mat-tree-node>
     <!-- Tree node for jobs -->
     <mat-tree-node
