@@ -69,10 +69,11 @@ export async function exportCsvHandler(
       .send('Unsupported or corrupt job');
     return;
   }
-  const jobName = job.name;
+  const {name: jobName} = job;
+  const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
   const loiDocs = await db.fetchLocationsOfInterestByJobId(surveyId, jobId);
   const loiProperties = getPropertyNames(loiDocs);
-  const headers = getHeaders(job.tasks, loiProperties);
+  const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
   res.setHeader(
@@ -101,7 +102,7 @@ export async function exportCsvHandler(
     // LOI fields, but no submission data.
     const submissions = submissionsByLoi[loiDoc.id] || [{}];
     submissions.forEach(submissionDict =>
-      writeSubmissions(csvStream, loiProperties, job.tasks, loi, submissionDict)
+      writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
     );
   });
   res.status(HttpStatus.OK);
