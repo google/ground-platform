@@ -140,10 +140,6 @@ export class DataStoreService {
           AclRole.VIEWER,
           AclRole.DATA_COLLECTOR,
           AclRole.SURVEY_ORGANIZER,
-          Role.OWNER,
-          Role.SURVEY_ORGANIZER,
-          Role.DATA_COLLECTOR,
-          Role.VIEWER,
         ])
       )
       .snapshotChanges()
