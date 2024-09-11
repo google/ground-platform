@@ -61,8 +61,8 @@ export class ShareDialogComponent {
 
   hasChanges = false;
 
-  /** The id of the currently active survey. */
-  private surveyId?: string;
+  /** The active survey. */
+  private survey?: Survey;
   private subscription = new Subscription();
 
   constructor(
@@ -86,7 +86,7 @@ export class ShareDialogComponent {
    */
   onAddUserSubmit(): void {
     // UI is hidden until survey is loaded, so this should never happen.
-    if (!this.surveyId || !this.acl) {
+    if (!this.survey || !this.acl) {
       return;
     }
     const {email, role} = this.addUserForm.value;
@@ -130,7 +130,7 @@ export class ShareDialogComponent {
   onSaveClicked(): void {
     // TODO: Show saving spinner.
     this.surveyService
-      .updateAcl(this.surveyId!, this.getAclMap())
+      .updateAcl(this.survey!, this.getAclMap())
       .then(() => this.dialogRef.close());
   }
 
@@ -145,7 +145,7 @@ export class ShareDialogComponent {
    * Update ACL and surveyId when survey is loaded.
    */
   private onSurveyLoaded(survey: Survey): void {
-    this.surveyId = survey.id;
+    this.survey = survey;
     this.originalAcl = survey.acl;
     // Sort users by email address.
     this.acl = this.surveyService.getActiveSurveyAcl();

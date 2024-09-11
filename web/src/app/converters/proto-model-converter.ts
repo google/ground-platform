@@ -73,31 +73,6 @@ export function dataSharingTypeToProto(type: DataSharingType) {
 }
 
 /**
- * Returns the proto representation of a Survey ACL model object.
- */
-export function aclToDocument(acl: Map<string, Role>): DocumentData | Error {
-  return toDocumentData(
-    new Pb.Survey({
-      acl: acl.map(role => roleToProtoRole(role)).toObject(),
-    })
-  );
-}
-
-/**
- * Returns the proto representation of a Survey DataSharingTerms model object.
- */
-export function dataSharingTermsToDocument(
-  type: DataSharingType,
-  customText?: string
-): DocumentData | Error {
-  return toDocumentData(
-    new Pb.Survey({
-      dataSharingTerms: toDataSharingTermsMessage({type, customText}),
-    })
-  );
-}
-
-/**
  * Returns the proto representation of a Survey model object.
  */
 export function surveyToDocument(

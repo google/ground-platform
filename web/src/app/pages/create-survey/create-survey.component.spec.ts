@@ -462,7 +462,7 @@ describe('CreateSurveyComponent', () => {
       clickContinueButton(fixture);
 
       expect(surveyServiceSpy.updateDataSharingTerms).toHaveBeenCalledOnceWith(
-        surveyId,
+        surveyWithJob,
         DataSharingType.CUSTOM,
         'Good day, sir'
       );
