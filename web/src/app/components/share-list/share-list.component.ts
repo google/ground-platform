@@ -83,7 +83,6 @@ export class ShareListComponent {
     this.acl.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
 
     this.surveyService.updateAcl(
-      this.survey!,
       Map(this.acl.map(entry => [entry.email, entry.role]))
     );
   }

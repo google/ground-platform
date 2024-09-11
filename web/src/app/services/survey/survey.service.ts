@@ -116,8 +116,8 @@ export class SurveyService {
    * @param survey the survey instance.
    * @param state the new status of the survey.
    */
-  updateState(survey: Survey, state: SurveyState): Promise<void> {
-    return this.dataStore.updateSurvey({...survey, state} as Survey);
+  updateState(state: SurveyState): Promise<void> {
+    return this.dataStore.updateSurvey({...this.activeSurvey, state} as Survey);
   }
 
   /**
@@ -126,8 +126,8 @@ export class SurveyService {
    * @param survey the survey instance.
    * @param acl the new access control list of the survey.
    */
-  updateAcl(survey: Survey, acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateSurvey({...survey, acl} as Survey);
+  updateAcl(acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateSurvey({...this.activeSurvey, acl} as Survey);
   }
 
   /**
@@ -137,12 +137,11 @@ export class SurveyService {
    * @param customText the text of the DataSharingTerms.
    */
   updateDataSharingTerms(
-    survey: Survey,
     type: DataSharingType,
     customText?: string
   ): Promise<void> {
     return this.dataStore.updateSurvey({
-      ...survey,
+      ...this.activeSurvey,
       dataSharingTerms: {type, ...(customText && {customText})},
     } as Survey);
   }
