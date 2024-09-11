@@ -130,7 +130,7 @@ export class ShareDialogComponent {
   onSaveClicked(): void {
     // TODO: Show saving spinner.
     this.surveyService
-      .updateAcl(this.survey!, this.getAclMap())
+      .updateAcl(this.getAclMap())
       .then(() => this.dialogRef.close());
   }
 
