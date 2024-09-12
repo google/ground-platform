@@ -131,7 +131,7 @@ export function importGeoJsonCallback(
       done();
     } catch (err: any) {
       console.debug(err);
-      error(HttpStatus.BAD_REQUEST, err);
+      error(HttpStatus.BAD_REQUEST, (err as Error).message);
     }
   });
 
