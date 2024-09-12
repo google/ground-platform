@@ -181,7 +181,7 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
   return new Pb.LocationOfInterest.Property(
     typeof value === 'number'
       ? {numericValue: value}
-      : {stringValue: value.toString()}
+      : {stringValue: value?.toString() || ''}
   );
 }
 
