@@ -15,9 +15,11 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
 import {List} from 'immutable';
 import {Subscription, switchMap} from 'rxjs';
 
+import {LoiPropertiesDialogComponent} from 'app/components/loi-properties-dialog/loi-properties-dialog.component';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -42,6 +44,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   isLoading = true;
 
   constructor(
+    private dialog: MatDialog,
     private loiService: LocationOfInterestService,
     private surveyService: SurveyService,
     private submissionService: SubmissionService,
@@ -79,6 +82,26 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
 
   onClosePanel() {
     this.navigationService.clearLocationOfInterestId();
+  }
+
+  hasProperties() {
+    return this.loi.properties?.size;
+  }
+
+  openPropertiesDialog(event: Event): void {
+    event.stopPropagation();
+    this.dialog.open(LoiPropertiesDialogComponent, {
+      width: '580px',
+      height: '70%',
+      autoFocus: false,
+      data: {
+        iconColor: this.iconColor,
+        iconName: this.icon,
+        loiDisplayName: this.name,
+        properties: this.loi.properties?.toObject(),
+      },
+      panelClass: 'loi-properties-dialog-container',
+    });
   }
 
   ngOnDestroy(): void {

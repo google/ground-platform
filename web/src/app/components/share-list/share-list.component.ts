@@ -32,7 +32,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 })
 export class ShareListComponent {
   acl?: Array<AclEntry>;
-  surveyId?: string;
+  survey?: Survey;
   surveyOwnerEmail?: string;
 
   private subscription = new Subscription();
@@ -53,7 +53,7 @@ export class ShareListComponent {
   }
 
   private async onSurveyLoaded(survey: Survey): Promise<void> {
-    this.surveyId = survey.id;
+    this.survey = survey;
 
     const owner = await this.authService.getUser(survey.ownerId);
 
@@ -83,7 +83,6 @@ export class ShareListComponent {
     this.acl.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
 
     this.surveyService.updateAcl(
-      this.surveyId!,
       Map(this.acl.map(entry => [entry.email, entry.role]))
     );
   }

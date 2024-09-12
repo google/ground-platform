@@ -17,7 +17,6 @@
 import {CdkTreeModule} from '@angular/cdk/tree';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
@@ -32,7 +31,6 @@ import {JobListItemComponent} from './job-list-item.component';
     BrowserModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule,
     MatListModule,
     MatMenuModule,
     MatSnackBarModule,
