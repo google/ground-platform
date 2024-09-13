@@ -52,10 +52,10 @@ export class JobDialogComponent {
         return 'Add new job';
       case DialogType.RenameJob:
         return 'Rename job';
-      case DialogType.DeleteJob:
-        return 'Delete job';
       case DialogType.UndoJobs:
         return 'Unpublished changes';
+      case DialogType.DeleteJob:
+        return 'Delete job';
       case DialogType.DeleteLois:
         return 'Delete predefined sites';
       case DialogType.DeleteOption:
@@ -73,14 +73,11 @@ export class JobDialogComponent {
         return 'Create';
       case DialogType.RenameJob:
         return 'Rename';
-      case DialogType.DeleteJob:
-        return 'Confirm';
       case DialogType.UndoJobs:
         return 'Continue';
+      case DialogType.DeleteJob:
       case DialogType.DeleteLois:
-        return 'Confirm';
       case DialogType.DeleteOption:
-        return 'Confirm';
       case DialogType.DeleteSurvey:
         return 'Confirm';
       default:
