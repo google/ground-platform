@@ -34,8 +34,6 @@ import {map} from 'rxjs/operators';
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
 import {
-  aclToDocument,
-  dataSharingTermsToDocument,
   jobToDocument,
   surveyToDocument,
 } from 'app/converters/proto-model-converter';
@@ -140,10 +138,6 @@ export class DataStoreService {
           AclRole.VIEWER,
           AclRole.DATA_COLLECTOR,
           AclRole.SURVEY_ORGANIZER,
-          Role.OWNER,
-          Role.SURVEY_ORGANIZER,
-          Role.DATA_COLLECTOR,
-          Role.VIEWER,
         ])
       )
       .snapshotChanges()
@@ -224,19 +218,6 @@ export class DataStoreService {
       .set(surveyToDocument(surveyId, {title: name, description}), {
         merge: true,
       });
-  }
-
-  /**
-   * Updates the survey state.
-   *
-   * @param surveyId the id of the survey.
-   * @param state the new state of the survey.
-   */
-  updateSurveyState(surveyId: string, state: SurveyState): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .set(surveyToDocument(surveyId, {state}), {merge: true});
   }
 
   addOrUpdateSurvey(survey: Survey): Promise<void> {
@@ -464,37 +445,6 @@ export class DataStoreService {
         return job?.tasks?.toList() ?? List<Task>();
       })
     );
-  }
-
-  /**
-   * Adds or overwrites the role of the specified user in the survey with the
-   * specified id.
-   * @param surveyId the id of the survey to be updated.
-   * @param email the email of the user whose role is to be updated.
-   * @param role the new role of the specified user.
-   */
-  updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update(aclToDocument(acl));
-  }
-
-  /**
-   * Adds or overwrites the dataSharingTerms in the survey of the specified id.
-   * @param surveyId the id of the survey to be updated.
-   * @param type the type of the DataSharingTerms.
-   * @param customText the text of the DataSharingTerms.
-   */
-  updateDataSharingTerms(
-    surveyId: string,
-    type: DataSharingType,
-    customText?: string
-  ): Promise<void> {
-    return this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update(dataSharingTermsToDocument(type, customText));
   }
 
   generateId() {

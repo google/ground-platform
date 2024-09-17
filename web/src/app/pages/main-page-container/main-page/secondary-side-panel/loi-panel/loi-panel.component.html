@@ -25,19 +25,29 @@ limitations under the License.
         <mat-icon svgIcon={{icon}} [ngStyle]="{color: iconColor}"></mat-icon>
         <div>{{ name }}</div>
       </div>
-  
+
+      <button
+        mat-icon-button
+        *ngIf="hasProperties()"
+        aria-label="properties"
+        (click)="openPropertiesDialog($event)"
+      >
+        <mat-icon class="material-symbols-outlined show-properties-icon">
+          data_info_alert
+        </mat-icon>
+      </button>
       <button mat-icon-button aria-label="back" (click)="onClosePanel()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
-  
+
     <div *ngIf="submissions && submissions.count() === 0" class="no-lois-container">
       <div class="mat-icon-container">
         <mat-icon>inbox</mat-icon>
       </div>
       No data collected for this site
     </div>
-  
+
     <mat-list *ngIf="submissions && submissions.count() > 0">
       <div *ngFor="let submission of submissions; let i = index">
         <mat-divider *ngIf="i > 0"></mat-divider>
