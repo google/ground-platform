@@ -83,6 +83,7 @@ export class DraftSurveyService {
     );
 
     this.dirty = true;
+    this.valid = this.valid.remove(job.id);
   }
 
   addOrUpdateTasks(jobId: string, tasks: List<Task>, valid: boolean): void {

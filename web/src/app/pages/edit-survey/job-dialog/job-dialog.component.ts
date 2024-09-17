@@ -54,10 +54,10 @@ export class JobDialogComponent {
         return 'Add new job';
       case DialogType.RenameJob:
         return 'Rename job';
-      case DialogType.DeleteJob:
-        return 'Delete job';
       case DialogType.UndoJobs:
         return 'Unpublished changes';
+      case DialogType.DeleteJob:
+        return 'Delete job';
       case DialogType.DeleteLois:
         return 'Delete predefined sites';
       case DialogType.DeleteOption:
