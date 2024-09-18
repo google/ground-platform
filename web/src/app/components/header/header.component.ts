@@ -105,6 +105,7 @@ export class HeaderComponent {
     this.publishingChanges = true;
     await this.draftSurveyService.updateSurvey();
     this.publishingChanges = false;
+    this.navigationService.selectSurvey(this.surveyId);
   }
 
   isDraftSurveyDirtyAndValid() {
