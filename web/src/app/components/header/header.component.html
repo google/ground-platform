@@ -54,7 +54,7 @@
         <button
           mat-flat-button
           class="finish-edit-button"
-          [disabled]="!isDraftSurveyDirtyAndValid()"
+          [disabled]="publishingChanges || !isDraftSurveyDirtyAndValid()"
           (click)="onFinishEditSurveyClick()"
         >
           Publish changes
