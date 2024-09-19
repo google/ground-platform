@@ -15,15 +15,15 @@ name: Create a new survey
 
 inputs:
   platform-repository:
-    description: 'ground-platform repository under test'
+    description: "ground-platform repository under test"
     default: google/ground-platform
 
   upload-artifacts:
-    description: 'Whether to upload the final emulator data artifacts'
-    default: 'false'
+    description: "Whether to upload the final emulator data artifacts"
+    default: "false"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -41,7 +41,7 @@ runs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: "18"
+        node-version: "20"
 
     - name: Load cached Node modules
       id: cache-npm
@@ -68,7 +68,7 @@ runs:
       id: setup-chrome
       with:
         chrome-version: 125
-    
+
     - name: Save CHROME_PATH
       shell: bash
       run: echo "CHROME_PATH=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
@@ -98,7 +98,7 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: data-create
-        path: '**/test'
+        path: "**/test"
         retention-days: 7
         overwrite: true
         if-no-files-found: error
