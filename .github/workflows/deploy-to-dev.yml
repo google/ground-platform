@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "18.x"
+          node-version: "20"
 
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
@@ -38,13 +38,13 @@ jobs:
 
       - name: Install deps
         run: npm run ci-all
-  
+
       - name: Build Ground
         run: npm run build-all --config=dev --project=gnd-dev
 
       - name: Deploy to Firebase
         uses: docker://w9jds/firebase-action:master
         with:
-            args: deploy --project gnd-dev
+          args: deploy --project gnd-dev
         env:
-            GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}

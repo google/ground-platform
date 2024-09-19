@@ -15,15 +15,15 @@ name: Verify survey submissions
 
 inputs:
   platform-repository:
-    description: 'ground-platform repository under test'
+    description: "ground-platform repository under test"
     default: google/ground-platform
 
   use-repo-data:
-    description: 'Whether to use the local repository emulator data or not'
-    default: 'true'
+    description: "Whether to use the local repository emulator data or not"
+    default: "true"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -41,7 +41,7 @@ runs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: "18"
+        node-version: "20"
 
     - name: Load cached Node modules
       id: cache-npm
@@ -62,13 +62,13 @@ runs:
       continue-on-error: true
       shell: bash
       run: npm list
-    
+
     - name: Install Chrome
       uses: browser-actions/setup-chrome@v1
       id: setup-chrome
       with:
         chrome-version: 125
-    
+
     - name: Save CHROME_PATH
       shell: bash
       run: |
@@ -77,7 +77,6 @@ runs:
     - name: Install nx-linux-x64-gnu
       shell: bash
       run: npm install @nx/nx-linux-x64-gnu
-
 
     - name: Install dependencies
       shell: bash
