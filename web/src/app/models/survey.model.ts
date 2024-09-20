@@ -78,6 +78,10 @@ export class Survey extends Copiable {
     super();
   }
 
+  hasJobs(): boolean {
+    return this.jobs.size > 0;
+  }
+
   getJob(jobId: string): Job | undefined {
     return this.jobs.get(jobId);
   }
