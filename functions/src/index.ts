@@ -22,27 +22,28 @@ import {sessionLoginHandler} from './session-login';
 import {importGeoJsonCallback} from './import-geojson';
 import {exportCsvHandler} from './export-csv';
 import {onCall} from 'firebase-functions/v2/https';
-import {onWriteSubmissionHandler} from './on-write-submission';
 import {onCreateLoiHandler} from './on-create-loi';
+import {onWriteJobHandler} from './on-write-job';
 import {onWriteLoiHandler} from './on-write-loi';
+import {onWriteSubmissionHandler} from './on-write-submission';
 import {onWriteSurveyHandler} from './on-write-survey';
-import {loi, submission, survey} from './common/datastore';
+import {job, loi, submission, survey} from './common/datastore';
 import {initializeFirebaseApp} from './common/context';
 
 // Ensure Firebase is initialized.
 initializeFirebaseApp();
 
-/** Template for LOI write triggers capturing survey and LOI ids. */
-export const loiPathTemplate = loi('{surveyId}', '{loiId}');
+/** Template for job write triggers capturing survey and job id. */
+const jobPathTemplate = job('{surveyId}', '{jobId}');
 
-/** Template for submission write triggers capturing survey and submission ids. */
-export const submissionPathTemplate = submission(
-  '{surveyId}',
-  '{submissionId}'
-);
+/** Template for LOI write triggers capturing survey and LOI id. */
+const loiPathTemplate = loi('{surveyId}', '{loiId}');
+
+/** Template for submission write triggers capturing survey and submission id. */
+const submissionPathTemplate = submission('{surveyId}', '{submissionId}');
 
 /** Template for survey write triggers capturing survey id. */
-export const surveyPathTemplate = survey('{surveyId}');
+const surveyPathTemplate = survey('{surveyId}');
 
 export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
@@ -52,20 +53,24 @@ export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 
-export const onWriteSurvey = functions.firestore
-  .document(surveyPathTemplate)
-  .onWrite(onWriteSurveyHandler);
+export const onCreateLoi = functions.firestore
+  .document(loiPathTemplate)
+  .onCreate(onCreateLoiHandler);
+
+export const onWriteJob = functions.firestore
+  .document(jobPathTemplate)
+  .onWrite(onWriteJobHandler);
 
 export const onWriteLoi = functions.firestore
   .document(loiPathTemplate)
   .onWrite(onWriteLoiHandler);
 
-export const onCreateLoi = functions.firestore
-  .document(loiPathTemplate)
-  .onCreate(onCreateLoiHandler);
-
 export const onWriteSubmission = functions.firestore
   .document(submissionPathTemplate)
   .onWrite(onWriteSubmissionHandler);
+
+export const onWriteSurvey = functions.firestore
+  .document(surveyPathTemplate)
+  .onWrite(onWriteSurveyHandler);
 
 export const sessionLogin = onHttpsRequest(sessionLoginHandler);
