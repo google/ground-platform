@@ -18,7 +18,7 @@
 
 <mat-dialog-content [ngSwitch]="data.dialogType">
   <mat-form-field
-    *ngSwitchCase=" [DialogType.AddJob, DialogType.RenameJob].includes(data.dialogType)
+    *ngSwitchCase="[DialogType.AddJob, DialogType.RenameJob].includes(data.dialogType)
       ? data.dialogType
       : ''
   ">
