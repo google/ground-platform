@@ -50,6 +50,21 @@ export class CreateSurveyComponent implements OnInit {
 
   readonly SetupPhase = SetupPhase;
 
+  @ViewChild('surveyDetails')
+  surveyDetails?: SurveyDetailsComponent;
+
+  @ViewChild('jobDetails')
+  jobDetails?: JobDetailsComponent;
+
+  @ViewChild('surveyLoi')
+  surveyLoi?: SurveyLoiComponent;
+
+  @ViewChild('taskDetails')
+  taskDetails?: TaskDetailsComponent;
+
+  @ViewChild('dataSharingTerms')
+  dataSharingTerms?: DataSharingTermsComponent;
+
   constructor(
     private surveyService: SurveyService,
     private jobService: JobService,
@@ -125,7 +140,7 @@ export class CreateSurveyComponent implements OnInit {
     ) {
       return SetupPhase.DEFINE_TASKS;
     }
-    if (survey.jobs.size > 0) {
+    if (survey.hasJobs()) {
       return SetupPhase.DEFINE_LOIS;
     }
     if (this.hasTitle(survey)) {
@@ -162,7 +177,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   job(): Job | undefined {
-    if (this.survey?.jobs.size ?? 0 > 0) {
+    if (this.survey?.hasJobs()) {
       return this.survey?.jobs.values().next().value;
     }
     return undefined;
@@ -234,9 +249,6 @@ export class CreateSurveyComponent implements OnInit {
     this.survey = this.surveyService.getActiveSurvey();
   }
 
-  @ViewChild('surveyDetails')
-  surveyDetails?: SurveyDetailsComponent;
-
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
     const [name, description] = this.surveyDetails!.toTitleAndDescription();
     if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
@@ -250,9 +262,6 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
-  @ViewChild('jobDetails')
-  jobDetails?: JobDetailsComponent;
-
   private getFirstJob(): Job {
     // there should only be at most one job attached to this survey at this
     // point when user is still in the survey creation flow.
@@ -262,7 +271,7 @@ export class CreateSurveyComponent implements OnInit {
   private async saveJobName(): Promise<void> {
     const name = this.jobDetails!.toJobName();
     let job;
-    if (this.survey!.jobs.size > 0) {
+    if (this.survey?.hasJobs()) {
       job = this.getFirstJob();
     } else {
       job = this.jobService.createNewJob();
@@ -302,15 +311,6 @@ export class CreateSurveyComponent implements OnInit {
   private async setSurveyStateToReady() {
     await this.surveyService.updateState(SurveyState.READY);
   }
-
-  @ViewChild('surveyLoi')
-  surveyLoi?: SurveyLoiComponent;
-
-  @ViewChild('taskDetails')
-  taskDetails?: TaskDetailsComponent;
-
-  @ViewChild('dataSharingTerms')
-  dataSharingTerms?: DataSharingTermsComponent;
 
   ngOnDestroy() {
     this.subscription.unsubscribe();

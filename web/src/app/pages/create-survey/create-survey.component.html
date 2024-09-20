@@ -89,10 +89,13 @@
               (onValidationChange)="onValidationChange($event)"
             ></data-sharing-terms>
           </ground-step-card>
-          <survey-review
+          <ground-step-card
             *ngSwitchCase="SetupPhase.REVIEW"
-            #surveyReview
-          ></survey-review>
+            title="Review survey"
+            description="Is your survey ready? Share it with collectors and other organizers."
+          >
+            <share-survey></share-survey>
+          </ground-step-card>
         </div>
       </div>
     </div>

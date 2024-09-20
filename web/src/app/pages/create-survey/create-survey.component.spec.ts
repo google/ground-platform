@@ -28,6 +28,7 @@ import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
 import {Observable, Subject} from 'rxjs';
 
+import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
@@ -45,8 +46,6 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
-
-import {SurveyReviewComponent} from './survey-review/survey-review.component';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -189,7 +188,7 @@ describe('CreateSurveyComponent', () => {
         SurveyDetailsComponent,
         JobDetailsComponent,
         DataSharingTermsComponent,
-        SurveyReviewComponent,
+        ShareSurveyComponent,
       ],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
