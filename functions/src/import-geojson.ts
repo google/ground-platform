@@ -131,7 +131,7 @@ export function importGeoJsonCallback(
       done();
     } catch (err: any) {
       console.debug(err);
-      error(HttpStatus.BAD_REQUEST, err);
+      error(HttpStatus.BAD_REQUEST, (err as Error).message);
     }
   });
 
@@ -181,7 +181,7 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
   return new Pb.LocationOfInterest.Property(
     typeof value === 'number'
       ? {numericValue: value}
-      : {stringValue: value.toString()}
+      : {stringValue: value?.toString() || ''}
   );
 }
 
