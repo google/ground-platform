@@ -17,7 +17,10 @@
 import {CommonModule} from '@angular/common';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {DataSharingType} from 'app/models/survey.model';
+import {
+  DATA_SHARING_TYPE_DESCRIPTION,
+  DataSharingType,
+} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 
 describe('DataSharingTermsComponent', () => {
@@ -48,22 +51,22 @@ describe('DataSharingTermsComponent', () => {
         .textContent!.trim(),
       description: card
         .querySelector('.option-radio-button p')!
-        .textContent!.trim(),
+        .innerHTML!.trim(),
     }));
     expect(contentValues).toEqual([
       {
         label: 'Private',
-        description: 'Data will be shared with survey organizers only',
+        description: DATA_SHARING_TYPE_DESCRIPTION.get(
+          DataSharingType.PRIVATE
+        )!,
       },
       {
         label: 'Public',
-        description:
-          'Survey organizers may share and use data publicly under the CC0 license',
+        description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PUBLIC)!,
       },
       {
         label: 'Custom agreement',
-        description:
-          'Survey organizers create terms which must be accepted by data collectors before collecting data',
+        description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.CUSTOM)!,
       },
     ]);
   });
