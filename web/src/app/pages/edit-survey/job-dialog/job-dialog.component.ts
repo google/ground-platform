@@ -25,6 +25,7 @@ export enum DialogType {
   DeleteLois,
   DeleteOption,
   DeleteSurvey,
+  DisableFreeForm,
 }
 
 export interface DialogData {
@@ -39,6 +40,7 @@ export interface DialogData {
 })
 export class JobDialogComponent {
   public static readonly JOB_NAME_FIELD_ID = 'job-name';
+
   readonly DialogType = DialogType;
 
   constructor(
@@ -62,6 +64,8 @@ export class JobDialogComponent {
         return 'Delete option';
       case DialogType.DeleteSurvey:
         return 'Delete survey';
+      case DialogType.DisableFreeForm:
+        return 'Disable free-form data collection?';
       default:
         return '';
     }
@@ -79,6 +83,7 @@ export class JobDialogComponent {
       case DialogType.DeleteLois:
       case DialogType.DeleteOption:
       case DialogType.DeleteSurvey:
+      case DialogType.DisableFreeForm:
         return 'Confirm';
       default:
         return '';
@@ -87,9 +92,5 @@ export class JobDialogComponent {
 
   get jobNameFieldId() {
     return JobDialogComponent.JOB_NAME_FIELD_ID;
-  }
-
-  onCancelClick(): void {
-    this.dialogRef.close();
   }
 }
