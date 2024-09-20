@@ -34,7 +34,7 @@ export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
   ],
   [
     DataSharingType.PUBLIC,
-    'Data collectors waive all rights to data collected as part of this survey under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>.<br />Survey organizers may share data freely.',
+    'Data collectors waive all rights to data collected as part of this survey under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>.<br>Survey organizers may share data freely.',
   ],
   [
     DataSharingType.CUSTOM,
