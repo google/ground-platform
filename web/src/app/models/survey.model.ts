@@ -28,14 +28,17 @@ export enum DataSharingType {
 }
 
 export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
-  [DataSharingType.PRIVATE, 'Data will be shared with survey organizers only'],
+  [
+    DataSharingType.PRIVATE,
+    'Survey organizers may <strong>not</strong> share and use collected data publicly or with third parties',
+  ],
   [
     DataSharingType.PUBLIC,
-    'Survey organizers may share and use data publicly under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>',
+    'Data collectors waive all rights to data collected as part of this survey under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>.<br />Survey organizers may share data freely.',
   ],
   [
     DataSharingType.CUSTOM,
-    'Survey organizers create terms which must be accepted by data collectors before collecting data',
+    'Data collectors must agree to the custom terms you provide here',
   ],
 ]);
 
