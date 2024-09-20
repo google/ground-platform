@@ -54,11 +54,11 @@
         <button
           mat-flat-button
           class="finish-edit-button"
-          [disabled]="publishingChanges || !isDraftSurveyDirtyAndValid()"
+          [disabled]="isPublishingChanges || !isDraftSurveyDirtyAndValid()"
           (click)="onFinishEditSurveyClick()"
         >
           Publish changes
-          <mat-icon *ngIf="publishingChanges">
+          <mat-icon *ngIf="isPublishingChanges">
             <mat-spinner diameter="18"></mat-spinner>
           </mat-icon>
         </button>
