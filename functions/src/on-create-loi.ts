@@ -44,13 +44,13 @@ export async function onCreateLoiHandler(
 
   if (!loiId || !data) return;
 
-  const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
+  const loiPb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
 
-  const geometry = toGeoJsonGeometry(pb.geometry!);
+  const geometry = toGeoJsonGeometry(loiPb.geometry!);
 
   const db = getDatastore();
 
-  let properties = propertiesPbToObject(pb.properties) || {};
+  let properties = propertiesPbToObject(loiPb.properties) || {};
 
   const propertyGenerators = await db.fetchPropertyGenerators();
 
@@ -71,7 +71,9 @@ export async function onCreateLoiHandler(
   await db.updateLoiProperties(
     surveyId,
     loiId,
-    toDocumentData(toLoiPbProperties(properties))
+    toDocumentData(
+      new Pb.LocationOfInterest({properties: toLoiPbProperties(properties)})
+    )
   );
 
   await broadcastSurveyUpdate(context.params.surveyId);
