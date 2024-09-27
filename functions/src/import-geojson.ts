@@ -169,7 +169,7 @@ function toLoiPb(
   });
 }
 
-function toLoiPbProperties(properties: GeoJsonProperties): {
+export function toLoiPbProperties(properties: GeoJsonProperties): {
   [k: string]: Pb.LocationOfInterest.Property;
 } {
   return Object.fromEntries(

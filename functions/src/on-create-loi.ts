@@ -19,7 +19,15 @@ import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
 import {getDatastore} from './common/context';
 import {Datastore} from './common/datastore';
 import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
+import {GroundProtos} from '@ground/proto';
+import {registry} from '@ground/lib';
 import {geojsonToWKT} from '@terraformer/wkt';
+import {toLoiPbProperties} from './import-geojson';
+
+import Pb = GroundProtos.ground.v1beta1;
+const l = registry.getFieldIds(Pb.LocationOfInterest);
+
+type Properties = {[key: string]: string | number};
 
 type PropertyGenerator = {
   name: string;
@@ -33,17 +41,17 @@ export async function onCreateLoiHandler(
 ) {
   const surveyId = context.params.surveyId;
   const loiId = context.params.loiId;
-  const loi = snapshot.data();
+  const data = snapshot.data();
 
-  if (!loiId || !loi) return;
+  if (!loiId || !data) return;
 
   const db = getDatastore();
 
-  let properties = loi.properties || {};
+  let properties = {} as Properties;
 
   const propertyGenerators = await db.fetchPropertyGenerators();
 
-  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(loi.geometry));
+  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(data[l.geometry]));
 
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
     properties = await updateProperties(
@@ -57,7 +65,10 @@ export async function onCreateLoiHandler(
       .forEach(key => (properties[key] = JSON.stringify(properties[key])));
   }
 
-  await db.updateLoiProperties(surveyId, loiId, properties);
+  await db.updateLoiProperties(surveyId, loiId, {
+    ...data[l.properties],
+    ...toLoiPbProperties(properties),
+  });
 
   await broadcastSurveyUpdate(context.params.surveyId);
 }
@@ -78,8 +89,6 @@ async function updateProperties(
     ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
   };
 }
-
-type Properties = {[key: string]: string | number};
 
 async function fetchProperties(url: string, wkt: string): Promise<Properties> {
   const response = await fetch(url, {
