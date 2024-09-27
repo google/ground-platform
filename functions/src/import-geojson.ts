@@ -188,17 +188,17 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
 function toGeometryPb(geometry: Geometry): Pb.Geometry {
   switch (geometry.type) {
     case 'Point':
-      return toPointGeometry(geometry.coordinates);
+      return toPointGeometryPb(geometry.coordinates);
     case 'Polygon':
-      return toPolygonGeometry(geometry.coordinates);
+      return toPolygonGeometryPb(geometry.coordinates);
     case 'MultiPolygon':
-      return toMultiPolygonGeometry(geometry.coordinates);
+      return toMultiPolygonGeometryPb(geometry.coordinates);
     default:
       throw new Error(`Unsupported GeoJSON type '${geometry.type}'`);
   }
 }
 
-function toPointGeometry(position: Position): Pb.Geometry {
+function toPointGeometryPb(position: Position): Pb.Geometry {
   const coordinates = toCoordinatesPb(position);
   const point = new Pb.Point({coordinates});
   return new Pb.Geometry({point});
@@ -221,7 +221,7 @@ function toPolygonPb(positions: Position[][]): Pb.Polygon {
   return new Pb.Polygon({shell, holes});
 }
 
-function toPolygonGeometry(positions: Position[][]): Pb.Geometry {
+function toPolygonGeometryPb(positions: Position[][]): Pb.Geometry {
   const polygon = toPolygonPb(positions);
   return new Pb.Geometry({polygon});
 }
@@ -231,7 +231,7 @@ function toLinearRingPb(positions: Position[]): Pb.LinearRing {
   return new Pb.LinearRing({coordinates});
 }
 
-function toMultiPolygonGeometry(positions: Position[][][]): Pb.Geometry {
+function toMultiPolygonGeometryPb(positions: Position[][][]): Pb.Geometry {
   // Skip invalid polygons.
   const polygons = positions.map(p => toPolygonPb(p));
   if (polygons.length === 0) throw new Error('Empty multi-polygon');
