@@ -20,12 +20,10 @@ import {getDatastore} from './common/context';
 import {Datastore} from './common/datastore';
 import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
 import {GroundProtos} from '@ground/proto';
-import {registry} from '@ground/lib';
+import {toGeoJsonGeometry, toMessage} from '@ground/lib';
 import {geojsonToWKT} from '@terraformer/wkt';
-import {toLoiPbProperties} from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
-const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 type Properties = {[key: string]: string | number};
 
@@ -45,13 +43,17 @@ export async function onCreateLoiHandler(
 
   if (!loiId || !data) return;
 
+  const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
+
+  const geometry = toGeoJsonGeometry(pb.geometry!);
+
   const db = getDatastore();
 
-  let properties = {} as Properties;
+  let properties = propertiesPbToObject(pb.properties) || {};
 
   const propertyGenerators = await db.fetchPropertyGenerators();
 
-  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(data[l.geometry]));
+  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
 
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
     properties = await updateProperties(
@@ -65,10 +67,7 @@ export async function onCreateLoiHandler(
       .forEach(key => (properties[key] = JSON.stringify(properties[key])));
   }
 
-  await db.updateLoiProperties(surveyId, loiId, {
-    ...data[l.properties],
-    ...toLoiPbProperties(properties),
-  });
+  await db.updateLoiProperties(surveyId, loiId, properties);
 
   await broadcastSurveyUpdate(context.params.surveyId);
 }
@@ -125,4 +124,17 @@ function removePrefixedKeys(obj: Properties, prefix: string): Properties {
     if (k.startsWith(prefix)) delete obj[k];
   });
   return obj;
+}
+
+function propertiesPbToObject(pb: {
+  [k: string]: Pb.LocationOfInterest.IProperty;
+}): Properties {
+  const properties: {[k: string]: string | number} = {};
+  for (const k of Object.keys(pb)) {
+    const v = pb[k].stringValue || pb[k].numericValue;
+    if (v !== null && v !== undefined) {
+      properties[k] = v;
+    }
+  }
+  return properties;
 }
