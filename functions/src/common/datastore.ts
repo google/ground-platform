@@ -179,10 +179,10 @@ export class Datastore {
   async updateLoiProperties(
     surveyId: string,
     loiId: string,
-    properties: {[key: string]: string | number}
+    propertiesDoc: DocumentData
   ) {
     const loiRef = this.db_.doc(loi(surveyId, loiId));
-    await loiRef.update({[l.properties]: properties});
+    await loiRef.update({[l.properties]: propertiesDoc});
   }
 
   static toFirestoreMap(geometry: any) {
