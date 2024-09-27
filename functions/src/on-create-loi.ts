@@ -20,8 +20,9 @@ import {getDatastore} from './common/context';
 import {Datastore} from './common/datastore';
 import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
 import {GroundProtos} from '@ground/proto';
-import {toGeoJsonGeometry, toMessage} from '@ground/lib';
+import {toDocumentData, toGeoJsonGeometry, toMessage} from '@ground/lib';
 import {geojsonToWKT} from '@terraformer/wkt';
+import {toLoiPbProperties} from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -67,7 +68,11 @@ export async function onCreateLoiHandler(
       .forEach(key => (properties[key] = JSON.stringify(properties[key])));
   }
 
-  await db.updateLoiProperties(surveyId, loiId, properties);
+  await db.updateLoiProperties(
+    surveyId,
+    loiId,
+    toDocumentData(toLoiPbProperties(properties))
+  );
 
   await broadcastSurveyUpdate(context.params.surveyId);
 }
