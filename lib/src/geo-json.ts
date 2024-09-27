@@ -77,3 +77,57 @@ function toGeoJsonMultiPolygon(multiPolygon: Pb.IMultiPolygon): MultiPolygon {
     coordinates: multiPolygon.polygons.map(p => toGeoJsonPolygonCoordinates(p)),
   };
 }
+
+export function toGeometryPb(geometry: Geometry): Pb.Geometry {
+  switch (geometry.type) {
+    case 'Point':
+      return toPointGeometryPb(geometry.coordinates);
+    case 'Polygon':
+      return toPolygonGeometryPb(geometry.coordinates);
+    case 'MultiPolygon':
+      return toMultiPolygonGeometryPb(geometry.coordinates);
+    default:
+      throw new Error(`Unsupported GeoJSON type '${geometry.type}'`);
+  }
+}
+
+function toPointGeometryPb(position: Position): Pb.Geometry {
+  const coordinates = toCoordinatesPb(position);
+  const point = new Pb.Point({coordinates});
+  return new Pb.Geometry({point});
+}
+
+function toCoordinatesPb(position: Position): Pb.Coordinates {
+  const [longitude, latitude] = position;
+  if (longitude === undefined || latitude === undefined)
+    throw new Error('Missing coordinate(s)');
+  return new Pb.Coordinates({longitude, latitude});
+}
+
+function toPolygonPb(positions: Position[][]): Pb.Polygon {
+  const [shellCoords, ...holeCoords] = positions;
+  // Ignore if shell is missing.
+  if (!shellCoords)
+    throw new Error('Missing required polygon shell coordinates');
+  const shell = toLinearRingPb(shellCoords);
+  const holes = holeCoords?.map(h => toLinearRingPb(h));
+  return new Pb.Polygon({shell, holes});
+}
+
+function toPolygonGeometryPb(positions: Position[][]): Pb.Geometry {
+  const polygon = toPolygonPb(positions);
+  return new Pb.Geometry({polygon});
+}
+
+function toLinearRingPb(positions: Position[]): Pb.LinearRing {
+  const coordinates = positions.map(p => toCoordinatesPb(p));
+  return new Pb.LinearRing({coordinates});
+}
+
+function toMultiPolygonGeometryPb(positions: Position[][][]): Pb.Geometry {
+  // Skip invalid polygons.
+  const polygons = positions.map(p => toPolygonPb(p));
+  if (polygons.length === 0) throw new Error('Empty multi-polygon');
+  const multiPolygon = new Pb.MultiPolygon({polygons});
+  return new Pb.Geometry({multiPolygon});
+}
