@@ -110,7 +110,7 @@ export class CreateSurveyComponent implements OnInit {
         .subscribe(([survey, lois]) => {
           this.survey = survey;
           if (this.isSetupFinished(this.survey)) {
-            this.navigationService.navigateToEditSurvey(this.survey.id);
+            this.navigationService.selectSurvey(this.survey.id);
           }
           this.lois = lois;
           if (this.setupPhase === SetupPhase.LOADING) {
@@ -246,9 +246,8 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
-        await this.setSurveyStateToReady();
+        this.setSurveyStateToReady();
         await this.draftSurveyService.updateSurvey();
-        !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
         break;
       default:
         break;
@@ -316,7 +315,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private async setSurveyStateToReady() {
-    await this.draftSurveyService.updateState(SurveyState.READY);
+    this.draftSurveyService.updateState(SurveyState.READY);
   }
 
   ngOnDestroy() {
