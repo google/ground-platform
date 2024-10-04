@@ -148,7 +148,7 @@ export class ShareDialogComponent {
     this.survey = survey;
     this.originalAcl = survey.acl;
     // Sort users by email address.
-    this.acl = this.surveyService.getActiveSurveyAcl();
+    this.acl = survey.getAclEntriesSorted();
   }
 
   private updateChangeState() {
