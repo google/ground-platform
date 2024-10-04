@@ -23,7 +23,7 @@ import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {AuthService, ROLE_OPTIONS} from 'app/services/auth/auth.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-list',
@@ -42,12 +42,12 @@ export class ShareListComponent {
   roles = Role;
 
   constructor(
-    readonly surveyService: SurveyService,
-    readonly authService: AuthService
+    readonly authService: AuthService,
+    readonly draftSurveyService: DraftSurveyService
   ) {
     this.subscription.add(
-      this.surveyService
-        .getActiveSurvey$()
+      this.draftSurveyService
+        .getSurvey$()
         .subscribe(survey => this.onSurveyLoaded(survey))
     );
   }
@@ -82,7 +82,7 @@ export class ShareListComponent {
     // Add user owner.
     this.acl.push(new AclEntry(this.surveyOwnerEmail!, Role.SURVEY_ORGANIZER));
 
-    this.surveyService.updateAcl(
+    this.draftSurveyService.updateAcl(
       Map(this.acl.map(entry => [entry.email, entry.role]))
     );
   }
