@@ -16,13 +16,13 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {canExport} from './common/auth';
+import {canExport, canManage} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
-import {DocumentData, QuerySnapshot} from 'firebase-admin/firestore';
+import {DocumentData} from 'firebase-admin/firestore';
 import {registry, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
@@ -44,6 +44,7 @@ export async function exportCsvHandler(
   user: DecodedIdToken
 ) {
   const db = getDatastore();
+  const {uid: userId} = user;
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
   const surveyDoc = await db.fetchSurvey(surveyId);
@@ -55,6 +56,7 @@ export async function exportCsvHandler(
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
+  const canManageSurvey = canManage(user, surveyDoc);
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
@@ -71,8 +73,12 @@ export async function exportCsvHandler(
   }
   const {name: jobName} = job;
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
-  const loiDocs = await db.fetchLocationsOfInterestByJobId(surveyId, jobId);
-  const loiProperties = getPropertyNames(loiDocs);
+  const lois = await db.fetchAccessibleLocationsOfInterestByJobId(
+    surveyId,
+    jobId,
+    !canManageSurvey ? userId : undefined
+  );
+  const loiProperties = getPropertyNames(lois);
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -89,9 +95,13 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const submissionsByLoi = await getSubmissionsByLoi(surveyId, jobId);
+  const submissionsByLoi = await getSubmissionsByLoi(
+    surveyId,
+    jobId,
+    !canManageSurvey ? userId : undefined
+  );
 
-  loiDocs.forEach(loiDoc => {
+  lois.forEach(loiDoc => {
     const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
     if (loi instanceof Error) {
       throw loi;
@@ -149,10 +159,15 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
  */
 async function getSubmissionsByLoi(
   surveyId: string,
-  jobId: string
+  jobId: string,
+  userId?: string
 ): Promise<SubmissionDict> {
   const db = getDatastore();
-  const submissions = await db.fetchSubmissionsByJobId(surveyId, jobId);
+  const submissions = await db.fetchAccessibleSubmissionsByJobId(
+    surveyId,
+    jobId,
+    userId
+  );
   const submissionsByLoi: {[name: string]: any[]} = {};
   submissions.forEach(submission => {
     const loiId = submission.get(sb.loiId) as string;
@@ -294,10 +309,8 @@ function getFileName(jobName: string | null) {
   return `${fileBase}.csv`;
 }
 
-function getPropertyNames(lois: QuerySnapshot<DocumentData>): Set<string> {
-  return new Set(
-    lois.docs.flatMap(loi => Object.keys(loi.get(l.properties) || {}))
-  );
+function getPropertyNames(lois: DocumentData[]): Set<string> {
+  return new Set(lois.flatMap(loi => Object.keys(loi.get(l.properties) || {})));
 }
 
 function getPropertiesByName(
