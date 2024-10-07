@@ -26,7 +26,7 @@ import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 
 import {ShareListComponent} from './share-list.component';
 
@@ -35,7 +35,7 @@ describe('ShareListComponent', () => {
   let fixture: ComponentFixture<ShareListComponent>;
   let loader: HarnessLoader;
 
-  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
+  let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let activeSurvey$: Subject<Survey>;
 
@@ -58,9 +58,10 @@ describe('ShareListComponent', () => {
   const user = new User('', '', true);
 
   beforeEach(waitForAsync(() => {
-    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
-    ]);
+    draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
+      'DraftSurveyService',
+      ['getSurvey$', 'updateAcl']
+    );
 
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
       'getUser',
@@ -68,14 +69,14 @@ describe('ShareListComponent', () => {
 
     activeSurvey$ = new Subject<Survey>();
 
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    draftSurveyServiceSpy.getSurvey$.and.returnValue(activeSurvey$);
     authServiceSpy.getUser.and.returnValue(firstValueFrom(of(user)));
 
     TestBed.configureTestingModule({
       declarations: [ShareListComponent],
       imports: [MatListModule],
       providers: [
-        {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
         {provide: AuthService, useValue: authServiceSpy},
       ],
     }).compileComponents();
