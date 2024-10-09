@@ -19,7 +19,8 @@ import {List, Map} from 'immutable';
 import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
+import {Role} from 'app/models/role.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 
 import {DataStoreService} from '../data-store/data-store.service';
@@ -116,6 +117,20 @@ export class DraftSurveyService {
     this.dirty = true;
 
     this.valid = this.valid.set(currentSurvey.id, valid);
+  }
+
+  updateAcl(acl: Map<string, Role>): void {
+    const currentSurvey = this.survey$.getValue();
+
+    this.survey$.next(currentSurvey.copyWith({acl}));
+
+    this.dirty = true;
+  }
+
+  updateState(state: SurveyState): void {
+    const currentSurvey = this.survey$.getValue();
+
+    this.survey$.next(currentSurvey.copyWith({state}));
   }
 
   async updateSurvey(): Promise<void> {

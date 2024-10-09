@@ -26,13 +26,12 @@ import {MatDialogRef} from '@angular/material/dialog';
 import {MatSelectChange} from '@angular/material/select';
 import {Map} from 'immutable';
 import {Subscription} from 'rxjs';
-import {take} from 'rxjs/operators';
 
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {ROLE_OPTIONS} from 'app/services/auth/auth.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -63,20 +62,17 @@ export class ShareDialogComponent {
 
   /** The active survey. */
   private survey?: Survey;
+
   private subscription = new Subscription();
 
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    readonly surveyService: SurveyService
+    private draftSurveyService: DraftSurveyService
   ) {
     this.subscription.add(
-      // Grab only the first value from getActiveSurvey$() so that
-      // successive changes to the remote survey config don't overwrite the
-      // contents of the data collectors list in the dialog.
-      this.surveyService
-        .getActiveSurvey$()
-        .pipe(take(1))
-        .subscribe(p => this.onSurveyLoaded(p))
+      this.draftSurveyService
+        .getSurvey$()
+        .subscribe(survey => this.onSurveyLoaded(survey))
     );
   }
 
@@ -129,9 +125,8 @@ export class ShareDialogComponent {
    */
   onSaveClicked(): void {
     // TODO: Show saving spinner.
-    this.surveyService
-      .updateAcl(this.getAclMap())
-      .then(() => this.dialogRef.close());
+    this.draftSurveyService.updateAcl(this.getAclMap());
+    this.dialogRef.close();
   }
 
   /**
@@ -148,7 +143,7 @@ export class ShareDialogComponent {
     this.survey = survey;
     this.originalAcl = survey.acl;
     // Sort users by email address.
-    this.acl = this.surveyService.getActiveSurveyAcl();
+    this.acl = survey.getAclEntriesSorted();
   }
 
   private updateChangeState() {
