@@ -47,6 +47,7 @@ export enum TaskGroup {
   DROP_PIN = 3,
   DRAW_AREA = 4,
   CAPTURE_LOCATION = 5,
+  MAP_A_NEW_SITE = 6,
 }
 
 export const taskGroupToTypes = new Map([
@@ -65,6 +66,7 @@ export const taskGroupToTypes = new Map([
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
   [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
   [TaskGroup.CAPTURE_LOCATION, List([TaskType.CAPTURE_LOCATION])],
+  [TaskGroup.MAP_A_NEW_SITE, List([TaskType.MAP_A_NEW_SITE])],
 ]);
 
 export const taskTypeToGroup = new Map([
@@ -78,6 +80,7 @@ export const taskTypeToGroup = new Map([
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
   [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
   [TaskType.CAPTURE_LOCATION, TaskGroup.CAPTURE_LOCATION],
+  [TaskType.MAP_A_NEW_SITE, TaskGroup.MAP_A_NEW_SITE],
 ]);
 
 @Component({
@@ -96,6 +99,7 @@ export class TasksEditorComponent {
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
+    TaskGroup.MAP_A_NEW_SITE,
     TaskGroup.CAPTURE_LOCATION,
   ];
 

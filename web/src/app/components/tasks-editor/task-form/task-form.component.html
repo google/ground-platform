@@ -108,6 +108,20 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+
+    <mat-form-field *ngIf="taskGroup === TaskGroup.MAP_A_NEW_SITE">
+      <mat-select
+        class="task-type-select"
+        [value]="taskAllowedTypes"
+        (selectionChange)="onTaskAllowedTypeSelect($event.value)"
+        (openedChange)="onTaskFocus()"
+        multiple
+      >
+        <mat-option *ngFor="let taskAllowedType of TaskAllowedTypes" [value]="taskAllowedType.type">
+          <span>{{ taskAllowedType.label }}</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
 
   <div
