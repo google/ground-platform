@@ -72,7 +72,7 @@ export class EditDetailsComponent implements OnInit {
     );
   }
 
-  onDetailChanges(valid: boolean): void {
+  onDetailsChange(valid: boolean): void {
     if (this.surveyDetails) {
       const [title, description] = this.surveyDetails.toTitleAndDescription();
 

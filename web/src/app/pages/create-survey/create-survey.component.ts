@@ -26,6 +26,7 @@ import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-te
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -67,6 +68,7 @@ export class CreateSurveyComponent implements OnInit {
 
   constructor(
     private surveyService: SurveyService,
+    private draftSurveyService: DraftSurveyService,
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
@@ -83,9 +85,13 @@ export class CreateSurveyComponent implements OnInit {
 
   ngOnInit(): void {
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(surveyId => {
+      this.navigationService.getSurveyId$().subscribe(async surveyId => {
         this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
         this.surveyService.activateSurvey(this.surveyId);
+        await this.draftSurveyService.init(this.surveyId);
+        this.draftSurveyService
+          .getSurvey$()
+          .subscribe(survey => (this.survey = survey));
       })
     );
 
@@ -104,7 +110,7 @@ export class CreateSurveyComponent implements OnInit {
         .subscribe(([survey, lois]) => {
           this.survey = survey;
           if (this.isSetupFinished(this.survey)) {
-            this.navigationService.navigateToEditSurvey(this.survey.id);
+            this.navigationService.selectSurvey(this.survey.id);
           }
           this.lois = lois;
           if (this.setupPhase === SetupPhase.LOADING) {
@@ -240,8 +246,8 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
-        await this.setSurveyStateToReady();
-        !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
+        this.setSurveyStateToReady();
+        await this.draftSurveyService.updateSurvey();
         break;
       default:
         break;
@@ -309,7 +315,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   private async setSurveyStateToReady() {
-    await this.surveyService.updateState(SurveyState.READY);
+    this.draftSurveyService.updateState(SurveyState.READY);
   }
 
   ngOnDestroy() {
