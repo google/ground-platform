@@ -122,13 +122,14 @@ export class TaskService {
 
     const loiTask = new Task(
       addLoiTaskId || this.dataStoreService.generateId(),
-      TaskType.DRAW_AREA,
+      TaskType.MAP_A_NEW_SITE,
       '',
       true,
       -1,
       undefined,
       undefined,
-      true
+      true,
+      [TaskType.DRAW_AREA]
     );
 
     const newTasks = tasks.map((task: Task) =>
