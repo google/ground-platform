@@ -136,7 +136,6 @@ export class TasksEditorComponent {
 
   get formArray() {
     return this.formGroup.get('tasks') as FormArray;
-    return this.formGroup?.get('tasks') as FormArray;
   }
 
   onTaskAdd(group: TaskGroup) {
