@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {canExport, canManage} from './common/auth';
+import {canExport, canImport} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
@@ -56,7 +56,7 @@ export async function exportCsvHandler(
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
-  const canManageSurvey = canManage(user, surveyDoc);
+  const canManageSurvey = canImport(user, surveyDoc);
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
   const jobDoc = await db.fetchJob(surveyId, jobId);

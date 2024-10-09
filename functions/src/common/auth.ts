@@ -107,10 +107,3 @@ export function canImport(
   const role = getRole(user, survey);
   return !!role && [Pb.Role.SURVEY_ORGANIZER].includes(role);
 }
-
-export function canManage(
-  user: DecodedIdToken,
-  survey: DocumentSnapshot
-): boolean {
-  return canImport(user, survey);
-}
