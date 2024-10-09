@@ -27,7 +27,7 @@ import {Geometry, GeometryType} from './geometry';
 export class Point implements Geometry {
   geometryType = GeometryType.POINT;
 
-  constructor(readonly coord: Coordinate) {}
+  constructor(readonly coord: Coordinate, readonly accuracy?: number, readonly altitude?: number) {}
 
   equals(other: Point): boolean {
     return is(this.coord, other.coord);
