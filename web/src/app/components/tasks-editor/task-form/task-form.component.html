@@ -112,8 +112,7 @@
     <mat-form-field *ngIf="taskGroup === TaskGroup.MAP_A_NEW_SITE">
       <mat-select
         class="task-type-select"
-        [value]="taskAllowedTypes"
-        (selectionChange)="onTaskAllowedTypeSelect($event.value)"
+        formControlName="allowedTypes"
         (openedChange)="onTaskFocus()"
         multiple
       >

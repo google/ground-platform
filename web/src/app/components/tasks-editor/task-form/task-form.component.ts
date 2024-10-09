@@ -253,6 +253,10 @@ export class TaskFormComponent {
     return this.formGroup.get('type')!;
   }
 
+  get allowedTypesControl(): AbstractControl {
+    return this.formGroup.get('allowedTypes')!;
+  }
+
   get labelControl(): AbstractControl {
     return this.formGroup.get('label')!;
   }
@@ -328,8 +332,6 @@ export class TaskFormComponent {
 
     if (cardinality && this.optionsControl.length === 0) this.onAddOption();
   }
-
-  onTaskAllowedTypeSelect(taskAllowedType: TaskAllowedType): void {}
 
   onTaskGroupSelect(taskGroup: TaskGroup): void {
     const taskType = taskGroupToTypes.get(taskGroup)?.first();
