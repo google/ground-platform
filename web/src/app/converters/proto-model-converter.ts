@@ -49,6 +49,11 @@ const PB_STATES = Map([
   [SurveyState.READY, Pb.Survey.State.READY],
 ]);
 
+const PB_METHODS = Map([
+  [TaskType.DROP_PIN, Pb.Task.DrawGeometry.Method.DROP_PIN],
+  [TaskType.DRAW_AREA, Pb.Task.DrawGeometry.Method.DRAW_AREA],
+]);
+
 /**
  * Converts Role instance to its proto message type.
  */
@@ -127,7 +132,8 @@ export function jobToDocument(job: Job): DocumentData {
  */
 function toTaskTypeMessage(
   taskType: TaskType,
-  taskMultipleChoice?: MultipleChoice
+  taskMultipleChoice?: MultipleChoice,
+  taskAllowedTypes?: TaskType[]
 ): Pb.ITask {
   switch (taskType) {
     case TaskType.TEXT:
@@ -199,6 +205,17 @@ function toTaskTypeMessage(
           allowedMethods: [Pb.Task.DrawGeometry.Method.DROP_PIN],
         }),
       };
+    case TaskType.MAP_A_NEW_SITE:
+      return {
+        drawGeometry: new Pb.Task.DrawGeometry({
+          allowedMethods:
+            taskAllowedTypes?.map(
+              allowedType =>
+                PB_METHODS.get(allowedType) ||
+                Pb.Task.DrawGeometry.Method.METHOD_UNSPECIFIED
+            ) || [],
+        }),
+      };
     case TaskType.CAPTURE_LOCATION:
       return {
         captureLocation: new Pb.Task.CaptureLocation({
@@ -236,7 +253,7 @@ function toTaskConditionMessage(
  */
 function toTaskMessage(task: Task): Pb.ITask {
   return new Pb.Task({
-    ...toTaskTypeMessage(task.type, task.multipleChoice),
+    ...toTaskTypeMessage(task.type, task.multipleChoice, task.allowedTypes),
     id: task.id,
     index: task.index,
     prompt: task.label,

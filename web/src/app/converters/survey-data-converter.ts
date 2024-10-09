@@ -37,7 +37,6 @@ import {Task, TaskType} from 'app/models/task/task.model';
 import Pb = GroundProtos.ground.v1beta1;
 
 const DateTimeQuestionType = Pb.Task.DateTimeQuestion.Type;
-const DrawGeometryMethod = Pb.Task.DrawGeometry.Method;
 const MultipleChoiceQuestionType = Pb.Task.MultipleChoiceQuestion.Type;
 const DataCollectionLevel = Pb.Task.DataCollectionLevel;
 
@@ -56,6 +55,11 @@ const DATA_SHARING_MODEL_TYPE = Map([
 const MODEL_STATES = Map([
   [Pb.Survey.State.DRAFT, SurveyState.DRAFT],
   [Pb.Survey.State.READY, SurveyState.READY],
+]);
+
+const METHOD_TO_TASK_TYPE = Map([
+  [Pb.Task.DrawGeometry.Method.DROP_PIN, TaskType.DROP_PIN],
+  [Pb.Task.DrawGeometry.Method.DRAW_AREA, TaskType.DRAW_AREA],
 ]);
 
 function dataSharingTypeFromProto(
@@ -126,11 +130,7 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
     else throw new Error('Error converting to Task: invalid task data');
   } else if (multipleChoiceQuestion) return TaskType.MULTIPLE_CHOICE;
   else if (drawGeometry) {
-    if (drawGeometry.allowedMethods!.includes(DrawGeometryMethod.DRAW_AREA))
-      return TaskType.DRAW_AREA;
-    else if (drawGeometry.allowedMethods!.includes(DrawGeometryMethod.DROP_PIN))
-      return TaskType.DROP_PIN;
-    else throw new Error('Error converting to Task: invalid task data');
+    return TaskType.MAP_A_NEW_SITE;
   } else if (captureLocation) return TaskType.CAPTURE_LOCATION;
   else if (takePhoto) return TaskType.PHOTO;
   else throw new Error('Error converting to Task: invalid task data');
@@ -184,7 +184,10 @@ function taskPbToModel(pb: Pb.ITask): Task {
     pb.index!,
     taskMultipleChoicePbToModel(pb),
     taskConditionPbToModel(pb),
-    pb.level! === DataCollectionLevel.LOI_METADATA
+    pb.level! === DataCollectionLevel.LOI_METADATA,
+    (pb.drawGeometry?.allowedMethods
+      ?.map(method => METHOD_TO_TASK_TYPE.get(method))
+      .filter(type => !!type) as TaskType[]) || []
   );
 }
 

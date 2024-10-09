@@ -70,7 +70,8 @@ export class Task extends Copiable {
      * `null` or when it evaluates to `true`.
      */
     readonly condition?: TaskCondition,
-    readonly addLoiTask?: boolean
+    readonly addLoiTask?: boolean,
+    readonly allowedTypes?: TaskType[]
   ) {
     super();
   }
