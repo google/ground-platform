@@ -229,8 +229,10 @@ export class TasksEditorComponent {
               this.formBuilder.group({
                 expressionType: expression.expressionType,
                 taskId: [expression.taskId, Validators.required],
-                optionIds:
-                  [expression.optionIds?.toArray(), Validators.required] || [],
+                optionIds: [
+                  expression.optionIds?.toArray() || [],
+                  Validators.required,
+                ],
               })
             ) || []
           ),
