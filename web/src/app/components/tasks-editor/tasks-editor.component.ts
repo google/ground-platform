@@ -100,7 +100,6 @@ export class TasksEditorComponent {
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
     TaskGroup.MAP_A_NEW_SITE,
-    TaskGroup.CAPTURE_LOCATION,
   ];
 
   constructor(
@@ -137,6 +136,7 @@ export class TasksEditorComponent {
 
   get formArray() {
     return this.formGroup.get('tasks') as FormArray;
+    return this.formGroup?.get('tasks') as FormArray;
   }
 
   onTaskAdd(group: TaskGroup) {
@@ -151,6 +151,7 @@ export class TasksEditorComponent {
       options: this.formBuilder.array([]),
       hasOtherOption: false,
       addLoiTask: false,
+      allowedTypes: [],
     });
 
     this.formArray.push(formGroup);
@@ -217,6 +218,7 @@ export class TasksEditorComponent {
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
       addLoiTask: task.addLoiTask,
+      allowedTypes: [task.allowedTypes],
     }) as FormGroup;
 
     if (task.condition) {
@@ -276,6 +278,7 @@ export class TasksEditorComponent {
           } as MultipleChoice)
         : undefined,
       addLoiTask: task.get('addLoiTask')?.value as boolean,
+      allowedTypes: task.get('allowedTypes')?.value as TaskType[],
       condition: condition?.value
         ? ({
             matchType: condition.get('matchType')?.value,
