@@ -168,20 +168,23 @@ export class Datastore {
           .get()
       ).docs;
     } else {
-      const importedLois = await this.db_
+      const importedLois = this.db_
         .collection(lois(surveyId))
         .where(l.jobId, '==', jobId)
-        .where(l.source, '==', Pb.LocationOfInterest.Source.IMPORTED)
-        .get();
+        .where(l.source, '==', Pb.LocationOfInterest.Source.IMPORTED);
 
-      const fieldDataLois = await this.db_
+      const fieldDataLois = this.db_
         .collection(lois(surveyId))
         .where(l.jobId, '==', jobId)
         .where(l.source, '==', Pb.LocationOfInterest.Source.FIELD_DATA)
-        .where(l.ownerId, '==', userId)
-        .get();
+        .where(l.ownerId, '==', userId);
 
-      return [...importedLois.docs, ...fieldDataLois.docs];
+      const [importedLoisSnapshot, fieldDataLoisSnapshot] = await Promise.all([
+        importedLois.get(),
+        fieldDataLois.get(),
+      ]);
+
+      return [...importedLoisSnapshot.docs, ...fieldDataLoisSnapshot.docs];
     }
   }
 
