@@ -73,7 +73,7 @@
   </div>
 
   <div class="task-form">
-    <mat-form-field class="question" appearance="fill">
+    <mat-form-field>
       <mat-label>{{ Tasks[taskGroup].placeholder }}</mat-label>
 
       <input
@@ -90,7 +90,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
+    <mat-form-field *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
         class="task-type-select"
         [value]="taskTypeOption"

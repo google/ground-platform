@@ -68,7 +68,7 @@
     display: flex;
     gap: 16px;
 
-    .question {
+    :first-child {
       flex: 1;
     }
   }
