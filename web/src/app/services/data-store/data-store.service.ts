@@ -364,7 +364,7 @@ export class DataStoreService {
       ref => ref.where(l.source, '==', Source.IMPORTED)
     );
 
-    const fieldData = this.db.collection(
+    const fieldDataLois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref =>
         ref
@@ -374,10 +374,10 @@ export class DataStoreService {
 
     return combineLatest([
       importedLois.valueChanges({idField: 'id'}),
-      fieldData.valueChanges({idField: 'id'}),
+      fieldDataLois.valueChanges({idField: 'id'}),
     ]).pipe(
-      map(([predefinedLois, fieldData]) =>
-        this.toLocationsOfInterest(predefinedLois.concat(fieldData))
+      map(([predefinedLois, fieldDataLois]) =>
+        this.toLocationsOfInterest(predefinedLois.concat(fieldDataLois))
       )
     );
   }

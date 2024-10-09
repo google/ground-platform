@@ -16,6 +16,7 @@
 
 import {Map as ImmutableMap, List} from 'immutable';
 
+import {AclEntry} from './acl-entry.model';
 import {Copiable} from './copiable';
 import {Job} from './job.model';
 import {Role} from './role.model';
@@ -95,6 +96,13 @@ export class Survey extends Copiable {
 
   getAclSorted(): ImmutableMap<string, Role> {
     return this.acl.sortBy(([key]) => key);
+  }
+
+  getAclEntriesSorted(): AclEntry[] {
+    return this.getAclSorted()
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toArray();
   }
 
   getPreviousJob(job: Job): Job | undefined {
