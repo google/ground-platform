@@ -26,7 +26,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {Map} from 'immutable';
 import {of} from 'rxjs';
 
-import {SurveyService} from 'app/services/survey/survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 
 import {ShareDialogComponent} from './share-dialog.component';
 
@@ -51,10 +51,10 @@ describe('ShareDialogComponent', () => {
       providers: [
         {provide: MatDialogRef, useValue: {}},
         {
-          provide: SurveyService,
+          provide: DraftSurveyService,
           useValue: {
-            getActiveSurvey$: () => of({acl: Map()}),
-            getCurrentSurveyAcl: () => {},
+            getSurvey$: () => of({acl: Map()}),
+            updateAcl: () => null,
           },
         },
       ],
