@@ -227,11 +227,11 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
 function isGeometryValid(geometry: Geometry): boolean {
   switch (geometry.type) {
     case 'Point':
-      return isCRS84(geometry.coordinates);
+      return isPositionValid(geometry.coordinates);
     case 'Polygon':
       for (const ring of geometry.coordinates) {
         for (const position of ring) {
-          if (!isCRS84(position)) return false;
+          if (!isPositionValid(position)) return false;
         }
       }
       break;
@@ -239,7 +239,7 @@ function isGeometryValid(geometry: Geometry): boolean {
       for (const polygon of geometry.coordinates) {
         for (const ring of polygon) {
           for (const position of ring) {
-            if (!isCRS84(position)) return false;
+            if (!isPositionValid(position)) return false;
           }
         }
       }
@@ -247,6 +247,6 @@ function isGeometryValid(geometry: Geometry): boolean {
   return true;
 }
 
-function isCRS84([lat, lng]: Position) {
+function isPositionValid([lat, lng]: Position) {
   return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
