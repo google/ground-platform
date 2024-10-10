@@ -23,7 +23,7 @@ import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
 import {toDocumentData, toGeometryPb} from '@ground/lib';
-import {Feature, GeoJsonProperties} from 'geojson';
+import {Feature, GeoJsonProperties, Geometry, Position} from 'geojson';
 import {ErrorHandler} from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
@@ -122,9 +122,20 @@ export function importGeoJsonCallback(
           }
         }
       );
+
+    file
+      .pipe(JSONStream.parse(['features', true], undefined))
+      .on('data', (geoJsonLoi: any) => {
+        try {
           if (geoJsonLoi.type !== 'Feature') {
             console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
             return;
+          }
+          if (!isGeometryValid(geoJsonLoi.geometry)) {
+            return error(
+              HttpStatus.BAD_REQUEST,
+              'Unsupported Feature coordinates format'
+            );
           }
           try {
             const loi = toDocumentData(
@@ -209,4 +220,31 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
       ? {numericValue: value}
       : {stringValue: value?.toString() || ''}
   );
+}
+
+function isGeometryValid(geometry: Geometry): boolean {
+  switch (geometry.type) {
+    case 'Point':
+      return isCRS84(geometry.coordinates);
+    case 'Polygon':
+      for (const ring of geometry.coordinates) {
+        for (const position of ring) {
+          if (!isCRS84(position)) return false;
+        }
+      }
+      break;
+    case 'MultiPolygon':
+      for (const polygon of geometry.coordinates) {
+        for (const ring of polygon) {
+          for (const position of ring) {
+            if (!isCRS84(position)) return false;
+          }
+        }
+      }
+  }
+  return true;
+}
+
+function isCRS84([lat, lng]: Position) {
+  return lat < -90 || lat > 90 || lng < -180 || lng > 180;
 }
