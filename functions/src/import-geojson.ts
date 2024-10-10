@@ -23,7 +23,7 @@ import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
 import {toDocumentData, toGeometryPb} from '@ground/lib';
-import {Feature, GeoJsonProperties} from 'geojson';
+import {Feature, GeoJsonProperties, Geometry, Position} from 'geojson';
 import {ErrorHandler} from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
@@ -81,24 +81,63 @@ export function importGeoJsonCallback(
     );
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
-    let geoJsonType: any = null;
-    file.pipe(JSONStream.parse('type', undefined)).on('data', (data: any) => {
-      geoJsonType = data;
-    });
+    file
+      .pipe(JSONStream.parse('type', undefined))
+      .on('data', (geoJsonType: string | undefined) => {
+        if (!geoJsonType) {
+          return error(
+            HttpStatus.BAD_REQUEST,
+            'Invalid GeoJSON: Missing "type" property'
+          );
+        }
+        if (geoJsonType !== 'FeatureCollection') {
+          return error(
+            HttpStatus.BAD_REQUEST,
+            `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
+          );
+        }
+      });
+
+    file
+      .pipe(JSONStream.parse('crs', undefined))
+      .on(
+        'data',
+        (
+          geoJsonCrs: {type: string; properties: {name?: string}} | undefined
+        ) => {
+          let crs = 'CRS84';
+          if (geoJsonCrs) {
+            const {type, properties} = geoJsonCrs;
+            switch (type) {
+              case 'name':
+                crs = properties?.name ?? 'CRS84';
+                break;
+            }
+          }
+          if (!crs.endsWith('CRS84')) {
+            return error(
+              HttpStatus.BAD_REQUEST,
+              `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
+                geoJsonCrs
+              )}'`
+            );
+          }
+        }
+      );
 
     file
       .pipe(JSONStream.parse(['features', true], undefined))
       .on('data', (geoJsonLoi: any) => {
         try {
-          if (geoJsonType !== 'FeatureCollection') {
-            return error(
-              HttpStatus.BAD_REQUEST,
-              `Expected 'FeatureCollection', got '${geoJsonType}'`
-            );
-          }
           if (geoJsonLoi.type !== 'Feature') {
             console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
             return;
+          }
+          if (!isGeometryValid(geoJsonLoi.geometry)) {
+            return error(
+              HttpStatus.BAD_REQUEST,
+              'Unsupported Feature coordinates format'
+            );
           }
           try {
             const loi = toDocumentData(
@@ -183,4 +222,31 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
       ? {numericValue: value}
       : {stringValue: value?.toString() || ''}
   );
+}
+
+function isGeometryValid(geometry: Geometry): boolean {
+  switch (geometry.type) {
+    case 'Point':
+      return isPositionValid(geometry.coordinates);
+    case 'Polygon':
+      for (const ring of geometry.coordinates) {
+        for (const position of ring) {
+          if (!isPositionValid(position)) return false;
+        }
+      }
+      break;
+    case 'MultiPolygon':
+      for (const polygon of geometry.coordinates) {
+        for (const ring of polygon) {
+          for (const position of ring) {
+            if (!isPositionValid(position)) return false;
+          }
+        }
+      }
+  }
+  return true;
+}
+
+function isPositionValid([lat, lng]: Position) {
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
