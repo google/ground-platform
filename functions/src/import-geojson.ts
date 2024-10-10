@@ -114,10 +114,12 @@ export function importGeoJsonCallback(
                 break;
             }
           }
-          if (!crs.includes('CRS84')) {
+          if (!crs.endsWith('CRS84')) {
             return error(
               HttpStatus.BAD_REQUEST,
-              `Unsupported GeoJSON CRS: Expected '*CRS84', got '${geoJsonCrs}'`
+              `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
+                geoJsonCrs
+              )}'`
             );
           }
         }
@@ -246,5 +248,5 @@ function isGeometryValid(geometry: Geometry): boolean {
 }
 
 function isCRS84([lat, lng]: Position) {
-  return lat < -90 || lat > 90 || lng < -180 || lng > 180;
+  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 }
