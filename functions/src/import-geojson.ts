@@ -81,21 +81,47 @@ export function importGeoJsonCallback(
     );
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
-    let geoJsonType: any = null;
-    file.pipe(JSONStream.parse('type', undefined)).on('data', (data: any) => {
-      geoJsonType = data;
-    });
+    file
+      .pipe(JSONStream.parse('type', undefined))
+      .on('data', (geoJsonType: string | undefined) => {
+        if (!geoJsonType) {
+          return error(
+            HttpStatus.BAD_REQUEST,
+            'Invalid GeoJSON: Missing "type" property'
+          );
+        }
+        if (geoJsonType !== 'FeatureCollection') {
+          return error(
+            HttpStatus.BAD_REQUEST,
+            `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
+          );
+        }
+      });
 
     file
-      .pipe(JSONStream.parse(['features', true], undefined))
-      .on('data', (geoJsonLoi: any) => {
-        try {
-          if (geoJsonType !== 'FeatureCollection') {
+      .pipe(JSONStream.parse('crs', undefined))
+      .on(
+        'data',
+        (
+          geoJsonCrs: {type: string; properties: {name?: string}} | undefined
+        ) => {
+          let crs = 'CRS84';
+          if (geoJsonCrs) {
+            const {type, properties} = geoJsonCrs;
+            switch (type) {
+              case 'name':
+                crs = properties?.name ?? 'CRS84';
+                break;
+            }
+          }
+          if (!crs.includes('CRS84')) {
             return error(
               HttpStatus.BAD_REQUEST,
-              `Expected 'FeatureCollection', got '${geoJsonType}'`
+              `Unsupported GeoJSON CRS: Expected '*CRS84', got '${geoJsonCrs}'`
             );
           }
+        }
+      );
           if (geoJsonLoi.type !== 'Feature') {
             console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
             return;
