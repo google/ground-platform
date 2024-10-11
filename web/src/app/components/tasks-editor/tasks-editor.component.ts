@@ -47,6 +47,7 @@ export enum TaskGroup {
   DROP_PIN = 3,
   DRAW_AREA = 4,
   CAPTURE_LOCATION = 5,
+  MAP_A_NEW_SITE = 6,
 }
 
 export const taskGroupToTypes = new Map([
@@ -65,6 +66,7 @@ export const taskGroupToTypes = new Map([
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
   [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
   [TaskGroup.CAPTURE_LOCATION, List([TaskType.CAPTURE_LOCATION])],
+  [TaskGroup.MAP_A_NEW_SITE, List([TaskType.MAP_A_NEW_SITE])],
 ]);
 
 export const taskTypeToGroup = new Map([
@@ -78,6 +80,7 @@ export const taskTypeToGroup = new Map([
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
   [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
   [TaskType.CAPTURE_LOCATION, TaskGroup.CAPTURE_LOCATION],
+  [TaskType.MAP_A_NEW_SITE, TaskGroup.MAP_A_NEW_SITE],
 ]);
 
 @Component({
@@ -96,7 +99,7 @@ export class TasksEditorComponent {
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
-    TaskGroup.CAPTURE_LOCATION,
+    TaskGroup.MAP_A_NEW_SITE,
   ];
 
   constructor(
@@ -147,6 +150,7 @@ export class TasksEditorComponent {
       options: this.formBuilder.array([]),
       hasOtherOption: false,
       addLoiTask: false,
+      allowedTypes: [],
     });
 
     this.formArray.push(formGroup);
@@ -213,6 +217,7 @@ export class TasksEditorComponent {
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
       addLoiTask: task.addLoiTask,
+      allowedTypes: [task.allowedTypes],
     }) as FormGroup;
 
     if (task.condition) {
@@ -225,8 +230,10 @@ export class TasksEditorComponent {
               this.formBuilder.group({
                 expressionType: expression.expressionType,
                 taskId: [expression.taskId, Validators.required],
-                optionIds:
-                  [expression.optionIds?.toArray(), Validators.required] || [],
+                optionIds: [
+                  expression.optionIds?.toArray() || [],
+                  Validators.required,
+                ],
               })
             ) || []
           ),
@@ -270,6 +277,7 @@ export class TasksEditorComponent {
           } as MultipleChoice)
         : undefined,
       addLoiTask: task.get('addLoiTask')?.value as boolean,
+      allowedTypes: task.get('allowedTypes')?.value as TaskType[],
       condition: condition?.value
         ? ({
             matchType: condition.get('matchType')?.value,
