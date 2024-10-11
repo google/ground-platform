@@ -22,8 +22,8 @@ import JSONStream from 'jsonstream-ts';
 import {canImport} from './common/auth';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {GroundProtos} from '@ground/proto';
-import {toDocumentData, toGeometryPb} from '@ground/lib';
-import {Feature, GeoJsonProperties, Geometry, Position} from 'geojson';
+import {toDocumentData, toGeometryPb, isGeometryValid} from '@ground/lib';
+import {Feature, GeoJsonProperties} from 'geojson';
 import {ErrorHandler} from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
@@ -222,31 +222,4 @@ function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
       ? {numericValue: value}
       : {stringValue: value?.toString() || ''}
   );
-}
-
-function isGeometryValid(geometry: Geometry): boolean {
-  switch (geometry.type) {
-    case 'Point':
-      return isPositionValid(geometry.coordinates);
-    case 'Polygon':
-      for (const ring of geometry.coordinates) {
-        for (const position of ring) {
-          if (!isPositionValid(position)) return false;
-        }
-      }
-      break;
-    case 'MultiPolygon':
-      for (const polygon of geometry.coordinates) {
-        for (const ring of polygon) {
-          for (const position of ring) {
-            if (!isPositionValid(position)) return false;
-          }
-        }
-      }
-  }
-  return true;
-}
-
-function isPositionValid([lng, lat]: Position) {
-  return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90;
 }
