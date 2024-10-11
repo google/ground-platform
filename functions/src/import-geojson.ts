@@ -247,6 +247,6 @@ function isGeometryValid(geometry: Geometry): boolean {
   return true;
 }
 
-function isPositionValid([lat, lng]: Position) {
-  return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+function isPositionValid([lng, lat]: Position) {
+  return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90;
 }
