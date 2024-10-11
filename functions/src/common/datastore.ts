@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
-import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
+import {DocumentData, GeoPoint} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
@@ -132,25 +132,60 @@ export class Datastore {
     return this.db_.doc(job(surveyId, jobId)).get();
   }
 
-  fetchSubmissionsByJobId(surveyId: string, jobId: string) {
-    return this.db_
-      .collection(submissions(surveyId))
-      .where(sb.jobId, '==', jobId)
-      .get();
+  fetchAccessibleSubmissionsByJobId(
+    surveyId: string,
+    jobId: string,
+    userId?: string
+  ) {
+    if (!userId) {
+      return this.db_
+        .collection(submissions(surveyId))
+        .where(sb.jobId, '==', jobId)
+        .get();
+    } else {
+      return this.db_
+        .collection(submissions(surveyId))
+        .where(sb.jobId, '==', jobId)
+        .where(sb.ownerId, '==', userId)
+        .get();
+    }
   }
 
   fetchLocationOfInterest(surveyId: string, loiId: string) {
     return this.fetchDoc_(loi(surveyId, loiId));
   }
 
-  fetchLocationsOfInterestByJobId(
+  async fetchAccessibleLocationsOfInterestByJobId(
     surveyId: string,
-    jobId: string
-  ): Promise<QuerySnapshot<DocumentData, DocumentData>> {
-    return this.db_
-      .collection(lois(surveyId))
-      .where(l.jobId, '==', jobId)
-      .get();
+    jobId: string,
+    userId?: string
+  ): Promise<DocumentData[]> {
+    if (!userId) {
+      return (
+        await this.db_
+          .collection(lois(surveyId))
+          .where(l.jobId, '==', jobId)
+          .get()
+      ).docs;
+    } else {
+      const importedLois = this.db_
+        .collection(lois(surveyId))
+        .where(l.jobId, '==', jobId)
+        .where(l.source, '==', Pb.LocationOfInterest.Source.IMPORTED);
+
+      const fieldDataLois = this.db_
+        .collection(lois(surveyId))
+        .where(l.jobId, '==', jobId)
+        .where(l.source, '==', Pb.LocationOfInterest.Source.FIELD_DATA)
+        .where(l.ownerId, '==', userId);
+
+      const [importedLoisSnapshot, fieldDataLoisSnapshot] = await Promise.all([
+        importedLois.get(),
+        fieldDataLois.get(),
+      ]);
+
+      return [...importedLoisSnapshot.docs, ...fieldDataLoisSnapshot.docs];
+    }
   }
 
   fetchSheetsConfig(surveyId: string) {
