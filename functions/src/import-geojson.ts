@@ -81,77 +81,13 @@ export function importGeoJsonCallback(
     );
     // Pipe file through JSON parser lib, inserting each row in the db as it is
     // received.
-    file
-      .pipe(JSONStream.parse('type', undefined))
-      .on('data', (geoJsonType: string | undefined) => {
-        if (!geoJsonType) {
-          return error(
-            HttpStatus.BAD_REQUEST,
-            'Invalid GeoJSON: Missing "type" property'
-          );
-        }
-        if (geoJsonType !== 'FeatureCollection') {
-          return error(
-            HttpStatus.BAD_REQUEST,
-            `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
-          );
-        }
-      });
+    file.pipe(JSONStream.parse('type', undefined)).on('data', onGeoJsonType);
 
-    file
-      .pipe(JSONStream.parse('crs', undefined))
-      .on(
-        'data',
-        (
-          geoJsonCrs: {type: string; properties: {name?: string}} | undefined
-        ) => {
-          let crs = 'CRS84';
-          if (geoJsonCrs) {
-            const {type, properties} = geoJsonCrs;
-            switch (type) {
-              case 'name':
-                crs = properties?.name ?? 'CRS84';
-                break;
-            }
-          }
-          if (!crs.endsWith('CRS84')) {
-            return error(
-              HttpStatus.BAD_REQUEST,
-              `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
-                geoJsonCrs
-              )}'`
-            );
-          }
-        }
-      );
+    file.pipe(JSONStream.parse('crs', undefined)).on('data', onGeoJsonCrs);
 
     file
       .pipe(JSONStream.parse(['features', true], undefined))
-      .on('data', (geoJsonLoi: any) => {
-        try {
-          if (geoJsonLoi.type !== 'Feature') {
-            console.debug(`Skipping LOI with invalid type ${geoJsonLoi.type}`);
-            return;
-          }
-          if (!isGeometryValid(geoJsonLoi.geometry)) {
-            return error(
-              HttpStatus.BAD_REQUEST,
-              'Unsupported Feature coordinates format'
-            );
-          }
-          try {
-            const loi = toDocumentData(
-              toLoiPb(geoJsonLoi as Feature, jobId, ownerId)
-            );
-            inserts.push(db.insertLocationOfInterest(surveyId, loi));
-          } catch (loiErr) {
-            console.debug('Skipping LOI', loiErr);
-          }
-        } catch (err) {
-          req.unpipe(busboy);
-          return error(HttpStatus.BAD_REQUEST, (err as Error).message);
-        }
-      });
+      .on('data', (data: any) => onGeoJsonFeature(data, surveyId, jobId));
   });
 
   // Handle non-file fields in the task. survey and job must appear
@@ -184,6 +120,87 @@ export function importGeoJsonCallback(
   // Use this for Cloud Functions rather than `req.pipe(busboy)`:
   // https://github.com/mscdex/busboy/issues/229#issuecomment-648303108
   busboy.end(req.rawBody);
+
+  /**
+   * This function is called by Busboy during file parsing to ensure that the GeoJSON
+   * data being processed is valid. It checks for the presence of the required 'type'
+   * property and verifies that its value is 'FeatureCollection'.
+   */
+  function onGeoJsonType(geoJsonType: string | undefined) {
+    if (!geoJsonType) {
+      return error(
+        HttpStatus.BAD_REQUEST,
+        'Invalid GeoJSON: Missing "type" property'
+      );
+    }
+    if (geoJsonType !== 'FeatureCollection') {
+      return error(
+        HttpStatus.BAD_REQUEST,
+        `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
+      );
+    }
+  }
+
+  /**
+   * This function is called by Busboy during file parsing to ensure that the GeoJSON
+   * data uses the 'CRS84' coordinate reference system.
+   */
+  function onGeoJsonCrs(
+    geoJsonCrs: {type: string; properties: {name?: string}} | undefined
+  ) {
+    let crs = 'CRS84';
+    if (geoJsonCrs) {
+      const {type, properties} = geoJsonCrs;
+      switch (type) {
+        case 'name':
+          crs = properties?.name ?? 'CRS84';
+          break;
+      }
+    }
+    if (!crs.endsWith('CRS84')) {
+      return error(
+        HttpStatus.BAD_REQUEST,
+        `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
+          geoJsonCrs
+        )}'`
+      );
+    }
+  }
+
+  /**
+   * This function is called by Busboy during file parsing to validate and process
+   * GeoJSON Feature objects within the file. It checks the feature type, geometry
+   * validity, and converts the feature to a document data format for insertion.
+   */
+  function onGeoJsonFeature(
+    geoJsonFeature: any,
+    surveyId: string,
+    jobId: string
+  ) {
+    try {
+      if (geoJsonFeature.type !== 'Feature') {
+        console.debug(`Skipping LOI with invalid type ${geoJsonFeature.type}`);
+        return;
+      }
+      if (!isGeometryValid(geoJsonFeature.geometry)) {
+        return error(
+          HttpStatus.BAD_REQUEST,
+          'Unsupported Feature coordinates format'
+        );
+      }
+      try {
+        const loi = toDocumentData(
+          toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
+        );
+        inserts.push(db.insertLocationOfInterest(surveyId, loi));
+      } catch (loiErr) {
+        console.debug('Skipping LOI', loiErr);
+      }
+    } catch (err) {
+      req.unpipe(busboy);
+      return error(HttpStatus.BAD_REQUEST, (err as Error).message);
+    }
+  }
 }
 
 /**
