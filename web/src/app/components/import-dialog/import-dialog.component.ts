@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {HttpErrorResponse} from '@angular/common/http';
 import {Component, Inject, NgZone} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-
 import {DataImportService} from 'app/services/data-import/data-import.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
@@ -72,7 +72,11 @@ export class ImportDialogComponent {
       this.notificationService.success(`${response.count} sites imported`);
     } catch (err) {
       console.error(err);
-      this.notificationService.error('Importing data collection sites failed');
+      this.notificationService.error(
+        `Importing data collection sites failed due to the following error: ${
+          (err as HttpErrorResponse).error
+        }`
+      );
     }
     this.isImporting = false;
     this.ngZone.run(() => {
