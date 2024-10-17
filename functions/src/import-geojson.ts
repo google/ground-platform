@@ -121,7 +121,7 @@ export function importGeoJsonCallback(
     console.error('Busboy error', err);
     hasError = true;
     req.unpipe(busboy);
-    error(HttpStatus.INTERNAL_SERVER_ERROR, err);
+    error(err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR, err.message);
   });
 
   // Start processing the body data.
