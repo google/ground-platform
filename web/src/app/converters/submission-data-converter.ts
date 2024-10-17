@@ -93,7 +93,9 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
       value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
     else if (captureLocationResult)
       value = new Point(
-        coordinatesPbToModel(captureLocationResult.coordinates!)
+        coordinatesPbToModel(captureLocationResult.coordinates!),
+        captureLocationResult.accuracy === null ? undefined : captureLocationResult.accuracy,
+        captureLocationResult.altitude === null ? undefined: captureLocationResult.altitude,
       );
     else if (takePhotoResult) value = takePhotoResult.photoPath;
     else throw new Error('Error converting to Submission: invalid task data');
