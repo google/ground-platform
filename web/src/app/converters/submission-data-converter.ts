@@ -66,7 +66,9 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
 
     if (!task) return;
 
-    let value = null;
+    const {skipped} = taskData;
+
+    if (skipped) return;
 
     const {
       textResponse,
@@ -77,6 +79,8 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
       captureLocationResult,
       takePhotoResult,
     } = taskData;
+
+    let value = null;
 
     if (textResponse) value = textResponse.text;
     else if (numberResponse) value = numberResponse.number;
