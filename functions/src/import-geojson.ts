@@ -85,15 +85,14 @@ export function importGeoJsonCallback(
     console.debug(
       `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
     );
-    // Pipe file through JSON parser lib, inserting each row in the db as it is
-    // received.
+
     file.pipe(JSONStream.parse('type', undefined)).on('data', onGeoJsonType);
 
     file.pipe(JSONStream.parse('crs', undefined)).on('data', onGeoJsonCrs);
 
     file
       .pipe(JSONStream.parse(['features', true], undefined))
-      .on('data', (data: any) => onGeoJsonFeature(data, surveyId, jobId));
+      .on('data', (data: any) => onGeoJsonFeature(data));
   });
 
   // Handle non-file fields in the task. survey and job must appear
@@ -105,8 +104,16 @@ export function importGeoJsonCallback(
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on('finish', async () => {
     if (hasError) return;
+    const {survey: surveyId, job: jobId} = params;
     try {
-      await Promise.all(inserts);
+      await Promise.all(
+        inserts.map(geoJsonFeature =>
+          db.insertLocationOfInterest(
+            surveyId,
+            toDocumentData(toLoiPb(geoJsonFeature as Feature, jobId, ownerId))
+          )
+        )
+      );
       const count = inserts.length;
       console.debug(`${count} LOIs imported`);
       res.send(JSON.stringify({count}));
@@ -184,11 +191,7 @@ export function importGeoJsonCallback(
    * GeoJSON Feature objects within the file. It checks the feature type, geometry
    * validity, and converts the feature to a document data format for insertion.
    */
-  function onGeoJsonFeature(
-    geoJsonFeature: any,
-    surveyId: string,
-    jobId: string
-  ) {
+  function onGeoJsonFeature(geoJsonFeature: any) {
     try {
       if (geoJsonFeature.type !== 'Feature') {
         console.debug(`Skipping LOI with invalid type ${geoJsonFeature.type}`);
@@ -201,10 +204,7 @@ export function importGeoJsonCallback(
         );
       }
       try {
-        const loi = toDocumentData(
-          toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
-        );
-        inserts.push(db.insertLocationOfInterest(surveyId, loi));
+        inserts.push(geoJsonFeature);
       } catch (loiErr) {
         console.debug('Skipping LOI', loiErr);
       }
