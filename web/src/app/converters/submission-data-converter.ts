@@ -58,19 +58,13 @@ function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   );
 }
 
-function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
+function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
   const submissionData: {[k: string]: Result} = {};
 
   pb.forEach(taskData => {
-    const task = job.tasks?.get(taskData.taskId!);
-
-    if (!task) return;
-
-    const {skipped} = taskData;
-
-    if (skipped) return;
-
     const {
+      taskId,
+      skipped,
       textResponse,
       numberResponse,
       dateTimeResponse,
@@ -97,9 +91,10 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
         coordinatesPbToModel(captureLocationResult.coordinates!)
       );
     else if (takePhotoResult) value = takePhotoResult.photoPath;
-    else throw new Error('Error converting to Submission: invalid task data');
+    else if (!skipped)
+      throw new Error('Error converting to Submission: invalid task data');
 
-    submissionData[task.id] = new Result(value!);
+    submissionData[taskId!] = new Result(value!);
   });
 
   return Map(submissionData);
@@ -119,6 +114,6 @@ export function submissionDocToModel(
     job,
     authInfoPbToModel(pb.created!),
     authInfoPbToModel(pb.lastModified!),
-    taskDataPbToModel(pb.taskData, job)
+    taskDataPbToModel(pb.taskData)
   );
 }
