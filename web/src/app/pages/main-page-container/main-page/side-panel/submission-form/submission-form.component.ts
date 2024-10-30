@@ -279,7 +279,7 @@ export class SubmissionFormComponent {
     const selectedOption: Option = task.getMultipleChoiceOption(
       this.submissionForm?.value[task.id]
     );
-    return new Result(new MultipleSelection(List([selectedOption])));
+    return new Result(new MultipleSelection(List([selectedOption.id])));
   }
 
   private addControlsForSelectMultipleTask(
@@ -289,15 +289,17 @@ export class SubmissionFormComponent {
   ): void {
     const {values: selectedOptions} = result?.value as MultipleSelection;
     for (const option of task.multipleChoice!.options) {
-      group[option.id] = new FormControl(selectedOptions?.contains(option));
+      group[option.id] = new FormControl(selectedOptions?.contains(option.id));
     }
   }
 
   private extractDataForSelectMultipleTask(task: Task): Result {
     const selectedOptions: MultipleSelection = new MultipleSelection(
-      task.multipleChoice!.options!.filter(
-        (option: Option) => this.submissionForm?.value[option.id]
-      )
+      task
+        .multipleChoice!.options!.filter(
+          (option: Option) => this.submissionForm?.value[option.id]
+        )
+        .map(option => option.id)
     );
     return new Result(selectedOptions);
   }

@@ -185,7 +185,7 @@ export class FirebaseDataConverter {
       return result.value;
     }
     if (result.value instanceof MultipleSelection) {
-      return result.value.values.map(option => option.id).toArray();
+      return result.value.values.toArray();
     }
     if (result.value instanceof Date) {
       return Timestamp.fromDate(result.value);

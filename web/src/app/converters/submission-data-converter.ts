@@ -87,12 +87,9 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
     else if (dateTimeResponse)
       value = new Date(timestampToInt(dateTimeResponse.dateTime));
     else if (multipleChoiceResponses) {
-      value = new MultipleSelection(
-        task.multipleChoice?.options.filter(({id: optionId}) =>
-          multipleChoiceResponses!.selectedOptionIds?.includes(optionId)
-        ) || List([]),
-        multipleChoiceResponses.otherText
-      );
+      const {selectedOptionIds, otherText} = multipleChoiceResponses;
+
+      value = new MultipleSelection(List(selectedOptionIds || []), otherText);
     } else if (drawGeometryResult)
       value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
     else if (captureLocationResult)
