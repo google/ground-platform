@@ -28,13 +28,11 @@
   line-height: 20px;
   padding-bottom: 0;
 
-  .input {
-    display: block;
+  .mat-mdc-form-field {
     width: 100%;
   }
 }
 
 .mat-mdc-dialog-actions {
   justify-content: flex-end;
-  padding: 0 24px;
 }

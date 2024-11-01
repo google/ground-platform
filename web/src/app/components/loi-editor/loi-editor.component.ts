@@ -61,29 +61,48 @@ export class LoiEditorComponent {
   }
 
   clearLois() {
-    const dialogRef = this.dialog.open(JobDialogComponent, {
-      data: {
-        dialogType: DialogType.DeleteLois,
-        surveyId: this.survey.id,
-        jobId: this.job.id,
-      },
-      panelClass: 'small-width-dialog',
-    });
+    this.dialog
+      .open(JobDialogComponent, {
+        data: {
+          dialogType: DialogType.DeleteLois,
+          surveyId: this.survey.id,
+          jobId: this.job.id,
+        },
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (!result) return;
 
-    dialogRef.afterClosed().subscribe(async (result: DialogData) => {
-      if (!result) return;
-
-      for (const loi of this.lois) {
-        this.dataStoreService.deleteLocationOfInterest(this.survey.id, loi.id);
-      }
-    });
+        for (const loi of this.lois) {
+          this.dataStoreService.deleteLocationOfInterest(
+            this.survey.id,
+            loi.id
+          );
+        }
+      });
   }
 
   toggleDataCollectorsCanAddLois(event: MatSlideToggleChange) {
-    this.updateStrategy.emit(
-      event.checked
-        ? DataCollectionStrategy.MIXED
-        : DataCollectionStrategy.PREDEFINED
-    );
+    if (!event.checked) {
+      this.dialog
+        .open(JobDialogComponent, {
+          data: {
+            dialogType: DialogType.DisableFreeForm,
+          },
+          panelClass: 'small-width-dialog',
+        })
+        .afterClosed()
+        .subscribe(async (result: DialogData) => {
+          if (!result) {
+            event.source.checked = event.checked = true;
+            return;
+          }
+
+          this.updateStrategy.emit(DataCollectionStrategy.PREDEFINED);
+        });
+    } else {
+      this.updateStrategy.emit(DataCollectionStrategy.MIXED);
+    }
   }
 }

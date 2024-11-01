@@ -19,7 +19,14 @@ import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
 import {getDatastore} from './common/context';
 import {Datastore} from './common/datastore';
 import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
+import {GroundProtos} from '@ground/proto';
+import {toDocumentData, toGeoJsonGeometry, toMessage} from '@ground/lib';
 import {geojsonToWKT} from '@terraformer/wkt';
+import {toLoiPbProperties} from './import-geojson';
+
+import Pb = GroundProtos.ground.v1beta1;
+
+type Properties = {[key: string]: string | number};
 
 type PropertyGenerator = {
   name: string;
@@ -33,17 +40,21 @@ export async function onCreateLoiHandler(
 ) {
   const surveyId = context.params.surveyId;
   const loiId = context.params.loiId;
-  const loi = snapshot.data();
+  const data = snapshot.data();
 
-  if (!loiId || !loi) return;
+  if (!loiId || !data) return;
+
+  const loiPb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
+
+  const geometry = toGeoJsonGeometry(loiPb.geometry!);
 
   const db = getDatastore();
 
-  let properties = loi.properties || {};
+  let properties = propertiesPbToObject(loiPb.properties) || {};
 
   const propertyGenerators = await db.fetchPropertyGenerators();
 
-  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(loi.geometry));
+  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
 
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
     properties = await updateProperties(
@@ -57,7 +68,13 @@ export async function onCreateLoiHandler(
       .forEach(key => (properties[key] = JSON.stringify(properties[key])));
   }
 
-  await db.updateLoiProperties(surveyId, loiId, properties);
+  await db.updateLoiProperties(
+    surveyId,
+    loiId,
+    toDocumentData(
+      new Pb.LocationOfInterest({properties: toLoiPbProperties(properties)})
+    )
+  );
 
   await broadcastSurveyUpdate(context.params.surveyId);
 }
@@ -78,8 +95,6 @@ async function updateProperties(
     ...(prefix ? prefixKeys(newProperties, prefix) : newProperties),
   };
 }
-
-type Properties = {[key: string]: string | number};
 
 async function fetchProperties(url: string, wkt: string): Promise<Properties> {
   const response = await fetch(url, {
@@ -116,4 +131,17 @@ function removePrefixedKeys(obj: Properties, prefix: string): Properties {
     if (k.startsWith(prefix)) delete obj[k];
   });
   return obj;
+}
+
+function propertiesPbToObject(pb: {
+  [k: string]: Pb.LocationOfInterest.IProperty;
+}): Properties {
+  const properties: {[k: string]: string | number} = {};
+  for (const k of Object.keys(pb)) {
+    const v = pb[k].stringValue || pb[k].numericValue;
+    if (v !== null && v !== undefined) {
+      properties[k] = v;
+    }
+  }
+  return properties;
 }

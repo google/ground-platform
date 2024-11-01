@@ -3,10 +3,6 @@
 
 @mixin color($theme) {
   div[left] {
-    .header-divider {
-      border-left: 1px solid mat.get-theme-color($theme, outline);
-    }
-
     .survey-title {
       color: mat.get-theme-color($theme, on-surface-variant);
     }

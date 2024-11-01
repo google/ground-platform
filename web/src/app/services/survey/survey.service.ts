@@ -19,7 +19,6 @@ import {List, Map} from 'immutable';
 import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
 import {shareReplay, switchMap} from 'rxjs/operators';
 
-import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -166,21 +165,6 @@ export class SurveyService {
   }
 
   /**
-   * Returns the acl of the current survey.
-   */
-  getActiveSurveyAcl(): AclEntry[] {
-    if (!this.activeSurvey) {
-      throw Error('No active survey');
-    }
-    return this.activeSurvey.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
-  }
-
-  /**
    * Checks if a user has survey organizer or owner level permissions of the survey.
    */
   canManageSurvey(): boolean {
@@ -189,7 +173,7 @@ export class SurveyService {
       return false;
     }
     const userEmail = user.email;
-    const acl = this.getActiveSurveyAcl();
+    const acl = this.activeSurvey.getAclEntriesSorted();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }

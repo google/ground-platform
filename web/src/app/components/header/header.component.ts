@@ -42,7 +42,7 @@ export class HeaderComponent {
   surveyId = '';
   state = HeaderState.DEFAULT;
   readonly HeaderState = HeaderState;
-  publishingChanges = false;
+  isPublishingChanges = false;
   canManage = false;
 
   constructor(
@@ -102,9 +102,10 @@ export class HeaderComponent {
   }
 
   async onFinishEditSurveyClick() {
-    this.publishingChanges = true;
+    this.isPublishingChanges = true;
     await this.draftSurveyService.updateSurvey();
-    this.publishingChanges = false;
+    this.isPublishingChanges = false;
+    this.navigationService.selectSurvey(this.surveyId);
   }
 
   isDraftSurveyDirtyAndValid() {
