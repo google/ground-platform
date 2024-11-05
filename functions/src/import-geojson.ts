@@ -66,7 +66,7 @@ export function importGeoJsonCallback(
   const ownerId = user.uid;
 
   // This code will process each file uploaded.
-  busboy.on('file', async (_name, file) => {
+  busboy.on('file', async (_fieldname, fileStream) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       return error(HttpStatus.BAD_REQUEST, 'Missing survey and/or job ID');
@@ -86,13 +86,16 @@ export function importGeoJsonCallback(
       `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
     );
 
-    file.pipe(JSONStream.parse('type', undefined)).on('data', onGeoJsonType);
-
-    file.pipe(JSONStream.parse('crs', undefined)).on('data', onGeoJsonCrs);
-
-    file
-      .pipe(JSONStream.parse(['features', true], undefined))
-      .on('data', (data: any) => onGeoJsonFeature(data));
+    fileStream.pipe(
+      JSONStream.parse(['features', true], undefined)
+        .on('header', (data: any) => {
+          onGeoJsonType(data.type);
+          if (data.crs) onGeoJsonCrs(data.crs);
+        })
+        .on('data', (data: any) => {
+          if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
+        })
+    );
   });
 
   // Handle non-file fields in the task. survey and job must appear
@@ -104,16 +107,8 @@ export function importGeoJsonCallback(
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on('finish', async () => {
     if (hasError) return;
-    const {survey: surveyId, job: jobId} = params;
     try {
-      await Promise.all(
-        inserts.map(geoJsonFeature =>
-          db.insertLocationOfInterest(
-            surveyId,
-            toDocumentData(toLoiPb(geoJsonFeature as Feature, jobId, ownerId))
-          )
-        )
-      );
+      await Promise.all(inserts);
       const count = inserts.length;
       console.debug(`${count} LOIs imported`);
       res.send(JSON.stringify({count}));
@@ -191,7 +186,11 @@ export function importGeoJsonCallback(
    * GeoJSON Feature objects within the file. It checks the feature type, geometry
    * validity, and converts the feature to a document data format for insertion.
    */
-  function onGeoJsonFeature(geoJsonFeature: any) {
+  function onGeoJsonFeature(
+    geoJsonFeature: any,
+    surveyId: string,
+    jobId: string
+  ) {
     try {
       if (geoJsonFeature.type !== 'Feature') {
         console.debug(`Skipping LOI with invalid type ${geoJsonFeature.type}`);
@@ -204,7 +203,10 @@ export function importGeoJsonCallback(
         );
       }
       try {
-        inserts.push(geoJsonFeature);
+        const loi = toDocumentData(
+          toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
+        );
+        inserts.push(db.insertLocationOfInterest(surveyId, loi));
       } catch (loiErr) {
         console.debug('Skipping LOI', loiErr);
       }
