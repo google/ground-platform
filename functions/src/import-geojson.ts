@@ -201,6 +201,7 @@ export function importGeoJsonCallback(
           'error',
           new BadRequestError('Unsupported Feature coordinates format')
         );
+        return;
       }
       try {
         const loi = toDocumentData(
