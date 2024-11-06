@@ -21,8 +21,9 @@ import {Constructor} from 'protobufjs';
 export type MessageTypePath = string[];
 
 export interface ProtoOptions {
-  java_package: string;
-  java_multiple_files: boolean;
+  java_package?: string;
+  java_multiple_files?: boolean;
+  syntax?: string;
 }
 
 export interface FieldDescriptor {
@@ -81,7 +82,9 @@ export class MessageRegistry {
     if (!desc) throw new Error(`Unknown constructor ${constructor.name}`);
     const map: {[key: string]: string} = {};
     if (desc.fields) {
-      Object.keys(desc.fields).forEach(name => map[name] = desc.fields![name].id?.toString());
+      Object.keys(desc.fields).forEach(
+        name => (map[name] = desc.fields![name].id?.toString())
+      );
     }
     return map;
   }
