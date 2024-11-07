@@ -86,11 +86,17 @@ export function importGeoJsonCallback(
       `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
     );
 
+    const parser = JSONStream.parse(['features', true], undefined);
+
     fileStream.pipe(
-      JSONStream.parse(['features', true], undefined)
+      parser
         .on('header', (data: any) => {
-          onGeoJsonType(data.type);
-          if (data.crs) onGeoJsonCrs(data.crs);
+          try {
+            onGeoJsonType(data.type);
+            if (data.crs) onGeoJsonCrs(data.crs);
+          } catch (error: any) {
+            busboy.emit('error', error);
+          }
         })
         .on('data', (data: any) => {
           if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
@@ -137,18 +143,12 @@ export function importGeoJsonCallback(
    * property and verifies that its value is 'FeatureCollection'.
    */
   function onGeoJsonType(geoJsonType: string | undefined) {
-    if (!geoJsonType) {
-      busboy.emit(
-        'error',
-        new BadRequestError('Invalid GeoJSON: Missing "type" property')
-      );
-    }
+    if (!geoJsonType)
+      throw new BadRequestError('Invalid GeoJSON: Missing "type" property');
+
     if (geoJsonType !== 'FeatureCollection') {
-      busboy.emit(
-        'error',
-        new BadRequestError(
-          `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
-        )
+      throw new BadRequestError(
+        `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
       );
     }
   }
@@ -169,16 +169,12 @@ export function importGeoJsonCallback(
           break;
       }
     }
-    if (!crs.endsWith('CRS84')) {
-      busboy.emit(
-        'error',
-        new BadRequestError(
-          `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
-            geoJsonCrs
-          )}'`
-        )
+    if (!crs.endsWith('CRS84'))
+      throw new BadRequestError(
+        `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
+          geoJsonCrs
+        )}'`
       );
-    }
   }
 
   /**
@@ -191,28 +187,27 @@ export function importGeoJsonCallback(
     surveyId: string,
     jobId: string
   ) {
+    if (geoJsonFeature.type !== 'Feature') {
+      console.debug(
+        `Skipping Feature with invalid type ${geoJsonFeature.type}`
+      );
+      return;
+    }
+    if (!isGeometryValid(geoJsonFeature.geometry)) {
+      console.debug(
+        `Skipping Feature with invalid coordinates ${JSON.stringify(
+          geoJsonFeature.geometry
+        )}`
+      );
+      return;
+    }
     try {
-      if (geoJsonFeature.type !== 'Feature') {
-        console.debug(`Skipping LOI with invalid type ${geoJsonFeature.type}`);
-        return;
-      }
-      if (!isGeometryValid(geoJsonFeature.geometry)) {
-        busboy.emit(
-          'error',
-          new BadRequestError('Unsupported Feature coordinates format')
-        );
-        return;
-      }
-      try {
-        const loi = toDocumentData(
-          toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
-        );
-        inserts.push(db.insertLocationOfInterest(surveyId, loi));
-      } catch (loiErr) {
-        console.debug('Skipping LOI', loiErr);
-      }
-    } catch (err) {
-      busboy.emit('error', new BadRequestError((err as Error).message));
+      const loi = toDocumentData(
+        toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
+      );
+      inserts.push(db.insertLocationOfInterest(surveyId, loi));
+    } catch (loiErr) {
+      console.debug('Skipping LOI', loiErr);
     }
   }
 }

@@ -224,7 +224,7 @@ describe('importGeoJson()', () => {
     {
       desc: 'imports non CRS84 point',
       input: geoJsonWithNonCRS84Point,
-      expectedStatus: HttpStatus.BAD_REQUEST,
+      expectedStatus: HttpStatus.OK,
       expected: [],
     },
   ];
