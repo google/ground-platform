@@ -187,14 +187,14 @@ function writeRow(
   loi: Pb.LocationOfInterest,
   submission: Pb.Submission
 ) {
-  const row = [];
-  // Header: system:index
-  row.push(quote(loi.customTag));
-  // Header: geometry
   if (!loi.geometry) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
     return;
   }
+  const row = [];
+  // Header: system:index
+  row.push(quote(loi.customTag));
+  // Header: geometry
   row.push(quote(toWkt(loi.geometry)));
   // Header: One column for each loi property (merged over all properties across all LOIs)
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
