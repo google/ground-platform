@@ -23,7 +23,7 @@ import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
 import {DocumentData} from 'firebase-admin/firestore';
-import {registry, toMessage} from '@ground/lib';
+import {registry, timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
@@ -138,14 +138,16 @@ function writeSubmissions(
 }
 
 function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
-  const headers = [];
-  headers.push('system:index');
-  headers.push('geometry');
-  headers.push(...loiProperties);
-  // TODO(#1936): Use `index` field to export columns in correct order.
-  tasks.forEach(task => headers.push('data:' + (task.prompt || '')));
-  headers.push('data:contributor_name');
-  headers.push('data:contributor_email');
+  const headers = [
+    'system:index',
+    'geometry',
+    ...loiProperties,
+    ...tasks.map(task => `data:${task.prompt || ''}`),
+    'data:contributor_name',
+    'data:contributor_email',
+    'data:created_client_timestamp',
+    'data:created_server_timestamp',
+  ];
   return headers.map(quote);
 }
 
@@ -199,9 +201,23 @@ function writeRow(
   const data = submission.taskData;
   // Header: One column for each task
   tasks.forEach(task => row.push(quote(getValue(task, data))));
-  // Header: contributor_username, contributor_email
-  row.push(quote(submission.created?.displayName));
-  row.push(quote(submission.created?.emailAddress));
+  // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
+  row.push(quote(submission.created!.displayName));
+  row.push(quote(submission.created!.emailAddress));
+  row.push(
+    quote(
+      new Date(
+        timestampToInt(submission.created!.clientTimestamp)
+      ).toISOString()
+    )
+  );
+  row.push(
+    quote(
+      new Date(
+        timestampToInt(submission.created!.serverTimestamp)
+      ).toISOString()
+    )
+  );
   csvStream.write(row);
 }
 
