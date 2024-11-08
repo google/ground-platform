@@ -198,25 +198,18 @@ function writeRow(
   row.push(quote(toWkt(loi.geometry)));
   // Header: One column for each loi property (merged over all properties across all LOIs)
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
-  const data = submission.taskData;
+  const {taskData: data} = submission;
   // Header: One column for each task
   tasks.forEach(task => row.push(quote(getValue(task, data))));
   // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
-  row.push(quote(submission.created!.displayName));
-  row.push(quote(submission.created!.emailAddress));
+  const {created} = submission;
+  row.push(quote(created?.displayName));
+  row.push(quote(created?.emailAddress));
   row.push(
-    quote(
-      new Date(
-        timestampToInt(submission.created!.clientTimestamp)
-      ).toISOString()
-    )
+    quote(new Date(timestampToInt(created?.clientTimestamp)).toISOString())
   );
   row.push(
-    quote(
-      new Date(
-        timestampToInt(submission.created!.serverTimestamp)
-      ).toISOString()
-    )
+    quote(new Date(timestampToInt(created?.serverTimestamp)).toISOString())
   );
   csvStream.write(row);
 }
