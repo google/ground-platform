@@ -76,7 +76,8 @@ function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
 
     let value = null;
 
-    if (textResponse) value = textResponse.text;
+    if (skipped) value = null;
+    else if (textResponse) value = textResponse.text;
     else if (numberResponse) value = numberResponse.number;
     else if (dateTimeResponse)
       value = new Date(timestampToInt(dateTimeResponse.dateTime));
@@ -91,10 +92,11 @@ function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
         coordinatesPbToModel(captureLocationResult.coordinates!)
       );
     else if (takePhotoResult) value = takePhotoResult.photoPath;
-    else if (!skipped)
+
+    if (value === undefined)
       throw new Error('Error converting to Submission: invalid task data');
 
-    submissionData[taskId!] = new Result(value!);
+    submissionData[taskId!] = new Result(value);
   });
 
   return Map(submissionData);
