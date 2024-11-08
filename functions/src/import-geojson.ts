@@ -28,6 +28,10 @@ import {ErrorHandler} from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
 
+class BadRequestError extends Error {
+  statusCode = HttpStatus.BAD_REQUEST;
+}
+
 /**
  * Read the body of a multipart HTTP POSTed form containing a GeoJson 'file'
  * and required 'survey' id and 'job' id to the database.
@@ -48,6 +52,8 @@ export function importGeoJsonCallback(
 
   const busboy = Busboy({headers: req.headers});
 
+  let hasError = false;
+
   // Dictionary used to accumulate task step values, keyed by step name.
   const params: {[name: string]: string} = {};
 
@@ -60,7 +66,7 @@ export function importGeoJsonCallback(
   const ownerId = user.uid;
 
   // This code will process each file uploaded.
-  busboy.on('file', async (_field, file, _filename) => {
+  busboy.on('file', async (_fieldname, fileStream) => {
     const {survey: surveyId, job: jobId} = params;
     if (!surveyId || !jobId) {
       return error(HttpStatus.BAD_REQUEST, 'Missing survey and/or job ID');
@@ -79,15 +85,23 @@ export function importGeoJsonCallback(
     console.debug(
       `Importing GeoJSON into survey '${surveyId}', job '${jobId}'`
     );
-    // Pipe file through JSON parser lib, inserting each row in the db as it is
-    // received.
-    file.pipe(JSONStream.parse('type', undefined)).on('data', onGeoJsonType);
 
-    file.pipe(JSONStream.parse('crs', undefined)).on('data', onGeoJsonCrs);
+    const parser = JSONStream.parse(['features', true], undefined);
 
-    file
-      .pipe(JSONStream.parse(['features', true], undefined))
-      .on('data', (data: any) => onGeoJsonFeature(data, surveyId, jobId));
+    fileStream.pipe(
+      parser
+        .on('header', (data: any) => {
+          try {
+            onGeoJsonType(data.type);
+            if (data.crs) onGeoJsonCrs(data.crs);
+          } catch (error: any) {
+            busboy.emit('error', error);
+          }
+        })
+        .on('data', (data: any) => {
+          if (!hasError) onGeoJsonFeature(data, surveyId, jobId);
+        })
+    );
   });
 
   // Handle non-file fields in the task. survey and job must appear
@@ -98,13 +112,14 @@ export function importGeoJsonCallback(
 
   // Triggered once all uploaded files are processed by Busboy.
   busboy.on('finish', async () => {
+    if (hasError) return;
     try {
       await Promise.all(inserts);
       const count = inserts.length;
       console.debug(`${count} LOIs imported`);
       res.send(JSON.stringify({count}));
       done();
-    } catch (err: any) {
+    } catch (err) {
       console.debug(err);
       error(HttpStatus.BAD_REQUEST, (err as Error).message);
     }
@@ -112,8 +127,9 @@ export function importGeoJsonCallback(
 
   busboy.on('error', (err: any) => {
     console.error('Busboy error', err);
+    hasError = true;
     req.unpipe(busboy);
-    error(HttpStatus.INTERNAL_SERVER_ERROR, err);
+    error(err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR, err.message);
   });
 
   // Start processing the body data.
@@ -127,15 +143,11 @@ export function importGeoJsonCallback(
    * property and verifies that its value is 'FeatureCollection'.
    */
   function onGeoJsonType(geoJsonType: string | undefined) {
-    if (!geoJsonType) {
-      return error(
-        HttpStatus.BAD_REQUEST,
-        'Invalid GeoJSON: Missing "type" property'
-      );
-    }
+    if (!geoJsonType)
+      throw new BadRequestError('Invalid GeoJSON: Missing "type" property');
+
     if (geoJsonType !== 'FeatureCollection') {
-      return error(
-        HttpStatus.BAD_REQUEST,
+      throw new BadRequestError(
         `Unsupported GeoJSON Type: Expected 'FeatureCollection', got '${geoJsonType}'`
       );
     }
@@ -157,14 +169,12 @@ export function importGeoJsonCallback(
           break;
       }
     }
-    if (!crs.endsWith('CRS84')) {
-      return error(
-        HttpStatus.BAD_REQUEST,
+    if (!crs.endsWith('CRS84'))
+      throw new BadRequestError(
         `Unsupported GeoJSON CRS: Expected 'CRS84', got '${JSON.stringify(
           geoJsonCrs
         )}'`
       );
-    }
   }
 
   /**
@@ -177,28 +187,27 @@ export function importGeoJsonCallback(
     surveyId: string,
     jobId: string
   ) {
+    if (geoJsonFeature.type !== 'Feature') {
+      console.debug(
+        `Skipping Feature with invalid type ${geoJsonFeature.type}`
+      );
+      return;
+    }
+    if (!isGeometryValid(geoJsonFeature.geometry)) {
+      console.debug(
+        `Skipping Feature with invalid coordinates ${JSON.stringify(
+          geoJsonFeature.geometry
+        )}`
+      );
+      return;
+    }
     try {
-      if (geoJsonFeature.type !== 'Feature') {
-        console.debug(`Skipping LOI with invalid type ${geoJsonFeature.type}`);
-        return;
-      }
-      if (!isGeometryValid(geoJsonFeature.geometry)) {
-        return error(
-          HttpStatus.BAD_REQUEST,
-          'Unsupported Feature coordinates format'
-        );
-      }
-      try {
-        const loi = toDocumentData(
-          toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
-        );
-        inserts.push(db.insertLocationOfInterest(surveyId, loi));
-      } catch (loiErr) {
-        console.debug('Skipping LOI', loiErr);
-      }
-    } catch (err) {
-      req.unpipe(busboy);
-      return error(HttpStatus.BAD_REQUEST, (err as Error).message);
+      const loi = toDocumentData(
+        toLoiPb(geoJsonFeature as Feature, jobId, ownerId)
+      );
+      inserts.push(db.insertLocationOfInterest(surveyId, loi));
+    } catch (loiErr) {
+      console.debug('Skipping LOI', loiErr);
     }
   }
 }
