@@ -121,7 +121,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
       },
       {
         icon: 'radio_button_checked',
-        label: 'Select One',
+        label: 'Select one',
         type: TaskType.MULTIPLE_CHOICE,
         cardinality: Cardinality.SELECT_ONE,
       },

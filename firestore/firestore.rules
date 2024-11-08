@@ -30,8 +30,7 @@
      */
     function getRole(survey) {
       // Get role from `acl` nested object (field 4).
-      // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
-      return ("4" in survey ? survey["4"] : survey.acl)[request.auth.token.email];
+      return survey["4"][request.auth.token.email];
     }
 
     /**
@@ -69,8 +68,7 @@
      * given survey.
      */
     function isOneOf(survey, roles) {
-      // TODO(#1858): Delete fallback to 'acl' collection once migration is complete.
-     return ("4" in survey ? survey["4"] : survey.acl)[request.auth.token.email] in roles;
+     return survey["4"][request.auth.token.email] in roles;
     }
 
     /**
@@ -79,10 +77,7 @@
      * assigned this role by default.
      */
     function canManageSurvey(survey) {
-      // TODO(#1858): Delete string role keys once migration is complete.
       return canAccess() && isOneOf(survey, [
-        'OWNER',
-        'SURVEY_ORGANIZER',
         3 /* SURVEY_ORGANIZER */
       ]);
     }
@@ -92,11 +87,7 @@
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      // TODO(#1858): Delete string role keys once migration is complete.
       return canAccess() && isOneOf(survey, [
-        'OWNER',
-        'SURVEY_ORGANIZER',
-        'DATA_COLLECTOR',
         2 /* DATA_COLLECTOR */,
         3 /* SURVEY_ORGANIZER */
       ]);
@@ -106,19 +97,20 @@
      * Returns true iff the current user is the owner of the specified LOI.
      */
     function isLoiOwner(loi) {
-      return loi.data['5'] == request.auth.uid;     
+      return loi.data['5'] == request.auth.uid;
     }
 
     /**
      * Returns true iff the current user is the owner of the specified submission.
      */
     function isSubmissionOwner(submission) {
-      return submission.data['5'] == request.auth.uid;     
+      return submission.data['5'] == request.auth.uid;
     }
 
     // Allow users to read, create, and write their own profiles in the db.
     match /users/{userId} {
-      allow read, create, write: if userId == request.auth.uid;
+      allow read: if userId == request.auth.uid || canAccess();
+      allow create, write: if userId == request.auth.uid;
     }
 
     // All users need to be able to read the passlist for rules to work.
@@ -137,6 +129,11 @@
     // Allow passlisted users to access Terms of Service and other config.
     match /config/{id} {
       allow read: if canAccess();
+    }
+
+    // Allow all users to access Access Denied config.
+    match /config/accessDenied {
+      allow read: if request.auth != null;
     }
 
     // Apply passlist and survey-level ACLs to LOI documents.

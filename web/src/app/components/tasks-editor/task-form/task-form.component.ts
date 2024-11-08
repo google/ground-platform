@@ -67,7 +67,7 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
   },
   {
     icon: 'radio_button_checked',
-    label: 'Select One',
+    label: 'Select one',
     type: TaskType.MULTIPLE_CHOICE,
     cardinality: Cardinality.SELECT_ONE,
   },
@@ -166,6 +166,8 @@ export class TaskFormComponent {
   hasCondition?: boolean;
 
   otherOption?: FormGroup;
+
+  Cardinality = Cardinality;
 
   taskGroup!: TaskGroup;
 

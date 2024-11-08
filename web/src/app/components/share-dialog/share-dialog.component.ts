@@ -26,13 +26,12 @@ import {MatDialogRef} from '@angular/material/dialog';
 import {MatSelectChange} from '@angular/material/select';
 import {Map} from 'immutable';
 import {Subscription} from 'rxjs';
-import {take} from 'rxjs/operators';
 
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {Survey} from 'app/models/survey.model';
 import {ROLE_OPTIONS} from 'app/services/auth/auth.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -61,22 +60,19 @@ export class ShareDialogComponent {
 
   hasChanges = false;
 
-  /** The id of the currently active survey. */
-  private surveyId?: string;
+  /** The active survey. */
+  private survey?: Survey;
+
   private subscription = new Subscription();
 
   constructor(
     private dialogRef: MatDialogRef<ShareDialogComponent>,
-    readonly surveyService: SurveyService
+    private draftSurveyService: DraftSurveyService
   ) {
     this.subscription.add(
-      // Grab only the first value from getActiveSurvey$() so that
-      // successive changes to the remote survey config don't overwrite the
-      // contents of the data collectors list in the dialog.
-      this.surveyService
-        .getActiveSurvey$()
-        .pipe(take(1))
-        .subscribe(p => this.onSurveyLoaded(p))
+      this.draftSurveyService
+        .getSurvey$()
+        .subscribe(survey => this.onSurveyLoaded(survey))
     );
   }
 
@@ -86,7 +82,7 @@ export class ShareDialogComponent {
    */
   onAddUserSubmit(): void {
     // UI is hidden until survey is loaded, so this should never happen.
-    if (!this.surveyId || !this.acl) {
+    if (!this.survey || !this.acl) {
       return;
     }
     const {email, role} = this.addUserForm.value;
@@ -129,9 +125,8 @@ export class ShareDialogComponent {
    */
   onSaveClicked(): void {
     // TODO: Show saving spinner.
-    this.surveyService
-      .updateAcl(this.surveyId!, this.getAclMap())
-      .then(() => this.dialogRef.close());
+    this.draftSurveyService.updateAcl(this.getAclMap());
+    this.dialogRef.close();
   }
 
   /**
@@ -145,10 +140,10 @@ export class ShareDialogComponent {
    * Update ACL and surveyId when survey is loaded.
    */
   private onSurveyLoaded(survey: Survey): void {
-    this.surveyId = survey.id;
+    this.survey = survey;
     this.originalAcl = survey.acl;
     // Sort users by email address.
-    this.acl = this.surveyService.getActiveSurveyAcl();
+    this.acl = survey.getAclEntriesSorted();
   }
 
   private updateChangeState() {

@@ -18,14 +18,14 @@
   <ground-header></ground-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
-  <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
+  <div id="loading-spinner" class="loading-spinner" *ngIf="setupPhase === SetupPhase.LOADING">
     <div>
       <mat-spinner></mat-spinner>
       <p class="loading-label">Loading survey...</p>
     </div>
   </div>
 
-  <div *ngIf="survey" class="container">
+  <div *ngIf="setupPhase !== SetupPhase.LOADING" class="container">
     <div class="card">
       <img
         *ngIf="setupPhase === SetupPhase.JOB_DETAILS"
@@ -79,8 +79,8 @@
           </ground-step-card>
           <ground-step-card
             *ngSwitchCase="SetupPhase.DEFINE_DATA_SHARING_TERMS"
-            title="Data sharing consent"
-            description="Choose how data collectors agree to data sharing terms before collecting data"
+            title="Data sharing agreement"
+            description="Select the terms collectors need to agree to before collecting data."
           >
             <data-sharing-terms
               #dataSharingTerms
@@ -89,10 +89,13 @@
               (onValidationChange)="onValidationChange($event)"
             ></data-sharing-terms>
           </ground-step-card>
-          <survey-review
+          <ground-step-card
             *ngSwitchCase="SetupPhase.REVIEW"
-            #surveyReview
-          ></survey-review>
+            title="Review survey"
+            description="Is your survey ready? Share it with collectors and other organizers."
+          >
+            <share-survey></share-survey>
+          </ground-step-card>
         </div>
       </div>
     </div>

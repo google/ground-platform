@@ -16,6 +16,7 @@
 
 import {Map as ImmutableMap, List} from 'immutable';
 
+import {AclEntry} from './acl-entry.model';
 import {Copiable} from './copiable';
 import {Job} from './job.model';
 import {Role} from './role.model';
@@ -28,14 +29,17 @@ export enum DataSharingType {
 }
 
 export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
-  [DataSharingType.PRIVATE, 'Data will be shared with survey organizers only'],
+  [
+    DataSharingType.PRIVATE,
+    'Survey organizers may <strong>not</strong> share and use collected data publicly or with third parties',
+  ],
   [
     DataSharingType.PUBLIC,
-    'Survey organizers may share and use data publicly under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>',
+    'Data collectors waive all rights to data collected as part of this survey under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>.<br>Survey organizers may share data freely.',
   ],
   [
     DataSharingType.CUSTOM,
-    'Survey organizers create terms which must be accepted by data collectors before collecting data',
+    'Data collectors must agree to the custom terms you provide here',
   ],
 ]);
 
@@ -78,12 +82,27 @@ export class Survey extends Copiable {
     super();
   }
 
+  hasJobs(): boolean {
+    return this.jobs.size > 0;
+  }
+
   getJob(jobId: string): Job | undefined {
     return this.jobs.get(jobId);
   }
 
   getJobsSorted(): List<Job> {
     return this.jobs.sortBy(job => job.index).toList();
+  }
+
+  getAclSorted(): ImmutableMap<string, Role> {
+    return this.acl.sortBy(([key]) => key);
+  }
+
+  getAclEntriesSorted(): AclEntry[] {
+    return this.getAclSorted()
+      .entrySeq()
+      .map(entry => new AclEntry(entry[0], entry[1]))
+      .toArray();
   }
 
   getPreviousJob(job: Job): Job | undefined {

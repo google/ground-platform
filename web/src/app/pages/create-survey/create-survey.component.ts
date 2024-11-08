@@ -16,15 +16,17 @@
 
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {filter, first, firstValueFrom} from 'rxjs';
+import {List} from 'immutable';
+import {Subscription, combineLatest, filter} from 'rxjs';
 
-import {Job} from 'app/models/job.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Survey, SurveyState} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-details.component';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -39,18 +41,34 @@ import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
   styleUrls: ['./create-survey.component.scss'],
 })
 export class CreateSurveyComponent implements OnInit {
+  subscription: Subscription = new Subscription();
   surveyId?: string;
   survey?: Survey;
+  lois?: List<LocationOfInterest>;
   canContinue = true;
   skipLoiSelection = false;
-  // TODO(#1119): when we refresh, the setupPhase below is always displayed for a split of a second.
-  // We should display a loading bar while we are waiting for the data to make a decision
-  // about which phase we are in.
-  setupPhase = SetupPhase.SURVEY_DETAILS;
+  setupPhase = SetupPhase.LOADING;
+
   readonly SetupPhase = SetupPhase;
+
+  @ViewChild('surveyDetails')
+  surveyDetails?: SurveyDetailsComponent;
+
+  @ViewChild('jobDetails')
+  jobDetails?: JobDetailsComponent;
+
+  @ViewChild('surveyLoi')
+  surveyLoi?: SurveyLoiComponent;
+
+  @ViewChild('taskDetails')
+  taskDetails?: TaskDetailsComponent;
+
+  @ViewChild('dataSharingTerms')
+  dataSharingTerms?: DataSharingTermsComponent;
 
   constructor(
     private surveyService: SurveyService,
+    private draftSurveyService: DraftSurveyService,
     private jobService: JobService,
     private taskService: TaskService,
     private navigationService: NavigationService,
@@ -65,34 +83,46 @@ export class CreateSurveyComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  async ngOnInit(): Promise<void> {
-    this.navigationService.getSurveyId$().subscribe(surveyId => {
-      this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
-      this.surveyService.activateSurvey(this.surveyId);
-    });
+  ngOnInit(): void {
+    this.subscription.add(
+      this.navigationService.getSurveyId$().subscribe(async surveyId => {
+        this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
+        this.surveyService.activateSurvey(this.surveyId);
+        await this.draftSurveyService.init(this.surveyId);
+        this.draftSurveyService
+          .getSurvey$()
+          .subscribe(survey => (this.survey = survey));
+      })
+    );
 
-    const survey = await firstValueFrom(
-      this.surveyService
-        .getActiveSurvey$()
+    this.subscription.add(
+      combineLatest([
+        this.surveyService.getActiveSurvey$(),
+        this.loiService.getLocationsOfInterest$(),
+      ])
         .pipe(
           filter(
-            survey =>
+            ([survey]) =>
               this.surveyId === NavigationService.SURVEY_ID_NEW ||
               survey.id === this.surveyId
           )
         )
+        .subscribe(([survey, lois]) => {
+          this.survey = survey;
+          if (this.isSetupFinished(this.survey)) {
+            this.navigationService.selectSurvey(this.survey.id);
+          }
+          this.lois = lois;
+          if (this.setupPhase === SetupPhase.LOADING) {
+            this.setupPhase = this.getSetupPhase(survey, lois);
+          }
+          if (this.setupPhase === SetupPhase.DEFINE_LOIS) {
+            this.canContinue =
+              !this.lois.isEmpty() ||
+              this.job()?.strategy === DataCollectionStrategy.MIXED;
+          }
+        })
     );
-    if (this.isSetupFinished(survey)) {
-      this.navigationService.navigateToEditSurvey(survey.id);
-      return;
-    }
-    this.loiService
-      .getLocationsOfInterest$()
-      .pipe(first())
-      .subscribe(lois => {
-        this.setupPhase = this.getSetupPhase(survey, lois);
-        this.survey = survey;
-      });
   }
 
   onValidationChange(valid: boolean) {
@@ -110,10 +140,13 @@ export class CreateSurveyComponent implements OnInit {
     if (survey.state === SurveyState.READY) {
       return SetupPhase.DEFINE_DATA_SHARING_TERMS;
     }
-    if (!lois.isEmpty()) {
+    if (
+      !lois.isEmpty() ||
+      this.job()?.strategy === DataCollectionStrategy.MIXED
+    ) {
       return SetupPhase.DEFINE_TASKS;
     }
-    if (survey.jobs.size > 0) {
+    if (survey.hasJobs()) {
       return SetupPhase.DEFINE_LOIS;
     }
     if (this.hasTitle(survey)) {
@@ -150,7 +183,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   job(): Job | undefined {
-    if (this.survey?.jobs.size ?? 0 > 0) {
+    if (this.survey?.hasJobs()) {
       return this.survey?.jobs.values().next().value;
     }
     return undefined;
@@ -213,17 +246,14 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
-        await this.setSurveyStateToReady();
-        !!this.surveyId && this.navigationService.selectSurvey(this.surveyId);
+        this.setSurveyStateToReady();
+        await this.draftSurveyService.updateSurvey();
         break;
       default:
         break;
     }
     this.survey = this.surveyService.getActiveSurvey();
   }
-
-  @ViewChild('surveyDetails')
-  surveyDetails?: SurveyDetailsComponent;
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
     const [name, description] = this.surveyDetails!.toTitleAndDescription();
@@ -238,9 +268,6 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
-  @ViewChild('jobDetails')
-  jobDetails?: JobDetailsComponent;
-
   private getFirstJob(): Job {
     // there should only be at most one job attached to this survey at this
     // point when user is still in the survey creation flow.
@@ -250,7 +277,7 @@ export class CreateSurveyComponent implements OnInit {
   private async saveJobName(): Promise<void> {
     const name = this.jobDetails!.toJobName();
     let job;
-    if (this.survey!.jobs.size > 0) {
+    if (this.survey?.hasJobs()) {
       job = this.getFirstJob();
     } else {
       job = this.jobService.createNewJob();
@@ -284,28 +311,20 @@ export class CreateSurveyComponent implements OnInit {
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
-    await this.surveyService.updateDataSharingTerms(
-      this.survey!.id,
-      type,
-      customText
-    );
+    await this.surveyService.updateDataSharingTerms(type, customText);
   }
 
   private async setSurveyStateToReady() {
-    await this.surveyService.updateState(this.survey!.id, SurveyState.READY);
+    this.draftSurveyService.updateState(SurveyState.READY);
   }
 
-  @ViewChild('surveyLoi')
-  surveyLoi?: SurveyLoiComponent;
-
-  @ViewChild('taskDetails')
-  taskDetails?: TaskDetailsComponent;
-
-  @ViewChild('dataSharingTerms')
-  dataSharingTerms?: DataSharingTermsComponent;
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 }
 
 export enum SetupPhase {
+  LOADING,
   SURVEY_DETAILS,
   JOB_DETAILS,
   DEFINE_LOIS,

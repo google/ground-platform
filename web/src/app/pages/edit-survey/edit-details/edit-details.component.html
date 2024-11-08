@@ -25,7 +25,7 @@
           #surveyDetails
           [title]="survey?.title"
           [description]="survey?.description"
-          (onValueChanges)="onDetailChanges($event)"
+          (onValueChanges)="onDetailsChange($event)"
         ></survey-details>
       </div>
     </mat-card-content>
@@ -33,7 +33,7 @@
 
   <mat-card class="survey-detail-card" *ngIf="survey?.dataSharingTerms as terms">
     <mat-card-content>
-      <div class="card-title">Data sharing consent</div>
+      <div class="card-title">Data sharing agreement</div>
       <div class="card-row">
         <p [innerHtml]="dataSharingTermsDetails.descriptionHtml"></p>
         <div *ngIf="dataSharingTermsDetails.customText as customText">

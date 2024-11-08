@@ -19,7 +19,6 @@ import {List, Map} from 'immutable';
 import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
 import {shareReplay, switchMap} from 'rxjs/operators';
 
-import {AclEntry} from 'app/models/acl-entry.model';
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -113,27 +112,37 @@ export class SurveyService {
   /**
    * Updates the survey with new state by calling the data-store service.
    *
-   * @param surveyId the id of the survey.
+   * @param survey the survey instance.
    * @param state the new status of the survey.
    */
-  updateState(surveyId: string, state: SurveyState): Promise<void> {
-    return this.dataStore.updateSurveyState(surveyId, state);
+  updateState(state: SurveyState): Promise<void> {
+    return this.dataStore.updateSurvey({...this.activeSurvey, state} as Survey);
   }
 
-  updateAcl(surveyId: string, acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateAcl(surveyId, acl);
+  /**
+   * Updates the survey with new acl by calling the data-store service.
+   *
+   * @param survey the survey instance.
+   * @param acl the new access control list of the survey.
+   */
+  updateAcl(acl: Map<string, Role>): Promise<void> {
+    return this.dataStore.updateSurvey({...this.activeSurvey, acl} as Survey);
   }
 
+  /**
+   * Adds or overwrites the dataSharingTerms in the survey of the specified id.
+   * @param survey the survey instance.
+   * @param type the type of the DataSharingTerms.
+   * @param customText the text of the DataSharingTerms.
+   */
   updateDataSharingTerms(
-    surveyId: string,
-    dataSharingType: DataSharingType,
+    type: DataSharingType,
     customText?: string
   ): Promise<void> {
-    return this.dataStore.updateDataSharingTerms(
-      surveyId,
-      dataSharingType,
-      customText
-    );
+    return this.dataStore.updateSurvey({
+      ...this.activeSurvey,
+      dataSharingTerms: {type, ...(customText && {customText})},
+    } as Survey);
   }
 
   async createSurvey(name: string, description?: string): Promise<string> {
@@ -156,21 +165,6 @@ export class SurveyService {
   }
 
   /**
-   * Returns the acl of the current survey.
-   */
-  getActiveSurveyAcl(): AclEntry[] {
-    if (!this.activeSurvey) {
-      throw Error('No active survey');
-    }
-    return this.activeSurvey.acl
-      .entrySeq()
-      .map(entry => new AclEntry(entry[0], entry[1]))
-      .toList()
-      .sortBy(entry => entry.email)
-      .toArray();
-  }
-
-  /**
    * Checks if a user has survey organizer or owner level permissions of the survey.
    */
   canManageSurvey(): boolean {
@@ -179,7 +173,7 @@ export class SurveyService {
       return false;
     }
     const userEmail = user.email;
-    const acl = this.getActiveSurveyAcl();
+    const acl = this.activeSurvey.getAclEntriesSorted();
     return !!acl.find(entry => entry.email === userEmail && entry.isManager());
   }
 }

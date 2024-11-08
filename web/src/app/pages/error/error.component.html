@@ -14,16 +14,26 @@
   limitations under the License.
 -->
 
-<div class="page">
+<div class="page error-page">
   <ground-header></ground-header>
 
-  <div class="container">
-    <div class="card">
-      <div class="content">
+  <div *ngIf="!isLoading" class="page-content">
+      <img src="/assets/img/access-denied.svg">
+
+      <ng-container *ngIf="errorType == ErrorType.GENERIC">
         <h1>Oops, something went wrong</h1>
 
         <h2>{{error}}</h2>
-      </div>
+      </ng-container>
+
+      <ng-container *ngIf="errorType == ErrorType.ACCESS_DENIED">
+        <h1>Access denied</h1>
+
+        <h2 *ngIf="accessDeniedMessage.message">{{accessDeniedMessage.message}}</h2>
+
+        <a *ngIf="accessDeniedMessage.link" mat-flat-button color="primary" href="{{accessDeniedMessage.link}}" target="_blank">
+          Click here to register
+        </a>
+      </ng-container>
     </div>
-  </div>
 </div>

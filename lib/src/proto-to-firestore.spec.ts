@@ -41,6 +41,7 @@ describe('toDocumentData()', () => {
       expected: {
         [s.name]: 'Survey name',
         [s.description]: 'Survey desc',
+        [s.state]: Survey.State.STATE_UNSPECIFIED
       },
     },
     {
@@ -83,6 +84,7 @@ describe('toDocumentData()', () => {
           email1: 2, // DATA_COLLECTOR
           email2: 3, // SURVEY_ORGANIZER
         },
+        [s.state]: Survey.State.STATE_UNSPECIFIED
       },
     },
     {

@@ -14,33 +14,43 @@
   limitations under the License.
 -->
 
-<div *ngIf="acl && acl.length > 0">
+<div
+  *ngIf="surveyOwnerEmail && acl"
+  class="share-list-container"
+>
   <mat-list>
-    <div *ngFor="let entry of acl; let i = index" class="share-row">
-      <mat-divider *ngIf="i > 0"></mat-divider>
-      <mat-list-item>
-        <div matListItemTitle>
-          {{entry.email}}
-        </div>
-        <mat-form-field subscriptSizing="dynamic" matListItemMeta>
-          <mat-select
-            *ngIf="entry.role != roles.OWNER; else ownerText"
-            class="role-select"
-            (selectionChange)="onRoleChange($event, i)"
-            [value]="entry.role"
-          >
-            <mat-option
-              *ngFor="let option of roleOptions"
-              [value]="option.value"
-              >{{ option.label }}</mat-option
+    <mat-list-item>
+      <div class="survey-owner-list-item">
+        <div>{{surveyOwnerEmail}}</div>
+
+        <div class="survey-owner-label">Survey owner</div>
+      </div>
+    </mat-list-item>
+
+    <ng-container *ngFor="let entry of acl; let i = index;">
+      <ng-container *ngIf="surveyOwnerEmail !== entry.email;">
+        <mat-divider></mat-divider>
+
+        <mat-list-item>
+          <div matListItemTitle>
+            {{entry.email}}
+          </div>
+          <mat-form-field subscriptSizing="dynamic" matListItemMeta>
+            <mat-select
+              class="role-select"
+              (selectionChange)="onRoleChange($event, i)"
+              [value]="entry.role"
             >
-            <mat-option value="-1" class="remove-option">Remove</mat-option>
-          </mat-select>
-          <ng-template #ownerText>
-            <input matInput disabled value="Owner" />
-          </ng-template>
-        </mat-form-field>
-      </mat-list-item>
-    </div>
+              <mat-option
+                *ngFor="let option of roleOptions"
+                [value]="option.value"
+                >{{ option.label }}</mat-option
+              >
+              <mat-option value="-1" class="remove-option">Remove</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-list-item>
+      </ng-container>
+    </ng-container>
   </mat-list>
 </div>

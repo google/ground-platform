@@ -17,7 +17,12 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
+
+enum ErrorType {
+  GENERIC,
+  ACCESS_DENIED,
+}
 
 @Component({
   selector: 'error',
@@ -25,11 +30,27 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
   styleUrls: ['./error.component.scss'],
 })
 export class ErrorComponent implements OnInit {
-  constructor(private route: ActivatedRoute) {}
-
+  isLoading = true;
   error = '';
+  errorType: ErrorType = ErrorType.GENERIC;
+  accessDeniedMessage = {};
 
-  ngOnInit(): void {
+  ErrorType = ErrorType;
+
+  constructor(
+    private route: ActivatedRoute,
+    private dataStore: DataStoreService
+  ) {}
+
+  async ngOnInit(): Promise<void> {
     this.error = this.route.snapshot.paramMap.get('error') ?? '';
+
+    if (this.error.startsWith('FirebaseError: [code=permission-denied]')) {
+      this.errorType = ErrorType.ACCESS_DENIED;
+
+      this.accessDeniedMessage = await this.dataStore.getAccessDeniedMessage();
+    }
+
+    this.isLoading = false;
   }
 }

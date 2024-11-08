@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-.share-row {
-  --mdc-list-list-item-one-line-container-height: 76px;
-  --mdc-list-list-item-trailing-supporting-text-size: 16px;
+.share-list-container {
+  .mat-mdc-list-item {
+    --mdc-list-list-item-one-line-container-height: 76px;
+    --mdc-list-list-item-trailing-supporting-text-size: 16px;
+  }
+
+  .survey-owner-list-item {
+    display: flex;
+
+    .survey-owner-label {
+      font-style: italic;
+      font-weight: 500;
+      text-align: right;
+      margin-left: auto;
+    }
+  }
 }

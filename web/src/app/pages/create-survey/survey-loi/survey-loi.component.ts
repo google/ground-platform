@@ -16,7 +16,6 @@
 
 import {Component} from '@angular/core';
 import {List} from 'immutable';
-import {Observable} from 'rxjs';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -48,10 +47,6 @@ export class SurveyLoiComponent {
     this.loiService
       .getPredefinedLoisByJobId$(this.job.id)
       .subscribe(lois => (this.lois = lois));
-
-    await this.onStrategyChange(
-      this.job?.strategy || DataCollectionStrategy.PREDEFINED
-    );
   }
 
   async onStrategyChange(strategy: DataCollectionStrategy) {

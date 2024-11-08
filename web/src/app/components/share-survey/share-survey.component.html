@@ -14,10 +14,26 @@
   limitations under the License.
 -->
 
-<button mat-flat-button class="share-survey-button" (click)="openShareDialog()">
-  <mat-icon>people_alt</mat-icon>
+<div class="share-survey-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Sharing</mat-card-title>
 
-  <label>Add data collectors</label>
-</button>
+      <mat-card-subtitle>
+        When your survey’s ready, share it with collectors and other organizers.
+      </mat-card-subtitle>
 
-<ground-share-list></ground-share-list>
+      <button mat-flat-button class="share-survey-button" (click)="openShareDialog()">
+        <mat-icon class="material-symbols-outlined">
+          group
+        </mat-icon>
+
+        <div>Add data collectors</div>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <ground-share-list></ground-share-list>
+    </mat-card-content>
+  </mat-card>
+</div>

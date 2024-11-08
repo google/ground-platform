@@ -24,7 +24,7 @@ import {
 } from './testing/http-test-helpers';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import HttpStatus from 'http-status-codes';
-import {OWNER_ROLE} from './common/auth';
+import {SURVEY_ORGANIZER_ROLE} from './common/auth';
 import {resetDatastore} from './common/context';
 import {Firestore} from 'firebase-admin/firestore';
 import {exportCsvHandler} from './export-csv';
@@ -51,10 +51,9 @@ describe('exportCsv()', () => {
   const email = 'somebody@test.it';
   const userId = 'user5000';
   const survey = {
-    id: 'survey001',
     [sv.name]: 'Test survey',
     [sv.acl]: {
-      [email]: OWNER_ROLE,
+      [email]: SURVEY_ORGANIZER_ROLE,
     },
   };
   const emptyJob = {id: 'job123'};
