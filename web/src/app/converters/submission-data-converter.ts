@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
+import {timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
-import Long from 'long';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Point} from 'app/models/geometry/point';
@@ -37,18 +36,6 @@ import {
 } from './geometry-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
-
-function timestampToInt(
-  timestamp: GroundProtos.google.protobuf.ITimestamp | null | undefined
-): number {
-  if (!timestamp) return 0;
-
-  return (
-    (Long.isLong(timestamp.seconds)
-      ? timestamp.seconds.toInt()
-      : timestamp.seconds || 0) * 1000
-  );
-}
 
 function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   return new AuditInfo(
