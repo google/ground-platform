@@ -33,18 +33,18 @@ jobs:
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
         env:
-          FILE_NAME: "web/keys/gnd-dev/firebase-config.js"
-          FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
+          FILE_NAME: "web/keys/ground-dev-sig/firebase-config.js"
+          FILE_DATA: ${{ secrets.FIREBASE_CONFIG_V2 }}
 
       - name: Install deps
         run: npm run ci-all
 
       - name: Build Ground
-        run: npm run build-all --config=dev --project=gnd-dev
+        run: npm run build-all --config=dev --project=ground-dev-sig
 
       - name: Deploy to Firebase
         uses: docker://w9jds/firebase-action:master
         with:
-          args: deploy --project gnd-dev
+          args: deploy --project ground-dev-sig
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GROUND_DEV_SIG }}
