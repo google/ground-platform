@@ -38,6 +38,11 @@ type pseudoGeoJsonGeometry = {
 export const config = () => 'config';
 
 /**
+ * Returns the path of passlist entry doc with the specified id.
+ */
+export const passlistEntry = (entryId: string) => `passlist/${entryId}`;
+
+/**
  * Returns the path of integrations doc.
  */
 export const integrations = () => config() + '/integrations';
