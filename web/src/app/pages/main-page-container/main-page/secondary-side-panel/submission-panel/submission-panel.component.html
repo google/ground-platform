@@ -41,10 +41,10 @@ limitations under the License.
             <div class="submission-question">{{task.label}}</div>
             <!-- Response -->
             <div class="submission-response">
-              <div *ngIf="getTaskSubmissionResult(task).value === null" class="submission-no-response">
+              <div *ngIf="getTaskSubmissionResult(task).value | isSkipped" class="submission-no-response">
                 Skipped
               </div>
-              <div *ngIf="getTaskSubmissionResult(task).value !== null">
+              <div *ngIf="!(getTaskSubmissionResult(task).value | isSkipped)">
                 <!-- Multiple choice task types -->
                 <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
                   <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task).values">

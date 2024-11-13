@@ -14,18 +14,32 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  Pipe,
+  PipeTransform,
+} from '@angular/core';
 import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
 import {Subscription, firstValueFrom} from 'rxjs';
 
 import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
-import {Result} from 'app/models/submission/result.model';
+import {Result, Skip} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
+
+@Pipe({name: 'isSkipped'})
+export class IsSkippedPipe implements PipeTransform {
+  transform(value: any): boolean {
+    return value instanceof Skip;
+  }
+}
 
 @Component({
   selector: 'submission-panel',
