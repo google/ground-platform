@@ -45,17 +45,13 @@ function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   );
 }
 
-function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
+function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
   const submissionData: {[k: string]: Result} = {};
 
   pb.forEach(taskData => {
-    const task = job.tasks?.get(taskData.taskId!);
-
-    if (!task) return;
-
-    let value = null;
-
     const {
+      taskId,
+      skipped,
       textResponse,
       numberResponse,
       dateTimeResponse,
@@ -65,17 +61,16 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
       takePhotoResult,
     } = taskData;
 
+    let value = null;
+
     if (textResponse) value = textResponse.text;
     else if (numberResponse) value = numberResponse.number;
     else if (dateTimeResponse)
       value = new Date(timestampToInt(dateTimeResponse.dateTime));
     else if (multipleChoiceResponses) {
-      value = new MultipleSelection(
-        task.multipleChoice?.options.filter(({id: optionId}) =>
-          multipleChoiceResponses!.selectedOptionIds?.includes(optionId)
-        ) || List([]),
-        multipleChoiceResponses.otherText
-      );
+      const {selectedOptionIds, otherText} = multipleChoiceResponses;
+
+      value = new MultipleSelection(List(selectedOptionIds || []), otherText);
     } else if (drawGeometryResult)
       value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
     else if (captureLocationResult)
@@ -83,9 +78,11 @@ function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
         coordinatesPbToModel(captureLocationResult.coordinates!)
       );
     else if (takePhotoResult) value = takePhotoResult.photoPath;
-    else throw new Error('Error converting to Submission: invalid task data');
 
-    submissionData[task.id] = new Result(value!);
+    if (value === undefined)
+      throw new Error('Error converting to Submission: invalid task data');
+
+    submissionData[taskId!] = new Result(value, !!skipped);
   });
 
   return Map(submissionData);
@@ -105,6 +102,6 @@ export function submissionDocToModel(
     job,
     authInfoPbToModel(pb.created!),
     authInfoPbToModel(pb.lastModified!),
-    taskDataPbToModel(pb.taskData, job)
+    taskDataPbToModel(pb.taskData)
   );
 }

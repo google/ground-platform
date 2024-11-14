@@ -23,12 +23,14 @@ import {Polygon} from '../geometry/polygon';
 export class Result {
   constructor(
     readonly value:
+      | null
       | number
       | string
       | MultipleSelection
       | Date
       | Point
       | Polygon
-      | MultiPolygon
+      | MultiPolygon,
+    readonly skipped: boolean = false
   ) {}
 }
