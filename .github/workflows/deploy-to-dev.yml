@@ -13,6 +13,11 @@
 # limitations under the License.
 
 name: Deploy to dev
+on:
+  pull_request:
+    branches:
+      - deploy-function
+
 #on:
 #  push:
 #    branches:
