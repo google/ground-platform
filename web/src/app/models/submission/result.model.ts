@@ -20,18 +20,17 @@ import {MultipleSelection} from './multiple-selection';
 import {Point} from '../geometry/point';
 import {Polygon} from '../geometry/polygon';
 
-export class Skip {}
-
 export class Result {
   constructor(
     readonly value:
+      | null
       | number
       | string
       | MultipleSelection
       | Date
       | Point
       | Polygon
-      | MultiPolygon
-      | Skip
+      | MultiPolygon,
+    readonly skipped: boolean = false
   ) {}
 }

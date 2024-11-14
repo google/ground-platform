@@ -23,10 +23,7 @@ import {MatListModule} from '@angular/material/list';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {BrowserModule} from '@angular/platform-browser';
 
-import {
-  IsSkippedPipe,
-  SubmissionPanelComponent,
-} from './submission-panel.component';
+import {SubmissionPanelComponent} from './submission-panel.component';
 
 @NgModule({
   imports: [
@@ -39,6 +36,6 @@ import {
     MatProgressSpinnerModule,
   ],
   exports: [SubmissionPanelComponent],
-  declarations: [SubmissionPanelComponent, IsSkippedPipe],
+  declarations: [SubmissionPanelComponent],
 })
 export class SubmissionPanelModule {}

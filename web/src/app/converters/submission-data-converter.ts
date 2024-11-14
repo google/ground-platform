@@ -23,7 +23,7 @@ import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
 import {Job} from 'app/models/job.model';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
-import {Result, Skip} from 'app/models/submission/result.model';
+import {Result} from 'app/models/submission/result.model';
 import {
   Submission,
   SubmissionData,
@@ -63,8 +63,7 @@ function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
 
     let value = null;
 
-    if (skipped) value = new Skip();
-    else if (textResponse) value = textResponse.text;
+    if (textResponse) value = textResponse.text;
     else if (numberResponse) value = numberResponse.number;
     else if (dateTimeResponse)
       value = new Date(timestampToInt(dateTimeResponse.dateTime));
@@ -80,10 +79,10 @@ function taskDataPbToModel(pb: Pb.ITaskData[]): SubmissionData {
       );
     else if (takePhotoResult) value = takePhotoResult.photoPath;
 
-    if (!value)
+    if (value === undefined)
       throw new Error('Error converting to Submission: invalid task data');
 
-    submissionData[taskId!] = new Result(value);
+    submissionData[taskId!] = new Result(value, !!skipped);
   });
 
   return Map(submissionData);
