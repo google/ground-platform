@@ -114,7 +114,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   getOptions(task: Task, submission: Submission): List<Option> {
     const result = submission.data?.get(task.id);
     if (result && result instanceof List) {
-      return (result.value as MultipleSelection).values;
+      return (
+        task.multipleChoice?.options.filter(option =>
+          (result.value as MultipleSelection).values.contains(option.id)
+        ) || List.of()
+      );
     } else {
       return List.of();
     }

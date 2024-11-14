@@ -34,59 +34,61 @@ limitations under the License.
     </div>
     <div *ngIf="tasks" class="submission-tasks-container">
       <div *ngFor="let task of tasks; let i = index">
-        <mat-divider *ngIf="i > 0"></mat-divider>
-        <div class="submission-task">
-          <!-- Question -->
-          <div class="submission-question">{{task.label}}</div>
-          <!-- Response -->
-          <div class="submission-response">
-            <div *ngIf="getTaskSubmissionResult(task) === undefined" class="submission-no-response">
-              Skipped
-            </div>
-            <div *ngIf="getTaskSubmissionResult(task) !== undefined">
-              <!-- Multiple choice task types -->
-              <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
-                <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task).values">
-                  {{option.label}}
-                </mat-checkbox>
-  
-                <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherValue as otherValue">
-                  Other: {{otherValue}}
-                </mat-checkbox>
+        <ng-container *ngIf="getTaskSubmissionResult(task) !== undefined">
+          <mat-divider *ngIf="i > 0"></mat-divider>
+          <div class="submission-task">
+            <!-- Question -->
+            <div class="submission-question">{{task.label}}</div>
+            <!-- Response -->
+            <div class="submission-response">
+              <div *ngIf="getTaskSubmissionResult(task).skipped" class="submission-no-response">
+                Skipped
               </div>
-              <!-- Photo task types -->
-              <div *ngIf="task.type === taskType.PHOTO">
-                <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img"/>
-              </div>
-              <!-- Geometry task types -->
-              <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
-                <div class="submission-response-geometry" [ngClass]="{'selected-submission-response-geometry': task.id === selectedTaskId}">
-                  <div class="submission-response-geometry-number" [ngStyle]="{ 'background-color': this.submission?.job.color ?? 'black' }">
-                    {{i}}
-                  </div>
-                  <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.DRAW_AREA" class="submission-response-geometry-label">
-                    {{task.id}}
-                  </div>
-                  <div *ngIf="task.type === taskType.CAPTURE_LOCATION" class="submission-response-geometry-label">
-                    {{getCaptureLocationCoord(task)}}
+              <div *ngIf="!getTaskSubmissionResult(task).skipped">
+                <!-- Multiple choice task types -->
+                <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
+                  <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task).values">
+                    {{option.label}}
+                  </mat-checkbox>
+    
+                  <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherValue as otherValue">
+                    Other: {{otherValue}}
+                  </mat-checkbox>
+                </div>
+                <!-- Photo task types -->
+                <div *ngIf="task.type === taskType.PHOTO">
+                  <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img"/>
+                </div>
+                <!-- Geometry task types -->
+                <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
+                  <div class="submission-response-geometry" [ngClass]="{'selected-submission-response-geometry': task.id === selectedTaskId}">
+                    <div class="submission-response-geometry-number" [ngStyle]="{ 'background-color': this.submission?.job.color ?? 'black' }">
+                      {{i}}
+                    </div>
+                    <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.DRAW_AREA" class="submission-response-geometry-label">
+                      {{task.id}}
+                    </div>
+                    <div *ngIf="task.type === taskType.CAPTURE_LOCATION" class="submission-response-geometry-label">
+                      {{getCaptureLocationCoord(task)}}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <!-- Date task types -->
-              <div *ngIf="task.type === taskType.DATE">
-                {{getDate(task)}}
-              </div>
-              <!-- Time task types -->
-              <div *ngIf="task.type === taskType.TIME">
-                {{getTime(task)}}
-              </div>
-              <!-- Remaining task types -->
-              <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE_TIME">
-                {{getTaskSubmissionResult(task)!.value.toString()}}
+                <!-- Date task types -->
+                <div *ngIf="task.type === taskType.DATE">
+                  {{getDate(task)}}
+                </div>
+                <!-- Time task types -->
+                <div *ngIf="task.type === taskType.TIME">
+                  {{getTime(task)}}
+                </div>
+                <!-- Remaining task types -->
+                <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE_TIME">
+                  {{getTaskSubmissionResult(task)!.value.toString()}}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ng-container>
       </div>
     </div>
   </ng-container>
