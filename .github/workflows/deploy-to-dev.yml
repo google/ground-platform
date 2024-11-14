@@ -16,12 +16,7 @@ name: Deploy to dev
 on:
   push:
     branches:
-      - deploy-function
-
-#on:
-#  push:
-#    branches:
-#      - master
+      - master
 jobs:
   build_and_deploy:
     if: github.repository_owner == 'google'
