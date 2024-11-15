@@ -44,13 +44,12 @@ limitations under the License.
               <div *ngIf="getTaskSubmissionResult(task).skipped" class="submission-no-response">
                 Skipped
               </div>
-              <div *ngIf="!getTaskSubmissionResult(task).skipped">
+              <ng-container *ngIf="!getTaskSubmissionResult(task).skipped">
                 <!-- Multiple choice task types -->
                 <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
                   <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task).values">
                     {{option.label}}
                   </mat-checkbox>
-    
                   <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherValue as otherValue">
                     Other: {{otherValue}}
                   </mat-checkbox>
@@ -85,7 +84,7 @@ limitations under the License.
                 <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE_TIME">
                   {{getTaskSubmissionResult(task)!.value.toString()}}
                 </div>
-              </div>
+              </ng-container>
             </div>
           </div>
         </ng-container>

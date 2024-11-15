@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-  Pipe,
-  PipeTransform,
-} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
 import {Subscription, firstValueFrom} from 'rxjs';
