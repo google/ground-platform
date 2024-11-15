@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -43,8 +43,9 @@ jobs:
         run: npm run build-all --config=dev --project=ground-dev-sig
 
       - name: Deploy to Firebase
-        uses: docker://w9jds/firebase-action:master
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          args: deploy --project ground-dev-sig
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GROUND_DEV_SIG }}
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GROUND_DEV_SIG }}
+          channelId: live
+          projectId: ground-dev-sig
