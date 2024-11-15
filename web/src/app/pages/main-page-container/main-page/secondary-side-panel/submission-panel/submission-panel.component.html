@@ -57,7 +57,7 @@ limitations under the License.
                 </div>
                 <!-- Photo task types -->
                 <div *ngIf="task.type === taskType.PHOTO">
-                  <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img"/>
+                  <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img" alt="Image could not be loaded"/>
                 </div>
                 <!-- Geometry task types -->
                 <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
