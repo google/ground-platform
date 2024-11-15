@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-
 import {MultipleSelection} from './multiple-selection';
-import {Point} from '../geometry/point';
-import {Polygon} from '../geometry/polygon';
+import {Geometry} from '../geometry/geometry';
 
 export class Result {
   constructor(
@@ -28,9 +25,7 @@ export class Result {
       | string
       | MultipleSelection
       | Date
-      | Point
-      | Polygon
-      | MultiPolygon,
+      | Geometry,
     readonly skipped: boolean = false
   ) {}
 }

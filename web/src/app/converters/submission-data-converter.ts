@@ -19,6 +19,7 @@ import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
 
 import {AuditInfo} from 'app/models/audit-info.model';
+import {Geometry} from 'app/models/geometry/geometry';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
 import {Job} from 'app/models/job.model';
@@ -44,15 +45,17 @@ function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
     new Date(timestampToInt(pb.serverTimestamp))
   );
 }
+
 function taskDataPbArrayToModel(pb: Pb.ITaskData[]): SubmissionData {
   const submissionData: {[k: string]: Result} = {};
 
   pb.forEach(taskData => {
     const result = taskDataPbToModel(taskData);
     if (result !== null) {
-      submissionData;
+      submissionData[taskData.taskId!] = result;
     }
   });
+
   return Map(submissionData);
 }
 
@@ -69,13 +72,20 @@ function taskDataPbToModel(taskData: Pb.ITaskData): Result | null {
       taskData
     );
     return null;
+  } else if (value === undefined) {
+    console.warn(
+      'Skipping unexpected undefined value on non-skipped task',
+      taskData
+    );
+    return null;
   } else {
     return new Result(value, false);
   }
 }
 
-// TODO: Add approrpriate return types.
-function taskDataPbToModelValue(taskData: Pb.ITaskData): any | null {
+function taskDataPbToModelValue(
+  taskData: Pb.ITaskData
+): string | number | Date | MultipleSelection | Geometry | null | undefined {
   const {
     textResponse,
     numberResponse,
