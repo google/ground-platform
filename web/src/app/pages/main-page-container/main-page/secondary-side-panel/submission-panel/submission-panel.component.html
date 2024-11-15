@@ -44,20 +44,19 @@ limitations under the License.
               <div *ngIf="getTaskSubmissionResult(task).skipped" class="submission-no-response">
                 Skipped
               </div>
-              <div *ngIf="!getTaskSubmissionResult(task).skipped">
+              <ng-container *ngIf="!getTaskSubmissionResult(task).skipped">
                 <!-- Multiple choice task types -->
                 <div *ngIf="task.type === taskType.MULTIPLE_CHOICE" class="submission-response-multiple-choice">
-                  <mat-checkbox disabled="true" checked="true" *ngFor="let option of getTaskMultipleChoiceSelections(task).values">
-                    {{option.label}}
+                  <mat-checkbox disabled="true" checked="true" *ngFor="let optionId of getTaskMultipleChoiceSelections(task).values">
+                    {{getMultipleChoiceOption(task, optionId).label}}
                   </mat-checkbox>
-    
                   <mat-checkbox disabled="true" checked="true" *ngIf="getTaskMultipleChoiceSelections(task).otherValue as otherValue">
                     Other: {{otherValue}}
                   </mat-checkbox>
                 </div>
                 <!-- Photo task types -->
                 <div *ngIf="task.type === taskType.PHOTO">
-                  <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img"/>
+                  <img src="{{this.firebaseURLs.get(getTaskSubmissionResult(task)!.value)}}" class="submission-img" alt="Image could not be loaded"/>
                 </div>
                 <!-- Geometry task types -->
                 <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
@@ -85,7 +84,7 @@ limitations under the License.
                 <div *ngIf="task.type === taskType.TEXT || task.type === taskType.NUMBER || task.type === taskType.DATE_TIME">
                   {{getTaskSubmissionResult(task)!.value.toString()}}
                 </div>
-              </div>
+              </ng-container>
             </div>
           </div>
         </ng-container>
