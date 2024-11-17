@@ -16,11 +16,9 @@
 
 import {List} from 'immutable';
 
-import {Option} from 'app/models/task/option.model';
-
 export class MultipleSelection {
   constructor(
-    readonly values: List<Option>,
+    readonly values: List<string>,
     readonly otherValue?: string | null
   ) {}
 }

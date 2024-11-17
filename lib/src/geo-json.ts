@@ -131,3 +131,30 @@ function toMultiPolygonGeometryPb(positions: Position[][][]): Pb.Geometry {
   const multiPolygon = new Pb.MultiPolygon({polygons});
   return new Pb.Geometry({multiPolygon});
 }
+
+export function isGeometryValid(geometry: Geometry): boolean {
+  switch (geometry.type) {
+    case 'Point':
+      return isPositionValid(geometry.coordinates);
+    case 'Polygon':
+      for (const ring of geometry.coordinates) {
+        for (const position of ring) {
+          if (!isPositionValid(position)) return false;
+        }
+      }
+      break;
+    case 'MultiPolygon':
+      for (const polygon of geometry.coordinates) {
+        for (const ring of polygon) {
+          for (const position of ring) {
+            if (!isPositionValid(position)) return false;
+          }
+        }
+      }
+  }
+  return true;
+}
+
+function isPositionValid([lng, lat]: Position) {
+  return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90;
+}
