@@ -23,6 +23,7 @@ import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
+import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -96,6 +97,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   getTaskSubmissionResult({id: taskId}: Task): Result | undefined {
     return this.submission?.data.get(taskId);
+  }
+
+  getMultipleChoiceOption(task: Task, optionId: string) {
+    return task.multipleChoice?.options.find(({id}: Option) => id === optionId);
   }
 
   getTaskMultipleChoiceSelections(task: Task): MultipleSelection {
