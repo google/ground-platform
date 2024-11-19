@@ -293,8 +293,10 @@ function getMultipleChoiceValues(
     responses.selectedOptionIds?.map(
       id => getMultipleChoiceLabel(task, id) || '#ERR'
     ) || [];
-  if (responses.otherText && responses.otherText.trim() !== '')
-    values.push(responses.otherText);
+  if (responses.otherText)
+    values.push(
+      responses.otherText.trim() !== '' ? responses.otherText : 'Other'
+    );
   return values.join(',');
 }
 
