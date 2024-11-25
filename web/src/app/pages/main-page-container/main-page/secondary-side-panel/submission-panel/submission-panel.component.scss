@@ -62,9 +62,8 @@
   .submission-response-geometry {
     display: flex;
     align-items: center;
-    height: 40px;
+    min-height: 40px;
     padding-inline-start: 8px;
-    margin-top: 8px;
   }
 
   .submission-response-geometry-number {
@@ -82,5 +81,6 @@
   .submission-response-geometry-label {
     padding-left: 16px;
     font-weight: 500;
+    white-space: pre-line;
   }
 }
