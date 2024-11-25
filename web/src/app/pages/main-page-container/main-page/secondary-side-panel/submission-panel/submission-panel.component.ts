@@ -125,17 +125,12 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     const {coord, accuracy, altitude} = this.getTaskSubmissionResult(task)!
       .value as Point;
     const {x, y} = coord;
-    const long = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
+    const lng = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
     const lat = Math.abs(y).toString() + (y > 0 ? '° N' : '° S');
-
-    let result = lat + ', ' + long;
-    if (altitude) {
-      result += '\nAltitude: ' + altitude + 'm';
-    }
-    if (accuracy) {
-      result += '\nAccuracy: ' + accuracy + 'm';
-    }
-    return result;
+    const result = [`${lat}, ${lng}`];
+    if (altitude) result.push(`Altitude: ${altitude}m`);
+    if (accuracy) result.push(`Accuracy: ${accuracy}m`);
+    return result.join('\n');
   }
 
   getDate(task: Task): string {
