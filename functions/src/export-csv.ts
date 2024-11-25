@@ -248,15 +248,14 @@ function getValue(
     takePhotoResult,
   } = result;
   if (textResponse) return textResponse.text ?? null;
-  if (numberResponse) return numberResponse.number ?? null;
-  if (dateTimeResponse) return getDateTimeValue(dateTimeResponse);
-  if (multipleChoiceResponses)
+  else if (numberResponse) return numberResponse.number ?? null;
+  else if (dateTimeResponse) return getDateTimeValue(dateTimeResponse);
+  else if (multipleChoiceResponses)
     return getMultipleChoiceValues(task, multipleChoiceResponses);
-  if (drawGeometryResult?.geometry) {
+  else if (drawGeometryResult?.geometry) {
     // TODO(#1248): Test when implementing other plot annotations feature.
     return toWkt(drawGeometryResult.geometry);
-  }
-  if (captureLocationResult) {
+  } else if (captureLocationResult) {
     // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
       new Pb.Geometry({
@@ -265,9 +264,8 @@ function getValue(
         }),
       })
     );
-  }
-  if (takePhotoResult) return getPhotoUrlValue(takePhotoResult);
-  return null;
+  } else if (takePhotoResult) return getPhotoUrlValue(takePhotoResult);
+  else return null;
 }
 
 function getDateTimeValue(
