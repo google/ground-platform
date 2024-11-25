@@ -293,6 +293,8 @@ function getMultipleChoiceValues(
     responses.selectedOptionIds?.map(
       id => getMultipleChoiceLabel(task, id) || '#ERR'
     ) || [];
+  // Ensure at least one value is present: if no values are selected and 'otherText' is empty, add 'Other' as a fallback.
+  if (values.length === 0 && !responses.otherText) values.push('Other');
   if (responses.otherText)
     values.push(
       responses.otherText.trim() !== '' ? responses.otherText : 'Other'
