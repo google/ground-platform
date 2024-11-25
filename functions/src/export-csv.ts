@@ -296,7 +296,9 @@ function getMultipleChoiceValues(
   if (values.length === 0 && !responses.otherText) values.push('Other');
   if (responses.otherText)
     values.push(
-      responses.otherText.trim() !== '' ? responses.otherText : 'Other'
+      responses.otherText.trim() !== ''
+        ? `Other: ${responses.otherText}`
+        : 'Other'
     );
   return values.join(',');
 }
