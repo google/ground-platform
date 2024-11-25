@@ -97,27 +97,24 @@ function taskDataPbToModelValue(
   } = taskData;
 
   if (textResponse) return textResponse.text;
-  else if (numberResponse) return numberResponse.number;
-  else if (dateTimeResponse)
+  if (numberResponse) return numberResponse.number;
+  if (dateTimeResponse)
     return new Date(timestampToInt(dateTimeResponse.dateTime));
-  else if (multipleChoiceResponses) {
+  if (multipleChoiceResponses) {
     const {selectedOptionIds, otherText} = multipleChoiceResponses;
 
     return new MultipleSelection(List(selectedOptionIds || []), otherText);
-  } else if (drawGeometryResult)
+  }
+  if (drawGeometryResult)
     return geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
-  else if (captureLocationResult)
+  if (captureLocationResult)
     return new Point(
       coordinatesPbToModel(captureLocationResult.coordinates!),
-      captureLocationResult.accuracy === null
-        ? undefined
-        : captureLocationResult.accuracy,
-      captureLocationResult.altitude === null
-        ? undefined
-        : captureLocationResult.altitude
+      captureLocationResult.accuracy || undefined,
+      captureLocationResult.altitude || undefined
     );
-  else if (takePhotoResult) return takePhotoResult.photoPath;
-  else return null;
+  if (takePhotoResult) return takePhotoResult.photoPath;
+  return null;
 }
 
 export function submissionDocToModel(
