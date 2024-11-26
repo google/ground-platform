@@ -237,38 +237,35 @@ function getValue(
   data: Pb.ITaskData[]
 ): string | number | null {
   const result = data.find(d => d.taskId === task.id);
-  if (!result) {
-    return null;
-  }
-  if (result.textResponse) {
-    return result.textResponse.text ?? null;
-  } else if (result.numberResponse) {
-    return getNumberValue(result.numberResponse);
-  } else if (result.dateTimeResponse) {
-    return getDateTimeValue(result.dateTimeResponse);
-  } else if (result.multipleChoiceResponses) {
-    return getMultipleChoiceValues(task, result.multipleChoiceResponses);
-  } else if (result.captureLocationResult) {
+  if (!result || result.skipped) return null;
+  const {
+    textResponse,
+    numberResponse,
+    dateTimeResponse,
+    multipleChoiceResponses,
+    drawGeometryResult,
+    captureLocationResult,
+    takePhotoResult,
+  } = result;
+  if (textResponse) return textResponse.text ?? null;
+  else if (numberResponse) return numberResponse.number ?? null;
+  else if (dateTimeResponse) return getDateTimeValue(dateTimeResponse);
+  else if (multipleChoiceResponses)
+    return getMultipleChoiceValues(task, multipleChoiceResponses);
+  else if (drawGeometryResult?.geometry) {
+    // TODO(#1248): Test when implementing other plot annotations feature.
+    return toWkt(drawGeometryResult.geometry);
+  } else if (captureLocationResult) {
     // TODO(#1916): Include altitude and accuracy in separate columns.
     return toWkt(
       new Pb.Geometry({
         point: new Pb.Point({
-          coordinates: result.captureLocationResult.coordinates,
+          coordinates: captureLocationResult.coordinates,
         }),
       })
     );
-  } else if (result.drawGeometryResult?.geometry) {
-    // TODO(#1248): Test when implementing other plot annotations feature.
-    return toWkt(result.drawGeometryResult.geometry);
-  } else if (result.takePhotoResult) {
-    return getPhotoUrlValue(result.takePhotoResult);
-  } else {
-    return null;
-  }
-}
-
-function getNumberValue(response: Pb.TaskData.INumberResponse): number | null {
-  return response.number ?? null;
+  } else if (takePhotoResult) return getPhotoUrlValue(takePhotoResult);
+  else return null;
 }
 
 function getDateTimeValue(
@@ -293,8 +290,15 @@ function getMultipleChoiceValues(
     responses.selectedOptionIds?.map(
       id => getMultipleChoiceLabel(task, id) || '#ERR'
     ) || [];
-  if (responses.otherText && responses.otherText.trim() !== '')
-    values.push(responses.otherText);
+  // Temporary workaround: Ensure at least one value is present: if no values are selected and 'otherText' is empty, add 'Other' as a fallback.
+  // https://github.com/google/ground-android/issues/2846
+  if (values.length === 0 && !responses.otherText) values.push('Other');
+  if (responses.otherText)
+    values.push(
+      responses.otherText.trim() !== ''
+        ? `Other: ${responses.otherText}`
+        : 'Other'
+    );
   return values.join(',');
 }
 
