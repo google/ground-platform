@@ -110,7 +110,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   getTaskMultipleChoiceOtherValue(task: Task): string | null {
     const multipleSelection = this.getTaskSubmissionResult(task)!
       .value as MultipleSelection;
-    // Ensure at least one value is present: if no values are selected and 'otherText' is empty, add 'Other' as a fallback.
+    // Temporary workaround: Ensure at least one value is present: if no values are selected and 'otherText' is empty, add 'Other' as a fallback.
+    // https://github.com/google/ground-android/issues/2846
     if (multipleSelection.values.size === 0 && !multipleSelection.otherValue)
       return 'Other';
     if (multipleSelection.otherValue)
