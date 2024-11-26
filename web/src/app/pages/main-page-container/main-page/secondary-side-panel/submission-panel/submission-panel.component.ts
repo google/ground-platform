@@ -107,22 +107,31 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     return this.getTaskSubmissionResult(task)!.value as MultipleSelection;
   }
 
+  getTaskMultipleChoiceOtherValue(task: Task): string | null {
+    const multipleSelection = this.getTaskSubmissionResult(task)!
+      .value as MultipleSelection;
+    // Temporary workaround: Ensure at least one value is present: if no values are selected and 'otherText' is empty, add 'Other' as a fallback.
+    // https://github.com/google/ground-android/issues/2846
+    if (multipleSelection.values.size === 0 && !multipleSelection.otherValue)
+      return 'Other';
+    if (multipleSelection.otherValue)
+      return multipleSelection.otherValue.trim() !== ''
+        ? `Other: ${multipleSelection.otherValue}`
+        : 'Other';
+    return null;
+  }
+
   getCaptureLocationCoord(task: Task): string {
     // x represents longitude, y represents latitude
     const {coord, accuracy, altitude} = this.getTaskSubmissionResult(task)!
       .value as Point;
     const {x, y} = coord;
-    const long = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
+    const lng = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
     const lat = Math.abs(y).toString() + (y > 0 ? '° N' : '° S');
-
-    let result = lat + ', ' + long;
-    if (altitude) {
-      result += '\nAltitude: ' + altitude + 'm';
-    }
-    if (accuracy) {
-      result += '\nAccuracy: ' + accuracy + 'm';
-    }
-    return result;
+    const result = [`${lat}, ${lng}`];
+    if (altitude) result.push(`Altitude: ${altitude}m`);
+    if (accuracy) result.push(`Accuracy: ${accuracy}m`);
+    return result.join('\n');
   }
 
   getDate(task: Task): string {
