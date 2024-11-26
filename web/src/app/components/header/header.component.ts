@@ -16,13 +16,13 @@
 
 import {Component} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
-import {Router} from '@angular/router';
 
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/pages/edit-survey/job-dialog/job-dialog.component';
+import {AuthService} from 'app/services/auth/auth.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -47,10 +47,10 @@ export class HeaderComponent {
 
   constructor(
     public dialog: MatDialog,
+    public authService: AuthService,
     public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
-    public surveyService: SurveyService,
-    private router: Router
+    public surveyService: SurveyService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -77,7 +77,7 @@ export class HeaderComponent {
   }
 
   onAboutClick() {
-    this.router.navigate([NavigationService.ABOUT]);
+    this.navigationService.navigateToAboutPage();
   }
 
   onTermsOfServiceClick() {
