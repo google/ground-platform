@@ -121,7 +121,7 @@ message TaskData {
     string other_text = 2;
 
     // Indicate that the response has Other option selected.
-    bool other_selected = 3
+    bool other_selected = 3;
   }
 
   message DrawGeometryResult {
