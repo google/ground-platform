@@ -255,7 +255,7 @@ describe('MapComponent', () => {
     );
   }));
 
-  fit('should render markers on map', () => {
+  it('should render markers on map', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));

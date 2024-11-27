@@ -142,36 +142,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.selectedJob$,
       ]).subscribe(
         ([survey, lois, locationOfInterestId, taskId, selectedJob]) => {
-          const loisMap = ImmutableMap(
-            lois
-              .filter(loi =>
-                this.showPredefinedLoisOnly ? loi.predefined : true
-              )
-              .filter(
-                loi => selectedJob === undefined || loi.jobId === selectedJob.id
-              )
-              .map(loi => [loi.id, loi])
-          );
-
-          const loiIdsToRemove = this.loisMap
-            .filter(
-              (value, key) =>
-                !(
-                  loisMap.has(key) &&
-                  this.isLocationOfInterestEqual(loisMap.get(key)!, value)
-                )
-            )
-            .keySeq()
-            .toList();
-          const loisToAdd = loisMap
-            .filter(
-              (value, key) =>
-                !(
-                  this.loisMap.has(key) &&
-                  this.isLocationOfInterestEqual(this.loisMap.get(key)!, value)
-                )
-            )
-            .toList();
+          const loisMap = this.getLoiMap(lois, selectedJob);
+          const loiIdsToRemove = this.getLoiIdsToRemove(loisMap);
+          const loisToAdd = this.getLoiIdsToAdd(loisMap);
           this.loisMap = loisMap;
 
           this.removeDeletedLocationsOfInterest(loiIdsToRemove);
@@ -215,6 +188,63 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.cancelReposition();
       })
     );
+  }
+
+  /**
+   * Gets map of LOIs for the selected job
+   * @param lois List of all locations of interest
+   * @param selectedJob Currently selected Job
+   * @returns Map of loi ids to loi objects
+   */
+  private getLoiMap(
+    lois: List<LocationOfInterest>,
+    selectedJob: Job | undefined
+  ): ImmutableMap<string, LocationOfInterest> {
+    return ImmutableMap(
+      lois
+        .filter(loi => (this.showPredefinedLoisOnly ? loi.predefined : true))
+        .filter(
+          loi => selectedJob === undefined || loi.jobId === selectedJob.id
+        )
+        .map(loi => [loi.id, loi])
+    );
+  }
+
+  /**
+   * Gets list of loi ids to remove from the map
+   * @param loisMap Map of loi ids to loi objects
+   * @returns List of loi ids to remove
+   */
+  private getLoiIdsToRemove(
+    loisMap: ImmutableMap<string, LocationOfInterest>
+  ): List<string> {
+    return this.loisMap
+      .filter(
+        (value, key) =>
+          !(
+            loisMap.has(key) &&
+            this.isLocationOfInterestEqual(loisMap.get(key)!, value)
+          )
+      )
+      .keySeq()
+      .toList();
+  }
+
+  /**
+   * Gets list of loi ids to add to the map
+   * @param loisMap Map of loi ids to loi objects
+   * @returns List of loi ids to add
+   */
+  private getLoiIdsToAdd(loisMap: ImmutableMap<string, LocationOfInterest>) {
+    return loisMap
+      .filter(
+        (value, key) =>
+          !(
+            this.loisMap.has(key) &&
+            this.isLocationOfInterestEqual(this.loisMap.get(key)!, value)
+          )
+      )
+      .toList();
   }
 
   /**
