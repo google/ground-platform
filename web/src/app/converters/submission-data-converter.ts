@@ -109,12 +109,8 @@ function taskDataPbToModelValue(
   else if (captureLocationResult)
     return new Point(
       coordinatesPbToModel(captureLocationResult.coordinates!),
-      captureLocationResult.accuracy === null
-        ? undefined
-        : captureLocationResult.accuracy,
-      captureLocationResult.altitude === null
-        ? undefined
-        : captureLocationResult.altitude
+      captureLocationResult.accuracy || undefined,
+      captureLocationResult.altitude || undefined
     );
   else if (takePhotoResult) return takePhotoResult.photoPath;
   else return null;
