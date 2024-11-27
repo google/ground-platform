@@ -131,7 +131,9 @@ class MockModel {
     new AuditInfo(MockModel.user001, new Date(), new Date()),
     Map({
       task001: new Result('result'),
-      task003: new Result(new MultipleSelection(List([MockModel.option001]))),
+      task003: new Result(
+        new MultipleSelection(List([MockModel.option001.id]))
+      ),
     })
   );
 }

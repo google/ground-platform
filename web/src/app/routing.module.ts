@@ -89,7 +89,6 @@ const routes: Routes = [
   {
     path: NavigationService.ABOUT,
     component: AboutComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: NavigationService.TERMS,

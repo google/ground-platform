@@ -67,19 +67,21 @@
       </ng-container>
     </ng-container>
 
-    <button mat-icon-button [matMenuTriggerFor]="infoMenu">
-      <mat-icon fontSet="material-symbols-outlined">info_outline_24px</mat-icon>
-    </button>
+    <ng-container *ngIf="authService.getUser$() | async as user">
+      <button mat-icon-button [matMenuTriggerFor]="infoMenu">
+        <mat-icon fontSet="material-symbols-outlined">info_outline_24px</mat-icon>
+      </button>
 
-    <mat-menu #infoMenu="matMenu">
-      <a (click)="onTermsOfServiceClick()">
-        <button mat-menu-item>Terms of service</button>
-      </a>
+      <mat-menu #infoMenu="matMenu">
+        <a *ngIf="user.isAuthenticated" (click)="onTermsOfServiceClick()">
+          <button mat-menu-item>Terms of Service</button>
+        </a>
 
-      <a (click)="onAboutClick()">
-        <button mat-menu-item>About</button>
-      </a>
-    </mat-menu>
+        <a (click)="onAboutClick()">
+          <button mat-menu-item>About</button>
+        </a>
+      </mat-menu>
+    </ng-container>
 
     <ground-current-user-widget></ground-current-user-widget>
   </div>

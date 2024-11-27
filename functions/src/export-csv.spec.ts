@@ -206,7 +206,7 @@ describe('exportCsv()', () => {
         [d.taskId]: 'task004',
         [d.multipleChoiceResponses]: {
           '1': ['aaa', 'bbb'],
-          '2': 'Other',
+          '2': 'other',
         },
       },
       {
@@ -238,9 +238,9 @@ describe('exportCsv()', () => {
       submissions: [],
       expectedFilename: 'ground-export.csv',
       expectedCsv: [
-        '"system:index","geometry","name","area","data:contributor_name","data:contributor_email"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,',
-        '"POINT_002","POINT (8.3 47.05)","Luzern",,,',
+        '"system:index","geometry","name","area","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
       ],
     },
     {
@@ -252,10 +252,10 @@ describe('exportCsv()', () => {
       submissions: [submission1a, submission1b, submission2a],
       expectedFilename: 'test-job.csv',
       expectedCsv: [
-        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,',
-        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other","POINT (45 -123)","http://photo/url",,',
+        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other: other","POINT (45 -123)","http://photo/url",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
       ],
     },
   ];

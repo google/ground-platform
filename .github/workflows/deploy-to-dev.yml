@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -33,18 +33,19 @@ jobs:
       - name: Create firebase-config.ts
         uses: "finnp/create-file-action@master"
         env:
-          FILE_NAME: "web/keys/gnd-dev/firebase-config.js"
-          FILE_DATA: ${{ secrets.FIREBASE_CONFIG }}
+          FILE_NAME: "web/keys/ground-dev-sig/firebase-config.js"
+          FILE_DATA: ${{ secrets.FIREBASE_CONFIG_V2 }}
 
       - name: Install deps
         run: npm run ci-all
 
       - name: Build Ground
-        run: npm run build-all --config=dev --project=gnd-dev
+        run: npm run build-all --config=dev --project=ground-dev-sig
 
       - name: Deploy to Firebase
-        uses: docker://w9jds/firebase-action:master
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          args: deploy --project gnd-dev
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GND_DEV }}
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GROUND_DEV_SIG }}
+          channelId: live
+          projectId: ground-dev-sig
