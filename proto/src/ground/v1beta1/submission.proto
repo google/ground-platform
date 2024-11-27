@@ -120,7 +120,7 @@ message TaskData {
     // The text provided in the "Other (please specify)" field, if present.
     string other_text = 2;
 
-    // Indicate that the reponse has Other option selected.
+    // Indicate that the response has Other option selected.
     bool other_selected = 3
   }
 
