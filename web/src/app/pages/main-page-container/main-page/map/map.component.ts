@@ -426,13 +426,6 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (color === undefined) {
       color = this.DEFAULT_MARKER_COLOR;
     }
-    const icon = {
-      url: this.groundPinService.getPinImageSource(color),
-      scaledSize: {
-        width: normalIconScale,
-        height: normalIconScale,
-      },
-    } as google.maps.Icon;
     
     // TODO(#2108): Switch to custom HTML and CSS markers. Having a custom HTML will
     // improve text wrapping, allow for a more square shape, and custom styles for
