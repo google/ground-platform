@@ -107,7 +107,11 @@ function taskDataPbToModelValue(
   } else if (drawGeometryResult)
     return geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
   else if (captureLocationResult)
-    return new Point(coordinatesPbToModel(captureLocationResult.coordinates!));
+    return new Point(
+      coordinatesPbToModel(captureLocationResult.coordinates!),
+      captureLocationResult.accuracy || undefined,
+      captureLocationResult.altitude || undefined
+    );
   else if (takePhotoResult) return takePhotoResult.photoPath;
   else return null;
 }
