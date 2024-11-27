@@ -137,6 +137,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     ).toLocaleTimeString([], {hour: 'numeric', minute: 'numeric'});
   }
 
+  selectGeometry(task: Task): void {
+    this.navigationService.showSubmissionDetailWithHighlightedTask(task.id);
+  }
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
