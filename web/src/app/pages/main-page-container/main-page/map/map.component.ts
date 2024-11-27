@@ -234,7 +234,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
             task.id,
             taskResult!.value as Point,
             this.submission?.job?.color,
-            task.index.toString(),
+            task.index.toString()
           );
           this.markers.set(task.id, marker);
         } else if (geometryType === GeometryType.POLYGON) {
@@ -426,7 +426,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (color === undefined) {
       color = this.DEFAULT_MARKER_COLOR;
     }
-    
+
     // TODO(#2108): Switch to custom HTML and CSS markers. Having a custom HTML will
     // improve text wrapping, allow for a more square shape, and custom styles for
     // selected markers (like increasing the scale).

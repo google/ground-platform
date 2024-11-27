@@ -189,9 +189,7 @@ describe('MapComponent', () => {
       mockLocationOfInterestId$
     );
     mockTaskId$ = new BehaviorSubject<string | null>(null);
-    navigationServiceSpy.getTaskId$.and.returnValue(
-      mockTaskId$
-    );
+    navigationServiceSpy.getTaskId$.and.returnValue(mockTaskId$);
     navigationServiceSpy.getSubmissionId$.and.returnValue(
       of<string | null>(null)
     );
