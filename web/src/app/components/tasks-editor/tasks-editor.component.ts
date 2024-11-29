@@ -23,7 +23,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {
   Cardinality,
@@ -50,7 +50,7 @@ export enum TaskGroup {
   MAP_A_NEW_SITE = 6,
 }
 
-export const taskGroupToTypes = new Map([
+export const taskGroupToTypes = Map([
   [
     TaskGroup.QUESTION,
     List([
@@ -69,7 +69,7 @@ export const taskGroupToTypes = new Map([
   [TaskGroup.MAP_A_NEW_SITE, List([TaskType.MAP_A_NEW_SITE])],
 ]);
 
-export const taskTypeToGroup = new Map([
+export const taskTypeToGroup = Map([
   [TaskType.TEXT, TaskGroup.QUESTION],
   [TaskType.MULTIPLE_CHOICE, TaskGroup.QUESTION],
   [TaskType.NUMBER, TaskGroup.QUESTION],

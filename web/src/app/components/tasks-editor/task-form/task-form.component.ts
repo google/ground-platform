@@ -197,8 +197,6 @@ export class TaskFormComponent {
 
   taskTypeOption?: TaskTypeOption;
 
-  taskAllowedTypes?: TaskAllowedType[];
-
   TaskGroup = TaskGroup;
 
   TaskType = TaskType;
@@ -240,7 +238,6 @@ export class TaskFormComponent {
 
     this.taskGroup = taskTypeToGroup.get(type) ?? TaskGroup.QUESTION;
     this.taskTypeOption = this.getTaskTypeOption(type, cardinality);
-    this.taskAllowedTypes = [];
     this.addLoiTask = this.addLoiTaskControl.value;
     this.hasCondition = this.conditionControl?.value;
 
