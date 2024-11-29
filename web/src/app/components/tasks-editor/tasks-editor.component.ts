@@ -139,19 +139,25 @@ export class TasksEditorComponent {
   }
 
   onTaskAdd(group: TaskGroup) {
-    const types = taskGroupToTypes.get(group);
+    const type = taskGroupToTypes.get(group)?.first();
 
     const formGroup = this.formBuilder.group({
       id: this.dataStoreService.generateId(),
-      type: types?.first(),
+      type,
       required: false,
       label: ['', Validators.required],
       cardinality: null,
       options: this.formBuilder.array([]),
       hasOtherOption: false,
-      addLoiTask: false,
-      allowedTypes: [],
-    });
+      addLoiTask: type === TaskType.MAP_A_NEW_SITE,
+    }) as FormGroup;
+
+    if (type === TaskType.MAP_A_NEW_SITE) {
+      formGroup.addControl(
+        'allowedTypes',
+        this.formBuilder.control([], Validators.required)
+      );
+    }
 
     this.formArray.push(formGroup);
   }
@@ -217,8 +223,14 @@ export class TasksEditorComponent {
       ),
       hasOtherOption: task.multipleChoice?.hasOtherOption,
       addLoiTask: task.addLoiTask,
-      allowedTypes: [task.allowedTypes],
     }) as FormGroup;
+
+    if (task.type === TaskType.MAP_A_NEW_SITE) {
+      control.addControl(
+        'allowedTypes',
+        this.formBuilder.control(task.allowedTypes, Validators.required)
+      );
+    }
 
     if (task.condition) {
       control.addControl(
