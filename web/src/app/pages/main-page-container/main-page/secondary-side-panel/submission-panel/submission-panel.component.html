@@ -60,9 +60,9 @@ limitations under the License.
                 </div>
                 <!-- Geometry task types -->
                 <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.CAPTURE_LOCATION || task.type === taskType.DRAW_AREA">
-                  <div class="submission-response-geometry" [ngClass]="{'selected-submission-response-geometry': task.id === selectedTaskId}">
+                  <div class="submission-response-geometry" [ngClass]="{'selected-submission-response-geometry': task.id === selectedTaskId}" (click)="selectGeometry(task)">
                     <div class="submission-response-geometry-number" [ngStyle]="{ 'background-color': this.submission?.job.color ?? 'black' }">
-                      {{i}}
+                      {{i + 1}}
                     </div>
                     <div *ngIf="task.type === taskType.DROP_PIN || task.type === taskType.DRAW_AREA" class="submission-response-geometry-label">
                       {{task.id}}
