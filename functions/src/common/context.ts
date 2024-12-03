@@ -15,10 +15,12 @@
  */
 
 import {Datastore} from './datastore';
+import {MailService} from './mail-service';
 import {initializeApp, getApp} from 'firebase-admin/app';
 import {getFirestore} from 'firebase-admin/firestore';
 
 let datastore: Datastore | undefined;
+let mailService: MailService | undefined;
 
 export function initializeFirebaseApp() {
   try {
@@ -34,6 +36,19 @@ export function getDatastore(): Datastore {
     datastore = new Datastore(getFirestore());
   }
   return datastore;
+}
+
+export async function getMailService(): Promise<MailService | undefined> {
+  if (!mailService && datastore) {
+    try {
+      const config = await MailService.gerMailServerConfig(datastore);
+
+      mailService = new MailService(config);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return mailService;
 }
 
 export function resetDatastore() {
