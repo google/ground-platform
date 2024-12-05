@@ -120,13 +120,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  onJobListSelect(): void | undefined {
-    if (!this.job?.id) {
-      return;
-    }
-    this.navigationService.showLocationOfInterestList(this.job.id);
-  }
-
   isSelectedLoi(node: DynamicFlatNode): boolean {
     return node.loi?.id === this.loiId;
   }
