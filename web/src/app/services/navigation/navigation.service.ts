@@ -22,7 +22,7 @@ import {
   NavigationExtras,
   Router,
 } from '@angular/router';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 /**
@@ -33,12 +33,11 @@ import {map} from 'rxjs/operators';
   providedIn: 'root',
 })
 export class NavigationService {
-  private static readonly JOB_ID_FRAGMENT_PARAM = 'l';
-  private static readonly LOI_ID_FRAGMENT_PARAM = 'f';
-  private static readonly LOI_JOB_ID_FRAGMENT_PARAM = 'fl';
-  private static readonly SUBMISSION_ID_FRAGMENT_PARAM = 'o';
-  private static readonly TASK_ID_FRAGMENT_PARAM = 't';
+  static readonly LOI_SEGMENT = 'site';
+  static readonly LOI_ID = 'siteId';
   static readonly JOB_ID_NEW = 'new';
+  static readonly SUBMISSION_SEGMENT = 'submission';
+  static readonly SUBMISSION_ID = 'submissionId';
   static readonly SUBMISSION_ID_NEW = 'new';
   static readonly SURVEY_ID_NEW = 'new';
   static readonly SURVEY_ID = 'surveyId';
@@ -47,6 +46,8 @@ export class NavigationService {
   static readonly SURVEYS_SEGMENT = 'surveys';
   static readonly SURVEYS_CREATE = 'create';
   static readonly SURVEYS_EDIT = 'edit';
+  static readonly TASK_SEGMENT = 'task';
+  static readonly TASK_ID = 'taskId';
   static readonly JOB_SEGMENT = 'job';
   static readonly ERROR = 'error';
   static readonly ABOUT = 'about';
@@ -54,14 +55,10 @@ export class NavigationService {
 
   private sidePanelExpanded = true;
 
-  // TODO: remove this logic once the new side panel replaces the old one
-  private fragmentParamsToSideNavMode(params: HttpParams): SideNavMode {
-    const submissionId = params.get(
-      NavigationService.SUBMISSION_ID_FRAGMENT_PARAM
-    );
-    const loiId = params.get(NavigationService.LOI_ID_FRAGMENT_PARAM);
-    const loiJobId = params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM);
-
+  private getSideNavMode(
+    loiId: string | null,
+    submissionId: string | null
+  ): SideNavMode {
     if (submissionId) {
       if (submissionId.includes('null')) {
         this.error(new Error('Check your URL. Submission id was set to null'));
@@ -76,22 +73,11 @@ export class NavigationService {
       }
       return SideNavMode.JOB_LIST;
     }
-    if (loiJobId) {
-      if (loiJobId.includes('null')) {
-        this.error(
-          new Error(
-            'Check your URL. Location of interest id and/or job id was set to null'
-          )
-        );
-      }
-      return SideNavMode.LOI_LIST;
-    }
     return SideNavMode.JOB_LIST;
   }
 
   private activatedRoute?: ActivatedRoute;
   private surveyId$?: Observable<string | null>;
-  private jobId$?: Observable<string | null>;
   private loiId$?: Observable<string | null>;
   private submissionId$?: Observable<string | null>;
   private taskId$?: Observable<string | null>;
@@ -109,33 +95,29 @@ export class NavigationService {
     this.surveyId$ = route.paramMap.pipe(
       map(params => params.get(NavigationService.SURVEY_ID))
     );
-    // Pipe values from URL fragment.
-    const fragmentParams$ = route.fragment.pipe(
-      map(fragment => new HttpParams({fromString: fragment || ''}))
+    this.loiId$ = route.paramMap.pipe(
+      map(params => params.get(NavigationService.LOI_ID))
     );
-    this.jobId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.JOB_ID_FRAGMENT_PARAM))
+
+    this.submissionId$ = route.paramMap.pipe(
+      map(params => params.get(NavigationService.SUBMISSION_ID))
     );
-    this.loiId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.LOI_ID_FRAGMENT_PARAM))
+
+    this.taskId$ = route.paramMap.pipe(
+      map(params => params.get(NavigationService.TASK_ID))
     );
-    this.submissionId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.SUBMISSION_ID_FRAGMENT_PARAM))
-    );
-    this.taskId$ = fragmentParams$.pipe(
-      map(params => params.get(NavigationService.TASK_ID_FRAGMENT_PARAM))
-    );
-    this.sideNavMode$ = fragmentParams$.pipe(
-      map(params => this.fragmentParamsToSideNavMode(params))
+
+    this.sideNavMode$ = route.paramMap.pipe(
+      map(params => {
+        const loiId = params.get(NavigationService.LOI_ID);
+        const submissionId = params.get(NavigationService.SUBMISSION_ID);
+        return this.getSideNavMode(loiId, submissionId);
+      })
     );
   }
 
   getSurveyId$(): Observable<string | null> {
     return this.surveyId$!;
-  }
-
-  getJobId$(): Observable<string | null> {
-    return this.jobId$!;
   }
 
   getLocationOfInterestId$(): Observable<string | null> {
@@ -183,85 +165,37 @@ export class NavigationService {
   }
 
   /**
-   * Get current LOI id in the URL fragment.
+   * Navigate to the current URL, updating the LOI id in the URL fragment.
    */
-  getLocationOfInterestId(): string | null {
-    return this.getFragmentParams().get(
-      NavigationService.LOI_ID_FRAGMENT_PARAM
+  selectLocationOfInterest(surveyId: string, loiId: string) {
+    this.router.navigateByUrl(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.LOI_SEGMENT}/${loiId}`
     );
   }
 
-  /**
-   * Navigate to the current URL, updating the LOI id in the URL fragment.
-   */
-  selectLocationOfInterest(id: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = id;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+  showSubmissionDetail(surveyId: string, loiId: string, submissionId: string) {
+    this.router.navigateByUrl(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.LOI_SEGMENT}/${loiId}/${NavigationService.SUBMISSION_SEGMENT}/${submissionId}`
+    );
   }
 
-  showLocationOfInterestList(jobId: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_JOB_ID_FRAGMENT_PARAM] = jobId;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
-  }
-
-  showSubmissionDetail(jobId: string, submissionId: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = jobId;
-    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
-  }
-
-  showSubmissionDetailWithHighlightedTask(taskId: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] =
-      this.getLocationOfInterestId()!;
-    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] =
-      this.getSubmissionId()!;
-    newParam[NavigationService.TASK_ID_FRAGMENT_PARAM] = taskId;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+  showSubmissionDetailWithHighlightedTask(
+    surveyId: string,
+    loiId: string,
+    submissionId: string,
+    taskId: string
+  ) {
+    this.router.navigateByUrl(
+      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.LOI_SEGMENT}/${loiId}/${NavigationService.SUBMISSION_SEGMENT}/${submissionId}/${NavigationService.TASK_SEGMENT}/${taskId}`
+    );
   }
 
   clearLocationOfInterestId() {
-    this.setFragmentParams(new HttpParams({fromString: ''}));
-  }
-
-  /**
-   * Get current submission id in the URL fragment.
-   */
-  getSubmissionId(): string | null {
-    return this.getFragmentParams().get(
-      NavigationService.SUBMISSION_ID_FRAGMENT_PARAM
-    );
-  }
-
-  /**
-   * Navigate to the current URL, updating the submission id in the URL
-   * fragment.
-   */
-  editSubmission(loiId: string, submissionId: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = loiId;
-    newParam[NavigationService.SUBMISSION_ID_FRAGMENT_PARAM] = submissionId;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+    this.loiId$ = of('');
   }
 
   clearSubmissionId() {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] =
-      this.getLocationOfInterestId()!;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
-  }
-
-  /**
-   * Navigate to the current URL, updating the job id in the URL
-   * fragment.
-   */
-  customizeJob(id: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.JOB_ID_FRAGMENT_PARAM] = id;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
+    this.submissionId$ = of('');
   }
 
   /**
@@ -350,7 +284,7 @@ export class NavigationService {
       {
         matrixParams: 'ignored',
         queryParams: 'ignored',
-        paths: 'exact',
+        paths: 'subset',
         fragment: 'ignored',
       } as IsActiveMatchOptions
     );
@@ -380,6 +314,4 @@ export class NavigationService {
 export enum SideNavMode {
   JOB_LIST = 1,
   SUBMISSION = 2,
-  LOI = 3,
-  LOI_LIST = 4,
 }

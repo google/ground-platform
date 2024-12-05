@@ -95,6 +95,21 @@ const routes: Routes = [
     component: TermsComponent,
     canActivate: [AuthGuard],
   },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.LOI_SEGMENT}/:${NavigationService.LOI_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.LOI_SEGMENT}/:${NavigationService.LOI_ID}/${NavigationService.SUBMISSION_SEGMENT}/:${NavigationService.SUBMISSION_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.LOI_SEGMENT}/:${NavigationService.LOI_ID}/${NavigationService.SUBMISSION_SEGMENT}/:${NavigationService.SUBMISSION_ID}/${NavigationService.TASK_SEGMENT}/:${NavigationService.TASK_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
 ];
 const config = RouterModule.forRoot(routes, {});
 

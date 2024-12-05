@@ -83,8 +83,9 @@ describe('MapComponent', () => {
     'job002 name',
     /* tasks= */ Map()
   );
+  const surveyId = 'survey001';
   const mockSurvey = new Survey(
-    'survey001',
+    surveyId,
     'title1',
     'description1',
     /* jobs= */ Map({
@@ -391,7 +392,7 @@ describe('MapComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(poiId1);
+    ).toHaveBeenCalledOnceWith(surveyId, poiId1);
   });
 
   it('should select loi when polygon is clicked', () => {
@@ -402,7 +403,7 @@ describe('MapComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(polygonLoiId1);
+    ).toHaveBeenCalledOnceWith(surveyId, polygonLoiId1);
   });
 
   it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
@@ -613,7 +614,7 @@ describe('MapComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(polygonLoiId1);
+    ).toHaveBeenCalledOnceWith(surveyId, polygonLoiId1);
   }));
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {
