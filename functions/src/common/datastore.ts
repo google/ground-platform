@@ -48,6 +48,11 @@ export const passlistEntry = (entryId: string) => `passlist/${entryId}`;
 export const integrations = () => config() + '/integrations';
 
 /**
+ * Returns the path of mail doc.
+ */
+export const mail = () => config() + '/mail';
+
+/**
  * Returns path to survey colection. This is a function for consistency with other path functions.
  */
 export const surveys = () => 'surveys';
@@ -129,8 +134,8 @@ export class Datastore {
     return this.db_.collection(integrations() + '/propertyGenerators').get();
   }
 
-  fetchMailServerConfig() {
-    return this.db_.doc(config() + '/mailServer').get();
+  fetchMail() {
+    return this.db_.doc(mail()).get();
   }
 
   fetchSurvey(surveyId: string) {

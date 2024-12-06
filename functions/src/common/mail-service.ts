@@ -1,6 +1,11 @@
 import * as nodemailer from 'nodemailer';
 import {Datastore} from './datastore';
 
+type MailConfig = {
+  defaultServer?: string;
+  servers?: {[key: string]: MailServerConfig};
+};
+
 type MailServerConfig = {
   host: string;
   port: number;
@@ -10,7 +15,6 @@ type MailServerConfig = {
 };
 
 export interface MailServiceEmail {
-  from?: string;
   to: string;
   subject: string;
   html: string;
@@ -19,8 +23,8 @@ export interface MailServiceEmail {
 export class MailService {
   private transporter_: any;
 
-  constructor(config: MailServerConfig) {
-    const {host, port, username, password, sender} = config;
+  constructor(mailServerConfig: MailServerConfig) {
+    const {host, port, username, password, sender} = mailServerConfig;
 
     this.transporter_ = nodemailer.createTransport({
       host,
@@ -48,12 +52,15 @@ export class MailService {
   }
 
   static async gerMailServerConfig(db: Datastore): Promise<MailServerConfig> {
-    const mailServerConfig = await db.fetchMailServerConfig();
-
-    if (mailServerConfig.exists) {
-      return mailServerConfig.data() as MailServerConfig;
-    } else {
+    const mail = await db.fetchMail();
+    if (!mail.exists) throw new Error('Unable to find Mail Configuration');
+    const mailConfig = mail.data() as MailConfig;
+    if (!mailConfig.defaultServer)
+      throw new Error('Unable to find Default Server');
+    const mailServerConfig =
+      mailConfig.servers && mailConfig.servers[mailConfig.defaultServer];
+    if (!mailServerConfig)
       throw new Error('Unable to find Mail Server Configuration');
-    }
+    return mailServerConfig;
   }
 }
