@@ -38,9 +38,19 @@ type pseudoGeoJsonGeometry = {
 export const config = () => 'config';
 
 /**
+ * Returns the path of passlist entry doc with the specified id.
+ */
+export const passlistEntry = (entryId: string) => `passlist/${entryId}`;
+
+/**
  * Returns the path of integrations doc.
  */
 export const integrations = () => config() + '/integrations';
+
+/**
+ * Returns the path of mail doc.
+ */
+export const mail = () => config() + '/mail';
 
 /**
  * Returns path to survey colection. This is a function for consistency with other path functions.
@@ -122,6 +132,10 @@ export class Datastore {
 
   fetchPropertyGenerators() {
     return this.db_.collection(integrations() + '/propertyGenerators').get();
+  }
+
+  fetchMail() {
+    return this.db_.doc(mail()).get();
   }
 
   fetchSurvey(surveyId: string) {
