@@ -39,9 +39,9 @@ export function getDatastore(): Datastore {
 }
 
 export async function getMailService(): Promise<MailService | undefined> {
-  if (!mailService && datastore) {
+  if (!mailService) {
     try {
-      const config = await MailService.gerMailServerConfig(datastore);
+      const config = await MailService.gerMailServerConfig(getDatastore());
 
       mailService = new MailService(config);
     } catch (e) {
