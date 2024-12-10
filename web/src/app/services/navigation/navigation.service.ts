@@ -33,11 +33,10 @@ import {map} from 'rxjs/operators';
   providedIn: 'root',
 })
 export class NavigationService {
-  private static readonly JOB_ID_FRAGMENT_PARAM = 'l';
-  private static readonly LOI_ID_FRAGMENT_PARAM = 'f';
-  private static readonly LOI_JOB_ID_FRAGMENT_PARAM = 'fl';
-  private static readonly SUBMISSION_ID_FRAGMENT_PARAM = 'o';
-  private static readonly TASK_ID_FRAGMENT_PARAM = 't';
+  private static readonly JOB_ID_FRAGMENT_PARAM = 'job';
+  private static readonly LOI_ID_FRAGMENT_PARAM = 'site';
+  private static readonly SUBMISSION_ID_FRAGMENT_PARAM = 'submission';
+  private static readonly TASK_ID_FRAGMENT_PARAM = 'task';
   static readonly JOB_ID_NEW = 'new';
   static readonly SUBMISSION_ID_NEW = 'new';
   static readonly SURVEY_ID_NEW = 'new';
@@ -60,7 +59,6 @@ export class NavigationService {
       NavigationService.SUBMISSION_ID_FRAGMENT_PARAM
     );
     const loiId = params.get(NavigationService.LOI_ID_FRAGMENT_PARAM);
-    const loiJobId = params.get(NavigationService.LOI_JOB_ID_FRAGMENT_PARAM);
 
     if (submissionId) {
       if (submissionId.includes('null')) {
@@ -75,16 +73,6 @@ export class NavigationService {
         );
       }
       return SideNavMode.JOB_LIST;
-    }
-    if (loiJobId) {
-      if (loiJobId.includes('null')) {
-        this.error(
-          new Error(
-            'Check your URL. Location of interest id and/or job id was set to null'
-          )
-        );
-      }
-      return SideNavMode.LOI_LIST;
     }
     return SideNavMode.JOB_LIST;
   }
@@ -197,12 +185,6 @@ export class NavigationService {
   selectLocationOfInterest(id: string) {
     const newParam: {[key: string]: string} = {};
     newParam[NavigationService.LOI_ID_FRAGMENT_PARAM] = id;
-    this.setFragmentParams(new HttpParams({fromObject: newParam}));
-  }
-
-  showLocationOfInterestList(jobId: string) {
-    const newParam: {[key: string]: string} = {};
-    newParam[NavigationService.LOI_JOB_ID_FRAGMENT_PARAM] = jobId;
     this.setFragmentParams(new HttpParams({fromObject: newParam}));
   }
 
@@ -380,6 +362,4 @@ export class NavigationService {
 export enum SideNavMode {
   JOB_LIST = 1,
   SUBMISSION = 2,
-  LOI = 3,
-  LOI_LIST = 4,
 }
