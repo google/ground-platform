@@ -44,7 +44,7 @@ export class TermsComponent implements OnInit {
   async ngOnInit() {
     const text = await this.dataStore.getTermsOfService();
 
-    this.termsOfServiceText = await parse(text.replace(/#NEWLINE#/g, '\n'));
+    this.termsOfServiceText = await parse(text);
   }
 
   onContinueButtonClick() {

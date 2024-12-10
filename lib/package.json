@@ -28,6 +28,7 @@
     "@ground/proto": "file:../proto",
     "firebase-functions": "^5.0.1",
     "immutable": "^4.3.6",
+    "long": "^5.2.3",
     "protobufjs": "^7.3.0"
   },
   "devDependencies": {
