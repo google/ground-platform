@@ -22,19 +22,29 @@
   .survey-detail-card {
     --mdc-elevated-card-container-elevation: 0;
 
+    .detail-content-with-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
     .card-row {
       :nth-child(1) {
         flex: 1;
       }
 
+      p {
+        margin-block-end: 0;
+      }
+
       &.edit-survey-details {
         margin-top: 12px;
       }
+    }
 
-      &.delete-survey {
-        display: flex;
-        align-items: center;
-      }
+    .mat-mdc-card-content {
+      padding: 24px;
     }
   }
 }
