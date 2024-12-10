@@ -39,7 +39,7 @@ export class AppComponent {
   private initGoogleMap(): void {
     const script = this.doc.createElement('script');
     script.type = 'text/javascript';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=marker`;
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(script);
   }
