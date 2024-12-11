@@ -28,11 +28,9 @@ export async function onCreatePasslistEntryHandler(
 
   const db = getDatastore();
 
-  const templateDoc = await db.fetchMailTemplate('passlisted');
+  const template = await db.fetchMailTemplate('passlisted');
 
-  if (templateDoc) {
-    const template = templateDoc.data();
-
+  if (template) {
     const {subject, html} = template;
 
     const mail = {
