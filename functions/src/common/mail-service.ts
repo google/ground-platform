@@ -56,7 +56,12 @@ export class MailService {
     });
   }
 
-  async sendMail(email: MailServiceEmail) {
+  /**
+   * Sends an email.
+   *
+   * @param email - Email object containing recipient, subject, and body.
+   */
+  async sendMail(email: MailServiceEmail): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       this.transporter_.sendMail(
         {from: this.sender_, ...email},
