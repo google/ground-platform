@@ -140,8 +140,8 @@ export class Datastore {
     return this.db_.collection(integrations() + '/propertyGenerators').get();
   }
 
-  fetchMail() {
-    return this.db_.doc(mail()).get();
+  fetchMailConfig() {
+    return this.fetchDoc_(mail());
   }
 
   fetchSurvey(surveyId: string) {
