@@ -57,7 +57,7 @@ export class MailService {
     await new Promise<void>((resolve, reject) => {
       this.transporter_.sendMail(
         {from: this.sender_, ...email},
-        (error: Error | any, _info: any) => {
+        (error: Error | any, _: any) => {
           if (error) {
             // 501 and 550 are errors from the mail server: email address not found
             if (error.responseCode === 501 || error.responseCode === 550) {
@@ -74,12 +74,11 @@ export class MailService {
   }
 
   static async gerMailServerConfig(db: Datastore): Promise<MailServerConfig> {
-    const mail = await db.fetchMail();
-    if (!mail.exists) throw new Error('Unable to find Mail Configuration');
-    const mailConfig = mail.data() as MailConfig;
-    const mailServerConfig = mailConfig.server;
+    const mailConfig = (await db.fetchMailConfig()) as MailConfig;
+    if (!mailConfig) throw new Error('Unable to find mail configuration');
+    const {server: mailServerConfig} = mailConfig;
     if (!mailServerConfig)
-      throw new Error('Unable to find Mail Server Configuration');
+      throw new Error('Mail server config not found in /config/mail/server');
     return mailServerConfig;
   }
 }

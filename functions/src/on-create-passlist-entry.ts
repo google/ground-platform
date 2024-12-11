@@ -30,17 +30,20 @@ export async function onCreatePasslistEntryHandler(
 
   const template = await db.fetchMailTemplate('passlisted');
 
-  if (template) {
-    const {subject, html} = template;
-
-    const mail = {
-      to: entryId,
-      subject,
-      html: stringFormat(html || '', [entryId]),
-    } as MailServiceEmail;
-
-    const mailService = await getMailService();
-
-    await mailService?.sendMail(mail);
+  if (!template) {
+    console.error('Template not found in /config/mail/templates/passlisted');
+    return;
   }
+
+  const {subject, html} = template;
+
+  const mail = {
+    to: entryId,
+    subject,
+    html: stringFormat(html || '', [entryId]),
+  } as MailServiceEmail;
+
+  const mailService = await getMailService();
+
+  await mailService?.sendMail(mail);
 }
