@@ -18,8 +18,7 @@ import * as nodemailer from 'nodemailer';
 import {Datastore} from './datastore';
 
 type MailConfig = {
-  defaultServer?: string;
-  servers?: MailServerConfig[];
+  server?: MailServerConfig;
 };
 
 type MailServerConfig = {
@@ -78,11 +77,7 @@ export class MailService {
     const mail = await db.fetchMail();
     if (!mail.exists) throw new Error('Unable to find Mail Configuration');
     const mailConfig = mail.data() as MailConfig;
-    if (!mailConfig.defaultServer)
-      throw new Error('Unable to find Default Server');
-    const mailServerConfig = mailConfig.servers?.find(
-      ({id}) => id === mailConfig.defaultServer
-    );
+    const mailServerConfig = mailConfig.server;
     if (!mailServerConfig)
       throw new Error('Unable to find Mail Server Configuration');
     return mailServerConfig;
