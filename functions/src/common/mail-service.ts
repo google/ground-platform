@@ -36,6 +36,9 @@ export interface MailServiceEmail {
   html: string;
 }
 
+/**
+ * Service for sending emails.
+ */
 export class MailService {
   private transporter_: nodemailer.Transporter;
   private sender_: string;
@@ -73,6 +76,9 @@ export class MailService {
     });
   }
 
+  /**
+   * Retrieves the mail server configuration from the database.
+   */
   static async getMailServerConfig(db: Datastore): Promise<MailServerConfig> {
     const mailConfig = (await db.fetchMailConfig()) as MailConfig;
     if (!mailConfig) throw new Error('Unable to find mail configuration');
