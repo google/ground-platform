@@ -91,6 +91,12 @@ export const submissions = (surveyId: string) =>
 export const submission = (surveyId: string, submissionId: string) =>
   submissions(surveyId) + '/' + submissionId;
 
+/**
+ * Returns the path of template doc with the specified id.
+ */
+export const mailTemplate = (templateId: string) =>
+  `${mail()}/templates/${templateId}`;
+
 export class Datastore {
   private db_: firestore.Firestore;
 
@@ -200,6 +206,10 @@ export class Datastore {
 
       return [...importedLoisSnapshot.docs, ...fieldDataLoisSnapshot.docs];
     }
+  }
+
+  fetchMailTemplate(templateId: string) {
+    return this.fetchDoc_(mailTemplate(templateId));
   }
 
   fetchSheetsConfig(surveyId: string) {
