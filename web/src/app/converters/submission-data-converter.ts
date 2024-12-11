@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
+import {timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {List, Map} from 'immutable';
-import Long from 'long';
 
 import {AuditInfo} from 'app/models/audit-info.model';
+import {Geometry} from 'app/models/geometry/geometry';
 import {Point} from 'app/models/geometry/point';
 import {Polygon} from 'app/models/geometry/polygon';
 import {Job} from 'app/models/job.model';
@@ -38,18 +38,6 @@ import {
 
 import Pb = GroundProtos.ground.v1beta1;
 
-function timestampToInt(
-  timestamp: GroundProtos.google.protobuf.ITimestamp | null | undefined
-): number {
-  if (!timestamp) return 0;
-
-  return (
-    (Long.isLong(timestamp.seconds)
-      ? timestamp.seconds.toInt()
-      : timestamp.seconds || 0) * 1000
-  );
-}
-
 function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   return new AuditInfo(
     new User(pb.userId!, pb.emailAddress!, true, pb.displayName!, pb.photoUrl!),
@@ -58,50 +46,74 @@ function authInfoPbToModel(pb: Pb.IAuditInfo): AuditInfo {
   );
 }
 
-function taskDataPbToModel(pb: Pb.ITaskData[], job: Job): SubmissionData {
+function taskDataPbArrayToModel(pb: Pb.ITaskData[]): SubmissionData {
   const submissionData: {[k: string]: Result} = {};
 
   pb.forEach(taskData => {
-    const task = job.tasks?.get(taskData.taskId!);
-
-    if (!task) return;
-
-    let value = null;
-
-    const {
-      textResponse,
-      numberResponse,
-      dateTimeResponse,
-      multipleChoiceResponses,
-      drawGeometryResult,
-      captureLocationResult,
-      takePhotoResult,
-    } = taskData;
-
-    if (textResponse) value = textResponse.text;
-    else if (numberResponse) value = numberResponse.number;
-    else if (dateTimeResponse)
-      value = new Date(timestampToInt(dateTimeResponse.dateTime));
-    else if (multipleChoiceResponses) {
-      value = new MultipleSelection(
-        task.multipleChoice?.options.filter(({id: optionId}) =>
-          multipleChoiceResponses!.selectedOptionIds?.includes(optionId)
-        ) || List([]),
-        multipleChoiceResponses.otherText
-      );
-    } else if (drawGeometryResult)
-      value = geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
-    else if (captureLocationResult)
-      value = new Point(
-        coordinatesPbToModel(captureLocationResult.coordinates!)
-      );
-    else if (takePhotoResult) value = takePhotoResult.photoPath;
-    else throw new Error('Error converting to Submission: invalid task data');
-
-    submissionData[task.id] = new Result(value!);
+    const result = taskDataPbToModel(taskData);
+    if (result !== null) {
+      submissionData[taskData.taskId!] = result;
+    }
   });
 
   return Map(submissionData);
+}
+
+function taskDataPbToModel(taskData: Pb.ITaskData): Result | null {
+  const value = taskDataPbToModelValue(taskData);
+  if (taskData.skipped) {
+    if (value) {
+      console.warn('Ignoring unexpected value on skipped task', value);
+    }
+    return new Result(null, true);
+  } else if (value === null) {
+    console.warn(
+      'Skipping unexpected missing value on non-skipped task',
+      taskData
+    );
+    return null;
+  } else if (value === undefined) {
+    console.warn(
+      'Skipping unexpected undefined value on non-skipped task',
+      taskData
+    );
+    return null;
+  } else {
+    return new Result(value, false);
+  }
+}
+
+function taskDataPbToModelValue(
+  taskData: Pb.ITaskData
+): string | number | Date | MultipleSelection | Geometry | null | undefined {
+  const {
+    textResponse,
+    numberResponse,
+    dateTimeResponse,
+    multipleChoiceResponses,
+    drawGeometryResult,
+    captureLocationResult,
+    takePhotoResult,
+  } = taskData;
+
+  if (textResponse) return textResponse.text;
+  else if (numberResponse) return numberResponse.number;
+  else if (dateTimeResponse)
+    return new Date(timestampToInt(dateTimeResponse.dateTime));
+  else if (multipleChoiceResponses) {
+    const {selectedOptionIds, otherText} = multipleChoiceResponses;
+
+    return new MultipleSelection(List(selectedOptionIds || []), otherText);
+  } else if (drawGeometryResult)
+    return geometryPbToModel(drawGeometryResult.geometry!) as Polygon;
+  else if (captureLocationResult)
+    return new Point(
+      coordinatesPbToModel(captureLocationResult.coordinates!),
+      captureLocationResult.accuracy || undefined,
+      captureLocationResult.altitude || undefined
+    );
+  else if (takePhotoResult) return takePhotoResult.photoPath;
+  else return null;
 }
 
 export function submissionDocToModel(
@@ -118,6 +130,6 @@ export function submissionDocToModel(
     job,
     authInfoPbToModel(pb.created!),
     authInfoPbToModel(pb.lastModified!),
-    taskDataPbToModel(pb.taskData, job)
+    taskDataPbArrayToModel(pb.taskData)
   );
 }

@@ -25,7 +25,7 @@
           #surveyDetails
           [title]="survey?.title"
           [description]="survey?.description"
-          (onValueChanges)="onDetailChanges($event)"
+          (onValueChanges)="onDetailsChange($event)"
         ></survey-details>
       </div>
     </mat-card-content>
@@ -48,10 +48,13 @@
 
   <mat-card class="survey-detail-card">
     <mat-card-content>
-      <div class="card-title">Delete survey</div>
-      <div class="card-row delete-survey">
-        <div>Permanently delete survey and associated data</div>
-
+      <div class="detail-content-with-button">
+        <div>
+          <div class="card-title">Delete survey</div>
+          <div class="card-row">
+            <div>Permanently delete survey and associated data</div>
+          </div>
+        </div>
         <button mat-flat-button (click)="openDeleteSurveyDialog()">
           Delete survey
         </button>

@@ -282,6 +282,13 @@ export class NavigationService {
   }
 
   /**
+   * Navigate to the about page
+   */
+  navigateToAboutPage() {
+    this.router.navigate([NavigationService.ABOUT]);
+  }
+
+  /**
    * Navigate to the terms of service page
    */
   navigateToTermsOfService() {

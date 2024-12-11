@@ -40,6 +40,7 @@ import {
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
+import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -56,6 +57,8 @@ describe('CreateSurveyComponent', () => {
   let activeSurvey$: Subject<Survey>;
   let lois: List<LocationOfInterest>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
+  let draftSurvey$: Subject<Survey>;
+  let draftSurveyServiceSpy: jasmine.SpyObj<DraftSurveyService>;
   let jobServiceSpy: jasmine.SpyObj<JobService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let taskServiceSpy: jasmine.SpyObj<TaskService>;
@@ -134,6 +137,7 @@ describe('CreateSurveyComponent', () => {
         'navigateToCreateSurvey',
         'navigateToEditSurvey',
         'getSidePanelExpanded',
+        'selectSurvey',
       ]
     );
     surveyId$ = new Subject<string | null>();
@@ -156,6 +160,13 @@ describe('CreateSurveyComponent', () => {
     surveyServiceSpy.updateDataSharingTerms.and.returnValue(
       new Promise(resolve => resolve(undefined))
     );
+
+    draftSurvey$ = new Subject<Survey>();
+    draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
+      'DraftSurveyService',
+      ['init', 'getSurvey$', 'updateState', 'updateSurvey']
+    );
+    draftSurveyServiceSpy.getSurvey$.and.returnValue(draftSurvey$);
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'addOrUpdateJob',
@@ -193,6 +204,7 @@ describe('CreateSurveyComponent', () => {
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
+        {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
         {provide: JobService, useValue: jobServiceSpy},
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
         {provide: ActivatedRoute, useValue: route},
@@ -288,9 +300,9 @@ describe('CreateSurveyComponent', () => {
     }));
 
     it('navigates to edit survey page', () => {
-      expect(
-        navigationServiceSpy.navigateToEditSurvey
-      ).toHaveBeenCalledOnceWith(surveyId);
+      expect(navigationServiceSpy.selectSurvey).toHaveBeenCalledOnceWith(
+        surveyId
+      );
     });
   });
 
