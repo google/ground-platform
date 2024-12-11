@@ -31,24 +31,15 @@ export function initializeFirebaseApp() {
 }
 
 export function getDatastore(): Datastore {
-  if (!datastore) {
-    initializeFirebaseApp();
-    datastore = new Datastore(getFirestore());
-  }
-  return datastore;
+  if (datastore) return datastore;
+  initializeFirebaseApp();
+  return new Datastore(getFirestore());
 }
 
 export async function getMailService(): Promise<MailService | undefined> {
-  if (!mailService) {
-    try {
-      const config = await MailService.gerMailServerConfig(getDatastore());
-
-      mailService = new MailService(config);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  return mailService;
+  if (mailService) return mailService;
+  const config = await MailService.getMailServerConfig(getDatastore());
+  return new MailService(config);
 }
 
 export function resetDatastore() {

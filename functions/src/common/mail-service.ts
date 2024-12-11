@@ -73,7 +73,7 @@ export class MailService {
     });
   }
 
-  static async gerMailServerConfig(db: Datastore): Promise<MailServerConfig> {
+  static async getMailServerConfig(db: Datastore): Promise<MailServerConfig> {
     const mailConfig = (await db.fetchMailConfig()) as MailConfig;
     if (!mailConfig) throw new Error('Unable to find mail configuration');
     const {server: mailServerConfig} = mailConfig;
