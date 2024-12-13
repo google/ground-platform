@@ -35,12 +35,12 @@ export async function onCreatePasslistEntryHandler(
     return;
   }
 
-  const {subject, html} = template;
+  const {subject, html: htmlBody} = template;
 
   const mail = {
     to: entryId,
     subject,
-    html: stringFormat(html || '', [entryId]),
+    html: stringFormat(htmlBody || '', [entryId]),
   } as MailServiceEmail;
 
   const mailService = await getMailService();

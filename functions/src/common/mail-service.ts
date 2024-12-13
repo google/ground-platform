@@ -15,6 +15,7 @@
  */
 
 import * as nodemailer from 'nodemailer';
+import sanitizeHtml from 'sanitize-html';
 import {Datastore} from './datastore';
 
 type MailConfig = {
@@ -62,9 +63,18 @@ export class MailService {
    * @param email - Email object containing recipient, subject, and body.
    */
   async sendMail(email: MailServiceEmail): Promise<void> {
+    const {html} = email;
+
+    const safeHtnl = sanitizeHtml(html, {
+      allowedTags: ['br', 'a'],
+      allowedAttributes: {
+        a: ['href'],
+      },
+    });
+
     await new Promise<void>((resolve, reject) => {
       this.transporter_.sendMail(
-        {from: this.sender_, ...email},
+        {from: this.sender_, ...email, html: safeHtnl},
         (error: Error | any, _: any) => {
           if (error) {
             // 501 and 550 are errors from the mail server: email address not found
