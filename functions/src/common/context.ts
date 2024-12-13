@@ -33,7 +33,8 @@ export function initializeFirebaseApp() {
 export function getDatastore(): Datastore {
   if (datastore) return datastore;
   initializeFirebaseApp();
-  return new Datastore(getFirestore());
+  datastore = new Datastore(getFirestore());
+  return datastore;
 }
 
 export async function getMailService(): Promise<MailService | undefined> {
@@ -42,7 +43,8 @@ export async function getMailService(): Promise<MailService | undefined> {
     getDatastore()
   );
   if (!mailServerConfig) return;
-  return new MailService(mailServerConfig);
+  mailService = new MailService(mailServerConfig);
+  return mailService;
 }
 
 export function resetDatastore() {
