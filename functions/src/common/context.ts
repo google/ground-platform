@@ -38,8 +38,11 @@ export function getDatastore(): Datastore {
 
 export async function getMailService(): Promise<MailService | undefined> {
   if (mailService) return mailService;
-  const config = await MailService.getMailServerConfig(getDatastore());
-  return new MailService(config);
+  const mailServerConfig = await MailService.getMailServerConfig(
+    getDatastore()
+  );
+  if (!mailServerConfig) return;
+  return new MailService(mailServerConfig);
 }
 
 export function resetDatastore() {

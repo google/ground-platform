@@ -84,12 +84,14 @@ export class MailService {
   /**
    * Retrieves the mail server configuration from the database.
    */
-  static async getMailServerConfig(db: Datastore): Promise<MailServerConfig> {
+  static async getMailServerConfig(
+    db: Datastore
+  ): Promise<MailServerConfig | undefined> {
     const mailConfig = (await db.fetchMailConfig()) as MailConfig;
-    if (!mailConfig) throw new Error('Unable to find mail configuration');
+    if (!mailConfig) console.error('Unable to find mail configuration');
     const {server: mailServerConfig} = mailConfig;
     if (!mailServerConfig)
-      throw new Error('Mail server config not found in /config/mail/server');
+      console.error('Mail server config not found in /config/mail/server');
     return mailServerConfig;
   }
 }
