@@ -65,7 +65,7 @@ export class MailService {
   async sendMail(email: MailServiceEmail): Promise<void> {
     const {html} = email;
 
-    const safeHtnl = sanitizeHtml(html, {
+    const safeHtml = sanitizeHtml(html, {
       allowedTags: ['br', 'a'],
       allowedAttributes: {
         a: ['href'],
@@ -74,7 +74,7 @@ export class MailService {
 
     await new Promise<void>((resolve, reject) => {
       this.transporter_.sendMail(
-        {from: this.sender_, ...email, html: safeHtnl},
+        {from: this.sender_, ...email, html: safeHtml},
         (error: Error | any, _: any) => {
           if (error) {
             // 501 and 550 are errors from the mail server: email address not found
@@ -98,10 +98,7 @@ export class MailService {
     db: Datastore
   ): Promise<MailServerConfig | undefined> {
     const mailConfig = (await db.fetchMailConfig()) as MailConfig;
-    if (!mailConfig) console.error('Unable to find mail configuration');
-    const {server: mailServerConfig} = mailConfig;
-    if (!mailServerConfig)
-      console.error('Mail server config not found in /config/mail/server');
-    return mailServerConfig;
+    if (!mailConfig?.server) console.error('Unable to find mail configuration');
+    return mailConfig?.server;
   }
 }
