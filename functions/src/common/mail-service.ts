@@ -72,23 +72,15 @@ export class MailService {
       },
     });
 
-    await new Promise<void>((resolve, reject) => {
-      this.transporter_.sendMail(
-        {from: this.sender_, ...email, html: safeHtml},
-        (error: Error | any, _: any) => {
-          if (error) {
-            // 501 and 550 are errors from the mail server: email address not found
-            if (error.responseCode === 501 || error.responseCode === 550) {
-              reject(new Error(error.response));
-            } else {
-              reject(error);
-            }
-          } else {
-            resolve();
-          }
-        }
-      );
-    });
+    try {
+      await this.transporter_.sendMail({
+        from: this.sender_,
+        ...email,
+        html: safeHtml,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   /**

@@ -20,6 +20,13 @@ import {getDatastore, getMailService} from './common/context';
 import {MailServiceEmail} from './common/mail-service';
 import {stringFormat} from './common/utils';
 
+/**
+ * Handles the creation of a passlist entry.
+ * This function is triggered by a Cloud Function on Firestore document creation.
+ *
+ * @param _ The QueryDocumentSnapshot object (unused in this function).
+ * @param context The EventContext object provided by the Cloud Functions framework.
+ */
 export async function onCreatePasslistEntryHandler(
   _: QueryDocumentSnapshot,
   context: EventContext
@@ -31,7 +38,7 @@ export async function onCreatePasslistEntryHandler(
   const template = await db.fetchMailTemplate('passlisted');
 
   if (!template) {
-    console.error('Template not found in /config/mail/templates/passlisted');
+    console.debug('Template not found in /config/mail/templates/passlisted');
     return;
   }
 
