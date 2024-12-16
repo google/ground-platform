@@ -38,7 +38,9 @@ export async function onCreatePasslistEntryHandler(
   const template = await db.fetchMailTemplate('passlisted');
 
   if (!template) {
-    console.debug('Template not found in /config/mail/templates/passlisted');
+    console.debug(
+      'Passlist notification email template not found in /config/mail/templates/passlisted'
+    );
     return;
   }
 

@@ -90,7 +90,7 @@ export class MailService {
     db: Datastore
   ): Promise<MailServerConfig | undefined> {
     const mailConfig = (await db.fetchMailConfig()) as MailConfig;
-    if (!mailConfig?.server) console.error('Unable to find mail configuration');
+    if (!mailConfig?.server) console.debug('Unable to find mail configuration');
     return mailConfig?.server;
   }
 }
