@@ -28,11 +28,11 @@ import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
-const sb = registry.getFieldIds(Pb.Submission);
+// const sb = registry.getFieldIds(Pb.Submission);
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 
 /** A dictionary of submissions values (array) keyed by loi ID. */
-type SubmissionDict = {[key: string]: any[]};
+// type SubmissionDict = {[key: string]: any[]};
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -95,46 +95,47 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const submissionsByLoi = await getSubmissionsByLoi(
+  const rows = await db.fetchLoisSubmissions(
     surveyId,
     jobId,
-    !canManageSurvey ? userId : undefined
+    !canManageSurvey ? userId : undefined,
+    250
   );
 
-  lois.forEach(loiDoc => {
+  for await (const row of rows) {
+    const [loiDoc, submissionDoc] = row;
     const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
-    if (loi instanceof Error) {
-      throw loi;
+    if (loi instanceof Error) throw loi;
+    if (submissionDoc) {
+      const submission = toMessage(submissionDoc.data(), Pb.Submission);
+      if (submission instanceof Error) throw submission;
+      writeRow(csvStream, loiProperties, tasks, loi, submission);
     }
-    // Submissions to be joined with the current LOI, resulting in one row
-    // per submission. For LOIs with no submissions, a single empty submission
-    // is added to ensure the LOI is represented in the output as a row with
-    // LOI fields, but no submission data.
-    const submissions = submissionsByLoi[loiDoc.id] || [{}];
-    submissions.forEach(submissionDict =>
-      writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
-    );
-  });
+  }
+
+  // const submissionsByLoi = await getSubmissionsByLoi(
+  //   surveyId,
+  //   jobId,
+  //   !canManageSurvey ? userId : undefined
+  // );
+
+  // lois.forEach(loiDoc => {
+  //   const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
+  //   if (loi instanceof Error) {
+  //     throw loi;
+  //   }
+  //   // Submissions to be joined with the current LOI, resulting in one row
+  //   // per submission. For LOIs with no submissions, a single empty submission
+  //   // is added to ensure the LOI is represented in the output as a row with
+  //   // LOI fields, but no submission data.
+  //   const submissions = submissionsByLoi[loiDoc.id] || [{}];
+  //   submissions.forEach(submissionDict =>
+  //     writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
+  //   );
+  // });
+
   res.status(HttpStatus.OK);
   csvStream.end();
-}
-
-function writeSubmissions(
-  csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
-  loiProperties: Set<string>,
-  tasks: Pb.ITask[],
-  loi: Pb.LocationOfInterest,
-  submissionDict: SubmissionDict
-) {
-  try {
-    const submission = toMessage(submissionDict, Pb.Submission);
-    if (submission instanceof Error) {
-      throw submission;
-    }
-    writeRow(csvStream, loiProperties, tasks, loi, submission);
-  } catch (e) {
-    console.debug('Skipping row', e);
-  }
 }
 
 function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
@@ -151,34 +152,52 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
   return headers.map(quote);
 }
 
-/**
- * Returns all submissions in the specified job, indexed by LOI ID.
- * Note: Indexes submissions by LOI id in memory. This consumes more
- * memory than iterating over and streaming both LOI and submission
- * collections simultaneously, but it's easier to read and maintain. This
- * function will need to be optimized to scale to larger datasets than
- * can fit in memory.
- */
-async function getSubmissionsByLoi(
-  surveyId: string,
-  jobId: string,
-  userId?: string
-): Promise<SubmissionDict> {
-  const db = getDatastore();
-  const submissions = await db.fetchAccessibleSubmissionsByJobId(
-    surveyId,
-    jobId,
-    userId
-  );
-  const submissionsByLoi: {[name: string]: any[]} = {};
-  submissions.forEach(submission => {
-    const loiId = submission.get(sb.loiId) as string;
-    const arr: any[] = submissionsByLoi[loiId] || [];
-    arr.push(submission.data());
-    submissionsByLoi[loiId] = arr;
-  });
-  return submissionsByLoi;
-}
+// /**
+//  * Returns all submissions in the specified job, indexed by LOI ID.
+//  * Note: Indexes submissions by LOI id in memory. This consumes more
+//  * memory than iterating over and streaming both LOI and submission
+//  * collections simultaneously, but it's easier to read and maintain. This
+//  * function will need to be optimized to scale to larger datasets than
+//  * can fit in memory.
+//  */
+// async function getSubmissionsByLoi(
+//   surveyId: string,
+//   jobId: string,
+//   userId?: string
+// ): Promise<SubmissionDict> {
+//   const db = getDatastore();
+//   const submissions = await db.fetchAccessibleSubmissionsByJobId(
+//     surveyId,
+//     jobId,
+//     userId
+//   );
+//   const submissionsByLoi: {[name: string]: any[]} = {};
+//   submissions.forEach(submission => {
+//     const loiId = submission.get(sb.loiId) as string;
+//     const arr: any[] = submissionsByLoi[loiId] || [];
+//     arr.push(submission.data());
+//     submissionsByLoi[loiId] = arr;
+//   });
+//   return submissionsByLoi;
+// }
+
+// function writeSubmissions(
+//   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
+//   loiProperties: Set<string>,
+//   tasks: Pb.ITask[],
+//   loi: Pb.LocationOfInterest,
+//   submissionDict: SubmissionDict
+// ) {
+//   try {
+//     const submission = toMessage(submissionDict, Pb.Submission);
+//     if (submission instanceof Error) {
+//       throw submission;
+//     }
+//     writeRow(csvStream, loiProperties, tasks, loi, submission);
+//   } catch (e) {
+//     console.debug('Skipping row', e);
+//   }
+// }
 
 function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
