@@ -121,12 +121,13 @@ describe('exportCsv()', () => {
   };
   const pointLoi1 = {
     id: 'loi100',
+    [l.id]: 'loi100',
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_001',
     [l.geometry]: {
       [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
     },
-    [l.submission_count]: 0,
+    [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.IMPORTED,
     [l.properties]: {
       name: {[pr.stringValue]: 'Dinagat Islands'},
@@ -135,6 +136,7 @@ describe('exportCsv()', () => {
   };
   const pointLoi2 = {
     id: 'loi200',
+    [l.id]: 'loi200',
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_002',
     [l.geometry]: {
