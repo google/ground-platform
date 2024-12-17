@@ -16,11 +16,13 @@
 
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
-import {DocumentData, GeoPoint} from 'firebase-admin/firestore';
+import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+import {leftOuterJoinSorted, QueryIterator} from './query-iterator';
+
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
 
@@ -136,7 +138,7 @@ export class Datastore {
     surveyId: string,
     jobId: string,
     userId?: string
-  ) {
+  ): Promise<QuerySnapshot> {
     if (!userId) {
       return this.db_
         .collection(submissions(surveyId))
@@ -190,6 +192,33 @@ export class Datastore {
 
   fetchSheetsConfig(surveyId: string) {
     return this.fetchDoc_(`${survey(surveyId)}/sheets/config`);
+  }
+
+  async fetchLoisSubmissions(
+    surveyId: string,
+    jobId: string,
+    userId: string | undefined,
+    page: number
+  ) {
+    const loisQuery = this.db_
+      .collection(lois(surveyId))
+      .where(l.jobId, '==', jobId)
+      .orderBy(l.id);
+    let submissionsQuery = this.db_
+      .collection(submissions(surveyId))
+      .where(sb.jobId, '==', jobId)
+      .orderBy(sb.loiId);
+    if (userId) {
+      submissionsQuery = submissionsQuery.where(sb.ownerId, '==', userId);
+    }
+    const loisIterator = new QueryIterator(loisQuery, page);
+    const submissionsIterator = new QueryIterator(submissionsQuery, page);
+    return leftOuterJoinSorted(
+      loisIterator,
+      v1 => v1.get(l.id),
+      submissionsIterator,
+      v2 => v2.get(sb.loiId)
+    );
   }
 
   async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
