@@ -92,25 +92,19 @@ export class NavigationService {
   init(route: ActivatedRoute) {
     this.activatedRoute = route;
     // Pipe values from URL query parameters.
-    this.surveyId$ = route.paramMap.pipe(
-      map(params => params.get(NavigationService.SURVEY_ID))
-    );
-    this.loiId$ = route.paramMap.pipe(
-      map(params => params.get(NavigationService.LOI_ID))
-    );
+    this.surveyId$ = route.paramMap.pipe(map(params => params.get(SURVEY_ID)));
+    this.loiId$ = route.paramMap.pipe(map(params => params.get(LOI_ID)));
 
     this.submissionId$ = route.paramMap.pipe(
-      map(params => params.get(NavigationService.SUBMISSION_ID))
+      map(params => params.get(SUBMISSION_ID))
     );
 
-    this.taskId$ = route.paramMap.pipe(
-      map(params => params.get(NavigationService.TASK_ID))
-    );
+    this.taskId$ = route.paramMap.pipe(map(params => params.get(TASK_ID)));
 
     this.sideNavMode$ = route.paramMap.pipe(
       map(params => {
-        const loiId = params.get(NavigationService.LOI_ID);
-        const submissionId = params.get(NavigationService.SUBMISSION_ID);
+        const loiId = params.get(LOI_ID);
+        const submissionId = params.get(SUBMISSION_ID);
         return this.getSideNavMode(loiId, submissionId);
       })
     );
@@ -169,13 +163,13 @@ export class NavigationService {
    */
   selectLocationOfInterest(surveyId: string, loiId: string) {
     this.router.navigateByUrl(
-      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.LOI_SEGMENT}/${loiId}`
+      `${SURVEY_SEGMENT}/${surveyId}/${LOI_SEGMENT}/${loiId}`
     );
   }
 
   showSubmissionDetail(surveyId: string, loiId: string, submissionId: string) {
     this.router.navigateByUrl(
-      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.LOI_SEGMENT}/${loiId}/${NavigationService.SUBMISSION_SEGMENT}/${submissionId}`
+      `${SURVEY_SEGMENT}/${surveyId}/${LOI_SEGMENT}/${loiId}/${SUBMISSION_SEGMENT}/${submissionId}`
     );
   }
 
@@ -186,7 +180,7 @@ export class NavigationService {
     taskId: string
   ) {
     this.router.navigateByUrl(
-      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.LOI_SEGMENT}/${loiId}/${NavigationService.SUBMISSION_SEGMENT}/${submissionId}/${NavigationService.TASK_SEGMENT}/${taskId}`
+      `${SURVEY_SEGMENT}/${surveyId}/${LOI_SEGMENT}/${loiId}/${SUBMISSION_SEGMENT}/${submissionId}/${TASK_SEGMENT}/${taskId}`
     );
   }
 
@@ -202,49 +196,46 @@ export class NavigationService {
    * Navigate to the URL with new survey id.
    */
   selectSurvey(id: string) {
-    this.router.navigateByUrl(`${NavigationService.SURVEY_SEGMENT}/${id}`);
+    this.router.navigateByUrl(`${SURVEY_SEGMENT}/${id}`);
   }
 
   /**
    * Navigate to the URL for new survey creation.
    */
   newSurvey() {
-    this.router.navigate([
-      NavigationService.SURVEY_SEGMENT,
-      NavigationService.SURVEY_ID_NEW,
-    ]);
+    this.router.navigate([SURVEY_SEGMENT, SURVEY_ID_NEW]);
   }
 
   /**
    * Navigate to the about page
    */
   navigateToAboutPage() {
-    this.router.navigate([NavigationService.ABOUT]);
+    this.router.navigate([ABOUT]);
   }
 
   /**
    * Navigate to the terms of service page
    */
   navigateToTermsOfService() {
-    this.router.navigate([NavigationService.TERMS]);
+    this.router.navigate([TERMS]);
   }
 
   /**
    * Navigate to the URL for viewing a list of available surveys.
    */
   navigateToSurveyList() {
-    this.router.navigate([NavigationService.SURVEYS_SEGMENT]);
+    this.router.navigate([SURVEYS_SEGMENT]);
   }
 
   navigateToCreateSurvey(surveyId: string | null, replaceUrl = false): void {
-    const url = `${NavigationService.SURVEYS_SEGMENT}${
+    const url = `${SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
-    }/${NavigationService.SURVEYS_CREATE}`;
+    }/${SURVEYS_CREATE}`;
     this.router.navigateByUrl(url, {replaceUrl});
   }
 
   navigateToEditSurvey(surveyId: string): void {
-    const url = `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}/${NavigationService.SURVEY_SEGMENT}`;
+    const url = `${SURVEY_SEGMENT}/${surveyId}/${SURVEYS_EDIT}/${SURVEY_SEGMENT}`;
     this.router.navigateByUrl(url);
   }
 
@@ -253,7 +244,7 @@ export class NavigationService {
    */
   navigateToEditJob(surveyId: string, jobId: string) {
     this.router.navigateByUrl(
-      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}/${NavigationService.JOB_SEGMENT}/${jobId}`
+      `${SURVEY_SEGMENT}/${surveyId}/${SURVEYS_EDIT}/${JOB_SEGMENT}/${jobId}`
     );
   }
 
@@ -261,7 +252,7 @@ export class NavigationService {
    * Navigate to the URL for signin.
    */
   signIn() {
-    this.router.navigate([NavigationService.SIGN_IN_SEGMENT]);
+    this.router.navigate([SIGN_IN_SEGMENT]);
   }
 
   /**
@@ -275,24 +266,21 @@ export class NavigationService {
    * Navigate to the URL for error.
    */
   error(error: Error) {
-    this.router.navigate([NavigationService.ERROR, {error}]);
+    this.router.navigate([ERROR, {error}]);
   }
 
   isSurveyPage(surveyId: string): boolean {
-    return this.router.isActive(
-      `${NavigationService.SURVEY_SEGMENT}/${surveyId}`,
-      {
-        matrixParams: 'ignored',
-        queryParams: 'ignored',
-        paths: 'subset',
-        fragment: 'ignored',
-      } as IsActiveMatchOptions
-    );
+    return this.router.isActive(`${SURVEY_SEGMENT}/${surveyId}`, {
+      matrixParams: 'ignored',
+      queryParams: 'ignored',
+      paths: 'subset',
+      fragment: 'ignored',
+    } as IsActiveMatchOptions);
   }
 
   isEditSurveyPage(surveyId: string): boolean {
     return this.router.isActive(
-      `${NavigationService.SURVEY_SEGMENT}/${surveyId}/${NavigationService.SURVEYS_EDIT}`,
+      `${SURVEY_SEGMENT}/${surveyId}/${SURVEYS_EDIT}`,
       {
         matrixParams: 'ignored',
         queryParams: 'ignored',
@@ -315,3 +303,23 @@ export enum SideNavMode {
   JOB_LIST = 1,
   SUBMISSION = 2,
 }
+
+const {
+  ABOUT,
+  ERROR,
+  LOI_ID,
+  LOI_SEGMENT,
+  JOB_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SUBMISSION_ID,
+  SUBMISSION_SEGMENT,
+  SURVEY_ID,
+  SURVEY_ID_NEW,
+  SURVEY_SEGMENT,
+  SURVEYS_CREATE,
+  SURVEYS_EDIT,
+  SURVEYS_SEGMENT,
+  TASK_ID,
+  TASK_SEGMENT,
+  TERMS,
+} = NavigationService;
