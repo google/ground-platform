@@ -65,12 +65,6 @@ export class MainPageComponent implements OnInit {
           id => id === NavigationService.JOB_ID_NEW && this.showTitleDialog()
         )
     );
-    // Show job dialog when non-null job id set in URL.
-    this.subscription.add(
-      this.navigationService
-        .getJobId$()
-        .subscribe(id => id && this.showEditJobDialog(id))
-    );
     // Show loi details when non-null LOI id set in URL.
     // Show submission details when submission id set in URL.
     this.subscription.add(
@@ -101,23 +95,6 @@ export class MainPageComponent implements OnInit {
       width: '500px',
       disableClose: true,
     });
-  }
-
-  private showEditJobDialog(jobId: string) {
-    this.activeSurvey$.pipe(take(1)).subscribe(survey =>
-      this.dialog.open(JobDialogComponent, {
-        autoFocus: jobId === NavigationService.JOB_ID_NEW,
-        data: {
-          surveyId:
-            survey.state === SurveyState.UNSAVED
-              ? NavigationService.SURVEY_ID_NEW
-              : survey.id,
-          createJob: jobId === NavigationService.SURVEY_ID_NEW,
-          job: survey.jobs?.get(jobId),
-        },
-        panelClass: 'job-dialog-container',
-      })
-    );
   }
 
   private loadLocationOfInterestDetails(loiId: string) {

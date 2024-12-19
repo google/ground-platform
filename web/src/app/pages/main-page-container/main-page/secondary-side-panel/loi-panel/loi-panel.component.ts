@@ -40,6 +40,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   name!: string | null;
   icon!: string;
   iconColor!: string;
+  surveyId!: string;
   submissions!: List<Submission>;
   isLoading = true;
 
@@ -56,8 +57,9 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
       this.surveyService
         .getActiveSurvey$()
         .pipe(
-          switchMap(survey =>
-            this.loiService.getSelectedLocationOfInterest$().pipe(
+          switchMap(survey => {
+            this.surveyId = survey.id;
+            return this.loiService.getSelectedLocationOfInterest$().pipe(
               switchMap(loi => {
                 this.iconColor = survey.getJob(loi.jobId)!.color!;
                 this.loi = loi;
@@ -66,8 +68,8 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
 
                 return this.submissionService.getSubmissions$();
               })
-            )
-          )
+            );
+          })
         )
         .subscribe(submissions => {
           this.submissions = submissions;
@@ -77,7 +79,11 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   onSelectSubmission(submissionId: string) {
-    this.navigationService.showSubmissionDetail(this.loi.id, submissionId);
+    this.navigationService.showSubmissionDetail(
+      this.surveyId,
+      this.loi.id,
+      submissionId
+    );
   }
 
   onClosePanel() {

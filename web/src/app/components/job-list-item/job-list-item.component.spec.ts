@@ -257,6 +257,6 @@ describe('JobListItemComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(loiId);
+    ).toHaveBeenCalledOnceWith(surveyId, loiId);
   });
 });

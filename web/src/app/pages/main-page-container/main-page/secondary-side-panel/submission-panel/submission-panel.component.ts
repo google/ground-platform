@@ -40,6 +40,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
+  surveyId: string | null = null;
   firebaseURLs = new Map<string, string>();
   isLoading = true;
 
@@ -52,6 +53,11 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.subscription.add(
+      this.navigationService.getSurveyId$().subscribe(surveyId => {
+        this.surveyId = surveyId;
+      })
+    );
     this.subscription.add(
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
@@ -92,7 +98,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   navigateToSubmissionList() {
-    this.navigationService.selectLocationOfInterest(this.submission!.loiId);
+    this.navigationService.selectLocationOfInterest(
+      this.surveyId!,
+      this.submission!.loiId
+    );
   }
 
   getTaskSubmissionResult({id: taskId}: Task): Result | undefined {
@@ -147,7 +156,12 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   selectGeometry(task: Task): void {
-    this.navigationService.showSubmissionDetailWithHighlightedTask(task.id);
+    this.navigationService.showSubmissionDetailWithHighlightedTask(
+      this.surveyId!,
+      this.submission!.loiId!,
+      this.submission!.id!,
+      task.id
+    );
   }
 
   ngOnDestroy(): void {

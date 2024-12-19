@@ -43,8 +43,6 @@
 @use 'app/pages/main-page-container/main-page/job-dialog/task-editor/_task-editor.component-theme' as task-editor;
 @use 'app/pages/main-page-container/main-page/job-dialog/_job-dialog.component-theme' as job-dialog;
 @use 'app/pages/main-page-container/main-page/map/_map.component-theme' as map;
-@use 'app/pages/main-page-container/main-page/side-panel/loi-panel/loi-panel-header/_loi-panel-header.component-theme' as loi-panel-header;
-@use 'app/pages/main-page-container/main-page/side-panel/loi-panel/_loi-panel.component-theme' as loi-panel;
 @use 'app/pages/main-page-container/main-page/side-panel/submission-form/_submission-form.component-theme' as submission-form;
 @use 'app/pages/main-page-container/main-page/survey-header/_survey-header.component-theme' as survey-header;
 @use 'app/pages/main-page-container/main-page/title-dialog/_title-dialog.component-theme' as title-dialog;
@@ -87,8 +85,6 @@ html {
   @include task-editor.theme($theme);
   @include job-dialog.theme($theme);
   @include map.theme($theme);
-  @include loi-panel-header.theme($theme);
-  @include loi-panel.theme($theme);
   @include submission-form.theme($theme);
   @include survey-header.theme($theme);
   @include title-dialog.theme($theme);

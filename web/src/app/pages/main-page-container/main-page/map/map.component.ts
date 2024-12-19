@@ -261,6 +261,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         const geometryType = (taskResult?.value as Geometry)?.geometryType;
         if (geometryType === GeometryType.POINT) {
           const marker = this.addSubmissionMarkerToMap(
+            this.submission!.loiId!,
+            this.submission!.id!,
             task.id,
             taskResult!.value as Point,
             this.submission?.job?.color,
@@ -269,6 +271,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
           this.markers.set(task.id, marker);
         } else if (geometryType === GeometryType.POLYGON) {
           const polygon = this.addSubmissionPolygonToMap(
+            this.submission!.loiId!,
+            this.submission!.id!,
             task.id,
             taskResult!.value as Polygon,
             this.submission?.job?.color
@@ -323,6 +327,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         );
         if (newLocationOfInterest) {
           this.navigationService.selectLocationOfInterest(
+            this.lastFitSurveyId,
             newLocationOfInterest.id
           );
         }
@@ -505,13 +510,17 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * Adds new marker that represents a geometry based task submission to existing map
    */
   private addSubmissionMarkerToMap(
+    loiId: string,
+    submissionId: string,
     taskId: string,
     geometry: Point,
     color: string | undefined,
     markerText: string
   ): google.maps.marker.AdvancedMarkerElement {
     const marker = this.addMarkerToMap(taskId, geometry, color, markerText);
-    marker.addListener('click', () => this.onSubmissionGeometryClick(taskId));
+    marker.addListener('click', () =>
+      this.onSubmissionGeometryClick(loiId, submissionId, taskId)
+    );
     return marker;
   }
 
@@ -519,14 +528,26 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this.disableMapClicks) {
       return;
     }
-    this.navigationService.selectLocationOfInterest(loiId);
+    this.navigationService.selectLocationOfInterest(
+      this.lastFitSurveyId,
+      loiId
+    );
   }
 
-  private onSubmissionGeometryClick(taskId: string) {
+  private onSubmissionGeometryClick(
+    loiId: string,
+    submissionId: string,
+    taskId: string
+  ) {
     if (this.disableMapClicks) {
       return;
     }
-    this.navigationService.showSubmissionDetailWithHighlightedTask(taskId);
+    this.navigationService.showSubmissionDetailWithHighlightedTask(
+      this.lastFitSurveyId,
+      loiId,
+      submissionId,
+      taskId
+    );
   }
 
   private onMarkerDragStart(
@@ -614,6 +635,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private selectSubmissionTask(taskId: string | null) {
+    if (!taskId) return;
+
     if (taskId === this.selectedSubmissionTaskId) {
       return;
     }
@@ -722,6 +745,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * Adds new polygon that represents a geometry based task submission to existing map
    */
   private addSubmissionPolygonToMap(
+    loiId: string,
+    submissionId: string,
     taskId: string,
     polygonModel: Polygon,
     color: string | undefined
@@ -729,7 +754,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const polygon = this.addPolygonToMap(polygonModel, color);
     polygon.set('id', taskId);
     polygon.set('color', color);
-    polygon.addListener('click', () => this.onSubmissionGeometryClick(taskId));
+    polygon.addListener('click', () =>
+      this.onSubmissionGeometryClick(loiId, submissionId, taskId)
+    );
     return polygon;
   }
 
@@ -763,7 +790,11 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const loi = LocationOfInterest.getSmallestByArea(candidateLois);
 
     this.zone.run(() => {
-      if (loi) this.navigationService.selectLocationOfInterest(loi.id);
+      if (loi)
+        this.navigationService.selectLocationOfInterest(
+          this.lastFitSurveyId,
+          loi.id
+        );
     });
   }
 

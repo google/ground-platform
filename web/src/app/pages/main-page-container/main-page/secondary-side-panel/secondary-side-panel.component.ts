@@ -34,19 +34,22 @@ export class SecondarySidePanelComponent {
   readonly sideNavMode = SideNavMode;
   readonly sideNavMode$: Observable<SideNavMode>;
 
-  locationOfInterestId = '';
-  submissionId = '';
+  locationOfInterestId: string | null = '';
+  submissionId: string | null = '';
 
   constructor(
     private route: ActivatedRoute,
     private navigationService: NavigationService
   ) {
     this.subscription.add(
-      this.route.fragment.subscribe(() => {
-        this.locationOfInterestId =
-          this.navigationService.getLocationOfInterestId() || '';
+      this.navigationService.getLocationOfInterestId$().subscribe(loiId => {
+        this.locationOfInterestId = loiId;
+      })
+    );
 
-        this.submissionId = this.navigationService.getSubmissionId() || '';
+    this.subscription.add(
+      this.navigationService.getSubmissionId$().subscribe(submissionId => {
+        this.submissionId = submissionId;
       })
     );
 
