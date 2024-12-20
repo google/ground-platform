@@ -45,6 +45,7 @@ const d = registry.getFieldIds(Pb.TaskData);
 const mq = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion);
 const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 const cl = registry.getFieldIds(Pb.TaskData.CaptureLocationResult);
+const a = registry.getFieldIds(Pb.AuditInfo);
 
 describe('exportCsv()', () => {
   let mockFirestore: Firestore;
@@ -56,6 +57,14 @@ describe('exportCsv()', () => {
       [email]: SURVEY_ORGANIZER_ROLE,
     },
   };
+  const auditInfo = {
+    [a.userId]: userId,
+    [a.displayName]: 'display_name',
+    [a.emailAddress]: 'address@email.com',
+    [a.clientTimestamp]: {1: 1, 2: 0},
+    [a.serverTimestamp]: {1: 1, 2: 0},
+  };
+
   const emptyJob = {id: 'job123'};
   const job1 = {
     id: 'job123',
@@ -197,6 +206,7 @@ describe('exportCsv()', () => {
         },
       },
     ],
+    [s.created]: auditInfo,
   };
   const submission2a = {
     id: '002a',
@@ -259,8 +269,23 @@ describe('exportCsv()', () => {
       expectedCsv: [
         '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
         '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,"display_name","address@email.com","1970-01-01T00:00:01.000Z","1970-01-01T00:00:01.000Z"',
         '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,"AAA,BBB,Other: other","POINT (45 -123)","http://photo/url",,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+      ],
+    },
+    {
+      desc: 'export points w/wo/submissions',
+      jobId: job1.id,
+      survey: survey,
+      jobs: [job1],
+      lois: [pointLoi1, pointLoi2],
+      submissions: [submission1a, submission1b],
+      expectedFilename: 'test-job.csv',
+      expectedCsv: [
+        '"system:index","geometry","name","area","data:What is the meaning of life?","data:How much?","data:When?","data:Which ones?","data:Where are you now?","data:Take a photo","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 1",42,,,,,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,"Submission 2",,"2012-03-08T12:17:24.000Z",,,,"display_name","address@email.com","1970-01-01T00:00:01.000Z","1970-01-01T00:00:01.000Z"',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,,,,,,,',
       ],
     },
   ];
