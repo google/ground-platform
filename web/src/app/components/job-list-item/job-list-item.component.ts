@@ -120,13 +120,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
   }
 
-  onJobListSelect(): void | undefined {
-    if (!this.job?.id) {
-      return;
-    }
-    this.navigationService.showLocationOfInterestList(this.job.id);
-  }
-
   isSelectedLoi(node: DynamicFlatNode): boolean {
     return node.loi?.id === this.loiId;
   }
@@ -136,8 +129,11 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   }
 
   selectLoi(node: DynamicFlatNode) {
-    if (this.isLoiNode(node)) {
-      this.navigationService.selectLocationOfInterest(node.loi!.id);
+    if (this.surveyId && this.isLoiNode(node)) {
+      this.navigationService.selectLocationOfInterest(
+        this.surveyId,
+        node.loi!.id
+      );
     }
   }
 
