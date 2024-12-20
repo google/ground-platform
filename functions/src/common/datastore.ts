@@ -152,7 +152,7 @@ export class Datastore {
   async fetchLoisSubmissions(
     surveyId: string,
     jobId: string,
-    userId: string | undefined,
+    ownerId: string | undefined,
     page: number
   ) {
     const loisQuery = this.db_
@@ -163,8 +163,8 @@ export class Datastore {
       .collection(submissions(surveyId))
       .where(sb.jobId, '==', jobId)
       .orderBy(sb.loiId);
-    if (userId) {
-      submissionsQuery = submissionsQuery.where(sb.ownerId, '==', userId);
+    if (ownerId) {
+      submissionsQuery = submissionsQuery.where(sb.ownerId, '==', ownerId);
     }
     const loisIterator = new QueryIterator(loisQuery, page, l.id);
     const submissionsIterator = new QueryIterator(

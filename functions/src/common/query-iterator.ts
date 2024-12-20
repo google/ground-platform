@@ -34,7 +34,7 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
   async next(): Promise<IteratorResult<QueryDocumentSnapshot>> {
     if (
       this.querySnapshot === null ||
-      this.currentIndex >= this.querySnapshot.docs.length
+      this.currentIndex >= this.querySnapshot.size
     ) {
       // Fetch next batch of documents
       let q = this.query.limit(this.pageSize);
@@ -44,7 +44,7 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
       this.querySnapshot = await q.get();
       this.currentIndex = 0;
     }
-    if (this.querySnapshot.docs.length > 0) {
+    if (this.querySnapshot.size > 0) {
       const document = this.querySnapshot.docs[this.currentIndex++];
       this.lastDocument = document; // Update last document for next batch
       return {

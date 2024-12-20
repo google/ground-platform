@@ -54,7 +54,11 @@ export async function exportCsvHandler(
   const canManageSurvey = canImport(user, surveyDoc);
   const ownerId = !canManageSurvey ? userId : undefined;
 
-  console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
+  console.log(
+    `Exporting survey '${surveyId}', job '${jobId}', owner '${
+      ownerId || 'survey organizer'
+    }'`
+  );
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
@@ -88,12 +92,7 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const rows = await db.fetchLoisSubmissions(
-    surveyId,
-    jobId,
-    !canManageSurvey ? userId : undefined,
-    50
-  );
+  const rows = await db.fetchLoisSubmissions(surveyId, jobId, ownerId, 50);
 
   for await (const row of rows) {
     try {
@@ -189,11 +188,8 @@ function toWkt(geometry: Pb.IGeometry): string {
  * Checks if a Location of Interest (LOI) is accessible to a given user.
  */
 function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId?: string) {
-  return (
-    loi.source === Pb.LocationOfInterest.Source.IMPORTED ||
-    (loi.source === Pb.LocationOfInterest.Source.FIELD_DATA &&
-      loi.ownerId === ownerId)
-  );
+  const isFieldData = loi.source === Pb.LocationOfInterest.Source.FIELD_DATA;
+  return ownerId ? isFieldData && loi.ownerId === ownerId : true;
 }
 
 /**
