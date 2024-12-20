@@ -21,6 +21,8 @@ import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
+import {leftOuterJoinSorted, QueryIterator} from './query-iterator';
+
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
 
@@ -132,64 +134,50 @@ export class Datastore {
     return this.db_.doc(job(surveyId, jobId)).get();
   }
 
-  fetchAccessibleSubmissionsByJobId(
-    surveyId: string,
-    jobId: string,
-    userId?: string
-  ) {
-    if (!userId) {
-      return this.db_
-        .collection(submissions(surveyId))
-        .where(sb.jobId, '==', jobId)
-        .get();
-    } else {
-      return this.db_
-        .collection(submissions(surveyId))
-        .where(sb.jobId, '==', jobId)
-        .where(sb.ownerId, '==', userId)
-        .get();
-    }
-  }
-
   fetchLocationOfInterest(surveyId: string, loiId: string) {
     return this.fetchDoc_(loi(surveyId, loiId));
   }
 
-  async fetchAccessibleLocationsOfInterestByJobId(
-    surveyId: string,
-    jobId: string,
-    userId?: string
-  ): Promise<DocumentData[]> {
-    if (!userId) {
-      return (
-        await this.db_
-          .collection(lois(surveyId))
-          .where(l.jobId, '==', jobId)
-          .get()
-      ).docs;
-    } else {
-      const importedLois = this.db_
-        .collection(lois(surveyId))
-        .where(l.jobId, '==', jobId)
-        .where(l.source, '==', Pb.LocationOfInterest.Source.IMPORTED);
-
-      const fieldDataLois = this.db_
-        .collection(lois(surveyId))
-        .where(l.jobId, '==', jobId)
-        .where(l.source, '==', Pb.LocationOfInterest.Source.FIELD_DATA)
-        .where(l.ownerId, '==', userId);
-
-      const [importedLoisSnapshot, fieldDataLoisSnapshot] = await Promise.all([
-        importedLois.get(),
-        fieldDataLois.get(),
-      ]);
-
-      return [...importedLoisSnapshot.docs, ...fieldDataLoisSnapshot.docs];
-    }
+  fetchLocationsOfInterest(surveyId: string, jobId: string) {
+    return this.db_
+      .collection(lois(surveyId))
+      .where(l.jobId, '==', jobId)
+      .get();
   }
 
   fetchSheetsConfig(surveyId: string) {
     return this.fetchDoc_(`${survey(surveyId)}/sheets/config`);
+  }
+
+  async fetchLoisSubmissions(
+    surveyId: string,
+    jobId: string,
+    ownerId: string | undefined,
+    page: number
+  ) {
+    const loisQuery = this.db_
+      .collection(lois(surveyId))
+      .where(l.jobId, '==', jobId)
+      .orderBy(l.id);
+    let submissionsQuery = this.db_
+      .collection(submissions(surveyId))
+      .where(sb.jobId, '==', jobId)
+      .orderBy(sb.loiId);
+    if (ownerId) {
+      submissionsQuery = submissionsQuery.where(sb.ownerId, '==', ownerId);
+    }
+    const loisIterator = new QueryIterator(loisQuery, page, l.id);
+    const submissionsIterator = new QueryIterator(
+      submissionsQuery,
+      page,
+      sb.loiId
+    );
+    return leftOuterJoinSorted(
+      loisIterator,
+      v1 => v1.get(l.id),
+      submissionsIterator,
+      v2 => v2.get(sb.loiId)
+    );
   }
 
   async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
