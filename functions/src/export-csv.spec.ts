@@ -150,6 +150,7 @@ describe('exportCsv()', () => {
   };
   const submission1a = {
     id: '001a',
+    [s.id]: '001a',
     [s.loiId]: pointLoi1.id,
     [s.index]: 1,
     [s.jobId]: job1.id,
@@ -173,6 +174,7 @@ describe('exportCsv()', () => {
   };
   const submission1b = {
     id: '001b',
+    [s.id]: '001b',
     [s.loiId]: pointLoi1.id,
     [s.index]: 2,
     [s.jobId]: job1.id,
@@ -198,6 +200,7 @@ describe('exportCsv()', () => {
   };
   const submission2a = {
     id: '002a',
+    [s.id]: '002a',
     [s.loiId]: pointLoi2.id,
     [s.index]: 1,
     [s.jobId]: job1.id,
@@ -241,8 +244,8 @@ describe('exportCsv()', () => {
       expectedFilename: 'ground-export.csv',
       expectedCsv: [
         '"system:index","geometry","name","area","data:contributor_name","data:contributor_email","data:created_client_timestamp","data:created_server_timestamp"',
-        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
-        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,"1970-01-01T00:00:00.000Z","1970-01-01T00:00:00.000Z"',
+        '"POINT_001","POINT (125.6 10.1)","Dinagat Islands",3.08,,,,',
+        '"POINT_002","POINT (8.3 47.05)","Luzern",,,,,',
       ],
     },
     {

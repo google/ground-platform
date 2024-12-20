@@ -22,17 +22,12 @@ import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
-import {DocumentData} from 'firebase-admin/firestore';
-import {registry, timestampToInt, toMessage} from '@ground/lib';
+import {QuerySnapshot} from 'firebase-admin/firestore';
+import {timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
-// const sb = registry.getFieldIds(Pb.Submission);
-const l = registry.getFieldIds(Pb.LocationOfInterest);
-
-/** A dictionary of submissions values (array) keyed by loi ID. */
-// type SubmissionDict = {[key: string]: any[]};
 
 /**
  * Iterates over all LOIs and submissions in a job, joining them
@@ -57,6 +52,8 @@ export async function exportCsvHandler(
     return;
   }
   const canManageSurvey = canImport(user, surveyDoc);
+  const ownerId = !canManageSurvey ? userId : undefined;
+
   console.log(`Exporting survey '${surveyId}', job '${jobId}'`);
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
@@ -73,12 +70,8 @@ export async function exportCsvHandler(
   }
   const {name: jobName} = job;
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
-  const lois = await db.fetchAccessibleLocationsOfInterestByJobId(
-    surveyId,
-    jobId,
-    !canManageSurvey ? userId : undefined
-  );
-  const loiProperties = getPropertyNames(lois);
+  const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);
+  const loiProperties = createProperySetFromSnapshot(snapshot);
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -99,40 +92,27 @@ export async function exportCsvHandler(
     surveyId,
     jobId,
     !canManageSurvey ? userId : undefined,
-    250
+    50
   );
 
   for await (const row of rows) {
-    const [loiDoc, submissionDoc] = row;
-    const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
-    if (loi instanceof Error) throw loi;
-    if (submissionDoc) {
-      const submission = toMessage(submissionDoc.data(), Pb.Submission);
-      if (submission instanceof Error) throw submission;
-      writeRow(csvStream, loiProperties, tasks, loi, submission);
+    try {
+      const [loiDoc, submissionDoc, found] = row;
+      const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
+      if (loi instanceof Error) throw loi;
+      if (isAccessibleLoi(loi, ownerId)) {
+        if (submissionDoc) {
+          const submission = toMessage(submissionDoc.data(), Pb.Submission);
+          if (submission instanceof Error) throw submission;
+          writeRow(csvStream, loiProperties, tasks, loi, submission);
+        } else if (found === 0) {
+          writeRow(csvStream, loiProperties, tasks, loi);
+        }
+      }
+    } catch (e) {
+      console.debug('Skipping row', e);
     }
   }
-
-  // const submissionsByLoi = await getSubmissionsByLoi(
-  //   surveyId,
-  //   jobId,
-  //   !canManageSurvey ? userId : undefined
-  // );
-
-  // lois.forEach(loiDoc => {
-  //   const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
-  //   if (loi instanceof Error) {
-  //     throw loi;
-  //   }
-  //   // Submissions to be joined with the current LOI, resulting in one row
-  //   // per submission. For LOIs with no submissions, a single empty submission
-  //   // is added to ensure the LOI is represented in the output as a row with
-  //   // LOI fields, but no submission data.
-  //   const submissions = submissionsByLoi[loiDoc.id] || [{}];
-  //   submissions.forEach(submissionDict =>
-  //     writeSubmissions(csvStream, loiProperties, tasks, loi, submissionDict)
-  //   );
-  // });
 
   res.status(HttpStatus.OK);
   csvStream.end();
@@ -152,59 +132,12 @@ function getHeaders(tasks: Pb.ITask[], loiProperties: Set<string>): string[] {
   return headers.map(quote);
 }
 
-// /**
-//  * Returns all submissions in the specified job, indexed by LOI ID.
-//  * Note: Indexes submissions by LOI id in memory. This consumes more
-//  * memory than iterating over and streaming both LOI and submission
-//  * collections simultaneously, but it's easier to read and maintain. This
-//  * function will need to be optimized to scale to larger datasets than
-//  * can fit in memory.
-//  */
-// async function getSubmissionsByLoi(
-//   surveyId: string,
-//   jobId: string,
-//   userId?: string
-// ): Promise<SubmissionDict> {
-//   const db = getDatastore();
-//   const submissions = await db.fetchAccessibleSubmissionsByJobId(
-//     surveyId,
-//     jobId,
-//     userId
-//   );
-//   const submissionsByLoi: {[name: string]: any[]} = {};
-//   submissions.forEach(submission => {
-//     const loiId = submission.get(sb.loiId) as string;
-//     const arr: any[] = submissionsByLoi[loiId] || [];
-//     arr.push(submission.data());
-//     submissionsByLoi[loiId] = arr;
-//   });
-//   return submissionsByLoi;
-// }
-
-// function writeSubmissions(
-//   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
-//   loiProperties: Set<string>,
-//   tasks: Pb.ITask[],
-//   loi: Pb.LocationOfInterest,
-//   submissionDict: SubmissionDict
-// ) {
-//   try {
-//     const submission = toMessage(submissionDict, Pb.Submission);
-//     if (submission instanceof Error) {
-//       throw submission;
-//     }
-//     writeRow(csvStream, loiProperties, tasks, loi, submission);
-//   } catch (e) {
-//     console.debug('Skipping row', e);
-//   }
-// }
-
 function writeRow(
   csvStream: csv.CsvFormatterStream<csv.Row, csv.Row>,
   loiProperties: Set<string>,
   tasks: Pb.ITask[],
   loi: Pb.LocationOfInterest,
-  submission: Pb.Submission
+  submission?: Pb.Submission
 ) {
   if (!loi.geometry) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
@@ -217,19 +150,23 @@ function writeRow(
   row.push(quote(toWkt(loi.geometry)));
   // Header: One column for each loi property (merged over all properties across all LOIs)
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
-  const {taskData: data} = submission;
-  // Header: One column for each task
-  tasks.forEach(task => row.push(quote(getValue(task, data))));
-  // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
-  const {created} = submission;
-  row.push(quote(created?.displayName));
-  row.push(quote(created?.emailAddress));
-  row.push(
-    quote(new Date(timestampToInt(created?.clientTimestamp)).toISOString())
-  );
-  row.push(
-    quote(new Date(timestampToInt(created?.serverTimestamp)).toISOString())
-  );
+  if (submission) {
+    const {taskData: data} = submission;
+    // Header: One column for each task
+    tasks.forEach(task => row.push(quote(getValue(task, data))));
+    // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
+    const {created} = submission;
+    row.push(quote(created?.displayName));
+    row.push(quote(created?.emailAddress));
+    row.push(
+      quote(new Date(timestampToInt(created?.clientTimestamp)).toISOString())
+    );
+    row.push(
+      quote(new Date(timestampToInt(created?.serverTimestamp)).toISOString())
+    );
+  } else {
+    row.concat(new Array(tasks.length + 4).fill(''));
+  }
   csvStream.write(row);
 }
 
@@ -246,6 +183,17 @@ function quote(value: any): string {
 
 function toWkt(geometry: Pb.IGeometry): string {
   return geojsonToWKT(toGeoJsonGeometry(geometry));
+}
+
+/**
+ * Checks if a Location of Interest (LOI) is accessible to a given user.
+ */
+function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId?: string) {
+  return (
+    loi.source === Pb.LocationOfInterest.Source.IMPORTED ||
+    (loi.source === Pb.LocationOfInterest.Source.FIELD_DATA &&
+      loi.ownerId === ownerId)
+  );
 }
 
 /**
@@ -341,8 +289,21 @@ function getFileName(jobName: string | null) {
   return `${fileBase}.csv`;
 }
 
-function getPropertyNames(lois: DocumentData[]): Set<string> {
-  return new Set(lois.flatMap(loi => Object.keys(loi.get(l.properties) || {})));
+function createProperySetFromSnapshot(
+  snapshot: QuerySnapshot,
+  ownerId?: string
+): Set<string> {
+  const allKeys = new Set<string>();
+  snapshot.forEach(doc => {
+    const loi = toMessage(doc.data(), Pb.LocationOfInterest);
+    if (loi instanceof Error) return;
+    if (!isAccessibleLoi(loi, ownerId)) return;
+    const properties = loi.properties;
+    for (const key of Object.keys(properties || {})) {
+      allKeys.add(key);
+    }
+  });
+  return allKeys;
 }
 
 function getPropertiesByName(

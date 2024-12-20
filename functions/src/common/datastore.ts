@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
-import {DocumentData, GeoPoint, QuerySnapshot} from 'firebase-admin/firestore';
+import {DocumentData, GeoPoint} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
