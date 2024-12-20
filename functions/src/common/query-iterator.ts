@@ -25,7 +25,11 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
   private currentIndex = 0;
   private lastDocument: QueryDocumentSnapshot | null = null;
 
-  constructor(private query: Query, private pageSize: number) {}
+  constructor(
+    private query: Query,
+    private pageSize: number,
+    private orderField: string
+  ) {}
 
   async next(): Promise<IteratorResult<QueryDocumentSnapshot>> {
     if (
@@ -35,7 +39,7 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
       // Fetch next batch of documents
       let q = this.query.limit(this.pageSize);
       if (this.lastDocument) {
-        q = q.startAfter(this.lastDocument);
+        q = q.startAfter([this.lastDocument?.get(this.orderField)]);
       }
       this.querySnapshot = await q.get();
       this.currentIndex = 0;
@@ -61,30 +65,38 @@ export async function* leftOuterJoinSorted<T, U>(
   getLeftKey: (left: T) => any,
   rightIterator: AsyncIterator<U>,
   getRightKey: (right: U) => any
-): AsyncGenerator<[T, U | undefined]> {
+): AsyncGenerator<[T, U | undefined, number]> {
   let leftItem = await leftIterator.next();
   let rightItem = await rightIterator.next();
+  let rightItemsFound = 0;
 
+  // This loop iterates through the left iterator until it's exhausted.
+  // In each iteration, it compares the current left item's key with the current
+  // right item's key (if there's a right item remaining).
   while (!leftItem.done) {
     const leftKey = getLeftKey(leftItem.value);
     const rightKey = rightItem.done ? undefined : getRightKey(rightItem.value);
-    // // Iterate until mismatch or end of right iterator
-    // while (!rightItem.done && leftKey === rightKey) {
-    //   console.log('aaaaargh 1');
-    //   yield [leftItem.value, rightItem.value]; // Yield a pair with both values
-    //   rightItem = await rightIterator.next();
-    // }
+    // Check for these conditions:
+    // 1. Right iterator is done (no more items on the right).
+    // 2. Left item's key is less than the right item's key (mismatch).
     if (rightItem.done || leftKey < rightKey) {
-      // Left item has no match or comes before the current right item
-      yield [leftItem.value, undefined]; // Yield a pair with undefined for the right side
+      // The left item has no matching item on the right (or right iterator is done).
+      // Yield a pair with the left item's value and undefined for the right side.
+      yield [leftItem.value, undefined, rightItemsFound];
+      // Move to the next left item and reset the counter for matches.
       leftItem = await leftIterator.next();
+      rightItemsFound = 0;
     } else if (leftKey > rightKey) {
-      // Right item comes before the current left item
+      // The right item's key is less than the left item's key (mismatch).
+      // Advance the right iterator to find a possible match for the current left item.
       rightItem = await rightIterator.next();
     } else {
-      // Match found
-      yield [leftItem.value, rightItem.value]; // Yield a pair with both values
-      leftItem = await leftIterator.next();
+      // Match found! The keys of the left and right items are equal.
+      // Increment the counter for the number of matches found for the current left item.
+      rightItemsFound++;
+      // Yield a pair with the left item's value, the matching right item's value,
+      // and the current count of matches for the left item.
+      yield [leftItem.value, rightItem.value, rightItemsFound];
       rightItem = await rightIterator.next();
     }
   }
