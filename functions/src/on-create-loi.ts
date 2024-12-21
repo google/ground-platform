@@ -34,6 +34,13 @@ type PropertyGenerator = {
   url: string;
 };
 
+/**
+ * Handles the creation of a Location of Interest (LOI) document in Firestore.
+ * This function is triggered by a Cloud Function on Firestore document creation.
+ *
+ * @param snapshot The QueryDocumentSnapshot object containing the created LOI data.
+ * @param context The EventContext object provided by the Cloud Functions framework.
+ */
 export async function onCreateLoiHandler(
   snapshot: QueryDocumentSnapshot,
   context: EventContext
