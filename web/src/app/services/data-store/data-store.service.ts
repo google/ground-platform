@@ -26,6 +26,11 @@ import {
 } from '@angular/fire/firestore';
 import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
+import {getDownloadURL, getStorage, ref} from 'firebase/storage';
+import {List, Map} from 'immutable';
+import {Observable, combineLatest, firstValueFrom} from 'rxjs';
+import {map} from 'rxjs/operators';
+
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
 import {loiDocToModel} from 'app/converters/loi-data-converter';
 import {
@@ -44,10 +49,6 @@ import {Submission} from 'app/models/submission/submission.model';
 import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
-import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
 
 import Pb = GroundProtos.ground.v1beta1;
 
