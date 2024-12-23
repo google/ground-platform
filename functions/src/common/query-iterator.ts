@@ -65,7 +65,7 @@ export async function* leftOuterJoinSorted<T, U>(
   getLeftKey: (left: T) => any,
   rightIterator: AsyncIterator<U>,
   getRightKey: (right: U) => any
-): AsyncGenerator<[T, U | undefined, number]> {
+): AsyncGenerator<[T, U | undefined]> {
   let leftItem = await leftIterator.next();
   let rightItem = await rightIterator.next();
   let rightItemsFound = 0;
@@ -81,8 +81,10 @@ export async function* leftOuterJoinSorted<T, U>(
     // 2. Left item's key is less than the right item's key (mismatch).
     if (rightItem.done || leftKey < rightKey) {
       // The left item has no matching item on the right (or right iterator is done).
-      // Yield a pair with the left item's value and undefined for the right side.
-      yield [leftItem.value, undefined, rightItemsFound];
+      // If no matching items were found on the right side for the current left item
+      // (or the right iterator has reached its end), yield a pair
+      // consisting of the left item's value and undefined.
+      if (rightItemsFound === 0) yield [leftItem.value, undefined];
       // Move to the next left item and reset the counter for matches.
       leftItem = await leftIterator.next();
       rightItemsFound = 0;
@@ -96,7 +98,7 @@ export async function* leftOuterJoinSorted<T, U>(
       rightItemsFound++;
       // Yield a pair with the left item's value, the matching right item's value,
       // and the current count of matches for the left item.
-      yield [leftItem.value, rightItem.value, rightItemsFound];
+      yield [leftItem.value, rightItem.value];
       rightItem = await rightIterator.next();
     }
   }

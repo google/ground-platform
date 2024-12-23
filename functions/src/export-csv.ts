@@ -96,17 +96,16 @@ export async function exportCsvHandler(
 
   for await (const row of rows) {
     try {
-      const [loiDoc, submissionDoc, found] = row;
+      const [loiDoc, submissionDoc] = row;
       const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(loi, ownerId)) {
-        if (submissionDoc) {
-          const submission = toMessage(submissionDoc.data(), Pb.Submission);
-          if (submission instanceof Error) throw submission;
-          writeRow(csvStream, loiProperties, tasks, loi, submission);
-        } else if (found === 0) {
-          writeRow(csvStream, loiProperties, tasks, loi);
-        }
+      if (!isAccessibleLoi(loi, ownerId)) return;
+      if (submissionDoc) {
+        const submission = toMessage(submissionDoc.data(), Pb.Submission);
+        if (submission instanceof Error) throw submission;
+        writeRow(csvStream, loiProperties, tasks, loi, submission);
+      } else {
+        writeRow(csvStream, loiProperties, tasks, loi);
       }
     } catch (e) {
       console.debug('Skipping row', e);
