@@ -39,34 +39,48 @@ import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
 import {TermsComponent} from './pages/terms/terms.component';
 
+const {
+  LOI_ID,
+  LOI_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SUBMISSION_ID,
+  SUBMISSION_SEGMENT,
+  SURVEY_ID,
+  SURVEYS_CREATE,
+  SURVEYS_EDIT,
+  SURVEYS_SEGMENT,
+  TASK_ID,
+  TASK_SEGMENT,
+} = NavigationService;
+
 const routes: Routes = [
   {
     path: '',
-    redirectTo: `${NavigationService.SURVEYS_SEGMENT}`,
+    redirectTo: `${SURVEYS_SEGMENT}`,
     pathMatch: 'full',
   },
   {
-    path: NavigationService.SIGN_IN_SEGMENT,
+    path: SIGN_IN_SEGMENT,
     component: SignInPageComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEYS_SEGMENT}`,
+    path: `${SURVEYS_SEGMENT}`,
     component: SurveyListComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEYS_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_CREATE}`,
+    path: `${SURVEYS_SEGMENT}/:${SURVEY_ID}/${SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEYS_SEGMENT}/${NavigationService.SURVEYS_CREATE}`,
+    path: `${SURVEYS_SEGMENT}/${SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}/${NavigationService.SURVEYS_EDIT}`,
+    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
     component: EditSurveyComponent,
     canActivate: [AuthGuard],
     children: [
@@ -77,7 +91,7 @@ const routes: Routes = [
     ],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${NavigationService.SURVEY_ID}`,
+    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },
@@ -93,6 +107,21 @@ const routes: Routes = [
   {
     path: NavigationService.TERMS,
     component: TermsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
+    component: MainPageContainerComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}/${TASK_SEGMENT}/:${TASK_ID}`,
+    component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },
 ];
