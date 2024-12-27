@@ -1,3 +1,32 @@
 {
-  "indexes": []
+  "indexes": [
+    {
+      "collectionGroup": "lois",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`2`",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`1`",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "`4`",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`2`",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ]
 }
