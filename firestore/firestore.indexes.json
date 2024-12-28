@@ -5,11 +5,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "`2`",
+          "fieldPath": "`2`", // job_id
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "`1`",
+          "fieldPath": "`1`", // id
           "order": "ASCENDING"
         }
       ]
@@ -19,11 +19,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "`4`",
+          "fieldPath": "`4`", // job_id
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "`2`",
+          "fieldPath": "`2`", // loi_id
           "order": "ASCENDING"
         }
       ]

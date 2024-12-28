@@ -274,7 +274,7 @@ describe('exportCsv()', () => {
       ],
     },
     {
-      desc: 'export points w/wo/submissions',
+      desc: 'export points w and w/o submissions',
       jobId: job1.id,
       survey: survey,
       jobs: [job1],
