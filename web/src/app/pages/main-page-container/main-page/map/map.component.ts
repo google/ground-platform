@@ -52,7 +52,6 @@ import {SurveyService} from 'app/services/survey/survey.service';
 /*global google*/
 
 const normalIconScale = 30;
-const enlargedIconScale = 50;
 const zoomedInLevel = 13;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
@@ -77,11 +76,13 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     mapTypeControl: true,
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
+    mapId: 'ground-map', // Need to set to use AdvancedMarkerElement
   };
   private selectedLocationOfInterestId: string | null = null;
-  markers: Map<string, google.maps.Marker> = new Map<
+  private selectedSubmissionTaskId: string | null = null;
+  markers: Map<string, google.maps.marker.AdvancedMarkerElement> = new Map<
     string,
-    google.maps.Marker
+    google.maps.marker.AdvancedMarkerElement
   >();
   polygons: Map<string, google.maps.Polygon[]> = new Map<
     string,
@@ -98,7 +99,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   newLocationOfInterestToReposition?: LocationOfInterest;
   oldLatLng?: google.maps.LatLng;
   newLatLng?: google.maps.LatLng;
-  markerToReposition?: google.maps.Marker;
+  markerToReposition?: google.maps.marker.AdvancedMarkerElement;
   disableMapClicks = false;
   lastFitSurveyId = '';
   lastFitJobId = '';
@@ -137,52 +138,29 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.activeSurvey$,
         this.lois$,
         this.navigationService.getLocationOfInterestId$(),
+        this.navigationService.getTaskId$(),
         this.selectedJob$,
-      ]).subscribe(([survey, lois, locationOfInterestId, selectedJob]) => {
-        const loisMap = ImmutableMap(
-          lois
-            .filter(loi =>
-              this.showPredefinedLoisOnly ? loi.predefined : true
-            )
-            .filter(
-              loi => selectedJob === undefined || loi.jobId === selectedJob.id
-            )
-            .map(loi => [loi.id, loi])
-        );
+      ]).subscribe(
+        ([survey, lois, locationOfInterestId, taskId, selectedJob]) => {
+          const loisMap = this.getLoiMap(lois, selectedJob);
+          const loiIdsToRemove = this.getLoiIdsToRemove(loisMap);
+          const loisToAdd = this.getLoiIdsToAdd(loisMap);
+          this.loisMap = loisMap;
 
-        const loiIdsToRemove = this.loisMap
-          .filter(
-            (value, key) =>
-              !(
-                loisMap.has(key) &&
-                this.isLocationOfInterestEqual(loisMap.get(key)!, value)
-              )
-          )
-          .keySeq()
-          .toList();
-        const loisToAdd = loisMap
-          .filter(
-            (value, key) =>
-              !(
-                this.loisMap.has(key) &&
-                this.isLocationOfInterestEqual(this.loisMap.get(key)!, value)
-              )
-          )
-          .toList();
-        this.loisMap = loisMap;
-
-        this.removeDeletedLocationsOfInterest(loiIdsToRemove);
-        this.addNewLocationsOfInterest(survey, loisToAdd);
-        if (
-          this.lastFitSurveyId !== survey.id ||
-          this.lastFitJobId !== (selectedJob?.id ?? '')
-        ) {
-          this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
-          this.lastFitSurveyId = survey.id;
-          this.lastFitJobId = selectedJob?.id ?? '';
+          this.removeDeletedLocationsOfInterest(loiIdsToRemove);
+          this.addNewLocationsOfInterest(survey, loisToAdd);
+          if (
+            this.lastFitSurveyId !== survey.id ||
+            this.lastFitJobId !== (selectedJob?.id ?? '')
+          ) {
+            this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
+            this.lastFitSurveyId = survey.id;
+            this.lastFitJobId = selectedJob?.id ?? '';
+          }
+          this.selectLocationOfInterest(locationOfInterestId);
+          this.selectSubmissionTask(taskId);
         }
-        this.selectLocationOfInterest(locationOfInterestId);
-      })
+      )
     );
 
     if (this.shouldEnableDrawingTools) {
@@ -213,11 +191,67 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   /**
+   * Gets map of LOIs for the selected job
+   * @param lois List of all locations of interest
+   * @param selectedJob Currently selected Job
+   * @returns Map of loi ids to loi objects
+   */
+  private getLoiMap(
+    lois: List<LocationOfInterest>,
+    selectedJob: Job | undefined
+  ): ImmutableMap<string, LocationOfInterest> {
+    return ImmutableMap(
+      lois
+        .filter(loi => (this.showPredefinedLoisOnly ? loi.predefined : true))
+        .filter(
+          loi => selectedJob === undefined || loi.jobId === selectedJob.id
+        )
+        .map(loi => [loi.id, loi])
+    );
+  }
+
+  /**
+   * Gets list of loi ids to remove from the map
+   * @param loisMap Map of loi ids to loi objects
+   * @returns List of loi ids to remove
+   */
+  private getLoiIdsToRemove(
+    loisMap: ImmutableMap<string, LocationOfInterest>
+  ): List<string> {
+    return this.loisMap
+      .filter(
+        (value, key) =>
+          !(
+            loisMap.has(key) &&
+            this.isLocationOfInterestEqual(loisMap.get(key)!, value)
+          )
+      )
+      .keySeq()
+      .toList();
+  }
+
+  /**
+   * Gets list of loi ids to add to the map
+   * @param loisMap Map of loi ids to loi objects
+   * @returns List of loi ids to add
+   */
+  private getLoiIdsToAdd(loisMap: ImmutableMap<string, LocationOfInterest>) {
+    return loisMap
+      .filter(
+        (value, key) =>
+          !(
+            this.loisMap.has(key) &&
+            this.isLocationOfInterestEqual(this.loisMap.get(key)!, value)
+          )
+      )
+      .toList();
+  }
+
+  /**
    * Add submission geometry based task results to existing map
    */
   addSubmissionResultsOnMap() {
     this.submission?.job?.tasks?.forEach(task => {
-      // TODO(#1477): Add geometry annotations in map as well
       if (
         task.type === TaskType.DRAW_AREA ||
         task.type === TaskType.DROP_PIN ||
@@ -227,13 +261,18 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         const geometryType = (taskResult?.value as Geometry)?.geometryType;
         if (geometryType === GeometryType.POINT) {
           const marker = this.addSubmissionMarkerToMap(
+            this.submission!.loiId!,
+            this.submission!.id!,
             task.id,
             taskResult!.value as Point,
-            this.submission?.job?.color
+            this.submission?.job?.color,
+            task.index.toString()
           );
           this.markers.set(task.id, marker);
         } else if (geometryType === GeometryType.POLYGON) {
           const polygon = this.addSubmissionPolygonToMap(
+            this.submission!.loiId!,
+            this.submission!.id!,
             task.id,
             taskResult!.value as Polygon,
             this.submission?.job?.color
@@ -288,6 +327,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         );
         if (newLocationOfInterest) {
           this.navigationService.selectLocationOfInterest(
+            this.lastFitSurveyId,
             newLocationOfInterest.id
           );
         }
@@ -323,7 +363,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private removeDeletedMarkers(idsToRemove: List<string>) {
     for (const id of this.markers.keys()) {
       if (idsToRemove.includes(id)) {
-        this.markers.get(id)!.setMap(null);
+        this.markers.get(id)!.map = null;
         this.markers.delete(id);
       }
     }
@@ -413,29 +453,33 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private addMarkerToMap(
     id: string,
     geometry: Point,
-    color: string | undefined
-  ): google.maps.Marker {
+    color: string | undefined,
+    markerText?: string | undefined
+  ): google.maps.marker.AdvancedMarkerElement {
     const {y: latitude, x: longitude} = geometry.coord;
     // Default color on Google Maps marker is red if unspecified
     if (color === undefined) {
       color = this.DEFAULT_MARKER_COLOR;
     }
-    const icon = {
-      url: this.groundPinService.getPinImageSource(color),
-      scaledSize: {
-        width: normalIconScale,
-        height: normalIconScale,
-      },
-    } as google.maps.Icon;
-    const options: google.maps.MarkerOptions = {
+
+    // TODO(#2108): Switch to custom HTML and CSS markers. Having a custom HTML will
+    // improve text wrapping, allow for a more square shape, and custom styles for
+    // selected markers (like increasing the scale).
+    const markerGlyph = new google.maps.marker.PinElement({
+      glyph: markerText,
+      glyphColor: 'white',
+      background: color,
+    });
+
+    const options: google.maps.marker.AdvancedMarkerElementOptions = {
       map: this.map.googleMap,
       position: new google.maps.LatLng(latitude, longitude),
-      icon,
-      draggable: false,
+      content: markerGlyph.element,
       title: id,
+      gmpClickable: !this.disableMapClicks,
     };
 
-    return new google.maps.Marker(options);
+    return new google.maps.marker.AdvancedMarkerElement(options);
   }
 
   /**
@@ -446,7 +490,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     jobId: string,
     geometry: Point,
     color: string | undefined
-  ): google.maps.Marker {
+  ): google.maps.marker.AdvancedMarkerElement {
     const marker = this.addMarkerToMap(loiId, geometry, color);
     marker.addListener('click', () =>
       this.onLocationOfInterestMarkerClick(loiId)
@@ -466,12 +510,17 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * Adds new marker that represents a geometry based task submission to existing map
    */
   private addSubmissionMarkerToMap(
+    loiId: string,
+    submissionId: string,
     taskId: string,
     geometry: Point,
-    color: string | undefined
-  ): google.maps.Marker {
-    const marker = this.addMarkerToMap(taskId, geometry, color);
-    marker.addListener('click', () => this.onSubmissionGeometryClick(taskId));
+    color: string | undefined,
+    markerText: string
+  ): google.maps.marker.AdvancedMarkerElement {
+    const marker = this.addMarkerToMap(taskId, geometry, color, markerText);
+    marker.addListener('click', () =>
+      this.onSubmissionGeometryClick(loiId, submissionId, taskId)
+    );
     return marker;
   }
 
@@ -479,19 +528,31 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this.disableMapClicks) {
       return;
     }
-    this.navigationService.selectLocationOfInterest(loiId);
+    this.navigationService.selectLocationOfInterest(
+      this.lastFitSurveyId,
+      loiId
+    );
   }
 
-  private onSubmissionGeometryClick(taskId: string) {
+  private onSubmissionGeometryClick(
+    loiId: string,
+    submissionId: string,
+    taskId: string
+  ) {
     if (this.disableMapClicks) {
       return;
     }
-    this.navigationService.showSubmissionDetailWithHighlightedTask(taskId);
+    this.navigationService.showSubmissionDetailWithHighlightedTask(
+      this.lastFitSurveyId,
+      loiId,
+      submissionId,
+      taskId
+    );
   }
 
   private onMarkerDragStart(
     event: google.maps.Data.MouseEvent,
-    marker: google.maps.Marker
+    marker: google.maps.marker.AdvancedMarkerElement
   ) {
     // TODO: Show confirm dialog and disable other components when entering reposition state.
     // Currently we are figuring out how should the UI trigger this state.
@@ -523,8 +584,14 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       ImmutableMap<string, string | number>()
     );
   }
-
-  private panAndZoom(position: google.maps.LatLng | null | undefined) {
+  private panAndZoom(
+    position:
+      | google.maps.LatLng
+      | google.maps.LatLngLiteral
+      | google.maps.LatLngAltitudeLiteral
+      | null
+      | undefined
+  ) {
     if (!position) {
       return;
     }
@@ -538,11 +605,11 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (editMode !== EditMode.None) {
       this.navigationService.clearLocationOfInterestId();
       for (const marker of this.markers) {
-        marker[1].setClickable(false);
+        marker[1].gmpClickable = false;
       }
     } else {
       for (const marker of this.markers) {
-        marker[1].setClickable(true);
+        marker[1].gmpClickable = true;
       }
     }
     this.mapOptions =
@@ -567,16 +634,18 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.selectedLocationOfInterestId = locationOfInterestId;
   }
 
-  private setIconSize(marker: google.maps.Marker, size: number) {
-    const icon = marker.getIcon() as google.maps.Icon;
-    const newIcon = {
-      url: icon.url,
-      scaledSize: {
-        width: size,
-        height: size,
-      },
-    } as google.maps.Icon;
-    marker.setIcon(newIcon);
+  private selectSubmissionTask(taskId: string | null) {
+    if (!taskId) return;
+
+    if (taskId === this.selectedSubmissionTaskId) {
+      return;
+    }
+    this.selectedSubmissionTaskId = taskId;
+
+    // Pan to submission marker on the map if selected
+    const marker = this.markers.get(taskId!);
+    if (!marker) return;
+    this.panAndZoom(marker.position);
   }
 
   private selectMarker(locationOfInterestId: string | null) {
@@ -586,11 +655,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     if (!marker) return;
 
-    this.setIconSize(marker, enlargedIconScale);
+    marker.gmpDraggable = this.shouldEnableDrawingTools;
 
-    marker.setDraggable(this.shouldEnableDrawingTools);
-
-    this.panAndZoom(marker.getPosition());
+    this.panAndZoom(marker.position);
   }
 
   private unselectMarker() {
@@ -600,9 +667,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     if (!selectedMarker) return;
 
-    this.setIconSize(selectedMarker, normalIconScale);
-
-    selectedMarker.setDraggable(false);
+    selectedMarker.gmpDraggable = false;
   }
 
   private selectPolygons(locationOfInterestId: string | null) {
@@ -680,6 +745,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
    * Adds new polygon that represents a geometry based task submission to existing map
    */
   private addSubmissionPolygonToMap(
+    loiId: string,
+    submissionId: string,
     taskId: string,
     polygonModel: Polygon,
     color: string | undefined
@@ -687,7 +754,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const polygon = this.addPolygonToMap(polygonModel, color);
     polygon.set('id', taskId);
     polygon.set('color', color);
-    polygon.addListener('click', () => this.onSubmissionGeometryClick(taskId));
+    polygon.addListener('click', () =>
+      this.onSubmissionGeometryClick(loiId, submissionId, taskId)
+    );
     return polygon;
   }
 
@@ -721,18 +790,22 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const loi = LocationOfInterest.getSmallestByArea(candidateLois);
 
     this.zone.run(() => {
-      if (loi) this.navigationService.selectLocationOfInterest(loi.id);
+      if (loi)
+        this.navigationService.selectLocationOfInterest(
+          this.lastFitSurveyId,
+          loi.id
+        );
     });
   }
 
   onSaveRepositionClick() {
-    this.markerToReposition?.setPosition(this.newLatLng!);
+    this.markerToReposition!.position = this.newLatLng!;
     this.loiService.updatePoint(this.newLocationOfInterestToReposition!);
     this.resetReposition();
   }
 
   onCancelRepositionClick() {
-    this.markerToReposition?.setPosition(this.oldLatLng!);
+    this.markerToReposition!.position = this.oldLatLng!;
     this.resetReposition();
   }
 

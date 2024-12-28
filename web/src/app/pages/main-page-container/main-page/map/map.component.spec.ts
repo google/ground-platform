@@ -32,15 +32,12 @@ import {MultiPolygon} from 'app/models/geometry/multi-polygon';
 import {Point} from 'app/models/geometry/point';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
@@ -56,6 +53,7 @@ describe('MapComponent', () => {
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
+  let mockTaskId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
   let mockEditMode$: BehaviorSubject<EditMode>;
@@ -85,8 +83,9 @@ describe('MapComponent', () => {
     'job002 name',
     /* tasks= */ Map()
   );
+  const surveyId = 'survey001';
   const mockSurvey = new Survey(
-    'survey001',
+    surveyId,
     'title1',
     'description1',
     /* jobs= */ Map({
@@ -179,6 +178,7 @@ describe('MapComponent', () => {
       'NavigationService',
       [
         'getLocationOfInterestId$',
+        'getTaskId$',
         'getSubmissionId$',
         'selectLocationOfInterest',
         'clearLocationOfInterestId',
@@ -189,6 +189,8 @@ describe('MapComponent', () => {
     navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
       mockLocationOfInterestId$
     );
+    mockTaskId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getTaskId$.and.returnValue(mockTaskId$);
     navigationServiceSpy.getSubmissionId$.and.returnValue(
       of<string | null>(null)
     );
@@ -258,12 +260,12 @@ describe('MapComponent', () => {
     expect(component.markers.size).toEqual(2);
     const marker1 = component.markers.get(poiId1)!;
     assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));
-    assertMarkerIcon(marker1, jobColor1, 30);
-    expect(marker1.getMap()).toEqual(component.map.googleMap!);
+    expect(marker1.element.innerHTML).toContain(`fill="${jobColor1}"`);
+    expect(marker1.map).toEqual(component.map.googleMap!);
     const marker2 = component.markers.get(poiId2)!;
     assertMarkerLatLng(marker2, new google.maps.LatLng(45.6, 12.3));
-    assertMarkerIcon(marker2, jobColor2, 30);
-    expect(marker2.getMap()).toEqual(component.map.googleMap!);
+    expect(marker2.element.innerHTML).toContain(`fill="${jobColor2}"`);
+    expect(marker2.map).toEqual(component.map.googleMap!);
   });
 
   it('should render polygons on map - polygon loi', () => {
@@ -324,8 +326,8 @@ describe('MapComponent', () => {
       expect(component.markers.size).toEqual(1);
       const marker1 = component.markers.get(poiId1)!;
       assertMarkerLatLng(marker1, new google.maps.LatLng(4.56, 1.23));
-      assertMarkerIcon(marker1, jobColor1, 30);
-      expect(marker1.getMap()).toEqual(component.map.googleMap!);
+      expect(marker1.element.innerHTML).toContain(`fill="${jobColor1}"`);
+      expect(marker1.map).toEqual(component.map.googleMap!);
     }));
 
     it('should fit the map when survey changed', fakeAsync(() => {
@@ -362,12 +364,12 @@ describe('MapComponent', () => {
       expect(component.markers.size).toEqual(2);
       const marker1 = component.markers.get(poiId2)!;
       assertMarkerLatLng(marker1, new google.maps.LatLng(45.7, 12.3));
-      assertMarkerIcon(marker1, jobColor2, 30);
-      expect(marker1.getMap()).toEqual(component.map.googleMap!);
+      expect(marker1.element.innerHTML).toContain(`fill="${jobColor2}"`);
+      expect(marker1.map).toEqual(component.map.googleMap!);
       const marker2 = component.markers.get(poiId3)!;
       assertMarkerLatLng(marker2, new google.maps.LatLng(78.9, 78.9));
-      assertMarkerIcon(marker2, jobColor2, 30);
-      expect(marker2.getMap()).toEqual(component.map.googleMap!);
+      expect(marker2.element.innerHTML).toContain(`fill="${jobColor2}"`);
+      expect(marker2.map).toEqual(component.map.googleMap!);
       expect(component.polygons.size).toEqual(1);
       const [polygon] = component.polygons.get(polygonLoiId1)!;
       assertPolygonPaths(polygon, [
@@ -390,16 +392,8 @@ describe('MapComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(poiId1);
+    ).toHaveBeenCalledOnceWith(surveyId, poiId1);
   });
-
-  it('should enlarge the marker when loi is selected', fakeAsync(() => {
-    mockLocationOfInterestId$.next(poiId1);
-    tick();
-
-    const marker1 = component.markers.get(poiId1)!;
-    assertMarkerIcon(marker1, jobColor1, 50);
-  }));
 
   it('should select loi when polygon is clicked', () => {
     const [polygon] = component.polygons.get(polygonLoiId1)!;
@@ -409,7 +403,7 @@ describe('MapComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(polygonLoiId1);
+    ).toHaveBeenCalledOnceWith(surveyId, polygonLoiId1);
   });
 
   it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
@@ -435,9 +429,9 @@ describe('MapComponent', () => {
 
   it('markers are not draggable by default', () => {
     const marker1 = component.markers.get(poiId1)!;
-    expect(marker1.getDraggable()).toBeFalse();
+    expect(marker1.gmpDraggable).toBeFalse();
     const marker2 = component.markers.get(poiId2)!;
-    expect(marker2.getDraggable()).toBeFalse();
+    expect(marker2.gmpDraggable).toBeFalse();
   });
 
   it('should set marker draggable when loi is selected', fakeAsync(() => {
@@ -445,7 +439,7 @@ describe('MapComponent', () => {
     tick();
 
     const marker1 = component.markers.get(poiId1)!;
-    expect(marker1.getDraggable()).toBeTrue();
+    expect(marker1.gmpDraggable).toBeTrue();
   }));
 
   it('should not set marker draggable when loi is selected and drawing tools turned off', fakeAsync(() => {
@@ -454,7 +448,7 @@ describe('MapComponent', () => {
     tick();
 
     const marker1 = component.markers.get(poiId1)!;
-    expect(marker1.getDraggable()).toBeFalse();
+    expect(marker1.gmpDraggable).toBeFalse();
   }));
 
   it('reposition dialog is not displayed by default', () => {
@@ -620,7 +614,7 @@ describe('MapComponent', () => {
 
     expect(
       navigationServiceSpy.selectLocationOfInterest
-    ).toHaveBeenCalledOnceWith(polygonLoiId1);
+    ).toHaveBeenCalledOnceWith(surveyId, polygonLoiId1);
   }));
 
   it('should add marker when map clicked and edit mode is "AddPoint"', fakeAsync(() => {
@@ -662,24 +656,11 @@ describe('MapComponent', () => {
   }));
 
   function assertMarkerLatLng(
-    marker: google.maps.Marker,
+    marker: google.maps.marker.AdvancedMarkerElement,
     latLng: google.maps.LatLng
   ): void {
-    expect(marker.getPosition()?.lat()).toEqual(latLng.lat());
-    expect(marker.getPosition()?.lng()).toEqual(latLng.lng());
-  }
-
-  function assertMarkerIcon(
-    marker: google.maps.Marker,
-    iconColor: string,
-    iconSize: number
-  ): void {
-    const icon = marker.getIcon() as google.maps.Icon;
-    expect(atob(icon.url.slice(GroundPinService.urlPrefix.length))).toContain(
-      iconColor
-    );
-    expect(icon.scaledSize?.height).toEqual(iconSize);
-    expect(icon.scaledSize?.width).toEqual(iconSize);
+    expect(marker.position?.lat).toEqual(latLng.lat());
+    expect(marker.position?.lng).toEqual(latLng.lng());
   }
 
   function assertPolygonPaths(
