@@ -149,6 +149,15 @@ export class Datastore {
     return this.fetchDoc_(`${survey(surveyId)}/sheets/config`);
   }
 
+  /**
+   * Fetches Location of Interests (LOIs) and their associated submissions for a given survey and job.
+   *
+   * @param surveyId The ID of the survey.
+   * @param jobId The ID of the job.
+   * @param ownerId The optional ID of the owner to filter submissions by.
+   * @param page The page number for pagination (used with the `QueryIterator`).
+   * @returns A Promise that resolves to an array of joined LOI and submission documents.
+   */
   async fetchLoisSubmissions(
     surveyId: string,
     jobId: string,
