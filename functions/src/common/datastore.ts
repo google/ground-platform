@@ -174,9 +174,9 @@ export class Datastore {
     );
     return leftOuterJoinSorted(
       loisIterator,
-      v1 => v1.get(l.id),
+      loiDoc => loiDoc.get(l.id),
       submissionsIterator,
-      v2 => v2.get(sb.loiId)
+      submissionDoc => submissionDoc.get(sb.loiId)
     );
   }
 

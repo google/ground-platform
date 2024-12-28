@@ -51,8 +51,7 @@ export async function exportCsvHandler(
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
-  const canManageSurvey = canImport(user, surveyDoc);
-  const ownerId = !canManageSurvey ? userId : undefined;
+  const ownerId = canImport(user, surveyDoc) ? undefined : userId;
 
   console.log(
     `Exporting survey '${surveyId}', job '${jobId}', owner '${
