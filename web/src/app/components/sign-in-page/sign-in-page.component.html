@@ -21,7 +21,7 @@
         <img class="logo" alt="Ground logo" src="/assets/img/logo.svg" />
       </div>
       <p class="title">Ground</p>
-      <p class="cta" *ngIf="!(isAuthenticated$() | async)">
+      <p class="cta" *ngIf="!(isAuthenticated$() | async)" i18n="@@signInCTA">
         Sign in to continue
       </p>
       <div class="buttons">
