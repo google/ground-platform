@@ -1,7 +1,7 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
@@ -9,11 +9,17 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@ground/lib": ["../lib"],
+      "@ground/proto": ["../proto"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
-    "strictTemplates": false
+    "strictTemplates": false,
+    "preserveSymlinks": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
+

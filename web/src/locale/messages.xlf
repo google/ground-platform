@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="signOutButton" datatype="html">
+        <source> Sign out </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/header/current-user-widget/account-popup/account-popup.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="manageSurveyButton" datatype="html">
+        <source>Manage survey</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/header/header.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="termsOfService" datatype="html">
+        <source>Terms of Service</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/header/header.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about" datatype="html">
+        <source>About</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/header/header.component.html</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/about/about.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="signInCTA" datatype="html">
+        <source> Sign in to continue </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/sign-in-page/sign-in-page.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="surveys" datatype="html">
+        <source>Surveys</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/survey-list/survey-list.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="createSurvey" datatype="html">
+        <source>Create survey</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/survey-list/survey-list.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="surveyDescription" datatype="html">
+        <source> Define jobs and sites for data collectors </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/components/survey-list/survey-list.component.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="projectDescription" datatype="html">
+        <source>Ground is an open-source community project built by Google and FAO under the Forest Data Partnership with help from SIG, Ecam, and open-source community contributors.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/about/about.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="licenseInfo" datatype="html">
+        <source>It is licensed under the <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://www.apache.org/licenses/LICENSE-2.0&quot; target=&quot;_blank&quot;&gt;"/>Apache License, Version 2.0<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/about/about.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="copyrightInfo" datatype="html">
+        <source>Copyright 2024 <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/google/ground-platform/blob/master/AUTHORS&quot; target=&quot;_blank&quot;&gt;"/>The Ground Authors<x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/about/about.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="backButtonLabel" datatype="html">
+        <source>Back</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/about/about.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="loadingSurvey" datatype="html">
+        <source>Loading survey...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="addJobAlt" datatype="html">
+        <source>Add a job</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="surveyDetailsTitle" datatype="html">
+        <source>Start building your survey</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="surveyDetailsDescription" datatype="html">
+        <source>Provide some basic info about your survey.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="defineLoiTitle" datatype="html">
+        <source>Where should data be collected?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="defineLoiDescription" datatype="html">
+        <source>Data collectors will complete specified tasks for these sites.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="defineTasksTitle" datatype="html">
+        <source>What data should be collected?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="defineTasksDescription" datatype="html">
+        <source>Data collectors will be prompted to complete the tasks you define here for each data collection site.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dataSharingTitle" datatype="html">
+        <source>Data sharing agreement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="dataSharingDescription" datatype="html">
+        <source>Select the terms collectors need to agree to before collecting data.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="reviewSurveyTitle" datatype="html">
+        <source>Review survey</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="reviewSurveyDescription" datatype="html">
+        <source>Is your survey ready? Share it with collectors and other organizers.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="backButton" datatype="html">
+        <source> Back </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/pages/create-survey/create-survey.component.html</context>
+          <context context-type="linenumber">133,135</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
