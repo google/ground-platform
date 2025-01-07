@@ -535,8 +535,8 @@ export class DataStoreService {
     userId: string,
     canManageSurvey: boolean
   ) {
-    return canManageSurvey
-      ? ref.where(sb.loiId, '==', loiId)
-      : ref.where(sb.loiId, '==', loiId).where(sb.ownerId, '==', userId);
+    const query = ref.where(sb.loiId, '==', loiId);
+
+    return canManageSurvey ? query : query.where(sb.ownerId, '==', userId);
   }
 }
