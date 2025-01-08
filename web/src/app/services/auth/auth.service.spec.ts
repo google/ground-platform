@@ -33,7 +33,13 @@ describe('AuthService', () => {
       providers: [
         {provide: AngularFirestore, useValue: {}},
         {provide: AngularFireFunctions, useValue: {}},
-        {provide: AngularFireAuth, useValue: {authState: NEVER}},
+        {
+          provide: AngularFireAuth,
+          useValue: {
+            authState: NEVER,
+            onIdTokenChanged: (callback: Function) => callback(null),
+          },
+        },
         {provide: DataStoreService, useValue: {user$: () => of()}},
         {provide: Router, useValue: {}},
         {provide: HttpClientService, useValue: {}},

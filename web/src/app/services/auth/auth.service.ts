@@ -19,8 +19,8 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFireFunctions} from '@angular/fire/compat/functions';
 import {GoogleAuthProvider} from 'firebase/auth';
 import firebase from 'firebase/compat/app';
-import {Observable, firstValueFrom, from} from 'rxjs';
-import {map, shareReplay, switchMap} from 'rxjs/operators';
+import {Observable, Subject, firstValueFrom, from} from 'rxjs';
+import {map, mergeWith, shareReplay, switchMap} from 'rxjs/operators';
 
 import {AclEntry} from 'app/models/acl-entry.model';
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
@@ -52,6 +52,7 @@ export const ROLE_OPTIONS = [
 })
 export class AuthService {
   private user$: Observable<User>;
+  private tokenChanged$ = new Subject<firebase.User | null>();
   private currentUser!: User;
   private hasAcceptedTos = false;
 
@@ -62,7 +63,9 @@ export class AuthService {
     private functions: AngularFireFunctions,
     private httpClientService: HttpClientService
   ) {
+    this.afAuth.onIdTokenChanged(user => this.tokenChanged$.next(user));
     this.user$ = this.afAuth.authState.pipe(
+      mergeWith(this.tokenChanged$),
       switchMap(user => from(this.onAuthStateChange(user))),
       map(user => user || ANONYMOUS_USER),
       // Cache last authenticated user so that late subscribers receive it as well.
