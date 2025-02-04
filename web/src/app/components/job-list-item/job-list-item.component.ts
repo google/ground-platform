@@ -120,6 +120,16 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
   }
 
+  async onDownloadGeoJsonClick() {
+    // TODO(#1160): This can be optimized to only create a cookie when missing or expired.
+    await this.authService.createSessionCookie();
+    window.open(
+      `${environment.cloudFunctionsUrl}/exportGeojson?` +
+        `survey=${this.surveyId}&job=${this.job?.id}`,
+      '_blank'
+    );
+  }
+
   isSelectedLoi(node: DynamicFlatNode): boolean {
     return node.loi?.id === this.loiId;
   }

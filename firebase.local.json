@@ -21,7 +21,7 @@
         "type": 301
       }
     ],
-    "rewrites": [      
+    "rewrites": [
       {
         "source": "/importGeoJson",
         "function": "importGeoJson"
@@ -29,6 +29,10 @@
       {
         "source": "/exportCsv",
         "function": "exportCsv"
+      },
+      {
+        "source": "/exportGeojson",
+        "function": "exportGeojson"
       },
       {
         "source": "**/!(*.*)",
