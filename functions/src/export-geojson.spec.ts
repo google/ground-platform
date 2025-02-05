@@ -131,7 +131,7 @@ describe('export()', () => {
   };
   const testCases = [
     {
-      desc: '[GEOJSON] - export point',
+      desc: 'export point',
       jobId: job1.id,
       survey: survey,
       jobs: [job1],

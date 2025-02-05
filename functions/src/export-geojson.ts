@@ -28,7 +28,7 @@ import {toGeoJsonGeometry} from '@ground/lib';
 import Pb = GroundProtos.ground.v1beta1;
 
 /**
- * Iterates over all LOIsin a job returning a valid GeoJSON file.
+ * Iterates over all LOIs in a job returning a valid GeoJSON file.
  */
 export async function exportGeojsonHandler(
   req: functions.Request,
