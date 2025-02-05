@@ -76,6 +76,7 @@ export async function exportCsvHandler(
     'Content-Disposition',
     'attachment; filename=' + getFileName(jobName)
   );
+
   const csvStream = csv.format({
     delimiter: ',',
     headers,

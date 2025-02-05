@@ -69,6 +69,12 @@ export async function exportGeojsonHandler(
     'Content-Disposition',
     'attachment; filename=' + getFileName(jobName)
   );
+
+  /**
+   * Creates a JSON stream representing a GeoJSON FeatureCollection.
+   * The arguments follow a pattern of open, separator, close, and
+   * indent, which helps to organize the JSON structure for clarity.
+   */
   const jsonStream = JSONStream.stringify(
     '{\n  "type": "FeatureCollection",\n  "features": [\n    ',
     ',\n',
