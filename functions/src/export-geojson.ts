@@ -83,12 +83,14 @@ export async function exportGeojsonHandler(
     try {
       const loi = toMessage(row.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (!isAccessibleLoi(loi, ownerId)) return;
-      writeRow(jsonStream, loi);
+      if (isAccessibleLoi(loi, ownerId)) {
+        writeRow(jsonStream, loi);
+      }
     } catch (e) {
       console.debug('Skipping row', e);
     }
   });
+
   res.status(HttpStatus.OK);
   jsonStream.end();
 }
