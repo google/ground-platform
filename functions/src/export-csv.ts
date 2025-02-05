@@ -53,12 +53,6 @@ export async function exportCsvHandler(
   }
   const ownerId = canImport(user, surveyDoc) ? undefined : userId;
 
-  console.log(
-    `Exporting survey '${surveyId}', job '${jobId}', owner '${
-      ownerId || 'survey organizer'
-    }'`
-  );
-
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
     res.status(HttpStatus.NOT_FOUND).send('Job not found');
