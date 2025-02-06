@@ -73,7 +73,7 @@
   </div>
 
   <div class="task-form">
-    <mat-form-field class="question" appearance="fill">
+    <mat-form-field>
       <mat-label>{{ Tasks[taskGroup].placeholder }}</mat-label>
 
       <input
@@ -90,7 +90,7 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field class="task-type" appearance="fill" *ngIf="taskGroup === TaskGroup.QUESTION">
+    <mat-form-field *ngIf="taskGroup === TaskGroup.QUESTION">
       <mat-select
         class="task-type-select"
         [value]="taskTypeOption"
@@ -105,6 +105,19 @@
         <mat-option *ngFor="let taskTypeOption of TaskTypeOptions" [value]="taskTypeOption" class="icon-task-type-option">
           <mat-icon>{{ taskTypeOption.icon }}</mat-icon>
           <span>{{ taskTypeOption.label }}</span>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="taskGroup === TaskGroup.MAP_A_NEW_SITE">
+      <mat-select
+        class="task-type-select"
+        formControlName="allowedTypes"
+        (openedChange)="onTaskFocus()"
+        multiple
+      >
+        <mat-option *ngFor="let taskAllowedType of TaskAllowedTypes" [value]="taskAllowedType.type">
+          <span>{{ taskAllowedType.label }}</span>
         </mat-option>
       </mat-select>
     </mat-form-field>
