@@ -21,6 +21,7 @@ import {handleProfileRefresh} from './profile-refresh';
 import {sessionLoginHandler} from './session-login';
 import {importGeoJsonCallback} from './import-geojson';
 import {exportCsvHandler} from './export-csv';
+import {exportGeojsonHandler} from './export-geojson';
 import {onCall} from 'firebase-functions/v2/https';
 import {onCreateLoiHandler} from './on-create-loi';
 import {onCreatePasslistEntryHandler} from './on-create-passlist-entry';
@@ -60,6 +61,8 @@ export const onCreatePasslistEntry = functions.firestore
 export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
 
 export const exportCsv = onHttpsRequest(exportCsvHandler);
+
+export const exportGeojson = onHttpsRequest(exportGeojsonHandler);
 
 export const onCreateLoi = functions.firestore
   .document(loiPathTemplate)

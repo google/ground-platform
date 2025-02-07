@@ -25,6 +25,10 @@
         {
           "fieldPath": "`2`", // loi_id
           "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "`1`", // submission_id
+          "order": "ASCENDING"
         }
       ]
     }

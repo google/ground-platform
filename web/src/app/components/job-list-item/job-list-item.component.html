@@ -63,7 +63,12 @@ limitations under the License.
           <mat-menu #jobMenu="matMenu">
             <a (click)="onDownloadCsvClick()" target="_blank">
               <button mat-menu-item>
-                <span>Download job data</span>
+                <span>Download job data (CSV)</span>
+              </button>
+            </a>
+            <a (click)="onDownloadGeoJsonClick()" target="_blank">
+              <button mat-menu-item>
+                <span>Download site locations (GeoJSON)</span>
               </button>
             </a>
           </mat-menu>

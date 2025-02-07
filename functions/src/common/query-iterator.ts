@@ -33,13 +33,8 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
    *
    * @param query The Firestore query to iterate over.
    * @param pageSize The number of documents to fetch in each batch.
-   * @param orderField The field to order documents by (optional).
    */
-  constructor(
-    private query: Query,
-    private pageSize: number,
-    private orderField: string
-  ) {}
+  constructor(private query: Query, private pageSize: number) {}
 
   /**
    * Fetches the next batch of documents and returns the next document in the iterator.
@@ -55,10 +50,11 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
       this.currentIndex >= this.querySnapshot.size
     ) {
       // Fetch next batch of documents
-      let q = this.query.limit(this.pageSize);
+      let q = this.query;
       if (this.lastDocument) {
-        q = q.startAfter([this.lastDocument?.get(this.orderField)]);
+        q = q.startAfter(this.lastDocument);
       }
+      q = q.limit(this.pageSize);
       this.querySnapshot = await q.get();
       this.currentIndex = 0;
     }
@@ -127,10 +123,20 @@ export async function* leftOuterJoinSorted<T, U>(
       // If no matching items were found on the right side for the current left item
       // (or the right iterator has reached its end), yield a pair
       // consisting of the left item's value and undefined.
-      if (rightItemsFound === 0) yield [leftItem.value, undefined];
-      // Move to the next left item and reset the counter for matches.
-      leftItem = await leftIterator.next();
-      rightItemsFound = 0;
+      if (rightItem.done) {
+        rightItem = await rightIterator.next();
+        if (rightItem.done) {
+          if (rightItemsFound === 0) yield [leftItem.value, undefined];
+          // Move to the next left item and reset the counter for matches.
+          leftItem = await leftIterator.next();
+          rightItemsFound = 0;
+        }
+      } else {
+        if (rightItemsFound === 0) yield [leftItem.value, undefined];
+        // Move to the next left item and reset the counter for matches.
+        leftItem = await leftIterator.next();
+        rightItemsFound = 0;
+      }
     } else if (leftKey > rightKey) {
       // The right item's key is less than the left item's key (mismatch).
       // Advance the right iterator to find a possible match for the current left item.

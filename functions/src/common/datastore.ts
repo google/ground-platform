@@ -194,17 +194,13 @@ export class Datastore {
       .orderBy(l.id);
     let submissionsQuery = this.db_
       .collection(submissions(surveyId))
-      .where(sb.jobId, '==', jobId)
-      .orderBy(sb.loiId);
+      .where(sb.jobId, '==', jobId);
     if (ownerId) {
       submissionsQuery = submissionsQuery.where(sb.ownerId, '==', ownerId);
     }
-    const loisIterator = new QueryIterator(loisQuery, page, l.id);
-    const submissionsIterator = new QueryIterator(
-      submissionsQuery,
-      page,
-      sb.loiId
-    );
+    submissionsQuery = submissionsQuery.orderBy(sb.loiId).orderBy(sb.id);
+    const loisIterator = new QueryIterator(loisQuery, page);
+    const submissionsIterator = new QueryIterator(submissionsQuery, page);
     return leftOuterJoinSorted(
       loisIterator,
       loiDoc => loiDoc.get(l.id),
