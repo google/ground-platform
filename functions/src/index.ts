@@ -24,15 +24,19 @@ import {exportCsvHandler} from './export-csv';
 import {exportGeojsonHandler} from './export-geojson';
 import {onCall} from 'firebase-functions/v2/https';
 import {onCreateLoiHandler} from './on-create-loi';
+import {onCreatePasslistEntryHandler} from './on-create-passlist-entry';
 import {onWriteJobHandler} from './on-write-job';
 import {onWriteLoiHandler} from './on-write-loi';
 import {onWriteSubmissionHandler} from './on-write-submission';
 import {onWriteSurveyHandler} from './on-write-survey';
-import {job, loi, submission, survey} from './common/datastore';
+import {job, loi, passlistEntry, submission, survey} from './common/datastore';
 import {initializeFirebaseApp} from './common/context';
 
 // Ensure Firebase is initialized.
 initializeFirebaseApp();
+
+/** Template for passlist entry write triggers capturing passlist entry id. */
+const passlistEntryPathTemplate = passlistEntry('{entryId}');
 
 /** Template for job write triggers capturing survey and job id. */
 const jobPathTemplate = job('{surveyId}', '{jobId}');
@@ -49,6 +53,10 @@ const surveyPathTemplate = survey('{surveyId}');
 export const profile = {
   refresh: onCall(request => handleProfileRefresh(request)),
 };
+
+export const onCreatePasslistEntry = functions.firestore
+  .document(passlistEntryPathTemplate)
+  .onCreate(onCreatePasslistEntryHandler);
 
 export const importGeoJson = onHttpsRequestAsync(importGeoJsonCallback);
 
