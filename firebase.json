@@ -32,6 +32,10 @@
         "function": "exportCsv"
       },
       {
+        "source": "/exportGeojson",
+        "function": "exportGeojson"
+      },
+      {
         "source": "/sessionLogin",
         "function": "sessionLogin"
       },

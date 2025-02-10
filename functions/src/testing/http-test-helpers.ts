@@ -51,7 +51,7 @@ export function createResponseSpy(chunks?: string[]): functions.Response<any> {
     'on',
     'once',
     'emit',
-    'write',
+    'removeListener',
   ]);
   res.status.and.callThrough().and.returnValue(res);
   res.end.and.callThrough().and.returnValue(res);
