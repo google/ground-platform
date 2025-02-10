@@ -33,11 +33,14 @@ describe('onCreatePasslistEntry()', () => {
   let getMailServiceMock: any;
   let mailServiceMock: any;
 
-  const email = 'this_is_a_test@test.com';
   const serverConfig = {
     port: 5555,
   };
-  const mail = {html: 'html', subject: 'subject'};
+  const mail = {
+    html: 'html',
+    subject: 'subject',
+    to: 'this_is_a_test@test.com',
+  };
 
   beforeEach(() => {
     mockFirestore = createMockFirestore();
@@ -79,16 +82,13 @@ describe('onCreatePasslistEntry()', () => {
   it('sends email notification', async () => {
     mockFirestore.doc('config/mail').set({server: serverConfig});
     mockFirestore.doc('config/mail/templates/passlisted').set(mail);
-    mockFirestore.doc(`passlists/${email}`).set({});
+    mockFirestore.doc(`passlists/${mail.to}`).set({});
     await test.wrap(functions.onCreatePasslistEntry)(
       newDocumentSnapshot({}),
-      newEventContext({entryId: email})
+      newEventContext({entryId: mail.to})
     );
     expect(getMailServiceMock).toHaveBeenCalled();
     expect(mailServiceMock.sendMail).toHaveBeenCalled();
-    expect(mailServiceMock.sendMail).toHaveBeenCalledWith({
-      to: email,
-      ...mail,
-    });
+    expect(mailServiceMock.sendMail).toHaveBeenCalledWith(mail);
   });
 });
