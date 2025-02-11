@@ -38,7 +38,7 @@
 
       <mat-menu #editSurveyMenu="matMenu">
         <a (click)="onEditSurveyClick()">
-          <button mat-menu-item>Manage survey</button>
+          <button mat-menu-item i18n="@@manageSurveyButton">Manage survey</button>
         </a>
       </mat-menu>
 
@@ -74,11 +74,11 @@
 
       <mat-menu #infoMenu="matMenu">
         <a *ngIf="user.isAuthenticated" (click)="onTermsOfServiceClick()">
-          <button mat-menu-item>Terms of Service</button>
+          <button mat-menu-item i18n="@@termsOfService">Terms of Service</button>
         </a>
 
         <a (click)="onAboutClick()">
-          <button mat-menu-item>About</button>
+          <button mat-menu-item i18n="@@about">About</button>
         </a>
       </mat-menu>
     </ng-container>
