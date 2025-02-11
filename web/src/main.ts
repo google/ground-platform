@@ -1,5 +1,3 @@
-/// <reference types="@angular/localize" />
-
 /**
  * Copyright 2019 The Ground Authors.
  *
