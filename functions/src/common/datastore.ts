@@ -40,9 +40,19 @@ type pseudoGeoJsonGeometry = {
 export const config = () => 'config';
 
 /**
+ * Returns the path of passlist entry doc with the specified id.
+ */
+export const passlistEntry = (entryId: string) => `passlist/${entryId}`;
+
+/**
  * Returns the path of integrations doc.
  */
 export const integrations = () => config() + '/integrations';
+
+/**
+ * Returns the path of mail doc.
+ */
+export const mail = () => config() + '/mail';
 
 /**
  * Returns path to survey colection. This is a function for consistency with other path functions.
@@ -82,6 +92,12 @@ export const submissions = (surveyId: string) =>
  */
 export const submission = (surveyId: string, submissionId: string) =>
   submissions(surveyId) + '/' + submissionId;
+
+/**
+ * Returns the path of template doc with the specified id.
+ */
+export const mailTemplate = (templateId: string) =>
+  `${mail()}/templates/${templateId}`;
 
 export class Datastore {
   private db_: firestore.Firestore;
@@ -126,6 +142,10 @@ export class Datastore {
     return this.db_.collection(integrations() + '/propertyGenerators').get();
   }
 
+  fetchMailConfig() {
+    return this.fetchDoc_(mail());
+  }
+
   fetchSurvey(surveyId: string) {
     return this.db_.doc(survey(surveyId)).get();
   }
@@ -143,6 +163,10 @@ export class Datastore {
       .collection(lois(surveyId))
       .where(l.jobId, '==', jobId)
       .get();
+  }
+
+  fetchMailTemplate(templateId: string) {
+    return this.fetchDoc_(mailTemplate(templateId));
   }
 
   fetchSheetsConfig(surveyId: string) {

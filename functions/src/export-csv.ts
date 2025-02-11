@@ -53,12 +53,6 @@ export async function exportCsvHandler(
   }
   const ownerId = canImport(user, surveyDoc) ? undefined : userId;
 
-  console.log(
-    `Exporting survey '${surveyId}', job '${jobId}', owner '${
-      ownerId || 'survey organizer'
-    }'`
-  );
-
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
     res.status(HttpStatus.NOT_FOUND).send('Job not found');
@@ -82,6 +76,7 @@ export async function exportCsvHandler(
     'Content-Disposition',
     'attachment; filename=' + getFileName(jobName)
   );
+
   const csvStream = csv.format({
     delimiter: ',',
     headers,
@@ -98,8 +93,7 @@ export async function exportCsvHandler(
       const [loiDoc, submissionDoc] = row;
       const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (!isAccessibleLoi(loi, ownerId)) return;
-      if (submissionDoc) {
+      if (isAccessibleLoi(loi, ownerId) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
         writeRow(csvStream, loiProperties, tasks, loi, submission);
