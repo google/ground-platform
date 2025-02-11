@@ -1,6 +1,6 @@
 export enum Env {
-  Dev = 'Dev',
-  Prod = 'Prod',
-  Local = 'Local',
-  Test = 'Test'
+  Dev,
+  Prod,
+  Local,
+  Test,
 }
