@@ -13,8 +13,7 @@
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
-    "strictTemplates": false,
-    "preserveSymlinks": true
+    "strictTemplates": false
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
