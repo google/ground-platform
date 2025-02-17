@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+import {Env} from './environment-enums';
+
 // This file will be replaced during build by using the `fileReplacements` array.
 // For example, `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-export const environment = {};
+export const environment: {
+  cloudFunctionsUrl?: string;
+  env?: Env;
+  firebase?: any;
+  googleMapsApiKey?: string;
+  production?: boolean;
+  useEmulators?: boolean;
+} = {};
