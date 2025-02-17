@@ -66,6 +66,7 @@
     "@angular/cli": "^17.3.12",
     "@angular/compiler-cli": "^17.3.12",
     "@angular/language-service": "^17.3.12",
+    "@angular/localize": "^17.3.12",
     "@jridgewell/source-map": "^0.3.2",
     "@types/google.maps": "^3.54.10",
     "@types/jasmine": "~3.6.0",
