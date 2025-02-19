@@ -1,14 +1,14 @@
 {
-  "extends": "./node_modules/gts",
+  "extends": "../node_modules/gts",
   "env": {
     "jasmine": true
   },
-  "root": true,
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "eslint-plugin-absolute-imports"
   ],
+  "root": true,
   "rules": {
-    "eqeqeq": ["error", "always", {"null": "ignore"}]    
+    "eqeqeq": ["error", "always", {"null": "ignore"}]
   }
 }
