@@ -2,8 +2,7 @@
   "name": "@ground/web",
   "version": "0.0.1",
   "scripts": {
-    "i18n-extract": "ng extract-i18n",
-    "aaa": "ng extract-i18n --format=xlf --out-file=messages.xlf --output-path=locale",
+    "i18n-extract": "ng extract-i18n --format=xlf --out-file=messages.xlf --output-path=src/locale",
     "clean": "rm -rf dist coverage *.log",
     "ci-all": "npm run ci-local-deps && npm ci",
     "ci-local-deps": "npm ci --workspace=../proto --workspace=../lib",
