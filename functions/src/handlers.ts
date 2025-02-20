@@ -76,8 +76,8 @@ export function onHttpsRequest(handler: HttpsRequestHandler) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
-        req,
-        res,
+        req as any,
+        res as any,
         async () =>
           await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
             try {
@@ -158,8 +158,8 @@ export function onHttpsRequestAsync(callback: HttpsRequestCallback) {
   return https.onRequest((req: https.Request, res: Response) =>
     corsMiddleware(req, res, () =>
       cookieParser()(
-        req,
-        res,
+        req as any,
+        res as any,
         async () =>
           await requireIdToken(req, res, async (idToken: DecodedIdToken) => {
             await invokeCallbackAsync(callback, req, res, idToken);
