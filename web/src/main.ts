@@ -1,3 +1,5 @@
+/// <reference types="@angular/localize" />
+
 /**
  * Copyright 2019 The Ground Authors.
  *
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import 'hammerjs';
 
 import {enableProdMode} from '@angular/core';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';

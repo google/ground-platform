@@ -8,6 +8,6 @@
   },
   "root": true,
   "rules": {
-    "eqeqeq": ["error", "always", {"null": "ignore"}]    
+    "eqeqeq": ["error", "always", {"null": "ignore"}]
   }
 }
