@@ -2,11 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": [
-      "google.maps",
-      "node",
-      "@angular/localize"
-    ]
+    "types": ["google.maps", "node"]
   },
   "files": ["src/main.ts"],
   "include": ["src/**/*.ts"],

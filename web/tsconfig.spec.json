@@ -2,12 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": [
-      "jasmine",
-      "node",
-      "jasmine-expect",
-      "@angular/localize"
-    ]
+    "types": ["jasmine", "node", "jasmine-expect"]
   },
   "files": ["src/test.ts"],
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
