@@ -130,6 +130,18 @@ message Task {
     Type type = 1;
   }
 
+  // A text block.
+  message InstructionTask {
+    // Valid values for the `type` field.
+    enum Type {
+      TYPE_UNSPECIFIED = 0;
+      // A single line of text.
+      SHORT_TEXT = 1;
+    }
+    // Required. The type of text question.
+    Type type = 1;
+  }
+
   // A question whose response is entered manually as a number.
   message NumberQuestion {
     // Allowed values for the `type` field.
