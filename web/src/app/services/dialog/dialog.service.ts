@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Injectable, inject} from '@angular/core';
+import {Component, Inject, Injectable, inject} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -51,8 +51,10 @@ export interface DialogData {
   ],
 })
 export class ConfirmationDialogComponent {
-  readonly dialogRef = inject(MatDialogRef<ConfirmationDialogComponent>);
-  readonly data = inject<DialogData>(MAT_DIALOG_DATA);
+  constructor(
+    public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData
+  ) {}
 
   onConfirm() {
     this.dialogRef.close(true);

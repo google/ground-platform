@@ -17,7 +17,7 @@
 <div class="page">
   <ground-header></ground-header>
 
-  <h1 class="page-title">Surveys</h1>
+  <h1 class="page-title" i18n>{{'app.surveys' | translate}}</h1>
 
   <div class="container">
     <div class="surveys-container">
@@ -36,8 +36,7 @@
 
           <mat-card-subtitle class="survey-description">
             Define jobs and sites for data collectors
-          </mat-card-subtitle
-          >
+          </mat-card-subtitle>
         </mat-card-header>
       </mat-card>
 
@@ -49,9 +48,7 @@
         (click)="onSurveyClicked(survey)"
       >
         <mat-card-header>
-          <mat-card-title class="survey-title">{{
-            survey.title
-          }}</mat-card-title>
+          <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
 
           <mat-card-subtitle class="survey-description">
             {{ survey.description }}

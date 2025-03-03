@@ -21,6 +21,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
+import {TranslatePipe} from '@ngx-translate/core';
 
 import {HeaderModule} from 'app/components/header/header.module';
 
@@ -36,6 +37,7 @@ import {SurveyListComponent} from './survey-list.component';
     MatDialogModule,
     MatCardModule,
     MatGridListModule,
+    TranslatePipe,
   ],
   exports: [SurveyListComponent],
 })

@@ -17,6 +17,7 @@
 import functions from 'firebase-functions';
 import {buffer} from 'node:stream/consumers';
 import {FormDataEncoder} from 'form-data-encoder';
+import {FormData} from 'formdata-node';
 
 export async function createPostRequestSpy(
   args: object,

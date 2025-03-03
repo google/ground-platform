@@ -8,7 +8,7 @@
     "jasmine": true
   },
   "rules": {
-    "eqeqeq": ["error", "always", {"null": "ignore"}],  
+    "eqeqeq": ["error", "always", {"null": "ignore"}],
     "node/no-unpublished-import": "off",
     "node/no-unpublished-require": "off",
     "@typescript-eslint/no-unused-vars": ["off", { "varsIgnorePattern": "_.*" }],
