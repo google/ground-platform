@@ -116,6 +116,10 @@ message Task {
 
     // A task in which the user must take a photo.
     TakePhoto take_photo = 13;
+
+    // A set of instructions to be shown to the data collector during the
+    // data collection process.
+    InstructionsTask instructions = 14;
   }
 
   // A question whose response is entered manually as text.
@@ -128,6 +132,13 @@ message Task {
     }
     // Required. The type of text question.
     Type type = 1;
+  }
+
+  // A set of instructions to be shown to the data collector during the
+  // data collection process.
+  message InstructionsTask {
+    // Required. Markdown text to be shown to the user.
+    string text = 1;
   }
 
   // A question whose response is entered manually as a number.
