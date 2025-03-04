@@ -16,8 +16,7 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FirebaseUISignInFailure} from 'firebaseui-angular';
-import {Observable, Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {Observable, Subscription, filter} from 'rxjs';
 
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -39,7 +38,7 @@ export class SignInPageComponent implements OnInit, OnDestroy {
       // TODO(#545): Redirect to original URL on success.
       this.authService
         .isAuthenticated$()
-        .pipe(filter(isAuth => isAuth || environment.useEmulators))
+        .pipe(filter(isAuth => isAuth || !!environment.useEmulators))
         .subscribe(() => this.navigationService.navigateToTermsOfService())
     );
   }
