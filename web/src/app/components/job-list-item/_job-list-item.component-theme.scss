@@ -2,12 +2,8 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  .expandable-node-start {
+  .job-name, .loi-name {
     color: mat.get-theme-color($theme, on-surface-variant);
-
-    .job-name {
-      color: mat.get-theme-color($theme, on-surface-variant);
-    }
   }
 
   .tree-node-selected {
@@ -21,12 +17,11 @@
   .mat-tree {
     --mat-tree-container-background-color: #{mat.get-theme-color($theme, surface-container)};
 
-    .mat-mdc-unelevated-button {
-      background-color: mat.get-theme-color($theme, surface-container);
+    .mat-tree-node {
+      min-height: 36px;
     }
 
-    .loi-tree-node{
-      color: mat.get-theme-color($theme, on-surface-variant);
+    .loi-tree-node {
       &:hover {
         color: mat.get-theme-color($theme, on-secondary-container);
         background-color: rgba(mat.get-theme-color($theme, on-surface), 0.12);
@@ -36,7 +31,7 @@
 }
 
 @mixin typography($theme) {
-  .expandable-node-start, .loi-name {
+  .job-name, .loi-name {
     font: mat.get-theme-typography($theme, label-large, font);
   }
 }

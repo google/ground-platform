@@ -20,8 +20,8 @@ limitations under the License.
   class="jobs"
   [ngClass]="{collapsed: !isSidePanelExpanded()}"
 >
-  <div *ngFor="let entry of jobs; let i = index" class="job">
-    <mat-divider *ngIf="i > 0"></mat-divider>
-    <ground-job-list-item [job]="entry"></ground-job-list-item>
-  </div>
+  <ground-job-list-item
+    *ngFor="let entry of jobs; let i = index; trackBy: trackById"
+    [job]="entry"
+  ></ground-job-list-item>
 </mat-list>
