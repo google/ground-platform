@@ -24,7 +24,6 @@ import {List} from 'immutable';
 import {BehaviorSubject, Observable, Subscription, merge} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 
-import {GeometryType} from 'app/models/geometry/geometry';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {getLoiIcon} from 'app/utils/utils';
@@ -41,6 +40,8 @@ export class DynamicFlatNode {
     public iconName = '',
     public iconColor = '',
     public jobId: string,
+    public isJob: boolean,
+    public childCount: number,
     // Specific for nodes that represent lois.
     public loi?: LocationOfInterest
   ) {}
@@ -129,6 +130,8 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
               /* iconName= */ getLoiIcon(loi),
               /* iconColor= */ node.iconColor,
               /* jobId= */ 'undefined',
+              /* isJob= */ false,
+              /* childCount= */ 0,
               /* loi= */ loi
             );
             loiNodes.push(loiNode);
