@@ -45,7 +45,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
   treeControl: FlatTreeControl<DynamicFlatNode>;
   dataSource: DynamicDataSource;
-  lois: List<LocationOfInterest> = List();
 
   getLevel = (node: DynamicFlatNode) => node.level;
   isExpandable = (node: DynamicFlatNode) => node.expandable;
@@ -85,22 +84,9 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
     this.subscription.add(
       this.loiService.getLocationsOfInterest$().subscribe(lois => {
-        this.lois = lois;
-
-        // Add initial node for current job
+        console.log(this.job!.name, lois.size);
         this.dataSource.data = this.dataSource.data.concat([
-          new DynamicFlatNode(
-            /* name= */ this.job!.name!,
-            /* level= */ 0,
-            /* expandable= */ true,
-            /* iconName= */ 'label',
-            /* iconColo= */ this.job!.color!,
-            /* jobId= */ this.job!.id,
-            /* isJob= */ true,
-            /* childCount= */ this.lois.filter(
-              loi => loi.jobId === this.job?.id
-            ).size
-          ),
+          this.createJobNode(this.job!, lois),
         ]);
       })
     );
@@ -140,16 +126,25 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
   }
 
+  createJobNode(job: Job, lois: List<LocationOfInterest>): DynamicFlatNode {
+    return new DynamicFlatNode(
+      /* name= */ job!.name!,
+      /* level= */ 0,
+      /* expandable= */ true,
+      /* iconName= */ 'label',
+      /* iconColo= */ job!.color!,
+      /* jobId= */ job!.id,
+      /* isJob= */ true,
+      /* childCount= */ lois.filter(loi => loi.jobId === this.job?.id).size
+    );
+  }
+
   isSelectedLoi(node: DynamicFlatNode): boolean {
     return node.loi?.id === this.loiId;
   }
 
-  isLoiNode(node: DynamicFlatNode): boolean {
-    return node.loi ? true : false;
-  }
-
   selectLoi(node: DynamicFlatNode) {
-    if (this.surveyId && this.isLoiNode(node)) {
+    if (this.surveyId && !node.isJob) {
       this.navigationService.selectLocationOfInterest(
         this.surveyId,
         node.loi!.id
