@@ -85,6 +85,24 @@ message Survey {
 
   // Defines the survey's current state.
   State state = 7;
+
+  // Defines the survey's current visibility.
+  enum Visibility {
+    // Default value when visibility is missing.
+    VISIBILITY_UNSPECIFIED = 0;
+
+    // Anyone with a link or QR Code can contribute.
+    RESTRICTED = 1;
+
+
+    UNLISTED = 2;
+
+    // Anyone can contribute.
+    PUBLIC = 3;
+  }
+
+  // Defines the survey's current visibility.
+  Visibility visibility = 8;
 }
 
 // Defines a user's role in a survey.
