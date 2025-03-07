@@ -52,7 +52,6 @@ export enum SurveyState {
 
 /** Enum for survey's current visibility. */
 export enum SurveyVisibility {
-  UNSPECIFIED = 0,
   RESTRICTED = 1,
   UNLISTED = 2,
   PUBLIC = 3,
