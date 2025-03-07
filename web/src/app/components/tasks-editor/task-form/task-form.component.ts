@@ -59,6 +59,11 @@ export interface TaskTypeOption {
   cardinality?: Cardinality;
 }
 
+export interface TaskAllowedType {
+  label: string;
+  type: TaskType;
+}
+
 export const TaskTypeOptions: Array<TaskTypeOption> = [
   {
     icon: 'notes',
@@ -94,6 +99,17 @@ export const TaskTypeOptions: Array<TaskTypeOption> = [
   },
 ];
 
+export const TaskAllowedTypes: Array<TaskAllowedType> = [
+  {
+    label: 'Drop a pin',
+    type: TaskType.DROP_PIN,
+  },
+  {
+    label: 'Draw/Walk perimiter',
+    type: TaskType.DRAW_AREA,
+  },
+];
+
 export const Tasks: {
   [key in TaskGroup]: {
     icon: string;
@@ -101,6 +117,7 @@ export const Tasks: {
     placeholder: string;
     requiredMessage: string;
     isGeometry?: boolean;
+    isAddLoiTask?: boolean;
   };
 } = {
   [TaskGroup.QUESTION]: {
@@ -135,6 +152,13 @@ export const Tasks: {
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
     isGeometry: true,
+  },
+  [TaskGroup.MAP_A_NEW_SITE]: {
+    icon: 'add_location_alt',
+    label: 'Map a new site',
+    placeholder: 'Instructions',
+    requiredMessage: 'Instructions are required',
+    isAddLoiTask: true,
   },
 };
 
@@ -179,6 +203,8 @@ export class TaskFormComponent {
 
   TaskTypeOptions = TaskTypeOptions;
 
+  TaskAllowedTypes = TaskAllowedTypes;
+
   Tasks = Tasks;
 
   GeometryTasks = GeometryTasks;
@@ -222,6 +248,10 @@ export class TaskFormComponent {
 
   get typeControl(): AbstractControl {
     return this.formGroup.get('type')!;
+  }
+
+  get allowedTypesControl(): AbstractControl {
+    return this.formGroup.get('allowedTypes')!;
   }
 
   get labelControl(): AbstractControl {

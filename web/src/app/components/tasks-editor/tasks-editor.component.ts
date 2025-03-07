@@ -23,7 +23,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 
 import {
   Cardinality,
@@ -47,9 +47,10 @@ export enum TaskGroup {
   DROP_PIN = 3,
   DRAW_AREA = 4,
   CAPTURE_LOCATION = 5,
+  MAP_A_NEW_SITE = 6,
 }
 
-export const taskGroupToTypes = new Map([
+export const taskGroupToTypes = Map([
   [
     TaskGroup.QUESTION,
     List([
@@ -65,9 +66,10 @@ export const taskGroupToTypes = new Map([
   [TaskGroup.DROP_PIN, List([TaskType.DROP_PIN])],
   [TaskGroup.DRAW_AREA, List([TaskType.DRAW_AREA])],
   [TaskGroup.CAPTURE_LOCATION, List([TaskType.CAPTURE_LOCATION])],
+  [TaskGroup.MAP_A_NEW_SITE, List([TaskType.MAP_A_NEW_SITE])],
 ]);
 
-export const taskTypeToGroup = new Map([
+export const taskTypeToGroup = Map([
   [TaskType.TEXT, TaskGroup.QUESTION],
   [TaskType.MULTIPLE_CHOICE, TaskGroup.QUESTION],
   [TaskType.NUMBER, TaskGroup.QUESTION],
@@ -78,6 +80,7 @@ export const taskTypeToGroup = new Map([
   [TaskType.DROP_PIN, TaskGroup.DROP_PIN],
   [TaskType.DRAW_AREA, TaskGroup.DRAW_AREA],
   [TaskType.CAPTURE_LOCATION, TaskGroup.CAPTURE_LOCATION],
+  [TaskType.MAP_A_NEW_SITE, TaskGroup.MAP_A_NEW_SITE],
 ]);
 
 @Component({
@@ -96,7 +99,7 @@ export class TasksEditorComponent {
   addableTaskGroups: Array<TaskGroup> = [
     TaskGroup.QUESTION,
     TaskGroup.PHOTO,
-    TaskGroup.CAPTURE_LOCATION,
+    TaskGroup.MAP_A_NEW_SITE,
   ];
 
   constructor(
@@ -136,18 +139,25 @@ export class TasksEditorComponent {
   }
 
   onTaskAdd(group: TaskGroup) {
-    const types = taskGroupToTypes.get(group);
+    const type = taskGroupToTypes.get(group)?.first();
 
     const formGroup = this.formBuilder.group({
       id: this.dataStoreService.generateId(),
-      type: types?.first(),
+      type,
       required: false,
       label: ['', Validators.required],
       cardinality: null,
       options: this.formBuilder.array([]),
       hasOtherOption: false,
-      addLoiTask: false,
-    });
+      addLoiTask: type === TaskType.MAP_A_NEW_SITE,
+    }) as FormGroup;
+
+    if (type === TaskType.MAP_A_NEW_SITE) {
+      formGroup.addControl(
+        'allowedTypes',
+        this.formBuilder.control([], Validators.required)
+      );
+    }
 
     this.formArray.push(formGroup);
   }
@@ -215,6 +225,13 @@ export class TasksEditorComponent {
       addLoiTask: task.addLoiTask,
     }) as FormGroup;
 
+    if (task.type === TaskType.MAP_A_NEW_SITE) {
+      control.addControl(
+        'allowedTypes',
+        this.formBuilder.control(task.allowedTypes, Validators.required)
+      );
+    }
+
     if (task.condition) {
       control.addControl(
         'condition',
@@ -225,8 +242,10 @@ export class TasksEditorComponent {
               this.formBuilder.group({
                 expressionType: expression.expressionType,
                 taskId: [expression.taskId, Validators.required],
-                optionIds:
-                  [expression.optionIds?.toArray(), Validators.required] || [],
+                optionIds: [
+                  expression.optionIds?.toArray() || [],
+                  Validators.required,
+                ],
               })
             ) || []
           ),
@@ -270,6 +289,7 @@ export class TasksEditorComponent {
           } as MultipleChoice)
         : undefined,
       addLoiTask: task.get('addLoiTask')?.value as boolean,
+      allowedTypes: task.get('allowedTypes')?.value as TaskType[],
       condition: condition?.value
         ? ({
             matchType: condition.get('matchType')?.value,
