@@ -91,10 +91,10 @@ message Survey {
     // Default value when visibility is missing.
     VISIBILITY_UNSPECIFIED = 0;
 
-    // Anyone with a link or QR Code can contribute.
+    // Only users in shared list can contribute.
     RESTRICTED = 1;
 
-
+    // Anyone with a link or QR Code can contribute.
     UNLISTED = 2;
 
     // Anyone can contribute.
