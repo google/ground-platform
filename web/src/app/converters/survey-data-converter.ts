@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {DocumentData} from '@angular/fire/firestore';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
@@ -20,7 +21,12 @@ import {List, Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {
+  DataSharingType,
+  Survey,
+  SurveyState,
+  SurveyVisibility,
+} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -56,6 +62,12 @@ const DATA_SHARING_MODEL_TYPE = Map([
 const MODEL_STATES = Map([
   [Pb.Survey.State.DRAFT, SurveyState.DRAFT],
   [Pb.Survey.State.READY, SurveyState.READY],
+]);
+
+const MODEL_VISIBILITIES = Map([
+  [Pb.Survey.Visibility.RESTRICTED, SurveyVisibility.RESTRICTED],
+  [Pb.Survey.Visibility.UNLISTED, SurveyVisibility.UNLISTED],
+  [Pb.Survey.Visibility.PUBLIC, SurveyVisibility.PUBLIC],
 ]);
 
 function dataSharingTypeFromProto(
@@ -212,6 +224,7 @@ export function surveyDocToModel(
       type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
       customText: pb.dataSharingTerms?.customText ?? undefined,
     },
-    MODEL_STATES.get(pb.state)
+    MODEL_STATES.get(pb.state),
+    MODEL_VISIBILITIES.get(pb.visibility) || SurveyVisibility.RESTRICTED
   );
 }
