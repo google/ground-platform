@@ -24,8 +24,8 @@ import {Role} from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
+  SurveyGeneralAccess,
   SurveyState,
-  SurveyVisibility,
 } from 'app/models/survey.model';
 import {
   Cardinality,
@@ -53,7 +53,7 @@ export const MODEL_ROLES = Map([
   [Pb.Role.VIEWER, Role.VIEWER],
 ]);
 
-const DATA_SHARING_MODEL_TYPE = Map([
+const MODEL_SHARING_MODEL_TYPES = Map([
   [Pb.Survey.DataSharingTerms.Type.PRIVATE, DataSharingType.PRIVATE],
   [Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0, DataSharingType.PUBLIC],
   [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
@@ -65,9 +65,9 @@ const MODEL_STATES = Map([
 ]);
 
 const MODEL_VISIBILITIES = Map([
-  [Pb.Survey.Visibility.RESTRICTED, SurveyVisibility.RESTRICTED],
-  [Pb.Survey.Visibility.UNLISTED, SurveyVisibility.UNLISTED],
-  [Pb.Survey.Visibility.PUBLIC, SurveyVisibility.PUBLIC],
+  [Pb.Survey.GeneralAccess.RESTRICTED, SurveyGeneralAccess.RESTRICTED],
+  [Pb.Survey.GeneralAccess.UNLISTED, SurveyGeneralAccess.UNLISTED],
+  [Pb.Survey.GeneralAccess.PUBLIC, SurveyGeneralAccess.PUBLIC],
 ]);
 
 function dataSharingTypeFromProto(
@@ -77,7 +77,7 @@ function dataSharingTypeFromProto(
     return DataSharingType.PRIVATE;
   }
 
-  const dataSharingType = DATA_SHARING_MODEL_TYPE.get(protoType);
+  const dataSharingType = MODEL_SHARING_MODEL_TYPES.get(protoType);
 
   if (!dataSharingType) {
     return DataSharingType.PRIVATE;
@@ -225,6 +225,6 @@ export function surveyDocToModel(
       customText: pb.dataSharingTerms?.customText ?? undefined,
     },
     MODEL_STATES.get(pb.state),
-    MODEL_VISIBILITIES.get(pb.visibility) || SurveyVisibility.RESTRICTED
+    MODEL_VISIBILITIES.get(pb.generalAccess) || SurveyGeneralAccess.RESTRICTED
   );
 }

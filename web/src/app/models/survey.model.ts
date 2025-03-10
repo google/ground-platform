@@ -50,8 +50,8 @@ export enum SurveyState {
   READY = 2,
 }
 
-/** Enum for survey's current visibility. */
-export enum SurveyVisibility {
+/** Enum for survey's current general access. */
+export enum SurveyGeneralAccess {
   RESTRICTED = 1,
   UNLISTED = 2,
   PUBLIC = 3,
@@ -74,7 +74,7 @@ export class Survey extends Copiable {
     /* dataSharingTerms= */
     {type: DataSharingType.PRIVATE},
     SurveyState.UNSAVED,
-    SurveyVisibility.RESTRICTED
+    SurveyGeneralAccess.RESTRICTED
   );
 
   constructor(
@@ -86,7 +86,7 @@ export class Survey extends Copiable {
     readonly ownerId: string,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
     readonly state?: SurveyState,
-    readonly visibility?: SurveyVisibility
+    readonly generalAccess?: SurveyGeneralAccess
   ) {
     super();
   }

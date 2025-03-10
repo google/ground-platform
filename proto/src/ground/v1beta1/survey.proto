@@ -86,12 +86,12 @@ message Survey {
   // Defines the survey's current state.
   State state = 7;
 
-  // Defines the survey's current visibility.
-  enum Visibility {
-    // Default value when visibility is missing.
-    VISIBILITY_UNSPECIFIED = 0;
+  // Defines the survey's current general_access.
+  enum GeneralAccess {
+    // Default value when general_access is missing.
+    GENERAL_ACCESS_UNSPECIFIED = 0;
 
-    // Only users in shared list can contribute.
+    // Only users with the DATA_COLLECTOR role in the survey ACLs can contribute.
     RESTRICTED = 1;
 
     // Anyone with a link or QR Code can contribute.
@@ -101,8 +101,8 @@ message Survey {
     PUBLIC = 3;
   }
 
-  // Defines the survey's current visibility.
-  Visibility visibility = 8;
+  // Defines the survey's current general_access.
+  GeneralAccess general_access = 8;
 }
 
 // Defines a user's role in a survey.

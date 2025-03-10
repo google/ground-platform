@@ -21,8 +21,8 @@ import {Role} from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
+  SurveyGeneralAccess,
   SurveyState,
-  SurveyVisibility,
 } from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
@@ -62,7 +62,7 @@ export class TestData {
         type: DataSharingType.PRIVATE,
       },
       SurveyState.DRAFT,
-      SurveyVisibility.RESTRICTED
+      SurveyGeneralAccess.RESTRICTED
     );
   }
 
