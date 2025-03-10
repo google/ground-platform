@@ -50,6 +50,13 @@ export enum SurveyState {
   READY = 2,
 }
 
+/** Enum for survey's current general access. */
+export enum SurveyGeneralAccess {
+  RESTRICTED = 1,
+  UNLISTED = 2,
+  PUBLIC = 3,
+}
+
 export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
@@ -66,7 +73,8 @@ export class Survey extends Copiable {
     '',
     /* dataSharingTerms= */
     {type: DataSharingType.PRIVATE},
-    SurveyState.UNSAVED
+    SurveyState.UNSAVED,
+    SurveyGeneralAccess.RESTRICTED
   );
 
   constructor(
@@ -77,7 +85,8 @@ export class Survey extends Copiable {
     readonly acl: ImmutableMap<string, Role>,
     readonly ownerId: string,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
-    readonly state?: SurveyState
+    readonly state?: SurveyState,
+    readonly generalAccess?: SurveyGeneralAccess
   ) {
     super();
   }
