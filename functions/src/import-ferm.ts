@@ -162,7 +162,7 @@ export async function importFermCallback(
     // 6. Send a success response:
     res.status(HttpStatus.OK).json({
       message: 'Data imported successfully',
-      data: {surveyId, url: `https://ground.openforis.org/${surveyId}`},
+      data: {surveyId, url: `https://ground.openforis.org/survey/${surveyId}`},
     });
 
     done();
