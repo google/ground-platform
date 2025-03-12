@@ -25,7 +25,17 @@
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
 
-   /**
+    /**
+     * Returns true iff the survey doesn't have a restricted access.
+     */
+    function isSurveyOpen(survey) {
+    	return survey["8"] in [
+        2 /* UNLISTED */,
+        3 /* PUBLIC */
+      ];
+    }
+
+    /**
      * Returns the current user's role in the given survey.
      */
     function getRole(survey) {
@@ -60,7 +70,8 @@
      * survey.
      */
     function canViewSurvey(survey) {
-      return canAccess() && getRole(survey) != null;
+      return canAccess() &&
+        (isSurveyOpen(survey) || getRole(survey) != null);
     }
 
     /**
@@ -87,10 +98,11 @@
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      return canAccess() && isOneOf(survey, [
-        2 /* DATA_COLLECTOR */,
-        3 /* SURVEY_ORGANIZER */
-      ]);
+      return canAccess() &&
+        (isSurveyOpen(survey) || isOneOf(survey, [
+          2 /* DATA_COLLECTOR */,
+          3 /* SURVEY_ORGANIZER */
+        ]));
     }
 
     /**
