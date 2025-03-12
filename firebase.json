@@ -40,6 +40,14 @@
         "function": "sessionLogin"
       },
       {
+        "source": "/importFerm",
+        "function": "importFerm"
+      },
+      {
+        "source": "/exportFerm",
+        "function": "exportFerm"
+      },
+      {
         "source": "**/!(*.*)",
         "destination": "/index.html"
       }

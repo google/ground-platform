@@ -60,9 +60,19 @@ export const mail = () => config() + '/mail';
 export const surveys = () => 'surveys';
 
 /**
+ * Returns path to user colection. This is a function for consistency with other path functions.
+ */
+export const users = () => 'users';
+
+/**
  * Returns the path of survey doc with the specified id.
  */
 export const survey = (surveyId: string) => surveys() + '/' + surveyId;
+
+/**
+ * Returns the path of the location of interest collection in the survey with the specified id.
+ */
+export const jobs = (surveyId: string) => survey(surveyId) + '/jobs';
 
 /**
  * Returns the path of job doc with the specified id.
@@ -71,7 +81,7 @@ export const job = (surveyId: string, jobId: string) =>
   `${survey(surveyId)}/jobs/${jobId}`;
 
 /**
- * Returns the path of the survey collection in the survey with the specified id.
+ * Returns the path of the location of interest collection in the survey with the specified id.
  */
 export const lois = (surveyId: string) => survey(surveyId) + '/lois';
 
@@ -154,6 +164,10 @@ export class Datastore {
     return this.db_.doc(job(surveyId, jobId)).get();
   }
 
+  fetchJobs(surveyId: string) {
+    return this.db_.collection(jobs(surveyId)).get();
+  }
+
   fetchLocationOfInterest(surveyId: string, loiId: string) {
     return this.fetchDoc_(loi(surveyId, loiId));
   }
@@ -171,6 +185,21 @@ export class Datastore {
 
   fetchSheetsConfig(surveyId: string) {
     return this.fetchDoc_(`${survey(surveyId)}/sheets/config`);
+  }
+
+  async getUserIdByEmail(userEmail: string): Promise<string | null> {
+    const querySnapshot = await this.db_
+      .collection(users())
+      .where('email', '==', userEmail)
+      .get();
+    if (querySnapshot.empty) return null;
+    const firstDoc = querySnapshot.docs[0];
+    return firstDoc.id;
+  }
+
+  async generateId() {
+    const docRef = await this.db_.collection('ids').add({});
+    return docRef.id;
   }
 
   /**
@@ -211,6 +240,18 @@ export class Datastore {
 
   async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
+  }
+
+  async insertSurvey(surveyId: string, surveyDoc: DocumentData): Promise<void> {
+    this.db_.doc(survey(surveyId)).set(surveyDoc);
+  }
+
+  async insertJob(
+    surveyId: string,
+    jobId: string,
+    jobDoc: DocumentData
+  ): Promise<void> {
+    this.db_.doc(job(surveyId, jobId)).set(jobDoc);
   }
 
   async countSubmissionsForLoi(
