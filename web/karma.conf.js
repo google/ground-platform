@@ -17,6 +17,7 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
+const path = require('path');
 process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 module.exports = function (config) {
@@ -34,7 +35,10 @@ module.exports = function (config) {
       'karma-jasmine-matchers',
       'karma-jasmine-html-reporter',
       'karma-coverage-istanbul-reporter',
-      '@angular-devkit/build-angular/plugins/karma',
+      require(path.join(
+        __dirname,
+        'node_modules/@angular-devkit/build-angular/plugins/karma'
+      )),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
