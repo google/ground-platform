@@ -17,13 +17,13 @@
 import * as functions from 'firebase-functions';
 import JSONStream from 'jsonstream-ts';
 import {getDatastore} from './common/context';
+import {getValue} from './export-csv';
 import * as HttpStatus from 'http-status-codes';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
-import {getValue} from './export-csv';
 
 export async function exportFermHandler(
   req: functions.Request,

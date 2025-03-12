@@ -19,9 +19,9 @@ import {firestore} from 'firebase-admin';
 import {DocumentData, GeoPoint} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
+import {leftOuterJoinSorted, QueryIterator} from './query-iterator';
 
 import Pb = GroundProtos.ground.v1beta1;
-import {leftOuterJoinSorted, QueryIterator} from './query-iterator';
 
 const l = registry.getFieldIds(Pb.LocationOfInterest);
 const sb = registry.getFieldIds(Pb.Submission);
@@ -238,12 +238,21 @@ export class Datastore {
     );
   }
 
-  async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
+  async fetchSubmissions(
+    surveyId: string,
+    jobId: string
+  ) {
+    return this.db_
+      .collection(submissions(surveyId))
+      .where(sb.jobId, '==', jobId).get();
+  }
+
+  async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData): Promise<void> {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 
   async insertSurvey(surveyId: string, surveyDoc: DocumentData): Promise<void> {
-    this.db_.doc(survey(surveyId)).set(surveyDoc);
+    await this.db_.doc(survey(surveyId)).set(surveyDoc);
   }
 
   async insertJob(

@@ -187,7 +187,7 @@ function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId?: string) {
 /**
  * Returns the string or number representation of a specific task element result.
  */
-function getValue(
+export function getValue(
   task: Pb.ITask,
   data: Pb.ITaskData[]
 ): string | number | null {
