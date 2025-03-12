@@ -71,7 +71,7 @@ message Survey {
   // collecting data.
   DataSharingTerms data_sharing_terms = 6;
 
-  // Defines the survey's current state.
+  // Possible values for the survey's current state.
   enum State {
     // Default value when status is missing.
     STATE_UNSPECIFIED = 0;
@@ -86,7 +86,7 @@ message Survey {
   // Defines the survey's current state.
   State state = 7;
 
-  // Defines the survey's current general_access.
+  // Possible values for who can access the survey beyond users in the ACLs.
   enum GeneralAccess {
     // Default value when general_access is missing.
     GENERAL_ACCESS_UNSPECIFIED = 0;
@@ -101,7 +101,7 @@ message Survey {
     PUBLIC = 3;
   }
 
-  // Defines the survey's current general_access.
+  // Defines who can access the survey beyond users in the ACLs.
   GeneralAccess general_access = 8;
 }
 
