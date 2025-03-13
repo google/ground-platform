@@ -18,7 +18,12 @@ import {Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {
+  DataSharingType,
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
@@ -56,7 +61,8 @@ export class TestData {
       {
         type: DataSharingType.PRIVATE,
       },
-      SurveyState.DRAFT
+      SurveyState.DRAFT,
+      SurveyGeneralAccess.RESTRICTED
     );
   }
 
