@@ -25,7 +25,18 @@
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
 
-   /**
+    /**
+     * Returns true iff all authenticated users can read and contribute
+     * data to the specified survey.
+     */
+    function isUnlistedOrPublic(survey) {
+    	return survey["8"] in [
+        2 /* UNLISTED */,
+        3 /* PUBLIC */
+      ];
+    }
+
+    /**
      * Returns the current user's role in the given survey.
      */
     function getRole(survey) {
@@ -60,7 +71,8 @@
      * survey.
      */
     function canViewSurvey(survey) {
-      return canAccess() && getRole(survey) != null;
+      return canAccess() &&
+        (isUnlistedOrPublic(survey) || getRole(survey) != null);
     }
 
     /**
@@ -87,10 +99,11 @@
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      return canAccess() && isOneOf(survey, [
-        2 /* DATA_COLLECTOR */,
-        3 /* SURVEY_ORGANIZER */
-      ]);
+      return canAccess() &&
+        (isUnlistedOrPublic(survey) || isOneOf(survey, [
+          2 /* DATA_COLLECTOR */,
+          3 /* SURVEY_ORGANIZER */
+        ]));
     }
 
     /**
