@@ -26,9 +26,10 @@
     }
 
     /**
-     * Returns true iff the survey doesn't have a restricted access.
+     * Returns true iff all authenticated users can read and contribute
+     * data to the specified survey.
      */
-    function isSurveyOpen(survey) {
+    function isUnlistedOrPublic(survey) {
     	return survey["8"] in [
         2 /* UNLISTED */,
         3 /* PUBLIC */
@@ -71,7 +72,7 @@
      */
     function canViewSurvey(survey) {
       return canAccess() &&
-        (isSurveyOpen(survey) || getRole(survey) != null);
+        (isUnlistedOrPublic(survey) || getRole(survey) != null);
     }
 
     /**
@@ -99,7 +100,7 @@
      */
     function canCollectData(survey) {
       return canAccess() &&
-        (isSurveyOpen(survey) || isOneOf(survey, [
+        (isUnlistedOrPublic(survey) || isOneOf(survey, [
           2 /* DATA_COLLECTOR */,
           3 /* SURVEY_ORGANIZER */
         ]));
