@@ -84,7 +84,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
     this.subscription.add(
       this.loiService.getLocationsOfInterest$().subscribe(lois => {
-        console.log(this.job!.name, lois.size);
         this.dataSource.data = this.dataSource.data.concat([
           this.createJobNode(this.job!, lois),
         ]);
