@@ -45,11 +45,11 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
   treeControl: FlatTreeControl<DynamicFlatNode>;
   dataSource: DynamicDataSource;
-  lois: List<LocationOfInterest> = List();
 
   getLevel = (node: DynamicFlatNode) => node.level;
   isExpandable = (node: DynamicFlatNode) => node.expandable;
-  hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
+  hasChild = (node: DynamicFlatNode) => node.childCount > 0;
+  isJob = (_: number, node: DynamicFlatNode) => node.level === 0;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -82,18 +82,13 @@ export class JobListItemComponent implements OnInit, OnDestroy {
         this.surveyId = id;
       })
     );
-
-    // Add initial node for current job
-    this.dataSource.data = this.dataSource.data.concat([
-      new DynamicFlatNode(
-        /* name= */ this.job!.name!,
-        /* level= */ 0,
-        /* expandable= */ true,
-        /* iconName= */ 'label',
-        /* iconColo= */ this.job!.color!,
-        /* jobId= */ this.job!.id
-      ),
-    ]);
+    this.subscription.add(
+      this.loiService.getLocationsOfInterest$().subscribe(lois => {
+        this.dataSource.data = this.dataSource.data.concat([
+          this.createJobNode(this.job!, lois),
+        ]);
+      })
+    );
   }
 
   ngOnChanges() {
@@ -130,16 +125,25 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     );
   }
 
+  createJobNode(job: Job, lois: List<LocationOfInterest>): DynamicFlatNode {
+    return new DynamicFlatNode(
+      /* name= */ job!.name!,
+      /* level= */ 0,
+      /* expandable= */ true,
+      /* iconName= */ 'label',
+      /* iconColo= */ job!.color!,
+      /* jobId= */ job!.id,
+      /* isJob= */ true,
+      /* childCount= */ lois.filter(loi => loi.jobId === this.job?.id).size
+    );
+  }
+
   isSelectedLoi(node: DynamicFlatNode): boolean {
     return node.loi?.id === this.loiId;
   }
 
-  isLoiNode(node: DynamicFlatNode): boolean {
-    return node.loi ? true : false;
-  }
-
   selectLoi(node: DynamicFlatNode) {
-    if (this.surveyId && this.isLoiNode(node)) {
+    if (this.surveyId && !node.isJob) {
       this.navigationService.selectLocationOfInterest(
         this.surveyId,
         node.loi!.id
