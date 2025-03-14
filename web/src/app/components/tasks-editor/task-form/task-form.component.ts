@@ -99,7 +99,7 @@ export const Tasks: {
     icon: string;
     label: string;
     placeholder: string;
-    requiredMessage: string;
+    requiredMessage?: string;
     isGeometry?: boolean;
   };
 } = {
@@ -135,6 +135,11 @@ export const Tasks: {
     placeholder: 'Instructions',
     requiredMessage: 'Instructions are required',
     isGeometry: true,
+  },
+  [TaskGroup.INSTRUCTIONS]: {
+    icon: 'list_alt_check',
+    label: 'Instructions',
+    placeholder: 'Instructions',
   },
 };
 
