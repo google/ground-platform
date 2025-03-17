@@ -169,6 +169,12 @@ function toTaskTypeMessage(
           type: Pb.Task.NumberQuestion.Type.FLOAT,
         }),
       };
+    case TaskType.INSTRUCTIONS:
+      return {
+        instructions: new Pb.Task.InstructionsTask({
+          text: '',
+        }),
+      };
     case TaskType.DATE:
       return {
         dateTimeQuestion: new Pb.Task.DateTimeQuestion({

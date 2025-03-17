@@ -124,6 +124,7 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
     drawGeometry,
     captureLocation,
     takePhoto,
+    instructions,
   } = pb;
 
   if (textQuestion) return TaskType.TEXT;
@@ -145,6 +146,7 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
     else throw new Error('Error converting to Task: invalid task data');
   } else if (captureLocation) return TaskType.CAPTURE_LOCATION;
   else if (takePhoto) return TaskType.PHOTO;
+  else if (instructions) return TaskType.INSTRUCTIONS;
   else throw new Error('Error converting to Task: invalid task data');
 }
 
