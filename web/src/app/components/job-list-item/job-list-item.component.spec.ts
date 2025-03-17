@@ -207,6 +207,7 @@ describe('JobListItemComponent', () => {
     loader = TestbedHarnessEnvironment.loader(fixture);
 
     surveyId$.next(surveyId);
+    lois$.next(List([]));
   });
 
   it('should create', () => {
