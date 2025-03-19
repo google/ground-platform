@@ -56,6 +56,10 @@
     Data collector will no longer be able to add new sites for this job.
     Data will only be collected for existing sites.
   </p>
+
+  <p *ngSwitchCase="DialogType.InvalidSurvey">
+    To publish changes, fix any outstanding issues with your survey.
+  </p>
 </mat-dialog-content>
 
 <mat-dialog-actions>
@@ -63,8 +67,9 @@
     mat-button
     color="primary"
     mat-dialog-close
+    *ngIf="backButtonLabel"
   >
-    Cancel
+    {{ backButtonLabel }}
   </button>
 
   <button
@@ -72,7 +77,8 @@
     color="primary"
     [mat-dialog-close]="data"
     cdkFocusInitial
+    *ngIf="continueButtonLabel"
   >
-    {{ buttonLabel }}
+    {{ continueButtonLabel }}
   </button>
 </mat-dialog-actions>

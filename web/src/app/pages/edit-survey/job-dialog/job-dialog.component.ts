@@ -26,6 +26,7 @@ export enum DialogType {
   DeleteOption,
   DeleteSurvey,
   DisableFreeForm,
+  InvalidSurvey,
 }
 
 export interface DialogData {
@@ -48,7 +49,7 @@ export class JobDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {}
 
-  public get title() {
+  public get title(): string | null {
     switch (this.data.dialogType) {
       case DialogType.AddJob:
         return 'Add new job';
@@ -66,12 +67,32 @@ export class JobDialogComponent {
         return 'Delete survey';
       case DialogType.DisableFreeForm:
         return 'Disable free-form data collection?';
+      case DialogType.InvalidSurvey:
+        return 'Fix issues with survey';
       default:
-        return '';
+        return null;
     }
   }
 
-  public get buttonLabel() {
+  public get backButtonLabel(): string | null {
+    switch (this.data.dialogType) {
+      case DialogType.AddJob:
+      case DialogType.RenameJob:
+      case DialogType.DeleteJob:
+      case DialogType.DeleteLois:
+      case DialogType.DeleteOption:
+      case DialogType.DeleteSurvey:
+      case DialogType.DisableFreeForm:
+        return 'Cancel';
+      case DialogType.UndoJobs:
+      case DialogType.InvalidSurvey:
+        return 'Go back';
+      default:
+        return null;
+    }
+  }
+
+  public get continueButtonLabel(): string | null {
     switch (this.data.dialogType) {
       case DialogType.AddJob:
         return 'Create';
@@ -86,7 +107,7 @@ export class JobDialogComponent {
       case DialogType.DisableFreeForm:
         return 'Confirm';
       default:
-        return '';
+        return null;
     }
   }
 
