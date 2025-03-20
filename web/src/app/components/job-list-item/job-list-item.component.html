@@ -17,68 +17,93 @@ limitations under the License.
 <div class="job-list-item-container">
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Tree node for lois -->
-    <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [class.tree-node-selected]="isSelectedLoi(node)"
-      class="loi-tree-node" role="button" tabindex="0" mat-button (click)="selectLoi(node)"
-      [style.padding-left]="isSidePanelExpanded() ? '40px' : '16px'">
-      <mat-icon svgIcon="{{ node.iconName }}" class="{{ node.jobId }} loi-icon" [ngStyle]="{color: node.iconColor}"
-        [style.padding-left]="isSidePanelExpanded() ? '10px' : '0'"></mat-icon>
-      <div class="loi-name" *ngIf="isSidePanelExpanded()">
-        {{ node.name }}
-      </div>
+    <mat-tree-node
+      *matTreeNodeDef="let node"
+      matTreeNodePadding
+      mat-button
+      class="loi-tree-node"
+      tabindex="0"
+      role="button"
+      (click)="selectLoi(node)"
+      [class.tree-node-selected]="isSelectedLoi(node)"
+      [style.padding-left]="isSidePanelExpanded() ? '50px' : '0px'"
+    >
+      <ng-container *ngIf="isSidePanelExpanded()">
+        <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
+
+        <div class="loi-name">{{ node.name }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="!isSidePanelExpanded()">
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+          <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
+        </button>
+      </ng-container>
     </mat-tree-node>
     <!-- Tree node for jobs -->
     <mat-tree-node
-      [class.tree-node-selected]="isSelectedLoi(node)"
-      *matTreeNodeDef="let node; when: hasChild"
-      matTreeNodePadding class="expandable-node"
+      *matTreeNodeDef="let node; when: isJob"
+      matTreeNodePadding
+      class="job-tree-node"
     >
-      <div class="expandable-node-start" *ngIf="isSidePanelExpanded()">
+      <ng-container *ngIf="isSidePanelExpanded()">
+        <ng-container *ngIf="hasChild(node)">
+          <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+            </mat-icon>
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="!hasChild(node)">
+          <div style="width: 40px; visibility: hidden;"></div>
+        </ng-container>
+
+        <div class="job-tree-node-label">
+          <ng-container *ngTemplateOutlet="jobLabel; context: { node: node }"></ng-container>
+        </div>
+
+        <div [ngSwitch]="actionsType">
+          <div *ngSwitchCase="jobListItemActionsType.MENU">
+            <button mat-icon-button [matMenuTriggerFor]="jobMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #jobMenu="matMenu">
+              <a (click)="onDownloadCsvClick()" target="_blank">
+                <button mat-menu-item>
+                  <span>Download job data (CSV)</span>
+                </button>
+              </a>
+              <a (click)="onDownloadGeoJsonClick()" target="_blank">
+                <button mat-menu-item>
+                  <span>Download site locations (GeoJSON)</span>
+                </button>
+              </a>
+            </mat-menu>
+          </div>
+          <div *ngSwitchCase="jobListItemActionsType.BACK">
+            <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isSidePanelExpanded()">
         <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
-          <mat-icon class="mat-icon-rtl-mirror">
-            chevron_right
-          </mat-icon>
-        </button>
-
-        <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
-          {{ node.iconName }}
-        </mat-icon>
-
-        <div class="job-name">{{ node.name }}</div>
-      </div>
-
-      <div class="expandable-node-start" *ngIf="!isSidePanelExpanded()">
-        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
-          <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}"
-            (click)="treeControl.toggle(node)">
+          <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
             {{ node.iconName }}
           </mat-icon>
         </button>
-      </div>
-
-      <div [ngSwitch]="actionsType" *ngIf="isSidePanelExpanded()">
-        <div *ngSwitchCase="jobListItemActionsType.MENU">
-          <button mat-icon-button [matMenuTriggerFor]="jobMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #jobMenu="matMenu">
-            <a (click)="onDownloadCsvClick()" target="_blank">
-              <button mat-menu-item>
-                <span>Download job data (CSV)</span>
-              </button>
-            </a>
-            <a (click)="onDownloadGeoJsonClick()" target="_blank">
-              <button mat-menu-item>
-                <span>Download site locations (GeoJSON)</span>
-              </button>
-            </a>
-          </mat-menu>
-        </div>
-        <div *ngSwitchCase="jobListItemActionsType.BACK">
-          <button mat-icon-button aria-label="back" (click)="onGoBackClick()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </div>
+      </ng-container>
     </mat-tree-node>
   </mat-tree>
 </div>
+
+<ng-template #jobLabel let-node="node">
+  <mat-icon class="job-icon" [ngStyle]="{color: node.iconColor}">
+    {{ node.iconName }}
+  </mat-icon>
+
+  <div class="job-name">{{ node.name }}</div>
+</ng-template>

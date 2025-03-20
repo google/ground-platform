@@ -20,7 +20,7 @@ import {BehaviorSubject, Observable, firstValueFrom} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {Survey, SurveyState} from 'app/models/survey.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 
 import {DataStoreService} from '../data-store/data-store.service';
@@ -123,6 +123,18 @@ export class DraftSurveyService {
     const currentSurvey = this.survey$.getValue();
 
     this.survey$.next(currentSurvey.copyWith({acl}));
+
+    this.dirty = true;
+  }
+
+  updateDataSharingTerms(type: DataSharingType, customText?: string): void {
+    const currentSurvey = this.survey$.getValue();
+
+    this.survey$.next(
+      currentSurvey.copyWith({
+        dataSharingTerms: {type, ...(customText && {customText})},
+      })
+    );
 
     this.dirty = true;
   }

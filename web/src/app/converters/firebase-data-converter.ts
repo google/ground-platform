@@ -46,6 +46,7 @@ const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.DROP_PIN, 'drop_pin'],
   [TaskType.DRAW_AREA, 'draw_area'],
   [TaskType.CAPTURE_LOCATION, 'capture_location'],
+  [TaskType.INSTRUCTIONS, 'instructions'],
 ]);
 
 export class FirebaseDataConverter {

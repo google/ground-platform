@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-.job-list-item-container {
-  padding: 2px 0;
-}
-
 ::ng-deep .mat-mdc-list .mat-mdc-list-item .mat-line {
   word-wrap: break-word !important;
   white-space: pre-wrap !important;
 }
 
-.expandable-node {
-  display: flex;
-  justify-content: space-between;
+.job-list-item-container {
+  margin-bottom: 8px;
+}
 
-  .expandable-node-start {
+.job-tree-node {
+  display: flex;
+
+  .job-tree-node-label {
+    min-width: 0;
     display: flex;
     align-items: center;
-    min-width: 0;
-
-    .job-icon {
-      padding-right: 16px;
-    }
+    gap: 8px;
+    flex: 1;
 
     .job-name {
       flex: 1;
@@ -53,11 +50,6 @@
 .loi-tree-node {
   border-radius: 24px;
   cursor: pointer;
-
-  .loi-icon {
-    width: 20px;
-    height: 20px;
-  }
 
   .loi-name {
     flex: 1;

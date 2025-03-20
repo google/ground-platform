@@ -164,7 +164,13 @@ describe('CreateSurveyComponent', () => {
     draftSurvey$ = new Subject<Survey>();
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
-      ['init', 'getSurvey$', 'updateState', 'updateSurvey']
+      [
+        'init',
+        'getSurvey$',
+        'updateDataSharingTerms',
+        'updateState',
+        'updateSurvey',
+      ]
     );
     draftSurveyServiceSpy.getSurvey$.and.returnValue(draftSurvey$);
 
@@ -469,14 +475,15 @@ describe('CreateSurveyComponent', () => {
       fixture.detectChanges();
     }));
 
-    it('updates data sharing agreement after clicking continue', () => {
+    it('updates data sharing agreement after clicking continue', fakeAsync(() => {
       clickContinueButton(fixture);
+      tick();
 
       expect(surveyServiceSpy.updateDataSharingTerms).toHaveBeenCalledOnceWith(
         DataSharingType.CUSTOM,
         'Good day, sir'
       );
-    });
+    }));
 
     it('goes back to task definition component after back button is clicked', () => {
       clickBackButton(fixture);

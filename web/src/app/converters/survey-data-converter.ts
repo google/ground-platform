@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {DocumentData} from '@angular/fire/firestore';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
@@ -20,7 +21,12 @@ import {List, Map} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {
+  DataSharingType,
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -47,7 +53,7 @@ export const MODEL_ROLES = Map([
   [Pb.Role.VIEWER, Role.VIEWER],
 ]);
 
-const DATA_SHARING_MODEL_TYPE = Map([
+const MODEL_SHARING_MODEL_TYPES = Map([
   [Pb.Survey.DataSharingTerms.Type.PRIVATE, DataSharingType.PRIVATE],
   [Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0, DataSharingType.PUBLIC],
   [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
@@ -58,6 +64,12 @@ const MODEL_STATES = Map([
   [Pb.Survey.State.READY, SurveyState.READY],
 ]);
 
+const MODEL_VISIBILITIES = Map([
+  [Pb.Survey.GeneralAccess.RESTRICTED, SurveyGeneralAccess.RESTRICTED],
+  [Pb.Survey.GeneralAccess.UNLISTED, SurveyGeneralAccess.UNLISTED],
+  [Pb.Survey.GeneralAccess.PUBLIC, SurveyGeneralAccess.PUBLIC],
+]);
+
 function dataSharingTypeFromProto(
   protoType?: Pb.Survey.DataSharingTerms.Type | null
 ) {
@@ -65,7 +77,7 @@ function dataSharingTypeFromProto(
     return DataSharingType.PRIVATE;
   }
 
-  const dataSharingType = DATA_SHARING_MODEL_TYPE.get(protoType);
+  const dataSharingType = MODEL_SHARING_MODEL_TYPES.get(protoType);
 
   if (!dataSharingType) {
     return DataSharingType.PRIVATE;
@@ -112,6 +124,7 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
     drawGeometry,
     captureLocation,
     takePhoto,
+    instructions,
   } = pb;
 
   if (textQuestion) return TaskType.TEXT;
@@ -133,6 +146,7 @@ function taskPbToModelTaskType(pb: Pb.ITask): TaskType {
     else throw new Error('Error converting to Task: invalid task data');
   } else if (captureLocation) return TaskType.CAPTURE_LOCATION;
   else if (takePhoto) return TaskType.PHOTO;
+  else if (instructions) return TaskType.INSTRUCTIONS;
   else throw new Error('Error converting to Task: invalid task data');
 }
 
@@ -212,6 +226,7 @@ export function surveyDocToModel(
       type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
       customText: pb.dataSharingTerms?.customText ?? undefined,
     },
-    MODEL_STATES.get(pb.state)
+    MODEL_STATES.get(pb.state),
+    MODEL_VISIBILITIES.get(pb.generalAccess) || SurveyGeneralAccess.RESTRICTED
   );
 }
