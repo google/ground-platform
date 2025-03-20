@@ -102,19 +102,28 @@ export class HeaderComponent {
   }
 
   async onFinishEditSurveyClick() {
-    this.isPublishingChanges = true;
-    await this.draftSurveyService.updateSurvey();
-    this.isPublishingChanges = false;
-    this.navigationService.selectSurvey(this.surveyId);
+    if (this.isDraftSurveyValid()) {
+      this.isPublishingChanges = true;
+      await this.draftSurveyService.updateSurvey();
+      this.isPublishingChanges = false;
+      this.navigationService.selectSurvey(this.surveyId);
+      return;
+    }
+
+    this.dialog.open(JobDialogComponent, {
+      data: {dialogType: DialogType.InvalidSurvey},
+      panelClass: 'small-width-dialog',
+    });
   }
 
-  isDraftSurveyDirtyAndValid() {
-    return (
-      this.draftSurveyService.dirty &&
-      this.draftSurveyService.valid.reduce(
-        (accumulator, currentValue) => accumulator && currentValue,
-        true
-      )
+  isDraftSurveyValid(): boolean {
+    return this.draftSurveyService.valid.reduce(
+      (accumulator, currentValue) => accumulator && currentValue,
+      true
     );
+  }
+
+  isDraftSurveyDirtyAndValid(): boolean {
+    return this.draftSurveyService.dirty && this.isDraftSurveyValid();
   }
 }
