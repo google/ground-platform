@@ -36,7 +36,7 @@ export interface DialogConfig {
   continueButtonLabel?: string;
 }
 
-const dialogConfigs: Record<DialogType, DialogConfig> = {
+export const dialogConfigs: Record<DialogType, DialogConfig> = {
   [DialogType.AddJob]: {
     title: 'Add new job',
     backButtonLabel: 'Cancel',
@@ -98,7 +98,7 @@ const dialogConfigs: Record<DialogType, DialogConfig> = {
 
 export interface DialogData {
   dialogType: DialogType;
-  jobName: string;
+  jobName?: string;
 }
 
 @Component({
