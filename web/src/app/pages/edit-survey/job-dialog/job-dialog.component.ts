@@ -26,11 +26,79 @@ export enum DialogType {
   DeleteOption,
   DeleteSurvey,
   DisableFreeForm,
+  InvalidSurvey,
 }
+
+export interface DialogConfig {
+  title: string;
+  content?: string;
+  backButtonLabel?: string;
+  continueButtonLabel?: string;
+}
+
+export const dialogConfigs: Record<DialogType, DialogConfig> = {
+  [DialogType.AddJob]: {
+    title: 'Add new job',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Create',
+  },
+  [DialogType.RenameJob]: {
+    title: 'Rename job',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Rename',
+  },
+  [DialogType.UndoJobs]: {
+    title: 'Unpublished changes',
+    content:
+      'If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?',
+    backButtonLabel: 'Go back',
+    continueButtonLabel: 'Continue',
+  },
+  [DialogType.DeleteJob]: {
+    title: 'Delete job',
+    content:
+      'This job and all of its associated data will be deleted. This operation can’t be undone. Are you sure?',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Confirm',
+  },
+  [DialogType.DeleteLois]: {
+    title: 'Delete predefined sites',
+    content:
+      'All predefined data collection sites and their associated data will be immediately deleted. This action cannot be undone.',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Confirm',
+  },
+  [DialogType.DeleteOption]: {
+    title: 'Delete option',
+    content:
+      'Are you sure you wish to delete this option? All associated data will be lost. This cannot be undone.',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Confirm',
+  },
+  [DialogType.DeleteSurvey]: {
+    title: 'Delete survey',
+    content:
+      'Are you sure you wish to delete this survey? All associated data will be lost. This cannot be undone.',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Confirm',
+  },
+  [DialogType.DisableFreeForm]: {
+    title: 'Disable free-form data collection?',
+    content:
+      'Data collector will no longer be able to add new sites for this job. Data will only be collected for existing sites.',
+    backButtonLabel: 'Cancel',
+    continueButtonLabel: 'Confirm',
+  },
+  [DialogType.InvalidSurvey]: {
+    title: 'Fix issues with survey',
+    content: 'To publish changes, fix any outstanding issues with your survey.',
+    backButtonLabel: 'Go back',
+  },
+};
 
 export interface DialogData {
   dialogType: DialogType;
-  jobName: string;
+  jobName?: string;
 }
 
 @Component({
@@ -48,46 +116,24 @@ export class JobDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {}
 
-  public get title() {
-    switch (this.data.dialogType) {
-      case DialogType.AddJob:
-        return 'Add new job';
-      case DialogType.RenameJob:
-        return 'Rename job';
-      case DialogType.UndoJobs:
-        return 'Unpublished changes';
-      case DialogType.DeleteJob:
-        return 'Delete job';
-      case DialogType.DeleteLois:
-        return 'Delete predefined sites';
-      case DialogType.DeleteOption:
-        return 'Delete option';
-      case DialogType.DeleteSurvey:
-        return 'Delete survey';
-      case DialogType.DisableFreeForm:
-        return 'Disable free-form data collection?';
-      default:
-        return '';
-    }
+  get dialogConfig(): DialogConfig {
+    return dialogConfigs[this.data.dialogType];
   }
 
-  public get buttonLabel() {
-    switch (this.data.dialogType) {
-      case DialogType.AddJob:
-        return 'Create';
-      case DialogType.RenameJob:
-        return 'Rename';
-      case DialogType.UndoJobs:
-        return 'Continue';
-      case DialogType.DeleteJob:
-      case DialogType.DeleteLois:
-      case DialogType.DeleteOption:
-      case DialogType.DeleteSurvey:
-      case DialogType.DisableFreeForm:
-        return 'Confirm';
-      default:
-        return '';
-    }
+  get title(): string {
+    return this.dialogConfig.title;
+  }
+
+  get content(): string | undefined {
+    return this.dialogConfig.content;
+  }
+
+  get backButtonLabel(): string | undefined {
+    return this.dialogConfig.backButtonLabel;
+  }
+
+  get continueButtonLabel(): string | undefined {
+    return this.dialogConfig.continueButtonLabel;
   }
 
   get jobNameFieldId() {

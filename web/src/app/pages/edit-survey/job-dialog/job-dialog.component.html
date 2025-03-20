@@ -17,45 +17,13 @@
 <h1 mat-dialog-title>{{ title }}</h1>
 
 <mat-dialog-content [ngSwitch]="data.dialogType">
-  <mat-form-field
-    *ngSwitchCase="[DialogType.AddJob, DialogType.RenameJob].includes(data.dialogType)
-      ? data.dialogType
-      : ''
-  ">
+  <p *ngIf="content">{{ content }}</p>
+
+  <mat-form-field *ngIf="[DialogType.AddJob, DialogType.RenameJob].includes(data.dialogType)">
     <mat-label>Job name</mat-label>
 
     <input [id]="jobNameFieldId" matInput [(ngModel)]="data.jobName" />
   </mat-form-field>
-
-  <p *ngSwitchCase="DialogType.DeleteJob">
-    This job and all of its associated data will be deleted. This operation
-    can’t be undone. Are you sure?
-  </p>
-
-  <p *ngSwitchCase="DialogType.UndoJobs">
-    If you leave this page, changes you’ve made to this survey won’t be
-    published. Are you sure you want to continue?
-  </p>
-
-  <p *ngSwitchCase="DialogType.DeleteLois">
-    All predefined data collection sites and their associated data will
-    be immediately deleted. This action cannot be undone.
-  </p>
-
-  <p *ngSwitchCase="DialogType.DeleteOption">
-    Are you sure you wish to delete this option?
-    All associated data will be lost. This cannot be undone.
-  </p>
-
-  <p *ngSwitchCase="DialogType.DeleteSurvey">
-    Are you sure you wish to delete this survey?
-    All associated data will be lost. This cannot be undone.
-  </p>
-
-  <p *ngSwitchCase="DialogType.DisableFreeForm">
-    Data collector will no longer be able to add new sites for this job.
-    Data will only be collected for existing sites.
-  </p>
 </mat-dialog-content>
 
 <mat-dialog-actions>
@@ -63,8 +31,9 @@
     mat-button
     color="primary"
     mat-dialog-close
+    *ngIf="backButtonLabel"
   >
-    Cancel
+    {{ backButtonLabel }}
   </button>
 
   <button
@@ -72,7 +41,8 @@
     color="primary"
     [mat-dialog-close]="data"
     cdkFocusInitial
+    *ngIf="continueButtonLabel"
   >
-    {{ buttonLabel }}
+    {{ continueButtonLabel }}
   </button>
 </mat-dialog-actions>

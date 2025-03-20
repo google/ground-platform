@@ -273,7 +273,7 @@ export class NavigationService {
     return this.router.isActive(`${SURVEY_SEGMENT}/${surveyId}`, {
       matrixParams: 'ignored',
       queryParams: 'ignored',
-      paths: 'subset',
+      paths: 'exact',
       fragment: 'ignored',
     } as IsActiveMatchOptions);
   }

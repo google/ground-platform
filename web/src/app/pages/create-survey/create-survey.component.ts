@@ -246,8 +246,7 @@ export class CreateSurveyComponent implements OnInit {
         this.setupPhase = SetupPhase.REVIEW;
         break;
       case SetupPhase.REVIEW:
-        this.setSurveyStateToReady();
-        await this.draftSurveyService.updateSurvey();
+        await this.setSurveyStateToReady();
         break;
       default:
         break;
@@ -305,17 +304,19 @@ export class CreateSurveyComponent implements OnInit {
     );
   }
 
-  private async saveDataSharingTerms() {
+  private async saveDataSharingTerms(): Promise<void> {
     const type = this.dataSharingTerms?.formGroup.controls.type.value;
 
     const customText =
       this.dataSharingTerms?.formGroup.controls.customText.value ?? undefined;
 
+    this.draftSurveyService.updateDataSharingTerms(type, customText);
     await this.surveyService.updateDataSharingTerms(type, customText);
   }
 
-  private async setSurveyStateToReady() {
+  private async setSurveyStateToReady(): Promise<void> {
     this.draftSurveyService.updateState(SurveyState.READY);
+    await this.draftSurveyService.updateSurvey();
   }
 
   ngOnDestroy() {
