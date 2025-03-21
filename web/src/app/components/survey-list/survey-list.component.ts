@@ -22,14 +22,21 @@ import {Survey, SurveyState} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
+export enum SurveyListFilter {
+  ALL,
+  RESTRICTED,
+  UNLISTED,
+  PUBLIC,
+}
+
 @Component({
   selector: 'ground-survey-list',
   templateUrl: './survey-list.component.html',
   styleUrls: ['./survey-list.component.scss'],
 })
 export class SurveyListComponent implements OnInit, OnDestroy {
-  surveys = List<Survey>();
   private subscription = new Subscription();
+  surveys = List<Survey>();
 
   constructor(
     private surveyService: SurveyService,
@@ -63,14 +70,11 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     this.navigationService.navigateToCreateSurvey(null);
   }
 
-  /**
-   * Clean up Rx subscription when cleaning up the component.
-   */
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
   private isSetupFinished(survey: Survey): boolean {
     return survey.state === SurveyState.READY;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
