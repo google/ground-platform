@@ -19,42 +19,61 @@
 
   <h1 class="page-title">{{'app.surveys' | translate}}</h1>
 
-  <div class="container">
-    <div class="surveys-container">
-      <mat-card
-        appearance="raised"
-        id="add-card"
-        class="survey-card new-survey-card"
-        (click)="onNewSurvey()"
-      >
-        <mat-card-header>
-          <div class="add-icon-container">
-            <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
-          </div>
+  <div class="filters-container">
+    <mat-chip-set aria-label="Fish selection">
+      <mat-chip disabled>
+        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>check</mat-icon>
+        <span>All</span>
+      </mat-chip>
+      <mat-chip>
+        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>lock</mat-icon>
+        <span>Restricted</span>
+      </mat-chip>
+      <mat-chip>
+        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>account_circle</mat-icon>
+        <span>Unlisted</span>
+      </mat-chip>
+      <mat-chip>
+        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>public</mat-icon>
+        <span>Public</span>
+      </mat-chip>
+    </mat-chip-set>
+  </div>
 
-          <mat-card-title class="survey-title">Create survey</mat-card-title>
+  <div class="surveys-container">
+    <mat-card
+      appearance="raised"
+      id="add-card"
+      class="survey-card new-survey-card"
+      (click)="onNewSurvey()"
+    >
+      <mat-card-header>
+        <div class="add-icon-container">
+          <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
+        </div>
 
-          <mat-card-subtitle class="survey-description">
-            Define jobs and sites for data collectors
-          </mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
+        <mat-card-title class="survey-title">Create survey</mat-card-title>
 
-      <mat-card
-        appearance="raised"
-        *ngFor="let survey of surveys; let i = index"
-        id="survey-card-{{ i }}"
-        class="survey-card"
-        (click)="onSurveyClicked(survey)"
-      >
-        <mat-card-header>
-          <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
+        <mat-card-subtitle class="survey-description">
+          Define jobs and sites for data collectors
+        </mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
 
-          <mat-card-subtitle class="survey-description">
-            {{ survey.description }}
-          </mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
-    </div>
+    <mat-card
+      appearance="raised"
+      *ngFor="let survey of surveys; let i = index"
+      id="survey-card-{{ i }}"
+      class="survey-card"
+      (click)="onSurveyClicked(survey)"
+    >
+      <mat-card-header>
+        <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
+
+        <mat-card-subtitle class="survey-description">
+          {{ survey.description }}
+        </mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
   </div>
 </div>
