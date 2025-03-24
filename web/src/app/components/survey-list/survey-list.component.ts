@@ -18,7 +18,11 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {Survey, SurveyState} from 'app/models/survey.model';
+import {
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -37,25 +41,38 @@ export enum SurveyListFilter {
 export class SurveyListComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
   surveys = List<Survey>();
+  allSurveys = List<Survey>();
+  filter = SurveyListFilter.ALL;
+
+  SurveyListFilter = SurveyListFilter;
 
   constructor(
-    private surveyService: SurveyService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private surveyService: SurveyService
   ) {}
 
   ngOnInit(): void {
-    const allSurveys = this.surveyService.getAccessibleSurveys$();
     this.subscription.add(
-      allSurveys?.subscribe(
-        surveys => {
-          this.surveys = surveys;
+      this.surveyService.getAccessibleSurveys$().subscribe({
+        next: surveys => {
+          this.allSurveys = surveys;
+          this.applyFilter();
         },
-        err => {
+        error: err => {
           console.error(err);
           this.navigationService.error(err);
-        }
-      )
+        },
+      })
     );
+  }
+
+  applyFilter(): void {
+    this.surveys = this.allSurveys.filter(this.filterSurveys.bind(this));
+  }
+
+  handleFilterSelection(newFilter: SurveyListFilter): void {
+    this.filter = newFilter;
+    this.applyFilter();
   }
 
   handleSurveySelection(clickedSurvey: Survey): void {
@@ -68,6 +85,19 @@ export class SurveyListComponent implements OnInit, OnDestroy {
 
   createNewSurvey(): void {
     this.navigationService.navigateToCreateSurvey(null);
+  }
+
+  private filterSurveys(survey: Survey): boolean {
+    switch (this.filter) {
+      case SurveyListFilter.PUBLIC:
+        return survey.generalAccess === SurveyGeneralAccess.PUBLIC;
+      case SurveyListFilter.RESTRICTED:
+        return survey.generalAccess === SurveyGeneralAccess.RESTRICTED;
+      case SurveyListFilter.UNLISTED:
+        return survey.generalAccess === SurveyGeneralAccess.UNLISTED;
+      default:
+        return true;
+    }
   }
 
   private isSetupFinished(survey: Survey): boolean {
