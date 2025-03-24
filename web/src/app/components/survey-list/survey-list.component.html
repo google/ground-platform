@@ -45,7 +45,7 @@
       appearance="raised"
       id="add-card"
       class="survey-card new-survey-card"
-      (click)="onNewSurvey()"
+      (click)="createNewSurvey()"
     >
       <mat-card-header>
         <div class="add-icon-container">
@@ -65,7 +65,7 @@
       *ngFor="let survey of surveys; let i = index"
       id="survey-card-{{ i }}"
       class="survey-card"
-      (click)="onSurveyClicked(survey)"
+      (click)="handleSurveySelection(survey)"
     >
       <mat-card-header>
         <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>

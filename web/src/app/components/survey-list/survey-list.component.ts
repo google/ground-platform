@@ -58,7 +58,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     );
   }
 
-  onSurveyClicked(clickedSurvey: Survey) {
+  handleSurveySelection(clickedSurvey: Survey): void {
     if (this.isSetupFinished(clickedSurvey)) {
       this.navigationService.selectSurvey(clickedSurvey.id);
     } else {
@@ -66,7 +66,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     }
   }
 
-  onNewSurvey() {
+  createNewSurvey(): void {
     this.navigationService.navigateToCreateSurvey(null);
   }
 
