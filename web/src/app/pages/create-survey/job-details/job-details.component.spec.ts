@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// import {ActivatedRoute} from '@angular/router';
-// import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {DocumentData} from '@angular/fire/firestore';
 import {timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';

@@ -17,9 +17,8 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {Observable, Subscription, combineLatest} from 'rxjs';
-import {take} from 'rxjs/operators';
 
-import {Survey, SurveyState} from 'app/models/survey.model';
+import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -27,7 +26,6 @@ import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
 
-import {JobDialogComponent} from './job-dialog/job-dialog.component';
 import {TitleDialogComponent} from './title-dialog/title-dialog.component';
 
 /**
