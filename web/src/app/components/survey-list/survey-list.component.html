@@ -68,6 +68,15 @@
       (click)="handleSurveySelection(survey)"
     >
       <mat-card-header>
+        <mat-icon mat-card-avatar fontSet="material-symbols-outlined" class="add-icon general-access-icon">
+          <ng-container [ngSwitch]="survey.generalAccess">
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED">lock</ng-container>
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.UNLISTED">account_circle</ng-container>
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED">pending</ng-container>
+            <ng-container *ngSwitchDefault>public</ng-container> 
+          </ng-container>
+        </mat-icon>
+
         <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
 
         <mat-card-subtitle class="survey-description">

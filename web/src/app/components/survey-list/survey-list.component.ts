@@ -46,6 +46,8 @@ export class SurveyListComponent implements OnInit, OnDestroy {
 
   SurveyListFilter = SurveyListFilter;
 
+  SurveyGeneralAccess = SurveyGeneralAccess;
+
   constructor(
     private navigationService: NavigationService,
     private surveyService: SurveyService
