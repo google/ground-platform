@@ -72,7 +72,7 @@
               (onValidationChange)="onValidationChange($event)"
             ></data-sharing-terms>
             <share-survey
-              *ngSwitchCase="SetupPhase.REVIEW"
+              *ngSwitchCase="SetupPhase.SHARE_SURVEY"
             ></share-survey>
           </ng-container>
         </ground-step-card>
@@ -96,7 +96,7 @@
         (click)="continue()"
         [disabled]="!canContinue"
       >
-        {{ setupPhase === SetupPhase.REVIEW ? 'Go to survey' : 'Continue' }}
+        {{ setupPhase === SetupPhase.SHARE_SURVEY ? 'Go to survey' : 'Continue' }}
       </button>
     </div>
   </div>

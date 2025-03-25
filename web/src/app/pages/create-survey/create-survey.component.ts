@@ -42,7 +42,7 @@ export enum SetupPhase {
   DEFINE_LOIS,
   DEFINE_TASKS,
   DEFINE_DATA_SHARING_TERMS,
-  REVIEW,
+  SHARE_SURVEY,
 }
 
 const setupPhaseMetadata = new Map<
@@ -56,9 +56,9 @@ const setupPhaseMetadata = new Map<
   [
     SetupPhase.SURVEY_DETAILS,
     {
-      progressBarTitle: 'Create survey',
+      progressBarTitle: 'Create a survey',
       cardTitle: 'Start building your survey',
-      cardDescription: 'Provide some basic info about your survey.',
+      cardDescription: 'Provide some basic info about your survey',
     },
   ],
   [
@@ -67,43 +67,43 @@ const setupPhaseMetadata = new Map<
       progressBarTitle: 'Add a job',
       cardTitle: 'Add a job',
       cardDescription:
-        "In the following steps, you'll define what data should be collected for which sites as part of this job.",
+        "In the following steps, you'll define what data should be collected for certain sites as part of this job",
     },
   ],
   [
     SetupPhase.DEFINE_LOIS,
     {
-      progressBarTitle: 'Data collection strategy',
+      progressBarTitle: 'Specify locations of interest',
       cardTitle: 'Where should data be collected?',
       cardDescription:
-        'Data collectors will complete specified tasks for these sites.',
+        'Data collectors will complete specified tasks for these sites',
     },
   ],
   [
     SetupPhase.DEFINE_TASKS,
     {
       progressBarTitle: 'Define data collection tasks',
-      cardTitle: 'What data should be collected?',
+      cardTitle: 'Define how specified data should be collected',
       cardDescription:
-        'Data collectors will be prompted to complete the tasks you define here for each data collection site.',
+        'Data collectors will be prompted to complete the tasks you define here in order',
     },
   ],
   [
     SetupPhase.DEFINE_DATA_SHARING_TERMS,
     {
-      progressBarTitle: 'Define data sharing terms',
-      cardTitle: 'Data sharing agreement',
+      progressBarTitle: 'Review abd share survey',
+      cardTitle: 'Data sharing consent',
       cardDescription:
-        'Select the terms collectors need to agree to before collecting data.',
+        'Require data collectors to agree to data sharing terms before submitting data',
     },
   ],
   [
-    SetupPhase.REVIEW,
+    SetupPhase.SHARE_SURVEY,
     {
-      progressBarTitle: 'Review and share survey',
-      cardTitle: 'Review survey',
+      progressBarTitle: 'Share with collectors and other organizers',
+      cardTitle: 'Share your survey',
       cardDescription:
-        'Is your survey ready? Share it with collectors and other organizers.',
+        'Participants will receive an email invitation with a link to your survey',
     },
   ],
 ]);
@@ -285,7 +285,7 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.DEFINE_DATA_SHARING_TERMS:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.SHARE_SURVEY:
         this.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
         break;
       default:
@@ -317,9 +317,9 @@ export class CreateSurveyComponent implements OnInit {
         break;
       case SetupPhase.DEFINE_DATA_SHARING_TERMS:
         await this.saveDataSharingTerms();
-        this.setupPhase = SetupPhase.REVIEW;
+        this.setupPhase = SetupPhase.SHARE_SURVEY;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.SHARE_SURVEY:
         await this.setSurveyStateToReady();
         break;
       default:

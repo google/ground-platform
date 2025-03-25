@@ -497,8 +497,8 @@ describe('CreateSurveyComponent', () => {
       surveyId$.next(surveyId);
       activeSurvey$.next(surveyWithJob);
       tick();
-      // Forcibly set phase to REVIEW for now since other steps are not ready yet
-      component.setupPhase = SetupPhase.REVIEW;
+      // Forcibly set phase to SHARE_SURVEY for now since other steps are not ready yet
+      component.setupPhase = SetupPhase.SHARE_SURVEY;
       fixture.detectChanges();
     }));
 
