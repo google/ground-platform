@@ -22,48 +22,58 @@
     margin: 60px 160px 24px 160px;
   }
 
-  .container {
-    .surveys-container {
-      display: flex;
-      flex-wrap: wrap;
-      margin: 0px 60px 0px 160px;
-      gap: 18px;
-  
-      .survey-card {
-        padding: 8px;
-        width: 278px;
-        height: 245px;
-        cursor: pointer;
-        border-radius: 24px;
-        box-shadow: none;
-  
-        .add-icon-container {
-          position: absolute;
-          width: 28px;
-          height: 28px;
-          left: 28px;
-          top: 28px;
-          border-radius: 4px;
-        }
-        
+  .filters-container {
+    margin: 0px 60px 24px 160px;
+  }
+
+  .surveys-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0px 60px 24px 160px;
+    gap: 18px;
+
+    .survey-card {
+      padding: 8px;
+      width: 278px;
+      height: 245px;
+      cursor: pointer;
+      border-radius: 24px;
+      box-shadow: none;
+
+      .add-icon-container {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        left: 28px;
+        top: 28px;
+        border-radius: 4px;
+
         .add-icon {
           position: absolute;
           top: 2px;
           left: 2px;
         }
+      }
 
-        .survey-title {
-          word-wrap: break-word;
-          margin-top: 60px;
-          margin-bottom: 8px;
-          line-height: 28px;
-          display: flex;
-          align-items: center;
-          /* Inside auto layout */
-          flex: none;
-          order: 0;
-          flex-grow: 0;
-        }
+      .general-access-icon {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        right: 28px;
+        top: 28px;
+      }
+
+      .survey-title {
+        word-wrap: break-word;
+        margin-top: 60px;
+        margin-bottom: 8px;
+        line-height: 28px;
+        display: flex;
+        align-items: center;
+        /* Inside auto layout */
+        flex: none;
+        order: 0;
+        flex-grow: 0;
       }
     }
   }
