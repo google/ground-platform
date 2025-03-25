@@ -35,86 +35,65 @@
       />
       <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
-        <mat-progress-bar
-          mode="determinate"
-          [value]="progressBarValue()"
-        ></mat-progress-bar>
-        <div [ngSwitch]="setupPhase">
-          <ground-step-card
-            *ngSwitchCase="SetupPhase.SURVEY_DETAILS"
-            title="Start building your survey"
-            description="Provide some basic info about your survey."
-          >
+        <mat-progress-bar mode="determinate" [value]="progressBarValue()"></mat-progress-bar>
+        <ground-step-card
+          [title]="cardTitle()"
+          [description]="cardDescription()"
+          [jobName]="[SetupPhase.DEFINE_LOIS, SetupPhase.DEFINE_TASKS].includes(setupPhase) ? jobName() : ''"
+        >
+          <ng-container [ngSwitch]="setupPhase">
             <survey-details
+              *ngSwitchCase="SetupPhase.SURVEY_DETAILS"
               #surveyDetails
               [title]="survey.title"
               [description]="survey.description"
               (onValidationChange)="onValidationChange($event)"
             ></survey-details>
-          </ground-step-card>
-          <job-details
-            *ngSwitchCase="SetupPhase.JOB_DETAILS"
-            #jobDetails
-            [name]="jobName()"
-            (onValidationChange)="onValidationChange($event)"
-          ></job-details>
-          <ground-step-card
-            *ngSwitchCase="SetupPhase.DEFINE_LOIS"
-            [jobName]="jobName()"
-            title="Where should data be collected?"
-            description="Data collectors will complete specified tasks for these sites."
-          >
-            <survey-loi #surveyLoi></survey-loi>
-          </ground-step-card>
-          <ground-step-card
-            *ngSwitchCase="SetupPhase.DEFINE_TASKS"
-            [jobName]="jobName()"
-            title="What data should be collected?"
-            description="Data collectors will be prompted to complete the tasks you define here for each data collection site."
-          >
+            <job-details
+              *ngSwitchCase="SetupPhase.JOB_DETAILS"
+              #jobDetails
+              [name]="jobName()"
+              (onValidationChange)="onValidationChange($event)"
+            ></job-details>
+            <survey-loi
+              *ngSwitchCase="SetupPhase.DEFINE_LOIS"
+              #surveyLoi
+            ></survey-loi>
             <task-details
+              *ngSwitchCase="SetupPhase.DEFINE_TASKS"
               #taskDetails
               (onValidationChange)="onValidationChange($event)"
             ></task-details>
-          </ground-step-card>
-          <ground-step-card
-            *ngSwitchCase="SetupPhase.DEFINE_DATA_SHARING_TERMS"
-            title="Data sharing agreement"
-            description="Select the terms collectors need to agree to before collecting data."
-          >
             <data-sharing-terms
+              *ngSwitchCase="SetupPhase.DEFINE_DATA_SHARING_TERMS"
               #dataSharingTerms
               [type]="survey.dataSharingTerms.type"
               [customText]="survey.dataSharingTerms.customText ?? ''"
               (onValidationChange)="onValidationChange($event)"
             ></data-sharing-terms>
-          </ground-step-card>
-          <ground-step-card
-            *ngSwitchCase="SetupPhase.REVIEW"
-            title="Review survey"
-            description="Is your survey ready? Share it with collectors and other organizers."
-          >
-            <share-survey></share-survey>
-          </ground-step-card>
-        </div>
+            <share-survey
+              *ngSwitchCase="SetupPhase.REVIEW"
+            ></share-survey>
+          </ng-container>
+        </ground-step-card>
       </div>
     </div>
     <div class="button-section">
       <button
         id="back-button"
         class="button"
-        (click)="back()"
         mat-button
         color="primary"
+        (click)="back()"
       >
         Back
       </button>
       <button
         id="continue-button"
         class="button continue-button"
-        (click)="continue()"
         mat-flat-button
         color="primary"
+        (click)="continue()"
         [disabled]="!canContinue"
       >
         {{ setupPhase === SetupPhase.REVIEW ? 'Go to survey' : 'Continue' }}
