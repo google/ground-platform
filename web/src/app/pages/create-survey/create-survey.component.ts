@@ -35,6 +35,79 @@ import {TaskService} from 'app/services/task/task.service';
 
 import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 
+export enum SetupPhase {
+  LOADING,
+  SURVEY_DETAILS,
+  JOB_DETAILS,
+  DEFINE_LOIS,
+  DEFINE_TASKS,
+  DEFINE_DATA_SHARING_TERMS,
+  SHARE_SURVEY,
+}
+
+const setupPhaseMetadata = new Map<
+  SetupPhase,
+  {
+    progressBarTitle: string;
+    cardTitle?: string;
+    cardDescription?: string;
+  }
+>([
+  [
+    SetupPhase.SURVEY_DETAILS,
+    {
+      progressBarTitle: 'Create a survey',
+      cardTitle: 'Start building your survey',
+      cardDescription: 'Provide some basic info about your survey',
+    },
+  ],
+  [
+    SetupPhase.JOB_DETAILS,
+    {
+      progressBarTitle: 'Add a job',
+      cardTitle: 'Add a job',
+      cardDescription:
+        "In the following steps, you'll define what data should be collected for certain sites as part of this job",
+    },
+  ],
+  [
+    SetupPhase.DEFINE_LOIS,
+    {
+      progressBarTitle: 'Specify locations of interest',
+      cardTitle: 'Where should data be collected?',
+      cardDescription:
+        'Data collectors will complete specified tasks for these sites',
+    },
+  ],
+  [
+    SetupPhase.DEFINE_TASKS,
+    {
+      progressBarTitle: 'Define data collection tasks',
+      cardTitle: 'Define how specified data should be collected',
+      cardDescription:
+        'Data collectors will be prompted to complete the tasks you define here in order',
+    },
+  ],
+  [
+    SetupPhase.DEFINE_DATA_SHARING_TERMS,
+    {
+      progressBarTitle: 'Review abd share survey',
+      cardTitle: 'Data sharing consent',
+      cardDescription:
+        'Require data collectors to agree to data sharing terms before submitting data',
+    },
+  ],
+  [
+    SetupPhase.SHARE_SURVEY,
+    {
+      progressBarTitle: 'Share with collectors and other organizers',
+      cardTitle: 'Share your survey',
+      cardDescription:
+        'Participants will receive an email invitation with a link to your survey',
+    },
+  ],
+]);
+
 @Component({
   selector: 'create-survey',
   templateUrl: './create-survey.component.html',
@@ -50,6 +123,8 @@ export class CreateSurveyComponent implements OnInit {
   setupPhase = SetupPhase.LOADING;
 
   readonly SetupPhase = SetupPhase;
+
+  readonly setupPhaseMetadata = setupPhaseMetadata;
 
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
@@ -159,24 +234,23 @@ export class CreateSurveyComponent implements OnInit {
     return survey.title.trim().length > 0;
   }
 
-  readonly setupPhaseToTitle = new Map<SetupPhase, String>([
-    [SetupPhase.SURVEY_DETAILS, 'Create survey'],
-    [SetupPhase.JOB_DETAILS, 'Add a job'],
-    [SetupPhase.DEFINE_LOIS, 'Data collection strategy'],
-    [SetupPhase.DEFINE_TASKS, 'Define data collection tasks'],
-    [SetupPhase.DEFINE_DATA_SHARING_TERMS, 'Define data sharing terms'],
-    [SetupPhase.REVIEW, 'Review and share survey'],
-  ]);
-
   progressBarTitle(): String {
-    return this.setupPhaseToTitle.get(this.setupPhase) ?? '';
+    return setupPhaseMetadata.get(this.setupPhase)?.progressBarTitle ?? '';
+  }
+
+  cardTitle(): String {
+    return setupPhaseMetadata.get(this.setupPhase)?.cardTitle ?? '';
+  }
+
+  cardDescription(): String {
+    return setupPhaseMetadata.get(this.setupPhase)?.cardDescription ?? '';
   }
 
   progressBarValue(): number {
-    const numberOfSteps = this.setupPhaseToTitle.size;
-    const currentPhaseIndex = Array.from(
-      this.setupPhaseToTitle.keys()
-    ).findIndex(phase => phase === this.setupPhase);
+    const numberOfSteps = setupPhaseMetadata.size;
+    const currentPhaseIndex = Array.from(setupPhaseMetadata.keys()).findIndex(
+      phase => phase === this.setupPhase
+    );
     return currentPhaseIndex > -1
       ? Math.round((currentPhaseIndex / numberOfSteps) * 100)
       : 0;
@@ -211,7 +285,7 @@ export class CreateSurveyComponent implements OnInit {
       case SetupPhase.DEFINE_DATA_SHARING_TERMS:
         this.setupPhase = SetupPhase.DEFINE_TASKS;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.SHARE_SURVEY:
         this.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
         break;
       default:
@@ -243,9 +317,9 @@ export class CreateSurveyComponent implements OnInit {
         break;
       case SetupPhase.DEFINE_DATA_SHARING_TERMS:
         await this.saveDataSharingTerms();
-        this.setupPhase = SetupPhase.REVIEW;
+        this.setupPhase = SetupPhase.SHARE_SURVEY;
         break;
-      case SetupPhase.REVIEW:
+      case SetupPhase.SHARE_SURVEY:
         await this.setSurveyStateToReady();
         break;
       default:
@@ -322,14 +396,4 @@ export class CreateSurveyComponent implements OnInit {
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-}
-
-export enum SetupPhase {
-  LOADING,
-  SURVEY_DETAILS,
-  JOB_DETAILS,
-  DEFINE_LOIS,
-  DEFINE_TASKS,
-  DEFINE_DATA_SHARING_TERMS,
-  REVIEW,
 }
