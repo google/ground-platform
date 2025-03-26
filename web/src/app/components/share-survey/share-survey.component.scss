@@ -20,12 +20,9 @@
   gap: 16px;
 
   .mat-mdc-card {
-    --mdc-elevated-card-container-elevation: 0;
-    border: 1px solid #e2e3dd;
-
     .mat-mdc-card-header {
+      padding: 24px 24px 0;
       align-items: center;
-      margin-bottom: 16px;
 
       .mat-mdc-card-title {
         font-family: Manrope;
@@ -47,6 +44,10 @@
       button {
         margin-left: auto;
       }
+    }
+
+    .mat-mdc-card-content {
+      padding: 24px;
     }
   }
 }
