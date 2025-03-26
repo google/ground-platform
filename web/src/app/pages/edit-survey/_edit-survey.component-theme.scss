@@ -22,13 +22,16 @@
     color: mat.get-theme-color($theme, on-background);
   }
 
-  .survey-detail-card {
-    --mdc-filled-button-container-color: transparent;
-    --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
-    border: 1px solid mat.get-theme-color($theme, neutral, 90);
-
-    .mdc-button {
-      border: 1px solid mat.get-theme-color($theme, outline);
+  .survey-details-container {
+    .mat-mdc-card {
+      --mdc-elevated-card-container-elevation: 0;
+      --mdc-filled-button-container-color: transparent;
+      --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
+      border: 1px solid mat.get-theme-color($theme, neutral, 90);
+  
+      .mdc-button {
+        border: 1px solid mat.get-theme-color($theme, outline);
+      }
     }
   }
  }
@@ -42,18 +45,20 @@
     font: mat.get-theme-typography($theme, title-medium, font);
   }
 
-  .survey-detail-card {
-    .card-title {
-      font: mat.get-theme-typography($theme, title-medium, font);
-    }
-
-    .card-subtitle {
-      font: mat.get-theme-typography($theme, title-small, font);
-      text-decoration: underline;
-    }
-
-    .card-row {
-      font: mat.get-theme-typography($theme, body-medium, font);
+  .survey-details-container {
+    .mat-mdc-card {
+      .card-title {
+        font: mat.get-theme-typography($theme, title-medium, font);
+      }
+  
+      .card-subtitle {
+        font: mat.get-theme-typography($theme, title-small, font);
+        text-decoration: underline;
+      }
+  
+      .card-row {
+        font: mat.get-theme-typography($theme, body-medium, font);
+      }
     }
   }
  }

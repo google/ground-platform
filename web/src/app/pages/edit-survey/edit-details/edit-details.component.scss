@@ -19,32 +19,30 @@
   flex-direction: column;
   gap: 16px;
 
-  .survey-detail-card {
-    --mdc-elevated-card-container-elevation: 0;
-
-    .detail-content-with-button {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .card-row {
-      :nth-child(1) {
-        flex: 1;
-      }
-
-      p {
-        margin-block-end: 0;
-      }
-
-      &.edit-survey-details {
-        margin-top: 12px;
-      }
-    }
-
+  .mat-mdc-card {
     .mat-mdc-card-content {
       padding: 24px;
+
+      .detail-content-with-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+  
+      .card-row {
+        :nth-child(1) {
+          flex: 1;
+        }
+  
+        p {
+          margin-block-end: 0;
+        }
+  
+        &.edit-survey-details {
+          margin-top: 12px;
+        }
+      }
     }
   }
 }
