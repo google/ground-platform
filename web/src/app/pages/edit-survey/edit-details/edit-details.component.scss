@@ -20,8 +20,21 @@
   gap: 16px;
 
   .mat-mdc-card {
+    .mat-mdc-card-header {
+      padding: 24px 24px 0;
+      align-items: center;
+
+      .mat-mdc-card-title {
+        font-family: Manrope;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+        text-align: left;
+      }
+    }
+
     .mat-mdc-card-content {
-      padding: 24px;
+      padding: 16px 24px 24px 24px;
 
       .detail-content-with-button {
         display: flex;

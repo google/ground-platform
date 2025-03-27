@@ -30,7 +30,6 @@
         font-weight: 700;
         line-height: 24px;
         text-align: left;
-        margin-bottom: 12px;
       }
   
       .mat-mdc-card-subtitle {
@@ -47,7 +46,7 @@
     }
 
     .mat-mdc-card-content {
-      padding: 24px;
+      padding: 16px 24px 24px 24px;
     }
   }
 }

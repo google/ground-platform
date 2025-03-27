@@ -18,32 +18,29 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
+import {MatListModule} from '@angular/material/list';
+import {MatSelectModule} from '@angular/material/select';
 
-import {ShareAccessControlModule} from 'app/components/share-access-control/share-access-control.module';
-import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
-import {ShareListModule} from 'app/components/share-list/share-list.module';
-
-import {ShareSurveyComponent} from './share-survey.component';
+import {ShareAccessControlComponent} from './share-access-control.component';
 
 @NgModule({
-  declarations: [ShareSurveyComponent],
+  declarations: [ShareAccessControlComponent],
   imports: [
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
     MatButtonModule,
-    MatCardModule,
     MatDialogModule,
+    MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    ShareAccessControlModule,
-    ShareDialogModule,
-    ShareListModule,
+    MatListModule,
+    MatSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
   ],
-  exports: [ShareSurveyComponent],
+  exports: [ShareAccessControlComponent],
 })
-export class ShareSurveyModule {}
+export class ShareAccessControlModule {}

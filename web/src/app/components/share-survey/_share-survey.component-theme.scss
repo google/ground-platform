@@ -24,10 +24,6 @@
       --mdc-filled-button-container-color: transparent;
       --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
       border: 1px solid mat.get-theme-color($theme, neutral, 90);
-  
-      .mdc-button {
-        border: 1px solid mat.get-theme-color($theme, outline);
-      }
     }
 
     button.share-survey-button.mdc-button.mdc-button--unelevated {

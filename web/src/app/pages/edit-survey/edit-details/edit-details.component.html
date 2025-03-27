@@ -16,9 +16,12 @@
 
 <div class="survey-details-container">
   <mat-card>
+    <mat-card-header>
+      <mat-card-title>Survey name and description</mat-card-title>
+    </mat-card-header>
+
     <mat-card-content>
-      <div class="card-title">Survey name and description</div>
-      <div class="card-row edit-survey-details">
+      <div class="edit-survey-details">
         <survey-details
           #surveyDetails
           [title]="survey?.title"
@@ -30,14 +33,17 @@
   </mat-card>
 
   <mat-card *ngIf="survey?.dataSharingTerms as terms">
+    <mat-card-header>
+      <mat-card-title>Data sharing agreement</mat-card-title>
+    </mat-card-header>
+
     <mat-card-content>
-      <div class="card-title">Data sharing agreement</div>
-      <div class="card-row">
-        <p [innerHtml]="dataSharingTermsDetails.descriptionHtml"></p>
-        <div *ngIf="dataSharingTermsDetails.customText as customText">
-          <div class="card-subtitle">Custom terms</div>
-          <p>{{ customText }}</p>
-        </div>
+      <div [innerHtml]="dataSharingTermsDetails.descriptionHtml"></div>
+
+      <div *ngIf="dataSharingTermsDetails.customText as customText">
+        <div class="card-subtitle">Custom terms</div>
+
+        <p>{{ customText }}</p>
       </div>
     </mat-card-content>
   </mat-card>
