@@ -15,11 +15,40 @@
  */
 
 import {Component} from '@angular/core';
-import {MatSelectChange} from '@angular/material/select';
 import {Survey, SurveyGeneralAccess} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import {Map} from 'immutable';
 import {Subscription} from 'rxjs';
+
+const generalAccessLabels = Map<SurveyGeneralAccess, any>([
+  [
+    SurveyGeneralAccess.RESTRICTED,
+    {
+      description: 'Only people with access can open with the link',
+      icon: 'lock',
+      label: 'Restricted',
+    },
+  ],
+  [
+    SurveyGeneralAccess.UNLISTED,
+    {
+      description:
+        'Everyone with the survey QR code or link can collect data for this survey',
+      icon: 'account_circle',
+      label: 'Unlisted',
+    },
+  ],
+
+  [
+    SurveyGeneralAccess.PUBLIC,
+    {
+      description: 'Everyone can collect data for this survey',
+      icon: 'public',
+      label: 'Public',
+    },
+  ],
+]);
 
 @Component({
   selector: 'ground-share-access-control',
@@ -32,6 +61,8 @@ export class ShareAccessControlComponent {
   selectedGeneralAccess!: SurveyGeneralAccess;
 
   SurveyGeneralAccess = SurveyGeneralAccess;
+
+  generalAccessLabels = generalAccessLabels;
 
   constructor(
     readonly authService: AuthService,
@@ -49,7 +80,7 @@ export class ShareAccessControlComponent {
       survey.generalAccess || SurveyGeneralAccess.RESTRICTED;
   }
 
-  onGeneralAccessSelect(generalAccess: SurveyGeneralAccess) {
+  changeGeneralAccess(generalAccess: SurveyGeneralAccess) {
     this.selectedGeneralAccess = generalAccess;
   }
 

@@ -25,20 +25,18 @@
     <mat-select
       [(value)]="selectedGeneralAccess"
       [hideSingleSelectionIndicator]="true"
-      (selectionChange)="onGeneralAccessSelect($event.value)"
+      (selectionChange)="changeGeneralAccess($event.value)"
       style="width: auto; padding: 8px; min-width: 150px;"
     >
       <mat-select-trigger class="task-label">
-        <div>{{selectedGeneralAccess}}</div>
+        <div>{{generalAccessLabels.get(selectedGeneralAccess)?.label}}</div>
       </mat-select-trigger>
 
-      <mat-option *ngFor="let generalAccess of [SurveyGeneralAccess.UNLISTED, SurveyGeneralAccess.PUBLIC, SurveyGeneralAccess.RESTRICTED]" [value]="generalAccess">
-        <div class="task-label">
-          <div>{{generalAccess}}</div>
-        </div>
+      <mat-option *ngFor="let generalAccess of generalAccessLabels.keys()" [value]="generalAccess">
+        <div class="task-label">{{generalAccessLabels.get(generalAccess)?.label}}</div>
       </mat-option>
     </mat-select>
 
-    <div>test</div>
+    <div>{{generalAccessLabels.get(selectedGeneralAccess)?.description}}</div>
   </div>
 </div>
