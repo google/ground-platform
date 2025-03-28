@@ -31,6 +31,8 @@ export class ShareAccessControlComponent {
 
   selectedGeneralAccess!: SurveyGeneralAccess;
 
+  SurveyGeneralAccess = SurveyGeneralAccess;
+
   constructor(
     readonly authService: AuthService,
     readonly draftSurveyService: DraftSurveyService
@@ -42,9 +44,14 @@ export class ShareAccessControlComponent {
     );
   }
 
-  private async onSurveyLoaded(survey: Survey): Promise<void> {}
+  private async onSurveyLoaded(survey: Survey): Promise<void> {
+    this.selectedGeneralAccess =
+      survey.generalAccess || SurveyGeneralAccess.RESTRICTED;
+  }
 
-  onGeneralAccessSelect(event: MatSelectChange) {}
+  onGeneralAccessSelect(generalAccess: SurveyGeneralAccess) {
+    this.selectedGeneralAccess = generalAccess;
+  }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();

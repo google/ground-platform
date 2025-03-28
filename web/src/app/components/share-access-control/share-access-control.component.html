@@ -14,9 +14,11 @@
   limitations under the License.
 -->
 
-<div class="share-access-control-container" style="display: flex; gap: 16px;">
-  <div class="bbb">
-    <mat-icon class="material-symbols-outlined">add</mat-icon>
+<div class="share-access-control-container">
+  <div class="bbb" [ngSwitch]="selectedGeneralAccess">
+    <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.UNLISTED">account_circle</mat-icon>
+    <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.PUBLIC">public</mat-icon>
+    <mat-icon class="material-symbols-outlined" *ngSwitchDefault>lock</mat-icon>
   </div>
 
   <div>
@@ -30,7 +32,7 @@
         <div>{{selectedGeneralAccess}}</div>
       </mat-select-trigger>
 
-      <mat-option *ngFor="let generalAccess of [1, 2, 3]" [value]="generalAccess">
+      <mat-option *ngFor="let generalAccess of [SurveyGeneralAccess.UNLISTED, SurveyGeneralAccess.PUBLIC, SurveyGeneralAccess.RESTRICTED]" [value]="generalAccess">
         <div class="task-label">
           <div>{{generalAccess}}</div>
         </div>

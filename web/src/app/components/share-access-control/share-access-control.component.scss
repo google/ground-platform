@@ -15,7 +15,8 @@
  */
 
 .share-access-control-container {
-  font-family: Manrope;
+  display: flex;
+  gap: 16px;
 
   .bbb {
     width: 40px;
