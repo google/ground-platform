@@ -22,14 +22,16 @@
     color: mat.get-theme-color($theme, on-background);
   }
 
-  .survey-details-container {
+  .survey-details-container, .share-survey-container {
     .mat-mdc-card {
       --mdc-elevated-card-container-elevation: 0;
-      --mdc-filled-button-container-color: transparent;
-      --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
       border: 1px solid mat.get-theme-color($theme, neutral, 90);
-  
-      .mdc-button {
+    }
+
+    .mdc-button {
+      &.delete-survey-button {
+        --mdc-filled-button-container-color: transparent;
+        --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
         border: 1px solid mat.get-theme-color($theme, outline);
       }
     }
@@ -45,18 +47,13 @@
     font: mat.get-theme-typography($theme, title-medium, font);
   }
 
-  .survey-details-container {
+  .survey-details-container, .share-survey-container {
     .mat-mdc-card {
-      .card-title {
+      .mat-mdc-card-title {
         font: mat.get-theme-typography($theme, title-medium, font);
       }
   
-      .card-subtitle {
-        font: mat.get-theme-typography($theme, title-small, font);
-        text-decoration: underline;
-      }
-  
-      .card-row {
+      .mat-mdc-card-content {
         font: mat.get-theme-typography($theme, body-medium, font);
       }
     }

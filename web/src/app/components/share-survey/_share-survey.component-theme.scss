@@ -21,14 +21,16 @@
   .share-survey-container {
     .mat-mdc-card {
       --mdc-elevated-card-container-elevation: 0;
-      --mdc-filled-button-container-color: transparent;
-      --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
       border: 1px solid mat.get-theme-color($theme, neutral, 90);
     }
 
-    button.share-survey-button.mdc-button.mdc-button--unelevated {
-      background-color: mat.get-theme-color($theme, secondary-container);
-      color: mat.get-theme-color($theme, on-secondary-container);
+    .mdc-button {
+      &.share-survey-button {
+        --mdc-filled-button-container-color: transparent;
+        --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
+        background-color: mat.get-theme-color($theme, secondary-container);
+        color: mat.get-theme-color($theme, on-secondary-container);
+      }
     }
   }
 }

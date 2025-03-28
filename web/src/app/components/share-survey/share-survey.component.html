@@ -15,15 +15,19 @@
 -->
 
 <div class="share-survey-container">
-  <mat-card>
+  <mat-card class="card-with-button">
+    <div class="relative-container">
+      <div class="positioned-button">
+        <button class="share-survey-button" mat-flat-button (click)="openShareDialog()">
+          <mat-icon class="material-symbols-outlined">add</mat-icon>
+
+          <span>Add partecipants</span>
+        </button>
+      </div>
+    </div>
+
     <mat-card-header>
       <mat-card-title>People with access</mat-card-title>
-
-      <button mat-flat-button class="share-survey-button" (click)="openShareDialog()">
-        <mat-icon class="material-symbols-outlined">add</mat-icon>
-
-        <span>Add partecipants</span>
-      </button>
     </mat-card-header>
 
     <mat-card-content>

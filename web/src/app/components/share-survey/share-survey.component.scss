@@ -20,29 +20,20 @@
   gap: 16px;
 
   .mat-mdc-card {
+    &.card-with-button {
+      .relative-container {
+        position: relative;
+      }
+
+      .positioned-button {
+        position: absolute;
+        right: 24px;
+        top: 24px;
+      }
+    }
+
     .mat-mdc-card-header {
       padding: 24px 24px 0;
-      align-items: center;
-
-      .mat-mdc-card-title {
-        font-family: Manrope;
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 24px;
-        text-align: left;
-      }
-  
-      .mat-mdc-card-subtitle {
-        font-family: Manrope;
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 20px;
-        text-align: left;
-      }
-
-      button {
-        margin-left: auto;
-      }
     }
 
     .mat-mdc-card-content {
