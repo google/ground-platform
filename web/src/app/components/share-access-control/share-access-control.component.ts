@@ -87,6 +87,8 @@ export class ShareAccessControlComponent {
 
   changeGeneralAccess(generalAccess: SurveyGeneralAccess) {
     this.selectedGeneralAccess = generalAccess;
+
+    this.draftSurveyService.updateGeneralAccess(generalAccess);
   }
 
   ngOnDestroy() {
