@@ -106,11 +106,11 @@ message Survey {
 
   // Possible values for the visibility of data in this survey.
   enum DataVisibility {
-    // Default value when visibility unset. Same as DATA_OWNER_AND_ORGANIZERS.
+    // Default value when visibility unset. Same as CONTRIBUTOR_AND_ORGANIZERS.
     DATA_VISIBILITY_UNSPECIFIED = 0;
 
-    // LOIs and submissions can only be viewed by their owners and survey organizers.
-    DATA_OWNER_AND_ORGANIZERS = 1;
+    // LOIs and submissions can only be viewed by their contributor and survey organizers.
+    CONTRIBUTOR_AND_ORGANIZERS = 1;
 
     // LOIs and submissions can be viewed by all users with access to this survey.
     ALL_SURVEY_PARTICIPANTS = 2;
