@@ -16,9 +16,10 @@
 
 .share-access-control-container {
   display: flex;
+  align-items: center;
   gap: 16px;
 
-  .bbb {
+  .general-access-icon {
     width: 40px;
     height: 40px;
     border-radius: 50px;
@@ -26,5 +27,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .general-access-select {
+    color: #1A1C19;
+    font-family: Manrope;
+    font-weight: 600;
+    font-size: 14px;
+    width: auto;
+  }
+
+  .general-access-description {
+    color: #424940;
+    font-family: Manrope;
+    font-weight: 500;
+    font-size: 14px;
   }
 }

@@ -15,7 +15,7 @@
 -->
 
 <div class="share-access-control-container">
-  <div class="bbb" [ngSwitch]="selectedGeneralAccess">
+  <div class="general-access-icon" [ngSwitch]="selectedGeneralAccess">
     <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.UNLISTED">account_circle</mat-icon>
     <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.PUBLIC">public</mat-icon>
     <mat-icon class="material-symbols-outlined" *ngSwitchDefault>lock</mat-icon>
@@ -23,10 +23,10 @@
 
   <div>
     <mat-select
+      class="general-access-select"
       [(value)]="selectedGeneralAccess"
       [hideSingleSelectionIndicator]="true"
       (selectionChange)="changeGeneralAccess($event.value)"
-      style="width: auto; padding: 8px; min-width: 150px;"
     >
       <mat-select-trigger class="task-label">
         <div>{{generalAccessLabels.get(selectedGeneralAccess)?.label}}</div>
@@ -37,6 +37,8 @@
       </mat-option>
     </mat-select>
 
-    <div>{{generalAccessLabels.get(selectedGeneralAccess)?.description}}</div>
+    <div class="general-access-description">
+      {{generalAccessLabels.get(selectedGeneralAccess)?.description}}
+    </div>
   </div>
 </div>
