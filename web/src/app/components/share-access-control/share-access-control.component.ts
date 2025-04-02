@@ -75,6 +75,10 @@ export class ShareAccessControlComponent {
     );
   }
 
+  get generalAccessKeys(): SurveyGeneralAccess[] {
+    return Array.from(this.generalAccessLabels.keys());
+  }
+
   private async onSurveyLoaded(survey: Survey): Promise<void> {
     this.selectedGeneralAccess =
       survey.generalAccess || SurveyGeneralAccess.RESTRICTED;

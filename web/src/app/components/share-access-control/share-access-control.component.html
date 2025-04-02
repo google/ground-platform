@@ -32,7 +32,7 @@
         <div>{{generalAccessLabels.get(selectedGeneralAccess)?.label}}</div>
       </mat-select-trigger>
 
-      <mat-option *ngFor="let generalAccess of generalAccessLabels.keys()" [value]="generalAccess">
+      <mat-option *ngFor="let generalAccess of generalAccessKeys" [value]="generalAccess">
         <div class="task-label">{{generalAccessLabels.get(generalAccess)?.label}}</div>
       </mat-option>
     </mat-select>
