@@ -15,7 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs';
 
 import {
@@ -43,6 +43,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   allSurveys = List<Survey>();
   surveys = List<Survey>();
   currentFilter = SurveyListFilter.ALL;
+  filterCounters = Map([[SurveyListFilter.ALL, 0]]);
 
   SurveyListFilter = SurveyListFilter;
 
@@ -58,6 +59,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
       this.surveyService.getAccessibleSurveys$().subscribe({
         next: surveys => {
           this.allSurveys = surveys;
+          this.applyFilterCounters();
           this.applyFilter();
         },
         error: err => {
@@ -66,6 +68,29 @@ export class SurveyListComponent implements OnInit, OnDestroy {
         },
       })
     );
+  }
+
+  applyFilterCounters(): void {
+    let restrictedCount = 0;
+    let unlistedCount = 0;
+    let publicCount = 0;
+
+    this.allSurveys.forEach(survey => {
+      if (survey.generalAccess === SurveyGeneralAccess.RESTRICTED) {
+        restrictedCount++;
+      } else if (survey.generalAccess === SurveyGeneralAccess.UNLISTED) {
+        unlistedCount++;
+      } else if (survey.generalAccess === SurveyGeneralAccess.PUBLIC) {
+        publicCount++;
+      }
+    });
+
+    this.filterCounters = Map([
+      [SurveyListFilter.ALL, this.allSurveys.size],
+      [SurveyListFilter.RESTRICTED, restrictedCount],
+      [SurveyListFilter.UNLISTED, unlistedCount],
+      [SurveyListFilter.PUBLIC, publicCount],
+    ]);
   }
 
   applyFilter(): void {
