@@ -21,34 +21,13 @@
 
   <div class="filters-container">
     <mat-chip-set aria-label="Survey filter">
-      <mat-chip
-        [disabled]="currentFilter === SurveyListFilter.ALL"
-        (click)="handleFilterSelection(SurveyListFilter.ALL)"
-      >
-        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>check</mat-icon>
-        <span>All</span>
-      </mat-chip>
-      <mat-chip
-        [disabled]="currentFilter === SurveyListFilter.RESTRICTED"
-        (click)="handleFilterSelection(SurveyListFilter.RESTRICTED)"
-      >
-        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>lock</mat-icon>
-        <span>Restricted</span>
-      </mat-chip>
-      <mat-chip
-        [disabled]="currentFilter === SurveyListFilter.UNLISTED"
-        (click)="handleFilterSelection(SurveyListFilter.UNLISTED)"
-      >
-        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>account_circle</mat-icon>
-        <span>Unlisted</span>
-      </mat-chip>
-      <mat-chip
-        [disabled]="currentFilter === SurveyListFilter.PUBLIC"
-        (click)="handleFilterSelection(SurveyListFilter.PUBLIC)"
-      >
-        <mat-icon fontSet="material-symbols-outlined" matChipAvatar>public</mat-icon>
-        <span>Public</span>
-      </mat-chip>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL, icon: 'check', label: 'All' }"></ng-container>
+
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock', label: 'Restricted' }"></ng-container>
+
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.UNLISTED, icon: 'account_circle', label: 'Unlisted' }"></ng-container>
+
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.PUBLIC, icon: 'public', label: 'Public' }"></ng-container>
     </mat-chip-set>
   </div>
 
@@ -98,3 +77,14 @@
     </mat-card>
   </div>
 </div>
+
+<ng-template #filterChip let-filter="filter", let-icon="icon", let-label="label">
+  <mat-chip
+    *ngIf="filterCounters.get(filter)"
+    [disabled]="currentFilter === filter"
+    (click)="handleFilterSelection(filter)"
+  >
+    <mat-icon fontSet="material-symbols-outlined" matChipAvatar>{{icon}}</mat-icon>
+    <span>{{label}}</span>
+  </mat-chip>
+</ng-template>
