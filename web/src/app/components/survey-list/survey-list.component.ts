@@ -40,9 +40,9 @@ export enum SurveyListFilter {
 })
 export class SurveyListComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
-  surveys = List<Survey>();
   allSurveys = List<Survey>();
-  filter = SurveyListFilter.ALL;
+  surveys = List<Survey>();
+  currentFilter = SurveyListFilter.ALL;
 
   SurveyListFilter = SurveyListFilter;
 
@@ -73,7 +73,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   }
 
   handleFilterSelection(newFilter: SurveyListFilter): void {
-    this.filter = newFilter;
+    this.currentFilter = newFilter;
     this.applyFilter();
   }
 
@@ -90,7 +90,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   }
 
   private filterSurveys(survey: Survey): boolean {
-    switch (this.filter) {
+    switch (this.currentFilter) {
       case SurveyListFilter.PUBLIC:
         return survey.generalAccess === SurveyGeneralAccess.PUBLIC;
       case SurveyListFilter.RESTRICTED:
