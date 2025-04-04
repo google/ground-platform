@@ -103,6 +103,21 @@ message Survey {
 
   // Defines who can access the survey beyond users in the ACLs.
   GeneralAccess general_access = 8;
+
+  // Possible values for the visibility of data in this survey.
+  enum DataVisibility {
+    // Default value when visibility unset. Same as CONTRIBUTOR_AND_ORGANIZERS.
+    DATA_VISIBILITY_UNSPECIFIED = 0;
+
+    // LOIs and submissions can only be viewed by their contributor and survey organizers.
+    CONTRIBUTOR_AND_ORGANIZERS = 1;
+
+    // LOIs and submissions can be viewed by all users with access to this survey.
+    ALL_SURVEY_PARTICIPANTS = 2;
+  }
+
+  // Defines who can see data submitted in this survey.
+  DataVisibility data_visibility = 9;
 }
 
 // Defines a user's role in a survey.
