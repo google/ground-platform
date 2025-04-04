@@ -26,17 +26,21 @@ import {MatIconModule} from '@angular/material/icon';
 import {By} from '@angular/platform-browser';
 import {
   TranslateModule,
-  TranslatePipe,
   TranslateService,
   TranslateStore,
 } from '@ngx-translate/core';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 import {of} from 'rxjs';
 
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {
+  DataSharingType,
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -100,6 +104,35 @@ describe('SurveyListComponent', () => {
     SurveyState.READY
   );
 
+  // A survey that has gone through creation flow
+  const publicSurvey = new Survey(
+    'survey003',
+    'title3',
+    'description3',
+    /* jobs= */ Map({
+      job003: new Job(
+        'job003',
+        /* index */ -1,
+        'green',
+        'name',
+        /* tasks= */ Map({
+          task001: new Task(
+            'task001',
+            TaskType.TEXT,
+            'Text Field',
+            /*required=*/ true,
+            0
+          ),
+        })
+      ),
+    }),
+    /* acl= */ Map(),
+    /* ownerId= */ '',
+    {type: DataSharingType.PRIVATE},
+    SurveyState.READY,
+    SurveyGeneralAccess.PUBLIC
+  );
+
   const surveyServiceSpy = jasmine.createSpyObj('SurveyService', [
     'getAccessibleSurveys$',
     'getSurveyAcl',
@@ -138,7 +171,7 @@ describe('SurveyListComponent', () => {
 
   beforeEach(() => {
     surveyServiceSpy.getAccessibleSurveys$.and.returnValue(
-      of<Survey[]>([incompleteSurvey, completeSurvey])
+      of<List<Survey>>(List([incompleteSurvey, completeSurvey, publicSurvey]))
     );
     surveyServiceSpy.getSurveyAcl.and.returnValue([
       new AclEntry('test@gmail.com', Role.SURVEY_ORGANIZER),
@@ -151,6 +184,23 @@ describe('SurveyListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should display survey cards', () => {
+    let surveyCards = fixture.debugElement.queryAll(By.css('.survey-card'));
+    expect(surveyCards.length).toBe(4, 'Should display 4 survey cards');
+
+    clickFilter(fixture, 2);
+    fixture.detectChanges();
+
+    surveyCards = fixture.debugElement.queryAll(By.css('.survey-card'));
+    expect(surveyCards.length).toBe(2, 'Should display 2 survey cards');
+
+    clickFilter(fixture, 1);
+    fixture.detectChanges();
+
+    surveyCards = fixture.debugElement.queryAll(By.css('.survey-card'));
+    expect(surveyCards.length).toBe(4, 'Should display 2 survey cards');
   });
 
   it('should go to create survey page when add card is clicked', () => {
@@ -182,7 +232,17 @@ function clickCard(
   fixture: ComponentFixture<SurveyListComponent>,
   id: string
 ): void {
-  const button = fixture.debugElement.query(By.css('#' + id))
+  const button = fixture.debugElement.query(By.css(`#${id}`))
     .nativeElement as HTMLElement;
   button.click();
+}
+
+function clickFilter(
+  fixture: ComponentFixture<SurveyListComponent>,
+  nth: number
+): void {
+  const filter = fixture.debugElement.query(
+    By.css(`mat-chip:nth-child(${nth})`)
+  ).nativeElement as HTMLElement;
+  filter.click();
 }

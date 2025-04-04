@@ -46,7 +46,12 @@ import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {
+  DataSharingType,
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {Task} from 'app/models/task/task.model';
 import {User} from 'app/models/user.model';
 
@@ -131,7 +136,10 @@ export class DataStoreService {
    * to the specified user.
    *
    */
-  loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
+  loadAccessibleSurveys$(
+    userEmail: string,
+    userId: string
+  ): Observable<List<Survey>> {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath(s.acl, userEmail), 'in', [
@@ -151,6 +159,13 @@ export class DataStoreService {
                 return surveyDocToModel(id, docData);
               })
               .filter(DataStoreService.filterAndLogError<Survey>)
+              .filter(
+                survey =>
+                  survey instanceof Survey &&
+                  (survey.generalAccess !== SurveyGeneralAccess.UNLISTED ||
+                    (survey.generalAccess === SurveyGeneralAccess.UNLISTED &&
+                      survey.ownerId === userId))
+              )
               .map(survey => survey as Survey)
           )
         )

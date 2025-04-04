@@ -15,12 +15,23 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs';
 
-import {Survey, SurveyState} from 'app/models/survey.model';
+import {
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+
+export enum SurveyListFilter {
+  ALL,
+  RESTRICTED,
+  UNLISTED,
+  PUBLIC,
+}
 
 @Component({
   selector: 'ground-survey-list',
@@ -28,30 +39,70 @@ import {SurveyService} from 'app/services/survey/survey.service';
   styleUrls: ['./survey-list.component.scss'],
 })
 export class SurveyListComponent implements OnInit, OnDestroy {
-  surveys = List<Survey>();
   private subscription = new Subscription();
+  allSurveys = List<Survey>();
+  surveys = List<Survey>();
+  currentFilter = SurveyListFilter.ALL;
+  filterCounters = Map([[SurveyListFilter.ALL, 0]]);
+
+  SurveyListFilter = SurveyListFilter;
+
+  SurveyGeneralAccess = SurveyGeneralAccess;
 
   constructor(
-    private surveyService: SurveyService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private surveyService: SurveyService
   ) {}
 
   ngOnInit(): void {
-    const allSurveys = this.surveyService.getAccessibleSurveys$();
     this.subscription.add(
-      allSurveys?.subscribe(
-        surveys => {
-          this.surveys = surveys;
+      this.surveyService.getAccessibleSurveys$().subscribe({
+        next: surveys => {
+          this.allSurveys = surveys;
+          this.applyFilterCounters();
+          this.applyFilter();
         },
-        err => {
+        error: err => {
           console.error(err);
           this.navigationService.error(err);
-        }
-      )
+        },
+      })
     );
   }
 
-  onSurveyClicked(clickedSurvey: Survey) {
+  applyFilterCounters(): void {
+    let restrictedCount = 0;
+    let unlistedCount = 0;
+    let publicCount = 0;
+
+    this.allSurveys.forEach(survey => {
+      if (survey.generalAccess === SurveyGeneralAccess.RESTRICTED) {
+        restrictedCount++;
+      } else if (survey.generalAccess === SurveyGeneralAccess.UNLISTED) {
+        unlistedCount++;
+      } else if (survey.generalAccess === SurveyGeneralAccess.PUBLIC) {
+        publicCount++;
+      }
+    });
+
+    this.filterCounters = Map([
+      [SurveyListFilter.ALL, this.allSurveys.size],
+      [SurveyListFilter.RESTRICTED, restrictedCount],
+      [SurveyListFilter.UNLISTED, unlistedCount],
+      [SurveyListFilter.PUBLIC, publicCount],
+    ]);
+  }
+
+  applyFilter(): void {
+    this.surveys = this.allSurveys.filter(this.filterSurveys.bind(this));
+  }
+
+  handleFilterSelection(newFilter: SurveyListFilter): void {
+    this.currentFilter = newFilter;
+    this.applyFilter();
+  }
+
+  handleSurveySelection(clickedSurvey: Survey): void {
     if (this.isSetupFinished(clickedSurvey)) {
       this.navigationService.selectSurvey(clickedSurvey.id);
     } else {
@@ -59,18 +110,28 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     }
   }
 
-  onNewSurvey() {
+  createNewSurvey(): void {
     this.navigationService.navigateToCreateSurvey(null);
   }
 
-  /**
-   * Clean up Rx subscription when cleaning up the component.
-   */
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  private filterSurveys(survey: Survey): boolean {
+    switch (this.currentFilter) {
+      case SurveyListFilter.RESTRICTED:
+        return survey.generalAccess === SurveyGeneralAccess.RESTRICTED;
+      case SurveyListFilter.UNLISTED:
+        return survey.generalAccess === SurveyGeneralAccess.UNLISTED;
+      case SurveyListFilter.PUBLIC:
+        return survey.generalAccess === SurveyGeneralAccess.PUBLIC;
+      default:
+        return true;
+    }
   }
 
   private isSetupFinished(survey: Survey): boolean {
     return survey.state === SurveyState.READY;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
