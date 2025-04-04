@@ -116,12 +116,12 @@ export class SurveyListComponent implements OnInit, OnDestroy {
 
   private filterSurveys(survey: Survey): boolean {
     switch (this.currentFilter) {
-      case SurveyListFilter.PUBLIC:
-        return survey.generalAccess === SurveyGeneralAccess.PUBLIC;
       case SurveyListFilter.RESTRICTED:
         return survey.generalAccess === SurveyGeneralAccess.RESTRICTED;
       case SurveyListFilter.UNLISTED:
         return survey.generalAccess === SurveyGeneralAccess.UNLISTED;
+      case SurveyListFilter.PUBLIC:
+        return survey.generalAccess === SurveyGeneralAccess.PUBLIC;
       default:
         return true;
     }

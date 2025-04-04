@@ -26,11 +26,10 @@ import {MatIconModule} from '@angular/material/icon';
 import {By} from '@angular/platform-browser';
 import {
   TranslateModule,
-  TranslatePipe,
   TranslateService,
   TranslateStore,
 } from '@ngx-translate/core';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 import {of} from 'rxjs';
 
 import {AclEntry} from 'app/models/acl-entry.model';
@@ -172,7 +171,7 @@ describe('SurveyListComponent', () => {
 
   beforeEach(() => {
     surveyServiceSpy.getAccessibleSurveys$.and.returnValue(
-      of<Survey[]>([incompleteSurvey, completeSurvey, publicSurvey])
+      of<List<Survey>>(List([incompleteSurvey, completeSurvey, publicSurvey]))
     );
     surveyServiceSpy.getSurveyAcl.and.returnValue([
       new AclEntry('test@gmail.com', Role.SURVEY_ORGANIZER),
@@ -191,7 +190,7 @@ describe('SurveyListComponent', () => {
     let surveyCards = fixture.debugElement.queryAll(By.css('.survey-card'));
     expect(surveyCards.length).toBe(4, 'Should display 4 survey cards');
 
-    clickFilter(fixture, 4);
+    clickFilter(fixture, 2);
     fixture.detectChanges();
 
     surveyCards = fixture.debugElement.queryAll(By.css('.survey-card'));
