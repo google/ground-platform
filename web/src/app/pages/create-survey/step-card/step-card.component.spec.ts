@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// import {ActivatedRoute} from '@angular/router';
-// import {ActivatedRouteStub} from 'testing/activated-route-stub';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {BrowserModule} from '@angular/platform-browser';
 

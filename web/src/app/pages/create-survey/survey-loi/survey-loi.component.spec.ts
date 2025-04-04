@@ -59,9 +59,7 @@ describe('SurveyLoiComponent', () => {
     Map(),
     Map(),
     '',
-    {
-      type: DataSharingType.PRIVATE,
-    }
+    {type: DataSharingType.PRIVATE}
   );
 
   const mockSurvey$ = of(mockSurvey);
