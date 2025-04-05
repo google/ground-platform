@@ -18,17 +18,17 @@
   <ground-header></ground-header>
 
   <!-- TODO(#1170): Extract the spinner into a component -->
-  <div id="loading-spinner" class="loading-spinner" *ngIf="setupPhase === SetupPhase.LOADING">
+  <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
     <div>
       <mat-spinner></mat-spinner>
       <p class="loading-label">Loading survey...</p>
     </div>
   </div>
 
-  <div *ngIf="setupPhase !== SetupPhase.LOADING" class="container">
+  <div *ngIf="createSurveyPhase !== CreateSurveyPhase.LOADING" class="container">
     <div class="card">
       <img
-        *ngIf="setupPhase === SetupPhase.JOB_DETAILS"
+        *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
         class="picture"
         src="/assets/img/add-job.svg"
         alt="Add a job"
@@ -39,40 +39,40 @@
         <ground-step-card
           [title]="cardTitle()"
           [description]="cardDescription()"
-          [jobName]="[SetupPhase.DEFINE_LOIS, SetupPhase.DEFINE_TASKS].includes(setupPhase) ? jobName() : ''"
+          [jobName]="[CreateSurveyPhase.DEFINE_LOIS, CreateSurveyPhase.DEFINE_TASKS].includes(createSurveyPhase) ? jobName() : ''"
         >
-          <ng-container [ngSwitch]="setupPhase">
+          <ng-container [ngSwitch]="createSurveyPhase">
             <survey-details
-              *ngSwitchCase="SetupPhase.SURVEY_DETAILS"
+              *ngSwitchCase="CreateSurveyPhase.SURVEY_DETAILS"
               #surveyDetails
               [title]="survey.title"
               [description]="survey.description"
               (onValidationChange)="onValidationChange($event)"
             ></survey-details>
             <job-details
-              *ngSwitchCase="SetupPhase.JOB_DETAILS"
+              *ngSwitchCase="CreateSurveyPhase.JOB_DETAILS"
               #jobDetails
               [name]="jobName()"
               (onValidationChange)="onValidationChange($event)"
             ></job-details>
             <survey-loi
-              *ngSwitchCase="SetupPhase.DEFINE_LOIS"
+              *ngSwitchCase="CreateSurveyPhase.DEFINE_LOIS"
               #surveyLoi
             ></survey-loi>
             <task-details
-              *ngSwitchCase="SetupPhase.DEFINE_TASKS"
+              *ngSwitchCase="CreateSurveyPhase.DEFINE_TASKS"
               #taskDetails
               (onValidationChange)="onValidationChange($event)"
             ></task-details>
             <data-sharing-terms
-              *ngSwitchCase="SetupPhase.DEFINE_DATA_SHARING_TERMS"
+              *ngSwitchCase="CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS"
               #dataSharingTerms
               [type]="survey.dataSharingTerms.type"
               [customText]="survey.dataSharingTerms.customText ?? ''"
               (onValidationChange)="onValidationChange($event)"
             ></data-sharing-terms>
             <share-survey
-              *ngSwitchCase="SetupPhase.SHARE_SURVEY"
+              *ngSwitchCase="CreateSurveyPhase.SHARE_SURVEY"
             ></share-survey>
           </ng-container>
         </ground-step-card>
@@ -96,7 +96,7 @@
         (click)="continue()"
         [disabled]="!canContinue"
       >
-        {{ setupPhase === SetupPhase.SHARE_SURVEY ? 'Go to survey' : 'Continue' }}
+        {{ createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY ? 'Go to survey' : 'Continue' }}
       </button>
     </div>
   </div>

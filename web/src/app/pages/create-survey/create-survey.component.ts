@@ -35,7 +35,7 @@ import {TaskService} from 'app/services/task/task.service';
 
 import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
 
-export enum SetupPhase {
+export enum CreateSurveyPhase {
   LOADING,
   SURVEY_DETAILS,
   JOB_DETAILS,
@@ -45,8 +45,8 @@ export enum SetupPhase {
   SHARE_SURVEY,
 }
 
-const setupPhaseMetadata = new Map<
-  SetupPhase,
+const createSurveyPhaseMetadata = new Map<
+  CreateSurveyPhase,
   {
     progressBarTitle: string;
     cardTitle?: string;
@@ -54,7 +54,7 @@ const setupPhaseMetadata = new Map<
   }
 >([
   [
-    SetupPhase.SURVEY_DETAILS,
+    CreateSurveyPhase.SURVEY_DETAILS,
     {
       progressBarTitle: 'Create a survey',
       cardTitle: 'Start building your survey',
@@ -62,7 +62,7 @@ const setupPhaseMetadata = new Map<
     },
   ],
   [
-    SetupPhase.JOB_DETAILS,
+    CreateSurveyPhase.JOB_DETAILS,
     {
       progressBarTitle: 'Add a job',
       cardTitle: 'Add a job',
@@ -71,7 +71,7 @@ const setupPhaseMetadata = new Map<
     },
   ],
   [
-    SetupPhase.DEFINE_LOIS,
+    CreateSurveyPhase.DEFINE_LOIS,
     {
       progressBarTitle: 'Specify locations of interest',
       cardTitle: 'Where should data be collected?',
@@ -80,7 +80,7 @@ const setupPhaseMetadata = new Map<
     },
   ],
   [
-    SetupPhase.DEFINE_TASKS,
+    CreateSurveyPhase.DEFINE_TASKS,
     {
       progressBarTitle: 'Define data collection tasks',
       cardTitle: 'Define how specified data should be collected',
@@ -89,7 +89,7 @@ const setupPhaseMetadata = new Map<
     },
   ],
   [
-    SetupPhase.DEFINE_DATA_SHARING_TERMS,
+    CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS,
     {
       progressBarTitle: 'Review abd share survey',
       cardTitle: 'Data sharing consent',
@@ -98,7 +98,7 @@ const setupPhaseMetadata = new Map<
     },
   ],
   [
-    SetupPhase.SHARE_SURVEY,
+    CreateSurveyPhase.SHARE_SURVEY,
     {
       progressBarTitle: 'Share with collectors and other organizers',
       cardTitle: 'Share your survey',
@@ -120,11 +120,11 @@ export class CreateSurveyComponent implements OnInit {
   lois?: List<LocationOfInterest>;
   canContinue = true;
   skipLoiSelection = false;
-  setupPhase = SetupPhase.LOADING;
+  createSurveyPhase = CreateSurveyPhase.LOADING;
 
-  readonly SetupPhase = SetupPhase;
+  readonly CreateSurveyPhase = CreateSurveyPhase;
 
-  readonly setupPhaseMetadata = setupPhaseMetadata;
+  readonly createSurveyPhaseMetadata = createSurveyPhaseMetadata;
 
   @ViewChild('surveyDetails')
   surveyDetails?: SurveyDetailsComponent;
@@ -188,10 +188,10 @@ export class CreateSurveyComponent implements OnInit {
             this.navigationService.selectSurvey(this.survey.id);
           }
           this.lois = lois;
-          if (this.setupPhase === SetupPhase.LOADING) {
-            this.setupPhase = this.getSetupPhase(survey, lois);
+          if (this.createSurveyPhase === CreateSurveyPhase.LOADING) {
+            this.createSurveyPhase = this.getSurveyPhase(survey, lois);
           }
-          if (this.setupPhase === SetupPhase.DEFINE_LOIS) {
+          if (this.createSurveyPhase === CreateSurveyPhase.DEFINE_LOIS) {
             this.canContinue =
               !this.lois.isEmpty() ||
               this.job()?.strategy === DataCollectionStrategy.MIXED;
@@ -208,26 +208,26 @@ export class CreateSurveyComponent implements OnInit {
     return survey.state === SurveyState.READY;
   }
 
-  private getSetupPhase(
+  private getSurveyPhase(
     survey: Survey,
     lois: Immutable.List<LocationOfInterest>
-  ): SetupPhase {
+  ): CreateSurveyPhase {
     if (survey.state === SurveyState.READY) {
-      return SetupPhase.DEFINE_DATA_SHARING_TERMS;
+      return CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS;
     }
     if (
       !lois.isEmpty() ||
       this.job()?.strategy === DataCollectionStrategy.MIXED
     ) {
-      return SetupPhase.DEFINE_TASKS;
+      return CreateSurveyPhase.DEFINE_TASKS;
     }
     if (survey.hasJobs()) {
-      return SetupPhase.DEFINE_LOIS;
+      return CreateSurveyPhase.DEFINE_LOIS;
     }
     if (this.hasTitle(survey)) {
-      return SetupPhase.JOB_DETAILS;
+      return CreateSurveyPhase.JOB_DETAILS;
     }
-    return SetupPhase.SURVEY_DETAILS;
+    return CreateSurveyPhase.SURVEY_DETAILS;
   }
 
   private hasTitle(survey: Survey): boolean {
@@ -235,22 +235,30 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   progressBarTitle(): String {
-    return setupPhaseMetadata.get(this.setupPhase)?.progressBarTitle ?? '';
+    return (
+      createSurveyPhaseMetadata.get(this.createSurveyPhase)?.progressBarTitle ??
+      ''
+    );
   }
 
   cardTitle(): String {
-    return setupPhaseMetadata.get(this.setupPhase)?.cardTitle ?? '';
+    return (
+      createSurveyPhaseMetadata.get(this.createSurveyPhase)?.cardTitle ?? ''
+    );
   }
 
   cardDescription(): String {
-    return setupPhaseMetadata.get(this.setupPhase)?.cardDescription ?? '';
+    return (
+      createSurveyPhaseMetadata.get(this.createSurveyPhase)?.cardDescription ??
+      ''
+    );
   }
 
   progressBarValue(): number {
-    const numberOfSteps = setupPhaseMetadata.size;
-    const currentPhaseIndex = Array.from(setupPhaseMetadata.keys()).findIndex(
-      phase => phase === this.setupPhase
-    );
+    const numberOfSteps = createSurveyPhaseMetadata.size;
+    const currentPhaseIndex = Array.from(
+      createSurveyPhaseMetadata.keys()
+    ).findIndex(phase => phase === this.createSurveyPhase);
     return currentPhaseIndex > -1
       ? Math.round((currentPhaseIndex / numberOfSteps) * 100)
       : 0;
@@ -268,25 +276,25 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   back(): void {
-    switch (this.setupPhase) {
-      case SetupPhase.SURVEY_DETAILS:
+    switch (this.createSurveyPhase) {
+      case CreateSurveyPhase.SURVEY_DETAILS:
         this.navigationService.navigateToSurveyList();
         break;
-      case SetupPhase.JOB_DETAILS:
-        this.setupPhase = SetupPhase.SURVEY_DETAILS;
+      case CreateSurveyPhase.JOB_DETAILS:
+        this.createSurveyPhase = CreateSurveyPhase.SURVEY_DETAILS;
         break;
-      case SetupPhase.DEFINE_LOIS:
-        this.setupPhase = SetupPhase.JOB_DETAILS;
+      case CreateSurveyPhase.DEFINE_LOIS:
+        this.createSurveyPhase = CreateSurveyPhase.JOB_DETAILS;
         break;
-      case SetupPhase.DEFINE_TASKS:
+      case CreateSurveyPhase.DEFINE_TASKS:
         this.canContinue = true;
-        this.setupPhase = SetupPhase.DEFINE_LOIS;
+        this.createSurveyPhase = CreateSurveyPhase.DEFINE_LOIS;
         break;
-      case SetupPhase.DEFINE_DATA_SHARING_TERMS:
-        this.setupPhase = SetupPhase.DEFINE_TASKS;
+      case CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS:
+        this.createSurveyPhase = CreateSurveyPhase.DEFINE_TASKS;
         break;
-      case SetupPhase.SHARE_SURVEY:
-        this.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
+      case CreateSurveyPhase.SHARE_SURVEY:
+        this.createSurveyPhase = CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS;
         break;
       default:
         break;
@@ -295,31 +303,31 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   async continue(): Promise<void> {
-    switch (this.setupPhase) {
-      case SetupPhase.SURVEY_DETAILS: {
+    switch (this.createSurveyPhase) {
+      case CreateSurveyPhase.SURVEY_DETAILS: {
         const createdSurveyId = await this.saveSurveyTitleAndDescription();
         if (createdSurveyId) {
           this.navigationService.navigateToCreateSurvey(createdSurveyId, true);
         }
-        this.setupPhase = SetupPhase.JOB_DETAILS;
+        this.createSurveyPhase = CreateSurveyPhase.JOB_DETAILS;
         break;
       }
-      case SetupPhase.JOB_DETAILS:
+      case CreateSurveyPhase.JOB_DETAILS:
         await this.saveJobName();
-        this.setupPhase = SetupPhase.DEFINE_LOIS;
+        this.createSurveyPhase = CreateSurveyPhase.DEFINE_LOIS;
         break;
-      case SetupPhase.DEFINE_LOIS:
-        this.setupPhase = SetupPhase.DEFINE_TASKS;
+      case CreateSurveyPhase.DEFINE_LOIS:
+        this.createSurveyPhase = CreateSurveyPhase.DEFINE_TASKS;
         break;
-      case SetupPhase.DEFINE_TASKS:
+      case CreateSurveyPhase.DEFINE_TASKS:
         await this.saveTasks();
-        this.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
+        this.createSurveyPhase = CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS;
         break;
-      case SetupPhase.DEFINE_DATA_SHARING_TERMS:
+      case CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS:
         await this.saveDataSharingTerms();
-        this.setupPhase = SetupPhase.SHARE_SURVEY;
+        this.createSurveyPhase = CreateSurveyPhase.SHARE_SURVEY;
         break;
-      case SetupPhase.SHARE_SURVEY:
+      case CreateSurveyPhase.SHARE_SURVEY:
         await this.setSurveyStateToReady();
         break;
       default:

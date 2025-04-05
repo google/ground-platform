@@ -35,7 +35,7 @@ import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
-  SetupPhase,
+  CreateSurveyPhase,
 } from 'app/pages/create-survey/create-survey.component';
 import {DataSharingTermsComponent} from 'app/pages/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/pages/create-survey/job-details/job-details.component';
@@ -449,7 +449,7 @@ describe('CreateSurveyComponent', () => {
       surveyId$.next(surveyId);
       activeSurvey$.next(surveyWithJob);
       tick();
-      component.setupPhase = SetupPhase.DEFINE_TASKS;
+      component.createSurveyPhase = CreateSurveyPhase.DEFINE_TASKS;
       fixture.detectChanges();
     }));
 
@@ -460,7 +460,7 @@ describe('CreateSurveyComponent', () => {
         flush();
         fixture.detectChanges();
 
-        expect(component.setupPhase).toBe(SetupPhase.DEFINE_LOIS);
+        expect(component.createSurveyPhase).toBe(CreateSurveyPhase.DEFINE_LOIS);
       }));
     });
   });
@@ -471,7 +471,7 @@ describe('CreateSurveyComponent', () => {
       activeSurvey$.next(surveyWithJob);
       tick();
       // Forcibly set phase to DEFINE_DATA_SHARING_TERMS
-      component.setupPhase = SetupPhase.DEFINE_DATA_SHARING_TERMS;
+      component.createSurveyPhase = CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS;
       fixture.detectChanges();
     }));
 
@@ -488,7 +488,7 @@ describe('CreateSurveyComponent', () => {
     it('goes back to task definition component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.setupPhase).toBe(SetupPhase.DEFINE_TASKS);
+      expect(component.createSurveyPhase).toBe(CreateSurveyPhase.DEFINE_TASKS);
     });
   });
 
@@ -498,14 +498,16 @@ describe('CreateSurveyComponent', () => {
       activeSurvey$.next(surveyWithJob);
       tick();
       // Forcibly set phase to SHARE_SURVEY for now since other steps are not ready yet
-      component.setupPhase = SetupPhase.SHARE_SURVEY;
+      component.createSurveyPhase = CreateSurveyPhase.SHARE_SURVEY;
       fixture.detectChanges();
     }));
 
     it('goes back to data sharing component after back button is clicked', () => {
       clickBackButton(fixture);
 
-      expect(component.setupPhase).toBe(SetupPhase.DEFINE_DATA_SHARING_TERMS);
+      expect(component.createSurveyPhase).toBe(
+        CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS
+      );
     });
   });
 });
