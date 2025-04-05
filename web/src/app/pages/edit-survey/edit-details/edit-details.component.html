@@ -15,12 +15,13 @@
 -->
 
 <div class="survey-details-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Survey name and description</mat-card-title>
+    </mat-card-header>
 
-  <mat-card class="survey-detail-card">
     <mat-card-content>
-      <div class="card-title">Survey name and description</div>
-
-      <div class="card-row edit-survey-details">
+      <div class="edit-survey-details">
         <survey-details
           #surveyDetails
           [title]="survey?.title"
@@ -31,34 +32,37 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-card class="survey-detail-card" *ngIf="survey?.dataSharingTerms as terms">
+  <mat-card *ngIf="survey?.dataSharingTerms as terms">
+    <mat-card-header>
+      <mat-card-title>Data sharing agreement</mat-card-title>
+    </mat-card-header>
+
     <mat-card-content>
-      <div class="card-title">Data sharing agreement</div>
-      <div class="card-row">
-        <p [innerHtml]="dataSharingTermsDetails.descriptionHtml"></p>
-        <div *ngIf="dataSharingTermsDetails.customText as customText">
-          <div class="card-subtitle">Custom terms</div>
-          <p>
-            {{ customText }}
-          </p>
-        </div>
+      <div [innerHtml]="dataSharingTermsDetails.descriptionHtml"></div>
+
+      <div *ngIf="dataSharingTermsDetails.customText as customText">
+        <div class="card-subtitle">Custom terms</div>
+
+        <p>{{ customText }}</p>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <mat-card class="survey-detail-card">
-    <mat-card-content>
-      <div class="detail-content-with-button">
-        <div>
-          <div class="card-title">Delete survey</div>
-          <div class="card-row">
-            <div>Permanently delete survey and associated data</div>
-          </div>
-        </div>
-        <button mat-flat-button (click)="openDeleteSurveyDialog()">
-          Delete survey
+  <mat-card class="card-with-button">
+    <div class="relative-container">
+      <div class="positioned-button">
+        <button class="delete-survey-button" mat-flat-button (click)="openDeleteSurveyDialog()">
+          <span>Delete survey</span>
         </button>
       </div>
+    </div>
+
+    <mat-card-header>
+      <mat-card-title>Delete survey</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div>Permanently delete survey and associated data</div>
     </mat-card-content>
   </mat-card>
 </div>

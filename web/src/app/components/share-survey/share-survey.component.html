@@ -15,25 +15,33 @@
 -->
 
 <div class="share-survey-container">
-  <mat-card>
+  <mat-card class="card-with-button">
+    <div class="relative-container">
+      <div class="positioned-button">
+        <button class="share-survey-button" mat-flat-button (click)="openShareDialog()">
+          <mat-icon class="material-symbols-outlined">add</mat-icon>
+
+          <span>Add participants</span>
+        </button>
+      </div>
+    </div>
+
     <mat-card-header>
-      <mat-card-title>Sharing</mat-card-title>
-
-      <mat-card-subtitle>
-        When your survey’s ready, share it with collectors and other organizers.
-      </mat-card-subtitle>
-
-      <button mat-flat-button class="share-survey-button" (click)="openShareDialog()">
-        <mat-icon class="material-symbols-outlined">
-          group
-        </mat-icon>
-
-        <div>Add data collectors</div>
-      </button>
+      <mat-card-title>People with access</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
       <ground-share-list></ground-share-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>General access</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <ground-share-access-control></ground-share-access-control>
     </mat-card-content>
   </mat-card>
 </div>
