@@ -21,7 +21,12 @@ import {List, Map} from 'immutable';
 
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {
+  DataSharingType,
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
@@ -47,6 +52,12 @@ const PB_DATA_SHARING_TYPE = Map([
 const PB_STATES = Map([
   [SurveyState.DRAFT, Pb.Survey.State.DRAFT],
   [SurveyState.READY, Pb.Survey.State.READY],
+]);
+
+const PB_GENERAL_ACCESS = Map([
+  [SurveyGeneralAccess.RESTRICTED, Pb.Survey.GeneralAccess.RESTRICTED],
+  [SurveyGeneralAccess.UNLISTED, Pb.Survey.GeneralAccess.UNLISTED],
+  [SurveyGeneralAccess.PUBLIC, Pb.Survey.GeneralAccess.PUBLIC],
 ]);
 
 /**
@@ -86,6 +97,7 @@ export function surveyToDocument(
     ownerId,
     dataSharingTerms,
     state,
+    generalAccess,
   } = survey;
 
   return toDocumentData(
@@ -99,6 +111,9 @@ export function surveyToDocument(
         dataSharingTerms: toDataSharingTermsMessage(dataSharingTerms),
       }),
       state: PB_STATES.get(state || SurveyState.DRAFT),
+      generalAccess: PB_GENERAL_ACCESS.get(
+        generalAccess || SurveyGeneralAccess.RESTRICTED
+      ),
     })
   );
 }
