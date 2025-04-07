@@ -6,6 +6,22 @@
     background-color: mat.get-theme-color($theme, surface-container);
   }
 
+  .filters-container {
+    --mdc-chip-elevated-disabled-container-color: #D4E8D1;
+    --mdc-chip-elevated-selected-container-color: #D4E8D1;
+    --mdc-chip-outline-color: #C4C7C5;
+    --mdc-chip-disabled-outline-color: #D4E8D1;
+    --mdc-chip-selected-outline-color: #D4E8D1;
+    --mdc-chip-label-text-color: #0F1F11;
+    --mdc-chip-disabled-label-text-color: #0F1F11;
+    --mdc-chip-selected-label-text-color: #0F1F11;
+    --mdc-chip-with-icon-icon-color: #006E2C;
+    --mdc-chip-with-icon-disabled-icon-color: #0F1F11;
+    --mdc-chip-with-icon-selected-icon-color: #0F1F11;
+    --mdc-chip-with-avatar-disabled-avatar-opacity: 1;
+    --mdc-chip-with-avatar-selected-avatar-opacity: 1;
+  }
+
   .mat-mdc-card {
     &.survey-card {
       background-color: mat.get-theme-color($theme, surface);

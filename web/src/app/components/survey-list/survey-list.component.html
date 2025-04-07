@@ -19,42 +19,75 @@
 
   <h1 class="page-title">{{'app.surveys' | translate}}</h1>
 
-  <div class="container">
-    <div class="surveys-container">
-      <mat-card
-        appearance="raised"
-        id="add-card"
-        class="survey-card new-survey-card"
-        (click)="onNewSurvey()"
-      >
-        <mat-card-header>
-          <div class="add-icon-container">
-            <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
-          </div>
+  <div class="filters-container">
+    <mat-chip-set aria-label="Survey filter">
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL, label: 'All' }"></ng-container>
 
-          <mat-card-title class="survey-title">Create survey</mat-card-title>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock', label: 'Restricted' }"></ng-container>
 
-          <mat-card-subtitle class="survey-description">
-            Define jobs and sites for data collectors
-          </mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.UNLISTED, icon: 'account_circle', label: 'Unlisted' }"></ng-container>
 
-      <mat-card
-        appearance="raised"
-        *ngFor="let survey of surveys; let i = index"
-        id="survey-card-{{ i }}"
-        class="survey-card"
-        (click)="onSurveyClicked(survey)"
-      >
-        <mat-card-header>
-          <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.PUBLIC, icon: 'public', label: 'Public' }"></ng-container>
+    </mat-chip-set>
+  </div>
 
-          <mat-card-subtitle class="survey-description">
-            {{ survey.description }}
-          </mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
-    </div>
+  <div class="surveys-container">
+    <mat-card
+      appearance="raised"
+      id="add-card"
+      class="survey-card new-survey-card"
+      (click)="createNewSurvey()"
+    >
+      <mat-card-header>
+        <div class="add-icon-container">
+          <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
+        </div>
+
+        <mat-card-title class="survey-title">Create survey</mat-card-title>
+
+        <mat-card-subtitle class="survey-description">
+          Define jobs and sites for data collectors
+        </mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+
+    <mat-card
+      appearance="raised"
+      *ngFor="let survey of surveys; let i = index"
+      id="survey-card-{{ i }}"
+      class="survey-card"
+      (click)="handleSurveySelection(survey)"
+    >
+      <mat-card-header>
+        <mat-icon mat-card-avatar fontSet="material-symbols-outlined" class="add-icon general-access-icon">
+          <ng-container [ngSwitch]="survey.generalAccess">
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED">lock</ng-container>
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.UNLISTED">account_circle</ng-container>
+            <ng-container *ngSwitchCase="SurveyGeneralAccess.RESTRICTED">pending</ng-container>
+            <ng-container *ngSwitchDefault>public</ng-container> 
+          </ng-container>
+        </mat-icon>
+
+        <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
+
+        <mat-card-subtitle class="survey-description">
+          {{ survey.description }}
+        </mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
   </div>
 </div>
+
+<ng-template #filterChip let-filter="filter", let-icon="icon", let-label="label">
+  <mat-chip
+    *ngIf="filterCounters.get(filter)"
+    [disabled]="currentFilter === filter"
+    (click)="handleFilterSelection(filter)"
+  >
+    <mat-icon *ngIf="icon || currentFilter === filter" fontSet="material-symbols-outlined" matChipAvatar>
+      {{currentFilter !== filter ? icon : "check"}}
+    </mat-icon>
+
+    <span>{{label}}</span>
+  </mat-chip>
+</ng-template>
