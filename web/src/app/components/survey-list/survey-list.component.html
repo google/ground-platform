@@ -21,7 +21,7 @@
 
   <div class="filters-container">
     <mat-chip-set aria-label="Survey filter">
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL, icon: 'check', label: 'All' }"></ng-container>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL, label: 'All' }"></ng-container>
 
       <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock', label: 'Restricted' }"></ng-container>
 
@@ -84,7 +84,10 @@
     [disabled]="currentFilter === filter"
     (click)="handleFilterSelection(filter)"
   >
-    <mat-icon fontSet="material-symbols-outlined" matChipAvatar>{{icon}}</mat-icon>
+    <mat-icon *ngIf="icon || currentFilter === filter" fontSet="material-symbols-outlined" matChipAvatar>
+      {{currentFilter !== filter ? icon : "check"}}
+    </mat-icon>
+
     <span>{{label}}</span>
   </mat-chip>
 </ng-template>
