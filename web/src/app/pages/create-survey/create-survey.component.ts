@@ -91,7 +91,7 @@ const createSurveyPhaseMetadata = new Map<
   [
     CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS,
     {
-      progressBarTitle: 'Review abd share survey',
+      progressBarTitle: 'Define data sharing terms',
       cardTitle: 'Data sharing consent',
       cardDescription:
         'Require data collectors to agree to data sharing terms before submitting data',
