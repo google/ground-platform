@@ -453,14 +453,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private addMarkerToMap(
     id: string,
     geometry: Point,
-    color: string | undefined,
+    color: string | undefined = this.DEFAULT_MARKER_COLOR,
     markerText?: string | undefined
   ): google.maps.marker.AdvancedMarkerElement {
     const {y: latitude, x: longitude} = geometry.coord;
-    // Default color on Google Maps marker is red if unspecified
-    if (color === undefined) {
-      color = this.DEFAULT_MARKER_COLOR;
-    }
 
     const options: google.maps.marker.AdvancedMarkerElementOptions = {
       map: this.map.googleMap,
