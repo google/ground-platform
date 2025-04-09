@@ -34,6 +34,13 @@ export class GroundPinService {
     return GroundPinService.urlPrefix + btoa(this.renderPin(color));
   }
 
+  getPinImageSvgElement(color?: string): Element {
+    const svgMarker = document.createElement('div');
+    svgMarker.innerHTML = this.renderPin(color);
+    svgMarker.style.transform = 'scale(1)';
+    return svgMarker;
+  }
+
   public static urlPrefix = 'data:image/svg+xml;charset=UTF-8;base64,';
   private static defaultIconColor = 'red';
   private static svgTemplate = `<?xml version="1.0" encoding="UTF-8"?>

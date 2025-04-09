@@ -462,19 +462,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       color = this.DEFAULT_MARKER_COLOR;
     }
 
-    // TODO(#2108): Switch to custom HTML and CSS markers. Having a custom HTML will
-    // improve text wrapping, allow for a more square shape, and custom styles for
-    // selected markers (like increasing the scale).
-    const markerGlyph = new google.maps.marker.PinElement({
-      glyph: markerText,
-      glyphColor: 'white',
-      background: color,
-    });
-
     const options: google.maps.marker.AdvancedMarkerElementOptions = {
       map: this.map.googleMap,
       position: new google.maps.LatLng(latitude, longitude),
-      content: markerGlyph.element,
+      content: this.groundPinService.getPinImageSvgElement(color),
       title: id,
       gmpClickable: !this.disableMapClicks,
     };
