@@ -461,7 +461,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const options: google.maps.marker.AdvancedMarkerElementOptions = {
       map: this.map.googleMap,
       position: new google.maps.LatLng(latitude, longitude),
-      content: this.groundPinService.getPinImageSvgElement(color),
+      content: this.groundPinService.getPinImageSvgElement(color, markerText),
       title: id,
       gmpClickable: !this.disableMapClicks,
     };
