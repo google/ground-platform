@@ -23,7 +23,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {NEVER, of} from 'rxjs';
 
 import {AuthService} from 'app/services/auth/auth.service';
-import {LoadingState} from 'app/services/loading-state.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';

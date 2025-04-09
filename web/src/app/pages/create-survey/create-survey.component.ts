@@ -210,7 +210,7 @@ export class CreateSurveyComponent implements OnInit {
 
   private getSurveyPhase(
     survey: Survey,
-    lois: Immutable.List<LocationOfInterest>
+    lois: List<LocationOfInterest>
   ): CreateSurveyPhase {
     if (survey.state === SurveyState.READY) {
       return CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS;
