@@ -65,7 +65,7 @@ describe('DataSharingTermsComponent', () => {
         description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PUBLIC)!,
       },
       {
-        label: 'Custom agreement',
+        label: 'Custom',
         description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.CUSTOM)!,
       },
     ]);
