@@ -193,7 +193,7 @@ describe('EditSurveyComponent', () => {
         },
         {
           buttonSelector: '#share-button',
-          expectedLabel: 'Sharing',
+          expectedLabel: 'Survey participants',
           expectedRouterLink: './share',
         },
         {
