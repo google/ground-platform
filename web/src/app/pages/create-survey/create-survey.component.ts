@@ -67,7 +67,7 @@ const createSurveyPhaseMetadata = new Map<
       progressBarTitle: 'Add a job',
       cardTitle: 'Add a job',
       cardDescription:
-        'In the following steps, you’ll define the data that should be collected for certain sites as part of this job',
+        "In the following steps, you'll define the data that should be collected for certain sites as part of this job",
     },
   ],
   [
