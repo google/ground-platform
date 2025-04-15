@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
-import {DocumentData, GeoPoint} from 'firebase-admin/firestore';
+import {DocumentData, FieldPath, GeoPoint} from 'firebase-admin/firestore';
 import {registry} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 
@@ -191,20 +191,20 @@ export class Datastore {
     const loisQuery = this.db_
       .collection(lois(surveyId))
       .where(l.jobId, '==', jobId)
-      .orderBy(l.id);
+      .orderBy(FieldPath.documentId());
     let submissionsQuery = this.db_
       .collection(submissions(surveyId))
       .where(sb.jobId, '==', jobId)
-      .orderBy(sb.loiId);
+      .orderBy(sb.loiId)
+      .orderBy(FieldPath.documentId());
     if (ownerId) {
       submissionsQuery = submissionsQuery.where(sb.ownerId, '==', ownerId);
     }
-    const loisIterator = new QueryIterator(loisQuery, page, l.id);
-    const submissionsIterator = new QueryIterator(
-      submissionsQuery,
-      page,
-      sb.loiId
-    );
+    const loisIterator = new QueryIterator(loisQuery, page, [l.id]);
+    const submissionsIterator = new QueryIterator(submissionsQuery, page, [
+      sb.loiId,
+      sb.id,
+    ]);
     return leftOuterJoinSorted(
       loisIterator,
       loiDoc => loiDoc.get(l.id),

@@ -38,7 +38,7 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
   constructor(
     private query: Query,
     private pageSize: number,
-    private orderField: string
+    private orderFields: string[]
   ) {}
 
   /**
@@ -57,14 +57,16 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
       // Fetch next batch of documents
       let q = this.query.limit(this.pageSize);
       if (this.lastDocument) {
-        q = q.startAfter([this.lastDocument?.get(this.orderField)]);
+        q = q.startAfter(
+          this.orderFields.map(orderField => this.lastDocument?.get(orderField))
+        );
       }
       this.querySnapshot = await q.get();
       this.currentIndex = 0;
     }
     if (this.querySnapshot.size > 0) {
       const document = this.querySnapshot.docs[this.currentIndex++];
-      this.lastDocument = document; // Update last document for next batch
+      this.lastDocument = this.querySnapshot.docs[this.querySnapshot.size - 1];
       return {
         value: document,
         done: false,
