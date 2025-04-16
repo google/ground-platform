@@ -47,7 +47,6 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {
-  DataSharingType,
   Survey,
   SurveyGeneralAccess,
   SurveyState,
@@ -188,7 +187,11 @@ export class DataStoreService {
   ): Promise<void> {
     const {id: surveyId, jobs} = survey;
 
-    jobIdsToDelete?.forEach(jobId => this.deleteJob(surveyId, jobId));
+    jobIdsToDelete?.forEach(jobId => {
+      this.deleteJob(surveyId, jobId);
+      this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
+      this.deleteAllSubmissionsInJob(surveyId, jobId);
+    });
 
     await Promise.all(
       jobs
@@ -196,7 +199,7 @@ export class DataStoreService {
         .map(job => this.addOrUpdateJob(surveyId, job))
     );
 
-    await this.db.firestore
+    return await this.db.firestore
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update(surveyToDocument(surveyId, survey));
@@ -249,27 +252,29 @@ export class DataStoreService {
       .set(jobToDocument(job));
   }
 
-  async deleteSurvey(survey: Survey) {
+  async deleteSurvey(survey: Survey): Promise<void> {
     const {id: surveyId} = survey;
 
-    await Promise.all(survey.jobs.map(job => this.deleteJob(surveyId, job.id)));
+    survey.jobs.forEach(({id: jobId}) => {
+      this.deleteJob(surveyId, jobId);
+      this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
+      this.deleteAllSubmissionsInJob(surveyId, jobId);
+    });
 
-    return await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .delete();
+    await this.db.collection(SURVEYS_COLLECTION_NAME).doc(surveyId).delete();
   }
 
-  async deleteJob(surveyId: string, jobId: string) {
-    await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-    await this.deleteAllSubmissionsInJob(surveyId, jobId);
+  private async deleteJob(surveyId: string, jobId: string): Promise<void> {
     return await this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
       .doc(jobId)
       .delete();
   }
 
-  private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
+  private async deleteAllSubmissionsInJob(
+    surveyId: string,
+    jobId: string
+  ): Promise<void[]> {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where(sb.jobId, '==', jobId)
@@ -281,7 +286,7 @@ export class DataStoreService {
   private async deleteAllSubmissionsInLocationOfInterest(
     surveyId: string,
     loiId: string
-  ) {
+  ): Promise<void[]> {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where(sb.loiId, '==', loiId)
@@ -293,7 +298,7 @@ export class DataStoreService {
   private async deleteAllLocationsOfInterestInJob(
     surveyId: string,
     jobId: string
-  ) {
+  ): Promise<void[]> {
     const lois = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
       ref => ref.where(l.jobId, '==', jobId)
@@ -302,7 +307,10 @@ export class DataStoreService {
     return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  async deleteLocationOfInterest(surveyId: string, loiId: string) {
+  async deleteLocationOfInterest(
+    surveyId: string,
+    loiId: string
+  ): Promise<void> {
     await this.deleteAllSubmissionsInLocationOfInterest(surveyId, loiId);
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
@@ -312,7 +320,10 @@ export class DataStoreService {
       .delete();
   }
 
-  async deleteSubmission(surveyId: string, submissionId: string) {
+  async deleteSubmission(
+    surveyId: string,
+    submissionId: string
+  ): Promise<void> {
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
