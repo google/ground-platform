@@ -12,6 +12,7 @@
     "shell": "firebase functions:shell",
     "emulators": "firebase emulators:start --only functions,firestore --project local",
     "deploy": "firebase login && firebase deploy --project $npm_config_project --only functions",
+    "deploy-one": "firebase login && firebase deploy --project $npm_config_project --only functions:$npm_config_function",
     "logs": "firebase functions:log",
     "test": "jasmine --config=jasmine.json",
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
