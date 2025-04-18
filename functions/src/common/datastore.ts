@@ -179,14 +179,14 @@ export class Datastore {
    * @param surveyId The ID of the survey.
    * @param jobId The ID of the job.
    * @param ownerId The optional ID of the owner to filter submissions by.
-   * @param page The page number for pagination (used with the `QueryIterator`).
+   * @param pageSize The number of documents to fetch per page for efficient pagination using the `QueryIterator`, especially useful for large datasets.
    * @returns A Promise that resolves to an array of joined LOI and submission documents.
    */
   async fetchLoisSubmissions(
     surveyId: string,
     jobId: string,
     ownerId: string | undefined,
-    page: number
+    pageSize: number
   ) {
     const loisQuery = this.db_
       .collection(lois(surveyId))
@@ -200,11 +200,8 @@ export class Datastore {
     if (ownerId) {
       submissionsQuery = submissionsQuery.where(sb.ownerId, '==', ownerId);
     }
-    const loisIterator = new QueryIterator(loisQuery, page, [l.id]);
-    const submissionsIterator = new QueryIterator(submissionsQuery, page, [
-      sb.loiId,
-      sb.id,
-    ]);
+    const loisIterator = new QueryIterator(loisQuery, pageSize);
+    const submissionsIterator = new QueryIterator(submissionsQuery, pageSize);
     return leftOuterJoinSorted(
       loisIterator,
       loiDoc => loiDoc.get(l.id),
