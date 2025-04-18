@@ -33,13 +33,8 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
    *
    * @param query The Firestore query to iterate over.
    * @param pageSize The number of documents to fetch in each batch.
-   * @param orderField The field to order documents by (optional).
    */
-  constructor(
-    private query: Query,
-    private pageSize: number,
-    private orderField: string
-  ) {}
+  constructor(private query: Query, private pageSize: number) {}
 
   /**
    * Fetches the next batch of documents and returns the next document in the iterator.
@@ -57,7 +52,7 @@ export class QueryIterator implements AsyncIterator<QueryDocumentSnapshot> {
       // Fetch next batch of documents
       let q = this.query.limit(this.pageSize);
       if (this.lastDocument) {
-        q = q.startAfter([this.lastDocument?.get(this.orderField)]);
+        q = q.startAfter(this.lastDocument);
       }
       this.querySnapshot = await q.get();
       this.currentIndex = 0;
