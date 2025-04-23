@@ -67,13 +67,13 @@ const createSurveyPhaseMetadata = new Map<
       progressBarTitle: 'Add a job',
       cardTitle: 'Add a job',
       cardDescription:
-        "In the following steps, you'll define what data should be collected for certain sites as part of this job",
+        "In the following steps, you'll define the data that should be collected for certain sites as part of this job",
     },
   ],
   [
     CreateSurveyPhase.DEFINE_LOIS,
     {
-      progressBarTitle: 'Specify locations of interest',
+      progressBarTitle: 'Specify data collection sites',
       cardTitle: 'Where should data be collected?',
       cardDescription:
         'Data collectors will complete specified tasks for these sites',
@@ -83,27 +83,26 @@ const createSurveyPhaseMetadata = new Map<
     CreateSurveyPhase.DEFINE_TASKS,
     {
       progressBarTitle: 'Define data collection tasks',
-      cardTitle: 'Define how specified data should be collected',
+      cardTitle: 'Which data should be collected?',
       cardDescription:
-        'Data collectors will be prompted to complete the tasks you define here in order',
+        'Data collectors will be prompted to complete the following tasks for each site',
     },
   ],
   [
     CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS,
     {
       progressBarTitle: 'Define data sharing terms',
-      cardTitle: 'Data sharing consent',
+      cardTitle: 'Which terms must data collectors agree to?',
       cardDescription:
-        'Require data collectors to agree to data sharing terms before submitting data',
+        'Select the terms data collectors need to agree to before they get started',
     },
   ],
   [
     CreateSurveyPhase.SHARE_SURVEY,
     {
-      progressBarTitle: 'Share with collectors and other organizers',
+      progressBarTitle: 'Share your survey',
       cardTitle: 'Share your survey',
-      cardDescription:
-        'Participants will receive an email invitation with a link to your survey',
+      cardDescription: '',
     },
   ],
 ]);
