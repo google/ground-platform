@@ -18,6 +18,7 @@ import {Injectable} from '@angular/core';
 import {
   AngularFirestore,
   CollectionReference,
+  DocumentChangeAction,
 } from '@angular/fire/compat/firestore';
 import {
   DocumentData,
@@ -28,7 +29,7 @@ import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
+import {Observable, combineLatest, firstValueFrom, merge} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
@@ -47,7 +48,6 @@ import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {
-  DataSharingType,
   Survey,
   SurveyGeneralAccess,
   SurveyState,
@@ -63,6 +63,7 @@ const sb = registry.getFieldIds(Pb.Submission);
 
 const Source = Pb.LocationOfInterest.Source;
 const AclRole = Pb.Role;
+const GeneralAccess = Pb.Survey.GeneralAccess;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
 
@@ -140,7 +141,17 @@ export class DataStoreService {
     userEmail: string,
     userId: string
   ): Observable<List<Survey>> {
-    return this.db
+    const surveyChangeAction = (surveys: DocumentChangeAction<unknown>[]) =>
+      surveys
+        .map((action: DocumentChangeAction<unknown>) => {
+          const docData = action.payload.doc.data() as DocumentData;
+          const id = action.payload.doc.id;
+          return surveyDocToModel(id, docData);
+        })
+        .filter(DataStoreService.filterAndLogError<Survey>)
+        .map(survey => survey as Survey);
+
+    const restrictedSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath(s.acl, userEmail), 'in', [
           AclRole.VIEWER,
@@ -150,26 +161,43 @@ export class DataStoreService {
       )
       .snapshotChanges()
       .pipe(
+        map(surveyChangeAction),
         map(surveys =>
-          List(
-            surveys
-              .map(a => {
-                const docData = a.payload.doc.data() as DocumentData;
-                const id = a.payload.doc.id;
-                return surveyDocToModel(id, docData);
-              })
-              .filter(DataStoreService.filterAndLogError<Survey>)
-              .filter(
-                survey =>
-                  survey instanceof Survey &&
-                  (survey.generalAccess !== SurveyGeneralAccess.UNLISTED ||
-                    (survey.generalAccess === SurveyGeneralAccess.UNLISTED &&
-                      survey.ownerId === userId))
-              )
-              .map(survey => survey as Survey)
+          surveys.filter(
+            survey =>
+              ![
+                SurveyGeneralAccess.PUBLIC,
+                SurveyGeneralAccess.UNLISTED,
+              ].includes(survey.generalAccess!)
           )
         )
       );
+
+    const unlistedSurveys$ = this.db
+      .collection(SURVEYS_COLLECTION_NAME, ref =>
+        ref
+          .where(s.generalAccess, '==', GeneralAccess.UNLISTED)
+          .where(s.ownerId, '==', userId)
+      )
+      .snapshotChanges()
+      .pipe(map(surveyChangeAction));
+
+    const publicSurveys$ = this.db
+      .collection(SURVEYS_COLLECTION_NAME, ref =>
+        ref.where(s.generalAccess, '==', GeneralAccess.PUBLIC)
+      )
+      .snapshotChanges()
+      .pipe(map(surveyChangeAction));
+
+    return combineLatest([
+      restrictedSurveys$,
+      unlistedSurveys$,
+      publicSurveys$,
+    ]).pipe(
+      map(([restrictedSurveys, unlistedSurveys, publicSurveys]) =>
+        List([...restrictedSurveys, ...unlistedSurveys, ...publicSurveys])
+      )
+    );
   }
 
   /**
