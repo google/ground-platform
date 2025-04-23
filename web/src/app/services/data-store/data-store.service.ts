@@ -22,12 +22,10 @@ import {
 import {
   DocumentData,
   FieldPath,
-  runTransaction,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
-import {getDocs} from 'firebase/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom} from 'rxjs';
@@ -189,17 +187,11 @@ export class DataStoreService {
   ): Promise<void> {
     const {id: surveyId, jobs} = survey;
 
-    try {
-      const firestore = this.db.firestore;
-      jobIdsToDelete?.forEach(jobId => {
-        this.deleteJob(surveyId, jobId);
-        this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-        this.deleteAllSubmissionsInJob(surveyId, jobId);
-      });
-    } catch (error) {
-      console.error(`Error deleting survey: ${surveyId}`, error);
-      throw error;
-    }
+    jobIdsToDelete?.forEach(jobId => {
+      this.deleteJob(surveyId, jobId);
+      this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
+      this.deleteAllSubmissionsInJob(surveyId, jobId);
+    });
 
     await Promise.all(
       jobs
