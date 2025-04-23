@@ -133,24 +133,30 @@ export class DataStoreService {
   }
 
   /**
+   * Transforms an array of Firestore `DocumentChangeAction` into an array of `Survey` models.
+   *
+   * It extracts the document data and ID from each action, converts it to a `Survey` model using `surveyDocToModel`,
+   * filters out any invalid surveys using `DataStoreService.filterAndLogError`, and finally casts the remaining
+   * elements to the `Survey` type.
+   */
+  private documentChangeToSurvey = (surveys: DocumentChangeAction<unknown>[]) =>
+    surveys
+      .map((action: DocumentChangeAction<unknown>) => {
+        const docData = action.payload.doc.data() as DocumentData;
+        const id = action.payload.doc.id;
+        return surveyDocToModel(id, docData);
+      })
+      .filter(DataStoreService.filterAndLogError<Survey>)
+      .map(survey => survey as Survey);
+
+  /**
    * Returns an Observable that loads and emits the list of surveys accessible
    * to the specified user.
-   *
    */
   loadAccessibleSurveys$(
     userEmail: string,
     userId: string
   ): Observable<List<Survey>> {
-    const surveyChangeAction = (surveys: DocumentChangeAction<unknown>[]) =>
-      surveys
-        .map((action: DocumentChangeAction<unknown>) => {
-          const docData = action.payload.doc.data() as DocumentData;
-          const id = action.payload.doc.id;
-          return surveyDocToModel(id, docData);
-        })
-        .filter(DataStoreService.filterAndLogError<Survey>)
-        .map(survey => survey as Survey);
-
     const restrictedSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath(s.acl, userEmail), 'in', [
@@ -161,7 +167,7 @@ export class DataStoreService {
       )
       .snapshotChanges()
       .pipe(
-        map(surveyChangeAction),
+        map(this.documentChangeToSurvey),
         map(surveys =>
           surveys.filter(
             survey => survey.generalAccess === SurveyGeneralAccess.RESTRICTED
@@ -176,14 +182,14 @@ export class DataStoreService {
           .where(s.ownerId, '==', userId)
       )
       .snapshotChanges()
-      .pipe(map(surveyChangeAction));
+      .pipe(map(this.documentChangeToSurvey));
 
     const publicSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(s.generalAccess, '==', GeneralAccess.PUBLIC)
       )
       .snapshotChanges()
-      .pipe(map(surveyChangeAction));
+      .pipe(map(this.documentChangeToSurvey));
 
     return combineLatest([
       restrictedSurveys$,
