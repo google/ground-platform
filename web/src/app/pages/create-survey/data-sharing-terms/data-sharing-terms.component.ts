@@ -60,7 +60,7 @@ export class DataSharingTermsComponent implements OnInit {
     },
     {
       value: DataSharingType.CUSTOM,
-      label: 'Custom agreement',
+      label: 'Custom',
       descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
         DataSharingType.CUSTOM
       )!,
