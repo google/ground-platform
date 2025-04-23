@@ -22,10 +22,12 @@ import {
 import {
   DocumentData,
   FieldPath,
+  runTransaction,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
+import {getDocs} from 'firebase/firestore';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
 import {Observable, combineLatest, firstValueFrom} from 'rxjs';
@@ -187,11 +189,17 @@ export class DataStoreService {
   ): Promise<void> {
     const {id: surveyId, jobs} = survey;
 
-    jobIdsToDelete?.forEach(jobId => {
-      this.deleteJob(surveyId, jobId);
-      this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-      this.deleteAllSubmissionsInJob(surveyId, jobId);
-    });
+    try {
+      const firestore = this.db.firestore;
+      jobIdsToDelete?.forEach(jobId => {
+        this.deleteJob(surveyId, jobId);
+        this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
+        this.deleteAllSubmissionsInJob(surveyId, jobId);
+      });
+    } catch (error) {
+      console.error(`Error deleting survey: ${surveyId}`, error);
+      throw error;
+    }
 
     await Promise.all(
       jobs
@@ -255,13 +263,45 @@ export class DataStoreService {
   async deleteSurvey(survey: Survey): Promise<void> {
     const {id: surveyId} = survey;
 
-    survey.jobs.forEach(({id: jobId}) => {
-      this.deleteJob(surveyId, jobId);
-      this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-      this.deleteAllSubmissionsInJob(surveyId, jobId);
-    });
+    try {
+      const firestore = this.db.firestore;
 
-    await this.db.collection(SURVEYS_COLLECTION_NAME).doc(surveyId).delete();
+      await firestore.runTransaction(async transaction => {
+        for (const {id: jobId} of survey.jobs.values()) {
+          const jobRef = firestore
+            .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+            .doc(jobId);
+          transaction.delete(jobRef);
+
+          const loisQuery = firestore
+            .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
+            .where(l.jobId, '==', jobId);
+
+          const loisSnapshot = await loisQuery.get();
+          loisSnapshot.forEach(doc => {
+            transaction.delete(doc.ref);
+          });
+
+          const submissionsQuery = firestore
+            .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
+            .where(sb.jobId, '==', jobId);
+
+          const submissionsSnapshot = await submissionsQuery.get();
+          submissionsSnapshot.forEach(doc => {
+            transaction.delete(doc.ref);
+          });
+        }
+
+        const surveyRef = firestore
+          .collection(SURVEYS_COLLECTION_NAME)
+          .doc(surveyId);
+
+        transaction.delete(surveyRef);
+      });
+    } catch (error) {
+      console.error(`Error deleting survey: ${surveyId}`, error);
+      throw error;
+    }
   }
 
   private async deleteJob(surveyId: string, jobId: string): Promise<void> {
