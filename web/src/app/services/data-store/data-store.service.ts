@@ -164,11 +164,7 @@ export class DataStoreService {
         map(surveyChangeAction),
         map(surveys =>
           surveys.filter(
-            survey =>
-              ![
-                SurveyGeneralAccess.PUBLIC,
-                SurveyGeneralAccess.UNLISTED,
-              ].includes(survey.generalAccess!)
+            survey => survey.generalAccess === SurveyGeneralAccess.RESTRICTED
           )
         )
       );
@@ -241,6 +237,10 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .set(surveyToDocument(surveyId, {title: name}), {merge: true});
+  }
+
+  getDb() {
+    return this.db;
   }
 
   /**
