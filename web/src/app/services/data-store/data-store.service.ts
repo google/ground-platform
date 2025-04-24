@@ -270,11 +270,6 @@ export class DataStoreService {
   ): Promise<void> {
     const firestore = this.db.firestore;
 
-    const jobRef = firestore
-      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
-      .doc(jobId);
-    transaction.delete(jobRef);
-
     const loisQuery = firestore
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
       .where(l.jobId, '==', jobId);
@@ -292,6 +287,11 @@ export class DataStoreService {
     submissionsSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
     });
+
+    const jobRef = firestore
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+      .doc(jobId);
+    transaction.delete(jobRef);
   }
 
   async deleteSurvey(survey: Survey): Promise<void> {
