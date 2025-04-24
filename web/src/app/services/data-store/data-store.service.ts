@@ -199,7 +199,7 @@ export class DataStoreService {
         .map(job => this.addOrUpdateJob(surveyId, job))
     );
 
-    return await this.db.firestore
+    await this.db.firestore
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
       .update(surveyToDocument(surveyId, survey));
