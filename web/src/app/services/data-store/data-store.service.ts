@@ -245,10 +245,6 @@ export class DataStoreService {
       .set(surveyToDocument(surveyId, {title: name}), {merge: true});
   }
 
-  getDb() {
-    return this.db;
-  }
-
   /**
    * Updates the survey with new name and new description.
    *
