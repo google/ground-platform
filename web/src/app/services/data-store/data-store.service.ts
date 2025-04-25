@@ -315,7 +315,7 @@ export class DataStoreService {
     }
   }
 
-  private async deleteAllSubmissionsInLocationOfInterest(
+  private async deleteSubmissionsByLoiId(
     surveyId: string,
     loiId: string
   ): Promise<void[]> {
@@ -331,7 +331,8 @@ export class DataStoreService {
     surveyId: string,
     loiId: string
   ): Promise<void> {
-    await this.deleteAllSubmissionsInLocationOfInterest(surveyId, loiId);
+    await this.deleteSubmissionsByLoiId(surveyId, loiId);
+
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
