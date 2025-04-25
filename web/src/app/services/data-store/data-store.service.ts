@@ -187,24 +187,23 @@ export class DataStoreService {
   ): Promise<void> {
     const {id: surveyId, jobs} = survey;
 
-    if (jobIdsToDelete) {
-      await this.db.firestore.runTransaction(async transaction => {
+    await this.db.firestore.runTransaction(async transaction => {
+      if (jobIdsToDelete) {
         for (const jobId of jobIdsToDelete) {
           await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
         }
-      });
-    }
+      }
 
-    await Promise.all(
-      jobs
-        .filter(({id}) => !jobIdsToDelete?.includes(id))
-        .map(job => this.addOrUpdateJob(surveyId, job))
-    );
+      const jobsToUpdate = jobs.filter(({id}) => !jobIdsToDelete?.includes(id));
+      for (const job of jobsToUpdate.values()) {
+        await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
+      }
 
-    await this.db.firestore
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update(surveyToDocument(surveyId, survey));
+      const surveyRef = this.db.firestore
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId);
+      transaction.update(surveyRef, surveyToDocument(surveyId, survey));
+    });
   }
 
   /**
@@ -252,6 +251,25 @@ export class DataStoreService {
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
       .doc(job.id)
       .set(jobToDocument(job));
+  }
+
+  /**
+   * @private
+   * Adds or updates a specific job within a Firestore transaction.
+   *
+   * @param transaction The Firestore transaction to perform the operation within.
+   * @param surveyId The ID of the survey the job belongs to.
+   * @param job The Job object to add or update.
+   */
+  private async _addOrUpdateJobInTransaction(
+    transaction: firebase.default.firestore.Transaction,
+    surveyId: string,
+    job: Job
+  ): Promise<void> {
+    const jobRef = this.db.firestore
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+      .doc(job.id);
+    transaction.set(jobRef, jobToDocument(job));
   }
 
   /**
