@@ -273,7 +273,6 @@ export class DataStoreService {
     const loisQuery = firestore
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
       .where(l.jobId, '==', jobId);
-
     const loisSnapshot = await loisQuery.get();
     loisSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
@@ -282,7 +281,6 @@ export class DataStoreService {
     const submissionsQuery = firestore
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
       .where(sb.jobId, '==', jobId);
-
     const submissionsSnapshot = await submissionsQuery.get();
     submissionsSnapshot.forEach(doc => {
       transaction.delete(doc.ref);
@@ -312,13 +310,13 @@ export class DataStoreService {
   private async deleteSubmissionsByLoiId(
     surveyId: string,
     loiId: string
-  ): Promise<void[]> {
+  ): Promise<void> {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where(sb.loiId, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
-    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+    await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
   async deleteLocationOfInterest(
