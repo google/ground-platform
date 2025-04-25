@@ -297,22 +297,16 @@ export class DataStoreService {
   async deleteSurvey(survey: Survey): Promise<void> {
     const {id: surveyId, jobs} = survey;
 
-    try {
-      await this.db.firestore.runTransaction(async transaction => {
-        for (const {id: jobId} of jobs.values()) {
-          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
-        }
+    await this.db.firestore.runTransaction(async transaction => {
+      for (const {id: jobId} of jobs.values()) {
+        await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+      }
 
-        const surveyRef = this.db.firestore
-          .collection(SURVEYS_COLLECTION_NAME)
-          .doc(surveyId);
-
-        transaction.delete(surveyRef);
-      });
-    } catch (error) {
-      console.error(`Error deleting survey: ${surveyId}`, error);
-      throw error;
-    }
+      const surveyRef = this.db.firestore
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId);
+      transaction.delete(surveyRef);
+    });
   }
 
   private async deleteSubmissionsByLoiId(
