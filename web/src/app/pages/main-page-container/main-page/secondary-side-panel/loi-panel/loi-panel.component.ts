@@ -79,7 +79,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  onSelectSubmission(submissionId: string) {
+  selectSubmission(submissionId: string) {
     this.navigationService.showSubmissionDetail(
       this.surveyId,
       this.loi.id,
@@ -87,8 +87,8 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  onClosePanel() {
-    this.navigationService.clearLocationOfInterestId();
+  closePanel() {
+    this.navigationService.selectSurvey(this.surveyId);
   }
 
   hasProperties() {
