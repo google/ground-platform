@@ -61,6 +61,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
             this.surveyId = survey.id;
             return this.loiService.getSelectedLocationOfInterest$().pipe(
               switchMap(loi => {
+                this.isLoading = true;
                 this.iconColor = survey.getJob(loi.jobId)!.color!;
                 this.loi = loi;
                 this.name = LocationOfInterestService.getDisplayName(loi);
