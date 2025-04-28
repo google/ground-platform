@@ -29,7 +29,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {getLoiIcon} from 'app/utils/utils';
 
 @Component({
-  selector: 'ground-loi-panel',
+  selector: 'loi-panel',
   templateUrl: './loi-panel.component.html',
   styleUrls: ['./loi-panel.component.scss'],
 })

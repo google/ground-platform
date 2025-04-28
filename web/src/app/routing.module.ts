@@ -23,8 +23,6 @@ import {SurveyListComponent} from 'app/components/survey-list/survey-list.compon
 import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
 import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
-import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
-import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
@@ -37,6 +35,9 @@ import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
 import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
+import {SecondarySidePanelComponent} from './pages/main-page-container/main-page/secondary-side-panel/secondary-side-panel.component';
+import {SurveyDashboardComponent} from './pages/survey-dashboard/survey-dashboard.component';
+import {SurveyDashboardModule} from './pages/survey-dashboard/survey-dashboard.module';
 import {TermsComponent} from './pages/terms/terms.component';
 
 const {
@@ -92,8 +93,22 @@ const routes: Routes = [
   },
   {
     path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}`,
-    component: MainPageContainerComponent,
+    component: SurveyDashboardComponent,
     canActivate: [AuthGuard],
+    children: [
+      {
+        path: `${LOI_SEGMENT}/:${LOI_ID}`,
+        component: SecondarySidePanelComponent,
+      },
+      {
+        path: `${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
+        component: SecondarySidePanelComponent,
+      },
+      {
+        path: `${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}/${TASK_SEGMENT}/:${TASK_ID}`,
+        component: SecondarySidePanelComponent,
+      },
+    ],
   },
   {
     path: NavigationService.ERROR,
@@ -109,34 +124,19 @@ const routes: Routes = [
     component: TermsComponent,
     canActivate: [AuthGuard],
   },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}/${TASK_SEGMENT}/:${TASK_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
 ];
 const config = RouterModule.forRoot(routes, {});
 
 @NgModule({
   imports: [config],
   exports: [
-    MainPageContainerModule,
-    RouterModule,
-    SignInPageModule,
-    SurveyListModule,
     CreateSurveyModule,
     EditSurveyModule,
     ErrorModule,
+    RouterModule,
+    SignInPageModule,
+    SurveyDashboardModule,
+    SurveyListModule,
   ],
 })
 export class AppRoutingModule {}

@@ -137,11 +137,11 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       combineLatest([
         this.activeSurvey$,
         this.lois$,
-        this.navigationService.getLocationOfInterestId$(),
+        this.loiService.getSelectedLocationOfInterest$(),
         this.navigationService.getTaskId$(),
         this.selectedJob$,
       ]).subscribe(
-        ([survey, lois, locationOfInterestId, taskId, selectedJob]) => {
+        ([survey, lois, {id: locationOfInterestId}, taskId, selectedJob]) => {
           const loisMap = this.getLoiMap(lois, selectedJob);
           const loiIdsToRemove = this.getLoiIdsToRemove(loisMap);
           const loisToAdd = this.getLoiIdsToAdd(loisMap);

@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import {HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {
-  ActivatedRoute,
-  IsActiveMatchOptions,
-  NavigationExtras,
-  Router,
-} from '@angular/router';
+import {ActivatedRoute, IsActiveMatchOptions, Router} from '@angular/router';
 import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 
@@ -55,33 +49,10 @@ export class NavigationService {
 
   private sidePanelExpanded = true;
 
-  private getSideNavMode(
-    loiId: string | null,
-    submissionId: string | null
-  ): SideNavMode {
-    if (submissionId) {
-      if (submissionId.includes('null')) {
-        this.error(new Error('Check your URL. Submission id was set to null'));
-      }
-      return SideNavMode.SUBMISSION;
-    }
-    if (loiId) {
-      if (loiId.includes('null')) {
-        this.error(
-          new Error('Check your URL. Location of interest id was set to null')
-        );
-      }
-      return SideNavMode.JOB_LIST;
-    }
-    return SideNavMode.JOB_LIST;
-  }
-
-  private activatedRoute?: ActivatedRoute;
   private surveyId$?: Observable<string | null>;
   private loiId$?: Observable<string | null>;
   private submissionId$?: Observable<string | null>;
   private taskId$?: Observable<string | null>;
-  private sideNavMode$?: Observable<SideNavMode>;
 
   constructor(private router: Router) {}
 
@@ -90,24 +61,13 @@ export class NavigationService {
    * the accessors are called.
    */
   init(route: ActivatedRoute) {
-    this.activatedRoute = route;
     // Pipe values from URL query parameters.
     this.surveyId$ = route.paramMap.pipe(map(params => params.get(SURVEY_ID)));
     this.loiId$ = route.paramMap.pipe(map(params => params.get(LOI_ID)));
-
     this.submissionId$ = route.paramMap.pipe(
       map(params => params.get(SUBMISSION_ID))
     );
-
     this.taskId$ = route.paramMap.pipe(map(params => params.get(TASK_ID)));
-
-    this.sideNavMode$ = route.paramMap.pipe(
-      map(params => {
-        const loiId = params.get(LOI_ID);
-        const submissionId = params.get(SUBMISSION_ID);
-        return this.getSideNavMode(loiId, submissionId);
-      })
-    );
   }
 
   getSurveyId$(): Observable<string | null> {
@@ -124,38 +84,6 @@ export class NavigationService {
 
   getTaskId$(): Observable<string | null> {
     return this.taskId$!;
-  }
-
-  getSideNavMode$(): Observable<SideNavMode> {
-    return this.sideNavMode$!;
-  }
-
-  /**
-   * Returns the current URL fragment, parsed as if their were normal HTTP
-   * query parameter key/value pairs.
-   */
-  private getFragmentParams(): HttpParams {
-    const fragment = this.activatedRoute!.snapshot.fragment;
-    return new HttpParams({fromString: fragment || ''});
-  }
-
-  /**
-   * Navigate to the current URL, replacing the URL fragment with the specified
-   * params.
-   */
-  private setFragmentParams(params: HttpParams) {
-    const primaryUrl = this.router
-      .parseUrl(this.router.url)
-      .root.children['primary'].toString();
-
-    if (params.toString()) {
-      const navigationExtras: NavigationExtras = {
-        fragment: params.toString(),
-      };
-      this.router.navigate([primaryUrl], navigationExtras);
-    } else {
-      this.router.navigate([primaryUrl]);
-    }
   }
 
   /**
@@ -297,11 +225,6 @@ export class NavigationService {
   onClickSidePanelButton() {
     this.sidePanelExpanded = !this.sidePanelExpanded;
   }
-}
-
-export enum SideNavMode {
-  JOB_LIST = 1,
-  SUBMISSION = 2,
 }
 
 const {
