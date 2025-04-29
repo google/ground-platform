@@ -130,7 +130,10 @@
         <h1 class="edit-survey-title" *ngIf="sectionTitle !== ''">
           {{ sectionTitle }}
         </h1>
+
         <router-outlet></router-outlet>
+
+        <ground-share-buttons [surveyId]="surveyId"></ground-share-buttons>
       </div>
     </div>
   </div>
