@@ -16,6 +16,8 @@
 
 import {Component, Input} from '@angular/core';
 
+import {NotificationService} from 'app/services/notification/notification.service';
+
 @Component({
   selector: 'ground-share-buttons',
   templateUrl: './share-buttons.component.html',
@@ -24,13 +26,15 @@ import {Component, Input} from '@angular/core';
 export class ShareButtonsComponent {
   @Input() surveyId = '';
 
-  constructor() {}
+  constructor(private readonly notificationService: NotificationService) {}
 
   copyLink() {
     console.log(this.surveyId);
+    this.notificationService.success('Survey link copied');
   }
 
   copyQrCode() {
     console.log(this.surveyId);
+    this.notificationService.success('Survey QR code copied');
   }
 }
