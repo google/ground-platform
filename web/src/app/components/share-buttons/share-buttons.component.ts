@@ -25,4 +25,12 @@ export class ShareButtonsComponent {
   @Input() surveyId = '';
 
   constructor() {}
+
+  copyLink() {
+    console.log(this.surveyId);
+  }
+
+  copyQrCode() {
+    console.log(this.surveyId);
+  }
 }

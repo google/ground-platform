@@ -15,13 +15,13 @@
 -->
 
 <div class="share-buttons">
-  <button mat-stroked-button>
+  <button mat-stroked-button (click)="copyLink()">
     <mat-icon fontSet="material-symbols-outlined">link_24px</mat-icon>
 
     <span>Copy link</span>
   </button>
 
-  <button mat-stroked-button>
+  <button mat-stroked-button (click)="copyQrCode()">
     <mat-icon fontSet="material-symbols-outlined">qr_code_2_24px</mat-icon>
 
     <span>Copy QR code</span>
