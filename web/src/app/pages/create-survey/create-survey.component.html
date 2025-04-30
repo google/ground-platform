@@ -31,7 +31,7 @@
         *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
         class="picture"
         src="/assets/img/add-job.svg"
-        alt="Add a job"
+        [alt]="CreateSurveyPhase.JOB_DETAILS.cardTitle"
       />
       <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
@@ -39,7 +39,7 @@
         <ground-step-card
           [title]="cardTitle()"
           [description]="cardDescription()"
-          [jobName]="[CreateSurveyPhase.DEFINE_LOIS, CreateSurveyPhase.DEFINE_TASKS].includes(createSurveyPhase) ? jobName() : ''"
+          [jobName]="jobName()"
         >
           <ng-container [ngSwitch]="createSurveyPhase">
             <survey-details
