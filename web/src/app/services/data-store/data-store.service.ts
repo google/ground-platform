@@ -218,25 +218,30 @@ export class DataStoreService {
   ): Promise<void> {
     const {id: surveyId, jobs} = survey;
 
-    jobIdsToDelete?.forEach(jobId => this.deleteJob(surveyId, jobId));
+    await this.db.firestore.runTransaction(async transaction => {
+      if (jobIdsToDelete) {
+        for (const jobId of jobIdsToDelete) {
+          await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+        }
+      }
 
-    await Promise.all(
-      jobs
-        .filter(({id}) => !jobIdsToDelete?.includes(id))
-        .map(job => this.addOrUpdateJob(surveyId, job))
-    );
+      const jobsToUpdate = jobs.filter(({id}) => !jobIdsToDelete?.includes(id));
+      for (const job of jobsToUpdate.values()) {
+        await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
+      }
 
-    await this.db.firestore
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .update(surveyToDocument(surveyId, survey));
+      const surveyRef = this.db.firestore
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId);
+      transaction.update(surveyRef, surveyToDocument(surveyId, survey));
+    });
   }
 
   /**
    * Updates the survey with new name.
    *
-   * @param surveyId the id of the survey.
-   * @param name the new name of the survey.
+   * @param surveyId The ID of the survey to update.
+   * @param name The new name of the survey.
    */
   updateSurveyTitle(surveyId: string, name: string): Promise<void> {
     return this.db
@@ -248,9 +253,9 @@ export class DataStoreService {
   /**
    * Updates the survey with new name and new description.
    *
-   * @param surveyId the id of the survey.
-   * @param name the new name of the survey.
-   * @param description the new description of the survey.
+   * @param surveyId The ID of the survey to update.
+   * @param name The new name of the survey.
+   * @param description The new description of the survey.
    */
   updateSurveyTitleAndDescription(
     surveyId: string,
@@ -279,61 +284,96 @@ export class DataStoreService {
       .set(jobToDocument(job));
   }
 
-  async deleteSurvey(survey: Survey) {
-    const {id: surveyId} = survey;
-
-    await Promise.all(survey.jobs.map(job => this.deleteJob(surveyId, job.id)));
-
-    return await this.db
-      .collection(SURVEYS_COLLECTION_NAME)
-      .doc(surveyId)
-      .delete();
-  }
-
-  async deleteJob(surveyId: string, jobId: string) {
-    await this.deleteAllLocationsOfInterestInJob(surveyId, jobId);
-    await this.deleteAllSubmissionsInJob(surveyId, jobId);
-    return await this.db
+  /**
+   * @private
+   * Adds or updates a specific job within a Firestore transaction.
+   *
+   * @param transaction The Firestore transaction to perform the operation within.
+   * @param surveyId The ID of the survey the job belongs to.
+   * @param job The Job object to add or update.
+   */
+  private async _addOrUpdateJobInTransaction(
+    transaction: firebase.default.firestore.Transaction,
+    surveyId: string,
+    job: Job
+  ): Promise<void> {
+    const jobRef = this.db.firestore
       .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
-      .doc(jobId)
-      .delete();
+      .doc(job.id);
+    transaction.set(jobRef, jobToDocument(job));
   }
 
-  private async deleteAllSubmissionsInJob(surveyId: string, jobId: string) {
-    const submissions = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
-      ref => ref.where(sb.jobId, '==', jobId)
-    );
-    const querySnapshot = await firstValueFrom(submissions.get());
-    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+  /**
+   * @private
+   * Deletes a specific job and all its associated Locations of Interest (LOIs)
+   * and submissions within a Firestore transaction.
+   *
+   * @param transaction The Firestore transaction to perform the deletions within.
+   * @param surveyId The ID of the survey the job belongs to.
+   * @param jobId The ID of the job to delete.
+   */
+  private async _deleteJobAndRelatedData(
+    transaction: firebase.default.firestore.Transaction,
+    surveyId: string,
+    jobId: string
+  ): Promise<void> {
+    const firestore = this.db.firestore;
+
+    const loisQuery = firestore
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
+      .where(l.jobId, '==', jobId);
+    const loisSnapshot = await loisQuery.get();
+    loisSnapshot.forEach(doc => {
+      transaction.delete(doc.ref);
+    });
+
+    const submissionsQuery = firestore
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`)
+      .where(sb.jobId, '==', jobId);
+    const submissionsSnapshot = await submissionsQuery.get();
+    submissionsSnapshot.forEach(doc => {
+      transaction.delete(doc.ref);
+    });
+
+    const jobRef = firestore
+      .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/jobs`)
+      .doc(jobId);
+    transaction.delete(jobRef);
   }
 
-  private async deleteAllSubmissionsInLocationOfInterest(
+  async deleteSurvey(survey: Survey): Promise<void> {
+    const {id: surveyId, jobs} = survey;
+
+    await this.db.firestore.runTransaction(async transaction => {
+      for (const {id: jobId} of jobs.values()) {
+        await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
+      }
+
+      const surveyRef = this.db.firestore
+        .collection(SURVEYS_COLLECTION_NAME)
+        .doc(surveyId);
+      transaction.delete(surveyRef);
+    });
+  }
+
+  private async deleteSubmissionsByLoiId(
     surveyId: string,
     loiId: string
-  ) {
+  ): Promise<void> {
     const submissions = this.db.collection(
       `${SURVEYS_COLLECTION_NAME}/${surveyId}/submissions`,
       ref => ref.where(sb.loiId, '==', loiId)
     );
     const querySnapshot = await firstValueFrom(submissions.get());
-    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+    await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
   }
 
-  private async deleteAllLocationsOfInterestInJob(
+  async deleteLocationOfInterest(
     surveyId: string,
-    jobId: string
-  ) {
-    const lois = this.db.collection(
-      `${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`,
-      ref => ref.where(l.jobId, '==', jobId)
-    );
-    const querySnapshot = await firstValueFrom(lois.get());
-    return await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
-  }
+    loiId: string
+  ): Promise<void> {
+    await this.deleteSubmissionsByLoiId(surveyId, loiId);
 
-  async deleteLocationOfInterest(surveyId: string, loiId: string) {
-    await this.deleteAllSubmissionsInLocationOfInterest(surveyId, loiId);
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
@@ -342,7 +382,10 @@ export class DataStoreService {
       .delete();
   }
 
-  async deleteSubmission(surveyId: string, submissionId: string) {
+  async deleteSubmission(
+    surveyId: string,
+    submissionId: string
+  ): Promise<void> {
     return await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
