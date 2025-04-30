@@ -204,7 +204,7 @@ export class Datastore {
     const submissionsIterator = new QueryIterator(submissionsQuery, pageSize);
     return leftOuterJoinSorted(
       loisIterator,
-      loiDoc => loiDoc.get(l.id),
+      loiDoc => loiDoc.id,
       submissionsIterator,
       submissionDoc => submissionDoc.get(sb.loiId)
     );
