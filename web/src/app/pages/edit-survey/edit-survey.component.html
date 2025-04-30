@@ -133,7 +133,7 @@
 
         <router-outlet></router-outlet>
 
-        <div class="button-section">
+        <div class="button-section" *ngIf="router.url.endsWith('/share')">
           <ground-share-buttons [surveyId]="surveyId"></ground-share-buttons>
         </div>
       </div>
