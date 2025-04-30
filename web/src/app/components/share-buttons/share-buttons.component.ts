@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 
 import {NotificationService} from 'app/services/notification/notification.service';
 
@@ -26,15 +26,54 @@ import {NotificationService} from 'app/services/notification/notification.servic
 export class ShareButtonsComponent {
   @Input() surveyId = '';
 
+  @ViewChild('qrCodeElement', {read: ElementRef})
+  qrCodeElement!: ElementRef<HTMLCanvasElement>;
+
   constructor(private readonly notificationService: NotificationService) {}
 
-  copyLink() {
-    console.log(this.surveyId);
-    this.notificationService.success('Survey link copied');
+  copyLinkToClipboard() {
+    const data = this.surveyId;
+    navigator.clipboard.writeText(data).then(
+      () => {
+        this.notificationService.success(
+          'Survey link copied into the clipboard'
+        );
+      },
+      _ => {
+        this.notificationService.error(
+          'Impossible to copy Survey link into the clipboard'
+        );
+      }
+    );
   }
 
-  copyQrCode() {
-    console.log(this.surveyId);
-    this.notificationService.success('Survey QR code copied');
+  copyQrCodeToClipboard() {
+    const canvas = this.qrCodeElement!.nativeElement.querySelector('canvas');
+
+    if (!canvas) {
+      console.error('Canvas element not found');
+      return;
+    }
+
+    canvas.toBlob(blob => {
+      if (!blob) {
+        console.error('Failed to create blob from canvas');
+        return;
+      }
+
+      const data = [new ClipboardItem({[blob.type]: blob})];
+      navigator.clipboard.write(data).then(
+        () => {
+          this.notificationService.success(
+            'Survey QR code copied into the clipboard'
+          );
+        },
+        _ => {
+          this.notificationService.error(
+            'Impossible to copy Survey QR code into the clipboard'
+          );
+        }
+      );
+    });
   }
 }

@@ -15,15 +15,33 @@
 -->
 
 <div class="share-buttons">
-  <button mat-stroked-button (click)="copyLink()">
+  <button mat-stroked-button (click)="copyLinkToClipboard()">
     <mat-icon fontSet="material-symbols-outlined">link_24px</mat-icon>
 
     <span>Copy link</span>
   </button>
 
-  <button mat-stroked-button (click)="copyQrCode()">
+  <button mat-stroked-button (click)="copyQrCodeToClipboard()">
     <mat-icon fontSet="material-symbols-outlined">qr_code_2_24px</mat-icon>
 
     <span>Copy QR code</span>
   </button>
 </div>
+
+<div style="display: none;">
+  <qrcode
+    #qrCodeElement
+    [qrdata]="'https://github.com/Cordobo/angularx-qrcode'"
+    [colorDark]="'#000000ff'"
+    [colorLight]="'#ffffffff'"
+    [elementType]="'canvas'"
+    [errorCorrectionLevel]="'M'"
+    [imageSrc]="'./assets/img/logo.svg'"
+    [imageHeight]="75"
+    [imageWidth]="75"
+    [margin]="2"
+    [scale]="1"
+    [width]="300"
+  ></qrcode>
+</div>
+
