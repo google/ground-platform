@@ -18,12 +18,13 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import {QRCodeModule} from 'angularx-qrcode';
 
 import {ShareButtonsComponent} from './share-buttons.component';
 
 @NgModule({
   declarations: [ShareButtonsComponent],
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, QRCodeModule],
   exports: [ShareButtonsComponent],
 })
 export class ShareButtonsModule {}
