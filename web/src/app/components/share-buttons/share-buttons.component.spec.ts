@@ -22,7 +22,7 @@ import {
 } from '@angular/core/testing';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
 import {ShareButtonsComponent} from './share-buttons.component';
@@ -31,9 +31,14 @@ describe('ShareButtonsComponent', () => {
   let component: ShareButtonsComponent;
   let fixture: ComponentFixture<ShareButtonsComponent>;
 
+  let navigationService: jasmine.SpyObj<NavigationService>;
   let notificationService: jasmine.SpyObj<NotificationService>;
 
   beforeEach(() => {
+    navigationService = jasmine.createSpyObj('NavigationService', [
+      'getSurveyAppLink',
+    ]);
+
     notificationService = jasmine.createSpyObj('NotificationService', [
       'success',
       'error',
@@ -43,6 +48,7 @@ describe('ShareButtonsComponent', () => {
       declarations: [ShareButtonsComponent],
       imports: [MatIconModule, MatButtonModule],
       providers: [
+        {provide: NavigationService, useValue: navigationService},
         {provide: NotificationService, useValue: notificationService},
       ],
     }).compileComponents();
@@ -58,13 +64,15 @@ describe('ShareButtonsComponent', () => {
 
   it('should copy link to clipboard and show success notification', fakeAsync(() => {
     const surveyId = 'testSurveyId';
+    const surveyAppLink = navigationService.getSurveyAppLink('testSurveyId');
+
     component.surveyId = surveyId;
     spyOn(navigator.clipboard, 'writeText').and.returnValue(Promise.resolve());
 
     component.copyLinkToClipboard();
     tick();
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(surveyId);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(surveyAppLink);
     expect(notificationService.success).toHaveBeenCalledWith(
       'Survey link copied into the clipboard'
     );
@@ -73,6 +81,8 @@ describe('ShareButtonsComponent', () => {
 
   it('should show error notification if copying link to clipboard fails', fakeAsync(() => {
     const surveyId = 'testSurveyId';
+    const surveyAppLink = navigationService.getSurveyAppLink('testSurveyId');
+
     component.surveyId = surveyId;
     spyOn(navigator.clipboard, 'writeText').and.returnValue(
       Promise.reject('Copy failed')
@@ -81,7 +91,7 @@ describe('ShareButtonsComponent', () => {
     component.copyLinkToClipboard();
     tick();
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(surveyId);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(surveyAppLink);
     expect(notificationService.success).not.toHaveBeenCalled();
     expect(notificationService.error).toHaveBeenCalledWith(
       'Impossible to copy Survey link into the clipboard'
