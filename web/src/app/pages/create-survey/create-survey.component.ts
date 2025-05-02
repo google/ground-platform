@@ -271,14 +271,7 @@ export class CreateSurveyComponent implements OnInit {
   }
 
   jobName(): string {
-    const jobName = this.job()?.name ?? '';
-
-    return [
-      CreateSurveyPhase.DEFINE_LOIS,
-      CreateSurveyPhase.DEFINE_TASKS,
-    ].includes(this.createSurveyPhase)
-      ? jobName
-      : '';
+    return this.job()?.name ?? '';
   }
 
   back(): void {
