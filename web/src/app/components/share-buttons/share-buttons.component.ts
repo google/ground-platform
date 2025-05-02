@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
 @Component({
@@ -23,17 +24,25 @@ import {NotificationService} from 'app/services/notification/notification.servic
   templateUrl: './share-buttons.component.html',
   styleUrls: ['./share-buttons.component.scss'],
 })
-export class ShareButtonsComponent {
+export class ShareButtonsComponent implements OnInit {
   @Input() surveyId = '';
 
   @ViewChild('qrCodeElement', {read: ElementRef})
   qrCodeElement!: ElementRef<HTMLCanvasElement>;
 
-  constructor(private readonly notificationService: NotificationService) {}
+  surveyAppLink = '';
+
+  constructor(
+    private readonly navigationService: NavigationService,
+    private readonly notificationService: NotificationService
+  ) {}
+
+  ngOnInit() {
+    this.surveyAppLink = this.navigationService.getSurveyAppLink(this.surveyId);
+  }
 
   copyLinkToClipboard() {
-    const data = this.surveyId;
-    navigator.clipboard.writeText(data).then(
+    navigator.clipboard.writeText(this.surveyAppLink).then(
       () => {
         this.notificationService.success(
           'Survey link copied into the clipboard'

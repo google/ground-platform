@@ -22,6 +22,7 @@ import {
 } from '@angular/core/testing';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+
 import {NotificationService} from 'app/services/notification/notification.service';
 
 import {ShareButtonsComponent} from './share-buttons.component';
