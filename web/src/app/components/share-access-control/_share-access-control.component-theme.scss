@@ -1,0 +1,30 @@
+@use 'sass:map';
+@use '@angular/material' as mat;
+
+@mixin color($theme) {
+  .general-access-select {
+    color: mat.get-theme-color($theme, neutral, 10);
+  }
+
+  .general-access-description {
+    color: mat.get-theme-color($theme, neutral-variant, 30);
+  }
+}
+
+
+@mixin typography($theme) {
+  .general-access-select {
+    font: mat.get-theme-typography($theme, body-medium, font);
+    font-weight: 600;
+  }
+
+  .general-access-description {
+    font: mat.get-theme-typography($theme, body-small, font);
+    font-weight: 500;
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+  @include typography($theme);
+}
