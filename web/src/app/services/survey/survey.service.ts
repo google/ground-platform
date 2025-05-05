@@ -158,10 +158,15 @@ export class SurveyService {
   /**
    * Deletes the survey and its subcollections.
    *
-   * @param surveyId the id of the survey.
+   * @param survey the survey instance.
    */
-  deleteSurvey(survey: Survey): Promise<void> {
-    return this.dataStore.deleteSurvey(survey);
+  async deleteSurvey(survey: Survey): Promise<void> {
+    try {
+      await this.dataStore.deleteSurvey(survey);
+    } catch (error) {
+      console.error(`Error deleting survey: ${survey.id}`, error);
+      throw error;
+    }
   }
 
   /**
