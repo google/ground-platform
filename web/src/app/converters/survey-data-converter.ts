@@ -24,6 +24,7 @@ import {Role} from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
+  SurveyDataVisibility,
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
@@ -64,10 +65,21 @@ const MODEL_STATES = Map([
   [Pb.Survey.State.READY, SurveyState.READY],
 ]);
 
-const MODEL_VISIBILITIES = Map([
+const MODEL_GENERAL_ACCESSES = Map([
   [Pb.Survey.GeneralAccess.RESTRICTED, SurveyGeneralAccess.RESTRICTED],
   [Pb.Survey.GeneralAccess.UNLISTED, SurveyGeneralAccess.UNLISTED],
   [Pb.Survey.GeneralAccess.PUBLIC, SurveyGeneralAccess.PUBLIC],
+]);
+
+const MODEL_DATA_VISIBILITIES = Map([
+  [
+    Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS,
+    SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS,
+  ],
+  [
+    Pb.Survey.DataVisibility.CONTRIBUTOR_AND_ORGANIZERS,
+    SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS,
+  ],
 ]);
 
 function dataSharingTypeFromProto(
@@ -227,6 +239,9 @@ export function surveyDocToModel(
       customText: pb.dataSharingTerms?.customText ?? undefined,
     },
     MODEL_STATES.get(pb.state),
-    MODEL_VISIBILITIES.get(pb.generalAccess) || SurveyGeneralAccess.RESTRICTED
+    MODEL_GENERAL_ACCESSES.get(pb.generalAccess) ||
+      SurveyGeneralAccess.RESTRICTED,
+    MODEL_DATA_VISIBILITIES.get(pb.dataVisibility) ||
+      SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
   );
 }
