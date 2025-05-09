@@ -35,16 +35,24 @@
   }
 }
 
-#tasks-help-text {
-  padding-top: 3ch;
-  padding-bottom: 2ch;
-  text-align: center;
-  color: #727970;
-}
-
-#add-task-buttons-list {
+.add-task-buttons-container {
+  border: 4px #dde5d9 dashed;
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 24px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
+
+  #tasks-help-text {
+    text-align: center;
+    color: #727970;
+  }
+
+  #add-task-buttons-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
 }

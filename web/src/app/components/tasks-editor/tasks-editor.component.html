@@ -43,13 +43,15 @@
   </div>
 </div>
 
-<div id="tasks-help-text">Add a task</div>
+<div class="add-task-buttons-container">
+  <div id="tasks-help-text">Add a task</div>
 
-<div id="add-task-buttons-list">
-  <add-task-button
-    *ngFor="let taskGroup of addableTaskGroups"
-    [taskGroup]="taskGroup"
-    (click)="onTaskAdd(taskGroup)"
-  >
-  </add-task-button>
+  <div id="add-task-buttons-list">
+    <add-task-button
+      *ngFor="let taskGroup of addableTaskGroups"
+      [taskGroup]="taskGroup"
+      (click)="onTaskAdd(taskGroup)"
+    >
+    </add-task-button>
+  </div>
 </div>
