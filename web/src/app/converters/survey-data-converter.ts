@@ -54,24 +54,24 @@ export const MODEL_ROLES = Map([
   [Pb.Role.VIEWER, Role.VIEWER],
 ]);
 
-const MODEL_SHARING_MODEL_TYPES = Map([
+const MODEL_DATA_SHARING_TYPES = Map([
   [Pb.Survey.DataSharingTerms.Type.PRIVATE, DataSharingType.PRIVATE],
   [Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0, DataSharingType.PUBLIC],
   [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
 ]);
 
-const MODEL_STATES = Map([
+const MODEL_STATE_VALUES = Map([
   [Pb.Survey.State.DRAFT, SurveyState.DRAFT],
   [Pb.Survey.State.READY, SurveyState.READY],
 ]);
 
-const MODEL_GENERAL_ACCESSES = Map([
+const MODEL_GENERAL_ACCESS_VALUES = Map([
   [Pb.Survey.GeneralAccess.RESTRICTED, SurveyGeneralAccess.RESTRICTED],
   [Pb.Survey.GeneralAccess.UNLISTED, SurveyGeneralAccess.UNLISTED],
   [Pb.Survey.GeneralAccess.PUBLIC, SurveyGeneralAccess.PUBLIC],
 ]);
 
-const MODEL_DATA_VISIBILITIES = Map([
+const MODEL_DATA_VISIBILITY_VALUES = Map([
   [
     Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS,
     SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS,
@@ -89,7 +89,7 @@ function dataSharingTypeFromProto(
     return DataSharingType.PRIVATE;
   }
 
-  const dataSharingType = MODEL_SHARING_MODEL_TYPES.get(protoType);
+  const dataSharingType = MODEL_DATA_SHARING_TYPES.get(protoType);
 
   if (!dataSharingType) {
     return DataSharingType.PRIVATE;
@@ -238,10 +238,10 @@ export function surveyDocToModel(
       type: dataSharingTypeFromProto(pb.dataSharingTerms?.type),
       customText: pb.dataSharingTerms?.customText ?? undefined,
     },
-    MODEL_STATES.get(pb.state),
-    MODEL_GENERAL_ACCESSES.get(pb.generalAccess) ||
+    MODEL_STATE_VALUES.get(pb.state),
+    MODEL_GENERAL_ACCESS_VALUES.get(pb.generalAccess) ||
       SurveyGeneralAccess.RESTRICTED,
-    MODEL_DATA_VISIBILITIES.get(pb.dataVisibility) ||
+    MODEL_DATA_VISIBILITY_VALUES.get(pb.dataVisibility) ||
       SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
   );
 }
