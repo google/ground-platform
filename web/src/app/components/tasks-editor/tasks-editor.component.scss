@@ -19,16 +19,14 @@
   flex-direction: column;
   gap: 16px;
 
-   // TODO(#1365): replace literal color values with theming/variables
   .task-container {
     &.loi-task-container {
-      padding: 16px;
-      background: #DDE5D9;
       border-radius: 8px;
-      border: 1px solid #DDE5D9;
+      border-style: solid;
+      border-width: 1px;
+      padding: 16px;
 
       .loi-task-label {
-        color: #424940;
         margin-bottom: 16px;
       }
     }
@@ -36,8 +34,9 @@
 }
 
 .add-task-buttons-container {
-  border: 4px #dde5d9 dashed;
   border-radius: 8px;
+  border-style: dashed;
+  border-width: 4px;
   margin-top: 16px;
   padding: 24px;
   display: flex;
@@ -46,7 +45,6 @@
 
   #tasks-help-text {
     text-align: center;
-    color: #727970;
   }
 
   #add-task-buttons-list {
