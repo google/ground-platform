@@ -14,10 +14,9 @@
   limitations under the License.
 -->
 
-<h1 mat-dialog-title>Share survey</h1>
+<h1 mat-dialog-title>Add survey participants</h1>
 
 <div mat-dialog-content>
-  <h2 class="share-dialog-description">Who do you want to invite for the survey?</h2>
   <form class="share-form" [formGroup]="addUserForm" (ngSubmit)="onAddUserSubmit()">
     <mat-form-field class="email-input">
       <mat-label>Email address</mat-label>
@@ -51,7 +50,7 @@
       [disabled]="addUserForm.value['email'] == '' || !addUserForm.valid"
       (click)="onAddUserSubmit()"
     >
-      <label>Done</label>
+      <label>Send</label>
     </button>
   </div>
 </div>
