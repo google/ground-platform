@@ -18,19 +18,33 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  .edit-job {
-    .tasks-editor {
-      color: mat.get-theme-color($theme, on-surface);
-    }
+  .tasks-editor {
+    color: mat.get-theme-color($theme, on-surface);
 
     .toolbar-right {
       color: mat.get-theme-color($theme, outline);
     }
+
+    .task-container {
+      &.loi-task-container {
+        background-color: mat.get-theme-color($theme, neutral-variant, 90);
+        border-color: mat.get-theme-color($theme, neutral-variant, 90);
+
+        .loi-task-label {
+          color: mat.get-theme-color($theme, neutral-variant, 30);
+        }
+      }
+    }
+  }
+
+  .add-task-buttons-container {
+    border-color: mat.get-theme-color($theme, neutral-variant, 90);
+    color: mat.get-theme-color($theme, neutral-variant, 50);
   }
 }
 
 @mixin typography($theme) {
-  tasks-editor {
+  .tasks-editor {
     .task-label, .loi-task-label {
       font: mat.get-theme-typography($theme, title-medium, font);
     }
@@ -40,12 +54,14 @@
     }
   }
 
-  #tasks-help-text {
-    font: mat.get-theme-typography($theme, body-medium, font);
-  }
+  .add-task-buttons-container {
+    #tasks-help-text {
+      font: mat.get-theme-typography($theme, body-medium, font);
+    }
 
-  .task-button {
-    font: mat.get-theme-typography($theme, label-large, font);
+    .task-button {
+      font: mat.get-theme-typography($theme, label-large, font);
+    }
   }
 }
 
