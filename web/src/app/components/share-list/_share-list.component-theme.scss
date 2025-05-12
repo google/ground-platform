@@ -18,12 +18,19 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-}
+  .share-list-container {
+    .survey-user-list-item {
+      .user-icon {
+        background-color: mat.get-theme-color($theme, secondary, 90);
+      }
 
-@mixin typography($theme) {
+      .survey-owner-label {
+        color: mat.get-theme-color($theme, neutral-variant, 50);
+      }
+    }
+  }
 }
 
 @mixin theme($theme) {
   @include color($theme);
-  @include typography($theme);
 }
