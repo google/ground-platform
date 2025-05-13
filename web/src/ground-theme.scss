@@ -28,6 +28,7 @@
 @use 'app/components/loi-properties-dialog/loi-properties-dialog.component-theme' as loi-properties-dialog;
 @use 'app/components/loi-selection/loi-selection.component-theme' as loi-selection;
 @use 'app/components/share-dialog/_share-dialog.component-theme' as share-dialog;
+@use 'app/components/share-list/_share-list.component-theme' as share-list;
 @use 'app/components/share-survey/_share-survey.component-theme' as share-survey;
 @use 'app/components/sign-in-page/_sign-in-page.component-theme' as sign-in-page;
 @use 'app/components/survey-list/_survey-list.component-theme' as survey-list;
@@ -70,6 +71,7 @@ html {
   @include loi-properties-dialog.theme($theme);
   @include loi-selection.theme($theme);
   @include share-dialog.theme($theme);
+  @include share-list.theme($theme);
   @include share-survey.theme($theme);
   @include sign-in-page.theme($theme);
   @include survey-list.theme($theme);
