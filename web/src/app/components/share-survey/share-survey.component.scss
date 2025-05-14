@@ -20,19 +20,16 @@
   gap: 16px;
 
   .mat-mdc-card {
-    &.card-with-button {
-      .relative-container {
-        position: relative;
-      }
-
-      .positioned-button {
-        position: absolute;
-        right: 24px;
-        top: 24px;
-      }
+    .floating-button {
+      position: absolute;
+      top: 34px;
+      right: 24px;
     }
 
     .mat-mdc-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 24px 24px 0;
     }
 
