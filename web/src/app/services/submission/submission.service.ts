@@ -23,7 +23,7 @@ import {AuditInfo} from 'app/models/audit-info.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
+import {Survey, SurveyDataVisibility} from 'app/models/survey.model';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
@@ -63,7 +63,9 @@ export class SubmissionService {
                             survey,
                             loi,
                             user.id,
-                            this.surveyService.canManageSurvey()
+                            this.surveyService.canManageSurvey() ||
+                              survey.dataVisibility ===
+                                SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
                           )
                     )
                   )

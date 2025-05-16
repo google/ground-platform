@@ -433,14 +433,14 @@ export class DataStoreService {
    *
    * @param survey the survey instance.
    * @param userEmail the email of the user to filter the results.
-   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
+   * @param canViewAll a flag indicating whether the user has permission to view all LOIs for this survey.
    */
   getAccessibleLois$(
     {id: surveyId}: Survey,
     userId: string,
-    canManageSurvey: boolean
+    canViewAll: boolean
   ): Observable<List<LocationOfInterest>> {
-    if (canManageSurvey) {
+    if (canViewAll) {
       return this.db
         .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
         .valueChanges({idField: 'id'})
@@ -477,17 +477,17 @@ export class DataStoreService {
    * @param survey the survey instance.
    * @param loi the loi instance.
    * @param userEmail the email of the user to filter the results.
-   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
+   * @param canViewAll a flag indicating whether the user has permission to view all LOIs for this survey.
    */
   getAccessibleSubmissions$(
     survey: Survey,
     loi: LocationOfInterest,
     userId: string,
-    canManageSurvey: boolean
+    canViewAll: boolean
   ): Observable<List<Submission>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        this.canViewSubmissions(ref, loi.id, userId, canManageSurvey)
+        this.canViewSubmissions(ref, loi.id, userId, canViewAll)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -621,10 +621,10 @@ export class DataStoreService {
     ref: CollectionReference,
     loiId: string,
     userId: string,
-    canManageSurvey: boolean
+    canViewAll: boolean
   ) {
     const query = ref.where(sb.loiId, '==', loiId);
 
-    return canManageSurvey ? query : query.where(sb.ownerId, '==', userId);
+    return canViewAll ? query : query.where(sb.ownerId, '==', userId);
   }
 }

@@ -21,7 +21,7 @@ import {map, switchMap} from 'rxjs/operators';
 
 import {GeometryType} from 'app/models/geometry/geometry';
 import {LocationOfInterest} from 'app/models/loi.model';
-import {SurveyState} from 'app/models/survey.model';
+import {SurveyDataVisibility, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -52,7 +52,9 @@ export class LocationOfInterestService {
                   : this.dataStore.getAccessibleLois$(
                       survey,
                       user.id,
-                      this.surveyService.canManageSurvey()
+                      this.surveyService.canManageSurvey() ||
+                        survey.dataVisibility ===
+                          SurveyDataVisibility.ALL_SURVEY_PARTICIPANTS
                     )
               )
             )
