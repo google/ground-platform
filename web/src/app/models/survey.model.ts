@@ -57,6 +57,12 @@ export enum SurveyGeneralAccess {
   PUBLIC = 3,
 }
 
+/** Enum for survey's current data visibility. */
+export enum SurveyDataVisibility {
+  ALL_SURVEY_PARTICIPANTS = 1,
+  CONTRIBUTOR_AND_ORGANIZERS = 2,
+}
+
 export class Survey extends Copiable {
   static readonly UNSAVED_NEW = new Survey(
     /* id= */
@@ -74,7 +80,8 @@ export class Survey extends Copiable {
     /* dataSharingTerms= */
     {type: DataSharingType.PRIVATE},
     SurveyState.UNSAVED,
-    SurveyGeneralAccess.RESTRICTED
+    SurveyGeneralAccess.RESTRICTED,
+    SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
   );
 
   constructor(
@@ -86,7 +93,8 @@ export class Survey extends Copiable {
     readonly ownerId: string,
     readonly dataSharingTerms: {type: DataSharingType; customText?: string},
     readonly state?: SurveyState,
-    readonly generalAccess?: SurveyGeneralAccess
+    readonly generalAccess?: SurveyGeneralAccess,
+    readonly dataVisibility?: SurveyDataVisibility
   ) {
     super();
   }

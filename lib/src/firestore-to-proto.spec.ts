@@ -79,14 +79,18 @@ describe('toMessage()', () => {
       desc: 'converts map<string, Message>',
       input: {
         '10': {
-          'stringProperty': {'1': 'aaa'},
+          'stringProperty': {'1': 'non-empty string'},
+          'emptyStringProperty': {'1': ''},
           'numberProperty': {'2': 123.4},
+          'valueZeroProperty': {'2': 0},
         },
       },
       expected: new LocationOfInterest({
         properties: {
-          'stringProperty': new LocationOfInterest.Property({stringValue: 'aaa'}),
+          'stringProperty': new LocationOfInterest.Property({stringValue: 'non-empty string'}),
+          'emptyStringProperty': new LocationOfInterest.Property({stringValue: ''}),
           'numberProperty': new LocationOfInterest.Property({numericValue: 123.4}),
+          'valueZeroProperty': new LocationOfInterest.Property({numericValue: 0}),
         },
       }),
     },
