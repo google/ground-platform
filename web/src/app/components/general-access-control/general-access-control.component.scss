@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.share-access-control-container {
+.general-access-control-container {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -28,7 +28,7 @@
     justify-content: center;
   }
 
-  .share-access-control {
+  .general-access-control {
     display: flex;
     flex-direction: column;
     gap: 4px;
