@@ -15,12 +15,11 @@
  */
 
 import {Component} from '@angular/core';
-import {Map} from 'immutable';
-import {Subscription} from 'rxjs';
-
 import {Survey, SurveyGeneralAccess} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import {Map} from 'immutable';
+import {Subscription} from 'rxjs';
 
 const generalAccessLabels = Map<SurveyGeneralAccess, any>([
   [
@@ -52,11 +51,11 @@ const generalAccessLabels = Map<SurveyGeneralAccess, any>([
 ]);
 
 @Component({
-  selector: 'ground-share-access-control',
-  templateUrl: './share-access-control.component.html',
-  styleUrls: ['./share-access-control.component.scss'],
+  selector: 'ground-general-access-control',
+  templateUrl: './general-access-control.component.html',
+  styleUrls: ['./general-access-control.component.scss'],
 })
-export class ShareAccessControlComponent {
+export class GeneralAccessControlComponent {
   private subscription = new Subscription();
 
   selectedGeneralAccess!: SurveyGeneralAccess;

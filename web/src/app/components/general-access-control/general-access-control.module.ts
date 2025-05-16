@@ -25,10 +25,10 @@ import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
 import {MatSelectModule} from '@angular/material/select';
 
-import {ShareAccessControlComponent} from './share-access-control.component';
+import {GeneralAccessControlComponent} from './general-access-control.component';
 
 @NgModule({
-  declarations: [ShareAccessControlComponent],
+  declarations: [GeneralAccessControlComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -41,6 +41,6 @@ import {ShareAccessControlComponent} from './share-access-control.component';
     MatSelectModule,
     ReactiveFormsModule,
   ],
-  exports: [ShareAccessControlComponent],
+  exports: [GeneralAccessControlComponent],
 })
-export class ShareAccessControlModule {}
+export class GeneralAccessControlModule {}
