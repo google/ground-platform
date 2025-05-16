@@ -54,7 +54,7 @@ export const MODEL_ROLES = Map([
   [Pb.Role.VIEWER, Role.VIEWER],
 ]);
 
-const MODEL_DATA_SHARING_TYPES = Map([
+const MODEL_DATA_SHARING_TERMS_TYPES = Map([
   [Pb.Survey.DataSharingTerms.Type.PRIVATE, DataSharingType.PRIVATE],
   [Pb.Survey.DataSharingTerms.Type.PUBLIC_CC0, DataSharingType.PUBLIC],
   [Pb.Survey.DataSharingTerms.Type.CUSTOM, DataSharingType.CUSTOM],
@@ -89,7 +89,7 @@ function dataSharingTypeFromProto(
     return DataSharingType.PRIVATE;
   }
 
-  const dataSharingType = MODEL_DATA_SHARING_TYPES.get(protoType);
+  const dataSharingType = MODEL_DATA_SHARING_TERMS_TYPES.get(protoType);
 
   if (!dataSharingType) {
     return DataSharingType.PRIVATE;
