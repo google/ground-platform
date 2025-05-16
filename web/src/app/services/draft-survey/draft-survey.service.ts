@@ -23,6 +23,7 @@ import {Role} from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
+  SurveyDataVisibility,
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
@@ -136,6 +137,14 @@ export class DraftSurveyService {
     const currentSurvey = this.survey$.getValue();
 
     this.survey$.next(currentSurvey.copyWith({generalAccess}));
+
+    this.dirty = true;
+  }
+
+  updateDataVisibility(dataVisibility: SurveyDataVisibility): void {
+    const currentSurvey = this.survey$.getValue();
+
+    this.survey$.next(currentSurvey.copyWith({dataVisibility}));
 
     this.dirty = true;
   }

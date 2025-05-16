@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,15 @@
  * limitations under the License.
  */
 
-.share-survey-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
-  .mat-mdc-card {
-    .floating-button {
-      position: absolute;
-      top: 34px;
-      right: 24px;
-    }
+import {DataVisibilityControlComponent} from './data-visibility-control.component';
 
-    .mat-mdc-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 24px 24px 0;
-    }
-
-    .mat-mdc-card-content {
-      padding: 16px 24px 24px 24px;
-    }
-  }
-}
+@NgModule({
+  declarations: [DataVisibilityControlComponent],
+  imports: [CommonModule, MatSlideToggleModule],
+  exports: [DataVisibilityControlComponent],
+})
+export class DataVisibilityControlModule {}

@@ -28,11 +28,13 @@ import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module
 import {ShareListModule} from 'app/components/share-list/share-list.module';
 
 import {ShareSurveyComponent} from './share-survey.component';
+import {DataVisibilityControlModule} from '../data-visibility-control/data-visibility-control.module';
 
 @NgModule({
   declarations: [ShareSurveyComponent],
   imports: [
     CommonModule,
+    DataVisibilityControlModule,
     FormsModule,
     ReactiveFormsModule,
     MatButtonModule,

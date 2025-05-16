@@ -22,6 +22,10 @@
     .mat-mdc-card {
       --mdc-elevated-card-container-elevation: 0;
       border: 1px solid mat.get-theme-color($theme, neutral, 90);
+
+      .mat-mdc-card-content {
+        color: mat.get-theme-color($theme, neutral-variant, 30);
+      }
     }
 
     .mdc-button {
