@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,46 @@ import {ActivatedRoute} from '@angular/router';
 import {Observable, Subscription} from 'rxjs';
 
 import {Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
+import {environment} from 'environments/environment';
 
 @Component({
-  selector: 'ground-main-page-container',
-  templateUrl: './main-page-container.component.html',
-  styleUrls: ['./main-page-container.component.css'],
+  selector: 'ground-survey-dashboard',
+  templateUrl: './survey-dashboard.component.html',
+  styleUrls: ['./survey-dashboard.component.scss'],
 })
-export class MainPageContainerComponent implements OnInit, OnDestroy {
+export class SurveyDashboardComponent implements OnInit, OnDestroy {
   activeSurvey$: Observable<Survey>;
   private subscription = new Subscription();
 
   constructor(
+    private authService: AuthService,
     private navigationService: NavigationService,
-    private surveyService: SurveyService,
-    route: ActivatedRoute
+    private route: ActivatedRoute,
+    private surveyService: SurveyService
   ) {
     this.activeSurvey$ = surveyService.getActiveSurvey$();
-    navigationService.init(route);
+    navigationService.init(this.route);
   }
 
   ngOnInit() {
     // Activate new survey on route changes.
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(id => {
-        if (!id) return;
-        if (this.surveyService.getActiveSurvey()?.id === id) return;
-        this.surveyService.activateSurvey(id);
+      this.navigationService.getSurveyId$().subscribe(surveyId => {
+        if (!surveyId) return;
+        if (this.surveyService.getActiveSurvey()?.id === surveyId) return;
+        this.surveyService.activateSurvey(surveyId);
+      })
+    );
+
+    // Redirect to sign in page if user is not authenticated.
+    this.subscription.add(
+      this.authService.isAuthenticated$().subscribe(isAuthenticated => {
+        if (!isAuthenticated && !environment.useEmulators) {
+          this.navigationService.signIn();
+        }
       })
     );
   }
