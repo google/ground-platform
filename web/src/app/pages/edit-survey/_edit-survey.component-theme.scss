@@ -30,9 +30,7 @@
 
     .mdc-button {
       &.delete-survey-button {
-        --mdc-filled-button-container-color: transparent;
-        --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
-        border: 1px solid mat.get-theme-color($theme, outline);
+        --mdc-outlined-button-label-text-color: #{mat.get-theme-color($theme, error)};
       }
     }
   }
