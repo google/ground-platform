@@ -41,7 +41,9 @@ describe('toDocumentData()', () => {
       expected: {
         [s.name]: 'Survey name',
         [s.description]: 'Survey desc',
-        [s.state]: Survey.State.STATE_UNSPECIFIED
+        [s.state]: Survey.State.STATE_UNSPECIFIED,
+        [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
+        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED
       },
     },
     {
@@ -84,7 +86,9 @@ describe('toDocumentData()', () => {
           email1: 2, // DATA_COLLECTOR
           email2: 3, // SURVEY_ORGANIZER
         },
-        [s.state]: Survey.State.STATE_UNSPECIFIED
+        [s.state]: Survey.State.STATE_UNSPECIFIED,
+        [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
+        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED
       },
     },
     {

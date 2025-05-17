@@ -55,7 +55,7 @@ function toMessageInternal<T>(
       console.debug(messageValue);
       continue;
     }
-    if (messageValue) properties[fieldName] = messageValue;
+    if (messageValue !== null) properties[fieldName] = messageValue;
   }
   return createInstance<T>(constructor, properties);
 }

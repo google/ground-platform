@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ const generalAccessLabels = Map<SurveyGeneralAccess, any>([
 ]);
 
 @Component({
-  selector: 'ground-share-access-control',
-  templateUrl: './share-access-control.component.html',
-  styleUrls: ['./share-access-control.component.scss'],
+  selector: 'ground-general-access-control',
+  templateUrl: './general-access-control.component.html',
+  styleUrls: ['./general-access-control.component.scss'],
 })
-export class ShareAccessControlComponent {
+export class GeneralAccessControlComponent {
   private subscription = new Subscription();
 
   selectedGeneralAccess!: SurveyGeneralAccess;
