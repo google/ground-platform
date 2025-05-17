@@ -4,7 +4,8 @@
   "description": "Ground web app custom build scripts",
   "type": "module",
   "scripts": {
-    "copy-keys": "node copy-keys.js"
+    "copy-keys": "node copy-keys.js",
+    "copy-well-known": "node copy-well-known.js"
   },
   "keywords": [],
   "author": "",
