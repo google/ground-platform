@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-.share-access-control-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+@use 'sass:map';
+@use '@angular/material' as mat;
 
-  .general-access-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50px;
-    background-color: #DDE5D9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
+@mixin color($theme) {
   .general-access-select {
-    color: #1A1C19;
-    font-family: Manrope;
-    font-weight: 600;
-    font-size: 14px;
-    width: auto;
+    color: mat.get-theme-color($theme, neutral, 10);
   }
 
   .general-access-description {
-    color: #424940;
-    font-family: Manrope;
-    font-weight: 500;
-    font-size: 14px;
+    color: mat.get-theme-color($theme, neutral-variant, 30);
   }
+
+  .general-access-icon {
+    background-color: mat.get-theme-color($theme, neutral-variant, 90);
+  }
+}
+
+
+@mixin typography($theme) {
+  .general-access-select {
+    font: mat.get-theme-typography($theme, body-medium, font);
+    font-weight: 600;
+  }
+
+  .general-access-description {
+    font: mat.get-theme-typography($theme, body-small, font);
+    font-weight: 500;
+  }
+}
+
+@mixin theme($theme) {
+  @include color($theme);
+  @include typography($theme);
 }
