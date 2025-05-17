@@ -238,16 +238,14 @@ export class Datastore {
     );
   }
 
-  async fetchSubmissions(
-    surveyId: string,
-    jobId: string
-  ) {
+  async fetchSubmissions(surveyId: string, jobId: string) {
     return this.db_
       .collection(submissions(surveyId))
-      .where(sb.jobId, '==', jobId).get();
+      .where(sb.jobId, '==', jobId)
+      .get();
   }
 
-  async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData): Promise<void> {
+  async insertLocationOfInterest(surveyId: string, loiDoc: DocumentData) {
     await this.db_.doc(survey(surveyId)).collection('lois').add(loiDoc);
   }
 

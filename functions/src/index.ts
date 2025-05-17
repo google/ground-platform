@@ -25,6 +25,7 @@ import {exportCsvHandler} from './export-csv';
 import {exportFermHandler} from './export-ferm';
 import {exportGeojsonHandler} from './export-geojson';
 import {onCall} from 'firebase-functions/v2/https';
+import {cloneSurveyHandler} from './clone-survey';
 import {onCreateLoiHandler} from './on-create-loi';
 import {onCreatePasslistEntryHandler} from './on-create-passlist-entry';
 import {onWriteJobHandler} from './on-write-job';
@@ -69,6 +70,8 @@ export const exportFerm = onHttpsRequest(exportFermHandler);
 export const exportCsv = onHttpsRequest(exportCsvHandler);
 
 export const exportGeojson = onHttpsRequest(exportGeojsonHandler);
+
+export const cloneSurvey = onHttpsRequest(cloneSurveyHandler);
 
 export const onCreateLoi = functions.firestore
   .document(loiPathTemplate)

@@ -24,6 +24,10 @@
     ],
     "rewrites": [
       {
+        "source": "/cloneSurvey",
+        "function": "cloneSurvey"
+      },
+      {
         "source": "/importGeoJson",
         "function": "importGeoJson"
       },
