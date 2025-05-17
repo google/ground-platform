@@ -59,11 +59,13 @@
   margin: 24px 0;
   justify-content: space-between;
   width: 880px;
-  font-weight: 400;
-}
 
-.continue-button {
-  border-radius: 100px;
-  height: 40px;
-  --mdc-filled-button-container-color: #006E2C;
+  .left-button-section {
+    flex: 1;
+  }
+
+  .right-button-section {
+    display: flex;
+    gap: 8px;
+  }
 }

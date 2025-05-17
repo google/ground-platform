@@ -25,6 +25,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {RouterModule} from '@angular/router';
 
+import {ShareButtonsModule} from 'app/components/share-buttons/share-buttons.module';
 import {EditSurveyComponent} from 'app/pages/edit-survey/edit-survey.component';
 
 import {SurveyHeaderModule} from '../main-page-container/main-page/survey-header/survey-header.module';
@@ -33,15 +34,16 @@ import {SurveyHeaderModule} from '../main-page-container/main-page/survey-header
   declarations: [EditSurveyComponent],
   imports: [
     CommonModule,
-    SurveyHeaderModule,
-    MatListModule,
+    MatDialogModule,
+    MatDividerModule,
     MatButtonModule,
     MatIconModule,
+    MatListModule,
+    MatMenuModule,
     MatProgressSpinnerModule,
     RouterModule,
-    MatMenuModule,
-    MatDividerModule,
-    MatDialogModule,
+    ShareButtonsModule,
+    SurveyHeaderModule,
   ],
   exports: [EditSurveyComponent],
 })
