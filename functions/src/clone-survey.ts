@@ -44,7 +44,7 @@ export async function cloneSurveyHandler(
     return;
   }
 
-  const newSurveyId = db.generateId();
+  const newSurveyId = await db.generateId();
 
   const surveyData = surveyDoc.data();
   if (surveyData) {
