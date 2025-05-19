@@ -79,18 +79,27 @@
       </div>
     </div>
     <div class="button-section">
-      <button
-        id="back-button"
-        class="button"
-        mat-button
-        color="primary"
-        (click)="back()"
-      >
-        Back
-      </button>
+      <div class="left-button-section">
+        <button
+          id="back-button"
+          class="button"
+          mat-button
+          color="primary"
+          (click)="back()"
+        >
+          Back
+        </button>
+      </div>
+
+      <div class="right-button-section">
+        <ground-copy-survey-controls
+          *ngIf="createSurveyPhase == CreateSurveyPhase.SHARE_SURVEY"
+          [surveyId]="surveyId"
+        ></ground-copy-survey-controls>
+
       <button
         id="continue-button"
-        class="button continue-button"
+        class="continue-button"
         mat-flat-button
         color="primary"
         (click)="continue()"
@@ -98,6 +107,7 @@
       >
         {{ createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY ? 'Go to survey' : 'Continue' }}
       </button>
+      </div>
     </div>
   </div>
 </div>
