@@ -75,7 +75,7 @@ describe('ShareButtonsComponent', () => {
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(surveyAppLink);
     expect(notificationService.success).toHaveBeenCalledWith(
-      'Survey link copied into the clipboard'
+      'Survey link copied to clipboard'
     );
     expect(notificationService.error).not.toHaveBeenCalled();
   }));
@@ -95,7 +95,7 @@ describe('ShareButtonsComponent', () => {
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(surveyAppLink);
     expect(notificationService.success).not.toHaveBeenCalled();
     expect(notificationService.error).toHaveBeenCalledWith(
-      'Impossible to copy Survey link into the clipboard'
+      'Impossible to copy Survey link to clipboard'
     );
   }));
 });
