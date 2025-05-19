@@ -133,7 +133,7 @@
 
         <router-outlet></router-outlet>
 
-        <div class="button-section" *ngIf="router.url.endsWith('/share')">
+        <div class="button-section" *ngIf="navigationService.isShareSurveyPage()">
           <ground-copy-survey-controls
             [surveyId]="surveyId"
           ></ground-copy-survey-controls>

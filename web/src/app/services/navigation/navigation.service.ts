@@ -295,12 +295,16 @@ export class NavigationService {
     );
   }
 
+  isShareSurveyPage(): boolean {
+    return this.router.url.endsWith('/share');
+  }
+
   getBaseOriginUrl(): string {
     return this.document.location.origin + this.location.prepareExternalUrl('');
   }
 
   getSurveyAppLink(surveyId: string): string {
-    return `${this.getBaseOriginUrl()}/android/${SURVEY_SEGMENT}/${surveyId}`;
+    return this.getBaseOriginUrl() + `android/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
   getSidePanelExpanded(): boolean {
