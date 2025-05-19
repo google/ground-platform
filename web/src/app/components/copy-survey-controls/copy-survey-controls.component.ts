@@ -19,6 +19,12 @@ import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
+/**
+ * Implements the controls for copying the survey link and QR code
+ * to the clipboard.
+ * This component is typically displayed in the survey create/edit
+ * view, enabling users to quickly share the survey.
+ */
 @Component({
   selector: 'ground-copy-survey-controls',
   templateUrl: './copy-survey-controls.component.html',
