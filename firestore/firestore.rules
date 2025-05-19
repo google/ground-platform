@@ -30,7 +30,7 @@
      * data to the specified survey.
      */
     function isUnlistedOrPublic(survey) {
-    	return survey["8"] in [
+      return survey["8"] in [
         2 /* UNLISTED */,
         3 /* PUBLIC */
       ];
@@ -40,7 +40,7 @@
      * Returns true iff data collectors can see each others' data.
      */
     function canViewDataCollectedByOthers(survey) {
-    	return survey["9"] == true
+      return survey["9"] == 2 /* ALL_SURVEY_PARTICIPANTS */
     }
 
     /**
@@ -118,7 +118,7 @@
     }
 
     /**
-     * Returns true iff the current user with the given email can contribute LOIs 
+     * Returns true iff the current user with the given email can contribute LOIs
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
