@@ -18,11 +18,11 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 const project = process.env['npm_config_project'];
 
-const assertLinksFilepath = `../keys/${project}/assertLinks.json`;
+const assertLinksFilepath = `../keys/${project}/assetLinks.json`;
 
 if (existsSync(assertLinksFilepath)) {
   const assertLinks = readFileSync(
-    `../keys/${project}/assertLinks.json`,
+    `../keys/${project}/assetLinks.json`,
     'utf8'
   );
 
@@ -32,7 +32,7 @@ if (existsSync(assertLinksFilepath)) {
     mkdirSync(wellKnownDir, { recursive: true });
   }
 
-  writeFileSync(`${wellKnownDir}/assertLinks.json`, assertLinks);
+  writeFileSync(`${wellKnownDir}/assetLinks.json`, assertLinks);
 } else {
   console.warn('Missing asserLinks.json file');
 }
