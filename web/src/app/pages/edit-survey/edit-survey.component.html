@@ -130,7 +130,14 @@
         <h1 class="edit-survey-title" *ngIf="sectionTitle !== ''">
           {{ sectionTitle }}
         </h1>
+
         <router-outlet></router-outlet>
+
+        <div class="button-section" *ngIf="navigationService.isShareSurveyPage()">
+          <ground-copy-survey-controls
+            [surveyId]="surveyId"
+          ></ground-copy-survey-controls>
+        </div>
       </div>
     </div>
   </div>
