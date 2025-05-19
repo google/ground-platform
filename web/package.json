@@ -8,7 +8,7 @@
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "prebuild": "npm run --prefix scripts copy-keys",
     "build": "ng build -c $npm_config_config",
-    "postbuild": "npm run --prefix scripts copy-well-known",
+    "postbuild": "npm run --prefix scripts copy-asset-links",
     "build-all": "npm run build-local-deps && npm run build",
     "build-and-test": "npm run build && npm run test",
     "build-all-and-test": "npm run build-all && npm run test",
