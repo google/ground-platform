@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {DOCUMENT, Location} from '@angular/common';
 import {HttpParams} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {
   ActivatedRoute,
   IsActiveMatchOptions,
@@ -83,7 +84,11 @@ export class NavigationService {
   private taskId$?: Observable<string | null>;
   private sideNavMode$?: Observable<SideNavMode>;
 
-  constructor(private router: Router) {}
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private location: Location,
+    private router: Router
+  ) {}
 
   /**
    * Set up streams using provided route. This must be called before any of
@@ -290,8 +295,12 @@ export class NavigationService {
     );
   }
 
+  getBaseOriginUrl(): string {
+    return this.document.location.origin + this.location.prepareExternalUrl('');
+  }
+
   getSurveyAppLink(surveyId: string): string {
-    return `${window.location.origin}/android/${SURVEY_SEGMENT}/${surveyId}`;
+    return `${this.getBaseOriginUrl()}/android/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
   getSidePanelExpanded(): boolean {
