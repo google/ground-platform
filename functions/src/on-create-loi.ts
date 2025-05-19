@@ -28,11 +28,16 @@ import Pb = GroundProtos.ground.v1beta1;
 
 type Properties = {[key: string]: string | number};
 
+type Headers = {[key: string]: string};
+
 type PropertyGenerator = {
+  headers?: Headers;
   name: string;
   prefix: string;
   url: string;
 };
+
+const defaultHeaders = {'Content-Type': 'application/json'};
 
 /**
  * Handles the creation of a Location of Interest (LOI) document in Firestore.
@@ -91,11 +96,15 @@ async function updateProperties(
   properties: Properties,
   wkt: string
 ): Promise<Properties> {
-  const {url, prefix} = propertyGenerator;
+  const {url, headers, prefix} = propertyGenerator;
 
   if (prefix) properties = removePrefixedKeys(properties, prefix);
 
-  const newProperties = await fetchProperties(url, wkt);
+  const newProperties = await fetchProperties(
+    url,
+    {...defaultHeaders, ...headers},
+    wkt
+  );
 
   return {
     ...properties,
@@ -103,12 +112,14 @@ async function updateProperties(
   };
 }
 
-async function fetchProperties(url: string, wkt: string): Promise<Properties> {
+async function fetchProperties(
+  url: string,
+  headers: Headers,
+  wkt: string
+): Promise<Properties> {
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({wkt}),
   });
 
