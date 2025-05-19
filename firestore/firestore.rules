@@ -172,9 +172,9 @@
       allow read: if request.auth != null;
     }
 
-    // Apply passlist and survey-level ACLs to LOI documents.
+    // Apply passlist and survey-level General Access and/or ACLs to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      // Allow if user has has read access to the survey.
+      // Allow if user has read access to the survey and the LOI.
       allow read: if canViewLoi(getSurvey(surveyId), request.resource);
       // Allow if user is owner of the new LOI and can collect data.
       allow create: if isLoiOwner(request.resource) && canCollectData(getSurvey(surveyId));
@@ -182,9 +182,9 @@
       allow write: if isLoiOwner(resource) || canManageSurvey(getSurvey(surveyId));
     }
 
-    // Apply passlist and survey-level ACLs to submission documents.
+    // Apply passlist and survey-level General Access and/or ACLs to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      // Allow if user has has read access to the survey.
+      // Allow if user has read access to the survey and the submission.
       allow read: if canViewSubmission(getSurvey(surveyId), request.resource);
       // Allow if user is owner of the new submission and can collect data.
       allow create: if isSubmissionOwner(request.resource) && canCollectData(getSurvey(surveyId));
@@ -194,7 +194,7 @@
 
     // Apply passlist and survey-level ACLs to job documents.
     match /surveys/{surveyId}/jobs/{jobId} {
-      // Allow if user has has read access to the survey.
+      // Allow if user has read access to the survey.
       allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user can manage survey.
       allow create, write: if canManageSurvey(getSurvey(surveyId));
