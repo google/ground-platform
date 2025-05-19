@@ -26,11 +26,11 @@ import {MatIconModule} from '@angular/material/icon';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
-import {ShareButtonsComponent} from './share-buttons.component';
+import {CopySurveyControlsComponent} from './copy-survey-controls.component';
 
 describe('ShareButtonsComponent', () => {
-  let component: ShareButtonsComponent;
-  let fixture: ComponentFixture<ShareButtonsComponent>;
+  let component: CopySurveyControlsComponent;
+  let fixture: ComponentFixture<CopySurveyControlsComponent>;
 
   let navigationService: jasmine.SpyObj<NavigationService>;
   let notificationService: jasmine.SpyObj<NotificationService>;
@@ -46,7 +46,7 @@ describe('ShareButtonsComponent', () => {
     ]);
 
     TestBed.configureTestingModule({
-      declarations: [ShareButtonsComponent],
+      declarations: [CopySurveyControlsComponent],
       imports: [MatIconModule, MatButtonModule],
       providers: [
         {provide: NavigationService, useValue: navigationService},
@@ -54,7 +54,7 @@ describe('ShareButtonsComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ShareButtonsComponent);
+    fixture = TestBed.createComponent(CopySurveyControlsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

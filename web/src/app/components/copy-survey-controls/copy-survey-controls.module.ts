@@ -20,11 +20,11 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {QRCodeModule} from 'angularx-qrcode';
 
-import {ShareButtonsComponent} from './share-buttons.component';
+import {CopySurveyControlsComponent} from './copy-survey-controls.component';
 
 @NgModule({
-  declarations: [ShareButtonsComponent],
+  declarations: [CopySurveyControlsComponent],
   imports: [CommonModule, MatButtonModule, MatIconModule, QRCodeModule],
-  exports: [ShareButtonsComponent],
+  exports: [CopySurveyControlsComponent],
 })
-export class ShareButtonsModule {}
+export class CopySurveyControlsModule {}

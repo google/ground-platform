@@ -20,11 +20,11 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {NotificationService} from 'app/services/notification/notification.service';
 
 @Component({
-  selector: 'ground-share-buttons',
-  templateUrl: './share-buttons.component.html',
-  styleUrls: ['./share-buttons.component.scss'],
+  selector: 'ground-copy-survey-controls',
+  templateUrl: './copy-survey-controls.component.html',
+  styleUrls: ['./copy-survey-controls.component.scss'],
 })
-export class ShareButtonsComponent implements OnInit {
+export class CopySurveyControlsComponent implements OnInit {
   @Input() surveyId = '';
 
   @ViewChild('qrCodeElement', {read: ElementRef})
