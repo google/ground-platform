@@ -16,6 +16,10 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
+// This script copies the assetLinks.json file from `web/keys/<project-id>/` to the local
+// `dist/.well-known` folder before build. This file is used for Digital Asset Links
+// to associate the web app with the Android app.
+
 const project = process.env['npm_config_project'];
 
 const assertLinksFilepath = `../keys/${project}/assetLinks.json`;
