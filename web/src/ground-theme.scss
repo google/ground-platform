@@ -19,6 +19,7 @@
 @use '@angular/material' as mat;
 @use './m3-theme';
 
+@use 'app/components/general-access-control/_general-access-control.component-theme' as general-access-control;
 @use 'app/components/header/current-user-widget/account-popup/_account-popup.component-theme' as account-popup;
 @use 'app/components/header/_header.component-theme.scss' as header;
 @use 'app/components/import-dialog/_import-dialog.component-theme' as import-dialog;
@@ -62,6 +63,7 @@ html {
   @include mat.all-component-themes($theme);
 
   // Custom component themes
+  @include general-access-control.theme($theme);
   @include account-popup.theme($theme);
   @include header.theme($theme);
   @include import-dialog.theme($theme);

@@ -21,6 +21,7 @@ import {Role} from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
+  SurveyDataVisibility,
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
@@ -62,7 +63,8 @@ export class TestData {
         type: DataSharingType.PRIVATE,
       },
       SurveyState.DRAFT,
-      SurveyGeneralAccess.RESTRICTED
+      SurveyGeneralAccess.RESTRICTED,
+      SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
     );
   }
 

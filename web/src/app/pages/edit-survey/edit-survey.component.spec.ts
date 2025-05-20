@@ -95,7 +95,7 @@ describe('EditSurveyComponent', () => {
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['init', 'getSurveyId$']
+      ['init', 'isShareSurveyPage', 'getSurveyId$']
     );
     surveyId$ = new Subject<string | null>();
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
@@ -193,7 +193,7 @@ describe('EditSurveyComponent', () => {
         },
         {
           buttonSelector: '#share-button',
-          expectedLabel: 'Survey participants',
+          expectedLabel: 'Sharing',
           expectedRouterLink: './share',
         },
         {
