@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "copy-keys": "node copy-keys.js",
-    "copy-well-known": "node copy-well-known.js"
+    "copy-well-known": "node copy-asset-links.js"
   },
   "keywords": [],
   "author": "",
