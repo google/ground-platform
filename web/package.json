@@ -46,6 +46,7 @@
     "@iplab/ngx-file-upload": "^17",
     "@ngx-translate/core": "^16.0.4",
     "@ngx-translate/http-loader": "^16.0.1",
+    "angularx-qrcode": "^17.0.1",
     "firebase": "^10.7.2",
     "firebaseui": "^6.1.0",
     "firebaseui-angular": "^6.2.0",
