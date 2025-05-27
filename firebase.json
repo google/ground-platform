@@ -30,7 +30,11 @@
         "function": "sessionLogin"
       },
       {
-        "source": "**/!(*.*)",
+        "source": "/fr/**",
+        "destination": "/fr/index.html"
+      },
+      {
+        "source": "/**",
         "destination": "/index.html"
       }
     ]
