@@ -19,6 +19,10 @@ import fse from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// This script the English language build of the web application from `dist/web/en`
+// to `dist/web`. This is useful for single-language deployments or when
+// the default language should be served directly from the root web path.
+
 // __dirname workaround for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
