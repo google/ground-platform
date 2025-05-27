@@ -10,16 +10,6 @@
         "source": "/",
         "destination": "/signin",
         "type": 301
-      },
-      {
-        "source": "/s/[:]new",
-        "destination": "/survey/new",
-        "type": 301
-      },
-      {
-        "source": "/s/:id",
-        "destination": "/survey/:id",
-        "type": 301
       }
     ],
     "rewrites": [
@@ -40,7 +30,11 @@
         "function": "sessionLogin"
       },
       {
-        "source": "**/!(*.*)",
+        "source": "/fr/**",
+        "destination": "/fr/index.html"
+      },
+      {
+        "source": "/**",
         "destination": "/index.html"
       }
     ]
