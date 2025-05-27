@@ -24,7 +24,8 @@
     "lint:fix": "npm run lint -- --fix",
     "posttest": "./posttest.sh",
     "login": "npx firebase login",
-    "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project"
+    "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
+    "extract-i18n": "ng extract-i18n"
   },
   "private": true,
   "dependencies": {
@@ -36,6 +37,7 @@
     "@angular/fire": "^17.1.0",
     "@angular/forms": "^17.3.12",
     "@angular/google-maps": "^17.3.8",
+    "@angular/localize": "^17.3.12",
     "@angular/material": "^17.3.8",
     "@angular/material-experimental": "^17.3.8",
     "@angular/platform-browser": "^17.3.12",
