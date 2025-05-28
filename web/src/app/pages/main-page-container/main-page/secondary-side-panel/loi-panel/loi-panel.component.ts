@@ -29,7 +29,7 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {getLoiIcon} from 'app/utils/utils';
 
 @Component({
-  selector: 'ground-loi-panel',
+  selector: 'loi-panel',
   templateUrl: './loi-panel.component.html',
   styleUrls: ['./loi-panel.component.scss'],
 })
@@ -61,6 +61,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
             this.surveyId = survey.id;
             return this.loiService.getSelectedLocationOfInterest$().pipe(
               switchMap(loi => {
+                this.isLoading = true;
                 this.iconColor = survey.getJob(loi.jobId)!.color!;
                 this.loi = loi;
                 this.name = LocationOfInterestService.getDisplayName(loi);
@@ -78,7 +79,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  onSelectSubmission(submissionId: string) {
+  selectSubmission(submissionId: string) {
     this.navigationService.showSubmissionDetail(
       this.surveyId,
       this.loi.id,
@@ -86,8 +87,8 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
     );
   }
 
-  onClosePanel() {
-    this.navigationService.clearLocationOfInterestId();
+  closePanel() {
+    this.navigationService.selectSurvey(this.surveyId);
   }
 
   hasProperties() {
