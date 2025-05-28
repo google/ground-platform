@@ -14,33 +14,17 @@
  * limitations under the License.
  */
 
-.share-access-control-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {QRCodeModule} from 'angularx-qrcode';
 
-  .general-access-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50px;
-    background-color: #DDE5D9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+import {CopySurveyControlsComponent} from './copy-survey-controls.component';
 
-  .general-access-select {
-    color: #1A1C19;
-    font-family: Manrope;
-    font-weight: 600;
-    font-size: 14px;
-    width: auto;
-  }
-
-  .general-access-description {
-    color: #424940;
-    font-family: Manrope;
-    font-weight: 500;
-    font-size: 14px;
-  }
-}
+@NgModule({
+  declarations: [CopySurveyControlsComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, QRCodeModule],
+  exports: [CopySurveyControlsComponent],
+})
+export class CopySurveyControlsModule {}

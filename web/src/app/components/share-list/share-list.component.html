@@ -20,7 +20,11 @@
 >
   <mat-list>
     <mat-list-item>
-      <div class="survey-owner-list-item">
+      <div class="survey-user-list-item">
+        <div class="user-icon">
+          {{surveyOwnerEmail.charAt(0).toUpperCase()}}
+        </div>
+
         <div>{{surveyOwnerEmail}}</div>
 
         <div class="survey-owner-label">Owner</div>
@@ -28,29 +32,30 @@
     </mat-list-item>
 
     <ng-container *ngFor="let entry of acl; let i = index;">
-      <ng-container *ngIf="surveyOwnerEmail !== entry.email;">
-        <mat-divider></mat-divider>
-
-        <mat-list-item>
-          <div matListItemTitle>
-            {{entry.email}}
+      <mat-list-item *ngIf="surveyOwnerEmail !== entry.email;">
+        <div class="survey-user-list-item">
+          <div class="user-icon">
+            {{entry.email.charAt(0).toUpperCase()}}
           </div>
-          <mat-form-field subscriptSizing="dynamic" matListItemMeta>
-            <mat-select
-              class="role-select"
-              (selectionChange)="onRoleChange($event, i)"
-              [value]="entry.role"
-            >
-              <mat-option
-                *ngFor="let option of roleOptions"
-                [value]="option.value"
-                >{{ option.label }}</mat-option
-              >
-              <mat-option value="-1" class="remove-option">Remove</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </mat-list-item>
-      </ng-container>
+
+          <div>{{entry.email}}</div>
+
+          <mat-select
+            class="role-select"
+            [(value)]="entry.role"
+            [hideSingleSelectionIndicator]="true"
+            (selectionChange)="onRoleChange($event, i)"
+          >
+            <mat-option *ngFor="let option of roleOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+
+            <mat-divider></mat-divider>
+
+            <mat-option value="-1" class="remove-option">Remove access</mat-option>
+          </mat-select>
+        </div>
+      </mat-list-item>
     </ng-container>
   </mat-list>
 </div>

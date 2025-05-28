@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import {DOCUMENT, Location} from '@angular/common';
+import {Inject, Injectable} from '@angular/core';
 import {ActivatedRoute, IsActiveMatchOptions, Router} from '@angular/router';
 import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -54,7 +55,11 @@ export class NavigationService {
   private submissionId$?: Observable<string | null>;
   private taskId$?: Observable<string | null>;
 
-  constructor(private router: Router) {}
+  constructor(
+    @Inject(DOCUMENT) private document: Document,
+    private location: Location,
+    private router: Router
+  ) {}
 
   /**
    * Set up streams using provided route. This must be called before any of
@@ -216,6 +221,18 @@ export class NavigationService {
         fragment: 'ignored',
       } as IsActiveMatchOptions
     );
+  }
+
+  isShareSurveyPage(): boolean {
+    return this.router.url.endsWith('/share');
+  }
+
+  getBaseOriginUrl(): string {
+    return this.document.location.origin + this.location.prepareExternalUrl('');
+  }
+
+  getSurveyAppLink(surveyId: string): string {
+    return this.getBaseOriginUrl() + `android/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
   getSidePanelExpanded(): boolean {

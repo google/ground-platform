@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,14 @@
 @use '@angular/material' as mat;
 
 @mixin color($theme) {
-  .share-survey-container {
-    .mat-mdc-card {
-      --mdc-elevated-card-container-elevation: 0;
-      border: 1px solid mat.get-theme-color($theme, neutral, 90);
-
-      .mat-mdc-card-content {
-        color: mat.get-theme-color($theme, neutral-variant, 30);
+  .share-list-container {
+    .survey-user-list-item {
+      .user-icon {
+        background-color: mat.get-theme-color($theme, secondary, 90);
       }
-    }
 
-    .mdc-button {
-      &.share-survey-button {
-        --mdc-filled-button-container-color: transparent;
-        --mdc-filled-button-label-text-color: #{mat.get-theme-color($theme, error)};
-        background-color: mat.get-theme-color($theme, secondary-container);
-        color: mat.get-theme-color($theme, on-secondary-container);
+      .survey-owner-label {
+        color: mat.get-theme-color($theme, neutral-variant, 50);
       }
     }
   }

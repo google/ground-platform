@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,13 @@ import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
 import {MatSelectModule} from '@angular/material/select';
 
-import {ShareAccessControlComponent} from './share-access-control.component';
+import {GeneralAccessControlComponent} from './general-access-control.component';
 
 @NgModule({
-  declarations: [ShareAccessControlComponent],
+  declarations: [GeneralAccessControlComponent],
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -38,9 +39,8 @@ import {ShareAccessControlComponent} from './share-access-control.component';
     MatInputModule,
     MatListModule,
     MatSelectModule,
-    FormsModule,
     ReactiveFormsModule,
   ],
-  exports: [ShareAccessControlComponent],
+  exports: [GeneralAccessControlComponent],
 })
-export class ShareAccessControlModule {}
+export class GeneralAccessControlModule {}

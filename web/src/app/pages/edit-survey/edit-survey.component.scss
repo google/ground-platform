@@ -40,6 +40,10 @@
   --mdc-list-list-item-leading-icon-color: #444746;
   --mdc-list-list-item-hover-leading-icon-color: #444746;
 
+  .is-active {
+    background-color: #dcddd9;
+  }
+
   .mat-mdc-list-item {
     border-radius: 32px;
 
@@ -70,5 +74,10 @@
 
   .content {
     text-align: left;
+  }
+
+  .button-section {
+    margin-top: 16px;
+    padding: 8px 0;
   }
 }

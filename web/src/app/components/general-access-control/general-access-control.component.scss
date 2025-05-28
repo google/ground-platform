@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,35 +14,27 @@
  * limitations under the License.
  */
 
-.share-list-container {
-  .mat-mdc-list-item {
-    --mdc-list-list-item-one-line-container-height: 48px;
-    --mdc-list-list-item-trailing-supporting-text-size: 16px;
-    padding: 0;
-  }
+.general-access-control-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 
-  .survey-user-list-item {
+  .general-access-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
+  }
 
-    .user-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .general-access-control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 
-    .survey-owner-label {
-      font-weight: 500;
-      margin-left: auto;
-    }
-
-    .role-select {
+    .general-access-select {
       width: fit-content;
-      margin-left: auto;
     }
   }
 }

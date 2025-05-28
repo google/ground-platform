@@ -48,13 +48,11 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-card class="card-with-button">
-    <div class="relative-container">
-      <div class="positioned-button">
-        <button class="delete-survey-button" mat-flat-button (click)="openDeleteSurveyDialog()">
-          <span>Delete survey</span>
-        </button>
-      </div>
+  <mat-card>
+    <div class="floating-button">
+      <button class="delete-survey-button" mat-stroked-button (click)="openDeleteSurveyDialog()">
+        <span>Delete survey</span>
+      </button>
     </div>
 
     <mat-card-header>
