@@ -16,7 +16,6 @@
 
 import {DOCUMENT} from '@angular/common';
 import {Component, Inject} from '@angular/core';
-import {TranslateService} from '@ngx-translate/core';
 
 import {environment} from 'environments/environment';
 import {Env} from 'environments/environment-enums';
@@ -31,14 +30,10 @@ import {Env} from 'environments/environment-enums';
   styleUrls: ['./app.css'],
 })
 export class AppComponent {
-  public constructor(
-    @Inject(DOCUMENT) private doc: Document,
-    private translate: TranslateService
-  ) {
+  public constructor(@Inject(DOCUMENT) private doc: Document) {
     if (environment.env !== Env.Test) {
       this.initGoogleMap();
     }
-    this.initTranslate();
   }
 
   private initGoogleMap(): void {
@@ -47,12 +42,5 @@ export class AppComponent {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=marker`;
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(script);
-  }
-
-  private initTranslate(): void {
-    this.translate.addLangs(['fr', 'en']);
-    this.translate.setDefaultLang('en');
-    const browserLang = this.translate.getBrowserLang();
-    this.translate.use(browserLang?.match(/en|fr/) ? browserLang : 'en');
   }
 }
