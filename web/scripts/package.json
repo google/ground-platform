@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "copy-keys": "node copy-keys.js",
-    "copy-asset-links": "node copy-asset-links.js",
-    "move-en-build": "node move-en-build.js"
+    "copy-asset-links": "node copy-asset-links.js"
   },
   "keywords": [],
   "author": "",
