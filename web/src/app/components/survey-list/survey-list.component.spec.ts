@@ -24,11 +24,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
 import {By} from '@angular/platform-browser';
-import {
-  TranslateModule,
-  TranslateService,
-  TranslateStore,
-} from '@ngx-translate/core';
 import {List, Map} from 'immutable';
 import {of} from 'rxjs';
 
@@ -153,7 +148,6 @@ describe('SurveyListComponent', () => {
         MatCardModule,
         MatGridListModule,
         MatIconModule,
-        TranslateModule.forRoot(),
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [
@@ -163,8 +157,6 @@ describe('SurveyListComponent', () => {
         {provide: AngularFirestore, useValue: {}},
         {provide: AngularFireAuth, useValue: {}},
         {provide: AuthService, useValue: authServiceSpy},
-        TranslateService,
-        TranslateStore,
       ],
     }).compileComponents();
   }));

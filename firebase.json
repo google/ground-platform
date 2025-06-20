@@ -5,23 +5,9 @@
   },
   "hosting": {
     "public": "web/dist/web",
-    "redirects": [
-      {
-        "source": "/",
-        "destination": "/signin",
-        "type": 301
-      },
-      {
-        "source": "/s/[:]new",
-        "destination": "/survey/new",
-        "type": 301
-      },
-      {
-        "source": "/s/:id",
-        "destination": "/survey/:id",
-        "type": 301
-      }
-    ],
+    "i18n": {
+      "root": "web/dist/web"
+    },
     "rewrites": [
       {
         "source": "/importGeoJson",
@@ -40,8 +26,16 @@
         "function": "sessionLogin"
       },
       {
-        "source": "**/!(*.*)",
-        "destination": "/index.html"
+        "source": "/en{,/**}",
+        "destination": "/en/index.html"
+      },
+      {
+        "source": "/fr{,/**}",
+        "destination": "/fr/index.html"
+      },
+      {
+        "source": "/**",
+        "destination": "/en/index.html"
       }
     ]
   },
