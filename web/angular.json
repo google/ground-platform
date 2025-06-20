@@ -10,10 +10,7 @@
       "sourceRoot": "src",
       "prefix": "ground",
       "i18n": {
-        "sourceLocale": {
-          "baseHref": "",
-          "code": "en"
-        },
+        "sourceLocale": "en",
         "locales": {
           "fr": {
             "translation": "src/locale/messages.fr.json"
@@ -32,15 +29,6 @@
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
-            "assets": [
-              "src/favicon.ico",
-              "src/assets",
-              "src/assets/icons/favicon-16x16.png",
-              "src/assets/icons/favicon-32x32.png",
-              "src/assets/icons/apple-touch-icon.png",
-              "src/assets/icons/android-chrome-192x192.png",
-              "src/assets/icons/android-chrome-512x512.png"
-            ],
             "stylePreprocessorOptions": {
               "includePaths": ["src/app/styles"]
             },

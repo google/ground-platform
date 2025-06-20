@@ -8,7 +8,7 @@
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "prebuild": "npm run --prefix scripts copy-keys",
     "build": "ng build -c $npm_config_config",
-    "postbuild": "npm run --prefix scripts copy-asset-links && npm run --prefix scripts move-en-build",
+    "postbuild": "npm run --prefix scripts copy-asset-links && npm run copy:shared-assets",
     "build-all": "npm run build-local-deps && npm run build",
     "build-and-test": "npm run build && npm run test",
     "build-all-and-test": "npm run build-all && npm run test",
@@ -25,7 +25,8 @@
     "posttest": "./posttest.sh",
     "login": "npx firebase login",
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
-    "extract-i18n": "ng extract-i18n"
+    "extract-i18n": "ng extract-i18n",
+    "copy:shared-assets": "rimraf dist/web/assets && cpx \"src/assets/**/*\" \"dist/web/assets\""
   },
   "private": true,
   "dependencies": {
@@ -74,6 +75,7 @@
     "@types/jasmine-expect": "3.8.1",
     "@types/jasminewd2": "^2.0.8",
     "@types/webpack-env": "^1.15.3",
+    "cpx": "^1.5.0",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^3.6.1",
@@ -97,6 +99,7 @@
     "prettier": "^2.8.1",
     "prettier-eslint": "^15.0.1",
     "puppeteer": "^22.10.0",
+    "rimraf": "^6.0.1",
     "ts-node": "^8.10.2",
     "typescript": "^5.4.5"
   }
