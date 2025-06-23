@@ -15,7 +15,7 @@
 -->
 
 <div *ngIf="isImporting; else defaultView">
-  <h2 mat-dialog-title>Importing sites...</h2>
+  <h2 mat-dialog-title i18n="@@app.dialogs.importSites.importingSites">Importing sites...</h2>
   <mat-dialog-content>
     <div class="progress-spinner">
       <mat-spinner mode="indeterminate" class="spinner"></mat-spinner>
@@ -23,7 +23,7 @@
   </mat-dialog-content>
 </div>
 <ng-template #defaultView>
-  <h2 mat-dialog-title>Import data collection sites (.geojson)</h2>
+  <h2 mat-dialog-title i18n="@@app.dialogs.importSites.title">Import data collection sites (.geojson)</h2>
   <mat-dialog-content>
     <form [formGroup]="uploadForm">
       <div>
@@ -38,8 +38,9 @@
     </form>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-button (click)="onImportLocationsOfInterest()" color="primary">
+    <button mat-button mat-dialog-close i18n="@@app.labels.cancel">Cancel</button>
+
+    <button mat-button (click)="onImportLocationsOfInterest()" color="primary" i18n="@@app.labels.upload">
       Upload
     </button>
   </mat-dialog-actions>

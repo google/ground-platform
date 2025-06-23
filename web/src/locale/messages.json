@@ -1,6 +1,31 @@
 {
   "locale": "en",
   "translations": {
+    "app.labels.copyLink": "Copy link",
+    "app.labels.copyQrCode": "Copy QR code",
+    "app.texts.generalAccess.restricted": "Only people with access can open with the link",
+    "app.labels.restricted": "Restricted",
+    "app.texts.generalAccess.unlisted": "Everyone with the survey QR code or link can collect data for this survey",
+    "app.labels.unlisted": "Unlisted",
+    "app.texts.generalAccess.public": "Everyone can collect data for this survey",
+    "app.labels.public": "Public",
+    "app.labels.signOut": "Sign out",
+    "app.labels.manageSurvey": "Manage survey",
+    "app.labels.cancel": "Cancel",
+    "app.labels.publishChanges": "Publish changes",
+    "app.labels.termsOfService": "Terms of service",
+    "app.labels.about": "About",
+    "app.dialogs.importSites.importingSites": "Importing sites...",
+    "app.dialogs.importSites.title": "Import data collection sites (.geojson)",
+    "app.labels.upload": "Upload",
+    "app.labels.downloadCsv": "Download job data (CSV)",
+    "app.labels.downloadGeojson": "Download site locations (GeoJSON)",
+    "app.cards.freeForm.title": " Free-form data collection ",
+    "app.cards.freeForm.description": " Allow data collectors to add and collect data about new locations as they go. ",
+    "app.cards.predefinedSampleSites.title": " Predefined sample sites ",
+    "app.cards.predefinedSampleSites.description": " Import areas or points of interest for which data should be collected. ",
+    "app.labels.import": "Import",
+    "app.labels.deleteAll": "Delete all",
     "app.surveys": "Surveys"
   }
 }

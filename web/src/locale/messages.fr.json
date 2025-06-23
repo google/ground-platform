@@ -1,6 +1,31 @@
 {
   "locale": "fr",
   "translations": {
+    "app.labels.copyLink": "FR",
+    "app.labels.copyQrCode": "FR",
+    "app.texts.generalAccess.restricted": "FR",
+    "app.labels.restricted": "FR",
+    "app.texts.generalAccess.unlisted": "FR",
+    "app.labels.unlisted": "FR",
+    "app.texts.generalAccess.public": "FR",
+    "app.labels.public": "FR",
+    "app.labels.signOut": "FR",
+    "app.labels.manageSurvey": "FR",
+    "app.labels.cancel": "Cancel",
+    "app.labels.publishChanges": "FR",
+    "app.labels.termsOfService": "FR",
+    "app.labels.about": "FR",
+    "app.dialogs.importSites.importingSites": "FR",
+    "app.dialogs.importSites.title": "FR",
+    "app.labels.upload": "FR",
+    "app.labels.downloadCsv": "FR",
+    "app.labels.downloadGeojson": "FR",
+    "app.cards.freeForm.title": "FR",
+    "app.cards.freeForm.description": "FR",
+    "app.cards.predefinedSampleSites.title": "FR",
+    "app.cards.predefinedSampleSites.description": "FR",
+    "app.labels.import": "FR",
+    "app.labels.deleteAll": "FR",
     "app.surveys": "Enquêtes"
   }
 }
