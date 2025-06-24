@@ -31,7 +31,7 @@ import {
 } from '../job-dialog/job-dialog.component';
 
 interface DataSharingTermsDetails {
-  descriptionHtml: string;
+  description: string;
   customText?: string;
 }
 
@@ -64,7 +64,7 @@ export class EditDetailsComponent implements OnInit {
         if (this.survey.dataSharingTerms) {
           const {type, customText} = this.survey.dataSharingTerms;
           this.dataSharingTermsDetails = {
-            descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
+            description: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
             customText,
           };
         }

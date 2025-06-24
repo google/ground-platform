@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
@@ -25,7 +27,7 @@ import {
 type DataSharingTermsOption = {
   value: DataSharingType;
   label: string;
-  descriptionHtml: string;
+  description: string;
 };
 
 @Component({
@@ -46,24 +48,18 @@ export class DataSharingTermsComponent implements OnInit {
   dataSharingTermsOptions: DataSharingTermsOption[] = [
     {
       value: DataSharingType.PRIVATE,
-      label: 'Private',
-      descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
-        DataSharingType.PRIVATE
-      )!,
+      label: $localize`:@@app.cards.dataSharingTerms.private.title:Private`,
+      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PRIVATE)!,
     },
     {
       value: DataSharingType.PUBLIC,
-      label: 'Public',
-      descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
-        DataSharingType.PUBLIC
-      )!,
+      label: $localize`:@@app.cards.dataSharingTerms.public.title:Public`,
+      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.PUBLIC)!,
     },
     {
       value: DataSharingType.CUSTOM,
-      label: 'Custom',
-      descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(
-        DataSharingType.CUSTOM
-      )!,
+      label: $localize`:@@app.cards.dataSharingTerms.custom.title:Custom`,
+      description: DATA_SHARING_TYPE_DESCRIPTION.get(DataSharingType.CUSTOM)!,
     },
   ];
 
