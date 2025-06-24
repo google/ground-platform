@@ -17,12 +17,12 @@
 <div class="share-survey-container">
   <mat-card>
     <mat-card-header>
-      <mat-card-title>People with access</mat-card-title>
+      <mat-card-title i18n="@@app.cards.share.title">eople with access</mat-card-title>
 
       <button class="share-survey-button" mat-flat-button (click)="openShareDialog()">
         <mat-icon class="material-symbols-outlined">add</mat-icon>
 
-        <span>Add participants</span>
+        <span i18n="@@app.labels.addParticipants">Add participants</span>
       </button>
     </mat-card-header>
 
@@ -33,7 +33,7 @@
 
   <mat-card>
     <mat-card-header>
-      <mat-card-title>General access</mat-card-title>
+      <mat-card-title i18n="@@app.cards.generalAccess.title">General access</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
@@ -45,11 +45,11 @@
     <ground-data-visibility-control class="floating-button"></ground-data-visibility-control>
 
     <mat-card-header>
-      <mat-card-title>Data visibility</mat-card-title>
+      <mat-card-title i18n="@@app.cards.dataVisibility.title">Data visibility</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
-      <div>Allow data collectors to see each others' data</div>
+      <div i18n="@@app.cards.dataVisibility.description">Allow data collectors to see each others' data</div>
     </mat-card-content>
   </mat-card>
 </div>

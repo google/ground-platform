@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
@@ -82,8 +84,9 @@ export class EditSurveyComponent implements OnInit {
         )
         .subscribe(event => {
           if (event.url.endsWith('survey'))
-            this.sectionTitle = 'Survey details';
-          else if (event.url.endsWith('share')) this.sectionTitle = 'Sharing';
+            this.sectionTitle = $localize`:@@app.editSurvey.surveyDetails.title:Survey details`;
+          else if (event.url.endsWith('share'))
+            this.sectionTitle = $localize`:@@app.editSurvey.sharing.title:Sharing`;
           else this.sectionTitle = '';
         })
     );

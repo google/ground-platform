@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {
   Component,
@@ -105,15 +107,15 @@ export const Tasks: {
 } = {
   [TaskGroup.QUESTION]: {
     icon: 'forum',
-    label: 'Answer a question',
-    placeholder: 'Question',
-    requiredMessage: 'Question is required',
+    label: $localize`:@@app.taskEditor.question.label:Answer a question`,
+    placeholder: $localize`:@@app.taskEditor.question.placeholder:Question`,
+    requiredMessage: $localize`:@@app.taskEditor.question.requiredMessage:Question is required`,
   },
   [TaskGroup.PHOTO]: {
     icon: 'photo_camera',
-    label: 'Take a photo',
-    placeholder: 'Instructions',
-    requiredMessage: 'Instructions are required',
+    label: $localize`:@@app.taskEditor.takeAPhoto.label:Take a photo`,
+    placeholder: $localize`:@@app.taskEditor.takeAPhoto.placeholder:Instructions`,
+    requiredMessage: $localize`:@@app.taskEditor.takeAPhoto.requiredMessage:Instructions are required`,
   },
   [TaskGroup.DROP_PIN]: {
     icon: 'pin_drop',
@@ -131,15 +133,15 @@ export const Tasks: {
   },
   [TaskGroup.CAPTURE_LOCATION]: {
     icon: 'share_location',
-    label: 'Capture location',
-    placeholder: 'Instructions',
-    requiredMessage: 'Instructions are required',
+    label: $localize`:@@app.taskEditor.captureLocation.label:Capture location`,
+    placeholder: $localize`:@@app.taskEditor.captureLocation.placeholder:Instructions`,
+    requiredMessage: 'app.taskEditor.captureLocation.requiredMessage',
     isGeometry: true,
   },
   [TaskGroup.INSTRUCTIONS]: {
     icon: 'list_alt_check',
-    label: 'Instructions',
-    placeholder: 'Instructions',
+    label: $localize`:@@app.taskEditor.instructions.label:Instructions`,
+    placeholder: $localize`:@@app.taskEditor.instructions.placeholder:Instructions`,
   },
 };
 
