@@ -12,7 +12,7 @@
     "app.labels.signOut": " Sign out ",
     "app.labels.manageSurvey": "Manage survey",
     "app.labels.cancel": " Cancel ",
-    "app.labels.publishChanges": " Publish changes {$START_TAG_MAT_ICON}{$START_TAG_MAT_SPINNER}{$CLOSE_TAG_MAT_SPINNER}{$CLOSE_TAG_MAT_ICON}",
+    "app.labels.publishChanges": "Publish changes",
     "app.labels.termsOfService": "Terms of service",
     "app.labels.about": "About",
     "app.dialogs.importSites.importingSites": "Importing sites...",
