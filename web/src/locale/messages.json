@@ -105,6 +105,7 @@
     "app.cards.dataSharingAgreement.title": "Data sharing agreement",
     "app.labels.customTerms": "Custom terms",
     "app.labels.deleteSurvey": "Delete survey",
+    "app.cards.deleteSurvey.title": "Delete survey",
     "app.cards.deleteSurvey.description": "Permanently delete survey and associated data",
     "app.labels.tasks": "Tasks",
     "app.labels.sites": "Sites",
