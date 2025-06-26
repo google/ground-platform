@@ -38,7 +38,7 @@
     </mat-card-header>
 
     <mat-card-content>
-      <div [innerHtml]="dataSharingTermsDetails.description | translate"></div>
+      <div i18n="@@app.cards.dataSharingAgreement.description"></div>
 
       <div *ngIf="dataSharingTermsDetails.customText as customText">
         <div class="card-subtitle" i18n="@@app.labels.customTerms">Custom terms</div>
