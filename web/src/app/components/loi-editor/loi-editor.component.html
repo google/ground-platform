@@ -18,8 +18,13 @@
   <div class="loi-editor-card">
     <div class="loi-editor-card-row">
       <div class="loi-editor-card-row-content">
-        <div class="loi-editor-card-row-title">Free-form data collection</div>
-        <div class="loi-editor-card-row-subtitle">Allow data collectors to add and collect data about new locations as they go.</div>
+        <div class="loi-editor-card-row-title" i18n="@@app.cards.freeForm.title">
+          Free-form data collection
+        </div>
+
+        <div class="loi-editor-card-row-subtitle" i18n="@@app.cards.freeForm.description">
+          Allow data collectors to add and collect data about new locations as they go.
+        </div>
       </div>
 
       <div class="loi-editor-card-actions">
@@ -36,8 +41,13 @@
   <div class="loi-editor-card" *ngIf="canImport">
     <div class="loi-editor-card-row">
       <div class="loi-editor-card-row-content">
-        <div class="loi-editor-card-row-title">Predefined sample sites</div>
-        <div class="loi-editor-card-row-subtitle">Import areas or points of interest for which data should be collected.</div>
+        <div class="loi-editor-card-row-title" i18n="@@app.cards.predefinedSampleSites.title">
+          Predefined sample sites
+        </div>
+
+        <div class="loi-editor-card-row-subtitle" i18n="@@app.cards.predefinedSampleSites.description">
+          Import areas or points of interest for which data should be collected.
+        </div>
       </div>
 
       <div
@@ -50,7 +60,8 @@
           (click)="importLois()"
         >
           <mat-icon class="material-symbols-outlined">input</mat-icon>
-          Import
+
+          <span i18n="@@app.labels.import">Import</span>
         </button>
 
         <button *ngIf="lois.size > 0"
@@ -59,7 +70,8 @@
           (click)="clearLois()"
         >
           <mat-icon class="material-symbols-outlined">delete</mat-icon>
-          Delete all
+
+          <span i18n="@@app.labels.deleteAll">Delete all</span>
         </button>
       </div>
     </div>

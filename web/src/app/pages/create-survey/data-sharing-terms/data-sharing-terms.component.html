@@ -19,20 +19,17 @@
     [id]="typeControlKey"
     [formControlName]="typeControlKey"
   >
-    <mat-card *ngFor="let option of dataSharingTermsOptions"
-      class="data-sharing-terms-card"
-    >
+    <mat-card *ngFor="let option of dataSharingTermsOptions" class="data-sharing-terms-card">
       <mat-card-content>
         <mat-radio-button class="option-radio-button" [value]="option.value">
           <span class="data-sharing-label">{{ option.label }}</span>
-          <p [innerHtml]="option.descriptionHtml"></p>
+          <p [innerHtml]="option.description"></p>
         </mat-radio-button>
         <div *ngIf="shouldShowCustomizeAgreementSection(option.value)">
-          <h3 id="customize-agreement-header"
-            class="field-header">
-            Customize agreement
+          <h3 id="customize-agreement-header" class="field-header">
+            <span i18n="@@app.labels.customizeAgreement">Customize agreement</span>
           </h3>
-          <p class="field-description">
+          <p class="field-description" i18n="@@app.texts.customAgreement">
             Create a custom agreement which will be shown to data collectors before they can
             collect data. Data collectors must agree to the terms of this agreement.
           </p>
@@ -40,10 +37,11 @@
             <textarea matInput
               formControlName="customText"
               placeholder="Enter the terms of your custom agreement..."
+              i18n-placeholder="@@app.forms.placeholders.customAgreement"
               aria-labelledby="customize-agreement-header">
             </textarea>
             <mat-error *ngIf="customTextControl.touched && customTextControl.invalid">
-              <ng-container *ngIf="customTextControl.getError('required')">
+              <ng-container *ngIf="customTextControl.getError('required')" i18n="@@app.labels.required">
                 Required
               </ng-container>
             </mat-error>

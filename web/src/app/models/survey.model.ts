@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Map as ImmutableMap, List} from 'immutable';
 
 import {AclEntry} from './acl-entry.model';
@@ -31,15 +33,15 @@ export enum DataSharingType {
 export const DATA_SHARING_TYPE_DESCRIPTION = new Map<DataSharingType, string>([
   [
     DataSharingType.PRIVATE,
-    'Data collectors must agree to share data with survey organizers',
+    $localize`:@@app.cards.dataSharingTerms.private.description:Data collectors must agree to share data with survey organizers`,
   ],
   [
     DataSharingType.PUBLIC,
-    'Data collectors waive all rights to data collected as part of this survey under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>. Survey organizers may share data freely.',
+    $localize`:@@app.cards.dataSharingTerms.public.description:Data collectors waive all rights to data collected as part of this survey under <a href="https://creativecommons.org/public-domain/cc0/" target="_blank">the CC0 license</a>. Survey organizers may share data freely.`,
   ],
   [
     DataSharingType.CUSTOM,
-    'Define custom terms that data collectors must agree to',
+    $localize`:@@app.cards.dataSharingTerms.custom.description:Define custom terms that data collectors must agree to`,
   ],
 ]);
 

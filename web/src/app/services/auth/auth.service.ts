@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Injectable} from '@angular/core';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFireFunctions} from '@angular/fire/compat/functions';
@@ -42,9 +44,18 @@ const ANONYMOUS_USER: User = {
 
 /** Roles and labels for select drop-downs. */
 export const ROLE_OPTIONS = [
-  {label: 'Data collector', value: Role.DATA_COLLECTOR},
-  {label: 'Survey organizer', value: Role.SURVEY_ORGANIZER},
-  {label: 'Viewer', value: Role.VIEWER},
+  {
+    label: $localize`:@@app.labels.roles.dataCollector:Data collector`,
+    value: Role.DATA_COLLECTOR,
+  },
+  {
+    label: $localize`:@@app.labels.roles.surveyOrganizer:Survey organizer`,
+    value: Role.SURVEY_ORGANIZER,
+  },
+  {
+    label: $localize`:@@app.labels.roles.viewer:Viewer`,
+    value: Role.VIEWER,
+  },
 ];
 
 @Injectable({

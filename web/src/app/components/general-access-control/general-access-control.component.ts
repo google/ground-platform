@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Component} from '@angular/core';
 import {Map} from 'immutable';
 import {Subscription} from 'rxjs';
@@ -26,27 +28,25 @@ const generalAccessLabels = Map<SurveyGeneralAccess, any>([
   [
     SurveyGeneralAccess.RESTRICTED,
     {
-      description: 'Only people with access can open with the link',
+      description: $localize`:@@app.texts.generalAccess.restricted:Only people with access can open with the link`,
       icon: 'lock',
-      label: 'Restricted',
+      label: $localize`:@@app.labels.restricted:Restricted`,
     },
   ],
   [
     SurveyGeneralAccess.UNLISTED,
     {
-      description:
-        'Everyone with the survey QR code or link can collect data for this survey',
+      description: $localize`:@@app.texts.generalAccess.unlisted:Everyone with the survey QR code or link can collect data for this survey`,
       icon: 'account_circle',
-      label: 'Unlisted',
+      label: $localize`:@@app.labels.unlisted:Unlisted`,
     },
   ],
-
   [
     SurveyGeneralAccess.PUBLIC,
     {
-      description: 'Everyone can collect data for this survey',
+      description: $localize`:@@app.texts.generalAccess.public:Everyone can collect data for this survey`,
       icon: 'public',
-      label: 'Public',
+      label: $localize`:@@app.labels.public:Public`,
     },
   ],
 ]);

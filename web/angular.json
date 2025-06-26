@@ -14,6 +14,9 @@
         "locales": {
           "fr": {
             "translation": "src/locale/messages.fr.json"
+          },
+          "vi": {
+            "translation": "src/locale/messages.vi.json"
           }
         }
       },
@@ -97,6 +100,9 @@
             },
             "fr": {
               "localize": ["fr"]
+            },
+            "vi": {
+              "localize": ["vi"]
             }
           }
         },
@@ -117,6 +123,9 @@
             },
             "fr": {
               "buildTarget": "web:build:dev,fr"
+            },
+            "vi": {
+              "buildTarget": "web:build:dev,vi"
             }
           }
         },

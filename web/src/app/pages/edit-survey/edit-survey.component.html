@@ -21,7 +21,7 @@
   <div id="loading-spinner" class="loading-spinner" *ngIf="!survey">
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label">Loading survey...</p>
+      <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
     </div>
   </div>
   <div *ngIf="survey" class="container">
@@ -35,7 +35,9 @@
         <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
           quick_reference_all
         </mat-icon>
-        <span matListItemTitle>Survey details</span>
+        <span matListItemTitle i18n="@@app.editSurvey.surveyDetails.title">
+          Survey details
+        </span>
       </a>
 
       <a
@@ -47,7 +49,9 @@
         <mat-icon class="material-symbols-outlined button-icon" matListItemIcon>
           group
         </mat-icon>
-        <span matListItemTitle>Sharing</span>
+        <span matListItemTitle i18n="@@app.editSurvey.sharing.title">
+          Sharing
+        </span>
       </a>
 
       <a
@@ -64,7 +68,7 @@
       </a>
 
       <div class="job-label-and-add-button">
-        <h3 matSubheader class="job-label">Jobs</h3>
+        <h3 matSubheader class="job-label" i18n="@@app.labels.jobs">Jobs</h3>
         <button
           mat-icon-button
           id="add-button"
@@ -102,6 +106,7 @@
           <button
             mat-menu-item
             id="rename-button-{{ i }}"
+            i18n="@@app.labels.rename"
             (click)="renameJob(job)"
           >
             Rename
@@ -109,6 +114,7 @@
           <button
             mat-menu-item
             id="duplicate-button-{{ i }}"
+            i18n="@@app.labels.duplicate"
             (click)="duplicateJob(job)"
           >
             Duplicate
@@ -117,6 +123,7 @@
           <button
             mat-menu-item
             id="delete-button-{{ i }}"
+            i18n="@@app.labels.remove"
             (click)="deleteJob(job)"
           >
             Remove

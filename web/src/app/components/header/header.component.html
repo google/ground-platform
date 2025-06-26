@@ -38,7 +38,7 @@
 
       <mat-menu #editSurveyMenu="matMenu">
         <a (click)="onEditSurveyClick()">
-          <button mat-menu-item>Manage survey</button>
+          <button mat-menu-item i18n="@@app.labels.manageSurvey">Manage survey</button>
         </a>
       </mat-menu>
 
@@ -46,6 +46,7 @@
         <button
           mat-button
           class="cancel-edit-button"
+          i18n="@@app.labels.cancel"
           (click)="onCancelEditSurveyClick()"
         >
           Cancel
@@ -57,7 +58,8 @@
           [disabled]="isPublishingChanges"
           (click)="onFinishEditSurveyClick()"
         >
-          Publish changes
+          <span i18n="@@app.labels.publishChanges">Publish changes</span>
+
           <mat-icon *ngIf="isPublishingChanges">
             <mat-spinner diameter="18"></mat-spinner>
           </mat-icon>
@@ -74,11 +76,11 @@
 
       <mat-menu #infoMenu="matMenu">
         <a *ngIf="user.isAuthenticated" (click)="onTermsOfServiceClick()">
-          <button mat-menu-item>Terms of Service</button>
+          <button mat-menu-item i18n="@@app.labels.termsOfService">Terms of service</button>
         </a>
 
         <a (click)="onAboutClick()">
-          <button mat-menu-item>About</button>
+          <button mat-menu-item i18n="@@app.labels.about">About</button>
         </a>
       </mat-menu>
     </ng-container>

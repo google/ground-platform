@@ -20,7 +20,7 @@
   <p *ngIf="content">{{ content }}</p>
 
   <mat-form-field *ngIf="[DialogType.AddJob, DialogType.RenameJob].includes(data.dialogType)">
-    <mat-label>Job name</mat-label>
+    <mat-label i18n="@@app.forms.labels.jobName">Job name</mat-label>
 
     <input [id]="jobNameFieldId" matInput [(ngModel)]="data.jobName" />
   </mat-form-field>

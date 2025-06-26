@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
 import {
   Component,
@@ -105,41 +107,42 @@ export const Tasks: {
 } = {
   [TaskGroup.QUESTION]: {
     icon: 'forum',
-    label: 'Answer a question',
-    placeholder: 'Question',
-    requiredMessage: 'Question is required',
+    label: $localize`:@@app.taskEditor.question.label:Answer a question`,
+    placeholder: $localize`:@@app.taskEditor.question.placeholder:Question`,
+    requiredMessage: $localize`:@@app.taskEditor.question.requiredMessage:Question is required`,
   },
   [TaskGroup.PHOTO]: {
     icon: 'photo_camera',
-    label: 'Take a photo',
-    placeholder: 'Instructions',
-    requiredMessage: 'Instructions are required',
+    label: $localize`:@@app.taskEditor.takeAPhoto.label:Take a photo`,
+    placeholder: $localize`:@@app.taskEditor.takeAPhoto.placeholder:Instructions`,
+    requiredMessage: $localize`:@@app.taskEditor.takeAPhoto.requiredMessage:Instructions are required`,
   },
   [TaskGroup.DROP_PIN]: {
     icon: 'pin_drop',
-    label: 'Drop a pin',
-    placeholder: 'Instructions',
-    requiredMessage: 'Instructions are required',
+    label: $localize`:@@app.taskEditor.pinDrop.label:Drop a pin`,
+    placeholder: $localize`:@@app.taskEditor.pinDrop.placeholder:Instructions`,
+    requiredMessage: $localize`:@@app.taskEditor.pinDrop.requiredMessage:Instructions are required`,
     isGeometry: true,
   },
   [TaskGroup.DRAW_AREA]: {
     icon: 'draw',
-    label: 'Draw or walk perimeter',
-    placeholder: 'Instructions',
-    requiredMessage: 'Instructions are required',
+    label: $localize`:@@app.taskEditor.drawArea.label:Draw or walk perimeter`,
+    placeholder: $localize`:@@app.taskEditor.drawArea.placeholder:Instructions`,
+    requiredMessage: $localize`:@@app.taskEditor.drawArea.requiredMessage:Instructions are required`,
     isGeometry: true,
   },
   [TaskGroup.CAPTURE_LOCATION]: {
     icon: 'share_location',
-    label: 'Capture location',
-    placeholder: 'Instructions',
-    requiredMessage: 'Instructions are required',
+    label: $localize`:@@app.taskEditor.captureLocation.label:Capture location`,
+    placeholder: $localize`:@@app.taskEditor.captureLocation.placeholder:Instructions`,
+    requiredMessage: $localize`:@@app.taskEditor.captureLocation.requiredMessage:Instructions are required`,
     isGeometry: true,
   },
   [TaskGroup.INSTRUCTIONS]: {
     icon: 'list_alt_check',
-    label: 'Instructions',
-    placeholder: 'Instructions',
+    label: $localize`:@@app.taskEditor.instructions.label:Instructions`,
+    placeholder: $localize`:@@app.taskEditor.instructions.placeholder:Instructions`,
+    requiredMessage: $localize`:@@app.taskEditor.instructions.requiredMessage:Instructions are required`,
   },
 };
 

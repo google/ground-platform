@@ -17,17 +17,17 @@
 <div class="page">
   <ground-header></ground-header>
 
-  <h1 class="page-title" i18n="@@app.surveys">Surveys</h1>
+  <h1 class="page-title" i18n="@@app.labels.surveys">Surveys</h1>
 
   <div class="filters-container">
     <mat-chip-set aria-label="Survey filter">
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL, label: 'All' }"></ng-container>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.ALL }"></ng-container>
 
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock', label: 'Restricted' }"></ng-container>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.RESTRICTED, icon: 'lock' }"></ng-container>
 
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.UNLISTED, icon: 'account_circle', label: 'Unlisted' }"></ng-container>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.UNLISTED, icon: 'account_circle' }"></ng-container>
 
-      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.PUBLIC, icon: 'public', label: 'Public' }"></ng-container>
+      <ng-container *ngTemplateOutlet="filterChip; context: { filter: SurveyListFilter.PUBLIC, icon: 'public' }"></ng-container>
     </mat-chip-set>
   </div>
 
@@ -43,10 +43,12 @@
           <mat-icon mat-card-avatar class="add-icon">add_24px</mat-icon>
         </div>
 
-        <mat-card-title class="survey-title">Create survey</mat-card-title>
+        <mat-card-title class="survey-title" i18n="@@app.labels.createSurvey">
+          Create survey
+        </mat-card-title>
 
-        <mat-card-subtitle class="survey-description">
-          Define jobs and sites for data collectors
+        <mat-card-subtitle class="survey-description" i18n="@@app.labels.createSurveyDescription">
+           Define jobs and sites for data collectors
         </mat-card-subtitle>
       </mat-card-header>
     </mat-card>
@@ -68,7 +70,7 @@
           </ng-container>
         </mat-icon>
 
-        <mat-card-title class="survey-title">{{survey.title}}</mat-card-title>
+        <mat-card-title class="survey-title">{{ survey.title }}</mat-card-title>
 
         <mat-card-subtitle class="survey-description">
           {{ survey.description }}
@@ -78,16 +80,19 @@
   </div>
 </div>
 
-<ng-template #filterChip let-filter="filter", let-icon="icon", let-label="label">
+<ng-template #filterChip let-filter="filter", let-icon="icon">
   <mat-chip
     *ngIf="filterCounters.get(filter)"
     [disabled]="currentFilter === filter"
     (click)="handleFilterSelection(filter)"
   >
     <mat-icon *ngIf="icon || currentFilter === filter" fontSet="material-symbols-outlined" matChipAvatar>
-      {{currentFilter !== filter ? icon : "check"}}
+      {{ currentFilter !== filter ? icon : "check" }}
     </mat-icon>
 
-    <span>{{label}}</span>
+    <span *ngIf="filter === SurveyListFilter.ALL" i18n="@@app.labels.all">All</span>
+    <span *ngIf="filter === SurveyListFilter.RESTRICTED" i18n="@@app.labels.restricted">Restricted</span>
+    <span *ngIf="filter === SurveyListFilter.UNLISTED" i18n="@@app.labels.unlisted">Unlisted</span>
+    <span *ngIf="filter === SurveyListFilter.PUBLIC" i18n="@@app.labels.public">Public</span>
   </mat-chip>
 </ng-template>

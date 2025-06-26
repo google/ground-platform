@@ -22,7 +22,9 @@
     *ngFor="let formGroup of formArray.controls; let i = index;"
     [ngClass]="{'loi-task-container': formGroup.get('addLoiTask').value || formGroup.get('condition')}"
   >
-    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label">When adding a new collection site...</div>
+    <div *ngIf="formGroup.get('addLoiTask').value" class="loi-task-label" i18n="@@app.texts.whenAdding">
+      When adding a new collection site...
+    </div>
 
     <div *ngIf="formGroup.get('condition')">
       <ground-task-condition-form
@@ -44,7 +46,7 @@
 </div>
 
 <div class="add-task-buttons-container">
-  <div id="tasks-help-text">Add a task</div>
+  <div id="tasks-help-text" i18n="@@app.labels.addATask">Add a task</div>
 
   <div id="add-task-buttons-list">
     <add-task-button

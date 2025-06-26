@@ -17,15 +17,16 @@
 <div class="page">
   <ground-header></ground-header>
   <div class="page-content">
-    <h1 class="page-title">Terms of Service</h1>
+    <h1 class="page-title" i18n="@@app.labels.termsOfService">Terms of service</h1>
     <div class="terms-text-container" [innerHTML]="termsOfServiceText"></div>
     <div class="action-buttons">
       @if(!hasAcceptedTos) {
-        <mat-checkbox [(ngModel)]="isTermsOfServiceChecked">
+        <mat-checkbox i18n="@@app.labels.agreeWithTermsOfService" [(ngModel)]="isTermsOfServiceChecked">
           I have read and agree with terms of service.
         </mat-checkbox>
         <button
           mat-flat-button
+          i18n="@@app.labels.continue"
           (click)="onContinueButtonClick()"
           [disabled]="!isTermsOfServiceChecked"
         >
@@ -39,7 +40,7 @@
           (click)="onBackButtonClick()"
         >
           <mat-icon>arrow_back</mat-icon>
-          <span>Back</span>
+          <span i18n="@@app.labels.back">Back</span>
         </button>
       }
     </div>

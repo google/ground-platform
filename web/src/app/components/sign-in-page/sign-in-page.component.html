@@ -13,6 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
 <ground-header></ground-header>
 <div class="body-container">
   <mat-card appearance="outlined" class="card">
@@ -21,7 +22,7 @@
         <img class="logo" alt="Ground logo" src="/assets/img/logo.svg" />
       </div>
       <p class="title">Ground</p>
-      <p class="cta" *ngIf="!(isAuthenticated$() | async)">
+      <p class="cta" *ngIf="!(isAuthenticated$() | async)" i18n="@@app.login.signIn">
         Sign in to continue
       </p>
       <div class="buttons">
