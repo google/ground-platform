@@ -33,6 +33,7 @@
     "app.cards.generalAccess.title": "General access",
     "app.cards.dataVisibility.title": "Data visibility",
     "app.cards.dataVisibility.description": "Allow data collectors to see each others' data",
+    "app.login.signIn": " Sign in to continue ",
     "app.labels.surveys": "Surveys",
     "app.labels.createSurvey": " Create survey ",
     "app.labels.createSurveyDescription": " Define jobs and sites for data collectors ",
