@@ -95,7 +95,7 @@
     "app.cards.dataSharingTerms.public.title": "Public",
     "app.cards.dataSharingTerms.custom.title": "Custom",
     "app.forms.labels.jobName": "Job name",
-    "app.forms.placeholders.jobName": "Job name",
+    "app.forms.placeholders.jobName": "Ex. Map production areas",
     "app.labels.job": "Job",
     "app.forms.labels.surveyName": "Survey name",
     "app.forms.placeholders.surveyName": "Ex. Regenerative agriculture survey",
