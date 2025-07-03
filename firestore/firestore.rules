@@ -168,11 +168,6 @@
       allow read: if isSignedIn();
     }
 
-    // Allow all users to access Access Denied config.
-    match /config/accessDenied {
-      allow read: if isSignedIn();
-    }
-
     // Apply survey-level permissions to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
       // Allow if user has read access to the survey and the LOI.
