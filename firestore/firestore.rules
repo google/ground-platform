@@ -61,7 +61,7 @@
     /**
      * Returns true iff the user's email is listed in the passlist (either explicitly, or via regex).
      */
-    function inPasslist() {
+    function isPasslisted() {
       return request.auth.token.email.matches(getPassRegexp())
         || exists(/databases/$(database)/documents/passlist/$(request.auth.token.email));
     }
@@ -160,7 +160,7 @@
     match /surveys/{surveyId} {
       allow read: if canViewSurvey(resource.data);
       allow write: if canManageSurvey(resource.data);
-      allow create: if isSignedIn() && inPasslist();
+      allow create: if isSignedIn() && isPasslisted();
     }
 
     // Allow all signed in users to access Terms of Service and other config.
