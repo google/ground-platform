@@ -24,6 +24,19 @@
     function getSurvey(surveyId) {
       return get(/databases/$(database)/documents/surveys/$(surveyId)).data;
     }
+    /**
+     * Fetches and returns the LOI with the specified id.
+     */
+    function getLoi(surveyId, loiId) {
+      return get(/databases/$(database)/documents/surveys/$(surveyId)/lois/$(loiId)).data;
+    }
+
+    /**
+     * Fetches and returns the submission with the specified id.
+     */
+    function getSubmission(surveyId, submissionId) {
+      return get(/databases/$(database)/documents/surveys/$(surveyId)/submissions/$(submissionId)).data;
+    }
 
     /**
      * Returns true iff all authenticated users can read and contribute
@@ -148,7 +161,7 @@
     // users to see each others' profiles..
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow create, write: if userId == request.auth.uid;
+      allow write: if userId == request.auth.uid;
     }
 
     // All users need to be able to read the passlist for rules to work.
@@ -159,9 +172,9 @@
 
     // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
-      allow read: if canViewSurvey(resource.data);
-      allow write: if canManageSurvey(resource.data);
       allow create: if isSignedIn() && isPasslisted();
+      allow read: if canViewSurvey(resource.data);
+      allow update, delete: if canManageSurvey(getSurvey(surveyId));
     }
 
     // Allow all signed in users to access Terms of Service and other config.
@@ -171,22 +184,22 @@
 
     // Apply survey-level permissions to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      // Allow if user has read access to the survey and the LOI.
-      allow read: if canViewLoi(getSurvey(surveyId), request.resource.data);
       // Allow if user is owner of the new LOI and can collect data.
       allow create: if isLoiOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
+      // Allow if user has read access to the survey and the LOI.
+      allow read: if canViewLoi(getSurvey(surveyId), request.resource.data);
       // Allow if user is owner of the existing LOI or can manage survey.
-      allow write: if isLoiOwner(resource.data) || canManageSurvey(getSurvey(surveyId));
+      allow update, delete: if isLoiOwner(getLoi(surveyId, loiId)) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply survey-level permissions to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      // Allow if user has read access to the survey and the submission.
-      allow read: if canViewSubmission(getSurvey(surveyId), request.resource);
       // Allow if user is owner of the new submission and can collect data.
       allow create: if isSubmissionOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
+      // Allow if user has read access to the survey and the submission.
+      allow read: if canViewSubmission(getSurvey(surveyId), request.resource);
       // Allow if user is owner of the existing submission or can manage survey.
-      allow write: if isSubmissionOwner(resource.data) || canManageSurvey(getSurvey(surveyId));
+      allow update, delete: if isSubmissionOwner(getSubmission(surveyId, submissionId)) || canManageSurvey(getSurvey(surveyId));
     }
 
     // Apply survey-level permissions to job documents.
@@ -194,7 +207,7 @@
       // Allow if user has read access to the survey.
       allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user can manage survey.
-      allow create, write: if canManageSurvey(getSurvey(surveyId));
+      allow write: if canManageSurvey(getSurvey(surveyId));
     }
   }
 }
