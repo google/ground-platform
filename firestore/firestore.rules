@@ -59,7 +59,7 @@
     }
 
     /**
-     * Returns true iff the user's email is listed in the passlist (either explicitly, or via regex).
+     * Returns true iff the user's email is listed in the passlist or allowed via regex.
      */
     function isPasslisted() {
       return request.auth.token.email.matches(getPassRegexp())
