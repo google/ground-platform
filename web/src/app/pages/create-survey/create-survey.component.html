@@ -21,7 +21,7 @@
   <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label">Loading survey...</p>
+      <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
     </div>
   </div>
 
@@ -81,10 +81,11 @@
     <div class="button-section">
       <div class="left-button-section">
         <button
+          mat-button
           id="back-button"
           class="button"
-          mat-button
           color="primary"
+          i18n="@@app.labels.back"
           (click)="back()"
         >
           Back
@@ -105,7 +106,8 @@
         (click)="continue()"
         [disabled]="!canContinue"
       >
-        {{ createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY ? 'Go to survey' : 'Continue' }}
+        <span *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.goToSurvey">Go to survey</span>
+        <span *ngIf="createSurveyPhase !== CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.continue">Continue</span>
       </button>
       </div>
     </div>

@@ -30,9 +30,10 @@
       <div class="user-display-name">{{ user.displayName }}</div>
       <div class="user-email">{{ user.email }}</div>
       <button
-        class="btn-signout"
         mat-flat-button
+        class="btn-signout"
         color="primary"
+        i18n="@@app.labels.signOut"
         (click)="onSignOut()"
       >
         Sign out
