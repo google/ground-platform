@@ -17,36 +17,23 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    /**
-     * Returns the regular expression matching emails granted access.
-     */
-    function getPassRegexp() {
-      return firestore.get(/databases/(default)/documents/passlist/regexp).data.regexp
-    }
 
     /**
-     * Returns true iff the user's email is explicitly listed in the passlist.
+     * Returns true iff the user is signed in.
      */
-    function inPasslist() {
-      return firestore.exists(/databases/(default)/documents/passlist/$(request.auth.token.email));
-    }
-
-    /**
-     * Returns true iff the user's email matches the passlist regex or
-     * is explicitly listed in the passlist.
-     */
-    function canAccess() {
-      return request.auth != null && (request.auth.token.email.matches(getPassRegexp()) || inPasslist());
+    function isSignedIn() {
+      return request.auth != null;
     }
     
     match /offline-imagery/{allPaths=**} {
       // All authenticated users can read.
-      allow read: if canAccess();
+      allow read: if isSignedIn();
     }
     
     match /user-media/{allPaths=**} {
       // All authenticated users can read.
-      allow create, read, write: if canAccess();
+      // TODO(#1373): Only allow users with permission to access.
+      allow create, read, write: if isSignedIn();
     }    
   }
 }
