@@ -16,20 +16,22 @@
 
 <form [formGroup]="formGroup">
   <mat-form-field class="input" appearance="fill">
-    <mat-label>Survey name</mat-label>
+    <mat-label i18n="@@app.forms.labels.surveyName">Survey name</mat-label>
     <input
       matInput
       [formControlName]="titleControlKey"
       placeholder="Ex. Regenerative agriculture survey"
+      i18n-placeholder="@@app.forms.placeholders.surveyName"
     />
   </mat-form-field>
 
   <mat-form-field class="input" appearance="fill" subscriptSizing="dynamic">
-    <mat-label>Description</mat-label>
+    <mat-label i18n="@@app.forms.labels.surveyDescription">Description</mat-label>
     <input
       matInput
       [formControlName]="descriptionControlKey"
       placeholder="Ex. Self-reporting of community-led regenerative agriculture activities"
+      i18n-placeholder="@@app.forms.placeholders.surveyDescription"
     />
   </mat-form-field>
 </form>

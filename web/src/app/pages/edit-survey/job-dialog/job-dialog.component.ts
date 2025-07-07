@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
@@ -38,61 +40,55 @@ export interface DialogConfig {
 
 export const dialogConfigs: Record<DialogType, DialogConfig> = {
   [DialogType.AddJob]: {
-    title: 'Add new job',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Create',
+    title: $localize`:@@app.dialogs.addJob.title:Add new job`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.create:Create`,
   },
   [DialogType.RenameJob]: {
-    title: 'Rename job',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Rename',
+    title: $localize`:@@app.dialogs.renameJob.title:Rename job`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.rename:Rename`,
   },
   [DialogType.UndoJobs]: {
-    title: 'Unpublished changes',
-    content:
-      'If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?',
-    backButtonLabel: 'Go back',
-    continueButtonLabel: 'Continue',
+    title: $localize`:@@app.dialogs.unpublishedChanges.title:Unpublished changes`,
+    content: $localize`:@@app.dialogs.unpublishedChanges.content:If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },
   [DialogType.DeleteJob]: {
-    title: 'Delete job',
-    content:
-      'This job and all of its associated data will be deleted. This operation can’t be undone. Are you sure?',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Confirm',
+    title: $localize`:@@app.dialogs.deleteJob.title:Delete job`,
+    content: $localize`:@@app.dialogs.deleteJob.content:This job and all of its associated data will be deleted. This operation can’t be undone. Are you sure?`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
   [DialogType.DeleteLois]: {
-    title: 'Delete predefined sites',
-    content:
-      'All predefined data collection sites and their associated data will be immediately deleted. This action cannot be undone.',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Confirm',
+    title: $localize`:@@app.dialogs.deleteLois.title:Delete predefined sites`,
+    content: $localize`:@@app.dialogs.deleteLois.content:All predefined data collection sites and their associated data will be immediately deleted. This action cannot be undone.`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
   [DialogType.DeleteOption]: {
-    title: 'Delete option',
-    content:
-      'Are you sure you wish to delete this option? All associated data will be lost. This cannot be undone.',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Confirm',
+    title: $localize`:@@app.dialogs.deleteOption.title:Delete option`,
+    content: $localize`:@@app.dialogs.deleteOption.content:Are you sure you wish to delete this option? All associated data will be lost. This cannot be undone.`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
   [DialogType.DeleteSurvey]: {
-    title: 'Delete survey',
-    content:
-      'Are you sure you wish to delete this survey? All associated data will be lost. This cannot be undone.',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Confirm',
+    title: $localize`:@@app.dialogs.deleteSurvey.title:Delete survey`,
+    content: $localize`:@@app.dialogs.deleteSurvey.content:Are you sure you wish to delete this survey? All associated data will be lost. This cannot be undone.`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
   [DialogType.DisableFreeForm]: {
-    title: 'Disable free-form data collection?',
-    content:
-      'Data collector will no longer be able to add new sites for this job. Data will only be collected for existing sites.',
-    backButtonLabel: 'Cancel',
-    continueButtonLabel: 'Confirm',
+    title: $localize`:@@app.dialogs.disableFreeForm.title:Disable free-form data collection?`,
+    content: $localize`:@@app.dialogs.disableFreeForm.content:Data collector will no longer be able to add new sites for this job. Data will only be collected for existing sites.`,
+    backButtonLabel: $localize`:@@app.labels.cancel:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.confirm:Confirm`,
   },
   [DialogType.InvalidSurvey]: {
-    title: 'Fix issues with survey',
-    content: 'To publish changes, fix any outstanding issues with your survey.',
-    backButtonLabel: 'Go back',
+    title: $localize`:@@app.dialogs.invalidSurvey.title:Fix issues with survey`,
+    content: $localize`:@@app.dialogs.invalidSurvey.content:To publish changes, fix any outstanding issues with your survey.`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
   },
 };
 

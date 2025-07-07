@@ -21,17 +21,17 @@
       <img src="/assets/img/access-denied.svg">
 
       <ng-container *ngIf="errorType == ErrorType.GENERIC">
-        <h1>Oops, something went wrong</h1>
+        <h1 i18n="@@app.error.generic">Oops, something went wrong</h1>
 
         <h2>{{error}}</h2>
       </ng-container>
 
       <ng-container *ngIf="errorType == ErrorType.ACCESS_DENIED">
-        <h1>Access denied</h1>
+        <h1 i18n="@@app.error.accessDenied">Access denied</h1>
 
         <h2 *ngIf="accessDeniedMessage.message">{{accessDeniedMessage.message}}</h2>
 
-        <a *ngIf="accessDeniedMessage.link" mat-flat-button color="primary" href="{{accessDeniedMessage.link}}" target="_blank">
+        <a *ngIf="accessDeniedMessage.link" mat-flat-button color="primary" href="{{accessDeniedMessage.link}}" target="_blank" i18n="@@app.error.clickHereToRegister">
           Click here to register
         </a>
       </ng-container>
