@@ -4,14 +4,20 @@ This directory contains configuration files for new Firestore instances. Complet
 
 > **Important:** Before completing the steps listed in this document, follow the instructions provided in [../functions](../functions/README.md) to set up your development environment. 
 
-1. Log into Firebase:
+1. Download and install dependencies.
 
-    ```
-    $ npx firebase login
+    ```sh
+    npm ci
     ```
 
-2. Deploy the Firestore configuration:
+2. Log into Firebase:
 
+    ```sh
+    npx firebase login
     ```
-    $ npx firebase deploy --only firestore --project <firebase-project>
+
+3. Deploy the Firestore configuration:
+
+    ```sh
+    npx firebase deploy --only firestore --project <firebase-project>
     ```
