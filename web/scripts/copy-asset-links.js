@@ -30,7 +30,7 @@ if (existsSync(assertLinksFilepath)) {
     'utf8'
   );
 
-  const wellKnownDir = '../dist/.well-known';
+  const wellKnownDir = '../dist/web/.well-known';
 
   if (!existsSync(wellKnownDir)) {
     mkdirSync(wellKnownDir, { recursive: true });
