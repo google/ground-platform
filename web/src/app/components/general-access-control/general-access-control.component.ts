@@ -41,14 +41,14 @@ const generalAccessLabels = Map<SurveyGeneralAccess, any>([
       label: $localize`:@@app.labels.unlisted:Unlisted`,
     },
   ],
-  [
-    SurveyGeneralAccess.PUBLIC,
-    {
-      description: $localize`:@@app.texts.generalAccess.public:Everyone can collect data for this survey`,
-      icon: 'public',
-      label: $localize`:@@app.labels.public:Public`,
-    },
-  ],
+  // [
+  //   SurveyGeneralAccess.PUBLIC,
+  //   {
+  //     description: $localize`:@@app.texts.generalAccess.public:Everyone can collect data for this survey`,
+  //     icon: 'public',
+  //     label: $localize`:@@app.labels.public:Public`,
+  //   },
+  // ],
 ]);
 
 @Component({

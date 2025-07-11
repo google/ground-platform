@@ -16,14 +16,8 @@
 
 <div class="general-access-control-container">
   <div class="general-access-icon" [ngSwitch]="selectedGeneralAccess">
-    <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.UNLISTED">
-      {{ generalAccessLabels.get(SurveyGeneralAccess.UNLISTED).icon }}
-    </mat-icon>
-    <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.PUBLIC">
-      {{ generalAccessLabels.get(SurveyGeneralAccess.PUBLIC).icon }}
-    </mat-icon>
-    <mat-icon class="material-symbols-outlined" *ngSwitchDefault>
-      {{ generalAccessLabels.get(SurveyGeneralAccess.RESTRICTED).icon }}
+    <mat-icon class="material-symbols-outlined">
+      {{ generalAccessLabels.get(selectedGeneralAccess)?.icon ?? generalAccessLabels.get(SurveyGeneralAccess.RESTRICTED)?.icon }}
     </mat-icon>
   </div>
 
