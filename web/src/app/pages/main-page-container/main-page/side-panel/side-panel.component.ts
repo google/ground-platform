@@ -19,7 +19,7 @@ import {Observable} from 'rxjs';
 
 import {
   NavigationService,
-  SideNavMode,
+  // SideNavMode,
 } from 'app/services/navigation/navigation.service';
 
 @Component({
@@ -28,10 +28,10 @@ import {
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
-  readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
+  // readonly sideNavMode = SideNavMode;
+  // readonly sideNavMode$: Observable<SideNavMode>;
 
   constructor(private navigationService: NavigationService) {
-    this.sideNavMode$ = this.navigationService.getSideNavMode$();
+    // this.sideNavMode$ = this.navigationService.getSideNavMode$();
   }
 }
