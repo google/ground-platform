@@ -300,7 +300,7 @@ export class NavigationService {
   }
 
   getSurveyAppLink(surveyId: string): string {
-    return `${this.document.location.origin}/android/${SURVEY_SEGMENT}/${surveyId}`;
+    return `${this.document.location.origin}/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
   getSidePanelExpanded(): boolean {
