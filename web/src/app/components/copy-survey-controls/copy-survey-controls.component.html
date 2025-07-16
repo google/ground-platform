@@ -30,6 +30,7 @@
 
 <div style="display: none;">
   <qrcode
+    *ngIf="surveyAppLink"
     #qrCodeElement
     [qrdata]="surveyAppLink"
     [colorDark]="'#000000ff'"
@@ -44,4 +45,3 @@
     [width]="300"
   ></qrcode>
 </div>
-

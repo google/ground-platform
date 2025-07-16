@@ -53,6 +53,7 @@ export class NavigationService {
   static readonly ERROR = 'error';
   static readonly ABOUT = 'about';
   static readonly TERMS = 'terms';
+  static readonly ANDROID_SEGMENT = 'android';
 
   private sidePanelExpanded = true;
 
@@ -300,7 +301,7 @@ export class NavigationService {
   }
 
   getSurveyAppLink(surveyId: string): string {
-    return `${this.document.location.origin}/android/${SURVEY_SEGMENT}/${surveyId}`;
+    return `${this.document.location.origin}/${ANDROID_SEGMENT}/${SURVEY_SEGMENT}/${surveyId}`;
   }
 
   getSidePanelExpanded(): boolean {
@@ -335,4 +336,5 @@ const {
   TASK_ID,
   TASK_SEGMENT,
   TERMS,
+  ANDROID_SEGMENT,
 } = NavigationService;
