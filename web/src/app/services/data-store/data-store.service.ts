@@ -179,7 +179,11 @@ export class DataStoreService {
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref
           .where(s.generalAccess, '==', GeneralAccess.UNLISTED)
-          .where(s.ownerId, '==', userId)
+          .where(
+            new FieldPath(s.acl, userEmail),
+            '==',
+            AclRole.SURVEY_ORGANIZER
+          )
       )
       .snapshotChanges()
       .pipe(map(this.documentChangeToSurvey));
