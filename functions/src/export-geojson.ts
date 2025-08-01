@@ -64,6 +64,8 @@ export async function exportGeojsonHandler(
   }
   const {name: jobName} = job;
 
+  const survey = toMessage(surveyDoc.data()!, Pb.Survey);
+
   res.type('application/json');
   res.setHeader(
     'Content-Disposition',
@@ -89,7 +91,7 @@ export async function exportGeojsonHandler(
     try {
       const loi = toMessage(row.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(loi, ownerId)) {
+      if (isAccessibleLoi(survey, loi, ownerId)) {
         writeRow(jsonStream, loi);
       }
     } catch (e) {
@@ -118,7 +120,15 @@ function writeRow(jsonStream: any, loi: Pb.LocationOfInterest) {
 /**
  * Checks if a Location of Interest (LOI) is accessible to a given user.
  */
-function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId?: string) {
+function isAccessibleLoi(
+  survey: Pb.ISurvey,
+  loi: Pb.ILocationOfInterest,
+  ownerId?: string
+) {
+  if (
+    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS
+  )
+    return true;
   const isFieldData = loi.source === Pb.LocationOfInterest.Source.FIELD_DATA;
   return ownerId ? isFieldData && loi.ownerId === ownerId : true;
 }
