@@ -76,8 +76,8 @@ export class SurveyService {
     if (!user) {
       return new Observable<List<Survey>>();
     }
-    const {email: userEmail, id: userId} = user;
-    return this.dataStore.loadAccessibleSurveys$(userEmail, userId);
+    const {email: userEmail} = user;
+    return this.dataStore.loadAccessibleSurveys$(userEmail);
   }
 
   /**
