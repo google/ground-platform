@@ -153,11 +153,8 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the list of surveys accessible
    * to the specified user.
    */
-  loadAccessibleSurveys$(
-    userEmail: string,
-    userId: string
-  ): Observable<List<Survey>> {
-    const restrictedSurveys$ = this.db
+  loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
+    const accessibleRestrictedSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath(s.acl, userEmail), 'in', [
           AclRole.VIEWER,
@@ -175,11 +172,15 @@ export class DataStoreService {
         )
       );
 
-    const unlistedSurveys$ = this.db
+    const accessibleUnlistedSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref
           .where(s.generalAccess, '==', GeneralAccess.UNLISTED)
-          .where(s.ownerId, '==', userId)
+          .where(
+            new FieldPath(s.acl, userEmail),
+            '==',
+            AclRole.SURVEY_ORGANIZER
+          )
       )
       .snapshotChanges()
       .pipe(map(this.documentChangeToSurvey));
@@ -192,12 +193,12 @@ export class DataStoreService {
       .pipe(map(this.documentChangeToSurvey));
 
     return combineLatest([
-      restrictedSurveys$,
-      unlistedSurveys$,
+      accessibleRestrictedSurveys$,
+      accessibleUnlistedSurveys$,
       publicSurveys$,
     ]).pipe(
-      map(([restrictedSurveys, unlistedSurveys, publicSurveys]) =>
-        List([...restrictedSurveys, ...unlistedSurveys, ...publicSurveys])
+      map(([restricted, unlisted, publicSurveys]) =>
+        List([...restricted, ...unlisted, ...publicSurveys])
       )
     );
   }
