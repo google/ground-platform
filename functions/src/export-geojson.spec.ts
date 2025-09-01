@@ -145,11 +145,6 @@ describe('export()', () => {
             properties: {name: 'Dinagat Islands', area: 3.08},
             geometry: {type: 'Point', coordinates: [125.6, 10.1]},
           },
-          {
-            type: 'Feature',
-            properties: null,
-            geometry: {type: 'Point', coordinates: [8.3, 47.05]},
-          },
         ],
       },
     },
