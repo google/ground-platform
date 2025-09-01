@@ -108,11 +108,10 @@ function writeRow(jsonStream: any, loi: Pb.LocationOfInterest) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
     return;
   }
-  const geoJsonGeometry = toGeoJsonGeometry(loi.geometry);
   const row = {
     type: 'Feature',
     properties: propertiesPbToModel(loi.properties).toObject(),
-    geometry: geoJsonGeometry,
+    geometry: toGeoJsonGeometry(loi.geometry),
   };
   jsonStream.write(row);
 }
