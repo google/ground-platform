@@ -28,6 +28,11 @@ import {
   AngularFireFunctionsModule,
   USE_EMULATOR as USE_FUNCTIONS_EMULATOR,
 } from '@angular/fire/compat/functions';
+import {
+  AngularFireRemoteConfigModule,
+  DEFAULTS as RC_DEFAULTS,
+  SETTINGS as RC_SETTINGS,
+} from '@angular/fire/compat/remote-config';
 import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -59,6 +64,14 @@ initializeApp(environment.firebase);
       provide: FIRESTORE_SETTINGS,
       useValue: {ignoreUndefinedProperties: true},
     },
+    {
+      provide: RC_SETTINGS,
+      useValue: {minimumFetchIntervalMillis: 3600000},
+    },
+    {
+      provide: RC_DEFAULTS,
+      useValue: {play_store_id: ''},
+    },
     // Emulator ports defined in ../firebase.local.json
     // TODO(#979): Set up auth emulator and enable rules.
     {
@@ -83,6 +96,7 @@ initializeApp(environment.firebase);
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireFunctionsModule,
+    AngularFireRemoteConfigModule,
     AngularFireStorageModule,
     BrowserAnimationsModule,
     BrowserModule,
