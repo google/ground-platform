@@ -22,7 +22,6 @@ import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
-// import {QuerySnapshot} from 'firebase-admin/firestore';
 import {timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
@@ -82,24 +81,6 @@ export async function exportCsvHandler(
         Object.keys(loi[10] || {}).forEach(key => loiProperties.add(key));
       })
     );
-    // snapshot.forEach(doc => {
-    //   // const loi = toMessage(doc.data(), Pb.LocationOfInterest);
-    //   const loi = doc.data() as {
-    //     5: string;
-    //     9: number;
-    //     10: {[key: string]: any};
-    //   };
-    //   // if (loi instanceof Error) return;
-    //   if (ownerId ? loi[9] === 2 && loi[5] === ownerId : true) return;
-    //   // if (!isAccessibleLoi(loi, ownerId)) return;
-    //   // const properties = loi.properties;
-    //   // for (const key of Object.keys(properties || {})) {
-    //   //   loiProperties.add(key);
-    //   // }
-    //   Object.keys(loi[10] || {}).forEach(key => loiProperties.add(key));
-    // });
-    // a += 1000;
-    // console.log('Processed: ', a);
     lastVisible = snapshot.docs[snapshot.docs.length - 1];
     query = query.startAfter(lastVisible);
   } while (lastVisible);
@@ -313,23 +294,9 @@ function getFileName(jobName: string | null) {
   return `${fileBase}.csv`;
 }
 
-// function createProperySetFromSnapshot(
-//   snapshot: QuerySnapshot,
-//   ownerId?: string
-// ): Set<string> {
-//   const allKeys = new Set<string>();
-//   snapshot.forEach(doc => {
-//     const loi = toMessage(doc.data(), Pb.LocationOfInterest);
-//     if (loi instanceof Error) return;
-//     if (!isAccessibleLoi(loi, ownerId)) return;
-//     const properties = loi.properties;
-//     for (const key of Object.keys(properties || {})) {
-//       allKeys.add(key);
-//     }
-//   });
-//   return allKeys;
-// }
-
+/**
+ * Retrieves the values of specified properties from a LocationOfInterest object.
+ */
 function getPropertiesByName(
   loi: Pb.LocationOfInterest,
   properties: Set<string | number>
