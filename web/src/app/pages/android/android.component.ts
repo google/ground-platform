@@ -48,7 +48,7 @@ export class AndroidPageComponent implements OnInit {
 
     if (!playStoreId) return;
 
-    const timeout = 1500; // ms
+    const timeout = 1500;
 
     // Fallback: redirect to Play Store if app doesn't open
     const fallback = setTimeout(() => {

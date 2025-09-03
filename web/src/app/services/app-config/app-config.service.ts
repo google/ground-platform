@@ -18,6 +18,9 @@ import {Injectable} from '@angular/core';
 import {AngularFireRemoteConfig} from '@angular/fire/compat/remote-config';
 import {Observable, from, switchMap} from 'rxjs';
 
+/**
+ * Service for fetching and managing app configuration from Firebase Remote Config.
+ */
 @Injectable({
   providedIn: 'root',
 })
