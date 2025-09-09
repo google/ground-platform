@@ -24,7 +24,7 @@ import {
 } from './testing/http-test-helpers';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import HttpStatus from 'http-status-codes';
-import {SURVEY_ORGANIZER_ROLE} from './common/auth';
+import {DATA_COLLECTOR_ROLE} from './common/auth';
 import {resetDatastore} from './common/context';
 import {Firestore} from 'firebase-admin/firestore';
 import {exportGeojsonHandler} from './export-geojson';
@@ -46,11 +46,13 @@ const op = registry.getFieldIds(Pb.Task.MultipleChoiceQuestion.Option);
 describe('export()', () => {
   let mockFirestore: Firestore;
   const email = 'somebody@test.it';
+  const userId = 'user5000';
   const survey = {
     [sv.name]: 'Test survey',
     [sv.acl]: {
-      [email]: SURVEY_ORGANIZER_ROLE,
+      [email]: DATA_COLLECTOR_ROLE,
     },
+    [sv.dataVisibility]: Pb.Survey.DataVisibility.CONTRIBUTOR_AND_ORGANIZERS,
   };
   const job1 = {
     id: 'job123',
@@ -123,10 +125,25 @@ describe('export()', () => {
       [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
     },
     [l.submissionCount]: 0,
-    [l.source]: Pb.LocationOfInterest.Source.IMPORTED,
+    [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
       name: {[pr.stringValue]: 'Dinagat Islands'},
       area: {[pr.numericValue]: 3.08},
+    },
+    [l.ownerId]: userId,
+  };
+  const pointLoi2 = {
+    id: 'loi200',
+    [l.id]: 'loi200',
+    [l.jobId]: job1.id,
+    [l.customTag]: 'POINT_002',
+    [l.geometry]: {
+      [g.point]: {[p.coordinates]: {[c.latitude]: 47.05, [c.longitude]: 8.3}},
+    },
+    [l.submissionCount]: 0,
+    [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
+    [l.properties]: {
+      name: {[pr.stringValue]: 'Luzern'},
     },
   };
   const testCases = [
@@ -135,7 +152,7 @@ describe('export()', () => {
       jobId: job1.id,
       survey: survey,
       jobs: [job1],
-      lois: [pointLoi1],
+      lois: [pointLoi1, pointLoi2],
       expectedFilename: 'test-job.geojson',
       expectedGeojson: {
         type: 'FeatureCollection',
@@ -144,11 +161,6 @@ describe('export()', () => {
             type: 'Feature',
             properties: {name: 'Dinagat Islands', area: 3.08},
             geometry: {type: 'Point', coordinates: [125.6, 10.1]},
-          },
-          {
-            type: 'Feature',
-            properties: null,
-            geometry: {type: 'Point', coordinates: [8.3, 47.05]},
           },
         ],
       },
@@ -164,38 +176,44 @@ describe('export()', () => {
     resetDatastore();
   });
 
-  testCases.forEach(({desc, jobId, survey, jobs, lois, expectedFilename}) =>
-    it(desc, async () => {
-      // Populate database.
-      mockFirestore.doc(`surveys/${survey.id}`).set(survey);
-      jobs?.forEach(({id, ...job}) =>
-        mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
-      );
-      lois?.forEach(({id, ...loi}) =>
-        mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
-      );
+  testCases.forEach(
+    ({desc, jobId, survey, jobs, lois, expectedFilename, expectedGeojson}) =>
+      it(desc, async () => {
+        // Populate database.
+        mockFirestore.doc(`surveys/${survey.id}`).set(survey);
+        jobs?.forEach(({id, ...job}) =>
+          mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
+        );
+        lois?.forEach(({id, ...loi}) =>
+          mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
+        );
 
-      // Build mock request and response.
-      const req = await createGetRequestSpy({
-        url: '/exportGeojson',
-        query: {
-          survey: survey.id,
-          job: jobId,
-        },
-      });
-      const chunks: string[] = [];
-      const res = createResponseSpy(chunks);
+        // Build mock request and response.
+        const req = await createGetRequestSpy({
+          url: '/exportGeojson',
+          query: {
+            survey: survey.id,
+            job: jobId,
+          },
+        });
+        const chunks: string[] = [];
+        const res = createResponseSpy(chunks);
 
-      // Run export handler.
-      await exportGeojsonHandler(req, res, {email} as DecodedIdToken);
+        // Run export handler.
+        await exportGeojsonHandler(req, res, {
+          email,
+          uid: userId,
+        } as DecodedIdToken);
 
-      // Check post-conditions.
-      expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
-      expect(res.type).toHaveBeenCalledOnceWith('application/json');
-      expect(res.setHeader).toHaveBeenCalledOnceWith(
-        'Content-Disposition',
-        `attachment; filename=${expectedFilename}`
-      );
-    })
+        // Check post-conditions.
+        expect(res.status).toHaveBeenCalledOnceWith(HttpStatus.OK);
+        expect(res.type).toHaveBeenCalledOnceWith('application/json');
+        expect(res.setHeader).toHaveBeenCalledOnceWith(
+          'Content-Disposition',
+          `attachment; filename=${expectedFilename}`
+        );
+        const output = JSON.parse(chunks.join(''));
+        expect(output).toEqual(expectedGeojson);
+      })
   );
 });
