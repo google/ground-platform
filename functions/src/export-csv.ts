@@ -66,9 +66,12 @@ export async function exportCsvHandler(
     return;
   }
   const {name: jobName} = job;
+
+  const survey = toMessage(surveyDoc.data()!, Pb.Survey);
+
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
   const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);
-  const loiProperties = createProperySetFromSnapshot(snapshot);
+  const loiProperties = createProperySetFromSnapshot(snapshot, survey, ownerId);
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -93,7 +96,7 @@ export async function exportCsvHandler(
       const [loiDoc, submissionDoc] = row;
       const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(loi, ownerId) && submissionDoc) {
+      if (isAccessibleLoi(survey, loi, ownerId) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
         writeRow(csvStream, loiProperties, tasks, loi, submission);
@@ -179,7 +182,15 @@ function toWkt(geometry: Pb.IGeometry): string {
 /**
  * Checks if a Location of Interest (LOI) is accessible to a given user.
  */
-function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId?: string) {
+function isAccessibleLoi(
+  survey: Pb.ISurvey,
+  loi: Pb.ILocationOfInterest,
+  ownerId?: string
+) {
+  if (
+    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS
+  )
+    return true;
   const isFieldData = loi.source === Pb.LocationOfInterest.Source.FIELD_DATA;
   return ownerId ? isFieldData && loi.ownerId === ownerId : true;
 }
@@ -279,13 +290,14 @@ function getFileName(jobName: string | null) {
 
 function createProperySetFromSnapshot(
   snapshot: QuerySnapshot,
+  survey: Pb.ISurvey,
   ownerId?: string
 ): Set<string> {
   const allKeys = new Set<string>();
   snapshot.forEach(doc => {
     const loi = toMessage(doc.data(), Pb.LocationOfInterest);
     if (loi instanceof Error) return;
-    if (!isAccessibleLoi(loi, ownerId)) return;
+    if (!isAccessibleLoi(survey, loi, ownerId)) return;
     const properties = loi.properties;
     for (const key of Object.keys(properties || {})) {
       allKeys.add(key);
