@@ -94,11 +94,19 @@ function getRole(
   return acl && user.email ? acl[user.email] : null;
 }
 
-export function canExport(
+export function hasRole(
   user: DecodedIdToken,
   survey: DocumentSnapshot
 ): boolean {
   return !!getRole(user, survey);
+}
+
+export function isDataCollector(
+  user: DecodedIdToken,
+  survey: DocumentSnapshot
+): boolean {
+  const role = getRole(user, survey);
+  return !!role && role === Pb.Role.DATA_COLLECTOR;
 }
 
 export function canImport(
