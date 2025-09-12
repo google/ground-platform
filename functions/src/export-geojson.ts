@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {Map} from 'immutable';
-import {canExport, canImport} from './common/auth';
+import {hasRole, isDataCollector} from './common/auth';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
@@ -43,11 +43,11 @@ export async function exportGeojsonHandler(
     res.status(HttpStatus.NOT_FOUND).send('Survey not found');
     return;
   }
-  if (!canExport(user, surveyDoc)) {
+  if (!hasRole(user, surveyDoc)) {
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
-  const ownerId = canImport(user, surveyDoc) ? undefined : userId;
+  const ownerId = isDataCollector(user, surveyDoc) ? userId : undefined;
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
