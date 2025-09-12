@@ -45,15 +45,19 @@ export function loiDocToModel(
   const pb = toMessage(data, Pb.LocationOfInterest) as Pb.LocationOfInterest;
   if (!pb.jobId) return Error(`Missing job_id in loi ${id}`);
   if (!pb.geometry) return Error(`Missing geometry in loi ${id}`);
-  const geometry = geometryPbToModel(pb.geometry);
-  if (!geometry) return new Error(`Invalid geometry in loi ${id}`);
-  const properties = propertiesPbToModel(pb.properties || {});
-  return new LocationOfInterest(
-    id,
-    pb.jobId,
-    geometry,
-    properties,
-    pb.customTag,
-    pb.source === Pb.LocationOfInterest.Source.IMPORTED
-  );
+  try {
+    const geometry = geometryPbToModel(pb.geometry);
+    if (!geometry) return Error(`Invalid geometry in loi ${id}`);
+    const properties = propertiesPbToModel(pb.properties || {});
+    return new LocationOfInterest(
+      id,
+      pb.jobId,
+      geometry,
+      properties,
+      pb.customTag,
+      pb.source === Pb.LocationOfInterest.Source.IMPORTED
+    );
+  } catch (e: any) {
+    return Error(`${e.message} in loi ${id}`);
+  }
 }
