@@ -15,7 +15,6 @@
  */
 
 import * as functions from 'firebase-functions';
-import {Map} from 'immutable';
 import {canExport, canImport} from './common/auth';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
