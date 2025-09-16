@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {isDataCollector, hasRole} from './common/auth';
+import {hasRole, hasDataCollectorRole} from './common/auth';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
@@ -51,7 +51,7 @@ export async function exportCsvHandler(
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
-  const ownerId = isDataCollector(user, surveyDoc) ? userId : undefined;
+  const isDataCollector = hasDataCollectorRole(user, surveyDoc);
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
@@ -69,9 +69,15 @@ export async function exportCsvHandler(
 
   const survey = toMessage(surveyDoc.data()!, Pb.Survey);
 
+  const ownerIdFilter = isDataCollector ? userId : undefined;
+
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
   const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);
-  const loiProperties = createProperySetFromSnapshot(snapshot, survey, ownerId);
+  const loiProperties = createProperySetFromSnapshot(
+    snapshot,
+    survey,
+    ownerIdFilter
+  );
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -89,14 +95,19 @@ export async function exportCsvHandler(
   });
   csvStream.pipe(res);
 
-  const rows = await db.fetchLoisSubmissions(surveyId, jobId, ownerId, 50);
+  const rows = await db.fetchLoisSubmissions(
+    surveyId,
+    jobId,
+    ownerIdFilter,
+    50
+  );
 
   for await (const row of rows) {
     try {
       const [loiDoc, submissionDoc] = row;
       const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(survey, loi, ownerId) && submissionDoc) {
+      if (isAccessibleLoi(survey, loi, ownerIdFilter) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
         writeRow(csvStream, loiProperties, tasks, loi, submission);

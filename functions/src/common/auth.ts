@@ -101,7 +101,7 @@ export function hasRole(
   return !!getRole(user, survey);
 }
 
-export function isDataCollector(
+export function hasDataCollectorRole(
   user: DecodedIdToken,
   survey: DocumentSnapshot
 ): boolean {

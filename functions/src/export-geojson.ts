@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {Map} from 'immutable';
-import {hasRole, isDataCollector} from './common/auth';
+import {hasRole, hasDataCollectorRole} from './common/auth';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
@@ -47,7 +47,7 @@ export async function exportGeojsonHandler(
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
-  const ownerId = isDataCollector(user, surveyDoc) ? userId : undefined;
+  const isDataCollector = hasDataCollectorRole(user, surveyDoc);
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
@@ -64,6 +64,8 @@ export async function exportGeojsonHandler(
   const {name: jobName} = job;
 
   const survey = toMessage(surveyDoc.data()!, Pb.Survey);
+
+  const ownerIdFilter = isDataCollector ? userId : undefined;
 
   res.type('application/json');
   res.setHeader(
@@ -83,7 +85,7 @@ export async function exportGeojsonHandler(
     try {
       const loi = toMessage(row.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(survey, loi, ownerId)) {
+      if (isAccessibleLoi(survey, loi, ownerIdFilter)) {
         const feature = buildFeature(loi);
         if (!feature) continue;
 
