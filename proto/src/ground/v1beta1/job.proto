@@ -220,8 +220,10 @@ message Task {
     repeated Method allowed_methods = 1;
 
     // Optional. When `true`, the user cannot override the location used when
-    // adding points or vertices. In this case, "location lock" cannot be turned off,
-    // and as such the actual device location will always be used.
+    // adding points or polygon vertices. In this case, "location lock" cannot be
+    // turned off, and as such the actual device location will always be used.
+    // When `false` or unset, the user can pan and zoom the map to disable the
+    // location lock and select a location other than their current one.
     boolean require_device_location = 2;
 
     // Optional. The minimum accuracy, in meters, required when "location lock"
