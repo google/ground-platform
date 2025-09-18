@@ -234,7 +234,7 @@ message Task {
 
   // A task in which the user must capture their current device location.
   // Deprecated. Use `DrawGeometry` with `allowed_methods = [DROP_PIN]` and
-  // `require_device_location = true`.
+  // `require_device_location = true` instead.
   message CaptureLocation {
     // Required. The minimum accuracy, in meters, required when capturing
     // the current location. Set to 999.0 to represent "no limit".
