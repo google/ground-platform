@@ -30,6 +30,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
 import {AboutComponent} from './pages/about/about.component';
+import {AndroidIntentLandingPageComponent} from './pages/android-intent-landing-page/android-intent-landing-page.component';
 import {EditDetailsComponent} from './pages/edit-survey/edit-details/edit-details.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
@@ -103,6 +104,11 @@ const routes: Routes = [
   {
     path: NavigationService.ABOUT,
     component: AboutComponent,
+  },
+  {
+    path: `${NavigationService.ANDROID_SEGMENT}`,
+    component: AndroidIntentLandingPageComponent,
+    children: [{path: '**', component: AndroidIntentLandingPageComponent}],
   },
   {
     path: NavigationService.TERMS,
