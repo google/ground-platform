@@ -70,7 +70,7 @@ initializeApp(environment.firebase);
     },
     {
       provide: RC_DEFAULTS,
-      useValue: {play_store_id: ''},
+      useValue: {google_play_id: ''},
     },
     // Emulator ports defined in ../firebase.local.json
     // TODO(#979): Set up auth emulator and enable rules.
