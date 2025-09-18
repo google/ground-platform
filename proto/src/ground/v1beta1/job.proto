@@ -224,7 +224,7 @@ message Task {
     // turned off, and as such the actual device location will always be used.
     // When `false` or unset, the user can pan and zoom the map to disable the
     // location lock and select a location other than their current one.
-    boolean require_device_location = 2;
+    bool require_device_location = 2;
 
     // Optional. The minimum accuracy, in meters, required when "location lock"
     // is enabled. When unset (`0`), a default of 15m is used.
