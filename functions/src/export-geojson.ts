@@ -16,7 +16,6 @@
 
 import * as functions from 'firebase-functions';
 import {Map} from 'immutable';
-import JSONStream from 'jsonstream-ts';
 import {canExport, canImport} from './common/auth';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
@@ -64,61 +63,74 @@ export async function exportGeojsonHandler(
   }
   const {name: jobName} = job;
 
+  const survey = toMessage(surveyDoc.data()!, Pb.Survey);
+
   res.type('application/json');
   res.setHeader(
     'Content-Disposition',
     'attachment; filename=' + getFileName(jobName)
   );
+  res.status(HttpStatus.OK);
 
-  /**
-   * Creates a JSON stream representing a GeoJSON FeatureCollection.
-   * The arguments follow a pattern of open, separator, close, and
-   * indent, which helps to organize the JSON structure for clarity.
-   */
-  const jsonStream = JSONStream.stringify(
-    '{\n  "type": "FeatureCollection",\n  "features": [\n    ',
-    ',\n',
-    '\n  ]\n}',
-    '  '
-  );
-  jsonStream.pipe(res);
+  // Write opening of FeatureCollection manually
+  res.write('{\n  "type": "FeatureCollection",\n  "features": [\n');
 
+  // Fetch all locations of interest
   const rows = await db.fetchLocationsOfInterest(surveyId, jobId);
 
-  rows.forEach(row => {
+  let first = true;
+  for (const row of rows.docs) {
     try {
       const loi = toMessage(row.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(loi, ownerId)) {
-        writeRow(jsonStream, loi);
+      if (isAccessibleLoi(survey, loi, ownerId)) {
+        const feature = buildFeature(loi);
+        if (!feature) continue;
+
+        // Manually write the separator comma before each feature except the first one.
+        if (!first) {
+          res.write(',\n');
+        } else {
+          first = false;
+        }
+
+        // Use JSON.stringify to convert the feature object to a string and write it.
+        res.write(JSON.stringify(feature, null, 2));
       }
     } catch (e) {
       console.debug('Skipping row', e);
     }
-  });
+  }
 
-  res.status(HttpStatus.OK);
-  jsonStream.end();
+  // Close the FeatureCollection after the loop completes.
+  res.write('\n  ]\n}');
+  res.end();
 }
 
-function writeRow(jsonStream: any, loi: Pb.LocationOfInterest) {
+function buildFeature(loi: Pb.LocationOfInterest) {
   if (!loi.geometry) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
-    return;
+    return null;
   }
-  const geoJsonGeometry = toGeoJsonGeometry(loi.geometry);
-  const row = {
+  return {
     type: 'Feature',
     properties: propertiesPbToModel(loi.properties).toObject(),
-    geometry: geoJsonGeometry,
+    geometry: toGeoJsonGeometry(loi.geometry),
   };
-  jsonStream.write(row);
 }
 
 /**
  * Checks if a Location of Interest (LOI) is accessible to a given user.
  */
-function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId?: string) {
+function isAccessibleLoi(
+  survey: Pb.ISurvey,
+  loi: Pb.ILocationOfInterest,
+  ownerId?: string
+) {
+  if (
+    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS
+  )
+    return true;
   const isFieldData = loi.source === Pb.LocationOfInterest.Source.FIELD_DATA;
   return ownerId ? isFieldData && loi.ownerId === ownerId : true;
 }

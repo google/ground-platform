@@ -28,6 +28,7 @@ const s = registry.getFieldIds(Pb.Survey);
 // https://firebase.google.com/docs/hosting/manage-cache#using_cookies
 export const SESSION_COOKIE_NAME = '__session';
 export const SURVEY_ORGANIZER_ROLE = Pb.Role.SURVEY_ORGANIZER;
+export const DATA_COLLECTOR_ROLE = Pb.Role.DATA_COLLECTOR;
 
 /**
  * Returns the encoded auth token from the "Authorization: Bearer" HTTP header
