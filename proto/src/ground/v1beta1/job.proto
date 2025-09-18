@@ -218,9 +218,21 @@ message Task {
     // geometry task. If multiple methods are specified, data collectors are
     // prompted which method should be used.
     repeated Method allowed_methods = 1;
+
+    // Optional. When `true`, the user cannot override the location used when
+    // adding points or vertices. In this case, "location lock" cannot be turned off,
+    // and as such the actual device location will always be used.
+    boolean require_device_location = 2;
+
+    // Optional. The minimum accuracy, in meters, required when "location lock"
+    // is enabled. When unset (`0`), a default of 15m is used.
+    float min_accuracy_meters = 3;
+
   }
 
   // A task in which the user must capture their current device location.
+  // Deprecated. Use `DrawGeometry` with `allowed_methods = [DROP_PIN]` and
+  // `require_device_location = true`.
   message CaptureLocation {
     // Required. The minimum accuracy, in meters, required when capturing
     // the current location. Set to 999.0 to represent "no limit".
