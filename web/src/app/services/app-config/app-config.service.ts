@@ -31,9 +31,9 @@ export class AppConfigService {
     return (this.remoteConfig as AngularFireRemoteConfig).fetchAndActivate();
   }
 
-  getPlayStoreId(): Observable<string> {
+  getGooglePlayId(): Observable<string> {
     return from(this.fetchConfig()).pipe(
-      switchMap(() => from(this.remoteConfig.getString('play_store_id')))
+      switchMap(() => from(this.remoteConfig.getString('google_play_id')))
     );
   }
 }

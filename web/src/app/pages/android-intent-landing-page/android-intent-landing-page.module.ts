@@ -18,11 +18,11 @@ import {CommonModule} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 
-import {AndroidPageComponent} from 'app/pages/android/android.component';
+import {AndroidIntentLandingPageComponent} from './android-intent-landing-page.component';
 
 @NgModule({
-  declarations: [AndroidPageComponent],
+  declarations: [AndroidIntentLandingPageComponent],
   imports: [CommonModule, RouterModule],
-  exports: [AndroidPageComponent],
+  exports: [AndroidIntentLandingPageComponent],
 })
 export class AndroidModule {}

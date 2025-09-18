@@ -21,20 +21,20 @@ import {firstValueFrom} from 'rxjs';
 import {AppConfigService} from 'app/services/app-config/app-config.service';
 
 @Component({
-  selector: 'ground-android-page',
+  selector: 'ground-android-landing-page',
   template: `
-    <div *ngIf="playStoreId$ | async as playStoreId">
+    <div *ngIf="googlePlayId$ | async as googlePlayId">
       <a
-        [href]="'https://play.google.com/store/apps/details?id=' + playStoreId"
+        [href]="'https://play.google.com/store/apps/details?id=' + googlePlayId"
       >
-        Go to Play Store
+        Get in on Google Play
       </a>
     </div>
   `,
 })
-export class AndroidPageComponent implements OnInit {
+export class AndroidIntentLandingPageComponent implements OnInit {
   fullPath = '';
-  playStoreId$ = this.appConfigService.getPlayStoreId();
+  googlePlayId$ = this.appConfigService.getGooglePlayId();
 
   constructor(
     private appConfigService: AppConfigService,
@@ -44,19 +44,19 @@ export class AndroidPageComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.fullPath = this.router.url;
 
-    const playStoreId = await firstValueFrom(this.playStoreId$);
+    const googlePlayId = await firstValueFrom(this.googlePlayId$);
 
-    if (!playStoreId) return;
+    if (!googlePlayId) return;
 
     const timeout = 1500;
 
     // Fallback: redirect to Play Store if app doesn't open
     const fallback = setTimeout(() => {
-      window.location.href = `https://play.google.com/store/apps/details?id=${playStoreId}`;
+      window.location.href = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
     }, timeout);
 
     // Try opening the app via intent URL
-    window.location.href = `intent://${this.fullPath}#Intent;scheme=https;package=${playStoreId};end`;
+    window.location.href = `intent://${this.fullPath}#Intent;scheme=https;package=${googlePlayId};end`;
 
     // Cancel fallback if app is opened (browser loses focus)
     const blurHandler = () => {
