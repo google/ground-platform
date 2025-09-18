@@ -53,8 +53,8 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     const timeout = 1500;
 
-    // Fallback: redirect to Play Store if app doesn't open
-    const fallback = setTimeout(() => {
+    // Fallback: redirect to Google Play if app doesn't open
+    const redirectTimeoutId = setTimeout(() => {
       window.location.href = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
     }, timeout);
 
@@ -63,7 +63,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     // Cancel fallback if app is opened (browser loses focus)
     const blurHandler = () => {
-      clearTimeout(fallback);
+      clearTimeout(redirectTimeoutId);
       window.removeEventListener('blur', blurHandler);
     };
     window.addEventListener('blur', blurHandler);
