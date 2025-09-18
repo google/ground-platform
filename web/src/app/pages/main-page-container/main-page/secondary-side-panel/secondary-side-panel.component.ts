@@ -14,46 +14,47 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Observable, Subscription, firstValueFrom} from 'rxjs';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {Subscription, filter, startWith} from 'rxjs';
 
-import {
-  NavigationService,
-  SideNavMode,
-} from 'app/services/navigation/navigation.service';
+import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
 
 @Component({
   selector: 'ground-secondary-side-panel',
   templateUrl: './secondary-side-panel.component.html',
   styleUrls: ['./secondary-side-panel.component.css'],
 })
-export class SecondarySidePanelComponent {
+export class SecondarySidePanelComponent implements OnInit {
   subscription: Subscription = new Subscription();
-
-  readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
-
-  locationOfInterestId: string | null = '';
-  submissionId: string | null = '';
+  locationOfInterestId: string | null = null;
+  submissionId: string | null = null;
 
   constructor(
+    private loiService: LocationOfInterestService,
     private route: ActivatedRoute,
-    private navigationService: NavigationService
-  ) {
-    this.subscription.add(
-      this.navigationService.getLocationOfInterestId$().subscribe(loiId => {
-        this.locationOfInterestId = loiId;
-      })
-    );
+    private router: Router,
+    private submissionService: SubmissionService
+  ) {}
 
+  ngOnInit() {
     this.subscription.add(
-      this.navigationService.getSubmissionId$().subscribe(submissionId => {
-        this.submissionId = submissionId;
-      })
+      this.router.events
+        .pipe(
+          filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+          startWith(this.router)
+        )
+        .subscribe(_ => {
+          this.locationOfInterestId =
+            this.route.snapshot.paramMap.get('siteId');
+          this.submissionId = this.route.snapshot.paramMap.get('submissionId');
+          this.loiService.selectLocationOfInterest(this.locationOfInterestId!);
+          this.submissionService.selectSubmission(this.submissionId!);
+          console.log('LOI ID (snapshot):', this.locationOfInterestId);
+          console.log('SUBMISSION ID (snapshot):', this.submissionId);
+        })
     );
-
-    this.sideNavMode$ = navigationService.getSideNavMode$();
   }
 
   ngOnDestroy() {

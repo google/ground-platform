@@ -36,7 +36,7 @@ limitations under the License.
           data_info_alert
         </mat-icon>
       </button>
-      <button mat-icon-button aria-label="back" (click)="onClosePanel()">
+      <button mat-icon-button aria-label="back" (click)="closePanel()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -52,12 +52,12 @@ limitations under the License.
       <div *ngFor="let submission of submissions; let i = index">
         <mat-divider *ngIf="i > 0"></mat-divider>
         <div class="submission-item">
-          <mat-list-item (click)="onSelectSubmission(submission.id)">
+          <mat-list-item (click)="selectSubmission(submission.id)">
             <mat-icon matListItemIcon class="material-symbols-outlined">text_snippet</mat-icon>
             <h3 matListItemTitle>{{ submission.created.user.displayName }}</h3>
             <p matListItemLine>{{ submission.created.clientTime | date: 'longDate' }}</p>
           </mat-list-item>
-          <button mat-icon-button (click)="onSelectSubmission(submission.id)">
+          <button mat-icon-button (click)="selectSubmission(submission.id)">
             <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
