@@ -27,7 +27,10 @@ import {AppConfigService} from 'app/services/app-config/app-config.service';
       <a
         [href]="'https://play.google.com/store/apps/details?id=' + googlePlayId"
       >
-        Get in on Google Play
+        <img
+          src="/assets/img/GetItOnGooglePlay_Badge_Web_color_English.png"
+          alt="Get in on Google Play"
+        />
       </a>
     </div>
   `,
