@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import {Map} from 'immutable';
-import {canExport} from './common/auth';
+import {canExport, hasOrganizerRole} from './common/auth';
 import {getDatastore} from './common/context';
 import {isAccessibleLoi} from './common/utils';
 import * as HttpStatus from 'http-status-codes';
@@ -71,7 +71,10 @@ export async function exportGeojsonHandler(
   }
   const {name: jobName} = job;
 
+  const isOrganizer = hasOrganizerRole(user, surveyDoc);
+
   const filterByOwnerId =
+    !isOrganizer &&
     survey.dataVisibility !== Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
 
   res.type('application/json');

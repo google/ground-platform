@@ -16,7 +16,7 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {canExport} from './common/auth';
+import {canExport, hasOrganizerRole} from './common/auth';
 import {isAccessibleLoi} from './common/utils';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
@@ -75,7 +75,10 @@ export async function exportCsvHandler(
   }
   const {name: jobName} = job;
 
+  const isOrganizer = hasOrganizerRole(user, surveyDoc);
+
   const filterByOwnerId =
+    !isOrganizer &&
     survey.dataVisibility !== Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
