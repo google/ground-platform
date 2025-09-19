@@ -94,10 +94,20 @@ function getRole(
   return acl && user.email ? acl[user.email] : null;
 }
 
+export function hasOrganizerRole(
+  user: DecodedIdToken,
+  survey: DocumentSnapshot
+): boolean {
+  const role = getRole(user, survey);
+  return !!role && [Pb.Role.SURVEY_ORGANIZER].includes(role);
+}
+
 export function canExport(
   user: DecodedIdToken,
   survey: DocumentSnapshot
 ): boolean {
+  const generalAccess = survey.get(s.generalAccess);
+  if (generalAccess !== Pb.Survey.GeneralAccess.RESTRICTED) return true;
   return !!getRole(user, survey);
 }
 
@@ -105,6 +115,5 @@ export function canImport(
   user: DecodedIdToken,
   survey: DocumentSnapshot
 ): boolean {
-  const role = getRole(user, survey);
-  return !!role && [Pb.Role.SURVEY_ORGANIZER].includes(role);
+  return hasOrganizerRole(user, survey);
 }

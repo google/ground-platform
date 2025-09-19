@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+import {GroundProtos} from '@ground/proto';
+
+import Pb = GroundProtos.ground.v1beta1;
+
+/**
+ * Checks if a Location of Interest (LOI) is accessible to a given user.
+ */
+export function isAccessibleLoi(
+  loi: Pb.ILocationOfInterest,
+  ownerId: string | null
+) {
+  if (loi.source === Pb.LocationOfInterest.Source.IMPORTED) return true;
+  if (!ownerId) return true;
+  return loi.ownerId === ownerId;
+}
+
 export function stringFormat(s: string, ...args: any[]): string {
   return s.replace(/\{(\d+)\}/g, (_, index) => args[index] || `{${index}}`);
 }
