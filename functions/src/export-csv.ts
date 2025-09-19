@@ -76,7 +76,7 @@ export async function exportCsvHandler(
   const {name: jobName} = job;
 
   const filterByOwnerId =
-    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+    survey.dataVisibility !== Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
   const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);

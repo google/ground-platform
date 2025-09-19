@@ -72,7 +72,7 @@ export async function exportGeojsonHandler(
   const {name: jobName} = job;
 
   const filterByOwnerId =
-    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+    survey.dataVisibility !== Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
 
   res.type('application/json');
   res.setHeader(
