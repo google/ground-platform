@@ -17,6 +17,7 @@
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
 import {canExport} from './common/auth';
+import {isAccessibleLoi} from './common/utils';
 import {geojsonToWKT} from '@terraformer/wkt';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
@@ -196,15 +197,6 @@ function quote(value: any): string {
 
 function toWkt(geometry: Pb.IGeometry): string {
   return geojsonToWKT(toGeoJsonGeometry(geometry));
-}
-
-/**
- * Checks if a Location of Interest (LOI) is accessible to a given user.
- */
-function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId: string | null) {
-  if (loi.source === Pb.LocationOfInterest.Source.IMPORTED) return true;
-  if (!ownerId) return true;
-  return loi.ownerId === ownerId;
 }
 
 /**

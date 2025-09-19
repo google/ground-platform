@@ -18,6 +18,7 @@ import * as functions from 'firebase-functions';
 import {Map} from 'immutable';
 import {canExport} from './common/auth';
 import {getDatastore} from './common/context';
+import {isAccessibleLoi} from './common/utils';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {toMessage} from '@ground/lib';
@@ -125,15 +126,6 @@ function buildFeature(loi: Pb.LocationOfInterest) {
     properties: propertiesPbToModel(loi.properties).toObject(),
     geometry: toGeoJsonGeometry(loi.geometry),
   };
-}
-
-/**
- * Checks if a Location of Interest (LOI) is accessible to a given user.
- */
-function isAccessibleLoi(loi: Pb.ILocationOfInterest, ownerId: string | null) {
-  if (loi.source === Pb.LocationOfInterest.Source.IMPORTED) return true;
-  if (!ownerId) return true;
-  return loi.ownerId === ownerId;
 }
 
 /**
