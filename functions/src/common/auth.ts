@@ -94,19 +94,13 @@ function getRole(
   return acl && user.email ? acl[user.email] : null;
 }
 
-export function hasRole(
+export function canExport(
   user: DecodedIdToken,
   survey: DocumentSnapshot
 ): boolean {
+  const generalAccess = survey.get(s.generalAccess);
+  if (generalAccess !== Pb.Survey.GeneralAccess.RESTRICTED) return true;
   return !!getRole(user, survey);
-}
-
-export function hasDataCollectorRole(
-  user: DecodedIdToken,
-  survey: DocumentSnapshot
-): boolean {
-  const role = getRole(user, survey);
-  return !!role && role === Pb.Role.DATA_COLLECTOR;
 }
 
 export function canImport(
