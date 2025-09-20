@@ -15,7 +15,6 @@
  */
 
 import * as functions from 'firebase-functions';
-import {Map} from 'immutable';
 import {canExport, canImport} from './common/auth';
 import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
@@ -112,9 +111,11 @@ function buildFeature(loi: Pb.LocationOfInterest) {
     console.debug(`Skipping LOI ${loi.id} - missing geometry`);
     return null;
   }
+  const orderedProperties = propertiesPbToModel(loi.properties);
+  const propertiesObject = Object.fromEntries(orderedProperties);
   return {
     type: 'Feature',
-    properties: propertiesPbToModel(loi.properties).toObject(),
+    properties: propertiesObject,
     geometry: toGeoJsonGeometry(loi.geometry),
   };
 }
@@ -146,13 +147,13 @@ function getFileName(jobName: string | null) {
 
 function propertiesPbToModel(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
-}): Map<string, string | number> {
-  const properties: {[k: string]: string | number} = {};
-  for (const k of Object.keys(pb)) {
-    const v = pb[k].stringValue || pb[k].numericValue;
+}): [string, string | number][] {
+  const entries: [string, string | number][] = [];
+  for (const k of Reflect.ownKeys(pb)) {
+    const v = pb[k as string].stringValue || pb[k as string].numericValue;
     if (v !== null && v !== undefined) {
-      properties[k] = v;
+      entries.push([k as string, v]);
     }
   }
-  return Map(properties);
+  return entries;
 }
