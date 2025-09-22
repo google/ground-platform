@@ -137,34 +137,6 @@ export class NavigationService {
   }
 
   /**
-   * Returns the current URL fragment, parsed as if their were normal HTTP
-   * query parameter key/value pairs.
-   */
-  private getFragmentParams(): HttpParams {
-    const fragment = this.activatedRoute!.snapshot.fragment;
-    return new HttpParams({fromString: fragment || ''});
-  }
-
-  /**
-   * Navigate to the current URL, replacing the URL fragment with the specified
-   * params.
-   */
-  private setFragmentParams(params: HttpParams) {
-    const primaryUrl = this.router
-      .parseUrl(this.router.url)
-      .root.children['primary'].toString();
-
-    if (params.toString()) {
-      const navigationExtras: NavigationExtras = {
-        fragment: params.toString(),
-      };
-      this.router.navigate([primaryUrl], navigationExtras);
-    } else {
-      this.router.navigate([primaryUrl]);
-    }
-  }
-
-  /**
    * Navigate to the current URL, updating the LOI id in the URL fragment.
    */
   selectLocationOfInterest(surveyId: string, loiId: string) {
