@@ -57,10 +57,10 @@ export class HeaderComponent {
     this.navigationService.getSurveyId$()?.subscribe(surveyId => {
       if (surveyId) this.surveyId = surveyId;
     });
-    if (this.navigationService.isSurveyPage(this.surveyId)) {
-      this.state = HeaderState.MAP_VIEW;
-    } else if (this.navigationService.isEditSurveyPage(this.surveyId)) {
+    if (this.navigationService.isEditSurveyPage(this.surveyId)) {
       this.state = HeaderState.EDIT_SURVEY;
+    } else if (this.navigationService.isSurveyPage(this.surveyId)) {
+      this.state = HeaderState.MAP_VIEW;
     }
     this.surveyService.getActiveSurvey$().subscribe(_ => {
       // Update "manage" state when survey changes.
