@@ -38,6 +38,10 @@
         "destination": "/vi/index.html"
       },
       {
+        "source": "/android/**",
+        "destination": "/en/android.html"
+      },
+      {
         "source": "/**",
         "destination": "/en/index.html"
       }
