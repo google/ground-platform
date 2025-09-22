@@ -219,11 +219,13 @@ message Task {
     // prompted which method should be used.
     repeated Method allowed_methods = 1;
 
-    // Optional. When `true`, the user cannot override the location used when
-    // adding points or polygon vertices. In this case, "location lock" cannot be
-    // turned off, and as such the actual device location will always be used.
-    // When `false` or unset, the user can pan and zoom the map to disable the
-    // location lock and select a location other than their current one.
+    // Optional. When `true`, points and polygon vertices will always reflect the
+    // user's actual device location. Specifically, mobile data collections will
+    // not be able to disable the "location lock" feature by panning the map.
+    // When `true, this field cannot be changed via the web console, and jobs with at
+    // least one task with this field set cannot be used for web-based data collection.
+    // When `false` or unset, the data collectors will be able to pan the map to
+    // add a point or vertex at a location other than their current physical one.
     bool require_device_location = 2;
 
     // Optional. The minimum accuracy, in meters, required when "location lock"
