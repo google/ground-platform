@@ -107,7 +107,12 @@ export function canExport(
   survey: DocumentSnapshot
 ): boolean {
   const generalAccess = survey.get(s.generalAccess);
-  if (generalAccess !== Pb.Survey.GeneralAccess.RESTRICTED) return true;
+  if (
+    [Pb.Survey.GeneralAccess.PUBLIC, Pb.Survey.GeneralAccess.UNLISTED].includes(
+      generalAccess
+    )
+  )
+    return true;
   return !!getRole(user, survey);
 }
 
