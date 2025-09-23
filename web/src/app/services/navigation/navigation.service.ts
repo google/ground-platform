@@ -163,11 +163,14 @@ export class NavigationService implements OnDestroy {
   }
 
   clearLocationOfInterestId() {
-    this.loiId$ = of('');
+    const surveyId = this.urlParams().surveyId;
+    this.router.navigateByUrl(`${SURVEY_SEGMENT}/${surveyId}`);
   }
 
   clearSubmissionId() {
-    this.submissionId$ = of('');
+    const surveyId = this.urlParams().surveyId;
+    const loiId = this.urlParams().loiId;
+    surveyId && loiId && this.selectLocationOfInterest(surveyId, loiId);
   }
 
   /**
