@@ -20,13 +20,22 @@ import Pb = GroundProtos.ground.v1beta1;
 
 /**
  * Checks if a Location of Interest (LOI) is accessible to a given user.
+ *
+ * An LOI is accessible if:
+ * - Its source is `IMPORTED`.
+ * - Its `ownerId` passed to the function is `null`.
+ * - Its `ownerId` matches the LOI's owner.
+ *
+ * @param loi The Location of Interest object to check.
+ * @param ownerId The ID of the user requesting access. Pass `null` to bypass the ownership check.
+ * @returns True if the LOI is accessible to the user, false otherwise.
  */
 export function isAccessibleLoi(
   loi: Pb.ILocationOfInterest,
   ownerId: string | null
 ) {
   if (loi.source === Pb.LocationOfInterest.Source.IMPORTED) return true;
-  if (!ownerId) return true;
+  if (ownerId === null) return true;
   return loi.ownerId === ownerId;
 }
 
