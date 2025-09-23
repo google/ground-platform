@@ -131,7 +131,6 @@ describe('CreateSurveyComponent', () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
-        'init',
         'getSurveyId$',
         'navigateToSurveyList',
         'navigateToCreateSurvey',
