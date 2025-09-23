@@ -81,15 +81,12 @@ export class NavigationService implements OnDestroy {
           currentRoute = currentRoute.firstChild;
         }
 
-        // Now, collect params from the current route and all its parents
         const params: Params = {};
         let route = currentRoute;
 
         while (route) {
-          // Object.assign() merges the new parameters into the existing object
-          // This way, the deeper, more specific parameters can override parent ones if there's a name collision
           Object.assign(params, route.snapshot.params);
-          route = route.parent!; // Navigate to the parent route
+          route = route.parent!;
         }
 
         this.urlParams.set(
@@ -103,15 +100,12 @@ export class NavigationService implements OnDestroy {
       });
 
     effect(() => {
-      const surveyId = this.urlParams().surveyId;
+      const {surveyId, loiId, submissionId, taskId, sideNavMode} =
+        this.urlParams();
       this.surveyId$.next(surveyId);
-      const loiId = this.urlParams().loiId;
       this.loiId$.next(loiId);
-      const submissionId = this.urlParams().submissionId;
       this.submissionId$.next(submissionId);
-      const taskId = this.urlParams().taskId;
       this.taskId$.next(taskId);
-      const sideNavMode = this.urlParams().sideNavMode;
       this.sideNavMode$.next(sideNavMode);
     });
   }
