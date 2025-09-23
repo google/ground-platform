@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {DOCUMENT, Location} from '@angular/common';
-import {HttpParams} from '@angular/common/http';
-import {Inject, Injectable} from '@angular/core';
+import {DOCUMENT} from '@angular/common';
+import {Inject, Injectable, OnDestroy, effect, signal} from '@angular/core';
 import {
-  ActivatedRoute,
   IsActiveMatchOptions,
-  NavigationExtras,
+  NavigationEnd,
+  Params,
   Router,
 } from '@angular/router';
-import {Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
+import {filter} from 'rxjs/operators';
+
+import {UrlParams} from './url-params';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -33,7 +34,7 @@ import {map} from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
-export class NavigationService {
+export class NavigationService implements OnDestroy {
   static readonly LOI_SEGMENT = 'site';
   static readonly LOI_ID = 'siteId';
   static readonly JOB_ID_NEW = 'new';
@@ -57,63 +58,62 @@ export class NavigationService {
 
   private sidePanelExpanded = true;
 
-  private getSideNavMode(
-    loiId: string | null,
-    submissionId: string | null
-  ): SideNavMode {
-    if (submissionId) {
-      if (submissionId.includes('null')) {
-        this.error(new Error('Check your URL. Submission id was set to null'));
-      }
-      return SideNavMode.SUBMISSION;
-    }
-    if (loiId) {
-      if (loiId.includes('null')) {
-        this.error(
-          new Error('Check your URL. Location of interest id was set to null')
-        );
-      }
-      return SideNavMode.JOB_LIST;
-    }
-    return SideNavMode.JOB_LIST;
-  }
+  public urlParams = signal<UrlParams>(new UrlParams(null, null, null, null));
 
-  private activatedRoute?: ActivatedRoute;
-  private surveyId$?: Observable<string | null>;
-  private loiId$?: Observable<string | null>;
-  private submissionId$?: Observable<string | null>;
-  private taskId$?: Observable<string | null>;
-  private sideNavMode$?: Observable<SideNavMode>;
+  private surveyId$ = new BehaviorSubject<string | null>(null);
+  private loiId$ = new BehaviorSubject<string | null>(null);
+  private submissionId$ = new BehaviorSubject<string | null>(null);
+  private taskId$ = new BehaviorSubject<string | null>(null);
+  private sideNavMode$ = new BehaviorSubject<SideNavMode>(SideNavMode.JOB_LIST);
+
+  private subscription: Subscription;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
-    private location: Location,
     private router: Router
-  ) {}
+  ) {
+    this.subscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        let currentRoute = this.router.routerState.root;
 
-  /**
-   * Set up streams using provided route. This must be called before any of
-   * the accessors are called.
-   */
-  init(route: ActivatedRoute) {
-    this.activatedRoute = route;
-    // Pipe values from URL query parameters.
-    this.surveyId$ = route.paramMap.pipe(map(params => params.get(SURVEY_ID)));
-    this.loiId$ = route.paramMap.pipe(map(params => params.get(LOI_ID)));
+        while (currentRoute.firstChild) {
+          currentRoute = currentRoute.firstChild;
+        }
 
-    this.submissionId$ = route.paramMap.pipe(
-      map(params => params.get(SUBMISSION_ID))
-    );
+        // Now, collect params from the current route and all its parents
+        const params: Params = {};
+        let route = currentRoute;
 
-    this.taskId$ = route.paramMap.pipe(map(params => params.get(TASK_ID)));
+        while (route) {
+          // Object.assign() merges the new parameters into the existing object
+          // This way, the deeper, more specific parameters can override parent ones if there's a name collision
+          Object.assign(params, route.snapshot.params);
+          route = route.parent!; // Navigate to the parent route
+        }
 
-    this.sideNavMode$ = route.paramMap.pipe(
-      map(params => {
-        const loiId = params.get(LOI_ID);
-        const submissionId = params.get(SUBMISSION_ID);
-        return this.getSideNavMode(loiId, submissionId);
-      })
-    );
+        this.urlParams.set(
+          new UrlParams(
+            params[SURVEY_ID],
+            params[LOI_ID],
+            params[SUBMISSION_ID],
+            params[TASK_ID]
+          )
+        );
+      });
+
+    effect(() => {
+      const surveyId = this.urlParams().surveyId;
+      this.surveyId$.next(surveyId);
+      const loiId = this.urlParams().loiId;
+      this.loiId$.next(loiId);
+      const submissionId = this.urlParams().submissionId;
+      this.submissionId$.next(submissionId);
+      const taskId = this.urlParams().taskId;
+      this.taskId$.next(taskId);
+      const sideNavMode = this.urlParams().sideNavMode;
+      this.sideNavMode$.next(sideNavMode);
+    });
   }
 
   getSurveyId$(): Observable<string | null> {
@@ -282,6 +282,10 @@ export class NavigationService {
 
   onClickSidePanelButton() {
     this.sidePanelExpanded = !this.sidePanelExpanded;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }
 

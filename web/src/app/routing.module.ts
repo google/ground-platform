@@ -95,6 +95,24 @@ const routes: Routes = [
     path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
+    children: [
+      {
+        path: `${LOI_SEGMENT}/:${LOI_ID}`,
+        component: MainPageContainerComponent,
+        children: [
+          {
+            path: `${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
+            component: MainPageContainerComponent,
+            children: [
+              {
+                path: `${TASK_SEGMENT}/:${TASK_ID}`,
+                component: MainPageContainerComponent,
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     path: NavigationService.ERROR,
@@ -113,21 +131,6 @@ const routes: Routes = [
   {
     path: NavigationService.TERMS,
     component: TermsComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}/${TASK_SEGMENT}/:${TASK_ID}`,
-    component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },
 ];
