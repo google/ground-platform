@@ -73,9 +73,11 @@ export async function exportGeojsonHandler(
 
   const isOrganizer = hasOrganizerRole(user, surveyDoc);
 
-  const filterByOwnerId =
-    !isOrganizer &&
-    survey.dataVisibility !== Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+  const canViewAll =
+    isOrganizer ||
+    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+
+  const ownerIdFilter = canViewAll ? null : userId;
 
   res.type('application/json');
   res.setHeader(
@@ -95,7 +97,7 @@ export async function exportGeojsonHandler(
     try {
       const loi = toMessage(row.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(loi, filterByOwnerId ? userId : null)) {
+      if (isAccessibleLoi(loi, ownerIdFilter)) {
         const feature = buildFeature(loi);
         if (!feature) continue;
 

@@ -77,16 +77,15 @@ export async function exportCsvHandler(
 
   const isOrganizer = hasOrganizerRole(user, surveyDoc);
 
-  const filterByOwnerId =
-    !isOrganizer &&
-    survey.dataVisibility !== Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+  const canViewAll =
+    isOrganizer ||
+    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+
+  const ownerIdFilter = canViewAll ? null : userId;
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
   const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);
-  const loiProperties = createProperySetFromSnapshot(
-    snapshot,
-    filterByOwnerId ? userId : null
-  );
+  const loiProperties = createProperySetFromSnapshot(snapshot, ownerIdFilter);
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -107,7 +106,7 @@ export async function exportCsvHandler(
   const rows = await db.fetchLoisSubmissions(
     surveyId,
     jobId,
-    filterByOwnerId ? userId : null,
+    ownerIdFilter,
     50
   );
 
@@ -116,10 +115,7 @@ export async function exportCsvHandler(
       const [loiDoc, submissionDoc] = row;
       const loi = toMessage(loiDoc.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (
-        isAccessibleLoi(loi, filterByOwnerId ? userId : null) &&
-        submissionDoc
-      ) {
+      if (isAccessibleLoi(loi, ownerIdFilter) && submissionDoc) {
         const submission = toMessage(submissionDoc.data(), Pb.Submission);
         if (submission instanceof Error) throw submission;
         writeRow(csvStream, loiProperties, tasks, loi, submission);
