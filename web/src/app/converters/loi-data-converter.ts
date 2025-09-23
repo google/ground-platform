@@ -58,6 +58,8 @@ export function loiDocToModel(
       pb.source === Pb.LocationOfInterest.Source.IMPORTED
     );
   } catch (e: any) {
-    return Error(`${e.message} in loi ${id}`);
+    const wrappedError = new Error(`Error converting LOI with ID ${id}`);
+    (wrappedError as any).cause = e;
+    return wrappedError;
   }
 }
