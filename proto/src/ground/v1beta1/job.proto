@@ -218,9 +218,25 @@ message Task {
     // geometry task. If multiple methods are specified, data collectors are
     // prompted which method should be used.
     repeated Method allowed_methods = 1;
+
+    // Optional. When `true`, points and polygon vertices will always reflect the
+    // user's actual device location. Specifically, mobile data collections will
+    // not be able to disable the "location lock" feature by panning the map.
+    // When `true, this field cannot be changed via the web console, and jobs with at
+    // least one task with this field set cannot be used for web-based data collection.
+    // When `false` or unset, the data collectors will be able to pan the map to
+    // add a point or vertex at a location other than their current physical one.
+    bool require_device_location = 2;
+
+    // Optional. The minimum accuracy, in meters, required when "location lock"
+    // is enabled. When unset (`0`), a default of 15m is used.
+    float min_accuracy_meters = 3;
+
   }
 
   // A task in which the user must capture their current device location.
+  // Deprecated. Use `DrawGeometry` with `allowed_methods = [DROP_PIN]` and
+  // `require_device_location = true` instead.
   message CaptureLocation {
     // Required. The minimum accuracy, in meters, required when capturing
     // the current location. Set to 999.0 to represent "no limit".
