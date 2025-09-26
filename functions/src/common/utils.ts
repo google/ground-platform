@@ -34,7 +34,7 @@ export function isAccessibleLoi(
   loi: Pb.ILocationOfInterest,
   ownerId: string | null
 ) {
-  return return loi.source === Pb.LocationOfInterest.Source.IMPORTED
+  return loi.source === Pb.LocationOfInterest.Source.IMPORTED
   || ownerId === null
   || loi.ownerId === ownerId;
 }
