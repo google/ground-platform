@@ -34,9 +34,11 @@ export function isAccessibleLoi(
   loi: Pb.ILocationOfInterest,
   ownerId: string | null
 ) {
-  return loi.source === Pb.LocationOfInterest.Source.IMPORTED
-  || ownerId === null
-  || loi.ownerId === ownerId;
+  return (
+    loi.source === Pb.LocationOfInterest.Source.IMPORTED ||
+    ownerId === null ||
+    loi.ownerId === ownerId
+  );
 }
 
 export function stringFormat(s: string, ...args: any[]): string {
