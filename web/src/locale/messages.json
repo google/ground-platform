@@ -119,6 +119,8 @@
     "app.dialogs.unpublishedChanges.title": "Unpublished changes",
     "app.dialogs.unpublishedChanges.content": "If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?",
     "app.labels.goBack": "Go back",
+    "app.dialogs.cloneSurvey.title": "Clone survey",
+    "app.dialogs.cloneSurvey.content": "This survey and all associated data will be cloned. The copy will not include its jobs, submissions, or sites. You will be redirected to the cloned survey dashboard upon completion. Are you sure?",
     "app.dialogs.deleteJob.title": "Delete job",
     "app.dialogs.deleteJob.content": "This job and all of its associated data will be deleted. This operation can’t be undone. Are you sure?",
     "app.labels.confirm": "Confirm",

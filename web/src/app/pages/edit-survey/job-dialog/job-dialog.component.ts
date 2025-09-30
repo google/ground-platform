@@ -24,6 +24,7 @@ export enum DialogType {
   RenameJob,
   DeleteJob,
   UndoJobs,
+  CloneSurvey,
   DeleteLois,
   DeleteOption,
   DeleteSurvey,
@@ -52,6 +53,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
   [DialogType.UndoJobs]: {
     title: $localize`:@@app.dialogs.unpublishedChanges.title:Unpublished changes`,
     content: $localize`:@@app.dialogs.unpublishedChanges.content:If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
+  },
+  [DialogType.CloneSurvey]: {
+    title: $localize`:@@app.dialogs.cloneSurvey.title:Clone survey`,
+    content: $localize`:@@app.dialogs.cloneSurvey.content:This survey and all associated data will be cloned. The copy will not include its jobs, submissions, or sites. You will be redirected to the cloned survey dashboard upon completion. Are you sure?`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
     continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },

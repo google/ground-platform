@@ -119,6 +119,8 @@
     "app.dialogs.unpublishedChanges.title": "Modifications non publiées",
     "app.dialogs.unpublishedChanges.content": "Si vous quittez cette page, les modifications apportées à cette enquête ne seront pas enregistrées. Voulez-vous vraiment continuer ?",
     "app.labels.goBack": "Retour",
+    "app.dialogs.cloneSurvey.title": "Clone survey",
+    "app.dialogs.cloneSurvey.content": "This survey and all associated data will be cloned. The copy will not include its jobs, submissions, or sites. You will be redirected to the cloned survey dashboard upon completion. Are you sure?",
     "app.dialogs.deleteJob.title": "Supprimer la mission",
     "app.dialogs.deleteJob.content": "Cette mission et toutes ses données associées seront supprimées. Cette action est irréversible. Êtes-vous sûr de vouloir continuer ?",
     "app.labels.confirm": "Confirmer",

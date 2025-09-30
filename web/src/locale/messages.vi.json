@@ -119,6 +119,8 @@
     "app.dialogs.unpublishedChanges.title": "Thay đổi chưa được xuất bản",
     "app.dialogs.unpublishedChanges.content": "Nếu bạn rời trang này, các thay đổi trong khảo sát sẽ không được lưu. Bạn có chắc muốn tiếp tục?",
     "app.labels.goBack": "Quay lại",
+    "app.dialogs.cloneSurvey.title": "Clone survey",
+    "app.dialogs.cloneSurvey.content": "This survey and all associated data will be cloned. The copy will not include its jobs, submissions, or sites. You will be redirected to the cloned survey dashboard upon completion. Are you sure?",
     "app.dialogs.deleteJob.title": "Xóa công việc",
     "app.dialogs.deleteJob.content": "Công việc này và tất cả dữ liệu liên quan sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác. Bạn có chắc không?",
     "app.labels.confirm": "Xác nhận",
