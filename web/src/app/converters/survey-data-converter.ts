@@ -112,6 +112,10 @@ export function jobDocsToModel(data: DocumentData[]): List<Job> {
   );
 }
 
+export function jobDocToModel(data: DocumentData): Job {
+  return jobPbToModel(toMessage(data, Pb.Job) as Pb.Job);
+}
+
 function jobPbToModel(pb: Pb.IJob): Job {
   return new Job(
     pb.id!,
