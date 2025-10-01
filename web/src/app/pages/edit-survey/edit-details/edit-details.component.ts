@@ -113,7 +113,7 @@ export class EditDetailsComponent implements OnInit {
 
           const newSurveyId = await this.surveyService.cloneSurvey(surveyId);
 
-          this.navigationService.navigateToEditSurvey(newSurveyId);
+          this.navigationService.navigateToSurveyDashboard(newSurveyId);
         }
       });
   }
