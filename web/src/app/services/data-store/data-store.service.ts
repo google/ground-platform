@@ -585,7 +585,7 @@ export class DataStoreService {
       .doc(surveyId)
       .ref.get();
 
-    const survey = surveyDocToModel(surveyId, surveyDoc);
+    const survey = surveyDocToModel(surveyId, surveyDoc.data() as DocumentData);
 
     if (survey instanceof Error) return '';
 
@@ -593,7 +593,7 @@ export class DataStoreService {
       ...survey,
       id: newSurveyId,
       title: 'Copy of ' + survey.title,
-      acl: survey.acl.filter(role => role !== Role.SURVEY_ORGANIZER),
+      acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
     });
 
     await this.db
@@ -611,7 +611,7 @@ export class DataStoreService {
     qs.forEach(async (jobDoc: QueryDocumentSnapshot<DocumentData>) => {
       const newJobId = this.generateId();
 
-      const job = jobDocToModel(jobDoc);
+      const job = jobDocToModel(jobDoc.data());
 
       const newJob = jobToDocument({
         ...job,
