@@ -214,6 +214,11 @@ export class NavigationService implements OnDestroy {
     this.router.navigateByUrl(url);
   }
 
+  navigateToSurveyDashboard(surveyId: string): void {
+    const url = `${SURVEY_SEGMENT}/${surveyId}`;
+    this.router.navigateByUrl(url);
+  }
+
   /**
    * Navigate to the URL with new survey id.
    */

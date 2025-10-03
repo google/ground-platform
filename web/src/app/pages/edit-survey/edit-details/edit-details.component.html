@@ -50,6 +50,22 @@
 
   <mat-card>
     <div class="floating-button">
+      <button mat-stroked-button (click)="openCloneSurveyDialog()">
+        <span i18n="@@app.labels.cloneSurvey">Clone survey</span>
+      </button>
+    </div>
+
+    <mat-card-header>
+      <mat-card-title i18n="@@app.cards.cloneSurvey.title">Clone survey</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div i18n="@@app.cards.cloneSurvey.description">Create an exact copy of the survey, excluding any collected data</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <div class="floating-button">
       <button class="delete-survey-button" mat-stroked-button (click)="openDeleteSurveyDialog()">
         <span i18n="@@app.labels.deleteSurvey">Delete survey</span>
       </button>
