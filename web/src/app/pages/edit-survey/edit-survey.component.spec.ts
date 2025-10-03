@@ -95,7 +95,7 @@ describe('EditSurveyComponent', () => {
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['init', 'isShareSurveyPage', 'getSurveyId$']
+      ['isShareSurveyPage', 'getSurveyId$']
     );
     surveyId$ = new Subject<string | null>();
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);

@@ -16,6 +16,7 @@
 
 import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
+import {of} from 'rxjs';
 
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
@@ -24,7 +25,13 @@ describe('NavigationService', () => {
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl'], {
+      events: of(),
+      routerState: {
+        root: {},
+      },
+    });
+
     TestBed.configureTestingModule({
       providers: [{provide: Router, useValue: routerSpy}],
     });

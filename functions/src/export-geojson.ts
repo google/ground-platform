@@ -16,8 +16,9 @@
 
 import * as functions from 'firebase-functions';
 import {Map} from 'immutable';
-import {canExport, canImport} from './common/auth';
+import {canExport, hasOrganizerRole} from './common/auth';
 import {getDatastore} from './common/context';
+import {isAccessibleLoi} from './common/utils';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {toMessage} from '@ground/lib';
@@ -38,6 +39,7 @@ export async function exportGeojsonHandler(
   const {uid: userId} = user;
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
+
   const surveyDoc = await db.fetchSurvey(surveyId);
   if (!surveyDoc.exists) {
     res.status(HttpStatus.NOT_FOUND).send('Survey not found');
@@ -47,7 +49,13 @@ export async function exportGeojsonHandler(
     res.status(HttpStatus.FORBIDDEN).send('Permission denied');
     return;
   }
-  const ownerId = canImport(user, surveyDoc) ? undefined : userId;
+  const survey = toMessage(surveyDoc.data()!, Pb.Survey);
+  if (survey instanceof Error) {
+    res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .send('Unsupported or corrupt survey');
+    return;
+  }
 
   const jobDoc = await db.fetchJob(surveyId, jobId);
   if (!jobDoc.exists || !jobDoc.data()) {
@@ -63,7 +71,13 @@ export async function exportGeojsonHandler(
   }
   const {name: jobName} = job;
 
-  const survey = toMessage(surveyDoc.data()!, Pb.Survey);
+  const isOrganizer = hasOrganizerRole(user, surveyDoc);
+
+  const canViewAll =
+    isOrganizer ||
+    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS;
+
+  const ownerIdFilter = canViewAll ? null : userId;
 
   res.type('application/json');
   res.setHeader(
@@ -83,7 +97,7 @@ export async function exportGeojsonHandler(
     try {
       const loi = toMessage(row.data(), Pb.LocationOfInterest);
       if (loi instanceof Error) throw loi;
-      if (isAccessibleLoi(survey, loi, ownerId)) {
+      if (isAccessibleLoi(loi, ownerIdFilter)) {
         const feature = buildFeature(loi);
         if (!feature) continue;
 
@@ -117,22 +131,6 @@ function buildFeature(loi: Pb.LocationOfInterest) {
     properties: propertiesPbToModel(loi.properties).toObject(),
     geometry: toGeoJsonGeometry(loi.geometry),
   };
-}
-
-/**
- * Checks if a Location of Interest (LOI) is accessible to a given user.
- */
-function isAccessibleLoi(
-  survey: Pb.ISurvey,
-  loi: Pb.ILocationOfInterest,
-  ownerId?: string
-) {
-  if (
-    survey.dataVisibility === Pb.Survey.DataVisibility.ALL_SURVEY_PARTICIPANTS
-  )
-    return true;
-  const isFieldData = loi.source === Pb.LocationOfInterest.Source.FIELD_DATA;
-  return ownerId ? isFieldData && loi.ownerId === ownerId : true;
 }
 
 /**

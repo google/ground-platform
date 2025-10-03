@@ -56,11 +56,8 @@ export class EditSurveyComponent implements OnInit {
     private jobService: JobService,
     private draftSurveyService: DraftSurveyService,
     private navigationService: NavigationService,
-    private route: ActivatedRoute,
     private router: Router
-  ) {
-    navigationService.init(this.route);
-  }
+  ) {}
 
   ngOnInit(): void {
     this.subscription.add(
