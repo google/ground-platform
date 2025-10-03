@@ -38,7 +38,7 @@ describe('HeaderComponent', () => {
         {provide: MatDialog, useValue: {}},
         {provide: AuthService, useValue: {getUser$: () => of()}},
         {provide: DraftSurveyService, useValue: {}},
-        {provide: Router, useValue: {}},
+        {provide: Router, useValue: {events: of()}},
         {provide: SurveyService, useValue: {canManageSurvey: () => false}},
       ],
     }).compileComponents();

@@ -15,8 +15,8 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {Router} from '@angular/router';
-import {NEVER} from 'rxjs';
+import {NavigationEnd, Router} from '@angular/router';
+import {BehaviorSubject, NEVER, of} from 'rxjs';
 
 import {AuthService} from 'app/services/auth/auth.service';
 
@@ -30,7 +30,7 @@ describe('SignInPageComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SignInPageComponent],
       providers: [
-        {provide: Router, useValue: {}},
+        {provide: Router, useValue: {events: of()}},
         {
           provide: AuthService,
           useValue: {getUser$: () => NEVER, isAuthenticated$: () => NEVER},

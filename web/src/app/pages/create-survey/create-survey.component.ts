@@ -145,11 +145,8 @@ export class CreateSurveyComponent implements OnInit {
     private taskService: TaskService,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
-    private cdr: ChangeDetectorRef,
-    route: ActivatedRoute
-  ) {
-    navigationService.init(route);
-  }
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngAfterViewChecked(): void {
     this.cdr.detectChanges();
