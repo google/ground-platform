@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2022", "dom"],
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
