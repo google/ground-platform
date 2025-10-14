@@ -15,7 +15,7 @@
  */
 
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, effect} from '@angular/core';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs';
@@ -38,6 +38,10 @@ import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
 export class JobListItemComponent implements OnInit, OnDestroy {
   @Input() job?: Job;
   @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
+
+  private surveyIdSignal = this.navigationService.getSurveyId();
+  private loiIdSignal = this.navigationService.getLoiId();
+
   surveyId?: string | null;
   loiId?: string | null;
   jobPinUrl: SafeUrl;
@@ -66,21 +70,16 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       this.isExpandable
     );
     this.dataSource = new DynamicDataSource(this.treeControl, this.loiService);
+
+    effect(() => {
+      this.surveyId = this.surveyIdSignal();
+      this.loiId = this.loiIdSignal();
+    });
   }
 
   ngOnInit() {
     this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       this.groundPinService.getPinImageSource(this.job?.color)
-    );
-    this.subscription.add(
-      this.navigationService.getLocationOfInterestId$().subscribe(id => {
-        this.loiId = id;
-      })
-    );
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(id => {
-        this.surveyId = id;
-      })
     );
     this.subscription.add(
       this.loiService.getLocationsOfInterest$().subscribe(lois => {
