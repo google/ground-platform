@@ -22,29 +22,40 @@ import {AppConfigService} from 'app/services/app-config/app-config.service';
 
 @Component({
   selector: 'ground-android-landing-page',
-  template: `
-    <div *ngIf="googlePlayId$ | async as googlePlayId">
-      <a
-        [href]="'https://play.google.com/store/apps/details?id=' + googlePlayId"
-      >
-        <img
-          src="assets/img/GetItOnGooglePlay_Badge_Web_color_English.png"
-          alt="Get in on Google Play"
-        />
-      </a>
-    </div>
-  `,
+  templateUrl: './android-intent-landing-page.component.html',
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
   fullPath = '';
   googlePlayId$ = this.appConfigService.getGooglePlayId();
+  isAndroid = false;
+  isIos = false;
 
   constructor(
     private appConfigService: AppConfigService,
     private router: Router
   ) {}
 
+  private isAndroidDevice(): boolean {
+    const userAgent =
+      window.navigator.userAgent || window.navigator.vendor || 'unknown';
+
+    return /Android/i.test(userAgent);
+  }
+
+  private isIosDevice(): boolean {
+    const userAgent =
+      window.navigator.userAgent || window.navigator.vendor || 'unknown';
+
+    return /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream;
+  }
+
   async ngOnInit(): Promise<void> {
+    this.isAndroid = this.isAndroidDevice();
+
+    this.isIos = this.isIosDevice();
+
+    if (this.isIos) return;
+
     this.fullPath = this.router.url;
 
     const googlePlayId = await firstValueFrom(this.googlePlayId$);
