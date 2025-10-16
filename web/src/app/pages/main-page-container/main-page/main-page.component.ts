@@ -39,8 +39,7 @@ import {TitleDialogComponent} from './title-dialog/title-dialog.component';
   styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit {
-  private loiIdSignal = this.navigationService.getLoiId();
-  private submissionIdSignal = this.navigationService.getSubmissionId();
+  private urlParamsSignal = this.navigationService.getUrlParams();
 
   activeSurvey$: Observable<Survey>;
   subscription: Subscription = new Subscription();
@@ -58,8 +57,7 @@ export class MainPageComponent implements OnInit {
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
 
     effect(() => {
-      const loiId = this.loiIdSignal();
-      const submissionId = this.submissionIdSignal();
+      const {loiId, submissionId} = this.urlParamsSignal();
       if (loiId) this.loiService.selectLocationOfInterest(loiId);
       if (submissionId) this.submissionService.selectSubmission(submissionId);
     });
@@ -84,14 +82,14 @@ export class MainPageComponent implements OnInit {
     );
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
   private showTitleDialog() {
     this.dialog.open(TitleDialogComponent, {
       width: '500px',
       disableClose: true,
     });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }

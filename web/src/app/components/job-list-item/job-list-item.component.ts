@@ -39,8 +39,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   @Input() job?: Job;
   @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
 
-  private surveyIdSignal = this.navigationService.getSurveyId();
-  private loiIdSignal = this.navigationService.getLoiId();
+  private urlParamsSignal = this.navigationService.getUrlParams();
 
   surveyId?: string | null;
   loiId?: string | null;
@@ -72,8 +71,9 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     this.dataSource = new DynamicDataSource(this.treeControl, this.loiService);
 
     effect(() => {
-      this.surveyId = this.surveyIdSignal();
-      this.loiId = this.loiIdSignal();
+      const {surveyId, loiId} = this.urlParamsSignal();
+      this.surveyId = surveyId;
+      this.loiId = loiId;
     });
   }
 
