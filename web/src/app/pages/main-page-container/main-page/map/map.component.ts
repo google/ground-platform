@@ -53,8 +53,10 @@ import {SurveyService} from 'app/services/survey/survey.service';
 
 const normalIconScale = 30;
 const zoomedInLevel = 13;
+const zoomCutoff = 10;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
+const highZoomPolygonStrokeWeight = 10;
 
 @Component({
   selector: 'ground-map',
@@ -130,6 +132,22 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   ngOnChanges() {
     this.selectedJob$.next(this.selectedJob);
+  }
+
+  onZoomChange() {
+    if (this.map.getZoom()! <= zoomCutoff) {
+      this.polygons?.forEach(polygons =>
+        polygons.forEach(polygon =>
+          polygon.setOptions({strokeWeight: highZoomPolygonStrokeWeight})
+        )
+      );
+    } else {
+      this.polygons?.forEach(polygons =>
+        polygons.forEach(polygon =>
+          polygon.setOptions({strokeWeight: normalPolygonStrokeWeight})
+        )
+      );
+    }
   }
 
   ngAfterViewInit() {
