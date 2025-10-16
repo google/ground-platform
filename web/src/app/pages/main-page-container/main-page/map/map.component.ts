@@ -135,19 +135,21 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   onZoomChange() {
-    if (this.map.getZoom()! <= zoomCutoff) {
-      this.polygons?.forEach(polygons =>
-        polygons.forEach(polygon =>
-          polygon.setOptions({strokeWeight: highZoomPolygonStrokeWeight})
-        )
-      );
-    } else {
-      this.polygons?.forEach(polygons =>
-        polygons.forEach(polygon =>
-          polygon.setOptions({strokeWeight: normalPolygonStrokeWeight})
-        )
-      );
-    }
+    const currentZoom = this.map.getZoom()!;
+
+    const newStrokeWeight =
+      currentZoom <= zoomCutoff
+        ? highZoomPolygonStrokeWeight
+        : normalPolygonStrokeWeight;
+
+    this.polygons?.forEach(polygons =>
+      polygons.forEach(polygon => {
+        if (!polygon.get('selected'))
+          polygon.setOptions({
+            strokeWeight: newStrokeWeight,
+          });
+      })
+    );
   }
 
   ngAfterViewInit() {
@@ -680,9 +682,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     const polygons = this.polygons.get(locationOfInterestId);
 
-    polygons?.forEach(polygon =>
-      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
-    );
+    polygons?.forEach(polygon => {
+      polygon.set('selected', true);
+      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
+    });
 
     this.fitMapToLocationsOfInterest(
       this.getLoisByIds(List([locationOfInterestId]))
@@ -696,11 +699,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.selectedLocationOfInterestId
     );
 
-    selectedPolygons?.forEach(polygon =>
+    selectedPolygons?.forEach(polygon => {
+      polygon.set('selected', false);
       polygon.setOptions({
         strokeWeight: normalPolygonStrokeWeight,
-      })
-    );
+      });
+    });
   }
 
   /**
