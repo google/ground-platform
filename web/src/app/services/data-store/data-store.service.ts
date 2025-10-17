@@ -29,7 +29,7 @@ import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom, merge} from 'rxjs';
+import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
@@ -415,6 +415,19 @@ export class DataStoreService {
       .pipe(
         map(data => FirebaseDataConverter.toUser(data as DocumentData, uid))
       );
+  }
+
+  /**
+   * Returns a stream indicating whether a document with the user's
+   * email as the ID exists in the 'passlist' collection.
+   *
+   * @param userEmail The email of the user (used as the document ID).
+   */
+  async isPasslisted(userEmail: string): Promise<boolean> {
+    const docSnapshot = await firstValueFrom(
+      this.db.doc(`passlist/${userEmail}`).get()
+    );
+    return docSnapshot.exists;
   }
 
   private toLocationsOfInterest(

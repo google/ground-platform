@@ -29,6 +29,7 @@ export enum DialogType {
   DeleteSurvey,
   DisableFreeForm,
   InvalidSurvey,
+  SurveyCreationDenied,
 }
 
 export interface DialogConfig {
@@ -89,6 +90,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     title: $localize`:@@app.dialogs.invalidSurvey.title:Fix issues with survey`,
     content: $localize`:@@app.dialogs.invalidSurvey.content:To publish changes, fix any outstanding issues with your survey.`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+  },
+  [DialogType.SurveyCreationDenied]: {
+    title: $localize`:@@app.dialogs.surveyCreationDenied.title:Registration Required`,
+    content: $localize`:@@app.dialogs.surveyCreationDenied.content:You must register for an account to create a new survey. Click "Continue" to be redirected to the registration form.`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },
 };
 

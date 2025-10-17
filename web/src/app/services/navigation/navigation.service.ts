@@ -26,6 +26,7 @@ import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 
 import {UrlParams} from './url-params';
+import {DataStoreService} from '../data-store/data-store.service';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -70,6 +71,7 @@ export class NavigationService implements OnDestroy {
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
+    private dataStore: DataStoreService,
     private router: Router
   ) {
     this.subscription = this.router.events
@@ -179,6 +181,18 @@ export class NavigationService implements OnDestroy {
    */
   newSurvey() {
     this.router.navigate([SURVEY_SEGMENT, SURVEY_ID_NEW]);
+  }
+
+  async getAccessDeniedLink(): Promise<string | undefined> {
+    const accessDeniedMessage = await this.dataStore.getAccessDeniedMessage();
+
+    return accessDeniedMessage?.link;
+  }
+
+  async navigateToSubscriptionForm() {
+    const accessDeniedLink = await this.getAccessDeniedLink();
+
+    if (accessDeniedLink) window.location.href = accessDeniedLink;
   }
 
   /**
