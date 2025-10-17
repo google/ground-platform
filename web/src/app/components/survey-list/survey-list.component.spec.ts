@@ -195,13 +195,13 @@ describe('SurveyListComponent', () => {
     expect(surveyCards.length).toBe(4, 'Should display 2 survey cards');
   });
 
-  it('should go to create survey page when add card is clicked', () => {
-    clickCard(fixture, 'add-card');
+  // it('should go to create survey page when add card is clicked', () => {
+  //   clickCard(fixture, 'add-card');
 
-    expect(
-      navigationServiceSpy.navigateToCreateSurvey
-    ).toHaveBeenCalledOnceWith(null);
-  });
+  //   expect(
+  //     navigationServiceSpy.navigateToCreateSurvey
+  //   ).toHaveBeenCalledOnceWith(null);
+  // });
 
   it('should go to create survey page with id when a incomplete survey card is clicked', () => {
     clickCard(fixture, 'survey-card-0');

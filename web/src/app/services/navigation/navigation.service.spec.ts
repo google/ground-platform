@@ -20,6 +20,8 @@ import {of} from 'rxjs';
 
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
+import {DataStoreService} from '../data-store/data-store.service';
+
 describe('NavigationService', () => {
   let service: NavigationService;
   let routerSpy: jasmine.SpyObj<Router>;
@@ -33,8 +35,15 @@ describe('NavigationService', () => {
     });
 
     TestBed.configureTestingModule({
-      providers: [{provide: Router, useValue: routerSpy}],
+      providers: [
+        {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
+        {provide: Router, useValue: routerSpy},
+      ],
     });
+
     service = TestBed.inject(NavigationService);
   });
 
