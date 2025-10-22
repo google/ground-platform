@@ -577,7 +577,7 @@ export class DataStoreService {
     return Promise.resolve(surveyId);
   }
 
-  async cloneSurvey(surveyId: string): Promise<string> {
+  async copySurvey(surveyId: string): Promise<string> {
     const newSurveyId = this.generateId();
 
     const surveyDoc = await this.db

@@ -24,7 +24,7 @@ export enum DialogType {
   RenameJob,
   DeleteJob,
   UndoJobs,
-  CloneSurvey,
+  CopySurvey,
   DeleteLois,
   DeleteOption,
   DeleteSurvey,
@@ -56,11 +56,11 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
     continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },
-  [DialogType.CloneSurvey]: {
-    title: $localize`:@@app.dialogs.cloneSurvey.title:Clone survey`,
-    content: $localize`:@@app.dialogs.cloneSurvey.content:This survey and all associated data will be cloned. The copy will not include its jobs, submissions, or sites. You will be redirected to the cloned survey dashboard upon completion. Are you sure?`,
-    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
-    continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
+  [DialogType.CopySurvey]: {
+    title: $localize`:@@app.dialogs.copySurvey.title:Copy survey`,
+    content: $localize`:@@app.dialogs.copySurvey.content:You can create a copy of this survey and its associated jobs. Data collection sites and data won't be included in the copy.`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Confirm`,
   },
   [DialogType.DeleteJob]: {
     title: $localize`:@@app.dialogs.deleteJob.title:Delete job`,

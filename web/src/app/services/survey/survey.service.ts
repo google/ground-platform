@@ -145,8 +145,8 @@ export class SurveyService {
     } as Survey);
   }
 
-  async cloneSurvey(surveyId: string): Promise<string> {
-    return this.dataStore.cloneSurvey(surveyId);
+  async copySurvey(surveyId: string): Promise<string> {
+    return this.dataStore.copySurvey(surveyId);
   }
 
   async createSurvey(name: string, description?: string): Promise<string> {
