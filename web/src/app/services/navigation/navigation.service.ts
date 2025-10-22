@@ -269,6 +269,10 @@ export class NavigationService implements OnDestroy {
     return this.router.url.endsWith('/share');
   }
 
+  getHost(): string {
+    return this.document.location.host;
+  }
+
   getSurveyAppLink(surveyId: string): string {
     return `${this.document.location.origin}/${ANDROID_SEGMENT}/${SURVEY_SEGMENT}/${surveyId}`;
   }

@@ -19,19 +19,20 @@ import {Router} from '@angular/router';
 import {firstValueFrom} from 'rxjs';
 
 import {AppConfigService} from 'app/services/app-config/app-config.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-android-landing-page',
   templateUrl: './android-intent-landing-page.component.html',
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
-  fullPath = '';
   googlePlayId$ = this.appConfigService.getGooglePlayId();
   isAndroid = false;
   isIos = false;
 
   constructor(
     private appConfigService: AppConfigService,
+    private navigationService: NavigationService,
     private router: Router
   ) {}
 
@@ -56,13 +57,15 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     if (this.isIos) return;
 
-    this.fullPath = this.router.url;
-
     const googlePlayId = await firstValueFrom(this.googlePlayId$);
 
     if (!googlePlayId) return;
 
-    const timeout = 1500;
+    const host = this.navigationService.getHost();
+
+    const path = this.router.url;
+
+    const timeout = 5000;
 
     // Fallback: redirect to Google Play if app doesn't open
     const redirectTimeoutId = setTimeout(() => {
@@ -70,7 +73,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
     }, timeout);
 
     // Try opening the app via intent URL
-    window.location.href = `intent://${this.fullPath}#Intent;scheme=https;package=${googlePlayId};end`;
+    window.location.href = `intent://${host}${path}#Intent;scheme=https;package=${googlePlayId};end`;
 
     // Cancel fallback if app is opened (browser loses focus)
     const blurHandler = () => {
