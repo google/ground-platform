@@ -16,11 +16,9 @@
 
 import '@angular/localize/init';
 
-import {Component, OnInit} from '@angular/core';
+import {Component, effect} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {List} from 'immutable';
-import {Subscription, filter, startWith} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
@@ -41,8 +39,9 @@ import {
   templateUrl: './edit-survey.component.html',
   styleUrls: ['./edit-survey.component.scss'],
 })
-export class EditSurveyComponent implements OnInit {
-  private subscription = new Subscription();
+export class EditSurveyComponent {
+  private urlSignal = this.navigationService.getUrl();
+  private surveyIdSignal = this.navigationService.getSurveyId();
 
   surveyId?: string;
   survey?: Survey;
@@ -55,38 +54,30 @@ export class EditSurveyComponent implements OnInit {
     private surveyService: SurveyService,
     private jobService: JobService,
     private draftSurveyService: DraftSurveyService,
-    private navigationService: NavigationService,
-    private router: Router
-  ) {}
+    private navigationService: NavigationService
+  ) {
+    effect(async () => {
+      const surveyId = this.surveyIdSignal();
 
-  ngOnInit(): void {
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(async surveyId => {
-        if (surveyId) {
-          this.surveyId = surveyId;
-          this.surveyService.activateSurvey(surveyId);
-          await this.draftSurveyService.init(surveyId);
-          this.draftSurveyService
-            .getSurvey$()
-            .subscribe(survey => (this.survey = survey));
-        }
-      })
-    );
+      if (surveyId) {
+        this.surveyId = surveyId;
+        this.surveyService.activateSurvey(surveyId);
+        await this.draftSurveyService.init(surveyId);
+        this.draftSurveyService
+          .getSurvey$()
+          .subscribe(survey => (this.survey = survey));
+      }
+    });
 
-    this.subscription.add(
-      this.router.events
-        .pipe(
-          filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-          startWith(this.router)
-        )
-        .subscribe(event => {
-          if (event.url.endsWith('survey'))
-            this.sectionTitle = $localize`:@@app.editSurvey.surveyDetails.title:Survey details`;
-          else if (event.url.endsWith('share'))
-            this.sectionTitle = $localize`:@@app.editSurvey.sharing.title:Sharing`;
-          else this.sectionTitle = '';
-        })
-    );
+    effect(() => {
+      const url = this.urlSignal();
+
+      if (url.endsWith('survey'))
+        this.sectionTitle = $localize`:@@app.editSurvey.surveyDetails.title:Survey details`;
+      else if (url.endsWith('share'))
+        this.sectionTitle = $localize`:@@app.editSurvey.sharing.title:Sharing`;
+      else this.sectionTitle = '';
+    });
   }
 
   jobs(): List<Job> {
@@ -171,9 +162,5 @@ export class EditSurveyComponent implements OnInit {
           break;
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 }

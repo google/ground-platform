@@ -31,7 +31,7 @@ import {
   Router,
 } from '@angular/router';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {filter, startWith} from 'rxjs/operators';
 
 import {UrlParams} from './url-params';
 
@@ -66,6 +66,8 @@ export class NavigationService implements OnDestroy {
 
   private sidePanelExpanded = true;
 
+  private urlSignal = signal<string>('');
+
   private urlParamsSignal = signal<UrlParams>(
     new UrlParams(null, null, null, null)
   );
@@ -93,8 +95,12 @@ export class NavigationService implements OnDestroy {
     private router: Router
   ) {
     this.subscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        startWith(this.router)
+      )
+
+      .subscribe(e => {
         let currentRoute = this.router.routerState.root;
 
         while (currentRoute.firstChild) {
@@ -108,6 +114,8 @@ export class NavigationService implements OnDestroy {
           Object.assign(params, route.snapshot.params);
           route = route.parent!;
         }
+
+        this.urlSignal.set(e.url);
 
         this.urlParamsSignal.set(
           new UrlParams(
@@ -129,6 +137,10 @@ export class NavigationService implements OnDestroy {
       this.taskId$.next(taskId);
       this.sideNavMode$.next(sideNavMode);
     });
+  }
+
+  getUrl(): Signal<string> {
+    return this.urlSignal;
   }
 
   getUrlParams(): Signal<UrlParams> {
