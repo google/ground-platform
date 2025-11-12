@@ -13,7 +13,7 @@
     "build-and-test": "npm run build && npm run test",
     "build-all-and-test": "npm run build-all && npm run test",
     "watch": "npm run build -- --watch",
-    "start": "npm run build && ng serve -c $npm_config_config",
+    "start": "ng serve -c $npm_config_config",
     "build-and-start": "npm run build && npm run start",
     "build-all-and-start": "npm run build-all && npm run start",
     "pretest": "./pretest.sh",
