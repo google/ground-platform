@@ -41,7 +41,7 @@ describe('AuthService', () => {
           },
         },
         {provide: DataStoreService, useValue: {user$: () => of()}},
-        {provide: Router, useValue: {}},
+        {provide: Router, useValue: {events: of()}},
         {provide: HttpClientService, useValue: {}},
       ],
     });

@@ -30,8 +30,8 @@
       <img
         *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
         class="picture"
-        src="/assets/img/add-job.svg"
-        [alt]="CreateSurveyPhase.JOB_DETAILS.cardTitle"
+        src="assets/img/add-job.svg"
+        [alt]="cardTitle()"
       />
       <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
