@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, effect} from '@angular/core';
 
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -25,18 +25,21 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
   styleUrls: ['./survey-json.component.scss'],
 })
 export class SurveyJsonComponent {
-  surveyId?: string;
+  surveyId?: string | null;
   json = '';
+
+  private urlParamsSignal = this.navigationService.getUrlParams();
 
   constructor(
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService
-  ) {}
+  ) {
+    effect(async () => {
+      const {surveyId} = this.urlParamsSignal();
 
-  async ngOnInit(): Promise<void> {
-    this.navigationService.getSurveyId$().subscribe(async surveyId => {
-      if (surveyId) {
-        this.surveyId = surveyId;
+      this.surveyId = surveyId;
+
+      if (this.surveyId) {
         this.json = JSON.stringify(
           await this.dataStoreService.loadRawSurvey(this.surveyId),
           null,
