@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, effect} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 
 import {
@@ -45,23 +45,31 @@ export class HeaderComponent {
   isPublishingChanges = false;
   canManage = false;
 
+  private surveyIdSignal = this.navigationService.getSurveyId();
+
   constructor(
     public dialog: MatDialog,
     public authService: AuthService,
     public draftSurveyService: DraftSurveyService,
     public navigationService: NavigationService,
     public surveyService: SurveyService
-  ) {}
+  ) {
+    effect(async () => {
+      const surveyId = this.surveyIdSignal();
+
+      if (surveyId) {
+        this.surveyId = surveyId;
+
+        if (this.navigationService.isEditSurveyPage(this.surveyId)) {
+          this.state = HeaderState.EDIT_SURVEY;
+        } else if (this.navigationService.isSurveyPage(this.surveyId)) {
+          this.state = HeaderState.MAP_VIEW;
+        }
+      }
+    });
+  }
 
   async ngOnInit(): Promise<void> {
-    this.navigationService.getSurveyId$()?.subscribe(surveyId => {
-      if (surveyId) this.surveyId = surveyId;
-    });
-    if (this.navigationService.isEditSurveyPage(this.surveyId)) {
-      this.state = HeaderState.EDIT_SURVEY;
-    } else if (this.navigationService.isSurveyPage(this.surveyId)) {
-      this.state = HeaderState.MAP_VIEW;
-    }
     this.surveyService.getActiveSurvey$().subscribe(_ => {
       // Update "manage" state when survey changes.
       this.canManage = this.surveyService.canManageSurvey();

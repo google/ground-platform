@@ -28,14 +28,14 @@ export class SurveyJsonComponent {
   surveyId?: string | null;
   json = '';
 
-  private urlParamsSignal = this.navigationService.getUrlParams();
+  private surveyIdSignal = this.navigationService.getSurveyId();
 
   constructor(
     private dataStoreService: DataStoreService,
     private navigationService: NavigationService
   ) {
     effect(async () => {
-      const {surveyId} = this.urlParamsSignal();
+      const surveyId = this.surveyIdSignal();
 
       this.surveyId = surveyId;
 

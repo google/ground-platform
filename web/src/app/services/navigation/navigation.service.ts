@@ -95,11 +95,7 @@ export class NavigationService implements OnDestroy {
     private router: Router
   ) {
     this.subscription = this.router.events
-      .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-        startWith(this.router)
-      )
-
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
         let currentRoute = this.router.routerState.root;
 
