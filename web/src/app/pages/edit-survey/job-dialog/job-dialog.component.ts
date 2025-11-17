@@ -92,7 +92,7 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
   },
   [DialogType.SurveyCreationDenied]: {
-    title: $localize`:@@app.dialogs.surveyCreationDenied.title:Registration Required`,
+    title: $localize`:@@app.dialogs.surveyCreationDenied.title:Registration required`,
     content: $localize`:@@app.dialogs.surveyCreationDenied.content:You must register for an account to create a new survey. Click "Continue" to be redirected to the registration form.`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
     continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
