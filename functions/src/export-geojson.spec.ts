@@ -127,8 +127,8 @@ describe('export()', () => {
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      name: {[pr.stringValue]: 'Dinagat Islands'},
       area: {[pr.numericValue]: 3.08},
+      name: {[pr.stringValue]: 'Dinagat Islands'},
     },
     [l.ownerId]: userId,
   };
@@ -159,7 +159,7 @@ describe('export()', () => {
         features: [
           {
             type: 'Feature',
-            properties: {name: 'Dinagat Islands', area: 3.08},
+            properties: {area: 3.08, name: 'Dinagat Islands'},
             geometry: {type: 'Point', coordinates: [125.6, 10.1]},
           },
         ],
@@ -214,6 +214,7 @@ describe('export()', () => {
         );
         const output = JSON.parse(chunks.join(''));
         expect(output).toEqual(expectedGeojson);
+        expect(JSON.stringify(output)).toEqual(JSON.stringify(expectedGeojson));
       })
   );
 });
