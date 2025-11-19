@@ -27,6 +27,9 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
+import {Map} from 'immutable';
+import {of} from 'rxjs';
+
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
@@ -34,8 +37,6 @@ import {EditDetailsComponent} from 'app/pages/edit-survey/edit-details/edit-deta
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {Map} from 'immutable';
-import {of} from 'rxjs';
 
 import {
   DialogData,
