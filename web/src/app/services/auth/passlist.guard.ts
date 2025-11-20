@@ -34,9 +34,9 @@ export const passlistGuard: CanActivateFn = async (): Promise<
 
   if (isPasslisted) {
     return true;
-  } else {
-    const url = await navigationService.getAccessDeniedLink();
-
-    return router.parseUrl(url || '/');
   }
+
+  const url = await navigationService.getAccessDeniedLink();
+
+  return router.parseUrl(url || '/');
 };
