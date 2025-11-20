@@ -134,9 +134,11 @@ export class SurveyListComponent implements OnInit, OnDestroy {
 
           this.navigationService.navigateToSubscriptionForm();
         });
-    } else {
-      this.navigationService.navigateToCreateSurvey(null);
+
+      return;
     }
+
+    this.navigationService.navigateToCreateSurvey(null);
   }
 
   private filterSurveys(survey: Survey): boolean {
