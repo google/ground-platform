@@ -137,6 +137,8 @@
     "app.dialogs.disableFreeForm.content": "Người thu thập dữ liệu sẽ không thể thêm điểm khảo sát mới cho công việc này. Dữ liệu chỉ được thu thập ở các điểm hiện có.",
     "app.dialogs.invalidSurvey.title": "Sửa các vấn đề trong khảo sát",
     "app.dialogs.invalidSurvey.content": "Để xuất bản thay đổi, hãy sửa các vấn đề còn tồn đọng trong khảo sát.",
+    "app.dialogs.surveyCreationDenied.title": "Yêu cầu đăng ký",
+    "app.dialogs.surveyCreationDenied.content": "Bạn phải đăng ký tài khoản để tạo khảo sát mới. Nhấp vào \"Tiếp tục\" để được chuyển hướng đến biểu mẫu đăng ký.",
     "app.error.generic": "Rất tiếc, đã xảy ra lỗi",
     "app.error.accessDenied": "Truy cập bị từ chối",
     "app.error.clickHereToRegister": "Nhấp vào đây để đăng ký",

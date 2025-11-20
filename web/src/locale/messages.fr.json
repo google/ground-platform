@@ -137,6 +137,8 @@
     "app.dialogs.disableFreeForm.content": "Le collecteur de données ne pourra plus ajouter de nouveaux sites pour cette mission. Les données ne seront collectées que pour les sites existants.",
     "app.dialogs.invalidSurvey.title": "Corriger les problèmes de l’enquête",
     "app.dialogs.invalidSurvey.content": "Pour enregistrer et publier les modifications, corrigez les problèmes en suspens dans votre enquête.",
+    "app.dialogs.surveyCreationDenied.title": "Inscription requise",
+    "app.dialogs.surveyCreationDenied.content": "Vous devez vous inscrire pour créer une nouvelle enquête. Cliquez sur \"Continuer\" pour être redirigé vers le formulaire d'inscription.",
     "app.error.generic": "Oups, une erreur s'est produite !",
     "app.error.accessDenied": "Accès refusé",
     "app.error.clickHereToRegister": "Cliquez ici pour vous inscrire",

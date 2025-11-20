@@ -422,6 +422,39 @@ export class DataStoreService {
       );
   }
 
+  /**
+   * Returns a promise resolving to true if the user's email is either
+   * explicitly listed as a document ID in the 'passlist' collection or
+   * matches the regular expression stored in the 'passlist/regexp' document.
+   *
+   * @param userEmail The email of the user to check against the passlist.
+   */
+  async isPasslisted(userEmail: string): Promise<boolean> {
+    const docSnapshot = await firstValueFrom(
+      this.db.doc(`passlist/${userEmail}`).get()
+    );
+
+    if (docSnapshot.exists) return true;
+
+    const regexpSnapshot = await firstValueFrom(
+      this.db.doc(`passlist/regexp`).get()
+    );
+
+    if (regexpSnapshot.exists) {
+      const regexpData = regexpSnapshot.data() as {regexp?: string} | undefined;
+
+      const regexpString = regexpData?.regexp;
+
+      if (regexpString) {
+        const regex = new RegExp(regexpString);
+
+        return regex.test(userEmail);
+      }
+    }
+
+    return false;
+  }
+
   private toLocationsOfInterest(
     loiIds: {id: string}[]
   ): List<LocationOfInterest> {

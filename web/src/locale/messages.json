@@ -137,6 +137,8 @@
     "app.dialogs.disableFreeForm.content": "Data collector will no longer be able to add new sites for this job. Data will only be collected for existing sites.",
     "app.dialogs.invalidSurvey.title": "Fix issues with survey",
     "app.dialogs.invalidSurvey.content": "To publish changes, fix any outstanding issues with your survey.",
+    "app.dialogs.surveyCreationDenied.title": "Registration required",
+    "app.dialogs.surveyCreationDenied.content": "You do not have permission to create surveys. Click \"Continue\" to request access.",
     "app.error.generic": "Oops, something went wrong",
     "app.error.accessDenied": "Access denied",
     "app.error.clickHereToRegister": " Click here to register ",
