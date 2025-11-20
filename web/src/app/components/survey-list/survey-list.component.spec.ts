@@ -15,12 +15,18 @@
  */
 
 import {Component} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+  waitForAsync,
+} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
-import {MatDialog} from '@angular/material/dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
 import {By} from '@angular/platform-browser';
@@ -37,6 +43,11 @@ import {
   SurveyState,
 } from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -49,8 +60,12 @@ class HeaderComponent {}
 describe('SurveyListComponent', () => {
   let component: SurveyListComponent;
   let fixture: ComponentFixture<SurveyListComponent>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  const dialog: Partial<MatDialog> = {};
+  let dialogRefSpy: jasmine.SpyObj<
+    MatDialogRef<JobDialogComponent, DialogData>
+  >;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
 
   // A survey that hasn't gone through creation flow
   const incompleteSurvey = new Survey(
@@ -132,15 +147,28 @@ describe('SurveyListComponent', () => {
     'getAccessibleSurveys$',
     'getSurveyAcl',
   ]);
-  const authServiceSpy = jasmine.createSpyObj('AuthService', [
-    'canManageSurvey',
-  ]);
 
   beforeEach(waitForAsync(() => {
+    authServiceSpy = jasmine.createSpyObj('AuthService', [
+      'canManageSurvey',
+      'isPasslisted',
+    ]);
+
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['navigateToCreateSurvey', 'selectSurvey', 'getSidePanelExpanded']
+      [
+        'navigateToCreateSurvey',
+        'navigateToSubscriptionForm',
+        'selectSurvey',
+        'getSidePanelExpanded',
+      ]
     );
+
+    dialogRefSpy = jasmine.createSpyObj<
+      MatDialogRef<JobDialogComponent, DialogData>
+    >('MatDialogRef', ['afterClosed', 'close']);
+    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    dialogSpy.open.and.returnValue(dialogRefSpy);
 
     TestBed.configureTestingModule({
       imports: [
@@ -151,7 +179,7 @@ describe('SurveyListComponent', () => {
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [
-        {provide: MatDialog, useValue: dialog},
+        {provide: MatDialog, useValue: dialogSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: AngularFirestore, useValue: {}},
@@ -169,6 +197,10 @@ describe('SurveyListComponent', () => {
       new AclEntry('test@gmail.com', Role.SURVEY_ORGANIZER),
     ]);
     authServiceSpy.canManageSurvey.and.returnValue(true);
+    authServiceSpy.isPasslisted.and.returnValue(Promise.resolve(true));
+    dialogRefSpy.afterClosed.and.returnValue(
+      of({dialogType: DialogType.SurveyCreationDenied} as DialogData)
+    );
     fixture = TestBed.createComponent(SurveyListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -195,13 +227,33 @@ describe('SurveyListComponent', () => {
     expect(surveyCards.length).toBe(4, 'Should display 2 survey cards');
   });
 
-  // it('should go to create survey page when add card is clicked', () => {
-  //   clickCard(fixture, 'add-card');
+  it('should go to create survey page when add card is clicked and user is passlisted', fakeAsync(() => {
+    const addCard = fixture.debugElement.query(By.css('#add-card'))
+      .nativeElement as HTMLElement;
 
-  //   expect(
-  //     navigationServiceSpy.navigateToCreateSurvey
-  //   ).toHaveBeenCalledOnceWith(null);
-  // });
+    addCard.click();
+
+    tick();
+
+    expect(navigationServiceSpy.navigateToCreateSurvey).toHaveBeenCalledWith(
+      null
+    );
+  }));
+
+  it('should go to supscription form when add card is clicked and user is not passlisted', fakeAsync(() => {
+    authServiceSpy.isPasslisted.and.returnValue(Promise.resolve(false));
+
+    const addCard = fixture.debugElement.query(By.css('#add-card'))
+      .nativeElement as HTMLElement;
+
+    addCard.click();
+
+    tick();
+
+    expect(
+      navigationServiceSpy.navigateToSubscriptionForm
+    ).toHaveBeenCalledWith();
+  }));
 
   it('should go to create survey page with id when a incomplete survey card is clicked', () => {
     clickCard(fixture, 'survey-card-0');
