@@ -13,23 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Injectable} from '@angular/core';
+
+import {inject} from '@angular/core';
+import {CanActivateFn, Router, UrlTree} from '@angular/router';
 
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class PasslistGuard {
-  constructor(
-    private authService: AuthService,
-    private navigationService: NavigationService
-  ) {}
+/**
+ * Functional Guard to check passlist status and redirect if needed.
+ */
+export const passlistGuard: CanActivateFn = async (): Promise<
+  boolean | UrlTree
+> => {
+  const authService = inject(AuthService);
+  const navigationService = inject(NavigationService);
+  const router = inject(Router);
 
-  async canActivate(): Promise<void> {
-    const isPasslisted = await this.authService.isPasslisted();
+  const isPasslisted = await authService.isPasslisted();
 
-    if (!isPasslisted) this.navigationService.navigateToSubscriptionForm();
+  if (isPasslisted) {
+    return true;
+  } else {
+    const url = await navigationService.getAccessDeniedLink();
+
+    return router.parseUrl(url || '/');
   }
-}
+};

@@ -26,7 +26,7 @@ import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
 import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
-import {PasslistGuard} from 'app/services/auth/passlist.guard';
+import {passlistGuard} from 'app/services/auth/passlist.guard';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
@@ -79,7 +79,7 @@ const routes: Routes = [
   {
     path: `${SURVEYS_SEGMENT}/${SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
-    canActivate: [AuthGuard, PasslistGuard],
+    canActivate: [AuthGuard, passlistGuard],
   },
   {
     path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
