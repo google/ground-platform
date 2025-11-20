@@ -23,6 +23,9 @@ import {
 import {
   DocumentData,
   FieldPath,
+  QueryDocumentSnapshot,
+  collection,
+  getDocs,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {registry} from '@ground/lib/dist/message-registry';
@@ -40,6 +43,7 @@ import {
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
 import {
+  jobDocToModel,
   jobDocsToModel,
   surveyDocToModel,
 } from 'app/converters/survey-data-converter';
@@ -66,6 +70,7 @@ const AclRole = Pb.Role;
 const GeneralAccess = Pb.Survey.GeneralAccess;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
+const JOBS_COLLECTION_NAME = 'jobs';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonBlob = {[field: string]: any};
@@ -603,6 +608,58 @@ export class DataStoreService {
         })
       );
     return Promise.resolve(surveyId);
+  }
+
+  async copySurvey(surveyId: string): Promise<string> {
+    const newSurveyId = this.generateId();
+
+    const surveyDoc = await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .ref.get();
+
+    const survey = surveyDocToModel(surveyId, surveyDoc.data() as DocumentData);
+
+    if (survey instanceof Error) return '';
+
+    const newSurvey = surveyToDocument(newSurveyId, {
+      ...survey,
+      id: newSurveyId,
+      title: 'Copy of ' + survey.title,
+      acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
+    });
+
+    await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(newSurveyId)
+      .set(newSurvey);
+
+    const jobsCollectionRef = collection(
+      this.db.firestore,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/${JOBS_COLLECTION_NAME}`
+    );
+
+    const qs = await getDocs(jobsCollectionRef);
+
+    qs.forEach(async (jobDoc: QueryDocumentSnapshot<DocumentData>) => {
+      const newJobId = this.generateId();
+
+      const job = jobDocToModel(jobDoc.data());
+
+      const newJob = jobToDocument({
+        ...job,
+        id: newJobId,
+      } as Job);
+
+      await this.db
+        .collection(
+          `${SURVEYS_COLLECTION_NAME}/${newSurveyId}/${JOBS_COLLECTION_NAME}`
+        )
+        .doc(newJobId)
+        .set(newJob);
+    });
+
+    return newSurveyId;
   }
 
   getImageDownloadURL(path: string) {

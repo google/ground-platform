@@ -50,7 +50,23 @@
 
   <mat-card>
     <div class="floating-button">
-      <button class="delete-survey-button" mat-stroked-button (click)="openDeleteSurveyDialog()">
+      <button id="copy-survey-button" mat-stroked-button (click)="openCopySurveyDialog()">
+        <span i18n="@@app.labels.copySurvey">Copy survey</span>
+      </button>
+    </div>
+
+    <mat-card-header>
+      <mat-card-title i18n="@@app.cards.copySurvey.title">Copy survey</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div i18n="@@app.cards.copySurvey.description">Copies jobs and tasks in this survey. Data collection sites and submission data are not copied.</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <div class="floating-button">
+      <button class="delete-survey-button" id="delete-survey-button" mat-stroked-button (click)="openDeleteSurveyDialog()">
         <span i18n="@@app.labels.deleteSurvey">Delete survey</span>
       </button>
     </div>

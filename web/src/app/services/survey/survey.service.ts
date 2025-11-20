@@ -145,6 +145,10 @@ export class SurveyService {
     } as Survey);
   }
 
+  async copySurvey(surveyId: string): Promise<string> {
+    return this.dataStore.copySurvey(surveyId);
+  }
+
   async createSurvey(name: string, description?: string): Promise<string> {
     const user = await firstValueFrom(this.authService.getUser$());
     const surveyId = await this.dataStore.createSurvey(
