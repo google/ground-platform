@@ -24,6 +24,7 @@ export enum DialogType {
   RenameJob,
   DeleteJob,
   UndoJobs,
+  CopySurvey,
   DeleteLois,
   DeleteOption,
   DeleteSurvey,
@@ -54,6 +55,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     content: $localize`:@@app.dialogs.unpublishedChanges.content:If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
     continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
+  },
+  [DialogType.CopySurvey]: {
+    title: $localize`:@@app.dialogs.copySurvey.title:Copy survey`,
+    content: $localize`:@@app.dialogs.copySurvey.content:This survey and all its associated jobs will be copied. Data collection sites and submission data won't be included in the copy.`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Confirm`,
   },
   [DialogType.DeleteJob]: {
     title: $localize`:@@app.dialogs.deleteJob.title:Delete job`,

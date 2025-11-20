@@ -100,6 +100,24 @@ export class EditDetailsComponent implements OnInit {
       });
   }
 
+  openCopySurveyDialog() {
+    this.dialog
+      .open(JobDialogComponent, {
+        data: {dialogType: DialogType.CopySurvey},
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (result?.dialogType === DialogType.CopySurvey) {
+          const {id: surveyId} = this.survey!;
+
+          const newSurveyId = await this.surveyService.copySurvey(surveyId);
+
+          this.navigationService.navigateToSurveyDashboard(newSurveyId);
+        }
+      });
+  }
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
