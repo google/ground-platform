@@ -24,6 +24,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 @Component({
   selector: 'ground-android-landing-page',
   templateUrl: './android-intent-landing-page.component.html',
+  styleUrls: ['./android-intent-landing-page.component.scss'],
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
   googlePlayId$ = this.appConfigService.getGooglePlayId();
@@ -80,6 +81,8 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     this.isIos = this.isIosDevice();
 
+    this.isIos = true;
+
     if (this.isIos) return;
 
     const googlePlayId = await firstValueFrom(this.googlePlayId$);
@@ -94,7 +97,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
 
     // Fallback: redirect to Google Play if app doesn't open
     const redirectTimeoutId = setTimeout(() => {
-      window.location.href = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
+      // window.location.href = `https://play.google.com/store/apps/details?id=${googlePlayId}`;
     }, timeout);
 
     // Try opening the app via intent URL

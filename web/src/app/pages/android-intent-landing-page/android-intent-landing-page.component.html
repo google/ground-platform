@@ -14,22 +14,26 @@
   limitations under the License.
 -->
 
-<ng-container *ngIf="isIos">
-  <p i18n="@@app.texts.platformNotSupported.iosMessage"><strong>Platform Not Supported:</strong> We've detected you're using an iOS device. Currently, <strong>Ground is only available for Android.</strong></p>
-</ng-container>
+<div class="page">
+  <div class="container">
+    <ng-container *ngIf="isIos">
+      <section i18n="@@app.texts.platformNotSupported.iosMessage"><strong>Platform Not Supported:</strong> We've detected you're using an iOS device. Currently, <strong>Ground is only available for Android.</strong></section>
+    </ng-container>
 
-<ng-container *ngIf="!isIos">
-  <p i18n="@@app.texts.launchingGround">Launching <strong>Ground</strong>...</p>
+    <ng-container *ngIf="!isIos">
+      <section i18n="@@app.texts.launchingGround">Launching <strong>Ground</strong>...</section>
 
-  <p i18n="@@app.texts.installRedirectMessage">If it doesn't open automatically, you will be redirected to Google Play to install it.</p>
+      <section i18n="@@app.texts.installRedirectMessage">If it doesn't open automatically, you will be redirected to Google Play to install it.</section>
 
-  <div *ngIf="googlePlayId$ | async as googlePlayId">
-    <a [href]="'https://play.google.com/store/apps/details?id=' + googlePlayId">
-      <img
-          [src]="getItOnGooglePlayImageSrc"
-          alt="Get in on Google Play"
-          i18n-alt="@@app.labels.googlePlayBadgeAlt"
-      />
-    </a>
+      <section *ngIf="googlePlayId$ | async as googlePlayId">
+        <a [href]="'https://play.google.com/store/apps/details?id=' + googlePlayId">
+          <img
+              [src]="getItOnGooglePlayImageSrc"
+              alt="Get in on Google Play"
+              i18n-alt="@@app.labels.googlePlayBadgeAlt"
+          />
+        </a>
+      </section>
+    </ng-container>
   </div>
-</ng-container>
+</div>
