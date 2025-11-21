@@ -93,8 +93,11 @@ export async function exportCsvHandler(
     await Promise.all(
       snapshot.docs.map(async doc => {
         const loi = doc.data();
-        if (!(ownerIdFilter ? loi[9] === 2 && loi[5] === ownerIdFilter : true))
-          return;
+        if (ownerIdFilter) {
+          if (!(loi[9] === 2 && loi[5] === ownerIdFilter)) {
+            return;
+          }
+        }
         Object.keys(loi[10] || {}).forEach(key => loiProperties.add(key));
       })
     );
