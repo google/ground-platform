@@ -15,7 +15,6 @@
  */
 
 import * as functions from 'firebase-functions';
-import {Map} from 'immutable';
 import {canExport, hasOrganizerRole} from './common/auth';
 import {getDatastore} from './common/context';
 import {isAccessibleLoi} from './common/utils';
@@ -128,7 +127,7 @@ function buildFeature(loi: Pb.LocationOfInterest) {
   }
   return {
     type: 'Feature',
-    properties: propertiesPbToModel(loi.properties).toObject(),
+    properties: propertiesPbToObject(loi.properties),
     geometry: toGeoJsonGeometry(loi.geometry),
   };
 }
@@ -142,15 +141,15 @@ function getFileName(jobName: string | null) {
   return `${fileBase}.geojson`;
 }
 
-function propertiesPbToModel(pb: {
+function propertiesPbToObject(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
-}): Map<string, string | number> {
+}): {[k: string]: string | number} {
   const properties: {[k: string]: string | number} = {};
-  for (const k of Object.keys(pb)) {
+  for (const k of Object.keys(pb).sort()) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {
       properties[k] = v;
     }
   }
-  return Map(properties);
+  return properties;
 }

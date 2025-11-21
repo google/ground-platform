@@ -21,6 +21,7 @@ import {Router} from '@angular/router';
 import {of} from 'rxjs';
 
 import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -35,6 +36,10 @@ describe('HeaderComponent', () => {
       imports: [MatMenuModule],
       declarations: [HeaderComponent],
       providers: [
+        {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
         {provide: MatDialog, useValue: {}},
         {provide: AuthService, useValue: {getUser$: () => of()}},
         {provide: DraftSurveyService, useValue: {}},

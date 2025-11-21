@@ -15,6 +15,7 @@
  */
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs';
 
@@ -23,6 +24,12 @@ import {
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/pages/edit-survey/job-dialog/job-dialog.component';
+import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -50,6 +57,8 @@ export class SurveyListComponent implements OnInit, OnDestroy {
   SurveyGeneralAccess = SurveyGeneralAccess;
 
   constructor(
+    private authService: AuthService,
+    public dialog: MatDialog,
     private navigationService: NavigationService,
     private surveyService: SurveyService
   ) {}
@@ -110,7 +119,25 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     }
   }
 
-  createNewSurvey(): void {
+  async createNewSurvey(): Promise<void> {
+    const isPasslisted = await this.authService.isPasslisted();
+
+    if (!isPasslisted) {
+      this.dialog
+        .open(JobDialogComponent, {
+          data: {dialogType: DialogType.SurveyCreationDenied},
+          panelClass: 'small-width-dialog',
+        })
+        .afterClosed()
+        .subscribe(async (result: DialogData) => {
+          if (!result) return;
+
+          this.navigationService.navigateToSubscriptionForm();
+        });
+
+      return;
+    }
+
     this.navigationService.navigateToCreateSurvey(null);
   }
 

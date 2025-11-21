@@ -20,6 +20,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {Router} from '@angular/router';
 import {NEVER, of} from 'rxjs';
 
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {SurveyHeaderComponent} from './survey-header.component';
@@ -33,6 +34,10 @@ describe('SurveyHeaderComponent', () => {
       imports: [MatIconModule, MatDialogModule],
       declarations: [SurveyHeaderComponent],
       providers: [
+        {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
         {
           provide: SurveyService,
           useValue: {
