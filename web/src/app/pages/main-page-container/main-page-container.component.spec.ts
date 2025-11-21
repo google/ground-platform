@@ -29,6 +29,7 @@ import {MainPageContainerComponent} from './main-page-container.component';
 const navigationService = {
   init: () => {},
   getSurveyId$: () => NEVER,
+  getSurveyId: () => NEVER,
 };
 
 const surveyService = jasmine.createSpyObj('SurveyService', [

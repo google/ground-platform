@@ -17,6 +17,7 @@
 import {HarnessLoader} from '@angular/cdk/testing';
 import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {CdkTreeModule} from '@angular/cdk/tree';
+import {Signal, WritableSignal, signal} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
@@ -42,6 +43,7 @@ import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {UrlParams} from 'app/services/navigation/url-params';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -69,6 +71,7 @@ describe('JobListItemComponent', () => {
   let submissions$: Subject<List<Submission>>;
   let surveyId$: Subject<string | null>;
   let locationOfInterestId$: Subject<string | null>;
+  let urlParamsSignal: WritableSignal<UrlParams>;
 
   const user = {
     id: 'user001',
@@ -153,6 +156,9 @@ describe('JobListItemComponent', () => {
         'getSurveyId$',
         'getLocationOfInterestId$',
         'selectLocationOfInterest',
+        'getSurveyId',
+        'getLoiId',
+        'getUrlParams',
         'getSidePanelExpanded',
         'isEditSurveyPage',
       ]
@@ -162,6 +168,7 @@ describe('JobListItemComponent', () => {
     submissions$ = new Subject<List<Submission>>();
     surveyId$ = new Subject<string | null>();
     locationOfInterestId$ = new Subject<string | null>();
+    urlParamsSignal = signal<UrlParams>(new UrlParams(null, null, null, null));
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
@@ -171,6 +178,7 @@ describe('JobListItemComponent', () => {
     navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
       locationOfInterestId$
     );
+    navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
 
     TestBed.configureTestingModule({
       declarations: [JobListItemComponent],
@@ -207,6 +215,7 @@ describe('JobListItemComponent', () => {
     loader = TestbedHarnessEnvironment.loader(fixture);
 
     surveyId$.next(surveyId);
+    urlParamsSignal.set(new UrlParams(surveyId, null, null, null));
     lois$.next(List([]));
   });
 
