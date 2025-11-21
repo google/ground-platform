@@ -27,7 +27,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
   googlePlayId$ = this.appConfigService.getGooglePlayId();
-  googlePlayImageSrc: string;
+  getItOnGooglePlayImageSrc: string;
   isAndroid = false;
   isIos = false;
 
@@ -40,7 +40,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
     const languageId = locale.split('-')[0];
     switch (languageId) {
       default:
-        this.googlePlayImageSrc =
+        this.getItOnGooglePlayImageSrc =
           'assets/img/GetItOnGooglePlay_Badge_Web_color_English.png';
     }
   }
