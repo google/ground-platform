@@ -106,10 +106,12 @@ function keys(dict?: {}): string[] {
   return Object.keys(dict || {});
 }
 
+export function jobDocToModel(data: DocumentData): Job {
+  return jobPbToModel(toMessage(data, Pb.Job) as Pb.Job);
+}
+
 export function jobDocsToModel(data: DocumentData[]): List<Job> {
-  return List<Job>(
-    data.map(job => jobPbToModel(toMessage(job, Pb.Job) as Pb.Job))
-  );
+  return List<Job>(data.map(jobDocToModel));
 }
 
 function jobPbToModel(pb: Pb.IJob): Job {

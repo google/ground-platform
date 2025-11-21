@@ -19,6 +19,7 @@ import {NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, NEVER, of} from 'rxjs';
 
 import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {SignInPageComponent} from './sign-in-page.component';
 
@@ -30,6 +31,10 @@ describe('SignInPageComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SignInPageComponent],
       providers: [
+        {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
         {provide: Router, useValue: {events: of()}},
         {
           provide: AuthService,

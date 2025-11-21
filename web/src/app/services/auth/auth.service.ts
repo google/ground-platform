@@ -130,6 +130,12 @@ export class AuthService {
     return firstValueFrom(this.dataStore.user$(userId));
   }
 
+  async isPasslisted(): Promise<boolean> {
+    const {email} = this.currentUser;
+
+    return this.dataStore.isPasslisted(email);
+  }
+
   isAuthenticated$(): Observable<boolean> {
     return this.getUser$().pipe(map(user => user.isAuthenticated));
   }
