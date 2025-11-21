@@ -39,6 +39,22 @@ export class AndroidIntentLandingPageComponent implements OnInit {
   ) {
     const languageId = locale.split('-')[0];
     switch (languageId) {
+      case 'es':
+        this.getItOnGooglePlayImageSrc =
+          'GetItOnGooglePlay_Badge_Web_color_Spanish.png';
+        break;
+      case 'fr':
+        this.getItOnGooglePlayImageSrc =
+          'GetItOnGooglePlay_Badge_Web_color_French.png';
+        break;
+      case 'pt':
+        this.getItOnGooglePlayImageSrc =
+          'GetItOnGooglePlay_Badge_Web_color_Portuguese-Portugal.png';
+        break;
+      case 'vi':
+        this.getItOnGooglePlayImageSrc =
+          'GetItOnGooglePlay_Badge_Web_color_Vietnamese.png';
+        break;
       default:
         this.getItOnGooglePlayImageSrc =
           'assets/img/GetItOnGooglePlay_Badge_Web_color_English.png';
