@@ -100,7 +100,7 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
   },
   [DialogType.SurveyCreationDenied]: {
     title: $localize`:@@app.dialogs.surveyCreationDenied.title:Registration required`,
-    content: $localize`:@@app.dialogs.surveyCreationDenied.content:You must register for an account to create a new survey. Click "Continue" to be redirected to the registration form.`,
+    content: $localize`:@@app.dialogs.surveyCreationDenied.content:You do not have permission to create surveys. Click "Continue" to request access.`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
     continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },

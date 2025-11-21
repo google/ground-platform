@@ -138,7 +138,7 @@
     "app.dialogs.invalidSurvey.title": "Corrigir problemas com o inquérito",
     "app.dialogs.invalidSurvey.content": "Para publicar as alterações, corrija quaisquer problemas pendentes no seu inquérito.",
     "app.dialogs.surveyCreationDenied.title": "Registration required",
-    "app.dialogs.surveyCreationDenied.content": "You must register for an account to create a new survey. Click \"Continue\" to be redirected to the registration form.",
+    "app.dialogs.surveyCreationDenied.content": "You do not have permission to create surveys. Click \"Continue\" to request access.",
     "app.error.generic": "Ups, algo correu mal",
     "app.error.accessDenied": "Acesso negado",
     "app.error.clickHereToRegister": " Clique aqui para se registar ",
