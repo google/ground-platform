@@ -30,8 +30,16 @@
         "destination": "/en/index.html"
       },
       {
+        "source": "/es{,/**}",
+        "destination": "/es/index.html"
+      },
+      {
         "source": "/fr{,/**}",
         "destination": "/fr/index.html"
+      },
+      {
+        "source": "/pt{,/**}",
+        "destination": "/pt/index.html"
       },
       {
         "source": "/vi{,/**}",
