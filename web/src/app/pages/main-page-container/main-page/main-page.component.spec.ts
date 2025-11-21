@@ -66,6 +66,7 @@ describe('MainPageComponent', () => {
       getSurveyId$: () => NEVER,
       getLocationOfInterestId$: () => NEVER,
       getSubmissionId$: () => NEVER,
+      getUrlParams: () => NEVER,
     };
 
     TestBed.configureTestingModule({
