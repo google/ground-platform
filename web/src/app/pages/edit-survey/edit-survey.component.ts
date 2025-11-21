@@ -20,7 +20,7 @@ import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {List} from 'immutable';
-import {Subscription, filter, startWith} from 'rxjs';
+import {Subscription, distinctUntilChanged, filter, startWith} from 'rxjs';
 
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
@@ -61,16 +61,19 @@ export class EditSurveyComponent implements OnInit {
 
   ngOnInit(): void {
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(async surveyId => {
-        if (surveyId) {
-          this.surveyId = surveyId;
-          this.surveyService.activateSurvey(surveyId);
-          await this.draftSurveyService.init(surveyId);
-          this.draftSurveyService
-            .getSurvey$()
-            .subscribe(survey => (this.survey = survey));
-        }
-      })
+      this.navigationService
+        .getSurveyId$()
+        .pipe(distinctUntilChanged())
+        .subscribe(async surveyId => {
+          if (surveyId) {
+            this.surveyId = surveyId;
+            this.surveyService.activateSurvey(surveyId);
+            await this.draftSurveyService.init(surveyId);
+            this.draftSurveyService
+              .getSurvey$()
+              .subscribe(survey => (this.survey = survey));
+          }
+        })
     );
 
     this.subscription.add(
