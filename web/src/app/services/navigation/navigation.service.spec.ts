@@ -16,18 +16,34 @@
 
 import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
+import {of} from 'rxjs';
 
 import {NavigationService} from 'app/services/navigation/navigation.service';
+
+import {DataStoreService} from '../data-store/data-store.service';
 
 describe('NavigationService', () => {
   let service: NavigationService;
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
-    TestBed.configureTestingModule({
-      providers: [{provide: Router, useValue: routerSpy}],
+    routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl'], {
+      events: of(),
+      routerState: {
+        root: {},
+      },
     });
+
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
+        {provide: Router, useValue: routerSpy},
+      ],
+    });
+
     service = TestBed.inject(NavigationService);
   });
 

@@ -24,11 +24,13 @@ export enum DialogType {
   RenameJob,
   DeleteJob,
   UndoJobs,
+  CopySurvey,
   DeleteLois,
   DeleteOption,
   DeleteSurvey,
   DisableFreeForm,
   InvalidSurvey,
+  SurveyCreationDenied,
 }
 
 export interface DialogConfig {
@@ -54,6 +56,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     content: $localize`:@@app.dialogs.unpublishedChanges.content:If you leave this page, changes you’ve made to this survey won’t be published. Are you sure you want to continue?`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
     continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
+  },
+  [DialogType.CopySurvey]: {
+    title: $localize`:@@app.dialogs.copySurvey.title:Copy survey`,
+    content: $localize`:@@app.dialogs.copySurvey.content:This survey and all its associated jobs will be copied. Data collection sites and submission data won't be included in the copy.`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Cancel`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Confirm`,
   },
   [DialogType.DeleteJob]: {
     title: $localize`:@@app.dialogs.deleteJob.title:Delete job`,
@@ -89,6 +97,12 @@ export const dialogConfigs: Record<DialogType, DialogConfig> = {
     title: $localize`:@@app.dialogs.invalidSurvey.title:Fix issues with survey`,
     content: $localize`:@@app.dialogs.invalidSurvey.content:To publish changes, fix any outstanding issues with your survey.`,
     backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+  },
+  [DialogType.SurveyCreationDenied]: {
+    title: $localize`:@@app.dialogs.surveyCreationDenied.title:Registration required`,
+    content: $localize`:@@app.dialogs.surveyCreationDenied.content:You must register for an account to create a new survey. Click "Continue" to be redirected to the registration form.`,
+    backButtonLabel: $localize`:@@app.labels.goBack:Go back`,
+    continueButtonLabel: $localize`:@@app.labels.continue:Continue`,
   },
 };
 

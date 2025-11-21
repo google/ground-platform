@@ -8,12 +8,12 @@
     "build-local-deps": "npm run build --workspace=../proto --workspace=../lib",
     "prebuild": "npm run --prefix scripts copy-keys",
     "build": "ng build -c $npm_config_config",
-    "postbuild": "npm run --prefix scripts copy-asset-links && npm run copy:shared-assets",
+    "postbuild": "npm run --prefix scripts copy-asset-links",
     "build-all": "npm run build-local-deps && npm run build",
     "build-and-test": "npm run build && npm run test",
     "build-all-and-test": "npm run build-all && npm run test",
     "watch": "npm run build -- --watch",
-    "start": "npm run build && ng serve -c $npm_config_config",
+    "start": "ng serve -c $npm_config_config",
     "build-and-start": "npm run build && npm run start",
     "build-all-and-start": "npm run build-all && npm run start",
     "pretest": "./pretest.sh",
@@ -25,8 +25,7 @@
     "posttest": "./posttest.sh",
     "login": "npx firebase login",
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
-    "extract-i18n": "ng extract-i18n",
-    "copy:shared-assets": "rimraf dist/web/assets && cpx \"src/assets/**/*\" \"dist/web/assets\""
+    "extract-i18n": "ng extract-i18n"
   },
   "private": true,
   "dependencies": {
@@ -99,7 +98,6 @@
     "prettier": "^2.8.1",
     "prettier-eslint": "^15.0.1",
     "puppeteer": "^22.10.0",
-    "rimraf": "^6.0.1",
     "ts-node": "^8.10.2",
     "typescript": "^5.4.5"
   }

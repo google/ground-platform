@@ -26,10 +26,12 @@ import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
 import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
+import {passlistGuard} from 'app/services/auth/passlist.guard';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
 import {AboutComponent} from './pages/about/about.component';
+import {AndroidIntentLandingPageComponent} from './pages/android-intent-landing-page/android-intent-landing-page.component';
 import {EditDetailsComponent} from './pages/edit-survey/edit-details/edit-details.component';
 import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
 import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
@@ -77,7 +79,7 @@ const routes: Routes = [
   {
     path: `${SURVEYS_SEGMENT}/${SURVEYS_CREATE}`,
     component: CreateSurveyComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, passlistGuard],
   },
   {
     path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
@@ -94,6 +96,24 @@ const routes: Routes = [
     path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
+    children: [
+      {
+        path: `${LOI_SEGMENT}/:${LOI_ID}`,
+        component: MainPageContainerComponent,
+        children: [
+          {
+            path: `${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
+            component: MainPageContainerComponent,
+            children: [
+              {
+                path: `${TASK_SEGMENT}/:${TASK_ID}`,
+                component: MainPageContainerComponent,
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   {
     path: NavigationService.ERROR,
@@ -105,23 +125,13 @@ const routes: Routes = [
     component: AboutComponent,
   },
   {
+    path: `${NavigationService.ANDROID_SEGMENT}`,
+    component: AndroidIntentLandingPageComponent,
+    children: [{path: '**', component: AndroidIntentLandingPageComponent}],
+  },
+  {
     path: NavigationService.TERMS,
     component: TermsComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}`,
-    component: MainPageContainerComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${LOI_SEGMENT}/:${LOI_ID}/${SUBMISSION_SEGMENT}/:${SUBMISSION_ID}/${TASK_SEGMENT}/:${TASK_ID}`,
-    component: MainPageContainerComponent,
     canActivate: [AuthGuard],
   },
 ];

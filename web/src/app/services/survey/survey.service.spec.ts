@@ -23,12 +23,23 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('SurveyService', () => {
-  const dataStoreServiceStub: Partial<DataStoreService> = {};
+  let service: SurveyService;
+  let dataStoreService: DataStoreService;
+
   const user$ = new Subject<User | null>();
-  beforeEach(() =>
+  const newSurveyId = 'newSurveyId';
+
+  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        {provide: DataStoreService, useValue: dataStoreServiceStub},
+        {
+          provide: DataStoreService,
+          useValue: {
+            copySurvey: jasmine
+              .createSpy('copySurvey')
+              .and.resolveTo(newSurveyId),
+          },
+        },
         {
           provide: AuthService,
           useValue: {
@@ -37,12 +48,28 @@ describe('SurveyService', () => {
           },
         },
       ],
-    })
-  );
+    });
+
+    service = TestBed.inject(SurveyService);
+
+    dataStoreService = TestBed.inject(DataStoreService) as DataStoreService & {
+      copySurvey: jasmine.Spy;
+    };
+  });
 
   it('should be created', () => {
-    // TODO(gino-m): Implement tests.
-    const service: SurveyService = TestBed.inject(SurveyService);
     expect(service).toBeTruthy();
+  });
+
+  it('should call copySurvey and return the new ID', async () => {
+    const originalSurveyId = 'original123';
+
+    const resultId = await service.copySurvey(originalSurveyId);
+
+    expect(dataStoreService.copySurvey).toHaveBeenCalledOnceWith(
+      originalSurveyId
+    );
+
+    expect(resultId).toBe(newSurveyId);
   });
 });

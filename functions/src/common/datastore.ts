@@ -198,7 +198,7 @@ export class Datastore {
   async fetchLoisSubmissions(
     surveyId: string,
     jobId: string,
-    ownerId: string | undefined,
+    ownerId: string | null,
     pageSize: number
   ) {
     const loisQuery = this.db_

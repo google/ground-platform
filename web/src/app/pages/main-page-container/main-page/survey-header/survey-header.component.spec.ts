@@ -18,8 +18,9 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {Router} from '@angular/router';
-import {NEVER} from 'rxjs';
+import {NEVER, of} from 'rxjs';
 
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {SurveyHeaderComponent} from './survey-header.component';
@@ -34,6 +35,10 @@ describe('SurveyHeaderComponent', () => {
       declarations: [SurveyHeaderComponent],
       providers: [
         {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
+        {
           provide: SurveyService,
           useValue: {
             getActiveSurvey$: () => NEVER,
@@ -44,6 +49,7 @@ describe('SurveyHeaderComponent', () => {
         {
           provide: Router,
           useValue: {
+            events: of(),
             isActive: () => true,
           },
         },
