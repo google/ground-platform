@@ -138,7 +138,7 @@
     "app.dialogs.invalidSurvey.title": "Corriger les problèmes de l’enquête",
     "app.dialogs.invalidSurvey.content": "Pour enregistrer et publier les modifications, corrigez les problèmes en suspens dans votre enquête.",
     "app.dialogs.surveyCreationDenied.title": "Inscription requise",
-    "app.dialogs.surveyCreationDenied.content": "Vous devez vous inscrire pour créer une nouvelle enquête. Cliquez sur \"Continuer\" pour être redirigé vers le formulaire d'inscription.",
+    "app.dialogs.surveyCreationDenied.content": "You do not have permission to create surveys. Click \"Continue\" to request access.",
     "app.error.generic": "Oups, une erreur s'est produite !",
     "app.error.accessDenied": "Accès refusé",
     "app.error.clickHereToRegister": "Cliquez ici pour vous inscrire",

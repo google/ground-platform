@@ -138,7 +138,7 @@
     "app.dialogs.invalidSurvey.title": "Sửa các vấn đề trong khảo sát",
     "app.dialogs.invalidSurvey.content": "Để xuất bản thay đổi, hãy sửa các vấn đề còn tồn đọng trong khảo sát.",
     "app.dialogs.surveyCreationDenied.title": "Yêu cầu đăng ký",
-    "app.dialogs.surveyCreationDenied.content": "Bạn phải đăng ký tài khoản để tạo khảo sát mới. Nhấp vào \"Tiếp tục\" để được chuyển hướng đến biểu mẫu đăng ký.",
+    "app.dialogs.surveyCreationDenied.content": "You do not have permission to create surveys. Click \"Continue\" to request access.",
     "app.error.generic": "Rất tiếc, đã xảy ra lỗi",
     "app.error.accessDenied": "Truy cập bị từ chối",
     "app.error.clickHereToRegister": "Nhấp vào đây để đăng ký",
