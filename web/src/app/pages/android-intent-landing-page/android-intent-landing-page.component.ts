@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, LOCALE_ID, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {firstValueFrom} from 'rxjs';
 
@@ -27,14 +27,23 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 })
 export class AndroidIntentLandingPageComponent implements OnInit {
   googlePlayId$ = this.appConfigService.getGooglePlayId();
+  googlePlayImageSrc: string;
   isAndroid = false;
   isIos = false;
 
   constructor(
+    @Inject(LOCALE_ID) public locale: string,
     private appConfigService: AppConfigService,
     private navigationService: NavigationService,
     private router: Router
-  ) {}
+  ) {
+    const languageId = locale.split('-')[0];
+    switch (languageId) {
+      default:
+        this.googlePlayImageSrc =
+          'assets/img/GetItOnGooglePlay_Badge_Web_color_English.png';
+    }
+  }
 
   private isAndroidDevice(): boolean {
     const userAgent =
