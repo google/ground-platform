@@ -12,8 +12,14 @@
       "i18n": {
         "sourceLocale": "en",
         "locales": {
+          "es": {
+            "translation": "src/locale/messages.es.json"
+          },
           "fr": {
             "translation": "src/locale/messages.fr.json"
+          },
+          "pt": {
+            "translation": "src/locale/messages.pt.json"
           },
           "vi": {
             "translation": "src/locale/messages.vi.json"
@@ -102,8 +108,14 @@
             "en": {
               "localize": ["en"]
             },
+            "es": {
+              "localize": ["es"]
+            },
             "fr": {
               "localize": ["fr"]
+            },
+            "pt": {
+              "localize": ["pt"]
             },
             "vi": {
               "localize": ["vi"]
@@ -125,8 +137,14 @@
             "prod": {
               "buildTarget": "web:build:prod,en"
             },
+            "es": {
+              "buildTarget": "web:build:dev,es"
+            },
             "fr": {
               "buildTarget": "web:build:dev,fr"
+            },
+            "pt": {
+              "buildTarget": "web:build:dev,pt"
             },
             "vi": {
               "buildTarget": "web:build:dev,vi"
