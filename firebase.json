@@ -8,6 +8,13 @@
     "i18n": {
       "root": "web/dist/web"
     },
+    "redirects": [
+      {
+        "source": "/android/**",
+        "destination": "/en/android/:splat",
+        "type": 301
+      }
+    ],
     "rewrites": [
       {
         "source": "/importGeoJson",
@@ -36,10 +43,6 @@
       {
         "source": "/vi{,/**}",
         "destination": "/vi/index.html"
-      },
-      {
-        "source": "/android/**",
-        "destination": "/en/android.html"
       },
       {
         "source": "/**",
