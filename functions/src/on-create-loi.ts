@@ -30,8 +30,11 @@ type Properties = {[key: string]: string | number};
 
 type Headers = {[key: string]: string};
 
+type Body = {[key: string]: any};
+
 type PropertyGenerator = {
   headers?: Headers;
+  body?: Body;
   name: string;
   prefix: string;
   url: string;
@@ -66,14 +69,22 @@ export async function onCreateLoiHandler(
 
   const propertyGenerators = await db.fetchPropertyGenerators();
 
-  const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
-
   for (const propertyGeneratorDoc of propertyGenerators.docs) {
-    properties = await updateProperties(
-      propertyGeneratorDoc.data() as PropertyGenerator,
-      properties,
-      wkt
-    );
+    const propertyGenerator = propertyGeneratorDoc.data() as PropertyGenerator;
+
+    if (propertyGeneratorDoc.id === 'whisp') {
+      const {body, headers, prefix, url} = propertyGenerator;
+
+      const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
+
+      const newProperties = await fetchWhispProperties(
+        url,
+        {...defaultHeaders, ...headers},
+        {wkt, ...body}
+      );
+
+      properties = await updateProperties(properties, newProperties, prefix);
+    }
 
     Object.keys(properties)
       .filter(key => typeof properties[key] === 'object')
@@ -92,19 +103,11 @@ export async function onCreateLoiHandler(
 }
 
 async function updateProperties(
-  propertyGenerator: PropertyGenerator,
   properties: Properties,
-  wkt: string
+  newProperties: Properties,
+  prefix?: string
 ): Promise<Properties> {
-  const {url, headers, prefix} = propertyGenerator;
-
   if (prefix) properties = removePrefixedKeys(properties, prefix);
-
-  const newProperties = await fetchProperties(
-    url,
-    {...defaultHeaders, ...headers},
-    wkt
-  );
 
   return {
     ...properties,
@@ -112,23 +115,24 @@ async function updateProperties(
   };
 }
 
-async function fetchProperties(
+async function fetchWhispProperties(
   url: string,
   headers: Headers,
-  wkt: string
+  body: Body
 ): Promise<Properties> {
   const response = await fetch(url, {
     method: 'POST',
     headers,
-    body: JSON.stringify({wkt}),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) return {};
 
   const json = await response.json();
 
-  // Additional properties are stored into the first element of an array under the 'data' key.
-  return json?.data[0] || {};
+  if (json?.code !== 'analysis_completed') return {};
+
+  return json?.data?.features[0]?.properties || {};
 }
 
 /**
