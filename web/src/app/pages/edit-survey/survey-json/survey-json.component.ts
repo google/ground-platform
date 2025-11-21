@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, effect} from '@angular/core';
+import {Component} from '@angular/core';
 
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'survey-json',
@@ -25,27 +25,21 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
   styleUrls: ['./survey-json.component.scss'],
 })
 export class SurveyJsonComponent {
-  surveyId?: string | null;
+  surveyId?: string;
   json = '';
-
-  private surveyIdSignal = this.navigationService.getSurveyId();
 
   constructor(
     private dataStoreService: DataStoreService,
-    private navigationService: NavigationService
+    private surveyService: SurveyService
   ) {
-    effect(async () => {
-      const surveyId = this.surveyIdSignal();
+    this.surveyService.getActiveSurvey$().subscribe(async survey => {
+      this.surveyId = survey.id;
 
-      this.surveyId = surveyId;
-
-      if (this.surveyId) {
-        this.json = JSON.stringify(
-          await this.dataStoreService.loadRawSurvey(this.surveyId),
-          null,
-          2
-        );
-      }
+      this.json = JSON.stringify(
+        await this.dataStoreService.loadRawSurvey(this.surveyId),
+        null,
+        2
+      );
     });
   }
 
