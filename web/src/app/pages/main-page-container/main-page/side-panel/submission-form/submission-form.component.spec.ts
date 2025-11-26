@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -172,6 +172,7 @@ describe('SubmissionFormComponent', () => {
   beforeEach(waitForAsync(() => {
     const navigationService = {
       getSurveyId$: () => of(''),
+      getUrlParams: () => NEVER,
       getLocationOfInterestId$: () => NEVER,
       getSidePanelExpanded: () => false,
     };
