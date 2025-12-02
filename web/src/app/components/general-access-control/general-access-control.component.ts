@@ -1,5 +1,5 @@
 /**
- * Copyright 2023 The Ground Authors.
+ * Copyright 2025 The Ground Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {Component} from '@angular/core';
 import {Map} from 'immutable';
 import {Subscription} from 'rxjs';
@@ -26,37 +28,27 @@ const generalAccessLabels = Map<SurveyGeneralAccess, any>([
   [
     SurveyGeneralAccess.RESTRICTED,
     {
-      description: 'Only people with access can open with the link',
+      description: $localize`:@@app.texts.generalAccess.restricted:Only people with access can open with the link`,
       icon: 'lock',
-      label: 'Restricted',
+      label: $localize`:@@app.labels.restricted:Restricted`,
     },
   ],
   [
     SurveyGeneralAccess.UNLISTED,
     {
-      description:
-        'Everyone with the survey QR code or link can collect data for this survey',
+      description: $localize`:@@app.texts.generalAccess.unlisted:Everyone with the survey QR code or link can collect data for this survey`,
       icon: 'account_circle',
-      label: 'Unlisted',
-    },
-  ],
-
-  [
-    SurveyGeneralAccess.PUBLIC,
-    {
-      description: 'Everyone can collect data for this survey',
-      icon: 'public',
-      label: 'Public',
+      label: $localize`:@@app.labels.unlisted:Unlisted`,
     },
   ],
 ]);
 
 @Component({
-  selector: 'ground-share-access-control',
-  templateUrl: './share-access-control.component.html',
-  styleUrls: ['./share-access-control.component.scss'],
+  selector: 'ground-general-access-control',
+  templateUrl: './general-access-control.component.html',
+  styleUrls: ['./general-access-control.component.scss'],
 })
-export class ShareAccessControlComponent {
+export class GeneralAccessControlComponent {
   private subscription = new Subscription();
 
   selectedGeneralAccess!: SurveyGeneralAccess;

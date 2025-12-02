@@ -16,10 +16,13 @@
 
 <form [formGroup]="formGroup">
   <mat-form-field class="input" appearance="fill">
-    <mat-label>Job name</mat-label>
+    <mat-label i18n="@@app.forms.labels.jobName">Job name</mat-label>
 
-    <input 
-      matInput [formControlName]="nameControlKey"
-      placeholder="Ex. Map production areas" />
+    <input
+      matInput
+      placeholder="Ex. Map production areas"
+      i18n-placeholder="@@app.forms.placeholders.jobName"
+      [formControlName]="nameControlKey"
+    />
   </mat-form-field>
 </form>

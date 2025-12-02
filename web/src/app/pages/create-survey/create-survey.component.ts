@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import '@angular/localize/init';
+
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {List} from 'immutable';
@@ -56,52 +58,48 @@ const createSurveyPhaseMetadata = new Map<
   [
     CreateSurveyPhase.SURVEY_DETAILS,
     {
-      progressBarTitle: 'Create a survey',
-      cardTitle: 'Start building your survey',
-      cardDescription: 'Provide some basic info about your survey',
+      progressBarTitle: $localize`:@@app.createSurvey.surveyDetails.progress:Create a survey`,
+      cardTitle: $localize`:@@app.createSurvey.surveyDetails.title:Start building your survey`,
+      cardDescription: $localize`:@@app.createSurvey.surveyDetails.description:Provide some basic info about your survey`,
     },
   ],
   [
     CreateSurveyPhase.JOB_DETAILS,
     {
-      progressBarTitle: 'Add a job',
-      cardTitle: 'Add a job',
-      cardDescription:
-        "In the following steps, you'll define the data that should be collected for certain sites as part of this job",
+      progressBarTitle: $localize`:@@app.createSurvey.jobDetails.progress:Add a job`,
+      cardTitle: $localize`:@@app.createSurvey.jobDetails.title:Add a job`,
+      cardDescription: $localize`:@@app.createSurvey.jobDetails.description:In the following steps, you'll define the data that should be collected for certain sites as part of this job`,
     },
   ],
   [
     CreateSurveyPhase.DEFINE_LOIS,
     {
-      progressBarTitle: 'Specify data collection sites',
-      cardTitle: 'Where should data be collected?',
-      cardDescription:
-        'Data collectors will complete specified tasks for these sites',
+      progressBarTitle: $localize`:@@app.createSurvey.defineLois.progress:Specify data collection sites`,
+      cardTitle: $localize`:@@app.createSurvey.defineLois.title:Where should data be collected?`,
+      cardDescription: $localize`:@@app.createSurvey.defineLois.description:Data collectors will complete specified tasks for these sites`,
     },
   ],
   [
     CreateSurveyPhase.DEFINE_TASKS,
     {
-      progressBarTitle: 'Define data collection tasks',
-      cardTitle: 'Which data should be collected?',
-      cardDescription:
-        'Data collectors will be prompted to complete the following tasks for each site',
+      progressBarTitle: $localize`:@@app.createSurvey.defineTasks.progress:Define data collection tasks`,
+      cardTitle: $localize`:@@app.createSurvey.defineTasks.title:Which data should be collected?`,
+      cardDescription: $localize`:@@app.createSurvey.defineTasks.description:Data collectors will be prompted to complete the following tasks for each site`,
     },
   ],
   [
     CreateSurveyPhase.DEFINE_DATA_SHARING_TERMS,
     {
-      progressBarTitle: 'Define data sharing terms',
-      cardTitle: 'Which terms must data collectors agree to?',
-      cardDescription:
-        'Select the terms data collectors need to agree to before they get started',
+      progressBarTitle: $localize`:@@app.createSurvey.defineDataSharingTerms.progress:Define data sharing terms`,
+      cardTitle: $localize`:@@app.createSurvey.defineDataSharingTerms.title:Which terms must data collectors agree to?`,
+      cardDescription: $localize`:@@app.createSurvey.defineDataSharingTerms.description:Select the terms data collectors need to agree to before they get started`,
     },
   ],
   [
     CreateSurveyPhase.SHARE_SURVEY,
     {
-      progressBarTitle: 'Share your survey',
-      cardTitle: 'Share your survey',
+      progressBarTitle: $localize`:@@app.createSurvey.shareSurvey.progress:Share your survey`,
+      cardTitle: $localize`:@@app.createSurvey.shareSurvey.title:Share your survey`,
       cardDescription: '',
     },
   ],
@@ -147,11 +145,8 @@ export class CreateSurveyComponent implements OnInit {
     private taskService: TaskService,
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
-    private cdr: ChangeDetectorRef,
-    route: ActivatedRoute
-  ) {
-    navigationService.init(route);
-  }
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngAfterViewChecked(): void {
     this.cdr.detectChanges();

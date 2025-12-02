@@ -76,8 +76,8 @@ export class SurveyService {
     if (!user) {
       return new Observable<List<Survey>>();
     }
-    const {email: userEmail, id: userId} = user;
-    return this.dataStore.loadAccessibleSurveys$(userEmail, userId);
+    const {email: userEmail} = user;
+    return this.dataStore.loadAccessibleSurveys$(userEmail);
   }
 
   /**
@@ -143,6 +143,10 @@ export class SurveyService {
       ...this.activeSurvey,
       dataSharingTerms: {type, ...(customText && {customText})},
     } as Survey);
+  }
+
+  async copySurvey(surveyId: string): Promise<string> {
+    return this.dataStore.copySurvey(surveyId);
   }
 
   async createSurvey(name: string, description?: string): Promise<string> {

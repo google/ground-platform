@@ -31,7 +31,7 @@ import {
 } from '../job-dialog/job-dialog.component';
 
 interface DataSharingTermsDetails {
-  descriptionHtml: string;
+  description: string;
   customText?: string;
 }
 
@@ -64,7 +64,7 @@ export class EditDetailsComponent implements OnInit {
         if (this.survey.dataSharingTerms) {
           const {type, customText} = this.survey.dataSharingTerms;
           this.dataSharingTermsDetails = {
-            descriptionHtml: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
+            description: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
             customText,
           };
         }
@@ -96,6 +96,24 @@ export class EditDetailsComponent implements OnInit {
           this.surveyService.deleteSurvey(this.survey!);
 
           this.navigationService.navigateToSurveyList();
+        }
+      });
+  }
+
+  openCopySurveyDialog() {
+    this.dialog
+      .open(JobDialogComponent, {
+        data: {dialogType: DialogType.CopySurvey},
+        panelClass: 'small-width-dialog',
+      })
+      .afterClosed()
+      .subscribe(async (result: DialogData) => {
+        if (result?.dialogType === DialogType.CopySurvey) {
+          const {id: surveyId} = this.survey!;
+
+          const newSurveyId = await this.surveyService.copySurvey(surveyId);
+
+          this.navigationService.navigateToSurveyDashboard(newSurveyId);
         }
       });
   }

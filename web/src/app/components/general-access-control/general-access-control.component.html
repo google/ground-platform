@@ -14,14 +14,14 @@
   limitations under the License.
 -->
 
-<div class="share-access-control-container">
+<div class="general-access-control-container">
   <div class="general-access-icon" [ngSwitch]="selectedGeneralAccess">
-    <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.UNLISTED">account_circle</mat-icon>
-    <mat-icon class="material-symbols-outlined" *ngSwitchCase="SurveyGeneralAccess.PUBLIC">public</mat-icon>
-    <mat-icon class="material-symbols-outlined" *ngSwitchDefault>lock</mat-icon>
+    <mat-icon class="material-symbols-outlined">
+      {{ generalAccessLabels.get(selectedGeneralAccess)?.icon ?? generalAccessLabels.get(SurveyGeneralAccess.RESTRICTED)?.icon }}
+    </mat-icon>
   </div>
 
-  <div>
+  <div class="general-access-control">
     <mat-select
       class="general-access-select"
       [(value)]="selectedGeneralAccess"

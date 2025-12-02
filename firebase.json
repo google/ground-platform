@@ -5,20 +5,13 @@
   },
   "hosting": {
     "public": "web/dist/web",
+    "i18n": {
+      "root": "web/dist/web"
+    },
     "redirects": [
       {
-        "source": "/",
-        "destination": "/signin",
-        "type": 301
-      },
-      {
-        "source": "/s/[:]new",
-        "destination": "/survey/new",
-        "type": 301
-      },
-      {
-        "source": "/s/:id",
-        "destination": "/survey/:id",
+        "source": "/android/**",
+        "destination": "/en/android/:splat",
         "type": 301
       }
     ],
@@ -40,8 +33,20 @@
         "function": "sessionLogin"
       },
       {
-        "source": "**/!(*.*)",
-        "destination": "/index.html"
+        "source": "/en{,/**}",
+        "destination": "/en/index.html"
+      },
+      {
+        "source": "/fr{,/**}",
+        "destination": "/fr/index.html"
+      },
+      {
+        "source": "/vi{,/**}",
+        "destination": "/vi/index.html"
+      },
+      {
+        "source": "/**",
+        "destination": "/en/index.html"
       }
     ]
   },

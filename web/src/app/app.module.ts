@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {HttpClient, HttpClientModule} from '@angular/common/http';
+import {HttpClientModule} from '@angular/common/http';
 import {NgModule} from '@angular/core';
 import {AngularFireModule} from '@angular/fire/compat';
 import {AngularFireAuthModule} from '@angular/fire/compat/auth';
@@ -28,11 +28,14 @@ import {
   AngularFireFunctionsModule,
   USE_EMULATOR as USE_FUNCTIONS_EMULATOR,
 } from '@angular/fire/compat/functions';
+import {
+  AngularFireRemoteConfigModule,
+  DEFAULTS as RC_DEFAULTS,
+  SETTINGS as RC_SETTINGS,
+} from '@angular/fire/compat/remote-config';
 import {AngularFireStorageModule} from '@angular/fire/compat/storage';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
-import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {initializeApp} from 'firebase/app';
 import {GoogleAuthProvider} from 'firebase/auth';
 import {FirebaseUIModule, firebaseui} from 'firebaseui-angular';
@@ -52,10 +55,6 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
 };
 
-export function HttpLoaderFactory(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
-
 initializeApp(environment.firebase);
 
 @NgModule({
@@ -64,6 +63,14 @@ initializeApp(environment.firebase);
     {
       provide: FIRESTORE_SETTINGS,
       useValue: {ignoreUndefinedProperties: true},
+    },
+    {
+      provide: RC_SETTINGS,
+      useValue: {minimumFetchIntervalMillis: 3600000},
+    },
+    {
+      provide: RC_DEFAULTS,
+      useValue: {google_play_id: ''},
     },
     // Emulator ports defined in ../firebase.local.json
     // TODO(#979): Set up auth emulator and enable rules.
@@ -89,6 +96,7 @@ initializeApp(environment.firebase);
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireFunctionsModule,
+    AngularFireRemoteConfigModule,
     AngularFireStorageModule,
     BrowserAnimationsModule,
     BrowserModule,
@@ -96,13 +104,6 @@ initializeApp(environment.firebase);
     FirebaseUIModule.forRoot(firebaseUiAuthConfig),
     HttpClientModule,
     MainPageContainerModule,
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
   ],
   bootstrap: [AppComponent],
 })

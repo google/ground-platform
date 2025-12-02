@@ -15,10 +15,11 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {Router} from '@angular/router';
-import {NEVER} from 'rxjs';
+import {NavigationEnd, Router} from '@angular/router';
+import {BehaviorSubject, NEVER, of} from 'rxjs';
 
 import {AuthService} from 'app/services/auth/auth.service';
+import {DataStoreService} from 'app/services/data-store/data-store.service';
 
 import {SignInPageComponent} from './sign-in-page.component';
 
@@ -30,7 +31,11 @@ describe('SignInPageComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [SignInPageComponent],
       providers: [
-        {provide: Router, useValue: {}},
+        {
+          provide: DataStoreService,
+          useValue: {getAccessDeniedMessage: () => ''},
+        },
+        {provide: Router, useValue: {events: of()}},
         {
           provide: AuthService,
           useValue: {getUser$: () => NEVER, isAuthenticated$: () => NEVER},

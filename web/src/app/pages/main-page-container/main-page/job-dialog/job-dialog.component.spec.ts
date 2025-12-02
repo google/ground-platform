@@ -28,7 +28,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Router} from '@angular/router';
-import {NEVER} from 'rxjs';
+import {NEVER, of} from 'rxjs';
 
 import {InlineEditorModule} from 'app/components/inline-editor/inline-editor.module';
 import {AuthService} from 'app/services/auth/auth.service';
@@ -93,5 +93,5 @@ describe('JobDialogComponent', () => {
 });
 
 function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate']);
+  return jasmine.createSpyObj('Router', ['navigate'], {events: of()});
 }

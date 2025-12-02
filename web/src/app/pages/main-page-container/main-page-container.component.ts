@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Observable, Subscription} from 'rxjs';
+import {Component, effect} from '@angular/core';
+import {Observable} from 'rxjs';
 
 import {Survey} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
@@ -27,29 +26,21 @@ import {SurveyService} from 'app/services/survey/survey.service';
   templateUrl: './main-page-container.component.html',
   styleUrls: ['./main-page-container.component.css'],
 })
-export class MainPageContainerComponent implements OnInit, OnDestroy {
-  activeSurvey$: Observable<Survey>;
-  private subscription = new Subscription();
+export class MainPageContainerComponent {
+  private surveyIdSignal = this.navigationService.getSurveyId();
+
+  protected activeSurvey$: Observable<Survey>;
 
   constructor(
     private navigationService: NavigationService,
-    private surveyService: SurveyService,
-    route: ActivatedRoute
+    private surveyService: SurveyService
   ) {
     this.activeSurvey$ = surveyService.getActiveSurvey$();
-    navigationService.init(route);
-  }
 
-  ngOnInit() {
-    // Activate new survey on route changes.
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(id => {
-        id && this.surveyService.activateSurvey(id);
-      })
-    );
-  }
+    effect(() => {
+      const surveyId = this.surveyIdSignal();
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+      if (surveyId) this.surveyService.activateSurvey(surveyId);
+    });
   }
 }

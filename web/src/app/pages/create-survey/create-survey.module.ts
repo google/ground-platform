@@ -21,6 +21,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
+import {CopySurveyControlsModule} from 'app/components/copy-survey-controls/copy-survey-controls.module';
 import {HeaderModule} from 'app/components/header/header.module';
 import {ShareSurveyModule} from 'app/components/share-survey/share-survey.module';
 import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
@@ -35,19 +36,20 @@ import {SurveyLoiModule} from './survey-loi/survey-loi.module';
 @NgModule({
   declarations: [CreateSurveyComponent],
   imports: [
-    DataSharingTermsModule,
-    JobDetailsModule,
-    TaskDetailsModule,
-    SurveyDetailsModule,
-    SurveyLoiModule,
-    ShareSurveyModule,
     CommonModule,
+    DataSharingTermsModule,
+    HeaderModule,
+    JobDetailsModule,
     MatButtonModule,
     MatInputModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
-    HeaderModule,
+    CopySurveyControlsModule,
+    ShareSurveyModule,
     StepCardModule,
+    SurveyDetailsModule,
+    SurveyLoiModule,
+    TaskDetailsModule,
   ],
   exports: [CreateSurveyComponent],
 })

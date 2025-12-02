@@ -23,13 +23,16 @@ import {
 import {
   DocumentData,
   FieldPath,
+  QueryDocumentSnapshot,
+  collection,
+  getDocs,
   serverTimestamp,
 } from '@angular/fire/firestore';
 import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
 import {List, Map} from 'immutable';
-import {Observable, combineLatest, firstValueFrom, merge} from 'rxjs';
+import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
@@ -40,6 +43,7 @@ import {
 } from 'app/converters/proto-model-converter';
 import {submissionDocToModel} from 'app/converters/submission-data-converter';
 import {
+  jobDocToModel,
   jobDocsToModel,
   surveyDocToModel,
 } from 'app/converters/survey-data-converter';
@@ -66,6 +70,7 @@ const AclRole = Pb.Role;
 const GeneralAccess = Pb.Survey.GeneralAccess;
 
 const SURVEYS_COLLECTION_NAME = 'surveys';
+const JOBS_COLLECTION_NAME = 'jobs';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type JsonBlob = {[field: string]: any};
@@ -153,11 +158,8 @@ export class DataStoreService {
    * Returns an Observable that loads and emits the list of surveys accessible
    * to the specified user.
    */
-  loadAccessibleSurveys$(
-    userEmail: string,
-    userId: string
-  ): Observable<List<Survey>> {
-    const restrictedSurveys$ = this.db
+  loadAccessibleSurveys$(userEmail: string): Observable<List<Survey>> {
+    const accessibleRestrictedSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref.where(new FieldPath(s.acl, userEmail), 'in', [
           AclRole.VIEWER,
@@ -175,11 +177,15 @@ export class DataStoreService {
         )
       );
 
-    const unlistedSurveys$ = this.db
+    const accessibleUnlistedSurveys$ = this.db
       .collection(SURVEYS_COLLECTION_NAME, ref =>
         ref
           .where(s.generalAccess, '==', GeneralAccess.UNLISTED)
-          .where(s.ownerId, '==', userId)
+          .where(
+            new FieldPath(s.acl, userEmail),
+            '==',
+            AclRole.SURVEY_ORGANIZER
+          )
       )
       .snapshotChanges()
       .pipe(map(this.documentChangeToSurvey));
@@ -192,12 +198,12 @@ export class DataStoreService {
       .pipe(map(this.documentChangeToSurvey));
 
     return combineLatest([
-      restrictedSurveys$,
-      unlistedSurveys$,
+      accessibleRestrictedSurveys$,
+      accessibleUnlistedSurveys$,
       publicSurveys$,
     ]).pipe(
-      map(([restrictedSurveys, unlistedSurveys, publicSurveys]) =>
-        List([...restrictedSurveys, ...unlistedSurveys, ...publicSurveys])
+      map(([restricted, unlisted, publicSurveys]) =>
+        List([...restricted, ...unlisted, ...publicSurveys])
       )
     );
   }
@@ -416,6 +422,39 @@ export class DataStoreService {
       );
   }
 
+  /**
+   * Returns a promise resolving to true if the user's email is either
+   * explicitly listed as a document ID in the 'passlist' collection or
+   * matches the regular expression stored in the 'passlist/regexp' document.
+   *
+   * @param userEmail The email of the user to check against the passlist.
+   */
+  async isPasslisted(userEmail: string): Promise<boolean> {
+    const docSnapshot = await firstValueFrom(
+      this.db.doc(`passlist/${userEmail}`).get()
+    );
+
+    if (docSnapshot.exists) return true;
+
+    const regexpSnapshot = await firstValueFrom(
+      this.db.doc(`passlist/regexp`).get()
+    );
+
+    if (regexpSnapshot.exists) {
+      const regexpData = regexpSnapshot.data() as {regexp?: string} | undefined;
+
+      const regexpString = regexpData?.regexp;
+
+      if (regexpString) {
+        const regex = new RegExp(regexpString);
+
+        return regex.test(userEmail);
+      }
+    }
+
+    return false;
+  }
+
   private toLocationsOfInterest(
     loiIds: {id: string}[]
   ): List<LocationOfInterest> {
@@ -433,14 +472,14 @@ export class DataStoreService {
    *
    * @param survey the survey instance.
    * @param userEmail the email of the user to filter the results.
-   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
+   * @param canViewAll a flag indicating whether the user has permission to view all LOIs for this survey.
    */
   getAccessibleLois$(
     {id: surveyId}: Survey,
     userId: string,
-    canManageSurvey: boolean
+    canViewAll: boolean
   ): Observable<List<LocationOfInterest>> {
-    if (canManageSurvey) {
+    if (canViewAll) {
       return this.db
         .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
         .valueChanges({idField: 'id'})
@@ -477,17 +516,17 @@ export class DataStoreService {
    * @param survey the survey instance.
    * @param loi the loi instance.
    * @param userEmail the email of the user to filter the results.
-   * @param canManageSurvey a flag indicating whether the user has survey organizer or owner level permissions of the survey.
+   * @param canViewAll a flag indicating whether the user has permission to view all LOIs for this survey.
    */
   getAccessibleSubmissions$(
     survey: Survey,
     loi: LocationOfInterest,
     userId: string,
-    canManageSurvey: boolean
+    canViewAll: boolean
   ): Observable<List<Submission>> {
     return this.db
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
-        this.canViewSubmissions(ref, loi.id, userId, canManageSurvey)
+        this.canViewSubmissions(ref, loi.id, userId, canViewAll)
       )
       .valueChanges({idField: 'id'})
       .pipe(
@@ -571,6 +610,58 @@ export class DataStoreService {
     return Promise.resolve(surveyId);
   }
 
+  async copySurvey(surveyId: string): Promise<string> {
+    const newSurveyId = this.generateId();
+
+    const surveyDoc = await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(surveyId)
+      .ref.get();
+
+    const survey = surveyDocToModel(surveyId, surveyDoc.data() as DocumentData);
+
+    if (survey instanceof Error) return '';
+
+    const newSurvey = surveyToDocument(newSurveyId, {
+      ...survey,
+      id: newSurveyId,
+      title: 'Copy of ' + survey.title,
+      acl: survey.acl.filter(role => role === Role.SURVEY_ORGANIZER),
+    });
+
+    await this.db
+      .collection(SURVEYS_COLLECTION_NAME)
+      .doc(newSurveyId)
+      .set(newSurvey);
+
+    const jobsCollectionRef = collection(
+      this.db.firestore,
+      `${SURVEYS_COLLECTION_NAME}/${surveyId}/${JOBS_COLLECTION_NAME}`
+    );
+
+    const qs = await getDocs(jobsCollectionRef);
+
+    qs.forEach(async (jobDoc: QueryDocumentSnapshot<DocumentData>) => {
+      const newJobId = this.generateId();
+
+      const job = jobDocToModel(jobDoc.data());
+
+      const newJob = jobToDocument({
+        ...job,
+        id: newJobId,
+      } as Job);
+
+      await this.db
+        .collection(
+          `${SURVEYS_COLLECTION_NAME}/${newSurveyId}/${JOBS_COLLECTION_NAME}`
+        )
+        .doc(newJobId)
+        .set(newJob);
+    });
+
+    return newSurveyId;
+  }
+
   getImageDownloadURL(path: string) {
     return getDownloadURL(ref(getStorage(), path));
   }
@@ -621,10 +712,10 @@ export class DataStoreService {
     ref: CollectionReference,
     loiId: string,
     userId: string,
-    canManageSurvey: boolean
+    canViewAll: boolean
   ) {
     const query = ref.where(sb.loiId, '==', loiId);
 
-    return canManageSurvey ? query : query.where(sb.ownerId, '==', userId);
+    return canViewAll ? query : query.where(sb.ownerId, '==', userId);
   }
 }

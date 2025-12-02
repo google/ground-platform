@@ -45,7 +45,7 @@
 
     <div class="toolbar-right" *ngIf="taskGroup !== TaskGroup.INSTRUCTIONS">
       <div>
-        <mat-label>Required</mat-label>
+        <mat-label i18n="@@app.labels.required">Required</mat-label>
 
         <mat-slide-toggle formControlName="required" color="primary"></mat-slide-toggle>
       </div>
@@ -56,7 +56,7 @@
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onTaskDuplicate()">
-          <span>Duplicate</span>
+          <span i18n="@@app.labels.duplicate">Duplicate</span>
         </button>
 
         <button mat-menu-item (click)="onTaskConditionToggle()">
@@ -66,7 +66,7 @@
         <mat-divider></mat-divider>
 
         <button mat-menu-item (click)="onTaskDelete()">
-          <span>Delete</span>
+          <span i18n="@@app.labels.delete">Delete</span>
         </button>
       </mat-menu>
     </div>
@@ -78,7 +78,7 @@
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="onTaskDelete()">
-          <span>Delete</span>
+          <span i18n="@@app.labels.delete">Delete</span>
         </button>
       </mat-menu>
     </div>

@@ -23,24 +23,26 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 
-import {ShareAccessControlModule} from 'app/components/share-access-control/share-access-control.module';
 import {ShareDialogModule} from 'app/components/share-dialog/share-dialog.module';
 import {ShareListModule} from 'app/components/share-list/share-list.module';
 
 import {ShareSurveyComponent} from './share-survey.component';
+import {DataVisibilityControlModule} from '../data-visibility-control/data-visibility-control.module';
+import {GeneralAccessControlModule} from '../general-access-control/general-access-control.module';
 
 @NgModule({
   declarations: [ShareSurveyComponent],
   imports: [
     CommonModule,
+    DataVisibilityControlModule,
     FormsModule,
     ReactiveFormsModule,
+    GeneralAccessControlModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
     MatIconModule,
     MatInputModule,
-    ShareAccessControlModule,
     ShareDialogModule,
     ShareListModule,
   ],

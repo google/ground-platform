@@ -27,7 +27,7 @@
 
         <div>{{surveyOwnerEmail}}</div>
 
-        <div class="survey-owner-label">Owner</div>
+        <div class="survey-owner-label" i18n="@@app.labels.roles.owner">Owner</div>
       </div>
     </mat-list-item>
 
@@ -46,12 +46,13 @@
             [hideSingleSelectionIndicator]="true"
             (selectionChange)="onRoleChange($event, i)"
           >
-
             <mat-option *ngFor="let option of roleOptions" [value]="option.value">
               {{ option.label }}
             </mat-option>
 
-            <mat-option value="-1" class="remove-option">Remove</mat-option>
+            <mat-divider></mat-divider>
+
+            <mat-option value="-1" class="remove-option" i18n="@@app.labels.remove">Remove</mat-option>
           </mat-select>
         </div>
       </mat-list-item>

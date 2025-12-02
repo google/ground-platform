@@ -21,7 +21,7 @@
   <div id="loading-spinner" class="loading-spinner" *ngIf="createSurveyPhase === CreateSurveyPhase.LOADING">
     <div>
       <mat-spinner></mat-spinner>
-      <p class="loading-label">Loading survey...</p>
+      <p class="loading-label" i18n="@@app.labels.loadingSurvey">Loading survey...</p>
     </div>
   </div>
 
@@ -30,8 +30,8 @@
       <img
         *ngIf="createSurveyPhase === CreateSurveyPhase.JOB_DETAILS"
         class="picture"
-        src="/assets/img/add-job.svg"
-        alt="Add a job"
+        src="assets/img/add-job.svg"
+        [alt]="cardTitle()"
       />
       <div class="create-survey-content">
         <div class="progress-bar-title">{{ progressBarTitle() }}</div>
@@ -79,25 +79,37 @@
       </div>
     </div>
     <div class="button-section">
-      <button
-        id="back-button"
-        class="button"
-        mat-button
-        color="primary"
-        (click)="back()"
-      >
-        Back
-      </button>
+      <div class="left-button-section">
+        <button
+          mat-button
+          id="back-button"
+          class="button"
+          color="primary"
+          i18n="@@app.labels.back"
+          (click)="back()"
+        >
+          Back
+        </button>
+      </div>
+
+      <div class="right-button-section">
+        <ground-copy-survey-controls
+          *ngIf="createSurveyPhase == CreateSurveyPhase.SHARE_SURVEY"
+          [surveyId]="surveyId"
+        ></ground-copy-survey-controls>
+
       <button
         id="continue-button"
-        class="button continue-button"
+        class="continue-button"
         mat-flat-button
         color="primary"
         (click)="continue()"
         [disabled]="!canContinue"
       >
-        {{ createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY ? 'Go to survey' : 'Continue' }}
+        <span *ngIf="createSurveyPhase === CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.goToSurvey">Go to survey</span>
+        <span *ngIf="createSurveyPhase !== CreateSurveyPhase.SHARE_SURVEY" i18n="@@app.labels.continue">Continue</span>
       </button>
+      </div>
     </div>
   </div>
 </div>

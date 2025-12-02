@@ -30,10 +30,17 @@
      * data to the specified survey.
      */
     function isUnlistedOrPublic(survey) {
-    	return survey["8"] in [
+      return survey["8"] in [
         2 /* UNLISTED */,
         3 /* PUBLIC */
       ];
+    }
+
+    /**
+     * Returns true iff data collectors can see each others' data.
+     */
+    function canViewDataCollectedByOthers(survey) {
+      return survey["9"] == 2 /* ALL_SURVEY_PARTICIPANTS */
     }
 
     /**
@@ -52,27 +59,44 @@
     }
 
     /**
-     * Returns true iff the user's email is explicitly listed in the passlist.
+     * Returns true iff the user's email is listed in the passlist or allowed via regex.
      */
-    function inPasslist() {
-      return exists(/databases/$(database)/documents/passlist/$(request.auth.token.email));
+    function isPasslisted() {
+      return request.auth.token.email.matches(getPassRegexp())
+        || exists(/databases/$(database)/documents/passlist/$(request.auth.token.email));
     }
 
     /**
-     * Returns true iff the user's email matches the passlist regex or
-     * is explicitly listed in the passlist.
+     * Returns true iff the user is authenticated.
      */
-    function canAccess() {
-      return request.auth != null && (request.auth.token.email.matches(getPassRegexp()) || inPasslist());
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     /**
-     * Returns true iff the user with the given email can read the specified
+     * Returns true iff the user with the user's email can read the specified
      * survey.
      */
     function canViewSurvey(survey) {
-      return canAccess() &&
+      return isSignedIn() &&
         (isUnlistedOrPublic(survey) || getRole(survey) != null);
+    }
+
+    /**
+    * Returns true iff user can see each other's lois in the specified
+    * survey.
+    */
+    function canViewLoi(survey, loi) {
+      return canViewSurvey(survey) && (isLoiOwner(loi) || canViewDataCollectedByOthers(survey));
+    }
+
+    /**
+    * Returns true iff user can see each other's submissions in the specified
+    * survey.
+    */
+    function canViewSubmission(survey, submission) {
+      return canViewSurvey(survey) && 
+        (isSubmissionOwner(submission) || canViewDataCollectedByOthers(survey));
     }
 
     /**
@@ -84,22 +108,22 @@
     }
 
     /**
-     * Returns true if the current user is passlisted and has the `SURVEY_ORGANIZER` role
+     * Returns true if the current user is signed in and has the `SURVEY_ORGANIZER` role
      * in the specified survey. Note that this include survey owners, since they are
      * assigned this role by default.
      */
     function canManageSurvey(survey) {
-      return canAccess() && isOneOf(survey, [
+      return isSignedIn() && isOneOf(survey, [
         3 /* SURVEY_ORGANIZER */
       ]);
     }
 
     /**
-     * Returns true iff the current user with the given email can contribute LOIs 
+     * Returns true iff the current user with the given email can contribute LOIs
      * and submissions to the specified survey.
      */
     function canCollectData(survey) {
-      return canAccess() &&
+      return isSignedIn() &&
         (isUnlistedOrPublic(survey) || isOneOf(survey, [
           2 /* DATA_COLLECTOR */,
           3 /* SURVEY_ORGANIZER */
@@ -110,71 +134,71 @@
      * Returns true iff the current user is the owner of the specified LOI.
      */
     function isLoiOwner(loi) {
-      return loi.data['5'] == request.auth.uid;
+      return loi['5'] == request.auth.uid;
     }
 
     /**
      * Returns true iff the current user is the owner of the specified submission.
      */
     function isSubmissionOwner(submission) {
-      return submission.data['5'] == request.auth.uid;
+      return submission['5'] == request.auth.uid;
     }
 
-    // Allow users to read, create, and write their own profiles in the db.
+    // Allow users to create and update their own profiles in the db, and for all signed in
+    // users to see each others' profiles..
     match /users/{userId} {
-      allow read: if userId == request.auth.uid || canAccess();
-      allow create, write: if userId == request.auth.uid;
+      allow read: if isSignedIn();
+      allow write: if userId == request.auth.uid;
     }
 
     // All users need to be able to read the passlist for rules to work.
     match /passlist/{entry} {
       // TODO(#1602): Replace "regexp" with simple pattern matching.
-      allow read: if request.auth != null && entry in ['regexp', request.auth.token.email];
+      allow read: if isSignedIn() && entry in ['regexp', request.auth.token.email];
     }
 
     // Apply passlist and survey-level ACLs to survey documents.
     match /surveys/{surveyId} {
+      allow create: if isSignedIn() && isPasslisted();
       allow read: if canViewSurvey(resource.data);
-      allow write: if canManageSurvey(resource.data);
-      allow create: if canAccess();
+      allow update, delete: if canManageSurvey(getSurvey(surveyId));
     }
 
-    // Allow passlisted users to access Terms of Service and other config.
+    // Allow all signed in users to access Terms of Service and other config.
     match /config/{id} {
-      allow read: if canAccess();
+      allow read: if isSignedIn();
     }
 
-    // Allow all users to access Access Denied config.
-    match /config/accessDenied {
-      allow read: if request.auth != null;
-    }
-
-    // Apply passlist and survey-level ACLs to LOI documents.
+    // Apply survey-level permissions to LOI documents.
     match /surveys/{surveyId}/lois/{loiId} {
-      // Allow if user has has read access to the survey.
-      allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the new LOI and can collect data.
-      allow create: if isLoiOwner(request.resource) && canCollectData(getSurvey(surveyId));
+      allow create: if isLoiOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
+      // Allow if user has read access to the survey and the LOI.
+      allow get: if canViewLoi(getSurvey(surveyId), resource.data);
+      // Allow all survey users to list LOIs.
+      allow list: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the existing LOI or can manage survey.
-      allow write: if isLoiOwner(resource) || canManageSurvey(getSurvey(surveyId));
+      allow update, delete: if isLoiOwner(resource.data) || canManageSurvey(getSurvey(surveyId));
     }
 
-    // Apply passlist and survey-level ACLs to submission documents.
+    // Apply survey-level permissions to submission documents.
     match /surveys/{surveyId}/submissions/{submissionId} {
-      // Allow if user has has read access to the survey.
-      allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the new submission and can collect data.
-      allow create: if isSubmissionOwner(request.resource) && canCollectData(getSurvey(surveyId));
+      allow create: if isSubmissionOwner(request.resource.data) && canCollectData(getSurvey(surveyId));
+      // Allow if user has read access to the survey and the submission.
+      allow get: if canViewSubmission(getSurvey(surveyId), resource.data);
+      // Allow all survey users to list submissions.
+      allow list: if canViewSurvey(getSurvey(surveyId));
       // Allow if user is owner of the existing submission or can manage survey.
-      allow write: if isSubmissionOwner(resource) || canManageSurvey(getSurvey(surveyId));
+      allow update, delete: if isSubmissionOwner(resource.data) || canManageSurvey(getSurvey(surveyId));
     }
 
-    // Apply passlist and survey-level ACLs to job documents.
+    // Apply survey-level permissions to job documents.
     match /surveys/{surveyId}/jobs/{jobId} {
-      // Allow if user has has read access to the survey.
+      // Allow if user has read access to the survey.
       allow read: if canViewSurvey(getSurvey(surveyId));
       // Allow if user can manage survey.
-      allow create, write: if canManageSurvey(getSurvey(surveyId));
+      allow write: if canManageSurvey(getSurvey(surveyId));
     }
   }
 }

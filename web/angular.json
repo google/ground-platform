@@ -9,6 +9,17 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "ground",
+      "i18n": {
+        "sourceLocale": "en",
+        "locales": {
+          "fr": {
+            "translation": "src/locale/messages.fr.json"
+          },
+          "vi": {
+            "translation": "src/locale/messages.vi.json"
+          }
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -16,17 +27,14 @@
             "outputPath": "dist/web",
             "index": "src/index.html",
             "main": "src/main.ts",
+            "localize": true,
+            "i18nMissingTranslation": "error",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "aot": true,
             "assets": [
               "src/favicon.ico",
-              "src/assets",
-              "src/assets/icons/favicon-16x16.png",
-              "src/assets/icons/favicon-32x32.png",
-              "src/assets/icons/apple-touch-icon.png",
-              "src/assets/icons/android-chrome-192x192.png",
-              "src/assets/icons/android-chrome-512x512.png"
+              "src/assets"
             ],
             "stylePreprocessorOptions": {
               "includePaths": ["src/app/styles"]
@@ -90,6 +98,15 @@
                   "maximumError": "200kb"
                 }
               ]
+            },
+            "en": {
+              "localize": ["en"]
+            },
+            "fr": {
+              "localize": ["fr"]
+            },
+            "vi": {
+              "localize": ["vi"]
             }
           }
         },
@@ -100,20 +117,28 @@
           },
           "configurations": {
             "local": {
-              "buildTarget": "web:build:local"
+              "buildTarget": "web:build:local,en"
             },
             "dev": {
-              "buildTarget": "web:build:dev"
+              "buildTarget": "web:build:dev,en"
             },
             "prod": {
-              "buildTarget": "web:build:prod"
+              "buildTarget": "web:build:prod,en"
+            },
+            "fr": {
+              "buildTarget": "web:build:dev,fr"
+            },
+            "vi": {
+              "buildTarget": "web:build:dev,vi"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "web:build"
+            "buildTarget": "web:build",
+            "format": "json",
+            "outputPath": "src/locale"
           }
         },
         "test": {
@@ -131,12 +156,7 @@
             "karmaConfig": "karma.conf.js",
             "assets": [
               "src/favicon.ico",
-              "src/assets",
-              "src/assets/icons/favicon-16x16.png",
-              "src/assets/icons/favicon-32x32.png",
-              "src/assets/icons/apple-touch-icon.png",
-              "src/assets/icons/android-chrome-192x192.png",
-              "src/assets/icons/android-chrome-512x512.png"
+              "src/assets"
             ],
             "stylePreprocessorOptions": {
               "includePaths": ["src/app/styles"]

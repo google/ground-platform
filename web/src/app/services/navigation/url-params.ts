@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-.share-access-control-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+import {SideNavMode} from './navigation.service';
 
-  .general-access-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50px;
-    background-color: #DDE5D9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+export class UrlParams {
+  public sideNavMode: SideNavMode;
 
-  .general-access-select {
-    color: #1A1C19;
-    font-family: Manrope;
-    font-weight: 600;
-    font-size: 14px;
-    width: auto;
-  }
-
-  .general-access-description {
-    color: #424940;
-    font-family: Manrope;
-    font-weight: 500;
-    font-size: 14px;
+  constructor(
+    readonly surveyId: string | null,
+    readonly loiId: string | null,
+    readonly submissionId: string | null,
+    readonly taskId: string | null
+  ) {
+    if (this.submissionId) {
+      this.sideNavMode = SideNavMode.SUBMISSION;
+    } else {
+      this.sideNavMode = SideNavMode.JOB_LIST;
+    }
   }
 }
