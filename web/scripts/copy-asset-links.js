@@ -38,5 +38,5 @@ if (existsSync(assertLinksFilepath)) {
 
   writeFileSync(`${wellKnownDir}/assetLinks.json`, assertLinks);
 } else {
-  console.warn('Missing asserLinks.json file');
+  console.warn('Warning: Missing assetLinks.json file');
 }
