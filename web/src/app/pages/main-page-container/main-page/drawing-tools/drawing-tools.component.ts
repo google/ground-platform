@@ -20,12 +20,14 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
+  effect,
+  input,
 } from '@angular/core';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {List} from 'immutable';
 import {Observable, Subscription} from 'rxjs';
-import {map} from 'rxjs/internal/operators/map';
-import {tap} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
@@ -35,8 +37,7 @@ import {
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-drawing-tools',
@@ -46,13 +47,21 @@ import {SurveyService} from 'app/services/survey/survey.service';
 })
 export class DrawingToolsComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
+  survey = input<Survey>();
   pointValue = 'point';
   polygonValue = 'polygon';
   selectedValue = '';
   private lastSelectedValue = '';
   selectedJobId = '';
-  private activeSurvey!: Survey;
-  readonly jobs$: Observable<List<Job>>;
+
+  readonly jobs = computed(() => {
+    const survey = this.survey();
+    if (!survey) return List<Job>();
+    return List(survey.jobs.valueSeq().toArray())
+      .sortBy(l => l.index)
+      .filter(l => this.authService.canUserAddPointsToJob(survey, l));
+  });
+
   readonly black = '#202225';
   readonly addPointIconBlack = this.sanitizer.bypassSecurityTrustUrl(
     this.groundPinService.getPinImageSource(this.black)
@@ -71,25 +80,20 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
-    surveyService: SurveyService,
-    authService: AuthService
+    private authService: AuthService
   ) {
     this.isSubmissionSelected$ = this.navigationService
       .getSubmissionId$()
       .pipe(map(obs => !!obs));
     this.disabled$ = drawingToolsService.getDisabled$();
-    this.jobs$ = surveyService.getActiveSurvey$().pipe(
-      tap(survey => {
-        this.activeSurvey = survey;
+
+    effect(() => {
+      const survey = this.survey();
+      if (survey) {
         this.selectedJobId = survey.jobs.keySeq().first();
         this.drawingToolsService.setSelectedJobId(this.selectedJobId);
-      }),
-      map(survey =>
-        List(survey.jobs.valueSeq().toArray())
-          .sortBy(l => l.index)
-          .filter(l => authService.canUserAddPointsToJob(this.activeSurvey, l))
-      )
-    );
+      }
+    });
   }
 
   ngOnInit() {

@@ -15,13 +15,14 @@
 -->
 
 <div class="page">
-  <ground-survey-header></ground-survey-header>
+  <ground-survey-header [activeSurvey]="activeSurvey()"></ground-survey-header>
   <div class="page-content">
-    <ground-side-panel></ground-side-panel>
-    <ground-secondary-side-panel></ground-secondary-side-panel>
+    <ground-side-panel [activeSurvey]="activeSurvey()"></ground-side-panel>
+    <ground-secondary-side-panel [activeSurvey]="activeSurvey()"></ground-secondary-side-panel>
     <div *ngIf="shouldEnableDrawingTools">
-      <ground-drawing-tools></ground-drawing-tools>
+      <ground-drawing-tools [survey]="activeSurvey()"></ground-drawing-tools>
     </div>
-    <ground-map [shouldEnableDrawingTools]="shouldEnableDrawingTools"></ground-map>
+    <ground-map *ngIf="shouldShowMap" [activeSurvey]="activeSurvey()" [selectedJob]="selectedJob"
+      [shouldEnableDrawingTools]="shouldEnableDrawingTools" [showPredefinedLoisOnly]="showPredefinedLoisOnly"></ground-map>
   </div>
 </div>

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
 import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
+
+// ...
 
 import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
@@ -25,6 +27,7 @@ import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
+import { Survey } from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 
@@ -37,10 +40,10 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
 
   @Input() submissionId!: string;
+  activeSurvey = input<Survey>();
   submission: Submission | null = null;
   tasks?: List<Task>;
   selectedTaskId: string | null = null;
-  surveyId: string | null = null;
   firebaseURLs = new Map<string, string>();
   isLoading = true;
 
@@ -53,11 +56,6 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(surveyId => {
-        this.surveyId = surveyId;
-      })
-    );
     this.subscription.add(
       this.submissionService.getSelectedSubmission$().subscribe(submission => {
         if (submission instanceof Submission) {
@@ -99,7 +97,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   navigateToSubmissionList() {
     this.navigationService.selectLocationOfInterest(
-      this.surveyId!,
+      this.activeSurvey()?.id!,
       this.submission!.loiId
     );
   }
@@ -157,7 +155,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   selectGeometry(task: Task): void {
     this.navigationService.showSubmissionDetailWithHighlightedTask(
-      this.surveyId!,
+      this.activeSurvey()?.id!,
       this.submission!.loiId!,
       this.submission!.id!,
       task.id

@@ -35,8 +35,7 @@ import {
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 import {DrawingToolsComponent} from './drawing-tools.component';
 import {DrawingToolsModule} from './drawing-tools.module';
@@ -50,7 +49,6 @@ describe('DrawingToolsComponent', () => {
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
   let mockSubmissionId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
   const jobId1 = 'job001';
   const jobId2 = 'job002';
@@ -105,25 +103,23 @@ describe('DrawingToolsComponent', () => {
     mockSubmissionId$ = new BehaviorSubject<string | null>(null);
     navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
-    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
-    ]);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
-
     TestBed.configureTestingModule({
       imports: [DrawingToolsModule, BrowserAnimationsModule],
       declarations: [DrawingToolsComponent],
       providers: [
         {provide: AuthService, useValue: authServiceSpy},
         {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: SurveyService, useValue: surveyServiceSpy},
+        { provide: NavigationService, useValue: navigationServiceSpy },
       ],
     }).compileComponents();
   }));
 
   function resetFixture() {
+    if (fixture) {
+      fixture.destroy();
+    }
     fixture = TestBed.createComponent(DrawingToolsComponent);
+    fixture.componentRef.setInput('survey', mockSurvey);
     fixture.detectChanges();
   }
 
@@ -136,6 +132,9 @@ describe('DrawingToolsComponent', () => {
   }
 
   beforeEach(() => {
+    // resetFixture(); // Don't reset automatically, let tests do it or stick to standard.
+    // Actually standard is to do it in beforeEach.
+    // I will call resetFixture() here, but ensure resetFixture destroys previous.
     resetFixture();
   });
 
@@ -187,6 +186,9 @@ describe('DrawingToolsComponent', () => {
     it('does not display add point button when user cannot add point to any job', () => {
       authServiceSpy.canUserAddPointsToJob.and.returnValue(false);
       resetFixture();
+
+      // Verify spy behavior
+      // expect(authServiceSpy.canUserAddPointsToJob(mockSurvey, mockSurvey.jobs.first())).toBe(false);
 
       const addPointButton = fixture.debugElement.query(
         By.css('#add-point-button')

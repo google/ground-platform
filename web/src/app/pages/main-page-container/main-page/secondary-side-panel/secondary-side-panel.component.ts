@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, effect} from '@angular/core';
+import { Component, effect, input } from '@angular/core';
 import {Observable} from 'rxjs';
 
+import { Survey } from 'app/models/survey.model';
 import {
   NavigationService,
   SideNavMode,
@@ -28,6 +29,7 @@ import {
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
+  activeSurvey = input<Survey>();
   private loiIdSignal = this.navigationService.getLoiId();
   private submissionIdSignal = this.navigationService.getSubmissionId();
 

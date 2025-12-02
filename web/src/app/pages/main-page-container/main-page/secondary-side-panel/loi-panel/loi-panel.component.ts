@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {MatDialog} from '@angular/material/dialog';
 import {List} from 'immutable';
-import {Subscription, switchMap} from 'rxjs';
+import { Subscription, combineLatest, switchMap } from 'rxjs';
 
 import {LoiPropertiesDialogComponent} from 'app/components/loi-properties-dialog/loi-properties-dialog.component';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {Submission} from 'app/models/submission/submission.model';
+import { Survey } from 'app/models/survey.model';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 import {getLoiIcon} from 'app/utils/utils';
 
 @Component({
@@ -35,40 +36,38 @@ import {getLoiIcon} from 'app/utils/utils';
 })
 export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
+  activeSurvey = input<Survey>();
 
   loi!: LocationOfInterest;
   name!: string | null;
   icon!: string;
   iconColor!: string;
-  surveyId!: string;
   submissions!: List<Submission>;
   isLoading = true;
 
   constructor(
     private dialog: MatDialog,
     private loiService: LocationOfInterestService,
-    private surveyService: SurveyService,
     private submissionService: SubmissionService,
     private navigationService: NavigationService
   ) {}
 
   ngOnInit() {
     this.subscription.add(
-      this.surveyService
-        .getActiveSurvey$()
+      combineLatest([
+        toObservable(this.activeSurvey),
+        this.loiService.getSelectedLocationOfInterest$(),
+      ])
         .pipe(
-          switchMap(survey => {
-            this.surveyId = survey.id;
-            return this.loiService.getSelectedLocationOfInterest$().pipe(
-              switchMap(loi => {
-                this.iconColor = survey.getJob(loi.jobId)!.color!;
-                this.loi = loi;
-                this.name = LocationOfInterestService.getDisplayName(loi);
-                this.icon = getLoiIcon(loi);
+          switchMap(([survey, loi]) => {
+            if (survey) {
+              this.iconColor = survey.getJob(loi.jobId)!.color!;
+            }
+            this.loi = loi;
+            this.name = LocationOfInterestService.getDisplayName(loi);
+            this.icon = getLoiIcon(loi);
 
-                return this.submissionService.getSubmissions$();
-              })
-            );
+            return this.submissionService.getSubmissions$();
           })
         )
         .subscribe(submissions => {
@@ -80,7 +79,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
 
   onSelectSubmission(submissionId: string) {
     this.navigationService.showSubmissionDetail(
-      this.surveyId,
+      this.activeSurvey()?.id || '',
       this.loi.id,
       submissionId
     );

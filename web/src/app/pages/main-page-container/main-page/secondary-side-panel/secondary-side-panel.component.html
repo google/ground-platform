@@ -17,11 +17,11 @@
 <div [ngSwitch]="sideNavMode$ | async" class="secondary-side-panel-container">
   <div *ngIf="locationOfInterestId || submissionId" class="secondary-side-panel">
     <ng-container *ngSwitchCase="sideNavMode.SUBMISSION">
-      <submission-panel *ngIf="submissionId" [submissionId]="submissionId"></submission-panel>
+      <submission-panel *ngIf="submissionId" [submissionId]="submissionId" [activeSurvey]="activeSurvey()"></submission-panel>
     </ng-container>
 
     <ng-container *ngSwitchCase="sideNavMode.JOB_LIST">
-      <ground-loi-panel *ngIf="locationOfInterestId"></ground-loi-panel>
+      <ground-loi-panel *ngIf="locationOfInterestId" [activeSurvey]="activeSurvey()"></ground-loi-panel>
     </ng-container>
   </div>
 </div>
