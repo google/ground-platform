@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, effect} from '@angular/core';
+import {Component, computed, effect} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {Survey} from 'app/models/survey.model';
@@ -27,7 +27,9 @@ import {SurveyService} from 'app/services/survey/survey.service';
   styleUrls: ['./main-page-container.component.css'],
 })
 export class MainPageContainerComponent {
-  private surveyIdSignal = this.navigationService.getSurveyId();
+  private surveyIdSignal = computed(
+    () => this.navigationService.getUrlParams()().surveyId
+  );
 
   protected activeSurvey$: Observable<Survey>;
 

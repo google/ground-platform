@@ -18,15 +18,19 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   Component,
+  Injector,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
   ViewChild,
+  runInInjectionContext,
 } from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {GoogleMap} from '@angular/google-maps';
 import {Map as ImmutableMap, List} from 'immutable';
 import {BehaviorSubject, Observable, Subscription, combineLatest} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Geometry, GeometryType} from 'app/models/geometry/geometry';
@@ -114,6 +118,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() showPredefinedLoisOnly = false;
   @Input() selectedJob: Job | undefined = undefined;
 
+  private urlParams = this.navigationService.getUrlParams();
+
   constructor(
     private drawingToolsService: DrawingToolsService,
     private surveyService: SurveyService,
@@ -122,7 +128,8 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     private groundPinService: GroundPinService,
     private submissionService: SubmissionService,
     private zone: NgZone,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private injector: Injector
   ) {
     this.lois$ = this.loiService.getLocationsOfInterest$();
     this.activeSurvey$ = this.surveyService.getActiveSurvey$();
@@ -133,61 +140,62 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.subscription.add(
-      combineLatest([
-        this.activeSurvey$,
-        this.lois$,
-        this.navigationService.getLocationOfInterestId$(),
-        this.navigationService.getTaskId$(),
-        this.selectedJob$,
-      ]).subscribe(
-        ([survey, lois, locationOfInterestId, taskId, selectedJob]) => {
-          const loisMap = this.getLoiMap(lois, selectedJob);
-          const loiIdsToRemove = this.getLoiIdsToRemove(loisMap);
-          const loisToAdd = this.getLoiIdsToAdd(loisMap);
-          this.loisMap = loisMap;
-
-          this.removeDeletedLocationsOfInterest(loiIdsToRemove);
-          this.addNewLocationsOfInterest(survey, loisToAdd);
-          if (
-            this.lastFitSurveyId !== survey.id ||
-            this.lastFitJobId !== (selectedJob?.id ?? '')
-          ) {
-            this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
-            this.lastFitSurveyId = survey.id;
-            this.lastFitJobId = selectedJob?.id ?? '';
-          }
-          this.selectLocationOfInterest(locationOfInterestId);
-          this.selectSubmissionTask(taskId);
-        }
-      )
-    );
-
-    if (this.shouldEnableDrawingTools) {
+    runInInjectionContext(this.injector, () => {
       this.subscription.add(
-        this.drawingToolsService
-          .getEditMode$()
-          .subscribe(editMode => this.onEditModeChange(editMode))
-      );
-    }
+        combineLatest([
+          this.activeSurvey$,
+          this.lois$,
+          toObservable(this.urlParams).pipe(map(params => params.loiId)),
+          toObservable(this.urlParams).pipe(map(params => params.taskId)),
+          this.selectedJob$,
+        ]).subscribe(
+          ([survey, lois, locationOfInterestId, taskId, selectedJob]) => {
+            const loisMap = this.getLoiMap(lois, selectedJob);
+            const loiIdsToRemove = this.getLoiIdsToRemove(loisMap);
+            const loisToAdd = this.getLoiIdsToAdd(loisMap);
+            this.loisMap = loisMap;
 
-    this.subscription.add(
-      combineLatest([
-        this.navigationService.getLocationOfInterestId$(),
-        this.navigationService.getSubmissionId$(),
-        this.submissionService.getSelectedSubmission$(),
-      ]).subscribe(([, submissionId, submission]) => {
-        this.showSubmissionGeometry = !!submissionId;
-        if (submission instanceof Submission) {
-          this.submission = submission;
-          this.removeSubmissionResultsOnMap();
-          if (this.showSubmissionGeometry) {
-            this.addSubmissionResultsOnMap();
+            this.removeDeletedLocationsOfInterest(loiIdsToRemove);
+            this.addNewLocationsOfInterest(survey, loisToAdd);
+            if (
+              this.lastFitSurveyId !== survey.id ||
+              this.lastFitJobId !== (selectedJob?.id ?? '')
+            ) {
+              this.fitMapToLocationsOfInterest(List(this.loisMap.values()));
+              this.lastFitSurveyId = survey.id;
+              this.lastFitJobId = selectedJob?.id ?? '';
+            }
+            this.selectLocationOfInterest(locationOfInterestId);
+            this.selectSubmissionTask(taskId);
           }
-        }
-        this.cancelReposition();
-      })
-    );
+        )
+      );
+
+      if (this.shouldEnableDrawingTools) {
+        this.subscription.add(
+          this.drawingToolsService
+            .getEditMode$()
+            .subscribe(editMode => this.onEditModeChange(editMode))
+        );
+      }
+
+      this.subscription.add(
+        combineLatest([
+          toObservable(this.urlParams).pipe(map(params => params.submissionId)),
+          this.submissionService.getSelectedSubmission$(),
+        ]).subscribe(([submissionId, submission]) => {
+          this.showSubmissionGeometry = !!submissionId;
+          if (submission instanceof Submission) {
+            this.submission = submission;
+            this.removeSubmissionResultsOnMap();
+            if (this.showSubmissionGeometry) {
+              this.addSubmissionResultsOnMap();
+            }
+          }
+          this.cancelReposition();
+        })
+      );
+    });
   }
 
   /**

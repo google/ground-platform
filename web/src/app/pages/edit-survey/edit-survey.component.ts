@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import {Component, effect} from '@angular/core';
+import {Component, computed, effect} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {List} from 'immutable';
 
@@ -41,7 +41,9 @@ import {
 })
 export class EditSurveyComponent {
   private urlSignal = this.navigationService.getUrl();
-  private surveyIdSignal = this.navigationService.getSurveyId();
+  private surveyIdSignal = computed(
+    () => this.navigationService.getUrlParams()().surveyId
+  );
 
   surveyId?: string;
   survey?: Survey;

@@ -20,6 +20,8 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  Signal,
+  computed,
 } from '@angular/core';
 import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {List} from 'immutable';
@@ -62,7 +64,7 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     this.groundPinService.getPinImageSource(this.green)
   );
   addPointIcon = this.addPointIconBlack;
-  isSubmissionSelected$: Observable<boolean>;
+  isSubmissionSelected: Signal<boolean>;
   disabled$: Observable<boolean>;
 
   constructor(
@@ -74,9 +76,9 @@ export class DrawingToolsComponent implements OnInit, OnDestroy {
     surveyService: SurveyService,
     authService: AuthService
   ) {
-    this.isSubmissionSelected$ = this.navigationService
-      .getSubmissionId$()
-      .pipe(map(obs => !!obs));
+    this.isSubmissionSelected = computed(
+      () => !!this.navigationService.getUrlParams()().submissionId
+    );
     this.disabled$ = drawingToolsService.getDisabled$();
     this.jobs$ = surveyService.getActiveSurvey$().pipe(
       tap(survey => {

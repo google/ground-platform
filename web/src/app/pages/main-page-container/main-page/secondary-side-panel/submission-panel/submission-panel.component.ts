@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  Injector,
+} from '@angular/core';
 import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
+import {toObservable} from '@angular/core/rxjs-interop';
+import {Subscription, firstValueFrom, map, Observable} from 'rxjs';
 
 import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
@@ -39,6 +46,8 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   @Input() submissionId!: string;
   submission: Submission | null = null;
   tasks?: List<Task>;
+  selectedTaskId$: Observable<string | null>;
+  surveyId$: Observable<string | null>;
   selectedTaskId: string | null = null;
   surveyId: string | null = null;
   firebaseURLs = new Map<string, string>();
@@ -50,11 +59,15 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     private submissionService: SubmissionService,
     private navigationService: NavigationService,
     private storage: AngularFireStorage
-  ) {}
+  ) {
+    const urlParams$ = toObservable(this.navigationService.getUrlParams());
+    this.surveyId$ = urlParams$.pipe(map(params => params.surveyId));
+    this.selectedTaskId$ = urlParams$.pipe(map(params => params.taskId));
+  }
 
   ngOnInit() {
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(surveyId => {
+      this.surveyId$.subscribe(surveyId => {
         this.surveyId = surveyId;
       })
     );
@@ -72,7 +85,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
       })
     );
     this.subscription.add(
-      this.navigationService.getTaskId$().subscribe(taskId => {
+      this.selectedTaskId$.subscribe(taskId => {
         this.selectedTaskId = taskId;
       })
     );
