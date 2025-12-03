@@ -11,6 +11,7 @@
     "postbuild": "npm run --prefix scripts copy-asset-links",
     "build-all": "npm run build-local-deps && npm run build",
     "build-and-test": "npm run build --config=local && npm run test",
+    "build-and-test-headless": "npm run build --config=local && npm run test-headless",
     "build-all-and-test": "npm run build-all --config=local && npm run test",
     "build-all-and-test-headless": "npm run build-all --config=local && npm run test-headless",
     "watch": "npm run build -- --watch",
