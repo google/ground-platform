@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {WritableSignal, signal, computed} from '@angular/core';
+import {WritableSignal, signal} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -36,46 +36,18 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {UrlParams} from 'app/services/navigation/url-params';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 
 import {
-
   DialogData,
-
   DialogType,
-
   JobDialogComponent,
-
 } from './job-dialog/job-dialog.component';
-
-import {SurveyHeaderModule} from '../main-page-container/main-page/survey-header/survey-header.module';
-
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-
-import {MatListModule} from '@angular/material/list';
-
-import {MatIconModule} from '@angular/material/icon';
-
-import {MatMenuModule} from '@angular/material/menu';
-
-import {MatDividerModule} from '@angular/material/divider';
-
-import {AngularFireModule} from '@angular/fire/compat';
-
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-
-import {AuthService} from 'app/services/auth/auth.service';
-
-import {NEVER} from 'rxjs';
-
-import {User} from 'app/models/user.model';
-
-
 
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
+  let surveyId$: Subject<string | null>;
   let surveyIdSignal: WritableSignal<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
@@ -125,34 +97,22 @@ describe('EditSurveyComponent', () => {
 
   beforeEach(waitForAsync(() => {
     surveyIdSignal = signal<string | null>(null);
+    surveyId$ = new Subject<string | null>();
 
-    const urlParamsSignal = computed(() => {
-      return new UrlParams(surveyIdSignal(), null, null, null);
-    });
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      [
-        'isShareSurveyPage',
-        'getUrlParams',
-        'getUrl',
-        'navigateToEditJob',
-        'isEditSurveyPage',
-        'isSurveyPage',
-      ]
+      ['isShareSurveyPage', 'getSurveyId$', 'getSurveyId', 'getUrl']
     );
-    navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
-    navigationServiceSpy.getUrl.and.returnValue(signal(''));
-    navigationServiceSpy.isEditSurveyPage.and.returnValue(true);
+    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
+    navigationServiceSpy.getSurveyId.and.returnValue(surveyIdSignal);
 
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'activateSurvey',
       'getActiveSurvey$',
-      'canManageSurvey',
     ]);
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
-    surveyServiceSpy.canManageSurvey.and.returnValue(true);
 
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
@@ -182,24 +142,8 @@ describe('EditSurveyComponent', () => {
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogSpy.open.and.returnValue(dialogRefSpy);
 
-    const authServiceSpy = jasmine.createSpyObj('AuthService', [
-      'canShare',
-      'getUser$',
-    ]);
-    authServiceSpy.canShare.and.returnValue(of(true));
-    authServiceSpy.getUser$.and.returnValue(of({} as User));
-
     TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        SurveyHeaderModule,
-        MatProgressSpinnerModule,
-        MatListModule,
-        MatIconModule,
-        MatMenuModule,
-        MatDividerModule,
-        AngularFireModule.initializeApp({}),
-      ],
+      imports: [RouterTestingModule],
       declarations: [EditSurveyComponent],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
@@ -209,14 +153,6 @@ describe('EditSurveyComponent', () => {
         {provide: DataStoreService, useValue: dataStoreServiceSpy},
         {provide: ActivatedRoute, useValue: route},
         {provide: MatDialog, useValue: dialogSpy},
-        {
-          provide: AngularFireAuth,
-          useValue: {
-            authState: NEVER,
-            onIdTokenChanged: (callback: Function) => callback(null),
-          },
-        },
-        {provide: AuthService, useValue: authServiceSpy},
       ],
     }).compileComponents();
   }));
@@ -236,6 +172,7 @@ describe('EditSurveyComponent', () => {
   describe('when routed in with survey ID', () => {
     beforeEach(fakeAsync(() => {
       surveyIdSignal.set(surveyId);
+      surveyId$.next(surveyId);
       tick();
     }));
 
@@ -249,6 +186,7 @@ describe('EditSurveyComponent', () => {
   describe('when survey activated', () => {
     beforeEach(fakeAsync(() => {
       surveyIdSignal.set(surveyId);
+      surveyId$.next(surveyId);
       activeSurvey$.next(survey);
       tick();
       fixture.detectChanges();
@@ -305,7 +243,7 @@ describe('EditSurveyComponent', () => {
         );
       });
 
-      it('rename a job', fakeAsync(() => {
+      it('rename a job', () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
         const renameButton = fixture.debugElement.query(
@@ -317,19 +255,14 @@ describe('EditSurveyComponent', () => {
         );
 
         menuButton.click();
-        tick();
-        fixture.detectChanges();
-
         renameButton.click();
-        tick();
-        fixture.detectChanges();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           job1.copyWith({name: newJobName})
         );
-      }));
+      });
 
-      it('duplicate a job', fakeAsync(() => {
+      it('duplicate a job', () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
         const duplicateButton = fixture.debugElement.query(
@@ -337,9 +270,6 @@ describe('EditSurveyComponent', () => {
         ).nativeElement as HTMLElement;
 
         menuButton.click();
-        tick();
-        fixture.detectChanges();
-
         duplicateButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
@@ -349,9 +279,9 @@ describe('EditSurveyComponent', () => {
           ),
           true
         );
-      }));
+      });
 
-      it('delete a job', fakeAsync(() => {
+      it('delete a job', () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
         const deleteButton = fixture.debugElement.query(
@@ -362,13 +292,10 @@ describe('EditSurveyComponent', () => {
         );
 
         menuButton.click();
-        tick();
-        fixture.detectChanges();
-
         deleteButton.click();
 
         expect(draftSurveyServiceSpy.deleteJob).toHaveBeenCalledOnceWith(job1);
-      }));
+      });
     });
   });
 });

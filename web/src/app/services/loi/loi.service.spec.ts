@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {Map as ImmutableMap, List, Map} from 'immutable';
 import {Subject, of} from 'rxjs';
@@ -51,8 +50,8 @@ describe('LocationOfInterestService', () => {
 
   beforeEach(() => {
     const navigationService = {
-      getSurveyId: () => signal(''),
-      getLoiId: () => signal(''),
+      getSurveyId$: () => of(''),
+      getLocationOfInterestId$: () => of(''),
     };
     TestBed.configureTestingModule({
       providers: [

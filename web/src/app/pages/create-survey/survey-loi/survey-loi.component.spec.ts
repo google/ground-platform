@@ -15,7 +15,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -34,7 +34,6 @@ import {DataSharingType, Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {UrlParams} from 'app/services/navigation/url-params';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 import {SurveyLoiComponent} from './survey-loi.component';
@@ -68,7 +67,7 @@ describe('SurveyLoiComponent', () => {
   beforeEach(waitForAsync(() => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['getUrlParams', 'getSidePanelExpanded']
+      ['getLocationOfInterestId$', 'getSubmissionId$', 'getSidePanelExpanded']
     );
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -77,8 +76,8 @@ describe('SurveyLoiComponent', () => {
       'canManageSurvey',
     ]);
 
-    navigationServiceSpy.getUrlParams.and.returnValue(
-      signal(new UrlParams(null, null, null, null))
+    navigationServiceSpy.getSubmissionId$.and.returnValue(
+      of<string | null>(null)
     );
 
     surveyServiceSpy.canManageSurvey.and.returnValue(true);

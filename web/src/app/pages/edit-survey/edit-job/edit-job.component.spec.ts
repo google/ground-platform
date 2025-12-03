@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {signal} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {
   MatButtonToggle,
@@ -37,7 +36,6 @@ import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DialogService} from 'app/services/dialog/dialog.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {UrlParams} from 'app/services/navigation/url-params';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 describe('EditJobComponent', () => {
@@ -54,16 +52,8 @@ describe('EditJobComponent', () => {
   );
   const jobId = 'job-123';
   const user$ = new Subject<User | null>();
-  let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
 
   beforeEach(async () => {
-    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
-      'NavigationService',
-      ['getUrlParams']
-    );
-    navigationServiceSpy.getUrlParams.and.returnValue(
-      signal(new UrlParams(survey.id, null, null, null))
-    );
     await TestBed.configureTestingModule({
       declarations: [EditJobComponent],
       imports: [
@@ -97,7 +87,9 @@ describe('EditJobComponent', () => {
         },
         {
           provide: NavigationService,
-          useValue: navigationServiceSpy,
+          useValue: {
+            getSurveyId$: () => of(survey.id),
+          },
         },
       ],
     }).compileComponents();

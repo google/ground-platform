@@ -26,7 +26,10 @@ import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
-import {UrlParams} from 'app/services/navigation/url-params';
+
+import {Job} from 'app/models/job.model';
+import {DataSharingType, Survey} from 'app/models/survey.model';
+import {AuthService} from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
@@ -34,13 +37,9 @@ import {
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
-import {AuthService} from 'app/services/auth/auth.service';
-import {Survey, DataSharingType} from 'app/models/survey.model';
-import {Job} from 'app/models/job.model';
 
 import {DrawingToolsComponent} from './drawing-tools.component';
 import {DrawingToolsModule} from './drawing-tools.module';
-import {WritableSignal, signal} from '@angular/core';
 
 describe('DrawingToolsComponent', () => {
   let fixture: ComponentFixture<DrawingToolsComponent>;
@@ -49,7 +48,7 @@ describe('DrawingToolsComponent', () => {
   let mockDisabled$: BehaviorSubject<boolean>;
   let mockEditMode$: BehaviorSubject<EditMode>;
   let drawingToolsServiceSpy: jasmine.SpyObj<DrawingToolsService>;
-  let urlParamsSignal: WritableSignal<UrlParams>;
+  let mockSubmissionId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
 
@@ -99,12 +98,12 @@ describe('DrawingToolsComponent', () => {
     drawingToolsServiceSpy.getDisabled$.and.returnValue(mockDisabled$);
     drawingToolsServiceSpy.getEditMode$.and.returnValue(mockEditMode$);
 
-    urlParamsSignal = signal(new UrlParams(null, null, null, null));
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['getUrlParams']
+      ['getSubmissionId$']
     );
-    navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
+    mockSubmissionId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
       'getActiveSurvey$',
@@ -153,7 +152,7 @@ describe('DrawingToolsComponent', () => {
     });
 
     it('is disabled when an submission is selected', fakeAsync(() => {
-      urlParamsSignal.set(new UrlParams(null, null, 'oid1', null));
+      mockSubmissionId$.next('oid1');
       tick();
       // wait for async pipe to reflect
       fixture.detectChanges();

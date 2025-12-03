@@ -26,7 +26,6 @@ import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {List, Map} from 'immutable';
 import {BehaviorSubject, of} from 'rxjs';
-import { signal, WritableSignal } from '@angular/core';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {MultiPolygon} from 'app/models/geometry/multi-polygon';
@@ -41,7 +40,6 @@ import {
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {UrlParams} from 'app/services/navigation/url-params';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {polygonShellCoordsToPolygon} from 'testing/helpers';
@@ -54,7 +52,8 @@ describe('MapComponent', () => {
   let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
-  let urlParamsSignal: WritableSignal<UrlParams>;
+  let mockLocationOfInterestId$: BehaviorSubject<string | null>;
+  let mockTaskId$: BehaviorSubject<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
   let mockEditMode$: BehaviorSubject<EditMode>;
@@ -175,17 +174,26 @@ describe('MapComponent', () => {
     );
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(mockLois$);
 
-    urlParamsSignal = signal(new UrlParams(null, null, null, null));
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
-        'getUrlParams',
+        'getLocationOfInterestId$',
+        'getTaskId$',
+        'getSubmissionId$',
         'selectLocationOfInterest',
         'clearLocationOfInterestId',
         'showSubmissionDetailWithHighlightedTask',
       ]
     );
-    navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
+    mockLocationOfInterestId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
+      mockLocationOfInterestId$
+    );
+    mockTaskId$ = new BehaviorSubject<string | null>(null);
+    navigationServiceSpy.getTaskId$.and.returnValue(mockTaskId$);
+    navigationServiceSpy.getSubmissionId$.and.returnValue(
+      of<string | null>(null)
+    );
 
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
@@ -399,8 +407,7 @@ describe('MapComponent', () => {
   });
 
   it('should enlarge the stroke weight of the polygon when loi is selected', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, polygonLoiId1, null, null));
-    fixture.detectChanges();
+    mockLocationOfInterestId$.next(polygonLoiId1);
     tick();
 
     const [polygon] = component.polygons.get(polygonLoiId1)!;
@@ -408,7 +415,7 @@ describe('MapComponent', () => {
   }));
 
   it('should clear selected loi when map is clicked', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     google.maps.event.trigger(component.map.googleMap!, 'click', {
@@ -428,9 +435,7 @@ describe('MapComponent', () => {
   });
 
   it('should set marker draggable when loi is selected', fakeAsync(() => {
-    component.shouldEnableDrawingTools = true;
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
-    fixture.detectChanges();
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker1 = component.markers.get(poiId1)!;
@@ -439,7 +444,7 @@ describe('MapComponent', () => {
 
   it('should not set marker draggable when loi is selected and drawing tools turned off', fakeAsync(() => {
     component.shouldEnableDrawingTools = false;
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker1 = component.markers.get(poiId1)!;
@@ -454,7 +459,7 @@ describe('MapComponent', () => {
   });
 
   it('should pop up reposition dialog when marker dragged', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;
@@ -469,7 +474,7 @@ describe('MapComponent', () => {
   }));
 
   it('should disable drawing tools when marker dragged', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;
@@ -481,7 +486,7 @@ describe('MapComponent', () => {
   }));
 
   it('should disable marker click while repositioning a marker', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker1 = component.markers.get(poiId1)!;
@@ -497,7 +502,7 @@ describe('MapComponent', () => {
   }));
 
   it('should disable polygon click while repositioning a marker', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;
@@ -513,7 +518,7 @@ describe('MapComponent', () => {
   }));
 
   it('should disable map click while repositioning a marker', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;
@@ -530,7 +535,7 @@ describe('MapComponent', () => {
   }));
 
   it('should reposition marker when confirmed in reposition dialog', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;
@@ -557,7 +562,7 @@ describe('MapComponent', () => {
   }));
 
   it('should enable drawing tools when confirmed in reposition dialog', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;
@@ -578,7 +583,7 @@ describe('MapComponent', () => {
   }));
 
   it('should move marker back when canceled in reposition dialog', fakeAsync(() => {
-    urlParamsSignal.set(new UrlParams(surveyId, poiId1, null, null));
+    mockLocationOfInterestId$.next(poiId1);
     tick();
 
     const marker = component.markers.get(poiId1)!;

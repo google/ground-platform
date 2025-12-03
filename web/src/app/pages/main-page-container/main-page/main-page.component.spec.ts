@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {Component, NO_ERRORS_SCHEMA, signal} from '@angular/core';
+import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NEVER, of} from 'rxjs';
-import {User} from 'firebase/auth';
 
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
@@ -31,7 +30,6 @@ import {SurveyService} from 'app/services/survey/survey.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
 
 import {MainPageComponent} from './main-page.component';
-import {UrlParams} from 'app/services/navigation/url-params';
 
 @Component({selector: 'ground-map', template: ''})
 class MapComponent {}
@@ -54,25 +52,22 @@ describe('MainPageComponent', () => {
       'getActiveSurvey$',
       'activateSurvey',
     ]);
-    surveyService.getActiveSurvey$.and.returnValue(NEVER);
 
     const loiService = jasmine.createSpyObj('LocationOfInterestService', [
-      'selectLocationOfInterest',
+      'selectLocationOfInterest$',
     ]);
 
     const submissionService = jasmine.createSpyObj('SubmissionService', [
-      'selectSubmission',
+      'selectSubmission$',
       'getSelectedSubmission$',
     ]);
-    submissionService.getSelectedSubmission$.and.returnValue(NEVER);
 
-    const navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
-      'NavigationService',
-      ['getUrlParams', 'signIn']
-    );
-    navigationServiceSpy.getUrlParams.and.returnValue(
-      signal(new UrlParams(null, null, null, null))
-    );
+    const navigationService = {
+      getSurveyId$: () => NEVER,
+      getLocationOfInterestId$: () => NEVER,
+      getSubmissionId$: () => NEVER,
+      getUrlParams: () => NEVER,
+    };
 
     TestBed.configureTestingModule({
       declarations: [MainPageComponent, MapComponent, MatSideNavComponent],
@@ -85,16 +80,13 @@ describe('MainPageComponent', () => {
         },
         {provide: SubmissionService, useValue: submissionService},
         {provide: SurveyService, useValue: surveyService},
-        {provide: NavigationService, useValue: navigationServiceSpy},
+        {provide: NavigationService, useValue: navigationService},
         {provide: AngularFirestore, useValue: {}},
         {provide: AngularFireAuth, useValue: {}},
         {provide: Router, useValue: {}},
         {
           provide: AuthService,
-          useValue: {
-            getUser$: () => of({} as User),
-            isAuthenticated$: () => of(true),
-          },
+          useValue: {getUser$: () => NEVER, isAuthenticated$: () => NEVER},
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],
