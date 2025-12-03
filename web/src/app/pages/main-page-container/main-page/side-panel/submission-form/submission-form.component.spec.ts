@@ -171,9 +171,9 @@ describe('SubmissionFormComponent', () => {
 
   beforeEach(waitForAsync(() => {
     const navigationService = {
-      getSurveyId$: () => of(''),
-      getUrlParams: () => NEVER,
-      getLocationOfInterestId$: () => NEVER,
+      getSurveyId: () => signal(''),
+      getUrlParams: () => signal({}),
+      getLoiId: () => signal(''),
       getSidePanelExpanded: () => false,
     };
     const routerSpy = createRouterSpy();

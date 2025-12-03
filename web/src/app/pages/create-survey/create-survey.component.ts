@@ -16,10 +16,17 @@
 
 import '@angular/localize/init';
 
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChild,
+  Injector,
+} from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {ActivatedRoute} from '@angular/router';
 import {List} from 'immutable';
-import {Subscription, combineLatest, filter} from 'rxjs';
+import {Subscription, combineLatest, filter, map, Observable} from 'rxjs';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
@@ -118,6 +125,7 @@ export class CreateSurveyComponent implements OnInit {
   canContinue = true;
   skipLoiSelection = false;
   createSurveyPhase = CreateSurveyPhase.LOADING;
+  private surveyId$: Observable<string | null>;
 
   readonly CreateSurveyPhase = CreateSurveyPhase;
 
@@ -146,7 +154,11 @@ export class CreateSurveyComponent implements OnInit {
     private navigationService: NavigationService,
     private loiService: LocationOfInterestService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    this.surveyId$ = toObservable(
+      this.navigationService.getUrlParams()
+    ).pipe(map(params => params.surveyId));
+  }
 
   ngAfterViewChecked(): void {
     this.cdr.detectChanges();
@@ -154,8 +166,8 @@ export class CreateSurveyComponent implements OnInit {
 
   ngOnInit(): void {
     this.subscription.add(
-      this.navigationService.getSurveyId$().subscribe(async surveyId => {
-        this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
+      this.surveyId$.subscribe(async surveyId => {
+        this.surveyId = surveyId ?? NavigationService.SURVEY_ID_NEW;
         this.surveyService.activateSurvey(this.surveyId);
         await this.draftSurveyService.init(this.surveyId);
         this.draftSurveyService

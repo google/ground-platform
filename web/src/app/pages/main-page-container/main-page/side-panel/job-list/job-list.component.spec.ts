@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
@@ -76,8 +76,8 @@ describe('JobListComponent', () => {
 
   beforeEach(waitForAsync(() => {
     const navigationService = {
-      getSurveyId$: () => of(''),
-      getLocationOfInterestId$: () => of(''),
+      getSurveyId: () => signal(''),
+      getLoiId: () => signal(''),
       getSidePanelExpanded: () => true,
     };
     const routerSpy = createRouterSpy();

@@ -25,30 +25,33 @@ import {ActivatedRouteStub} from 'testing/activated-route-stub';
 
 import {MainPageComponent} from './main-page/main-page.component';
 import {MainPageContainerComponent} from './main-page-container.component';
-
-const navigationService = {
-  init: () => {},
-  getSurveyId$: () => NEVER,
-  getSurveyId: () => NEVER,
-};
-
-const surveyService = jasmine.createSpyObj('SurveyService', [
-  'getActiveSurvey$',
-  'activateSurvey',
-]);
+import {UrlParams} from 'app/services/navigation/url-params';
+import {signal} from '@angular/core';
 
 describe('MainPageContainerComponent', () => {
   let component: MainPageContainerComponent;
   let fixture: ComponentFixture<MainPageContainerComponent>;
   let route: ActivatedRouteStub;
 
+  const surveyService = jasmine.createSpyObj('SurveyService', [
+    'getActiveSurvey$',
+    'activateSurvey',
+  ]);
+
   beforeEach(waitForAsync(() => {
+    const navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      ['getUrlParams']
+    );
+    navigationServiceSpy.getUrlParams.and.returnValue(
+      signal(new UrlParams(null, null, null, null))
+    );
     route = new ActivatedRouteStub();
     TestBed.configureTestingModule({
       declarations: [MainPageContainerComponent, MainPageComponent],
       providers: [
         {provide: ActivatedRoute, useValue: route},
-        {provide: NavigationService, useValue: navigationService},
+        {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyService},
       ],
       schemas: [NO_ERRORS_SCHEMA],

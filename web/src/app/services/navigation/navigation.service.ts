@@ -73,20 +73,10 @@ export class NavigationService implements OnDestroy {
     new UrlParams(null, null, null, null)
   );
 
-  private surveyIdSignal = computed(() => this.urlParamsSignal().surveyId);
-  private loiIdSignal = computed(() => this.urlParamsSignal().loiId);
-  private submissionIdSignal = computed(
-    () => this.urlParamsSignal().submissionId
-  );
-  private taskIdSignal = computed(() => this.urlParamsSignal().taskId);
   private sideNavModeSignal = computed(
     () => this.urlParamsSignal().sideNavMode
   );
 
-  private surveyId$ = new BehaviorSubject<string | null>(null);
-  private loiId$ = new BehaviorSubject<string | null>(null);
-  private submissionId$ = new BehaviorSubject<string | null>(null);
-  private taskId$ = new BehaviorSubject<string | null>(null);
   private sideNavMode$ = new BehaviorSubject<SideNavMode>(SideNavMode.JOB_LIST);
 
   private subscription: Subscription;
@@ -127,12 +117,8 @@ export class NavigationService implements OnDestroy {
 
     // TODO remove this effect when everything will be migrated to Signals
     effect(() => {
-      const {surveyId, loiId, submissionId, taskId, sideNavMode} =
-        this.urlParamsSignal();
-      this.surveyId$.next(surveyId);
-      this.loiId$.next(loiId);
-      this.submissionId$.next(submissionId);
-      this.taskId$.next(taskId);
+      const {sideNavMode} = this.urlParamsSignal();
+
       this.sideNavMode$.next(sideNavMode);
     });
   }
@@ -145,40 +131,8 @@ export class NavigationService implements OnDestroy {
     return this.urlParamsSignal;
   }
 
-  getSurveyId(): Signal<string | null> {
-    return this.surveyIdSignal;
-  }
-
-  getLoiId(): Signal<string | null> {
-    return this.loiIdSignal;
-  }
-
-  getSubmissionId(): Signal<string | null> {
-    return this.submissionIdSignal;
-  }
-
-  getTaskId(): Signal<string | null> {
-    return this.taskIdSignal;
-  }
-
   getSideNavMode(): Signal<SideNavMode> {
     return this.sideNavModeSignal;
-  }
-
-  getSurveyId$(): Observable<string | null> {
-    return this.surveyId$!;
-  }
-
-  getLocationOfInterestId$(): Observable<string | null> {
-    return this.loiId$!;
-  }
-
-  getSubmissionId$(): Observable<string | null> {
-    return this.submissionId$!;
-  }
-
-  getTaskId$(): Observable<string | null> {
-    return this.taskId$!;
   }
 
   getSideNavMode$(): Observable<SideNavMode> {

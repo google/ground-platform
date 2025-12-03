@@ -15,9 +15,10 @@
  */
 
 import {Component, ViewChild} from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Params} from '@angular/router';
 import {List} from 'immutable';
-import {Subscription} from 'rxjs';
+import {Subscription, map, Observable} from 'rxjs';
 
 import {LoiEditorComponent} from 'app/components/loi-editor/loi-editor.component';
 import {TasksEditorComponent} from 'app/components/tasks-editor/tasks-editor.component';
@@ -44,6 +45,7 @@ export class EditJobComponent {
   subscription: Subscription = new Subscription();
   loisSubscription: Subscription = new Subscription();
 
+  surveyId$: Observable<string | null>;
   surveyId?: string;
   jobId?: string;
 
@@ -70,14 +72,15 @@ export class EditJobComponent {
     public surveyService: SurveyService,
     public draftSurveyService: DraftSurveyService
   ) {
-    this.subscription.add(
-      this.navigationService
-        .getSurveyId$()
-        .subscribe(surveyId => this.onSurveyIdChange(surveyId))
+    this.surveyId$ = toObservable(this.navigationService.getUrlParams()).pipe(
+      map(params => params.surveyId)
     );
   }
 
   async ngOnInit(): Promise<void> {
+    this.subscription.add(
+      this.surveyId$.subscribe(surveyId => this.onSurveyIdChange(surveyId))
+    );
     this.subscription.add(
       this.route.params.subscribe(async params => {
         await this.onJobIdChange(params);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {toSignal} from '@angular/core/rxjs-interop';
 import {
   ComponentFixture,
   TestBed,
@@ -26,12 +27,13 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
-import {Observable, Subject} from 'rxjs';
+import {Observable, Subject, map, of, NEVER} from 'rxjs';
 
-import {ShareSurveyComponent} from 'app/components/share-survey/share-survey.component';
+import {ShareSurveyComponent} from '../../components/share-survey/share-survey.component';
 import {Job} from 'app/models/job.model';
 import {LocationOfInterest} from 'app/models/loi.model';
 import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {User} from 'app/models/user.model';
 import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
@@ -44,9 +46,27 @@ import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {UrlParams} from 'app/services/navigation/url-params';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import {HeaderComponent} from '../../components/header/header.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {StepCardComponent} from './step-card/step-card.component';
+import {MatRadioModule} from '@angular/material/radio';
+import {MatCardModule} from '@angular/material/card';
+import {ShareListComponent} from '../../components/share-list/share-list.component';
+import {GeneralAccessControlComponent} from '../../components/general-access-control/general-access-control.component';
+import {DataVisibilityControlComponent} from '../../components/data-visibility-control/data-visibility-control.component';
+import {CopySurveyControlsComponent} from '../../components/copy-survey-controls/copy-survey-controls.component';
+import {TaskDetailsComponent} from './task-details/task-details.component';
+import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {AngularFireModule} from '@angular/fire/compat';
+import {AngularFireAuth} from '@angular/fire/compat/auth';
+import {AuthService} from 'app/services/auth/auth.service';
+import {MatMenuModule} from '@angular/material/menu';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -131,16 +151,18 @@ describe('CreateSurveyComponent', () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
-        'getSurveyId$',
+        'getUrlParams',
         'navigateToSurveyList',
         'navigateToCreateSurvey',
         'navigateToEditSurvey',
         'getSidePanelExpanded',
         'selectSurvey',
+        'isEditSurveyPage',
+        'isSurveyPage',
+        'getSurveyAppLink',
       ]
     );
     surveyId$ = new Subject<string | null>();
-    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
 
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -150,12 +172,14 @@ describe('CreateSurveyComponent', () => {
       'createSurvey',
       'getActiveSurvey',
       'updateDataSharingTerms',
+      'canManageSurvey',
     ]);
     surveyServiceSpy.createSurvey.and.returnValue(
       new Promise(resolve => resolve(newSurveyId))
     );
     activeSurvey$ = new Subject<Survey>();
     surveyServiceSpy.getActiveSurvey$.and.returnValue(activeSurvey$);
+    surveyServiceSpy.canManageSurvey.and.returnValue(true);
     surveyServiceSpy.updateDataSharingTerms.and.returnValue(
       new Promise(resolve => resolve(undefined))
     );
@@ -197,14 +221,37 @@ describe('CreateSurveyComponent', () => {
       'updateLoiTasks',
     ]);
 
+    const authServiceSpy = jasmine.createSpyObj('AuthService', [
+      'canShare',
+      'getUser$',
+    ]);
+    authServiceSpy.canShare.and.returnValue(of(true));
+    authServiceSpy.getUser$.and.returnValue(of({} as User));
+
     TestBed.configureTestingModule({
-      imports: [MatDialogModule],
+      imports: [
+        MatDialogModule,
+        MatProgressSpinnerModule,
+        MatProgressBarModule,
+        MatRadioModule,
+        MatCardModule,
+        AngularFireModule.initializeApp({}),
+        MatMenuModule,
+      ],
       declarations: [
         CreateSurveyComponent,
         SurveyDetailsComponent,
         JobDetailsComponent,
         DataSharingTermsComponent,
         ShareSurveyComponent,
+        HeaderComponent,
+        StepCardComponent,
+        ShareListComponent,
+        GeneralAccessControlComponent,
+        DataVisibilityControlComponent,
+        CopySurveyControlsComponent,
+        TaskDetailsComponent,
+        SurveyLoiComponent,
       ],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
@@ -214,13 +261,33 @@ describe('CreateSurveyComponent', () => {
         {provide: LocationOfInterestService, useValue: loiServiceSpy},
         {provide: ActivatedRoute, useValue: route},
         {provide: TaskService, useValue: taskServiceSpy},
+        {
+          provide: AngularFireAuth,
+          useValue: {
+            authState: NEVER,
+            onIdTokenChanged: (callback: Function) => callback(null),
+          },
+        },
+        {provide: AuthService, useValue: authServiceSpy},
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateSurveyComponent);
     component = fixture.componentInstance;
+
+    const urlParams$ = surveyId$.pipe(
+      map(surveyId => new UrlParams(surveyId, null, null, null))
+    );
+    navigationServiceSpy.getUrlParams.and.returnValue(
+      toSignal(urlParams$, {
+        initialValue: new UrlParams(null, null, null, null),
+        injector: fixture.componentRef.injector,
+      })
+    );
+
     fixture.detectChanges();
   });
 
@@ -234,6 +301,7 @@ describe('CreateSurveyComponent', () => {
   describe('when routed in with survey ID', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
+      component.ngOnInit();
       tick();
     }));
 
@@ -244,20 +312,39 @@ describe('CreateSurveyComponent', () => {
     });
   });
 
-  describe('when no survey', () => {
-    beforeEach(fakeAsync(() => {
-      surveyId$.next(NavigationService.SURVEY_ID_NEW);
-      activeSurvey$.next(Survey.UNSAVED_NEW);
-      tick();
-      fixture.detectChanges();
-    }));
-
-    it('displays survey details component', () => {
-      expect(component.surveyDetails).toBeDefined();
-    });
-  });
-
-  describe('when active survey has empty title', () => {
+          describe('when no survey', () => {
+            beforeEach(fakeAsync(() => {
+              surveyId$.next(NavigationService.SURVEY_ID_NEW);
+              activeSurvey$.next(Survey.UNSAVED_NEW);
+              component.createSurveyPhase = CreateSurveyPhase.SURVEY_DETAILS;
+              fixture.detectChanges();
+              tick();
+              fixture.detectChanges();
+            }));
+      
+            it('creates new survey with title and description after clicking continue', fakeAsync(() => {
+              const newName = 'newName';
+              const newDescription = 'newDescription';
+              const surveyDetailsComponent = component.surveyDetails!;
+              surveyDetailsComponent.formGroup.controls[
+                surveyDetailsComponent.titleControlKey
+              ].setValue(newName);
+              surveyDetailsComponent.formGroup.controls[
+                surveyDetailsComponent.descriptionControlKey
+              ].setValue(newDescription);
+              fixture.detectChanges();
+              clickContinueButton(fixture);
+              flush();
+      
+              expect(surveyServiceSpy.createSurvey).toHaveBeenCalledOnceWith(
+                newName,
+                newDescription
+              );
+              expect(
+                navigationServiceSpy.navigateToCreateSurvey
+              ).toHaveBeenCalledOnceWith(newSurveyId, true);
+            }));
+          });  describe('when active survey has empty title', () => {
     beforeEach(fakeAsync(() => {
       surveyId$.next(surveyId);
       activeSurvey$.next(surveyWithoutTitle);

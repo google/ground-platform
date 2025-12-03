@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, effect} from '@angular/core';
+import {Component, computed, effect} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {
@@ -28,8 +28,9 @@ import {
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
-  private loiIdSignal = this.navigationService.getLoiId();
-  private submissionIdSignal = this.navigationService.getSubmissionId();
+  private urlParams = this.navigationService.getUrlParams();
+  private loiIdSignal = computed(() => this.urlParams().loiId);
+  private submissionIdSignal = computed(() => this.urlParams().submissionId);
 
   locationOfInterestId: string | null = '';
   submissionId: string | null = '';

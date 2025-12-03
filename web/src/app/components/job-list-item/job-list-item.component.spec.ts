@@ -69,8 +69,6 @@ describe('JobListItemComponent', () => {
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let lois$: Subject<List<LocationOfInterest>>;
   let submissions$: Subject<List<Submission>>;
-  let surveyId$: Subject<string | null>;
-  let locationOfInterestId$: Subject<string | null>;
   let urlParamsSignal: WritableSignal<UrlParams>;
 
   const user = {
@@ -153,11 +151,7 @@ describe('JobListItemComponent', () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       [
-        'getSurveyId$',
-        'getLocationOfInterestId$',
         'selectLocationOfInterest',
-        'getSurveyId',
-        'getLoiId',
         'getUrlParams',
         'getSidePanelExpanded',
         'isEditSurveyPage',
@@ -166,18 +160,12 @@ describe('JobListItemComponent', () => {
 
     lois$ = new Subject<List<LocationOfInterest>>();
     submissions$ = new Subject<List<Submission>>();
-    surveyId$ = new Subject<string | null>();
-    locationOfInterestId$ = new Subject<string | null>();
     urlParamsSignal = signal<UrlParams>(new UrlParams(null, null, null, null));
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.getSubmissions$.and.returnValue(submissions$);
-    navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
-    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
-      locationOfInterestId$
-    );
     navigationServiceSpy.getUrlParams.and.returnValue(urlParamsSignal);
 
     TestBed.configureTestingModule({
@@ -214,7 +202,6 @@ describe('JobListItemComponent', () => {
     fixture.detectChanges();
     loader = TestbedHarnessEnvironment.loader(fixture);
 
-    surveyId$.next(surveyId);
     urlParamsSignal.set(new UrlParams(surveyId, null, null, null));
     lois$.next(List([]));
   });
