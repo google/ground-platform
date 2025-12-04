@@ -40,7 +40,8 @@ import {
   styleUrls: ['./edit-survey.component.scss'],
 })
 export class EditSurveyComponent {
-  private urlSignal = this.navigationService.getUrl();
+  private editSurveyPageSignal =
+    this.navigationService.getEditSurveyPageSignal();
   private surveyIdSignal = this.navigationService.getSurveyId();
 
   surveyId?: string;
@@ -70,13 +71,19 @@ export class EditSurveyComponent {
     });
 
     effect(() => {
-      const url = this.urlSignal();
+      const section = this.editSurveyPageSignal();
 
-      if (url.endsWith('survey'))
-        this.sectionTitle = $localize`:@@app.editSurvey.surveyDetails.title:Survey details`;
-      else if (url.endsWith('share'))
-        this.sectionTitle = $localize`:@@app.editSurvey.sharing.title:Sharing`;
-      else this.sectionTitle = '';
+      switch (section) {
+        case NavigationService.SURVEY_SEGMENT:
+          this.sectionTitle = $localize`:@@app.editSurvey.surveyDetails.title:Survey details`;
+          break;
+        case NavigationService.SURVEYS_SHARE:
+          this.sectionTitle = $localize`:@@app.editSurvey.sharing.title:Sharing`;
+          break;
+        default:
+          this.sectionTitle = '';
+          break;
+      }
     });
   }
 
