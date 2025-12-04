@@ -53,8 +53,10 @@ import {SurveyService} from 'app/services/survey/survey.service';
 
 const normalIconScale = 30;
 const zoomedInLevel = 13;
+const zoomCutoff = 10;
 const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
+const highZoomPolygonStrokeWeight = 10;
 
 @Component({
   selector: 'ground-map',
@@ -130,6 +132,24 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   ngOnChanges() {
     this.selectedJob$.next(this.selectedJob);
+  }
+
+  onZoomChange() {
+    const currentZoom = this.map.getZoom()!;
+
+    const newStrokeWeight =
+      currentZoom <= zoomCutoff
+        ? highZoomPolygonStrokeWeight
+        : normalPolygonStrokeWeight;
+
+    this.polygons?.forEach(polygons =>
+      polygons.forEach(polygon => {
+        if (!polygon.get('selected'))
+          polygon.setOptions({
+            strokeWeight: newStrokeWeight,
+          });
+      })
+    );
   }
 
   ngAfterViewInit() {
@@ -662,9 +682,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     const polygons = this.polygons.get(locationOfInterestId);
 
-    polygons?.forEach(polygon =>
-      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
-    );
+    polygons?.forEach(polygon => {
+      polygon.set('selected', true);
+      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight});
+    });
 
     this.fitMapToLocationsOfInterest(
       this.getLoisByIds(List([locationOfInterestId]))
@@ -678,11 +699,12 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       this.selectedLocationOfInterestId
     );
 
-    selectedPolygons?.forEach(polygon =>
+    selectedPolygons?.forEach(polygon => {
+      polygon.set('selected', false);
       polygon.setOptions({
         strokeWeight: normalPolygonStrokeWeight,
-      })
-    );
+      });
+    });
   }
 
   /**
