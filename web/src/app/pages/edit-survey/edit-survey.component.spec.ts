@@ -101,7 +101,12 @@ describe('EditSurveyComponent', () => {
 
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['isShareSurveyPage', 'getSurveyId$', 'getSurveyId', 'getUrl']
+      [
+        'isShareSurveyPage',
+        'getEditSurveyPageSignal',
+        'getSurveyId$',
+        'getSurveyId',
+      ]
     );
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
     navigationServiceSpy.getSurveyId.and.returnValue(surveyIdSignal);
