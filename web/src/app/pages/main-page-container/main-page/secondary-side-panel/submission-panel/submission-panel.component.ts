@@ -78,6 +78,17 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     );
   }
 
+  get submittedTasks() {
+    if (!this.tasks) {
+      return [];
+    }
+    console.log(this.tasks.toArray());
+
+    return this.tasks.filter(
+      task => this.getTaskSubmissionResult(task) !== undefined
+    );
+  }
+
   getFirebaseImageURLs() {
     this.tasks?.forEach(task => {
       if (task.type === this.taskType.PHOTO) {
