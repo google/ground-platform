@@ -31,7 +31,7 @@ import {
 import {registry} from '@ground/lib/dist/message-registry';
 import {GroundProtos} from '@ground/proto';
 import {getDownloadURL, getStorage, ref} from 'firebase/storage';
-import {List, Map} from 'immutable';
+import {List, Map, OrderedMap} from 'immutable';
 import {Observable, combineLatest, firstValueFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
 
@@ -683,13 +683,12 @@ export class DataStoreService {
   }
 
   /**
-   * Converts list of tasks to map.
+   * Converts list of tasks to ordered map.
    */
   convertTasksListToMap(tasks: List<Task>): Map<string, Task> {
-    let tasksMap = Map<string, Task>();
-    tasks.forEach((task: Task, index: number) => {
-      const jobFieldId = tasks && tasks.get(index)?.id;
-      const taskId = jobFieldId ? jobFieldId : this.generateId();
+    let tasksMap = OrderedMap<string, Task>();
+    tasks.forEach((task: Task) => {
+      const taskId = task.id ? task.id : this.generateId();
       tasksMap = tasksMap.set(taskId, task);
     });
     return tasksMap;
