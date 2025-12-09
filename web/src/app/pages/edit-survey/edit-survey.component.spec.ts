@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {WritableSignal, signal} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -47,6 +48,7 @@ import {
 describe('EditSurveyComponent', () => {
   let fixture: ComponentFixture<EditSurveyComponent>;
   let surveyId$: Subject<string | null>;
+  let surveyIdSignal: WritableSignal<string | null>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
   let route: ActivatedRouteStub;
   let activeSurvey$: Subject<Survey>;
@@ -92,13 +94,22 @@ describe('EditSurveyComponent', () => {
     /* ownerId= */ '',
     {type: DataSharingType.PRIVATE}
   );
+
   beforeEach(waitForAsync(() => {
+    surveyIdSignal = signal<string | null>(null);
+    surveyId$ = new Subject<string | null>();
+
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
-      ['isShareSurveyPage', 'getSurveyId$']
+      [
+        'isShareSurveyPage',
+        'getEditSurveyPageSignal',
+        'getSurveyId$',
+        'getSurveyId',
+      ]
     );
-    surveyId$ = new Subject<string | null>();
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
+    navigationServiceSpy.getSurveyId.and.returnValue(surveyIdSignal);
 
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -151,10 +162,10 @@ describe('EditSurveyComponent', () => {
     }).compileComponents();
   }));
 
-  beforeEach(() => {
+  beforeEach(fakeAsync(() => {
     fixture = TestBed.createComponent(EditSurveyComponent);
     fixture.detectChanges();
-  });
+  }));
 
   it('shows spinner when survey not loaded', () => {
     const spinner = fixture.debugElement.query(By.css('#loading-spinner'))
@@ -165,6 +176,7 @@ describe('EditSurveyComponent', () => {
 
   describe('when routed in with survey ID', () => {
     beforeEach(fakeAsync(() => {
+      surveyIdSignal.set(surveyId);
       surveyId$.next(surveyId);
       tick();
     }));
@@ -178,6 +190,7 @@ describe('EditSurveyComponent', () => {
 
   describe('when survey activated', () => {
     beforeEach(fakeAsync(() => {
+      surveyIdSignal.set(surveyId);
       surveyId$.next(surveyId);
       activeSurvey$.next(survey);
       tick();

@@ -17,7 +17,7 @@
 import {Component} from '@angular/core';
 
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'survey-json',
@@ -30,19 +30,16 @@ export class SurveyJsonComponent {
 
   constructor(
     private dataStoreService: DataStoreService,
-    private navigationService: NavigationService
-  ) {}
+    private surveyService: SurveyService
+  ) {
+    this.surveyService.getActiveSurvey$().subscribe(async survey => {
+      this.surveyId = survey.id;
 
-  async ngOnInit(): Promise<void> {
-    this.navigationService.getSurveyId$().subscribe(async surveyId => {
-      if (surveyId) {
-        this.surveyId = surveyId;
-        this.json = JSON.stringify(
-          await this.dataStoreService.loadRawSurvey(this.surveyId),
-          null,
-          2
-        );
-      }
+      this.json = JSON.stringify(
+        await this.dataStoreService.loadRawSurvey(this.surveyId),
+        null,
+        2
+      );
     });
   }
 

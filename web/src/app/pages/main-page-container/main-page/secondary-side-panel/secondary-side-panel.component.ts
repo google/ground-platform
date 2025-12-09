@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Observable, Subscription, firstValueFrom} from 'rxjs';
+import {Component, effect} from '@angular/core';
+import {Observable} from 'rxjs';
 
 import {
   NavigationService,
@@ -29,34 +28,23 @@ import {
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
-  subscription: Subscription = new Subscription();
-
-  readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
+  private loiIdSignal = this.navigationService.getLoiId();
+  private submissionIdSignal = this.navigationService.getSubmissionId();
 
   locationOfInterestId: string | null = '';
   submissionId: string | null = '';
 
-  constructor(
-    private route: ActivatedRoute,
-    private navigationService: NavigationService
-  ) {
-    this.subscription.add(
-      this.navigationService.getLocationOfInterestId$().subscribe(loiId => {
-        this.locationOfInterestId = loiId;
-      })
-    );
+  readonly sideNavMode = SideNavMode;
+  readonly sideNavMode$: Observable<SideNavMode>;
 
-    this.subscription.add(
-      this.navigationService.getSubmissionId$().subscribe(submissionId => {
-        this.submissionId = submissionId;
-      })
-    );
+  constructor(private navigationService: NavigationService) {
+    effect(() => {
+      const loiId = this.loiIdSignal();
+      const submissionId = this.submissionIdSignal();
+      if (loiId) this.locationOfInterestId = loiId;
+      if (submissionId) this.submissionId = submissionId;
+    });
 
     this.sideNavMode$ = navigationService.getSideNavMode$();
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

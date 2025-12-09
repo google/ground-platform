@@ -15,7 +15,15 @@
  */
 
 import {DOCUMENT} from '@angular/common';
-import {Inject, Injectable, OnDestroy, effect, signal} from '@angular/core';
+import {
+  Inject,
+  Injectable,
+  OnDestroy,
+  Signal,
+  computed,
+  effect,
+  signal,
+} from '@angular/core';
 import {
   IsActiveMatchOptions,
   NavigationEnd,
@@ -49,6 +57,7 @@ export class NavigationService implements OnDestroy {
   static readonly SURVEYS_SEGMENT = 'surveys';
   static readonly SURVEYS_CREATE = 'create';
   static readonly SURVEYS_EDIT = 'edit';
+  static readonly SURVEYS_SHARE = 'share';
   static readonly TASK_SEGMENT = 'task';
   static readonly TASK_ID = 'taskId';
   static readonly JOB_SEGMENT = 'job';
@@ -59,7 +68,21 @@ export class NavigationService implements OnDestroy {
 
   private sidePanelExpanded = true;
 
-  public urlParams = signal<UrlParams>(new UrlParams(null, null, null, null));
+  private urlSignal = signal<string>('');
+
+  private urlParamsSignal = signal<UrlParams>(
+    new UrlParams(null, null, null, null)
+  );
+
+  private surveyIdSignal = computed(() => this.urlParamsSignal().surveyId);
+  private loiIdSignal = computed(() => this.urlParamsSignal().loiId);
+  private submissionIdSignal = computed(
+    () => this.urlParamsSignal().submissionId
+  );
+  private taskIdSignal = computed(() => this.urlParamsSignal().taskId);
+  private sideNavModeSignal = computed(
+    () => this.urlParamsSignal().sideNavMode
+  );
 
   private surveyId$ = new BehaviorSubject<string | null>(null);
   private loiId$ = new BehaviorSubject<string | null>(null);
@@ -75,8 +98,8 @@ export class NavigationService implements OnDestroy {
     private router: Router
   ) {
     this.subscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => {
         let currentRoute = this.router.routerState.root;
 
         while (currentRoute.firstChild) {
@@ -91,7 +114,9 @@ export class NavigationService implements OnDestroy {
           route = route.parent!;
         }
 
-        this.urlParams.set(
+        this.urlSignal.set(e.url);
+
+        this.urlParamsSignal.set(
           new UrlParams(
             params[SURVEY_ID],
             params[LOI_ID],
@@ -101,15 +126,40 @@ export class NavigationService implements OnDestroy {
         );
       });
 
+    // TODO remove this effect when everything will be migrated to Signals
     effect(() => {
       const {surveyId, loiId, submissionId, taskId, sideNavMode} =
-        this.urlParams();
+        this.urlParamsSignal();
       this.surveyId$.next(surveyId);
       this.loiId$.next(loiId);
       this.submissionId$.next(submissionId);
       this.taskId$.next(taskId);
       this.sideNavMode$.next(sideNavMode);
     });
+  }
+
+  getUrlParams(): Signal<UrlParams> {
+    return this.urlParamsSignal;
+  }
+
+  getSurveyId(): Signal<string | null> {
+    return this.surveyIdSignal;
+  }
+
+  getLoiId(): Signal<string | null> {
+    return this.loiIdSignal;
+  }
+
+  getSubmissionId(): Signal<string | null> {
+    return this.submissionIdSignal;
+  }
+
+  getTaskId(): Signal<string | null> {
+    return this.taskIdSignal;
+  }
+
+  getSideNavMode(): Signal<SideNavMode> {
+    return this.sideNavModeSignal;
   }
 
   getSurveyId$(): Observable<string | null> {
@@ -159,13 +209,13 @@ export class NavigationService implements OnDestroy {
   }
 
   clearLocationOfInterestId() {
-    const surveyId = this.urlParams().surveyId;
+    const surveyId = this.urlParamsSignal().surveyId;
     this.router.navigateByUrl(`${SURVEY_SEGMENT}/${surveyId}`);
   }
 
   clearSubmissionId() {
-    const surveyId = this.urlParams().surveyId;
-    const loiId = this.urlParams().loiId;
+    const surveyId = this.urlParamsSignal().surveyId;
+    const loiId = this.urlParamsSignal().loiId;
     surveyId && loiId && this.selectLocationOfInterest(surveyId, loiId);
   }
 
@@ -285,7 +335,11 @@ export class NavigationService implements OnDestroy {
   }
 
   isShareSurveyPage(): boolean {
-    return this.router.url.endsWith('/share');
+    return this.router.url.endsWith(SURVEYS_SHARE);
+  }
+
+  getHost(): string {
+    return this.document.location.host;
   }
 
   getSurveyAppLink(surveyId: string): string {
@@ -298,6 +352,17 @@ export class NavigationService implements OnDestroy {
 
   onClickSidePanelButton() {
     this.sidePanelExpanded = !this.sidePanelExpanded;
+  }
+
+  private editSurveyPageSignal = computed(() => {
+    const url = this.urlSignal();
+    if (url.endsWith('survey')) return SURVEY_SEGMENT;
+    else if (url.endsWith('share')) return SURVEYS_SHARE;
+    else return '';
+  });
+
+  getEditSurveyPageSignal(): Signal<string> {
+    return this.editSurveyPageSignal;
   }
 
   ngOnDestroy(): void {
@@ -324,6 +389,7 @@ const {
   SURVEY_SEGMENT,
   SURVEYS_CREATE,
   SURVEYS_EDIT,
+  SURVEYS_SHARE,
   SURVEYS_SEGMENT,
   TASK_ID,
   TASK_SEGMENT,
