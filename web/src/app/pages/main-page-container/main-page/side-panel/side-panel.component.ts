@@ -29,7 +29,7 @@ import {
 })
 export class SidePanelComponent {
   readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
+  readonly sideNavMode$: Observable<SideNavMode | null>;
 
   constructor(private navigationService: NavigationService) {
     this.sideNavMode$ = this.navigationService.getSideNavMode$();

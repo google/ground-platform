@@ -88,7 +88,9 @@ export class NavigationService implements OnDestroy {
   private loiId$ = new BehaviorSubject<string | null>(null);
   private submissionId$ = new BehaviorSubject<string | null>(null);
   private taskId$ = new BehaviorSubject<string | null>(null);
-  private sideNavMode$ = new BehaviorSubject<SideNavMode>(SideNavMode.JOB_LIST);
+  private sideNavMode$ = new BehaviorSubject<SideNavMode | null>(
+    SideNavMode.JOB_LIST
+  );
 
   private subscription: Subscription;
 
@@ -158,7 +160,7 @@ export class NavigationService implements OnDestroy {
     return this.taskIdSignal;
   }
 
-  getSideNavMode(): Signal<SideNavMode> {
+  getSideNavMode(): Signal<SideNavMode | null> {
     return this.sideNavModeSignal;
   }
 
@@ -178,7 +180,7 @@ export class NavigationService implements OnDestroy {
     return this.taskId$!;
   }
 
-  getSideNavMode$(): Observable<SideNavMode> {
+  getSideNavMode$(): Observable<SideNavMode | null> {
     return this.sideNavMode$!;
   }
 
