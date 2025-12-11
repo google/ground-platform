@@ -40,7 +40,7 @@ import {
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import { SubmissionService } from 'app/services/submission/submission.service';
+import {SubmissionService} from 'app/services/submission/submission.service';
 import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
 import {MapComponent} from './map.component';

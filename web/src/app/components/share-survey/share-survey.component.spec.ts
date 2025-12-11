@@ -1,8 +1,8 @@
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {MatCardModule} from '@angular/material/card';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
 
 import {ShareSurveyComponent} from './share-survey.component';
 

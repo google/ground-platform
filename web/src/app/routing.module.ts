@@ -135,7 +135,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
 ];
-const config = RouterModule.forRoot(routes, { bindToComponentInputs: true });
+const config = RouterModule.forRoot(routes, {bindToComponentInputs: true});
 
 @NgModule({
   imports: [config],

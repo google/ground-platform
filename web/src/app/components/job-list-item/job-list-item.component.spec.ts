@@ -16,7 +16,7 @@
 
 import {HarnessLoader} from '@angular/cdk/testing';
 import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
-import { CdkTreeModule } from '@angular/cdk/tree';
+import {CdkTreeModule} from '@angular/cdk/tree';
 import {Signal, WritableSignal, signal} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
@@ -29,7 +29,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import {MatTreeHarness} from '@angular/material/tree/testing';
 import {Router} from '@angular/router';
 import {List, Map} from 'immutable';
-import { Subject, of } from 'rxjs';
+import {Subject, of} from 'rxjs';
 
 import {AuditInfo} from 'app/models/audit-info.model';
 import {Coordinate} from 'app/models/geometry/coordinate';

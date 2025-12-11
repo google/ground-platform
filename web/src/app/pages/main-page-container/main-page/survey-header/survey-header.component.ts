@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, input } from '@angular/core';
+import {Component, input} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
-import { Survey } from 'app/models/survey.model';
+import {Survey} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -35,7 +35,7 @@ export class SurveyHeaderComponent {
     public navigationService: NavigationService,
     public surveyService: SurveyService,
     private dialog: MatDialog
-  ) { }
+  ) {}
 
   /**
    * Updates the survey title with input element value.
@@ -64,6 +64,8 @@ export class SurveyHeaderComponent {
   }
 
   isEditSurveyPage() {
-    return this.navigationService.isEditSurveyPage(this.activeSurvey()?.id || '');
+    return this.navigationService.isEditSurveyPage(
+      this.activeSurvey()?.id || ''
+    );
   }
 }

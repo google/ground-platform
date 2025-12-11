@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import {WritableSignal, signal} from '@angular/core';
+import {NO_ERRORS_SCHEMA, WritableSignal, signal} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
-  flush,
-  waitForAsync,
   discardPeriodicTasks,
+  fakeAsync,
+  flush,
+  tick,
+  waitForAsync,
 } from '@angular/core/testing';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {By} from '@angular/platform-browser';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {Map} from 'immutable';

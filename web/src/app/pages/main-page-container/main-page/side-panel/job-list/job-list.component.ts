@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, computed, input } from '@angular/core';
-import { List } from 'immutable';
+import {Component, computed, input} from '@angular/core';
+import {List} from 'immutable';
 
 import {Job} from 'app/models/job.model';
-import { Survey } from 'app/models/survey.model';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {Survey} from 'app/models/survey.model';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-job-list',
@@ -35,7 +35,7 @@ export class JobListComponent {
       : List<Job>();
   });
 
-  constructor(readonly navigationService: NavigationService) { }
+  constructor(readonly navigationService: NavigationService) {}
 
   trackById(index: number, job: Job): string {
     return job.id;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, effect, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
+import {Component, effect, input} from '@angular/core';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {switchMap} from 'rxjs/operators';
 
 import {SurveyService} from 'app/services/survey/survey.service';
 

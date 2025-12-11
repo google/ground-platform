@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import {Component, NO_ERRORS_SCHEMA, signal} from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
@@ -102,7 +102,7 @@ describe('MainPageComponent', () => {
       jobs: {},
       acl: {},
       ownerId: 'owner1',
-      dataSharingTerms: {}
+      dataSharingTerms: {},
     } as any;
 
     fixture.componentRef.setInput('activeSurvey', mockSurvey);

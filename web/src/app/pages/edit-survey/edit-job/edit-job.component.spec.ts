@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import { Component, Input } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {
   MatButtonToggle,
   MatButtonToggleGroup,
 } from '@angular/material/button-toggle';
 import {MatDialogModule} from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import {MatIconModule} from '@angular/material/icon';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {User} from 'firebase/auth';
-import { List, Map } from 'immutable';
+import {List, Map} from 'immutable';
 import {Subject, from, of} from 'rxjs';
 
+import {LoiEditorComponent} from 'app/components/loi-editor/loi-editor.component';
 import {TasksEditorModule} from 'app/components/tasks-editor/tasks-editor.module';
-import { DataCollectionStrategy, Job } from 'app/models/job.model';
-import { LoiEditorComponent } from 'app/components/loi-editor/loi-editor.component';
-import { LocationOfInterest } from 'app/models/loi.model';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
 import {EditJobComponent} from 'app/pages/edit-survey/edit-job/edit-job.component';

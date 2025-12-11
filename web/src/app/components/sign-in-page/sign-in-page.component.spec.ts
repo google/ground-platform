@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, NEVER, of} from 'rxjs';

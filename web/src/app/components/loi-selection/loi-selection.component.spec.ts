@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {MatDialog} from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
 import {List, Map} from 'immutable';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
@@ -78,7 +78,12 @@ describe('LoiSelectionComponent', () => {
     matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     TestBed.configureTestingModule({
-      imports: [GoogleMapsModule, GroundIconModule, MatListModule, MatIconModule],
+      imports: [
+        GoogleMapsModule,
+        GroundIconModule,
+        MatListModule,
+        MatIconModule,
+      ],
       declarations: [LoiSelectionComponent],
       providers: [
         {

@@ -15,20 +15,20 @@
  */
 
 import {CommonModule} from '@angular/common';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
   fakeAsync,
   flushMicrotasks,
 } from '@angular/core/testing';
+import {MatCardModule} from '@angular/material/card';
 import {
   MatDialog,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {MatIconModule} from '@angular/material/icon';
 import {By} from '@angular/platform-browser';
 import {Map} from 'immutable';
 import {of} from 'rxjs';

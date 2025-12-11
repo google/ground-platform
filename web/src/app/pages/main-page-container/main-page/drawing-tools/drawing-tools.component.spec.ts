@@ -35,7 +35,7 @@ import {
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
 import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import { NavigationService } from 'app/services/navigation/navigation.service';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {DrawingToolsComponent} from './drawing-tools.component';
 import {DrawingToolsModule} from './drawing-tools.module';
@@ -109,7 +109,7 @@ describe('DrawingToolsComponent', () => {
       providers: [
         {provide: AuthService, useValue: authServiceSpy},
         {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
-        { provide: NavigationService, useValue: navigationServiceSpy },
+        {provide: NavigationService, useValue: navigationServiceSpy},
       ],
     }).compileComponents();
   }));

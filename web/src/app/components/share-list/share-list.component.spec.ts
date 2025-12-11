@@ -19,7 +19,7 @@ import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatListModule} from '@angular/material/list';
 import {MatListHarness} from '@angular/material/list/testing';
-import { MatSelectModule } from '@angular/material/select';
+import {MatSelectModule} from '@angular/material/select';
 import {Map} from 'immutable';
 import {Subject, firstValueFrom, of} from 'rxjs';
 

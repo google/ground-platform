@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -22,9 +23,8 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {MatDialogModule} from '@angular/material/dialog';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';

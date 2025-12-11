@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, input} from '@angular/core';
 import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
-import { firstValueFrom, Subscription } from 'rxjs';
+import {Subscription, firstValueFrom} from 'rxjs';
 
 // ...
 
@@ -25,9 +25,9 @@ import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
 import {Submission} from 'app/models/submission/submission.model';
+import {Survey} from 'app/models/survey.model';
 import {Option} from 'app/models/task/option.model';
 import {Task, TaskType} from 'app/models/task/task.model';
-import { Survey } from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 
