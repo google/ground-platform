@@ -82,7 +82,6 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     if (!this.tasks) {
       return [];
     }
-    console.log(this.tasks.toArray());
 
     return this.tasks.filter(
       task => this.getTaskSubmissionResult(task) !== undefined
