@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, effect} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Component} from '@angular/core';
 
 import {
   NavigationService,
@@ -28,23 +27,11 @@ import {
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
-  private loiIdSignal = this.navigationService.getLoiId();
-  private submissionIdSignal = this.navigationService.getSubmissionId();
+  loiIdSignal = this.navigationService.getLoiId();
+  submissionIdSignal = this.navigationService.getSubmissionId();
+  sideNavModeSignal = this.navigationService.getSideNavMode();
 
-  locationOfInterestId: string | null = '';
-  submissionId: string | null = '';
+  SideNavMode = SideNavMode;
 
-  readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
-
-  constructor(private navigationService: NavigationService) {
-    effect(() => {
-      const loiId = this.loiIdSignal();
-      const submissionId = this.submissionIdSignal();
-      if (loiId) this.locationOfInterestId = loiId;
-      if (submissionId) this.submissionId = submissionId;
-    });
-
-    this.sideNavMode$ = navigationService.getSideNavMode$();
-  }
+  constructor(private navigationService: NavigationService) {}
 }
