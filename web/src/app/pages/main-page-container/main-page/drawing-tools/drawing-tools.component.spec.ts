@@ -132,9 +132,6 @@ describe('DrawingToolsComponent', () => {
   }
 
   beforeEach(() => {
-    // resetFixture(); // Don't reset automatically, let tests do it or stick to standard.
-    // Actually standard is to do it in beforeEach.
-    // I will call resetFixture() here, but ensure resetFixture destroys previous.
     resetFixture();
   });
 
