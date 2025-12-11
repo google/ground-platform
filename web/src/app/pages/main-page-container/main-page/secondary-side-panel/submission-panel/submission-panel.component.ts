@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnDestroy, OnInit, input} from '@angular/core';
-import {AngularFireStorage} from '@angular/fire/compat/storage';
-import {List} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
+import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { List } from 'immutable';
+import { Subscription, firstValueFrom } from 'rxjs';
 
-import {Point} from 'app/models/geometry/point';
-import {MultipleSelection} from 'app/models/submission/multiple-selection';
-import {Result} from 'app/models/submission/result.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
-import {Option} from 'app/models/task/option.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
+import { Point } from 'app/models/geometry/point';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
+import { Result } from 'app/models/submission/result.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Survey } from 'app/models/survey.model';
+import { Option } from 'app/models/task/option.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 
 @Component({
   selector: 'submission-panel',
@@ -51,7 +51,7 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
     private submissionService: SubmissionService,
     private navigationService: NavigationService,
     private storage: AngularFireStorage
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.subscription.add(
@@ -94,18 +94,27 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   }
 
   navigateToSubmissionList() {
+    const survey = this.activeSurvey();
+    if (!survey) {
+      console.error("No active survey - can't navigate to submission list");
+      return;
+    }
+    if (!this.submission) {
+      console.error("No submission - can't navigate to submission list");
+      return;
+    }
     this.navigationService.selectLocationOfInterest(
-      this.activeSurvey()?.id!,
-      this.submission!.loiId
+      survey.id,
+      this.submission.loiId
     );
   }
 
-  getTaskSubmissionResult({id: taskId}: Task): Result | undefined {
+  getTaskSubmissionResult({ id: taskId }: Task): Result | undefined {
     return this.submission?.data.get(taskId);
   }
 
   getMultipleChoiceOption(task: Task, optionId: string) {
-    return task.multipleChoice?.options.find(({id}: Option) => id === optionId);
+    return task.multipleChoice?.options.find(({ id }: Option) => id === optionId);
   }
 
   getTaskMultipleChoiceSelections(task: Task): MultipleSelection {
@@ -128,9 +137,9 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
 
   getCaptureLocationCoord(task: Task): string {
     // x represents longitude, y represents latitude
-    const {coord, accuracy, altitude} = this.getTaskSubmissionResult(task)!
+    const { coord, accuracy, altitude } = this.getTaskSubmissionResult(task)!
       .value as Point;
-    const {x, y} = coord;
+    const { x, y } = coord;
     const lng = Math.abs(x).toString() + (x > 0 ? '° E' : '° W');
     const lat = Math.abs(y).toString() + (y > 0 ? '° N' : '° S');
     const result = [`${lat}, ${lng}`];
@@ -148,14 +157,24 @@ export class SubmissionPanelComponent implements OnInit, OnDestroy {
   getTime(task: Task): string {
     return (
       this.getTaskSubmissionResult(task)?.value as Date
-    ).toLocaleTimeString([], {hour: 'numeric', minute: 'numeric'});
+    ).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' });
   }
 
   selectGeometry(task: Task): void {
+    const survey = this.activeSurvey();
+    if (!survey) {
+      console.error("No active survey - can't select geometry");
+      return;
+    }
+    if (!this.submission) {
+      console.error("No submission - can't select geometry");
+      return;
+    }
+
     this.navigationService.showSubmissionDetailWithHighlightedTask(
-      this.activeSurvey()?.id!,
-      this.submission!.loiId!,
-      this.submission!.id!,
+      survey.id,
+      this.submission.loiId,
+      this.submission.id,
       task.id
     );
   }
