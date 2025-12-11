@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { firebaseConfig } from 'environments/.firebase-config';
+import {firebaseConfig} from 'environments/.firebase-config';
+
 import {Env} from 'environments/environment-enums';
 
 export const environment = {
