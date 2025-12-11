@@ -15,6 +15,11 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/survey-details.component';
 
@@ -26,6 +31,17 @@ describe('SurveyDetailsComponent', () => {
   const description = 'description';
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [SurveyDetailsComponent],
+      imports: [
+        MatFormFieldModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        NoopAnimationsModule,
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(SurveyDetailsComponent);
     component = fixture.componentInstance;
     component.title = title;

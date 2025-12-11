@@ -26,6 +26,9 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {Map} from 'immutable';
 import {of} from 'rxjs';
@@ -82,7 +85,8 @@ describe('EditDetailsComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [EditDetailsComponent],
-      imports: [CommonModule, MatDialogModule],
+      imports: [CommonModule, MatDialogModule, MatCardModule, MatIconModule],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {provide: MatDialog, useValue: dialogSpy},
         {

@@ -315,6 +315,7 @@ describe('MapComponent', () => {
     });
 
     it('should render only lois under the job', fakeAsync(() => {
+      tick();
       component.ngOnChanges();
 
       expect(component.markers.size).toEqual(1);
@@ -325,9 +326,11 @@ describe('MapComponent', () => {
     }));
 
     it('should fit the map when survey changed', fakeAsync(() => {
+      tick();
       spyOn(component.map, 'fitBounds');
       component.selectedJob = job2;
       component.ngOnChanges();
+      tick();
 
       expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
         new google.maps.LatLngBounds(new google.maps.LatLng(45.6, 12.3))

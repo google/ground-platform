@@ -47,6 +47,7 @@ describe('SecondarySidePanelComponent', () => {
       'getSideNavMode$',
       'getLoiId',
       'getSubmissionId',
+      'getSideNavMode',
     ]);
 
     navigationServiceSpy.getSideNavMode$.and.returnValue(
@@ -56,6 +57,9 @@ describe('SecondarySidePanelComponent', () => {
     (navigationServiceSpy.getLoiId as jasmine.Spy).and.returnValue(() => null);
     (navigationServiceSpy.getSubmissionId as jasmine.Spy).and.returnValue(
       () => null
+    );
+    (navigationServiceSpy.getSideNavMode as jasmine.Spy).and.returnValue(
+      () => SideNavMode.JOB_LIST
     );
 
     TestBed.configureTestingModule({

@@ -1,6 +1,8 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
 
 import {ShareSurveyComponent} from './share-survey.component';
 
@@ -10,8 +12,9 @@ describe('ShareSurveyComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatIconModule, MatDialogModule],
+      imports: [MatIconModule, MatDialogModule, MatCardModule],
       declarations: [ShareSurveyComponent],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ShareSurveyComponent);

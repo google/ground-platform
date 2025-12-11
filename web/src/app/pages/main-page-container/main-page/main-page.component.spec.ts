@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, NO_ERRORS_SCHEMA} from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
@@ -66,7 +66,7 @@ describe('MainPageComponent', () => {
       getSurveyId$: () => NEVER,
       getLocationOfInterestId$: () => NEVER,
       getSubmissionId$: () => NEVER,
-      getUrlParams: () => NEVER,
+      getUrlParams: () => signal({}),
     };
 
     TestBed.configureTestingModule({
@@ -93,6 +93,19 @@ describe('MainPageComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(MainPageComponent);
+
+    // Create a minimal mock survey for the input
+    const mockSurvey = {
+      id: 'survey1',
+      title: 'Survey Title',
+      description: 'Description',
+      jobs: {},
+      acl: {},
+      ownerId: 'owner1',
+      dataSharingTerms: {}
+    } as any;
+
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

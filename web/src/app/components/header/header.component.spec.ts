@@ -15,6 +15,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {MatMenuModule} from '@angular/material/menu';
 import {Router} from '@angular/router';
@@ -46,6 +47,7 @@ describe('HeaderComponent', () => {
         {provide: Router, useValue: {events: of()}},
         {provide: SurveyService, useValue: {canManageSurvey: () => false}},
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   });
 

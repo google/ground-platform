@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Map } from 'immutable';
 import { of } from 'rxjs';
 
@@ -80,11 +82,13 @@ describe('SubmissionPanelComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [SubmissionPanelComponent],
+      imports: [MatProgressSpinnerModule],
       providers: [
         { provide: SubmissionService, useValue: submissionServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: AngularFireStorage, useValue: storageSpy },
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   }));
 

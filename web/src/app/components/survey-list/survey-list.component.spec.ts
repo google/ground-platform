@@ -29,6 +29,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
 import {By} from '@angular/platform-browser';
 import {List, Map} from 'immutable';
 import {of} from 'rxjs';
@@ -176,6 +177,7 @@ describe('SurveyListComponent', () => {
         MatCardModule,
         MatGridListModule,
         MatIconModule,
+        MatChipsModule,
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [

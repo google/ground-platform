@@ -45,6 +45,9 @@ export class MainPageComponent implements OnInit {
   subscription: Subscription = new Subscription();
   shouldEnableDrawingTools = false;
   showSubmissionPanel: Boolean = false;
+  shouldShowMap = true;
+  selectedJob = null;
+  showPredefinedLoisOnly = false;
 
   constructor(
     private navigationService: NavigationService,

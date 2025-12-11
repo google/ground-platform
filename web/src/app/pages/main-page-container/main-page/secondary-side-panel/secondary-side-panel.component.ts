@@ -35,5 +35,6 @@ export class SecondarySidePanelComponent {
 
   SideNavMode = SideNavMode;
 
-  constructor(private navigationService: NavigationService) { }
+  constructor(private navigationService: NavigationService) {
+  }
 }

@@ -38,6 +38,8 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
   activeSurvey = input<Survey>();
 
+  activeSurvey$ = toObservable(this.activeSurvey);
+
   loi!: LocationOfInterest;
   name!: string | null;
   icon!: string;
@@ -55,7 +57,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription.add(
       combineLatest([
-        toObservable(this.activeSurvey),
+        this.activeSurvey$,
         this.loiService.getSelectedLocationOfInterest$(),
       ])
         .pipe(

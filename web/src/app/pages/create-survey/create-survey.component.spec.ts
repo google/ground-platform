@@ -22,7 +22,9 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {MatDialogModule} from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
@@ -198,7 +200,7 @@ describe('CreateSurveyComponent', () => {
     ]);
 
     TestBed.configureTestingModule({
-      imports: [MatDialogModule],
+      imports: [MatDialogModule, MatProgressSpinnerModule],
       declarations: [
         CreateSurveyComponent,
         SurveyDetailsComponent,
@@ -206,6 +208,7 @@ describe('CreateSurveyComponent', () => {
         DataSharingTermsComponent,
         ShareSurveyComponent,
       ],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
