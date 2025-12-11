@@ -19,8 +19,6 @@ import {AngularFireStorage} from '@angular/fire/compat/storage';
 import {List} from 'immutable';
 import {Subscription, firstValueFrom} from 'rxjs';
 
-// ...
-
 import {Point} from 'app/models/geometry/point';
 import {MultipleSelection} from 'app/models/submission/multiple-selection';
 import {Result} from 'app/models/submission/result.model';
