@@ -43,11 +43,7 @@ export class MainPageComponent implements OnInit {
   private urlParamsSignal = this.navigationService.getUrlParams();
 
   subscription: Subscription = new Subscription();
-  shouldEnableDrawingTools = false;
   showSubmissionPanel: Boolean = false;
-  shouldShowMap = true;
-  selectedJob = null;
-  showPredefinedLoisOnly = false;
 
   constructor(
     private navigationService: NavigationService,

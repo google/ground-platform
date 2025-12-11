@@ -19,10 +19,6 @@
   <div class="page-content">
     <ground-side-panel [activeSurvey]="activeSurvey()"></ground-side-panel>
     <ground-secondary-side-panel [activeSurvey]="activeSurvey()"></ground-secondary-side-panel>
-    <div *ngIf="shouldEnableDrawingTools">
-      <ground-drawing-tools [survey]="activeSurvey()"></ground-drawing-tools>
-    </div>
-    <ground-map *ngIf="shouldShowMap" [activeSurvey]="activeSurvey()" [selectedJob]="selectedJob"
-      [shouldEnableDrawingTools]="shouldEnableDrawingTools" [showPredefinedLoisOnly]="showPredefinedLoisOnly"></ground-map>
+    <ground-map [activeSurvey]="activeSurvey()"></ground-map>
   </div>
 </div>
