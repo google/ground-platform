@@ -33,8 +33,8 @@ limitations under the License.
       {{submission?.lastModified?.clientTime | date: 'shortTime' }}
     </div>
     <div *ngIf="tasks" class="submission-tasks-container">
-      <div *ngFor="let task of tasks; let i = index">
-        <ng-container *ngIf="getTaskSubmissionResult(task) !== undefined">
+      <div *ngFor="let task of submittedTasks; let i = index">
+        <ng-container>
           <mat-divider *ngIf="i > 0"></mat-divider>
           <div class="submission-task">
             <!-- Question -->
