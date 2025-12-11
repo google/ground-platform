@@ -17,7 +17,7 @@
 import {DocumentData} from '@angular/fire/firestore';
 import {toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
-import {List, Map} from 'immutable';
+import {List, Map, OrderedMap} from 'immutable';
 
 import {DataCollectionStrategy, Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
@@ -120,7 +120,7 @@ function jobPbToModel(pb: Pb.IJob): Job {
     pb.index!,
     pb.style?.color || undefined,
     pb.name!,
-    Map<string, Task>(
+    OrderedMap<string, Task>(
       pb.tasks!.map(taskPb => [taskPb.id!, taskPbToModel(taskPb)])
     ),
     pb.tasks!.find(task => task.level === DataCollectionLevel.LOI_METADATA)
