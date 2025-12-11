@@ -61,7 +61,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private groundPinService: GroundPinService,
     private authService: AuthService
   ) {
-    console.log('JobListItemComponent urlParamsSignal:', this.urlParamsSignal);
     this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
       groundPinService.getPinImageSource()
     );
