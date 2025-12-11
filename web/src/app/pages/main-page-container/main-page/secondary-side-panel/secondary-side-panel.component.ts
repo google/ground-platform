@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, effect, input } from '@angular/core';
-import {Observable} from 'rxjs';
+import { Component, input } from '@angular/core';
 
 import { Survey } from 'app/models/survey.model';
 import {
@@ -30,23 +29,11 @@ import {
 })
 export class SecondarySidePanelComponent {
   activeSurvey = input<Survey>();
-  private loiIdSignal = this.navigationService.getLoiId();
-  private submissionIdSignal = this.navigationService.getSubmissionId();
+  loiIdSignal = this.navigationService.getLoiId();
+  submissionIdSignal = this.navigationService.getSubmissionId();
+  sideNavModeSignal = this.navigationService.getSideNavMode();
 
-  locationOfInterestId: string | null = '';
-  submissionId: string | null = '';
+  SideNavMode = SideNavMode;
 
-  readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
-
-  constructor(private navigationService: NavigationService) {
-    effect(() => {
-      const loiId = this.loiIdSignal();
-      const submissionId = this.submissionIdSignal();
-      if (loiId) this.locationOfInterestId = loiId;
-      if (submissionId) this.submissionId = submissionId;
-    });
-
-    this.sideNavMode$ = navigationService.getSideNavMode$();
-  }
+  constructor(private navigationService: NavigationService) { }
 }

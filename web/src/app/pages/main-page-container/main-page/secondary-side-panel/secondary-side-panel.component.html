@@ -14,14 +14,14 @@
   limitations under the License.
 -->
 
-<div [ngSwitch]="sideNavMode$ | async" class="secondary-side-panel-container">
-  <div *ngIf="locationOfInterestId || submissionId" class="secondary-side-panel">
-    <ng-container *ngSwitchCase="sideNavMode.SUBMISSION">
-      <submission-panel *ngIf="submissionId" [submissionId]="submissionId" [activeSurvey]="activeSurvey()"></submission-panel>
+<div [ngSwitch]="sideNavModeSignal()" class="secondary-side-panel-container">
+  <div *ngIf="loiIdSignal() || submissionIdSignal()" class="secondary-side-panel">
+    <ng-container *ngSwitchCase="SideNavMode.SUBMISSION">
+      <submission-panel *ngIf="submissionIdSignal()" [submissionId]="submissionIdSignal()"></submission-panel>
     </ng-container>
 
-    <ng-container *ngSwitchCase="sideNavMode.JOB_LIST">
-      <ground-loi-panel *ngIf="locationOfInterestId" [activeSurvey]="activeSurvey()"></ground-loi-panel>
+    <ng-container *ngSwitchCase="SideNavMode.JOB_LIST">
+      <ground-loi-panel *ngIf="loiIdSignal()"></ground-loi-panel>
     </ng-container>
   </div>
 </div>

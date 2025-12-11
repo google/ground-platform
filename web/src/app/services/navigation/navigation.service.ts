@@ -31,7 +31,7 @@ import {
   Router,
 } from '@angular/router';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {filter, startWith} from 'rxjs/operators';
+import {filter} from 'rxjs/operators';
 
 import {UrlParams} from './url-params';
 import {DataStoreService} from '../data-store/data-store.service';
@@ -57,6 +57,7 @@ export class NavigationService implements OnDestroy {
   static readonly SURVEYS_SEGMENT = 'surveys';
   static readonly SURVEYS_CREATE = 'create';
   static readonly SURVEYS_EDIT = 'edit';
+  static readonly SURVEYS_SHARE = 'share';
   static readonly TASK_SEGMENT = 'task';
   static readonly TASK_ID = 'taskId';
   static readonly JOB_SEGMENT = 'job';
@@ -87,7 +88,9 @@ export class NavigationService implements OnDestroy {
   private loiId$ = new BehaviorSubject<string | null>(null);
   private submissionId$ = new BehaviorSubject<string | null>(null);
   private taskId$ = new BehaviorSubject<string | null>(null);
-  private sideNavMode$ = new BehaviorSubject<SideNavMode>(SideNavMode.JOB_LIST);
+  private sideNavMode$ = new BehaviorSubject<SideNavMode | null>(
+    SideNavMode.JOB_LIST
+  );
 
   private subscription: Subscription;
 
@@ -137,10 +140,6 @@ export class NavigationService implements OnDestroy {
     });
   }
 
-  getUrl(): Signal<string> {
-    return this.urlSignal;
-  }
-
   getUrlParams(): Signal<UrlParams> {
     return this.urlParamsSignal;
   }
@@ -161,7 +160,7 @@ export class NavigationService implements OnDestroy {
     return this.taskIdSignal;
   }
 
-  getSideNavMode(): Signal<SideNavMode> {
+  getSideNavMode(): Signal<SideNavMode | null> {
     return this.sideNavModeSignal;
   }
 
@@ -181,7 +180,7 @@ export class NavigationService implements OnDestroy {
     return this.taskId$!;
   }
 
-  getSideNavMode$(): Observable<SideNavMode> {
+  getSideNavMode$(): Observable<SideNavMode | null> {
     return this.sideNavMode$!;
   }
 
@@ -338,7 +337,7 @@ export class NavigationService implements OnDestroy {
   }
 
   isShareSurveyPage(): boolean {
-    return this.router.url.endsWith('/share');
+    return this.router.url.endsWith(SURVEYS_SHARE);
   }
 
   getHost(): string {
@@ -355,6 +354,17 @@ export class NavigationService implements OnDestroy {
 
   onClickSidePanelButton() {
     this.sidePanelExpanded = !this.sidePanelExpanded;
+  }
+
+  private editSurveyPageSignal = computed(() => {
+    const url = this.urlSignal();
+    if (url.endsWith('survey')) return SURVEY_SEGMENT;
+    else if (url.endsWith('share')) return SURVEYS_SHARE;
+    else return '';
+  });
+
+  getEditSurveyPageSignal(): Signal<string> {
+    return this.editSurveyPageSignal;
   }
 
   ngOnDestroy(): void {
@@ -381,6 +391,7 @@ const {
   SURVEY_SEGMENT,
   SURVEYS_CREATE,
   SURVEYS_EDIT,
+  SURVEYS_SHARE,
   SURVEYS_SEGMENT,
   TASK_ID,
   TASK_SEGMENT,

@@ -31,7 +31,7 @@ import {
 export class SidePanelComponent {
   activeSurvey = input<Survey>();
   readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
+  readonly sideNavMode$: Observable<SideNavMode | null>;
 
   constructor(private navigationService: NavigationService) {
     this.sideNavMode$ = this.navigationService.getSideNavMode$();
