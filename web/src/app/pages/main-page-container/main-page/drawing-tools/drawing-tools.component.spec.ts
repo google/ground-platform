@@ -188,7 +188,7 @@ describe('DrawingToolsComponent', () => {
       resetFixture();
 
       // Verify spy behavior
-      // expect(authServiceSpy.canUserAddPointsToJob(mockSurvey, mockSurvey.jobs.first())).toBe(false);
+      expect(authServiceSpy.canUserAddPointsToJob(mockSurvey, mockSurvey.jobs.first())).toBe(false);
 
       const addPointButton = fixture.debugElement.query(
         By.css('#add-point-button')
