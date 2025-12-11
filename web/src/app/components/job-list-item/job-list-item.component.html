@@ -35,7 +35,7 @@ limitations under the License.
       </ng-container>
 
       <ng-container *ngIf="!isSidePanelExpanded()">
-        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+        <button mat-icon-button [attr.aria-label]="'Toggle ' + node.item">
           <mat-icon svgIcon="{{ node.iconName }}" class="loi-icon" [ngStyle]="{color: node.iconColor}"></mat-icon>
         </button>
       </ng-container>
