@@ -23,7 +23,6 @@ import {getDatastore} from './common/context';
 import * as HttpStatus from 'http-status-codes';
 import {DecodedIdToken} from 'firebase-admin/auth';
 import {List} from 'immutable';
-import {QuerySnapshot} from 'firebase-admin/firestore';
 import {timestampToInt, toMessage} from '@ground/lib';
 import {GroundProtos} from '@ground/proto';
 import {toGeoJsonGeometry} from '@ground/lib';
@@ -84,8 +83,28 @@ export async function exportCsvHandler(
   const ownerIdFilter = canViewAll ? null : userId;
 
   const tasks = job.tasks.sort((a, b) => a.index! - b.index!);
-  const snapshot = await db.fetchLocationsOfInterest(surveyId, jobId);
-  const loiProperties = createProperySetFromSnapshot(snapshot, ownerIdFilter);
+
+  const loiProperties = new Set<string>();
+  let query = db.fetchPartialLocationsOfInterest(surveyId, jobId, 1000);
+  let lastVisible = null;
+  do {
+    const snapshot = await query.get();
+    if (snapshot.empty) break;
+    await Promise.all(
+      snapshot.docs.map(async doc => {
+        const loi = doc.data();
+        if (ownerIdFilter) {
+          if (!(loi[9] === 2 && loi[5] === ownerIdFilter)) {
+            return;
+          }
+        }
+        Object.keys(loi[10] || {}).forEach(key => loiProperties.add(key));
+      })
+    );
+    lastVisible = snapshot.docs[snapshot.docs.length - 1];
+    query = query.startAfter(lastVisible);
+  } while (lastVisible);
+
   const headers = getHeaders(tasks, loiProperties);
 
   res.type('text/csv');
@@ -291,23 +310,9 @@ function getFileName(jobName: string | null) {
   return `${fileBase}.csv`;
 }
 
-function createProperySetFromSnapshot(
-  snapshot: QuerySnapshot,
-  ownerId: string | null
-): Set<string> {
-  const allKeys = new Set<string>();
-  snapshot.forEach(doc => {
-    const loi = toMessage(doc.data(), Pb.LocationOfInterest);
-    if (loi instanceof Error) return;
-    if (!isAccessibleLoi(loi, ownerId)) return;
-    const properties = loi.properties;
-    for (const key of Object.keys(properties || {})) {
-      allKeys.add(key);
-    }
-  });
-  return allKeys;
-}
-
+/**
+ * Retrieves the values of specified properties from a LocationOfInterest object.
+ */
 function getPropertiesByName(
   loi: Pb.LocationOfInterest,
   properties: Set<string | number>
