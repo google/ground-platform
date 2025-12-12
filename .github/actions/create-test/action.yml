@@ -79,7 +79,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm run ci-all
+      run: npm ci
 
     - name: Build project and local deps
       shell: bash

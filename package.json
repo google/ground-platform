@@ -4,7 +4,6 @@
   "description": "Root package for Ground hosted components",
   "scripts": {
     "clean-all": "nx run-many -t clean",
-    "ci-all": "npm ci",
     "build-all": "nx run-many -t build",
     "deploy": "firebase login && firebase deploy --project $npm_config_project",
     "build-all-and-deploy": "nx run-many -t build && npm run deploy",
