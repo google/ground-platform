@@ -22,3 +22,7 @@ web/coverage/
 # Firebase Emulator local snapshots
 data/local
 data/test
+
+
+.nx/cache
+.nx/workspace-data
