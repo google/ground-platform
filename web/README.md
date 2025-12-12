@@ -9,7 +9,7 @@ This page describes additional npm scripts for use when developing the Ground we
 Perform a clean install of all deps without modifying package-lock.json with:
 
 ```shell
-npm run ci-all
+npm install
 ```
 
 NOTE: When adding new deps, using `npm install --save` or `--save-dev` to update and package.json package-lock.json accordingly.

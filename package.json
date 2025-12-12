@@ -3,13 +3,12 @@
   "version": "0.0.1",
   "description": "Root package for Ground hosted components",
   "scripts": {
-    "clean-all": "npm run clean --workspaces --if-present",
-    "ci-all": "npm ci && npm ci --workspaces",
-    "build-all": "npm run build --workspaces --if-present",
+    "clean-all": "nx run-many -t clean",
+    "build-all": "nx run-many -t build",
     "deploy": "firebase login && firebase deploy --project $npm_config_project",
-    "build-all-and-deploy": "npm run build-all && npm run deploy",
-    "build-all-and-start-local": "npm run build-all --config=local --project=local && npm run start:local",
-    "watch:local": "npm run watch --workspace functions > functions.log 2>&1 & npm run watch --config=local --project=local --workspace web > web.log 2>&1",
+    "build-all-and-deploy": "nx run-many -t build && npm run deploy",
+    "build-all-and-start-local": "nx run-many -t build --config=local --project=local && npm run start:local",
+    "watch:local": "nx run functions:watch > functions.log 2>&1 & nx run web:watch --config=local --project=local > web.log 2>&1",
     "start:local": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/local",
     "export:local": "firebase emulators:export data/local --project local --only firestore",
     "start-and-export:test": "firebase emulators:exec 'npm run watch:local' --project local --ui --config firebase.local.json --import data/test --export-on-exit data/test",
@@ -30,7 +29,7 @@
   "devDependencies": {
     "firebase-tools": "^13.24.2",
     "isolate-package": "^1.18.0",
-    "lerna": "^8.1.3",
+    "nx": "22.2.1",
     "start-server-and-test": "^2.0.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2"

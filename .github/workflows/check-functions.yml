@@ -40,7 +40,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm run ci-all
+        run: npm ci
 
       - name: Build functions and local deps
         run: npm run build-all

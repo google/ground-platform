@@ -11,8 +11,6 @@
     "lint": "eslint --ext .js,.ts src/",
     "lint:fix": "npm run lint -- --fix",
     "test": "jasmine --config=jasmine.json",
-    "ci-all": "npm run ci-local-deps && npm ci",
-    "ci-local-deps": "npm ci --workspace=../proto",
     "build-local-deps": "npm run build --workspace=../proto",
     "build": "tsc",
     "build-all": "npm run build-local-deps && npm run build",
