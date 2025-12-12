@@ -26,6 +26,7 @@ import {AngularFireAuth} from '@angular/fire/compat/auth';
 import {AngularFirestore} from '@angular/fire/compat/firestore';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
+import {MatChipsModule} from '@angular/material/chips';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatIconModule} from '@angular/material/icon';
@@ -176,6 +177,7 @@ describe('SurveyListComponent', () => {
         MatCardModule,
         MatGridListModule,
         MatIconModule,
+        MatChipsModule,
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [

@@ -41,7 +41,6 @@ import {
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
 import {polygonShellCoordsToPolygon} from 'testing/helpers';
 
 import {MapComponent} from './map.component';
@@ -49,7 +48,6 @@ import {MapComponent} from './map.component';
 describe('MapComponent', () => {
   let component: MapComponent;
   let fixture: ComponentFixture<MapComponent>;
-  let surveyServiceSpy: jasmine.SpyObj<SurveyService>;
   let mockLois$: BehaviorSubject<List<LocationOfInterest>>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let mockLocationOfInterestId$: BehaviorSubject<string | null>;
@@ -160,11 +158,6 @@ describe('MapComponent', () => {
   );
 
   beforeEach(waitForAsync(() => {
-    surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
-      'getActiveSurvey$',
-    ]);
-    surveyServiceSpy.getActiveSurvey$.and.returnValue(of<Survey>(mockSurvey));
-
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
       ['getLocationsOfInterest$', 'updatePoint', 'addPoint']
@@ -212,7 +205,6 @@ describe('MapComponent', () => {
       imports: [GoogleMapsModule],
       declarations: [MapComponent],
       providers: [
-        {provide: SurveyService, useValue: surveyServiceSpy},
         {
           provide: LocationOfInterestService,
           useValue: loiServiceSpy,
@@ -238,6 +230,7 @@ describe('MapComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MapComponent);
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
     component = fixture.componentInstance;
     component.shouldEnableDrawingTools = true;
     fixture.detectChanges();
@@ -315,12 +308,14 @@ describe('MapComponent', () => {
   describe('when selected job id is given', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(MapComponent);
+      fixture.componentRef.setInput('activeSurvey', mockSurvey);
       component = fixture.componentInstance;
       component.selectedJob = job1;
       fixture.detectChanges();
     });
 
     it('should render only lois under the job', fakeAsync(() => {
+      tick();
       component.ngOnChanges();
 
       expect(component.markers.size).toEqual(1);
@@ -331,9 +326,11 @@ describe('MapComponent', () => {
     }));
 
     it('should fit the map when survey changed', fakeAsync(() => {
+      tick();
       spyOn(component.map, 'fitBounds');
       component.selectedJob = job2;
       component.ngOnChanges();
+      tick();
 
       expect(component.map.fitBounds).toHaveBeenCalledOnceWith(
         new google.maps.LatLngBounds(new google.maps.LatLng(45.6, 12.3))

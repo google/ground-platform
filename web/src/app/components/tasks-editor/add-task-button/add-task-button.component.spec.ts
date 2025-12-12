@@ -15,6 +15,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatIconModule} from '@angular/material/icon';
 
 import {AddTaskButtonComponent} from './add-task-button.component';
 
@@ -24,6 +25,7 @@ describe('TaskButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [MatIconModule],
       declarations: [AddTaskButtonComponent],
     }).compileComponents();
 

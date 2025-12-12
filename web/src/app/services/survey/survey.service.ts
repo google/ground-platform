@@ -71,6 +71,10 @@ export class SurveyService {
     return this.activeSurvey$;
   }
 
+  loadSurvey$(id: string): Observable<Survey> {
+    return this.dataStore.loadSurvey$(id);
+  }
+
   getAccessibleSurveys$(): Observable<List<Survey>> {
     const user = this.authService.getCurrentUser();
     if (!user) {

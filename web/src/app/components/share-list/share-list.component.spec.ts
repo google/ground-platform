@@ -19,6 +19,7 @@ import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatListModule} from '@angular/material/list';
 import {MatListHarness} from '@angular/material/list/testing';
+import {MatSelectModule} from '@angular/material/select';
 import {Map} from 'immutable';
 import {Subject, firstValueFrom, of} from 'rxjs';
 
@@ -55,7 +56,7 @@ describe('ShareListComponent', () => {
     {type: DataSharingType.PRIVATE}
   );
 
-  const user = new User('', '', true);
+  const user = new User('user1', 'user1@gmail.com', true);
 
   beforeEach(waitForAsync(() => {
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
@@ -74,7 +75,7 @@ describe('ShareListComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ShareListComponent],
-      imports: [MatListModule],
+      imports: [MatListModule, MatSelectModule],
       providers: [
         {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
         {provide: AuthService, useValue: authServiceSpy},
@@ -95,10 +96,10 @@ describe('ShareListComponent', () => {
 
   it('updates itself when acl changes', async () => {
     activeSurvey$.next(survey);
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    fixture.whenStable().then(async () => {
-      expect(component.acl?.length).toBe(0);
-    });
+    expect(component.acl?.length).toBe(0);
 
     activeSurvey$.next(
       new Survey(
@@ -107,18 +108,18 @@ describe('ShareListComponent', () => {
         surveyDescription,
         /* jobs= */ Map(),
         /* acl= */ Map({a: Role.OWNER, b: Role.OWNER}),
-        /* ownerId= */ '',
+        /* ownerId= */ 'user1',
         {type: DataSharingType.PRIVATE}
       )
     );
+    fixture.detectChanges();
+    await fixture.whenStable();
 
-    fixture.whenStable().then(async () => {
-      expect(component.acl?.length).toBe(2);
+    expect(component.acl?.length).toBe(2);
 
-      const aclList = await loader.getHarness(MatListHarness);
-      const aclListItems = await aclList.getItems();
+    const aclList = await loader.getHarness(MatListHarness);
+    const aclListItems = await aclList.getItems();
 
-      expect(aclListItems.length).toBe(2);
-    });
+    expect(aclListItems.length).toBe(3);
   });
 });

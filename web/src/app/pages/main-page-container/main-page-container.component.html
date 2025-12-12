@@ -14,10 +14,8 @@
   limitations under the License.
 -->
 
-<ground-main-page *ngIf="activeSurvey$ | async; else loading"></ground-main-page>
+<ground-main-page *ngIf="survey(); let activeSurvey" [activeSurvey]="activeSurvey"></ground-main-page>
 
-<ng-template #loading>
-  <div class="progress-spinner">
-    <mat-spinner mode="indeterminate"></mat-spinner>
-  </div>
-</ng-template>
+<div *ngIf="!survey()" class="progress-spinner">
+  <mat-spinner mode="indeterminate"></mat-spinner>
+</div>

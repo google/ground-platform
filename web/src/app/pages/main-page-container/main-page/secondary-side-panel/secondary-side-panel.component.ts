@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, input} from '@angular/core';
 
+import {Survey} from 'app/models/survey.model';
 import {
   NavigationService,
   SideNavMode,
@@ -27,6 +28,7 @@ import {
   styleUrls: ['./secondary-side-panel.component.css'],
 })
 export class SecondarySidePanelComponent {
+  activeSurvey = input<Survey>();
   loiIdSignal = this.navigationService.getLoiId();
   submissionIdSignal = this.navigationService.getSubmissionId();
   sideNavModeSignal = this.navigationService.getSideNavMode();

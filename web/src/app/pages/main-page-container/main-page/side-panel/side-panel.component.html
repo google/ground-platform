@@ -16,6 +16,6 @@ limitations under the License.
 
 <div [ngSwitch]="sideNavMode$ | async" class="side-panel">
   <div *ngSwitchDefault>
-    <ground-job-list></ground-job-list>
+    <ground-job-list [activeSurvey]="activeSurvey()"></ground-job-list>
   </div>
 </div>

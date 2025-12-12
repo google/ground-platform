@@ -26,6 +26,8 @@
   <div left>
     <div class="header-divider"></div>
 
-    <div class="survey-title">{{ title ?? 'Untitled survey' }}</div>
+    <div class="survey-title">
+      {{ activeSurvey()?.title ?? 'Untitled survey' }}
+    </div>
   </div>
 </ground-header>

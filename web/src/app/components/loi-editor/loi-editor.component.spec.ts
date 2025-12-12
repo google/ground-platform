@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GoogleMapsModule} from '@angular/google-maps';
 import {MatDialog} from '@angular/material/dialog';
+import {MatIconModule} from '@angular/material/icon';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {List, Map} from 'immutable';
 
 import {ImportDialogComponent} from 'app/components/import-dialog/import-dialog.component';
@@ -79,8 +82,9 @@ describe('LoiEditorComponent', () => {
     matDialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
     TestBed.configureTestingModule({
-      imports: [GoogleMapsModule],
+      imports: [GoogleMapsModule, MatSlideToggleModule, MatIconModule],
       declarations: [LoiEditorComponent],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {
           provide: DataStoreService,
