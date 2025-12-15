@@ -85,7 +85,7 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
       return;
     }
     this.navigationService.showSubmissionDetail(
-      this.activeSurvey()?.id!,
+      this.activeSurvey()!.id,
       this.loi.id,
       submissionId
     );

@@ -27,8 +27,6 @@ import {MainPageContainerComponent} from 'app/pages/main-page-container/main-pag
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
 import {passlistGuard} from 'app/services/auth/passlist.guard';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-
 import {
   ABOUT,
   ANDROID_SEGMENT,
@@ -38,15 +36,16 @@ import {
   SIGN_IN_SEGMENT,
   SUBMISSION_ID,
   SUBMISSION_SEGMENT,
-  SURVEY_ID,
-  SURVEY_SEGMENT,
   SURVEYS_CREATE,
   SURVEYS_EDIT,
   SURVEYS_SEGMENT,
+  SURVEY_ID,
+  SURVEY_SEGMENT,
   TASK_ID,
   TASK_SEGMENT,
   TERMS,
 } from 'app/services/navigation/navigation.constants';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
 import {AboutComponent} from './pages/about/about.component';

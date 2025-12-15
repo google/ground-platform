@@ -33,8 +33,6 @@ import {
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 
-import {UrlParams} from './url-params';
-import {DataStoreService} from '../data-store/data-store.service';
 import {
   ABOUT,
   ANDROID_SEGMENT,
@@ -47,20 +45,22 @@ import {
   SUBMISSION_ID,
   SUBMISSION_ID_NEW,
   SUBMISSION_SEGMENT,
-  SURVEY_ID,
-  SURVEY_ID_NEW,
-  SURVEY_SEGMENT,
   SURVEYS_CREATE,
   SURVEYS_EDIT,
   SURVEYS_SEGMENT,
   SURVEYS_SHARE,
+  SURVEY_ID,
+  SURVEY_ID_NEW,
+  SURVEY_SEGMENT,
+  SideNavMode,
   TASK_ID,
   TASK_SEGMENT,
   TERMS,
 } from './navigation.constants';
-import {SideNavMode} from './navigation.constants';
+import {UrlParams} from './url-params';
+import {DataStoreService} from '../data-store/data-store.service';
 
-export {SideNavMode} from './navigation.constants'; 
+export {SideNavMode} from './navigation.constants';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -70,7 +70,6 @@ export {SideNavMode} from './navigation.constants';
   providedIn: 'root',
 })
 export class NavigationService implements OnDestroy {
-
   private sidePanelExpanded = true;
 
   private urlSignal = signal<string>('');
@@ -376,7 +375,3 @@ export class NavigationService implements OnDestroy {
     this.subscription.unsubscribe();
   }
 }
-
-
-
-

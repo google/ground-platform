@@ -20,11 +20,11 @@ import {catchError, map} from 'rxjs/operators';
 
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {
   SIGN_IN_SEGMENT,
   TERMS,
 } from 'app/services/navigation/navigation.constants';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {environment} from 'environments/environment';
 
 @Injectable({

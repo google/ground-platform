@@ -68,8 +68,6 @@ export class SurveyHeaderComponent {
       console.error('No active survey');
       return;
     }
-    return this.navigationService.isEditSurveyPage(
-      this.activeSurvey()?.id!
-    );
+    return this.navigationService.isEditSurveyPage(this.activeSurvey()!.id);
   }
 }

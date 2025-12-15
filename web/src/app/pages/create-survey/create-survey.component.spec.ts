@@ -45,11 +45,11 @@ import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/sur
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
-import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;

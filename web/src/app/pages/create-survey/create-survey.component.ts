@@ -31,8 +31,8 @@ import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-de
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 
@@ -173,8 +173,7 @@ export class CreateSurveyComponent implements OnInit {
         .pipe(
           filter(
             ([survey]) =>
-              this.surveyId === SURVEY_ID_NEW ||
-              survey.id === this.surveyId
+              this.surveyId === SURVEY_ID_NEW || survey.id === this.surveyId
           )
         )
         .subscribe(([survey, lois]) => {

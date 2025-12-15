@@ -21,8 +21,8 @@ import {Subscription} from 'rxjs';
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {JOB_ID_NEW} from 'app/services/navigation/navigation.constants';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
@@ -66,9 +66,7 @@ export class MainPageComponent implements OnInit {
     this.subscription.add(
       this.navigationService
         .getSurveyId$()
-        .subscribe(
-          id => id === JOB_ID_NEW && this.showTitleDialog()
-        )
+        .subscribe(id => id === JOB_ID_NEW && this.showTitleDialog())
     );
     // Redirect to sign in page if user is not authenticated.
     this.subscription.add(

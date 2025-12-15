@@ -23,8 +23,8 @@ import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
+import {NavigationService} from 'app/services/navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',
