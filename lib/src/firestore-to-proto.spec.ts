@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from '@ground/proto';
-import {toMessage} from './firestore-to-proto';
-import {Constructor} from 'protobufjs';
+import { GroundProtos } from '@ground/proto';
+import { toMessage } from './firestore-to-proto';
+import { Constructor } from 'protobufjs';
 
-const {Coordinates, Job, LinearRing, Role, Style, Survey, Task, LocationOfInterest} =
-  GroundProtos.ground.v1beta1;
+const {
+  Coordinates,
+  Job,
+  LinearRing,
+  Role,
+  Style,
+  Survey,
+  Task,
+  LocationOfInterest,
+} = GroundProtos.ground.v1beta1;
 
 describe('toMessage()', () => {
   [
@@ -37,26 +45,26 @@ describe('toMessage()', () => {
     {
       desc: 'converts nested message',
       input: {
-        '4': {'1': '#112233'},
+        '4': { '1': '#112233' },
       },
       expected: new Job({
-        style: new Style({color: '#112233'}),
+        style: new Style({ color: '#112233' }),
       }),
     },
     {
       desc: 'converts repeated message',
       input: {
         '1': [
-          {'1': 5, '2': 7},
-          {'1': 12, '2': 23},
-          {'1': 9, '2': 2},
+          { '1': 5, '2': 7 },
+          { '1': 12, '2': 23 },
+          { '1': 9, '2': 2 },
         ],
       },
       expected: new LinearRing({
         coordinates: [
-          new Coordinates({latitude: 5, longitude: 7}),
-          new Coordinates({latitude: 12, longitude: 23}),
-          new Coordinates({latitude: 9, longitude: 2}),
+          new Coordinates({ latitude: 5, longitude: 7 }),
+          new Coordinates({ latitude: 12, longitude: 23 }),
+          new Coordinates({ latitude: 9, longitude: 2 }),
         ],
       }),
     },
@@ -79,18 +87,26 @@ describe('toMessage()', () => {
       desc: 'converts map<string, Message>',
       input: {
         '10': {
-          'stringProperty': {'1': 'non-empty string'},
-          'emptyStringProperty': {'1': ''},
-          'numberProperty': {'2': 123.4},
-          'valueZeroProperty': {'2': 0},
+          stringProperty: { '1': 'non-empty string' },
+          emptyStringProperty: { '1': '' },
+          numberProperty: { '2': 123.4 },
+          valueZeroProperty: { '2': 0 },
         },
       },
       expected: new LocationOfInterest({
         properties: {
-          'stringProperty': new LocationOfInterest.Property({stringValue: 'non-empty string'}),
-          'emptyStringProperty': new LocationOfInterest.Property({stringValue: ''}),
-          'numberProperty': new LocationOfInterest.Property({numericValue: 123.4}),
-          'valueZeroProperty': new LocationOfInterest.Property({numericValue: 0}),
+          stringProperty: new LocationOfInterest.Property({
+            stringValue: 'non-empty string',
+          }),
+          emptyStringProperty: new LocationOfInterest.Property({
+            stringValue: '',
+          }),
+          numberProperty: new LocationOfInterest.Property({
+            numericValue: 123.4,
+          }),
+          valueZeroProperty: new LocationOfInterest.Property({
+            numericValue: 0,
+          }),
         },
       }),
     },
@@ -112,20 +128,20 @@ describe('toMessage()', () => {
       desc: 'converts repeated message',
       input: {
         '1': [
-          {'1': 5, '2': 7},
-          {'1': 12, '2': 23},
-          {'1': 9, '2': 2},
+          { '1': 5, '2': 7 },
+          { '1': 12, '2': 23 },
+          { '1': 9, '2': 2 },
         ],
       },
       expected: new LinearRing({
         coordinates: [
-          new Coordinates({latitude: 5, longitude: 7}),
-          new Coordinates({latitude: 12, longitude: 23}),
-          new Coordinates({latitude: 9, longitude: 2}),
+          new Coordinates({ latitude: 5, longitude: 7 }),
+          new Coordinates({ latitude: 12, longitude: 23 }),
+          new Coordinates({ latitude: 9, longitude: 2 }),
         ],
       }),
     },
-  ].forEach(({desc, input, expected}) =>
+  ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toMessage(input, expected.constructor as Constructor<any>);
       expect(output).toEqual(expected);

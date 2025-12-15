@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export {toDocumentData} from './proto-to-firestore';
-export {toMessage} from './firestore-to-proto';
-export {timestampToInt} from './date-util';
-export {deleteEmpty, isEmpty} from './obj-util';
-export {toGeoJsonGeometry, toGeometryPb, isGeometryValid} from './geo-json';
-export {registry} from './message-registry';
+export { toDocumentData } from './proto-to-firestore';
+export { toMessage } from './firestore-to-proto';
+export { timestampToInt } from './date-util';
+export { deleteEmpty, isEmpty } from './obj-util';
+export { toGeoJsonGeometry, toGeometryPb, isGeometryValid } from './geo-json';
+export { registry } from './message-registry';
