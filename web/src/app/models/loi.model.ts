@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {List, Map} from 'immutable';
+import { List, Map } from 'immutable';
 
-import {Geometry} from './geometry/geometry';
+import { Geometry } from './geometry/geometry';
 
 export class LocationOfInterest {
   constructor(

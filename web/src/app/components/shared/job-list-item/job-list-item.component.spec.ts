@@ -14,40 +14,40 @@
  * limitations under the License.
  */
 
-import {HarnessLoader} from '@angular/cdk/testing';
-import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
-import {CdkTreeModule} from '@angular/cdk/tree';
-import {Signal, WritableSignal, signal} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatButtonHarness} from '@angular/material/button/testing';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatListModule} from '@angular/material/list';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatTreeModule} from '@angular/material/tree';
-import {MatTreeHarness} from '@angular/material/tree/testing';
-import {Router} from '@angular/router';
-import {List, Map} from 'immutable';
-import {Subject, of} from 'rxjs';
+import { HarnessLoader } from '@angular/cdk/testing';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { CdkTreeModule } from '@angular/cdk/tree';
+import { Signal, WritableSignal, signal } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { MatButtonHarness } from '@angular/material/button/testing';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTreeModule } from '@angular/material/tree';
+import { MatTreeHarness } from '@angular/material/tree/testing';
+import { Router } from '@angular/router';
+import { List, Map } from 'immutable';
+import { Subject, of } from 'rxjs';
 
-import {AuditInfo} from 'app/models/audit-info.model';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Point} from 'app/models/geometry/point';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {UrlParams} from 'app/services/navigation/url-params';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { UrlParams } from 'app/services/navigation/url-params';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {JobListItemComponent} from './job-list-item.component';
+import { JobListItemComponent } from './job-list-item.component';
 
 const authState = {
   displayName: null,
@@ -96,7 +96,7 @@ describe('JobListItemComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   function createLois(count: number): List<LocationOfInterest> {
@@ -191,14 +191,14 @@ describe('JobListItemComponent', () => {
         CdkTreeModule,
       ],
       providers: [
-        {provide: DataStoreService, useValue: {user$: () => of()}},
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: Router, useValue: {}},
-        {provide: SurveyService, useValue: surveyServiceSpy},
-        {provide: LocationOfInterestService, useValue: loiServiceSpy},
-        {provide: SubmissionService, useValue: submissionServiceSpy},
-        {provide: AngularFirestore, useValue: {}},
-        {provide: AuthService, useValue: {}},
+        { provide: DataStoreService, useValue: { user$: () => of() } },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: Router, useValue: {} },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: LocationOfInterestService, useValue: loiServiceSpy },
+        { provide: SubmissionService, useValue: submissionServiceSpy },
+        { provide: AngularFirestore, useValue: {} },
+        { provide: AuthService, useValue: {} },
         {
           provide: AngularFireAuth,
           useValue: mockAngularFireAuth,
@@ -261,7 +261,7 @@ describe('JobListItemComponent', () => {
     const loiId = lois.first()!.id;
 
     const selectLoiButton = await loader.getHarness(
-      MatButtonHarness.with({selector: '.loi-tree-node'})
+      MatButtonHarness.with({ selector: '.loi-tree-node' })
     );
     await selectLoiButton.click();
 

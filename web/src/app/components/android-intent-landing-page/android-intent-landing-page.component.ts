@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, Inject, LOCALE_ID, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {firstValueFrom} from 'rxjs';
+import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
-import {AppConfigService} from 'app/services/app-config/app-config.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { AppConfigService } from 'app/services/app-config/app-config.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-android-landing-page',

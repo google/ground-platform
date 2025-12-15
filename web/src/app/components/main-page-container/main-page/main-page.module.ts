@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatSidenavModule} from '@angular/material/sidenav';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
-import {DrawingToolsModule} from './drawing-tools/drawing-tools.module';
-import {JobDialogModule} from './job-dialog/job-dialog.module';
-import {MainPageComponent} from './main-page.component';
-import {MapModule} from './map/map.module';
-import {SecondarySidePanelModule} from './secondary-side-panel/secondary-side-panel.module';
-import {SidePanelModule} from './side-panel/side-panel.module';
-import {SurveyHeaderModule} from './survey-header/survey-header.module';
+import { DrawingToolsModule } from './drawing-tools/drawing-tools.module';
+import { JobDialogModule } from './job-dialog/job-dialog.module';
+import { MainPageComponent } from './main-page.component';
+import { MapModule } from './map/map.module';
+import { SecondarySidePanelModule } from './secondary-side-panel/secondary-side-panel.module';
+import { SidePanelModule } from './side-panel/side-panel.module';
+import { SurveyHeaderModule } from './survey-header/survey-header.module';
 
 @NgModule({
   declarations: [MainPageComponent],

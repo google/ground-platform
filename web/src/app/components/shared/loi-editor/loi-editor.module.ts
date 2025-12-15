@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-import {LoiEditorComponent} from './loi-editor.component';
-import {LoiSelectionModule} from '../loi-selection/loi-selection.module';
+import { LoiEditorComponent } from './loi-editor.component';
+import { LoiSelectionModule } from '../loi-selection/loi-selection.module';
 
 @NgModule({
   declarations: [LoiEditorComponent],

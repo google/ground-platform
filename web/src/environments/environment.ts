@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Env} from './environment-enums';
+import { Env } from './environment-enums';
 
 // This file will be replaced during build by using the `fileReplacements` array.
 // For example, `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.

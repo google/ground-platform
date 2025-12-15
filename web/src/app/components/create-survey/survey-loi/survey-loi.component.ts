@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {List} from 'immutable';
+import { Component } from '@angular/core';
+import { List } from 'immutable';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {JobService} from 'app/services/job/job.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { JobService } from 'app/services/job/job.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { TaskService } from 'app/services/task/task.service';
 
 @Component({
   selector: 'survey-loi',
@@ -55,7 +55,7 @@ export class SurveyLoiComponent {
 
       await this.jobService.addOrUpdateJob(
         this.surveyService.getActiveSurvey().id,
-        this.job.copyWith({tasks, strategy})
+        this.job.copyWith({ tasks, strategy })
       );
     }
   }

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {inject} from '@angular/core';
-import {CanActivateFn, Router, UrlTree} from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
 
-import {AuthService} from 'app/services/auth/auth.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 /**
  * Functional Guard to check passlist status and redirect if needed.

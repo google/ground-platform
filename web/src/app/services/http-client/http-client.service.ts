@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {firstValueFrom} from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +36,6 @@ export class HttpClientService {
   async postWithAuth<T>(url: string, body: any | null): Promise<T> {
     const token = await firstValueFrom(this.afAuth.idToken);
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return firstValueFrom(this.httpClient.post<T>(url, body, {headers}));
+    return firstValueFrom(this.httpClient.post<T>(url, body, { headers }));
   }
 }

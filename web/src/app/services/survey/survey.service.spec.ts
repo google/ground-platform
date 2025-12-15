@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
-import {Subject} from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { Subject } from 'rxjs';
 
-import {User} from 'app/models/user.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { User } from 'app/models/user.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 describe('SurveyService', () => {
   let service: SurveyService;

@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 export enum HeaderState {
   DEFAULT = 1,
@@ -55,7 +55,7 @@ export class HeaderComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.surveyService.getActiveSurvey$().subscribe(survey => {
-      const {id: surveyId} = survey;
+      const { id: surveyId } = survey;
 
       this.surveyId = surveyId;
 
@@ -92,7 +92,7 @@ export class HeaderComponent implements OnInit {
     }
 
     const dialogRef = this.dialog.open(JobDialogComponent, {
-      data: {dialogType: DialogType.UndoJobs},
+      data: { dialogType: DialogType.UndoJobs },
       panelClass: 'small-width-dialog',
     });
 
@@ -112,7 +112,7 @@ export class HeaderComponent implements OnInit {
     }
 
     this.dialog.open(JobDialogComponent, {
-      data: {dialogType: DialogType.InvalidSurvey},
+      data: { dialogType: DialogType.InvalidSurvey },
       panelClass: 'small-width-dialog',
     });
   }

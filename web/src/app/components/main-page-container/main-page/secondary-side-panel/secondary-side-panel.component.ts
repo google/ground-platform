@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Component, input} from '@angular/core';
+import { Component, input } from '@angular/core';
 
-import {Survey} from 'app/models/survey.model';
+import { Survey } from 'app/models/survey.model';
 import {
   NavigationService,
   SideNavMode,

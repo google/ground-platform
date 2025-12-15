@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, effect, input} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {Subscription} from 'rxjs';
+import { Component, OnInit, effect, input } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
-import {Survey} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {JOB_ID_NEW} from 'app/services/navigation/navigation.constants';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {environment} from 'environments/environment';
+import { Survey } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { JOB_ID_NEW } from 'app/services/navigation/navigation.constants';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { environment } from 'environments/environment';
 
-import {TitleDialogComponent} from './title-dialog/title-dialog.component';
+import { TitleDialogComponent } from './title-dialog/title-dialog.component';
 
 /**
  * Root component for main application page showing map, jobs list, and
@@ -55,7 +55,7 @@ export class MainPageComponent implements OnInit {
     private dialog: MatDialog
   ) {
     effect(() => {
-      const {loiId, submissionId} = this.urlParamsSignal();
+      const { loiId, submissionId } = this.urlParamsSignal();
       if (loiId) this.loiService.selectLocationOfInterest(loiId);
       if (submissionId) this.submissionService.selectSubmission(submissionId);
     });

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {RouterModule} from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
-import {AndroidIntentLandingPageComponent} from './android-intent-landing-page.component';
+import { AndroidIntentLandingPageComponent } from './android-intent-landing-page.component';
 
 @NgModule({
   declarations: [AndroidIntentLandingPageComponent],

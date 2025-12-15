@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, Inject, Injectable, inject} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
+import { Component, Inject, Injectable, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
   MatDialog,

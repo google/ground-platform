@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {List, hash, is} from 'immutable';
+import { List, hash, is } from 'immutable';
 
-import {Geometry, GeometryType} from './geometry';
-import {Polygon} from './polygon';
+import { Geometry, GeometryType } from './geometry';
+import { Polygon } from './polygon';
 
 /**
  * Models a collection of Polygons.

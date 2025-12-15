@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import {Component, Input} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { Component, Input } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MatButtonToggle,
   MatButtonToggleGroup,
 } from '@angular/material/button-toggle';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
-import {By} from '@angular/platform-browser';
-import {ActivatedRoute} from '@angular/router';
-import {User} from 'firebase/auth';
-import {List, Map} from 'immutable';
-import {Subject, from, of} from 'rxjs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { By } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { User } from 'firebase/auth';
+import { List, Map } from 'immutable';
+import { Subject, from, of } from 'rxjs';
 
-import {EditJobComponent} from 'app/components/edit-survey/edit-job/edit-job.component';
-import {LoiEditorComponent} from 'app/components/shared/loi-editor/loi-editor.component';
-import {TasksEditorModule} from 'app/components/shared/tasks-editor/tasks-editor.module';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
+import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
+import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Role } from 'app/models/role.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'loi-editor',
@@ -69,7 +69,7 @@ describe('EditJobComponent', () => {
     Map<string, Job>(),
     Map<string, Role>(),
     '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
   const jobId = 'job-123';
   const user$ = new Subject<User | null>();
@@ -85,9 +85,9 @@ describe('EditJobComponent', () => {
         TasksEditorModule,
       ],
       providers: [
-        {provide: AuthService, useValue: {getUser$: () => user$}},
-        {provide: DataStoreService, useValue: {generateId: () => '123'}},
-        {provide: DialogService, useValue: {}},
+        { provide: AuthService, useValue: { getUser$: () => user$ } },
+        { provide: DataStoreService, useValue: { generateId: () => '123' } },
+        { provide: DialogService, useValue: {} },
         {
           provide: SurveyService,
           useValue: {
@@ -104,7 +104,7 @@ describe('EditJobComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            params: from([{id: jobId}]),
+            params: from([{ id: jobId }]),
           },
         },
         {

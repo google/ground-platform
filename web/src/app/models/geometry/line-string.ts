@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {List, hash, is} from 'immutable';
+import { List, hash, is } from 'immutable';
 
-import {Coordinate} from './coordinate';
-import {Geometry, GeometryType} from './geometry';
+import { Coordinate } from './coordinate';
+import { Geometry, GeometryType } from './geometry';
 
 /**
  * Models an OGC-style LineString. A LineString consists of a sequence of two
@@ -45,7 +45,7 @@ export class LineString implements Geometry {
   }
 
   extendBounds(bounds: google.maps.LatLngBounds) {
-    for (const {y, x} of this.points) {
+    for (const { y, x } of this.points) {
       bounds.extend(new google.maps.LatLng(y, x));
     }
     return bounds;

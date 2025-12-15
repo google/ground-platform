@@ -20,13 +20,13 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {NotificationService} from 'app/services/notification/notification.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { NotificationService } from 'app/services/notification/notification.service';
 
-import {CopySurveyControlsComponent} from './copy-survey-controls.component';
+import { CopySurveyControlsComponent } from './copy-survey-controls.component';
 
 describe('ShareButtonsComponent', () => {
   let component: CopySurveyControlsComponent;
@@ -49,8 +49,8 @@ describe('ShareButtonsComponent', () => {
       declarations: [CopySurveyControlsComponent],
       imports: [MatIconModule, MatButtonModule],
       providers: [
-        {provide: NavigationService, useValue: navigationService},
-        {provide: NotificationService, useValue: notificationService},
+        { provide: NavigationService, useValue: navigationService },
+        { provide: NotificationService, useValue: notificationService },
       ],
     }).compileComponents();
 

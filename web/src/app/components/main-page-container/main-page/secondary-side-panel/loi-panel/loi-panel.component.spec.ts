@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatDialog} from '@angular/material/dialog';
-import {List, Map} from 'immutable';
-import {of} from 'rxjs';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
 
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 
-import {LocationOfInterestPanelComponent} from './loi-panel.component';
+import { LocationOfInterestPanelComponent } from './loi-panel.component';
 
 describe('LocationOfInterestPanelComponent', () => {
   let component: LocationOfInterestPanelComponent;
@@ -43,13 +43,13 @@ describe('LocationOfInterestPanelComponent', () => {
     Map(),
     Map(),
     'owner1',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   const mockLoi = new LocationOfInterest(
     'loi1',
     'job1',
-    {chainId: 'point1'} as any,
+    { chainId: 'point1' } as any,
     Map()
   );
 
@@ -74,10 +74,10 @@ describe('LocationOfInterestPanelComponent', () => {
     TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelComponent],
       providers: [
-        {provide: LocationOfInterestService, useValue: loiServiceSpy},
-        {provide: SubmissionService, useValue: submissionServiceSpy},
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: MatDialog, useValue: dialogSpy},
+        { provide: LocationOfInterestService, useValue: loiServiceSpy },
+        { provide: SubmissionService, useValue: submissionServiceSpy },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: MatDialog, useValue: dialogSpy },
       ],
     }).compileComponents();
   }));

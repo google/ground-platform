@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
+import { List } from 'immutable';
 
-import {Option} from './option.model';
+import { Option } from './option.model';
 
 /**
  *

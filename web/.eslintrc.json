@@ -13,6 +13,7 @@
     "node/no-unpublished-require": "off",
     "@typescript-eslint/no-unused-vars": ["off", { "varsIgnorePattern": "_.*" }],
     "object-curly-spacing": ["error", "always"],
+    "space-in-brackets": ["error", "always"],
     "sort-imports": [
       "error",
       {

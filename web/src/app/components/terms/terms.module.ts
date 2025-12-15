@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {MatButton} from '@angular/material/button';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatIcon} from '@angular/material/icon';
-import {RouterModule} from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 
-import {HeaderModule} from 'app/components/shared/header/header.module';
-import {TermsComponent} from 'app/components/terms/terms.component';
+import { HeaderModule } from 'app/components/shared/header/header.module';
+import { TermsComponent } from 'app/components/terms/terms.component';
 
 @NgModule({
   declarations: [TermsComponent],

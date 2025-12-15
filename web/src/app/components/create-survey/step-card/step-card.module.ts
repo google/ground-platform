@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
 
-import {StepCardComponent} from 'app/components/create-survey/step-card/step-card.component';
+import { StepCardComponent } from 'app/components/create-survey/step-card/step-card.component';
 
 @NgModule({
   declarations: [StepCardComponent],

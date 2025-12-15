@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {Map} from 'immutable';
-import {of} from 'rxjs';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
 
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
 import {
   NavigationService,
   SideNavMode,
 } from 'app/services/navigation/navigation.service';
 
-import {SecondarySidePanelComponent} from './secondary-side-panel.component';
+import { SecondarySidePanelComponent } from './secondary-side-panel.component';
 
 describe('SecondarySidePanelComponent', () => {
   let component: SecondarySidePanelComponent;
@@ -39,7 +39,7 @@ describe('SecondarySidePanelComponent', () => {
     Map(),
     Map(),
     'owner1',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(waitForAsync(() => {
@@ -64,7 +64,9 @@ describe('SecondarySidePanelComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [SecondarySidePanelComponent],
-      providers: [{provide: NavigationService, useValue: navigationServiceSpy}],
+      providers: [
+        { provide: NavigationService, useValue: navigationServiceSpy },
+      ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
   }));

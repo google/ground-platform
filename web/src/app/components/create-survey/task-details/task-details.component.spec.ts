@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialogModule} from '@angular/material/dialog';
-import {Map} from 'immutable';
-import {of} from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogModule } from '@angular/material/dialog';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
 
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {TaskDetailsComponent} from './task-details.component';
+import { TaskDetailsComponent } from './task-details.component';
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
@@ -39,7 +39,7 @@ describe('TaskDetailsComponent', () => {
     Map<string, Job>(),
     Map<string, Role>(),
     '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(async () => {
@@ -47,8 +47,8 @@ describe('TaskDetailsComponent', () => {
       declarations: [TaskDetailsComponent],
       imports: [MatDialogModule],
       providers: [
-        {provide: DataStoreService, useValue: {generateId: () => '123'}},
-        {provide: DialogService, useValue: {}},
+        { provide: DataStoreService, useValue: { generateId: () => '123' } },
+        { provide: DialogService, useValue: {} },
         {
           provide: SurveyService,
           useValue: {

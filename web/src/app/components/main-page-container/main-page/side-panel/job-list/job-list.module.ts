@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatListModule} from '@angular/material/list';
-import {BrowserModule} from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
+import { BrowserModule } from '@angular/platform-browser';
 
-import {JobListItemModule} from 'app/components/shared/job-list-item/job-list-item.module';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
+import { JobListItemModule } from 'app/components/shared/job-list-item/job-list-item.module';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 
-import {JobListComponent} from './job-list.component';
+import { JobListComponent } from './job-list.component';
 
 @NgModule({
   imports: [

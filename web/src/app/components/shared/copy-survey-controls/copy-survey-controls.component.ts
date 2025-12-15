@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {NotificationService} from 'app/services/notification/notification.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { NotificationService } from 'app/services/notification/notification.service';
 
 /**
  * Implements the controls for copying the survey link and QR code
@@ -33,7 +33,7 @@ import {NotificationService} from 'app/services/notification/notification.servic
 export class CopySurveyControlsComponent implements OnInit {
   @Input() surveyId = '';
 
-  @ViewChild('qrCodeElement', {read: ElementRef})
+  @ViewChild('qrCodeElement', { read: ElementRef })
   qrCodeElement!: ElementRef<HTMLCanvasElement>;
 
   surveyAppLink = '';
@@ -74,7 +74,7 @@ export class CopySurveyControlsComponent implements OnInit {
         return;
       }
 
-      const data = [new ClipboardItem({[blob.type]: blob})];
+      const data = [new ClipboardItem({ [blob.type]: blob })];
       navigator.clipboard.write(data).then(
         () => {
           this.notificationService.success(

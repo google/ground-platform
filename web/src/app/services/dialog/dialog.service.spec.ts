@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import {
   ConfirmationDialogComponent,
@@ -31,7 +31,7 @@ describe('DialogService', () => {
     matDialog = jasmine.createSpyObj('MatDialog', ['open']);
     TestBed.configureTestingModule({
       imports: [MatDialogModule, NoopAnimationsModule],
-      providers: [DialogService, {provide: MatDialog, useValue: matDialog}],
+      providers: [DialogService, { provide: MatDialog, useValue: matDialog }],
     });
     service = TestBed.inject(DialogService);
   });

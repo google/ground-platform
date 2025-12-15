@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {NavigationEnd, Router} from '@angular/router';
-import {BehaviorSubject, NEVER, of} from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NavigationEnd, Router } from '@angular/router';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
 
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {SignInPageComponent} from './sign-in-page.component';
+import { SignInPageComponent } from './sign-in-page.component';
 
 describe('SignInPageComponent', () => {
   let component: SignInPageComponent;
@@ -34,12 +34,12 @@ describe('SignInPageComponent', () => {
       providers: [
         {
           provide: DataStoreService,
-          useValue: {getAccessDeniedMessage: () => ''},
+          useValue: { getAccessDeniedMessage: () => '' },
         },
-        {provide: Router, useValue: {events: of()}},
+        { provide: Router, useValue: { events: of() } },
         {
           provide: AuthService,
-          useValue: {getUser$: () => NEVER, isAuthenticated$: () => NEVER},
+          useValue: { getUser$: () => NEVER, isAuthenticated$: () => NEVER },
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],

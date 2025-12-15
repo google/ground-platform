@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {HarnessLoader} from '@angular/cdk/testing';
-import {TestbedHarnessEnvironment} from '@angular/cdk/testing/testbed';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatListModule} from '@angular/material/list';
-import {MatListHarness} from '@angular/material/list/testing';
-import {MatSelectModule} from '@angular/material/select';
-import {Map} from 'immutable';
-import {Subject, firstValueFrom, of} from 'rxjs';
+import { HarnessLoader } from '@angular/cdk/testing';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MatListModule } from '@angular/material/list';
+import { MatListHarness } from '@angular/material/list/testing';
+import { MatSelectModule } from '@angular/material/select';
+import { Map } from 'immutable';
+import { Subject, firstValueFrom, of } from 'rxjs';
 
-import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {User} from 'app/models/user.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import { Role } from 'app/models/role.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { User } from 'app/models/user.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
-import {ShareListComponent} from './share-list.component';
+import { ShareListComponent } from './share-list.component';
 
 describe('ShareListComponent', () => {
   let component: ShareListComponent;
@@ -53,7 +53,7 @@ describe('ShareListComponent', () => {
     /* jobs= */ Map(),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   const user = new User('user1', 'user1@gmail.com', true);
@@ -77,8 +77,8 @@ describe('ShareListComponent', () => {
       declarations: [ShareListComponent],
       imports: [MatListModule, MatSelectModule],
       providers: [
-        {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
-        {provide: AuthService, useValue: authServiceSpy},
+        { provide: DraftSurveyService, useValue: draftSurveyServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
   }));
@@ -107,9 +107,9 @@ describe('ShareListComponent', () => {
         surveyTitle,
         surveyDescription,
         /* jobs= */ Map(),
-        /* acl= */ Map({a: Role.OWNER, b: Role.OWNER}),
+        /* acl= */ Map({ a: Role.OWNER, b: Role.OWNER }),
         /* ownerId= */ 'user1',
-        {type: DataSharingType.PRIVATE}
+        { type: DataSharingType.PRIVATE }
       )
     );
     fixture.detectChanges();
