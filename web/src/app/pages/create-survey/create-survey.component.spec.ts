@@ -49,6 +49,7 @@ import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
 import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -249,7 +250,7 @@ describe('CreateSurveyComponent', () => {
 
   describe('when no survey', () => {
     beforeEach(fakeAsync(() => {
-      surveyId$.next(NavigationService.SURVEY_ID_NEW);
+      surveyId$.next(SURVEY_ID_NEW);
       activeSurvey$.next(Survey.UNSAVED_NEW);
       tick();
       fixture.detectChanges();
@@ -317,7 +318,7 @@ describe('CreateSurveyComponent', () => {
   describe('Survey Details', () => {
     describe('when no survey', () => {
       beforeEach(fakeAsync(() => {
-        surveyId$.next(NavigationService.SURVEY_ID_NEW);
+        surveyId$.next(SURVEY_ID_NEW);
         activeSurvey$.next(Survey.UNSAVED_NEW);
         tick();
         fixture.detectChanges();
