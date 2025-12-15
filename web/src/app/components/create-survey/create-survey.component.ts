@@ -21,13 +21,13 @@ import {ActivatedRoute} from '@angular/router';
 import {List} from 'immutable';
 import {Subscription, combineLatest, filter} from 'rxjs';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey, SurveyState} from 'app/models/survey.model';
 import {DataSharingTermsComponent} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/components/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/components/create-survey/survey-details/survey-details.component';
 import {TaskDetailsComponent} from 'app/components/create-survey/task-details/task-details.component';
+import {DataCollectionStrategy, Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {Survey, SurveyState} from 'app/models/survey.model';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';

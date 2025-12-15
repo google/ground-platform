@@ -19,8 +19,8 @@ import {NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {RouterModule} from '@angular/router';
 
-import {HeaderModule} from 'app/components/shared/header/header.module';
 import {ErrorComponent} from 'app/components/error/error.component';
+import {HeaderModule} from 'app/components/shared/header/header.module';
 
 @NgModule({
   declarations: [ErrorComponent],

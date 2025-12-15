@@ -35,9 +35,9 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {Map} from 'immutable';
 import {BehaviorSubject, Subject, of} from 'rxjs';
 
+import {EditSurveyComponent} from 'app/components/edit-survey/edit-survey.component';
 import {Job} from 'app/models/job.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
-import {EditSurveyComponent} from 'app/components/edit-survey/edit-survey.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';

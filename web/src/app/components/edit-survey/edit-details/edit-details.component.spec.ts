@@ -33,10 +33,10 @@ import {By} from '@angular/platform-browser';
 import {Map} from 'immutable';
 import {of} from 'rxjs';
 
+import {EditDetailsComponent} from 'app/components/edit-survey/edit-details/edit-details.component';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
 import {DataSharingType, Survey} from 'app/models/survey.model';
-import {EditDetailsComponent} from 'app/components/edit-survey/edit-details/edit-details.component';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';

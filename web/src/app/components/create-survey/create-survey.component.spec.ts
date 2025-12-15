@@ -30,11 +30,6 @@ import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
 import {Observable, Subject} from 'rxjs';
 
-import {ShareSurveyComponent} from 'app/components/shared/share-survey/share-survey.component';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
-import {Task, TaskType} from 'app/models/task/task.model';
 import {
   CreateSurveyComponent,
   CreateSurveyPhase,
@@ -42,6 +37,11 @@ import {
 import {DataSharingTermsComponent} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {JobDetailsComponent} from 'app/components/create-survey/job-details/job-details.component';
 import {SurveyDetailsComponent} from 'app/components/create-survey/survey-details/survey-details.component';
+import {ShareSurveyComponent} from 'app/components/shared/share-survey/share-survey.component';
+import {Job} from 'app/models/job.model';
+import {LocationOfInterest} from 'app/models/loi.model';
+import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
+import {Task, TaskType} from 'app/models/task/task.model';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';

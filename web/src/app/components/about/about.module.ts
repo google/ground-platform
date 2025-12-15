@@ -20,8 +20,8 @@ import {MatButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {RouterModule} from '@angular/router';
 
-import {HeaderModule} from 'app/components/shared/header/header.module';
 import {AboutComponent} from 'app/components/about/about.component';
+import {HeaderModule} from 'app/components/shared/header/header.module';
 
 @NgModule({
   declarations: [AboutComponent],

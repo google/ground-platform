@@ -21,11 +21,11 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatCardModule} from '@angular/material/card';
 import {MatRadioModule} from '@angular/material/radio';
 
+import {DataSharingTermsComponent} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
 import {
   DATA_SHARING_TYPE_DESCRIPTION,
   DataSharingType,
 } from 'app/models/survey.model';
-import {DataSharingTermsComponent} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
 
 describe('DataSharingTermsComponent', () => {
   let component: DataSharingTermsComponent;

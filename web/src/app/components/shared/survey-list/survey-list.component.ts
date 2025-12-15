@@ -20,15 +20,15 @@ import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs';
 
 import {
-  Survey,
-  SurveyGeneralAccess,
-  SurveyState,
-} from 'app/models/survey.model';
-import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
+import {
+  Survey,
+  SurveyGeneralAccess,
+  SurveyState,
+} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';

@@ -34,17 +34,17 @@ import {
 import {MatDialog} from '@angular/material/dialog';
 import {List} from 'immutable';
 
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/components/edit-survey/job-dialog/job-dialog.component';
 import {Cardinality} from 'app/models/task/multiple-choice.model';
 import {
   TaskConditionExpressionType,
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
 import {TaskType} from 'app/models/task/task.model';
-import {
-  DialogData,
-  DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {moveItemInFormArray} from 'app/utils/utils';
 

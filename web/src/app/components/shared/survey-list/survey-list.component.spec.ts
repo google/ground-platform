@@ -34,6 +34,11 @@ import {By} from '@angular/platform-browser';
 import {List, Map} from 'immutable';
 import {of} from 'rxjs';
 
+import {
+  DialogData,
+  DialogType,
+  JobDialogComponent,
+} from 'app/components/edit-survey/job-dialog/job-dialog.component';
 import {AclEntry} from 'app/models/acl-entry.model';
 import {Job} from 'app/models/job.model';
 import {Role} from 'app/models/role.model';
@@ -44,11 +49,6 @@ import {
   SurveyState,
 } from 'app/models/survey.model';
 import {Task, TaskType} from 'app/models/task/task.model';
-import {
-  DialogData,
-  DialogType,
-  JobDialogComponent,
-} from 'app/components/edit-survey/job-dialog/job-dialog.component';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';

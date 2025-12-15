@@ -17,14 +17,14 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {SignInPageComponent} from 'app/components/shared/sign-in-page/sign-in-page.component';
-import {SignInPageModule} from 'app/components/shared/sign-in-page/sign-in-page.module';
-import {SurveyListComponent} from 'app/components/shared/survey-list/survey-list.component';
-import {SurveyListModule} from 'app/components/shared/survey-list/survey-list.module';
 import {CreateSurveyComponent} from 'app/components/create-survey/create-survey.component';
 import {CreateSurveyModule} from 'app/components/create-survey/create-survey.module';
 import {MainPageContainerComponent} from 'app/components/main-page-container/main-page-container.component';
 import {MainPageContainerModule} from 'app/components/main-page-container/main-page-container.module';
+import {SignInPageComponent} from 'app/components/shared/sign-in-page/sign-in-page.component';
+import {SignInPageModule} from 'app/components/shared/sign-in-page/sign-in-page.module';
+import {SurveyListComponent} from 'app/components/shared/survey-list/survey-list.component';
+import {SurveyListModule} from 'app/components/shared/survey-list/survey-list.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
 import {passlistGuard} from 'app/services/auth/passlist.guard';
 import {
@@ -47,7 +47,6 @@ import {
 } from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
-import {ShareSurveyComponent} from './components/shared/share-survey/share-survey.component';
 import {AboutComponent} from './components/about/about.component';
 import {AndroidIntentLandingPageComponent} from './components/android-intent-landing-page/android-intent-landing-page.component';
 import {EditDetailsComponent} from './components/edit-survey/edit-details/edit-details.component';
@@ -57,6 +56,7 @@ import {EditSurveyModule} from './components/edit-survey/edit-survey.module';
 import {SurveyJsonComponent} from './components/edit-survey/survey-json/survey-json.component';
 import {ErrorComponent} from './components/error/error.component';
 import {ErrorModule} from './components/error/error.module';
+import {ShareSurveyComponent} from './components/shared/share-survey/share-survey.component';
 import {TermsComponent} from './components/terms/terms.component';
 
 const routes: Routes = [
