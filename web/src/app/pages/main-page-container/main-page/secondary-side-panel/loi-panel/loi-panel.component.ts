@@ -80,8 +80,12 @@ export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   }
 
   onSelectSubmission(submissionId: string) {
+    if (!this.activeSurvey()) {
+      console.error('No active survey');
+      return;
+    }
     this.navigationService.showSubmissionDetail(
-      this.activeSurvey()?.id || '',
+      this.activeSurvey()?.id!,
       this.loi.id,
       submissionId
     );
