@@ -21,6 +21,10 @@ import {catchError, map} from 'rxjs/operators';
 import {User} from 'app/models/user.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {
+  SIGN_IN_SEGMENT,
+  TERMS,
+} from 'app/services/navigation/navigation.constants';
 import {environment} from 'environments/environment';
 
 @Injectable({
@@ -49,7 +53,7 @@ export class AuthGuard {
     if (environment.useEmulators) {
       return true;
     }
-    if (url.includes(NavigationService.SIGN_IN_SEGMENT)) {
+    if (url.includes(SIGN_IN_SEGMENT)) {
       if (!user.isAuthenticated) {
         return true;
       }
@@ -57,7 +61,7 @@ export class AuthGuard {
       return false;
     }
 
-    if (url.includes(NavigationService.TERMS)) {
+    if (url.includes(TERMS)) {
       if (user.isAuthenticated) {
         return true;
       }

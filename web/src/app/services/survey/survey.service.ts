@@ -24,6 +24,7 @@ import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {DataStoreService} from 'app/services/data-store/data-store.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
+import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +46,7 @@ export class SurveyService {
           // Asynchronously load survey. switchMap() internally disposes
           // of previous subscription if present.
           switchMap(id => {
-            if (id === NavigationService.SURVEY_ID_NEW) {
+            if (id === SURVEY_ID_NEW) {
               return of(Survey.UNSAVED_NEW);
             }
             return this.dataStore.loadSurvey$(id);

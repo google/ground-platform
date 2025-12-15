@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SideNavMode} from './navigation.service';
+import {SideNavMode} from './navigation.constants';
 
 export class UrlParams {
   public sideNavMode: SideNavMode | null;
