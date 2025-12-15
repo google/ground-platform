@@ -1,10 +1,15 @@
 {
-  "extends": "./node_modules/gts/",
+  "extends": "./node_modules/gts",
+  "env": {
+    "jasmine": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "root": true,
   "rules": {
     "node/no-unpublished-import": ["error", {
       "allowModules": ["jasmine"]
     }],
     "eqeqeq": ["error", "always", {"null": "ignore"}],
-    "space-in-brackets": ["error", "always"]
+    "object-curly-spacing": ["error", "always"]
   }
 }
