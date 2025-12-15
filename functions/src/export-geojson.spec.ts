@@ -22,14 +22,14 @@ import {
   createGetRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import {DecodedIdToken} from 'firebase-admin/auth';
+import { DecodedIdToken } from 'firebase-admin/auth';
 import HttpStatus from 'http-status-codes';
-import {DATA_COLLECTOR_ROLE} from './common/auth';
-import {resetDatastore} from './common/context';
-import {Firestore} from 'firebase-admin/firestore';
-import {exportGeojsonHandler} from './export-geojson';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import { DATA_COLLECTOR_ROLE } from './common/auth';
+import { resetDatastore } from './common/context';
+import { Firestore } from 'firebase-admin/firestore';
+import { exportGeojsonHandler } from './export-geojson';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sv = registry.getFieldIds(Pb.Survey);
@@ -122,13 +122,15 @@ describe('export()', () => {
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_001',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 10.1, [c.longitude]: 125.6 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      area: {[pr.numericValue]: 3.08},
-      name: {[pr.stringValue]: 'Dinagat Islands'},
+      area: { [pr.numericValue]: 3.08 },
+      name: { [pr.stringValue]: 'Dinagat Islands' },
     },
     [l.ownerId]: userId,
   };
@@ -138,12 +140,14 @@ describe('export()', () => {
     [l.jobId]: job1.id,
     [l.customTag]: 'POINT_002',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 47.05, [c.longitude]: 8.3}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 47.05, [c.longitude]: 8.3 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: Pb.LocationOfInterest.Source.FIELD_DATA,
     [l.properties]: {
-      name: {[pr.stringValue]: 'Luzern'},
+      name: { [pr.stringValue]: 'Luzern' },
     },
   };
   const testCases = [
@@ -159,8 +163,8 @@ describe('export()', () => {
         features: [
           {
             type: 'Feature',
-            properties: {area: 3.08, name: 'Dinagat Islands'},
-            geometry: {type: 'Point', coordinates: [125.6, 10.1]},
+            properties: { area: 3.08, name: 'Dinagat Islands' },
+            geometry: { type: 'Point', coordinates: [125.6, 10.1] },
           },
         ],
       },
@@ -177,14 +181,14 @@ describe('export()', () => {
   });
 
   testCases.forEach(
-    ({desc, jobId, survey, jobs, lois, expectedFilename, expectedGeojson}) =>
+    ({ desc, jobId, survey, jobs, lois, expectedFilename, expectedGeojson }) =>
       it(desc, async () => {
         // Populate database.
         mockFirestore.doc(`surveys/${survey.id}`).set(survey);
-        jobs?.forEach(({id, ...job}) =>
+        jobs?.forEach(({ id, ...job }) =>
           mockFirestore.doc(`surveys/${survey.id}/jobs/${id}`).set(job)
         );
-        lois?.forEach(({id, ...loi}) =>
+        lois?.forEach(({ id, ...loi }) =>
           mockFirestore.doc(`surveys/${survey.id}/lois/${id}`).set(loi)
         );
 

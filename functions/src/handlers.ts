@@ -15,14 +15,14 @@
  */
 
 import cors from 'cors';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {https, Response} from 'firebase-functions';
-import {getDecodedIdToken} from './common/auth';
-import {INTERNAL_SERVER_ERROR, UNAUTHORIZED} from 'http-status-codes';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { https, Response } from 'firebase-functions';
+import { getDecodedIdToken } from './common/auth';
+import { INTERNAL_SERVER_ERROR, UNAUTHORIZED } from 'http-status-codes';
 import cookieParser from 'cookie-parser';
 import HttpStatus from 'http-status-codes';
 
-const corsOptions = {origin: true};
+const corsOptions = { origin: true };
 const corsMiddleware = cors(corsOptions);
 
 /** Token to be used when running on local emulator for debugging. */
@@ -30,7 +30,7 @@ export class EmulatorIdToken implements DecodedIdToken {
   aud = '';
   auth_time = 0;
   exp = 0;
-  firebase = {identities: {}, sign_in_provider: ''};
+  firebase = { identities: {}, sign_in_provider: '' };
   iat = 0;
   iss = '';
   sub = '';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from '@ground/proto';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 
