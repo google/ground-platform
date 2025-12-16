@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -23,6 +24,7 @@ import {
   waitForAsync,
 } from '@angular/core/testing';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {By} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {List, Map} from 'immutable';
@@ -43,6 +45,7 @@ import {SurveyDetailsComponent} from 'app/pages/create-survey/survey-details/sur
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -198,7 +201,7 @@ describe('CreateSurveyComponent', () => {
     ]);
 
     TestBed.configureTestingModule({
-      imports: [MatDialogModule],
+      imports: [MatDialogModule, MatProgressSpinnerModule],
       declarations: [
         CreateSurveyComponent,
         SurveyDetailsComponent,
@@ -206,6 +209,7 @@ describe('CreateSurveyComponent', () => {
         DataSharingTermsComponent,
         ShareSurveyComponent,
       ],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
@@ -246,7 +250,7 @@ describe('CreateSurveyComponent', () => {
 
   describe('when no survey', () => {
     beforeEach(fakeAsync(() => {
-      surveyId$.next(NavigationService.SURVEY_ID_NEW);
+      surveyId$.next(SURVEY_ID_NEW);
       activeSurvey$.next(Survey.UNSAVED_NEW);
       tick();
       fixture.detectChanges();
@@ -314,7 +318,7 @@ describe('CreateSurveyComponent', () => {
   describe('Survey Details', () => {
     describe('when no survey', () => {
       beforeEach(fakeAsync(() => {
-        surveyId$.next(NavigationService.SURVEY_ID_NEW);
+        surveyId$.next(SURVEY_ID_NEW);
         activeSurvey$.next(Survey.UNSAVED_NEW);
         tick();
         fixture.detectChanges();

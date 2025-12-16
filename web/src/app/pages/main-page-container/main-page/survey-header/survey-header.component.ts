@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {Subscription} from 'rxjs';
 
 import {ShareDialogComponent} from 'app/components/share-dialog/share-dialog.component';
+import {Survey} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
@@ -27,25 +28,14 @@ import {SurveyService} from 'app/services/survey/survey.service';
   templateUrl: './survey-header.component.html',
   styleUrls: ['./survey-header.component.scss'],
 })
-export class SurveyHeaderComponent implements OnDestroy {
-  title: string;
-  surveyId!: string;
+export class SurveyHeaderComponent {
+  activeSurvey = input<Survey>();
 
-  subscription: Subscription = new Subscription();
   constructor(
     public navigationService: NavigationService,
     public surveyService: SurveyService,
     private dialog: MatDialog
-  ) {
-    this.title = '';
-    const activeSurvey$ = this.surveyService.getActiveSurvey$();
-    this.subscription.add(
-      activeSurvey$.subscribe(survey => {
-        this.title = survey.title || '';
-        this.surveyId = survey.id;
-      })
-    );
-  }
+  ) {}
 
   /**
    * Updates the survey title with input element value.
@@ -53,8 +43,9 @@ export class SurveyHeaderComponent implements OnDestroy {
    * @param evt the event emitted from the input element on blur.
    */
   updateSurveyTitle(value: string): Promise<void> {
-    if (value === this.title) return Promise.resolve();
-    return this.surveyService.updateTitle(this.surveyId, value);
+    const survey = this.activeSurvey();
+    if (!survey || value === survey.title) return Promise.resolve();
+    return this.surveyService.updateTitle(survey.id, value);
   }
 
   onSurveysButtonClick(): void {
@@ -68,15 +59,15 @@ export class SurveyHeaderComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
   onClickSidePanelButtonEvent() {
     this.navigationService.onClickSidePanelButton();
   }
 
   isEditSurveyPage() {
-    return this.navigationService.isEditSurveyPage(this.surveyId);
+    if (!this.activeSurvey()) {
+      console.error('No active survey');
+      return;
+    }
+    return this.navigationService.isEditSurveyPage(this.activeSurvey()!.id);
   }
 }

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, effect} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Component, effect, input} from '@angular/core';
+import {toObservable, toSignal} from '@angular/core/rxjs-interop';
+import {switchMap} from 'rxjs/operators';
 
-import {Survey} from 'app/models/survey.model';
-import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
@@ -27,20 +26,17 @@ import {SurveyService} from 'app/services/survey/survey.service';
   styleUrls: ['./main-page-container.component.css'],
 })
 export class MainPageContainerComponent {
-  private surveyIdSignal = this.navigationService.getSurveyId();
+  surveyId = input<string>();
+  survey = toSignal(
+    toObservable(this.surveyId).pipe(
+      switchMap(id => (id ? this.surveyService.loadSurvey$(id) : []))
+    )
+  );
 
-  protected activeSurvey$: Observable<Survey>;
-
-  constructor(
-    private navigationService: NavigationService,
-    private surveyService: SurveyService
-  ) {
-    this.activeSurvey$ = surveyService.getActiveSurvey$();
-
+  constructor(private surveyService: SurveyService) {
     effect(() => {
-      const surveyId = this.surveyIdSignal();
-
-      if (surveyId) this.surveyService.activateSurvey(surveyId);
+      const id = this.surveyId();
+      if (id) this.surveyService.activateSurvey(id);
     });
   }
 }

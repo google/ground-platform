@@ -31,6 +31,7 @@ import {TaskDetailsComponent} from 'app/pages/create-survey/task-details/task-de
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {TaskService} from 'app/services/task/task.service';
@@ -155,7 +156,7 @@ export class CreateSurveyComponent implements OnInit {
   ngOnInit(): void {
     this.subscription.add(
       this.navigationService.getSurveyId$().subscribe(async surveyId => {
-        this.surveyId = surveyId ? surveyId : NavigationService.SURVEY_ID_NEW;
+        this.surveyId = surveyId ? surveyId : SURVEY_ID_NEW;
         this.surveyService.activateSurvey(this.surveyId);
         await this.draftSurveyService.init(this.surveyId);
         this.draftSurveyService
@@ -172,8 +173,7 @@ export class CreateSurveyComponent implements OnInit {
         .pipe(
           filter(
             ([survey]) =>
-              this.surveyId === NavigationService.SURVEY_ID_NEW ||
-              survey.id === this.surveyId
+              this.surveyId === SURVEY_ID_NEW || survey.id === this.surveyId
           )
         )
         .subscribe(([survey, lois]) => {
@@ -332,7 +332,7 @@ export class CreateSurveyComponent implements OnInit {
 
   private async saveSurveyTitleAndDescription(): Promise<string | void> {
     const [name, description] = this.surveyDetails!.toTitleAndDescription();
-    if (this.surveyId === NavigationService.SURVEY_ID_NEW) {
+    if (this.surveyId === SURVEY_ID_NEW) {
       return await this.surveyService.createSurvey(name, description);
     }
 

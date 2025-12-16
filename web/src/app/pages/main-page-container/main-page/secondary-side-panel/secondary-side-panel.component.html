@@ -17,16 +17,12 @@
 <div [ngSwitch]="sideNavModeSignal()" class="secondary-side-panel-container">
   <div *ngIf="loiIdSignal() || submissionIdSignal()" class="secondary-side-panel">
     <ng-container *ngSwitchCase="SideNavMode.SUBMISSION">
-      <submission-panel
-        *ngIf="submissionIdSignal()"
-        [submissionId]="submissionIdSignal()"
-      ></submission-panel>
+      <submission-panel *ngIf="submissionIdSignal()" [submissionId]="submissionIdSignal()"
+        [activeSurvey]="activeSurvey()"></submission-panel>
     </ng-container>
 
     <ng-container *ngSwitchCase="SideNavMode.JOB_LIST">
-      <ground-loi-panel
-        *ngIf="loiIdSignal()"
-      ></ground-loi-panel>
+      <ground-loi-panel *ngIf="loiIdSignal()" [activeSurvey]="activeSurvey()"></ground-loi-panel>
     </ng-container>
   </div>
 </div>

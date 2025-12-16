@@ -27,6 +27,24 @@ import {MainPageContainerComponent} from 'app/pages/main-page-container/main-pag
 import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
 import {passlistGuard} from 'app/services/auth/passlist.guard';
+import {
+  ABOUT,
+  ANDROID_SEGMENT,
+  ERROR,
+  LOI_ID,
+  LOI_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SUBMISSION_ID,
+  SUBMISSION_SEGMENT,
+  SURVEYS_CREATE,
+  SURVEYS_EDIT,
+  SURVEYS_SEGMENT,
+  SURVEY_ID,
+  SURVEY_SEGMENT,
+  TASK_ID,
+  TASK_SEGMENT,
+  TERMS,
+} from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 
 import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
@@ -40,20 +58,6 @@ import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.c
 import {ErrorComponent} from './pages/error/error.component';
 import {ErrorModule} from './pages/error/error.module';
 import {TermsComponent} from './pages/terms/terms.component';
-
-const {
-  LOI_ID,
-  LOI_SEGMENT,
-  SIGN_IN_SEGMENT,
-  SUBMISSION_ID,
-  SUBMISSION_SEGMENT,
-  SURVEY_ID,
-  SURVEYS_CREATE,
-  SURVEYS_EDIT,
-  SURVEYS_SEGMENT,
-  TASK_ID,
-  TASK_SEGMENT,
-} = NavigationService;
 
 const routes: Routes = [
   {
@@ -82,7 +86,7 @@ const routes: Routes = [
     canActivate: [AuthGuard, passlistGuard],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
+    path: `${SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
     component: EditSurveyComponent,
     canActivate: [AuthGuard],
     children: [
@@ -93,7 +97,7 @@ const routes: Routes = [
     ],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}`,
+    path: `${SURVEY_SEGMENT}/:${SURVEY_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
     children: [
@@ -116,26 +120,26 @@ const routes: Routes = [
     ],
   },
   {
-    path: NavigationService.ERROR,
+    path: ERROR,
     component: ErrorComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: NavigationService.ABOUT,
+    path: ABOUT,
     component: AboutComponent,
   },
   {
-    path: `${NavigationService.ANDROID_SEGMENT}`,
+    path: `${ANDROID_SEGMENT}`,
     component: AndroidIntentLandingPageComponent,
     children: [{path: '**', component: AndroidIntentLandingPageComponent}],
   },
   {
-    path: NavigationService.TERMS,
+    path: TERMS,
     component: TermsComponent,
     canActivate: [AuthGuard],
   },
 ];
-const config = RouterModule.forRoot(routes, {});
+const config = RouterModule.forRoot(routes, {bindToComponentInputs: true});
 
 @NgModule({
   imports: [config],

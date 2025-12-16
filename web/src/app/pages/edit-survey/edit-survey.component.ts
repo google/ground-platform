@@ -24,6 +24,10 @@ import {Job} from 'app/models/job.model';
 import {Survey} from 'app/models/survey.model';
 import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
 import {JobService} from 'app/services/job/job.service';
+import {
+  SURVEYS_SHARE,
+  SURVEY_SEGMENT,
+} from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SurveyService} from 'app/services/survey/survey.service';
 import {environment} from 'environments/environment';
@@ -74,10 +78,10 @@ export class EditSurveyComponent {
       const section = this.editSurveyPageSignal();
 
       switch (section) {
-        case NavigationService.SURVEY_SEGMENT:
+        case SURVEY_SEGMENT:
           this.sectionTitle = $localize`:@@app.editSurvey.surveyDetails.title:Survey details`;
           break;
-        case NavigationService.SURVEYS_SHARE:
+        case SURVEYS_SHARE:
           this.sectionTitle = $localize`:@@app.editSurvey.sharing.title:Sharing`;
           break;
         default:

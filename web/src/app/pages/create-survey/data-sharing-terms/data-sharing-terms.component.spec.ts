@@ -15,7 +15,11 @@
  */
 
 import {CommonModule} from '@angular/common';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ReactiveFormsModule} from '@angular/forms';
+import {MatCardModule} from '@angular/material/card';
+import {MatRadioModule} from '@angular/material/radio';
 
 import {
   DATA_SHARING_TYPE_DESCRIPTION,
@@ -30,7 +34,13 @@ describe('DataSharingTermsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [DataSharingTermsComponent],
-      imports: [CommonModule],
+      imports: [
+        CommonModule,
+        MatCardModule,
+        MatRadioModule,
+        ReactiveFormsModule,
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DataSharingTermsComponent);

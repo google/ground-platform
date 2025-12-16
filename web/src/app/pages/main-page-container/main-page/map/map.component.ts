@@ -23,10 +23,13 @@ import {
   OnChanges,
   OnDestroy,
   ViewChild,
+  input,
 } from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {GoogleMap} from '@angular/google-maps';
 import {Map as ImmutableMap, List} from 'immutable';
 import {BehaviorSubject, Observable, Subscription, combineLatest} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
 
 import {Coordinate} from 'app/models/geometry/coordinate';
 import {Geometry, GeometryType} from 'app/models/geometry/geometry';
@@ -46,7 +49,6 @@ import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
 
 // To make ESLint happy:
 /*global google*/
@@ -63,6 +65,7 @@ const enlargedPolygonStrokeWeight = 6;
 })
 export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();
+  activeSurvey = input<Survey>();
   private selectedJob$: BehaviorSubject<Job | undefined> = new BehaviorSubject<
     Job | undefined
   >(undefined);
@@ -116,7 +119,6 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
   constructor(
     private drawingToolsService: DrawingToolsService,
-    private surveyService: SurveyService,
     private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
@@ -125,7 +127,10 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     private changeDetectorRef: ChangeDetectorRef
   ) {
     this.lois$ = this.loiService.getLocationsOfInterest$();
-    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
+    this.activeSurvey$ = toObservable(this.activeSurvey).pipe(
+      filter(s => !!s),
+      map(s => s as Survey)
+    );
   }
 
   ngOnChanges() {

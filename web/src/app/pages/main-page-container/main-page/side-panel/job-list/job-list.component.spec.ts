@@ -59,17 +59,6 @@ const mockAngularFireAuth = {
   authState: of(authState),
 };
 
-class MockSurveyService {
-  getActiveSurvey$() {
-    return of<Survey>(mockSurvey);
-  }
-  getCurrentSurvey() {}
-  getCurrentSurveyAcl() {}
-  canManageSurvey() {}
-}
-
-const surveyService = new MockSurveyService();
-
 describe('JobListComponent', () => {
   let component: JobListComponent;
   let fixture: ComponentFixture<JobListComponent>;
@@ -85,7 +74,6 @@ describe('JobListComponent', () => {
       declarations: [JobListComponent],
       imports: [MatListModule],
       providers: [
-        {provide: SurveyService, useValue: surveyService},
         {
           provide: Router,
           useValue: routerSpy,
@@ -104,6 +92,7 @@ describe('JobListComponent', () => {
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListComponent);
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
