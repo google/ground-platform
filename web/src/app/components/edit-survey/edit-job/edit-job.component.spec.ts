@@ -59,8 +59,6 @@ class MockLoiEditorComponent {
   @Input() lois!: List<LocationOfInterest>;
 }
 
-
-
 describe('EditJobComponent', () => {
   let component: EditJobComponent;
   let fixture: ComponentFixture<EditJobComponent>;

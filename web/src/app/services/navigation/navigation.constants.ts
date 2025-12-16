@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-
 export const LOI_SEGMENT = 'site';
 export const LOI_ID = 'siteId';
 export const JOB_ID_NEW = 'new';

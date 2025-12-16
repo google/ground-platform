@@ -26,7 +26,7 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
 
 const generalAccessLabels = Map<
   SurveyGeneralAccess,
-  {description: string; icon: string; label: string}
+  { description: string; icon: string; label: string }
 >([
   [
     SurveyGeneralAccess.RESTRICTED,

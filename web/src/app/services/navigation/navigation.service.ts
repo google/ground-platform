@@ -32,6 +32,7 @@ import {
 } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+
 import {
   ABOUT,
   ANDROID_SEGMENT,
@@ -51,7 +52,6 @@ import {
   SURVEY_ID,
   SURVEY_ID_NEW,
   SURVEY_SEGMENT,
-
   TASK_ID,
   TASK_SEGMENT,
   TERMS,

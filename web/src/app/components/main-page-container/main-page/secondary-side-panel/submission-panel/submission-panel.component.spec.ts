@@ -22,6 +22,7 @@ import { Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { AuditInfo } from 'app/models/audit-info.model';
+import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -58,7 +59,7 @@ describe('SubmissionPanelComponent', () => {
   const mockSubmission = new Submission(
     'sub1',
     'loi1',
-    { id: 'job1' } as any,
+    { id: 'job1' } as Job,
     mockAuditInfo,
     mockAuditInfo,
     Map()

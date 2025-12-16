@@ -22,6 +22,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 
+import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
@@ -103,7 +104,7 @@ describe('MainPageComponent', () => {
       acl: {},
       ownerId: 'owner1',
       dataSharingTerms: {},
-    } as any;
+    } as Survey;
 
     fixture.componentRef.setInput('activeSurvey', mockSurvey);
     component = fixture.componentInstance;

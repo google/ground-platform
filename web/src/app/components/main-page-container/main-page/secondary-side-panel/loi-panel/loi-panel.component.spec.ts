@@ -19,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
+import { Geometry } from 'app/models/geometry/geometry';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -49,7 +50,7 @@ describe('LocationOfInterestPanelComponent', () => {
   const mockLoi = new LocationOfInterest(
     'loi1',
     'job1',
-    { chainId: 'point1' } as any,
+    { chainId: 'point1' } as unknown as Geometry,
     Map()
   );
 
