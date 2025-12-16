@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -23,33 +23,33 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {By} from '@angular/platform-browser';
-import {ActivatedRoute} from '@angular/router';
-import {List, Map} from 'immutable';
-import {Observable, Subject} from 'rxjs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { By } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { List, Map } from 'immutable';
+import { Observable, Subject } from 'rxjs';
 
 import {
   CreateSurveyComponent,
   CreateSurveyPhase,
 } from 'app/components/create-survey/create-survey.component';
-import {DataSharingTermsComponent} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
-import {JobDetailsComponent} from 'app/components/create-survey/job-details/job-details.component';
-import {SurveyDetailsComponent} from 'app/components/create-survey/survey-details/survey-details.component';
-import {ShareSurveyComponent} from 'app/components/shared/share-survey/share-survey.component';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {JobService} from 'app/services/job/job.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import { DataSharingTermsComponent } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
+import { JobDetailsComponent } from 'app/components/create-survey/job-details/job-details.component';
+import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
+import { ShareSurveyComponent } from 'app/components/shared/share-survey/share-survey.component';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { JobService } from 'app/services/job/job.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { TaskService } from 'app/services/task/task.service';
+import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 describe('CreateSurveyComponent', () => {
   let component: CreateSurveyComponent;
@@ -79,7 +79,7 @@ describe('CreateSurveyComponent', () => {
     /* jobs= */ Map(),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
   const surveyWithoutJob = new Survey(
     surveyId,
@@ -88,7 +88,7 @@ describe('CreateSurveyComponent', () => {
     /* jobs= */ Map(),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
   const job = new Job(jobId, /* index */ 0, 'red', name, /* tasks= */ Map());
   const newJob = new Job(jobId, -1);
@@ -101,7 +101,7 @@ describe('CreateSurveyComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.CUSTOM, customText: 'Good day, sir'}
+    { type: DataSharingType.CUSTOM, customText: 'Good day, sir' }
   );
   const jobWithTask = new Job(
     jobId,
@@ -127,7 +127,7 @@ describe('CreateSurveyComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE},
+    { type: DataSharingType.PRIVATE },
     SurveyState.READY
   );
   beforeEach(waitForAsync(() => {
@@ -211,13 +211,13 @@ describe('CreateSurveyComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: SurveyService, useValue: surveyServiceSpy},
-        {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
-        {provide: JobService, useValue: jobServiceSpy},
-        {provide: LocationOfInterestService, useValue: loiServiceSpy},
-        {provide: ActivatedRoute, useValue: route},
-        {provide: TaskService, useValue: taskServiceSpy},
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: DraftSurveyService, useValue: draftSurveyServiceSpy },
+        { provide: JobService, useValue: jobServiceSpy },
+        { provide: LocationOfInterestService, useValue: loiServiceSpy },
+        { provide: ActivatedRoute, useValue: route },
+        { provide: TaskService, useValue: taskServiceSpy },
       ],
     }).compileComponents();
   }));
@@ -404,7 +404,7 @@ describe('CreateSurveyComponent', () => {
 
         expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           surveyId,
-          newJob.copyWith({name})
+          newJob.copyWith({ name })
         );
       }));
     });
@@ -433,7 +433,7 @@ describe('CreateSurveyComponent', () => {
 
         expect(jobServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           surveyId,
-          job.copyWith({name})
+          job.copyWith({ name })
         );
       }));
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatDialogModule} from '@angular/material/dialog';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MatDialogModule } from '@angular/material/dialog';
 
-import {EditStyleButtonComponent} from './edit-style-button.component';
+import { EditStyleButtonComponent } from './edit-style-button.component';
 
 describe('EditStyleButtonComponent', () => {
   let component: EditStyleButtonComponent;

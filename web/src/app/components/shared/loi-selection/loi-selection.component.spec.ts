@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {GoogleMapsModule} from '@angular/google-maps';
-import {MatDialog} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
-import {MatListModule} from '@angular/material/list';
-import {List, Map} from 'immutable';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GoogleMapsModule } from '@angular/google-maps';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { List, Map } from 'immutable';
 
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Point} from 'app/models/geometry/point';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {GroundIconModule} from 'app/modules/ground-icon.module';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {LoiSelectionComponent} from './loi-selection.component';
+import { LoiSelectionComponent } from './loi-selection.component';
 
 describe('LoiSelectionComponent', () => {
   let component: LoiSelectionComponent;
@@ -67,7 +67,7 @@ describe('LoiSelectionComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(() => {
@@ -138,7 +138,7 @@ describe('LoiSelectionComponent', () => {
 
   it('shows updated list of LOIs', () => {
     fixture.componentInstance.lois = List([
-      {...poi1, properties: Map({name: 'Test 1'})},
+      { ...poi1, properties: Map({ name: 'Test 1' }) },
       poi2,
     ]);
     fixture.detectChanges();

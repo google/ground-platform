@@ -22,23 +22,23 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import {By} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {Map} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Map } from 'immutable';
+import { BehaviorSubject, of } from 'rxjs';
 
-import {Job} from 'app/models/job.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
+import { Job } from 'app/models/job.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
-import {DrawingToolsComponent} from './drawing-tools.component';
-import {DrawingToolsModule} from './drawing-tools.module';
+import { DrawingToolsComponent } from './drawing-tools.component';
+import { DrawingToolsModule } from './drawing-tools.module';
 
 describe('DrawingToolsComponent', () => {
   let fixture: ComponentFixture<DrawingToolsComponent>;
@@ -78,7 +78,7 @@ describe('DrawingToolsComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(waitForAsync(() => {
@@ -107,9 +107,9 @@ describe('DrawingToolsComponent', () => {
       imports: [DrawingToolsModule, BrowserAnimationsModule],
       declarations: [DrawingToolsComponent],
       providers: [
-        {provide: AuthService, useValue: authServiceSpy},
-        {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
-        {provide: NavigationService, useValue: navigationServiceSpy},
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
+        { provide: NavigationService, useValue: navigationServiceSpy },
       ],
     }).compileComponents();
   }));

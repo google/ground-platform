@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {Subscription} from 'rxjs';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 
-import {SurveyDetailsComponent} from 'app/components/create-survey/survey-details/survey-details.component';
-import {DATA_SHARING_TYPE_DESCRIPTION, Survey} from 'app/models/survey.model';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
+import { DATA_SHARING_TYPE_DESCRIPTION, Survey } from 'app/models/survey.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 import {
   DialogData,
@@ -62,7 +62,7 @@ export class EditDetailsComponent implements OnInit {
       this.draftSurveyService.getSurvey$().subscribe(survey => {
         this.survey = survey;
         if (this.survey.dataSharingTerms) {
-          const {type, customText} = this.survey.dataSharingTerms;
+          const { type, customText } = this.survey.dataSharingTerms;
           this.dataSharingTermsDetails = {
             description: DATA_SHARING_TYPE_DESCRIPTION.get(type)!,
             customText,
@@ -87,7 +87,7 @@ export class EditDetailsComponent implements OnInit {
   openDeleteSurveyDialog() {
     this.dialog
       .open(JobDialogComponent, {
-        data: {dialogType: DialogType.DeleteSurvey},
+        data: { dialogType: DialogType.DeleteSurvey },
         panelClass: 'small-width-dialog',
       })
       .afterClosed()
@@ -103,13 +103,13 @@ export class EditDetailsComponent implements OnInit {
   openCopySurveyDialog() {
     this.dialog
       .open(JobDialogComponent, {
-        data: {dialogType: DialogType.CopySurvey},
+        data: { dialogType: DialogType.CopySurvey },
         panelClass: 'small-width-dialog',
       })
       .afterClosed()
       .subscribe(async (result: DialogData) => {
         if (result?.dialogType === DialogType.CopySurvey) {
-          const {id: surveyId} = this.survey!;
+          const { id: surveyId } = this.survey!;
 
           const newSurveyId = await this.surveyService.copySurvey(surveyId);
 

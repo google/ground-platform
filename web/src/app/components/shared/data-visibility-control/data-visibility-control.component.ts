@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
-import {Subscription} from 'rxjs';
+import { Component } from '@angular/core';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { Subscription } from 'rxjs';
 
-import {Survey, SurveyDataVisibility} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import { Survey, SurveyDataVisibility } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-data-visibility-control',

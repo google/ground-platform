@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DocumentData, DocumentSnapshot} from '@google-cloud/firestore';
+import { DocumentData, DocumentSnapshot } from '@google-cloud/firestore';
 
 export class TestDocumentSnapshot {
   constructor(private readonly testData: DocumentData) {}

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import { Component, ElementRef } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
-import {AccountPopupComponent} from 'app/components/shared/header/current-user-widget/account-popup/account-popup.component';
-import {AuthService} from 'app/services/auth/auth.service';
+import { AccountPopupComponent } from 'app/components/shared/header/current-user-widget/account-popup/account-popup.component';
+import { AuthService } from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-current-user-widget',
@@ -31,7 +31,7 @@ export class CurrentUserWidgetComponent {
   openProfileDialog(evt: MouseEvent): void {
     const target = new ElementRef(evt.currentTarget);
     this.dialog.open(AccountPopupComponent, {
-      data: {trigger: target},
+      data: { trigger: target },
     });
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 
 // To make ESLint happy:
 /*global btoa*/
@@ -23,8 +23,8 @@ import {Injectable} from '@angular/core';
   providedIn: 'root',
 })
 export class GroundPinService {
-  renderPin(options: {color?: string; text?: string}): string {
-    const {color = GroundPinService.defaultIconColor, text} = options;
+  renderPin(options: { color?: string; text?: string }): string {
+    const { color = GroundPinService.defaultIconColor, text } = options;
 
     return GroundPinService.svgTemplate
       .replace('{{ color }}', color)
@@ -33,12 +33,12 @@ export class GroundPinService {
   }
 
   getPinImageSource(color?: string): string {
-    return GroundPinService.urlPrefix + btoa(this.renderPin({color}));
+    return GroundPinService.urlPrefix + btoa(this.renderPin({ color }));
   }
 
   getPinImageSvgElement(color: string, text?: string): Element {
     const svgMarker = document.createElement('div');
-    svgMarker.innerHTML = this.renderPin({color, text});
+    svgMarker.innerHTML = this.renderPin({ color, text });
     svgMarker.style.transform = 'scale(1.5)';
     return svgMarker;
   }

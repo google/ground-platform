@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Role} from './role.model';
+import { Role } from './role.model';
 
 export class AclEntry {
   private static readonly MANAGER_ROLES = [Role.SURVEY_ORGANIZER, Role.OWNER];

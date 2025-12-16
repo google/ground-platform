@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit, input} from '@angular/core';
-import {toObservable} from '@angular/core/rxjs-interop';
-import {MatDialog} from '@angular/material/dialog';
-import {List} from 'immutable';
-import {Subscription, combineLatest, switchMap} from 'rxjs';
+import { Component, OnDestroy, OnInit, input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
+import { List } from 'immutable';
+import { Subscription, combineLatest, switchMap } from 'rxjs';
 
-import {LoiPropertiesDialogComponent} from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {getLoiIcon} from 'app/utils/utils';
+import { LoiPropertiesDialogComponent } from 'app/components/shared/loi-properties-dialog/loi-properties-dialog.component';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Survey } from 'app/models/survey.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { getLoiIcon } from 'app/utils/utils';
 
 @Component({
   selector: 'ground-loi-panel',

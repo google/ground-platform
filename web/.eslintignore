@@ -1,5 +1,1 @@
-**/*.json
-**/node_modules
-**/build
-**/dist
 src/test.ts

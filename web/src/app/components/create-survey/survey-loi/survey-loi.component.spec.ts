@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
   fakeAsync,
   waitForAsync,
 } from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatDialog} from '@angular/material/dialog';
-import {List, Map} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { MatDialog } from '@angular/material/dialog';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, of } from 'rxjs';
 
-import {LoiSelectionModule} from 'app/components/shared/loi-selection/loi-selection.module';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { LoiSelectionModule } from 'app/components/shared/loi-selection/loi-selection.module';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {SurveyLoiComponent} from './survey-loi.component';
+import { SurveyLoiComponent } from './survey-loi.component';
 
 describe('SurveyLoiComponent', () => {
   let fixture: ComponentFixture<SurveyLoiComponent>;
@@ -48,7 +48,7 @@ describe('SurveyLoiComponent', () => {
 
   const mockLois$ = new BehaviorSubject<List<LocationOfInterest>>(
     List<LocationOfInterest>([
-      {id: 'id1', jobId: 'jobId1'} as LocationOfInterest,
+      { id: 'id1', jobId: 'jobId1' } as LocationOfInterest,
     ])
   );
 
@@ -59,7 +59,7 @@ describe('SurveyLoiComponent', () => {
     Map(),
     Map(),
     '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   const mockSurvey$ = of(mockSurvey);
@@ -88,13 +88,13 @@ describe('SurveyLoiComponent', () => {
       declarations: [SurveyLoiComponent],
       imports: [LoiSelectionModule, CommonModule],
       providers: [
-        {provide: AngularFirestore, useValue: {}},
-        {provide: AngularFireAuth, useValue: {}},
-        {provide: AuthService, useValue: {}},
-        {provide: LocationOfInterestService, useValue: loiServiceSpy},
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: SurveyService, useValue: surveyServiceSpy},
-        {provide: MatDialog, useValue: {}},
+        { provide: AngularFirestore, useValue: {} },
+        { provide: AngularFireAuth, useValue: {} },
+        { provide: AuthService, useValue: {} },
+        { provide: LocationOfInterestService, useValue: loiServiceSpy },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: MatDialog, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Change, EventContext} from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
+import { Change, EventContext } from 'firebase-functions';
+import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
+import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
 
 export async function onWriteLoiHandler(
   _: Change<DocumentSnapshot>,

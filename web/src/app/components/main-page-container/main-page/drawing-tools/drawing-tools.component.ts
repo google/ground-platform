@@ -24,20 +24,20 @@ import {
   effect,
   input,
 } from '@angular/core';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {List} from 'immutable';
-import {Observable, Subscription} from 'rxjs';
-import {map} from 'rxjs/operators';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { List } from 'immutable';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
+import { Job } from 'app/models/job.model';
+import { Survey } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
   selector: 'ground-drawing-tools',

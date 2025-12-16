@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {QRCodeModule} from 'angularx-qrcode';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { QRCodeModule } from 'angularx-qrcode';
 
-import {CopySurveyControlsComponent} from './copy-survey-controls.component';
+import { CopySurveyControlsComponent } from './copy-survey-controls.component';
 
 @NgModule({
   declarations: [CopySurveyControlsComponent],

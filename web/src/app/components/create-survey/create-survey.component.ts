@@ -16,27 +16,27 @@
 
 import '@angular/localize/init';
 
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {List} from 'immutable';
-import {Subscription, combineLatest, filter} from 'rxjs';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { List } from 'immutable';
+import { Subscription, combineLatest, filter } from 'rxjs';
 
-import {DataSharingTermsComponent} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
-import {JobDetailsComponent} from 'app/components/create-survey/job-details/job-details.component';
-import {SurveyDetailsComponent} from 'app/components/create-survey/survey-details/survey-details.component';
-import {TaskDetailsComponent} from 'app/components/create-survey/task-details/task-details.component';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey, SurveyState} from 'app/models/survey.model';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {JobService} from 'app/services/job/job.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
+import { DataSharingTermsComponent } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.component';
+import { JobDetailsComponent } from 'app/components/create-survey/job-details/job-details.component';
+import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
+import { TaskDetailsComponent } from 'app/components/create-survey/task-details/task-details.component';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Survey, SurveyState } from 'app/models/survey.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { JobService } from 'app/services/job/job.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { TaskService } from 'app/services/task/task.service';
 
-import {SurveyLoiComponent} from './survey-loi/survey-loi.component';
+import { SurveyLoiComponent } from './survey-loi/survey-loi.component';
 
 export enum CreateSurveyPhase {
   LOADING,

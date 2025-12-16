@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {EventContext} from 'firebase-functions';
-import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {getDatastore, getMailService} from './common/context';
-import {MailServiceEmail} from './common/mail-service';
-import {stringFormat} from './common/utils';
+import { EventContext } from 'firebase-functions';
+import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
+import { getDatastore, getMailService } from './common/context';
+import { MailServiceEmail } from './common/mail-service';
+import { stringFormat } from './common/utils';
 
 /**
  * Handles the creation of a passlist entry.
@@ -44,7 +44,7 @@ export async function onCreatePasslistEntryHandler(
     return;
   }
 
-  const {subject, html: htmlBody} = template;
+  const { subject, html: htmlBody } = template;
 
   const mail = {
     to: entryId,

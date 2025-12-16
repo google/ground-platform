@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {DecodedIdToken, getAuth} from 'firebase-admin/auth';
-import {DocumentSnapshot} from 'firebase-admin/firestore';
-import {https, Response} from 'firebase-functions/v1';
-import {EmulatorIdToken} from '../handlers';
-import {GroundProtos} from '@ground/proto';
-import {registry} from '@ground/lib';
+import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
+import { DocumentSnapshot } from 'firebase-admin/firestore';
+import { https, Response } from 'firebase-functions/v1';
+import { EmulatorIdToken } from '../handlers';
+import { GroundProtos } from '@ground/proto';
+import { registry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 const s = registry.getFieldIds(Pb.Survey);
@@ -71,7 +71,7 @@ export async function setSessionCookie(
 ): Promise<void> {
   const token = getAuthBearer(req);
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
-  const cookie = await getAuth().createSessionCookie(token!, {expiresIn});
+  const cookie = await getAuth().createSessionCookie(token!, { expiresIn });
   res.cookie(SESSION_COOKIE_NAME, cookie, {
     maxAge: expiresIn,
     httpOnly: true,

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, switchMap} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { Observable, switchMap } from 'rxjs';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {MultipleChoice} from 'app/models/task/multiple-choice.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {SurveyService} from '../survey/survey.service';
+import { SurveyService } from '../survey/survey.service';
 
 export type TaskUpdate = {
   label: string;
@@ -132,7 +132,7 @@ export class TaskService {
     );
 
     const newTasks = tasks.map((task: Task) =>
-      task.copyWith({index: task.index + 1})
+      task.copyWith({ index: task.index + 1 })
     );
 
     return newTasks.set(loiTask.id, loiTask);

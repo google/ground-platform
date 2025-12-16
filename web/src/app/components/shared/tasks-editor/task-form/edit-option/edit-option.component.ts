@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {AbstractControl, FormGroup} from '@angular/forms';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { AbstractControl, FormGroup } from '@angular/forms';
 
-import {Cardinality} from 'app/models/task/multiple-choice.model';
+import { Cardinality } from 'app/models/task/multiple-choice.model';
 
 @Component({
   selector: 'ground-edit-option',

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {MatIconModule} from '@angular/material/icon';
+import { NgModule } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
-import {AddTaskButtonComponent} from './add-task-button.component';
+import { AddTaskButtonComponent } from './add-task-button.component';
 
 @NgModule({
   declarations: [AddTaskButtonComponent],

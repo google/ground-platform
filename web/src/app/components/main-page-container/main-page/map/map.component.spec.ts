@@ -21,29 +21,29 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {GoogleMapsModule} from '@angular/google-maps';
-import {List, Map} from 'immutable';
-import {BehaviorSubject, of} from 'rxjs';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { GoogleMapsModule } from '@angular/google-maps';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, of } from 'rxjs';
 
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Point} from 'app/models/geometry/point';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import { Point } from 'app/models/geometry/point';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {polygonShellCoordsToPolygon} from 'testing/helpers';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { polygonShellCoordsToPolygon } from 'testing/helpers';
 
-import {MapComponent} from './map.component';
+import { MapComponent } from './map.component';
 
 describe('MapComponent', () => {
   let component: MapComponent;
@@ -92,7 +92,7 @@ describe('MapComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
   const poi1 = new LocationOfInterest(
     poiId1,
@@ -209,10 +209,10 @@ describe('MapComponent', () => {
           provide: LocationOfInterestService,
           useValue: loiServiceSpy,
         },
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: SubmissionService, useValue: submissionServiceSpy},
-        {provide: DrawingToolsService, useValue: drawingToolsServiceSpy},
-        {provide: AuthService, useValue: {}},
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: SubmissionService, useValue: submissionServiceSpy },
+        { provide: DrawingToolsService, useValue: drawingToolsServiceSpy },
+        { provide: AuthService, useValue: {} },
         {
           provide: AngularFireAuth,
           useValue: {
@@ -223,7 +223,7 @@ describe('MapComponent', () => {
             }),
           },
         },
-        {provide: AngularFirestore, useValue: {}},
+        { provide: AngularFirestore, useValue: {} },
       ],
     }).compileComponents();
   }));

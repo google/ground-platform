@@ -16,8 +16,8 @@
 
 import '@angular/localize/init';
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import {
   DATA_SHARING_TYPE_DESCRIPTION,
@@ -67,7 +67,7 @@ export class DataSharingTermsComponent implements OnInit {
     this.formGroup = this.formBuilder.group({
       [this.typeControlKey]: DataSharingType.PRIVATE,
       [this.customTextControlKey]: [
-        {value: '', disabled: true},
+        { value: '', disabled: true },
         Validators.required,
       ],
     });

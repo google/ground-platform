@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
-import {List} from 'immutable';
-import {Subscription} from 'rxjs';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { List } from 'immutable';
+import { Subscription } from 'rxjs';
 
-import {TasksEditorComponent} from 'app/components/shared/tasks-editor/tasks-editor.component';
-import {Task} from 'app/models/task/task.model';
-import {TaskService} from 'app/services/task/task.service';
+import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
+import { Task } from 'app/models/task/task.model';
+import { TaskService } from 'app/services/task/task.service';
 
 @Component({
   selector: 'task-details',

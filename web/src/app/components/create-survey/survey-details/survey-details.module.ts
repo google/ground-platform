@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 
-import {SurveyDetailsComponent} from 'app/components/create-survey/survey-details/survey-details.component';
+import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
 
 @NgModule({
   declarations: [SurveyDetailsComponent],

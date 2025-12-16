@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {GoogleMapsModule} from '@angular/google-maps';
-import {MatDialog} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {List, Map} from 'immutable';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { GoogleMapsModule } from '@angular/google-maps';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { List, Map } from 'immutable';
 
-import {ImportDialogComponent} from 'app/components/shared/import-dialog/import-dialog.component';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Point} from 'app/models/geometry/point';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { ImportDialogComponent } from 'app/components/shared/import-dialog/import-dialog.component';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {LoiEditorComponent} from './loi-editor.component';
+import { LoiEditorComponent } from './loi-editor.component';
 
 describe('LoiEditorComponent', () => {
   let component: LoiEditorComponent;
@@ -71,7 +71,7 @@ describe('LoiEditorComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(() => {
@@ -125,7 +125,7 @@ describe('LoiEditorComponent', () => {
         importButton.click();
 
         expect(matDialogSpy.open).toHaveBeenCalledWith(ImportDialogComponent, {
-          data: {surveyId: survey.id, jobId: jobId2},
+          data: { surveyId: survey.id, jobId: jobId2 },
           width: '350px',
           maxHeight: '800px',
         });

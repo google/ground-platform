@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {Component, ViewChild} from '@angular/core';
-import {ActivatedRoute, Params} from '@angular/router';
-import {List} from 'immutable';
-import {Subscription} from 'rxjs';
+import { Component, ViewChild } from '@angular/core';
+import { ActivatedRoute, Params } from '@angular/router';
+import { List } from 'immutable';
+import { Subscription } from 'rxjs';
 
-import {LoiEditorComponent} from 'app/components/shared/loi-editor/loi-editor.component';
-import {TasksEditorComponent} from 'app/components/shared/tasks-editor/tasks-editor.component';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Task} from 'app/models/task/task.model';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {TaskService} from 'app/services/task/task.service';
+import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
+import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Task } from 'app/models/task/task.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { TaskService } from 'app/services/task/task.service';
 
 enum EditJobSection {
   TASKS,
@@ -134,7 +134,7 @@ export class EditJobComponent {
     );
 
     this.draftSurveyService.addOrUpdateJob(
-      this.job!.copyWith({tasks, strategy})
+      this.job!.copyWith({ tasks, strategy })
     );
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);

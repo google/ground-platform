@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {hash} from 'immutable';
+import { hash } from 'immutable';
 
 /**
  * A lightweight class used to store coordinates on the 2-dimensional Cartesian

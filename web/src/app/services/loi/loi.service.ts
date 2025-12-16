@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List} from 'immutable';
-import {Observable, ReplaySubject, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List } from 'immutable';
+import { Observable, ReplaySubject, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
-import {GeometryType} from 'app/models/geometry/geometry';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {SurveyDataVisibility, SurveyState} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { GeometryType } from 'app/models/geometry/geometry';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { SurveyDataVisibility, SurveyState } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
@@ -63,7 +63,7 @@ export class LocationOfInterestService {
 
     this.selectedLoi$ = this.selectedLoiId$.pipe(
       switchMap(loiId =>
-        this.lois$.pipe(map(lois => lois.find(({id}) => id === loiId)!))
+        this.lois$.pipe(map(lois => lois.find(({ id }) => id === loiId)!))
       )
     );
   }
@@ -122,7 +122,7 @@ export class LocationOfInterestService {
   }
 
   static getDisplayName(loi: LocationOfInterest): string {
-    const {customId, properties} = loi;
+    const { customId, properties } = loi;
     const name = properties?.get('name')?.toString()?.trim() || '';
     const loiId = customId?.trim() || '';
     if (name && loiId) {

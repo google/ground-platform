@@ -42,7 +42,7 @@ export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() index?: number;
   @Output() update = new EventEmitter();
   @Output() delete = new EventEmitter();
-  @ViewChild('optionInput', {static: true}) optionInput?: ElementRef;
+  @ViewChild('optionInput', { static: true }) optionInput?: ElementRef;
 
   optionGroup: FormGroup;
 

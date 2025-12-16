@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
-import {Map as ImmutableMap, List, Map} from 'immutable';
-import {Subject, of} from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { Map as ImmutableMap, List, Map } from 'immutable';
+import { Subject, of } from 'rxjs';
 
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Point} from 'app/models/geometry/point';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
-import {User} from 'app/models/user.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {polygonShellCoordsToPolygon} from 'testing/helpers';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import { Point } from 'app/models/geometry/point';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Survey } from 'app/models/survey.model';
+import { User } from 'app/models/user.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { polygonShellCoordsToPolygon } from 'testing/helpers';
 
 describe('LocationOfInterestService', () => {
   const activeSurvey$ = new Subject<Survey | null>();
@@ -55,15 +55,15 @@ describe('LocationOfInterestService', () => {
     };
     TestBed.configureTestingModule({
       providers: [
-        {provide: AuthService, useValue: {getUser$: () => user$}},
-        {provide: DataStoreService, useValue: {}},
+        { provide: AuthService, useValue: { getUser$: () => user$ } },
+        { provide: DataStoreService, useValue: {} },
         {
           provide: SurveyService,
           useValue: {
             getActiveSurvey$: () => activeSurvey$,
           },
         },
-        {provide: NavigationService, useValue: navigationService},
+        { provide: NavigationService, useValue: navigationService },
       ],
     });
   });

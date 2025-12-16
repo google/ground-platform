@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {ActivatedRoute} from '@angular/router';
-import {NEVER} from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { NEVER } from 'rxjs';
 
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
-import {MainPageComponent} from './main-page/main-page.component';
-import {MainPageContainerComponent} from './main-page-container.component';
+import { MainPageComponent } from './main-page/main-page.component';
+import { MainPageContainerComponent } from './main-page-container.component';
 
 const navigationService = {
   init: () => {},
@@ -47,9 +47,9 @@ describe('MainPageContainerComponent', () => {
     TestBed.configureTestingModule({
       declarations: [MainPageContainerComponent, MainPageComponent],
       providers: [
-        {provide: ActivatedRoute, useValue: route},
-        {provide: NavigationService, useValue: navigationService},
-        {provide: SurveyService, useValue: surveyService},
+        { provide: ActivatedRoute, useValue: route },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: SurveyService, useValue: surveyService },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

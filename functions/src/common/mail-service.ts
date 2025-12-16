@@ -16,7 +16,7 @@
 
 import * as nodemailer from 'nodemailer';
 import sanitizeHtml from 'sanitize-html';
-import {Datastore} from './datastore';
+import { Datastore } from './datastore';
 
 type MailConfig = {
   server?: MailServerConfig;
@@ -45,14 +45,14 @@ export class MailService {
   private sender_: string;
 
   constructor(mailServerConfig: MailServerConfig) {
-    const {host, port, username, password, sender} = mailServerConfig;
+    const { host, port, username, password, sender } = mailServerConfig;
 
     this.sender_ = sender || username;
 
     this.transporter_ = nodemailer.createTransport({
       host,
       port,
-      auth: {user: username, pass: password},
+      auth: { user: username, pass: password },
       sender: this.sender_,
     });
   }
@@ -63,7 +63,7 @@ export class MailService {
    * @param email - Email object containing recipient, subject, and body.
    */
   async sendMail(email: MailServiceEmail): Promise<void> {
-    const {html} = email;
+    const { html } = email;
 
     const safeHtml = sanitizeHtml(html, {
       allowedTags: ['br', 'a'],

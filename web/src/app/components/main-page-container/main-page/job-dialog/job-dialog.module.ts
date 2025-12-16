@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {DragDropModule} from '@angular/cdk/drag-drop';
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 
-import {InlineEditorModule} from 'app/components/shared/inline-editor/inline-editor.module';
+import { InlineEditorModule } from 'app/components/shared/inline-editor/inline-editor.module';
 
-import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
-import {JobDialogComponent} from './job-dialog.component';
-import {TaskEditorModule} from './task-editor/task-editor.module';
+import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
+import { JobDialogComponent } from './job-dialog.component';
+import { TaskEditorModule } from './task-editor/task-editor.module';
 
 @NgModule({
   declarations: [JobDialogComponent],

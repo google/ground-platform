@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatInputModule} from '@angular/material/input';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import {CreateSurveyComponent} from 'app/components/create-survey/create-survey.component';
-import {DataSharingTermsModule} from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.module';
-import {TaskDetailsModule} from 'app/components/create-survey/task-details/task-details.module';
-import {CopySurveyControlsModule} from 'app/components/shared/copy-survey-controls/copy-survey-controls.module';
-import {HeaderModule} from 'app/components/shared/header/header.module';
-import {ShareSurveyModule} from 'app/components/shared/share-survey/share-survey.module';
+import { CreateSurveyComponent } from 'app/components/create-survey/create-survey.component';
+import { DataSharingTermsModule } from 'app/components/create-survey/data-sharing-terms/data-sharing-terms.module';
+import { TaskDetailsModule } from 'app/components/create-survey/task-details/task-details.module';
+import { CopySurveyControlsModule } from 'app/components/shared/copy-survey-controls/copy-survey-controls.module';
+import { HeaderModule } from 'app/components/shared/header/header.module';
+import { ShareSurveyModule } from 'app/components/shared/share-survey/share-survey.module';
 
-import {JobDetailsModule} from './job-details/job-details.module';
-import {StepCardModule} from './step-card/step-card.module';
-import {SurveyDetailsModule} from './survey-details/survey-details.module';
-import {SurveyLoiModule} from './survey-loi/survey-loi.module';
+import { JobDetailsModule } from './job-details/job-details.module';
+import { StepCardModule } from './step-card/step-card.module';
+import { SurveyDetailsModule } from './survey-details/survey-details.module';
+import { SurveyLoiModule } from './survey-loi/survey-loi.module';
 
 @NgModule({
   declarations: [CreateSurveyComponent],

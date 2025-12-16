@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {registry} from './message-registry';
-import {GroundProtos} from '@ground/proto';
-import {toDocumentData} from './proto-to-firestore';
+import { registry } from './message-registry';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData } from './proto-to-firestore';
 
 import Pb = GroundProtos.ground.v1beta1;
 const s = registry.getFieldIds(Pb.Survey);
@@ -27,7 +27,7 @@ const t = registry.getFieldIds(Pb.Task);
 const st = registry.getFieldIds(Pb.Style);
 const dtq = registry.getFieldIds(Pb.Task.DateTimeQuestion);
 
-const {Job, Role, Style, Survey, Task, LinearRing, Coordinates} =
+const { Job, Role, Style, Survey, Task, LinearRing, Coordinates } =
   GroundProtos.ground.v1beta1;
 
 describe('toDocumentData()', () => {
@@ -43,34 +43,34 @@ describe('toDocumentData()', () => {
         [s.description]: 'Survey desc',
         [s.state]: Survey.State.STATE_UNSPECIFIED,
         [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
-        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED
+        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED,
       },
     },
     {
       desc: 'converts repeated message',
       input: new LinearRing({
         coordinates: [
-          new Coordinates({latitude: 5, longitude: 7}),
-          new Coordinates({latitude: 12, longitude: 23}),
-          new Coordinates({latitude: 9, longitude: 2}),
+          new Coordinates({ latitude: 5, longitude: 7 }),
+          new Coordinates({ latitude: 12, longitude: 23 }),
+          new Coordinates({ latitude: 9, longitude: 2 }),
         ],
       }),
       expected: {
         [lr.coordinates]: [
-          {[c.latitude]: 5, [c.longitude]: 7},
-          {[c.latitude]: 12, [c.longitude]: 23},
-          {[c.latitude]: 9, [c.longitude]: 2},
+          { [c.latitude]: 5, [c.longitude]: 7 },
+          { [c.latitude]: 12, [c.longitude]: 23 },
+          { [c.latitude]: 9, [c.longitude]: 2 },
         ],
       },
     },
     {
       desc: 'converts nested message',
       input: new Job({
-        style: new Style({color: '#112233'}),
+        style: new Style({ color: '#112233' }),
       }),
       expected: {
         [j.index]: 0,
-        [j.style]: {[st.color]: '#112233'},
+        [j.style]: { [st.color]: '#112233' },
       },
     },
     {
@@ -88,7 +88,7 @@ describe('toDocumentData()', () => {
         },
         [s.state]: Survey.State.STATE_UNSPECIFIED,
         [s.generalAccess]: Survey.GeneralAccess.GENERAL_ACCESS_UNSPECIFIED,
-        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED
+        [s.dataVisibility]: Survey.DataVisibility.DATA_VISIBILITY_UNSPECIFIED,
       },
     },
     {
@@ -113,16 +113,16 @@ describe('toDocumentData()', () => {
       desc: 'converts repeated message',
       input: new LinearRing({
         coordinates: [
-          new Coordinates({latitude: 5, longitude: 7}),
-          new Coordinates({latitude: 12, longitude: 23}),
-          new Coordinates({latitude: 9, longitude: 2}),
+          new Coordinates({ latitude: 5, longitude: 7 }),
+          new Coordinates({ latitude: 12, longitude: 23 }),
+          new Coordinates({ latitude: 9, longitude: 2 }),
         ],
       }),
       expected: {
         [lr.coordinates]: [
-          {[c.latitude]: 5, [c.longitude]: 7},
-          {[c.latitude]: 12, [c.longitude]: 23},
-          {[c.latitude]: 9, [c.longitude]: 2},
+          { [c.latitude]: 5, [c.longitude]: 7 },
+          { [c.latitude]: 12, [c.longitude]: 23 },
+          { [c.latitude]: 9, [c.longitude]: 2 },
         ],
       },
     },
@@ -137,10 +137,10 @@ describe('toDocumentData()', () => {
         [t.index]: 0,
         [t.required]: false,
         [t.level]: 0,
-        [t.textQuestion]: {'1': 1},
+        [t.textQuestion]: { '1': 1 },
       },
     },
-  ].forEach(({desc, input, expected}) =>
+  ].forEach(({ desc, input, expected }) =>
     it(desc, () => {
       const output = toDocumentData(input);
       expect(output).toEqual(expected);

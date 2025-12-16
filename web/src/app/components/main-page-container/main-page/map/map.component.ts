@@ -25,30 +25,30 @@ import {
   ViewChild,
   input,
 } from '@angular/core';
-import {toObservable} from '@angular/core/rxjs-interop';
-import {GoogleMap} from '@angular/google-maps';
-import {Map as ImmutableMap, List} from 'immutable';
-import {BehaviorSubject, Observable, Subscription, combineLatest} from 'rxjs';
-import {filter, map} from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { GoogleMap } from '@angular/google-maps';
+import { Map as ImmutableMap, List } from 'immutable';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Geometry, GeometryType} from 'app/models/geometry/geometry';
-import {MultiPolygon} from 'app/models/geometry/multi-polygon';
-import {Point} from 'app/models/geometry/point';
-import {Polygon} from 'app/models/geometry/polygon';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Survey} from 'app/models/survey.model';
-import {TaskType} from 'app/models/task/task.model';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Geometry, GeometryType } from 'app/models/geometry/geometry';
+import { MultiPolygon } from 'app/models/geometry/multi-polygon';
+import { Point } from 'app/models/geometry/point';
+import { Polygon } from 'app/models/geometry/polygon';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Survey } from 'app/models/survey.model';
+import { TaskType } from 'app/models/task/task.model';
 import {
   DrawingToolsService,
   EditMode,
 } from 'app/services/drawing-tools/drawing-tools.service';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SubmissionService} from 'app/services/submission/submission.service';
+import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SubmissionService } from 'app/services/submission/submission.service';
 
 // To make ESLint happy:
 /*global google*/
@@ -407,7 +407,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
         : survey.getJob(loi.jobId)?.name;
 
       if (loi.geometry instanceof Point) {
-        const {id, jobId, geometry} = loi;
+        const { id, jobId, geometry } = loi;
         const marker = this.addLocationOfInterestMarkerToMap(
           id,
           jobId,
@@ -461,7 +461,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     color: string | undefined = this.DEFAULT_MARKER_COLOR,
     markerText?: string | undefined
   ): google.maps.marker.AdvancedMarkerElement {
-    const {y: latitude, x: longitude} = geometry.coord;
+    const { y: latitude, x: longitude } = geometry.coord;
 
     const options: google.maps.marker.AdvancedMarkerElementOptions = {
       map: this.map.googleMap,
@@ -668,7 +668,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const polygons = this.polygons.get(locationOfInterestId);
 
     polygons?.forEach(polygon =>
-      polygon.setOptions({strokeWeight: enlargedPolygonStrokeWeight})
+      polygon.setOptions({ strokeWeight: enlargedPolygonStrokeWeight })
     );
 
     this.fitMapToLocationsOfInterest(
@@ -700,7 +700,9 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     const linearRings = [polygonModel.shell, ...polygonModel.holes];
     const paths = linearRings.map(linearRing =>
       linearRing.points
-        .map(({x, y}: {x: number; y: number}) => new google.maps.LatLng(y, x))
+        .map(
+          ({ x, y }: { x: number; y: number }) => new google.maps.LatLng(y, x)
+        )
         .toJS()
     );
     return new google.maps.Polygon({

@@ -16,21 +16,21 @@
 
 import '@angular/localize/init';
 
-import {Component, effect} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {List} from 'immutable';
+import { Component, effect } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { List } from 'immutable';
 
-import {Job} from 'app/models/job.model';
-import {Survey} from 'app/models/survey.model';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {JobService} from 'app/services/job/job.service';
+import { Job } from 'app/models/job.model';
+import { Survey } from 'app/models/survey.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { JobService } from 'app/services/job/job.service';
 import {
   SURVEYS_SHARE,
   SURVEY_SEGMENT,
 } from 'app/services/navigation/navigation.constants';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {environment} from 'environments/environment';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { environment } from 'environments/environment';
 
 import {
   DialogData,
@@ -135,7 +135,7 @@ export class EditSurveyComponent {
       autoFocus: [DialogType.AddJob, DialogType.RenameJob].includes(dialogType)
         ? `#${JobDialogComponent.JOB_NAME_FIELD_ID}`
         : 'first-tabbable',
-      data: {dialogType, jobName: job.name ?? ''},
+      data: { dialogType, jobName: job.name ?? '' },
       panelClass: 'small-width-dialog',
     });
 

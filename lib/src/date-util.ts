@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from '@ground/proto';
+import { GroundProtos } from '@ground/proto';
 import Long from 'long';
 
 export function timestampToInt(

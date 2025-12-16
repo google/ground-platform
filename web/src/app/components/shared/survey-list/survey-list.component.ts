@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {List, Map} from 'immutable';
-import {Subscription} from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { List, Map } from 'immutable';
+import { Subscription } from 'rxjs';
 
 import {
   DialogData,
@@ -29,9 +29,9 @@ import {
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 export enum SurveyListFilter {
   ALL,
@@ -125,7 +125,7 @@ export class SurveyListComponent implements OnInit, OnDestroy {
     if (!isPasslisted) {
       this.dialog
         .open(JobDialogComponent, {
-          data: {dialogType: DialogType.SurveyCreationDenied},
+          data: { dialogType: DialogType.SurveyCreationDenied },
           panelClass: 'small-width-dialog',
         })
         .afterClosed()

@@ -2,7 +2,6 @@
   "name": "@ground/e2e-tests",
   "version": "0.0.1",
   "description": "Automated testing of the Ground platform.",
-  "type": "module",
   "scripts": {
     "test:create": "tsx node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",
     "test:create:debug": "tsx --inspect node_modules/jasmine/bin/jasmine spec/create-survey.spec.ts",

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {MatDialogModule} from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
-import {Router} from '@angular/router';
-import {NEVER, of} from 'rxjs';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
+import { NEVER, of } from 'rxjs';
 
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {SurveyHeaderComponent} from './survey-header.component';
+import { SurveyHeaderComponent } from './survey-header.component';
 
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
@@ -37,7 +37,7 @@ describe('SurveyHeaderComponent', () => {
       providers: [
         {
           provide: DataStoreService,
-          useValue: {getAccessDeniedMessage: () => ''},
+          useValue: { getAccessDeniedMessage: () => '' },
         },
         {
           provide: SurveyService,

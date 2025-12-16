@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, ReplaySubject, firstValueFrom, of} from 'rxjs';
-import {shareReplay, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { Observable, ReplaySubject, firstValueFrom, of } from 'rxjs';
+import { shareReplay, switchMap } from 'rxjs/operators';
 
-import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey, SurveyState} from 'app/models/survey.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SURVEY_ID_NEW} from 'app/services/navigation/navigation.constants';
-import {NavigationService} from 'app/services/navigation/navigation.service';
+import { Role } from 'app/models/role.model';
+import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
+import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Injectable({
   providedIn: 'root',
@@ -81,7 +81,7 @@ export class SurveyService {
     if (!user) {
       return new Observable<List<Survey>>();
     }
-    const {email: userEmail} = user;
+    const { email: userEmail } = user;
     return this.dataStore.loadAccessibleSurveys$(userEmail);
   }
 
@@ -121,7 +121,10 @@ export class SurveyService {
    * @param state the new status of the survey.
    */
   updateState(state: SurveyState): Promise<void> {
-    return this.dataStore.updateSurvey({...this.activeSurvey, state} as Survey);
+    return this.dataStore.updateSurvey({
+      ...this.activeSurvey,
+      state,
+    } as Survey);
   }
 
   /**
@@ -131,7 +134,7 @@ export class SurveyService {
    * @param acl the new access control list of the survey.
    */
   updateAcl(acl: Map<string, Role>): Promise<void> {
-    return this.dataStore.updateSurvey({...this.activeSurvey, acl} as Survey);
+    return this.dataStore.updateSurvey({ ...this.activeSurvey, acl } as Survey);
   }
 
   /**
@@ -146,7 +149,7 @@ export class SurveyService {
   ): Promise<void> {
     return this.dataStore.updateSurvey({
       ...this.activeSurvey,
-      dataSharingTerms: {type, ...(customText && {customText})},
+      dataSharingTerms: { type, ...(customText && { customText }) },
     } as Survey);
   }
 

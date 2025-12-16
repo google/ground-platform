@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {List, hash, is} from 'immutable';
+import { List, hash, is } from 'immutable';
 
-import {Geometry, GeometryType} from './geometry';
-import {LinearRing} from './linear-ring';
+import { Geometry, GeometryType } from './geometry';
+import { LinearRing } from './linear-ring';
 
 /**
  * Represents a polygon with linear edges, which may include holes. The outer
@@ -50,7 +50,9 @@ export class Polygon implements Geometry {
 
   getArea(): number {
     return google.maps.geometry.spherical.computeArea(
-      this.shell.points.map(({x, y}) => new google.maps.LatLng(y, x)).toArray()
+      this.shell.points
+        .map(({ x, y }) => new google.maps.LatLng(y, x))
+        .toArray()
     );
   }
 }

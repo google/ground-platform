@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {Map} from 'immutable';
+import { DocumentData } from '@angular/fire/firestore';
+import { toMessage } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { Map } from 'immutable';
 
-import {LocationOfInterest} from 'app/models/loi.model';
+import { LocationOfInterest } from 'app/models/loi.model';
 
-import {geometryPbToModel} from './geometry-data-converter';
+import { geometryPbToModel } from './geometry-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
 
 function propertiesPbToModel(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Map<string, string | number> {
-  const properties: {[k: string]: string | number} = {};
+  const properties: { [k: string]: string | number } = {};
   for (const k of Object.keys(pb)) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {

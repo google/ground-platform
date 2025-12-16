@@ -1,55 +1,6 @@
 {
-  "extends": [
-    "./node_modules/gts",
-    "plugin:import/recommended",
-    "plugin:import/typescript"
-  ],
-  "env": {
-    "jasmine": true
-  },
-  "rules": {
-    "eqeqeq": ["error", "always", {"null": "ignore"}],
-    "node/no-unpublished-import": "off",
-    "node/no-unpublished-require": "off",
-    "@typescript-eslint/no-unused-vars": ["off", { "varsIgnorePattern": "_.*" }],
-    "object-curly-spacing": ["error", "always"],
-    "sort-imports": [
-      "error",
-      {
-        "ignoreCase": false,
-        "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false,
-        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
-        "allowSeparatedGroups": true
-      }
-    ],
-    "import/no-unresolved": "error",
-    "import/order": [
-      "error",
-      {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          ["sibling", "parent"],
-          "index",
-          "unknown"
-        ],
-        "newlines-between": "always",
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
-        }
-      }
-    ]
-  },
+  "extends": "../.eslintrc.json",
   "overrides": [
-    {
-      "files": ["*.ts"],
-      "extends": [
-        "plugin:prettier/recommended"
-      ]
-    },
     {
       "files": ["*.html"],
       "extends": ["plugin:@angular-eslint/template/recommended"],
@@ -66,7 +17,7 @@
   "settings": {
     "import/resolver": {
       "typescript": {
-        "project": "./web/tsconfig.json"
+        "project": "./tsconfig.json"
       }
     }
   }

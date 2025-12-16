@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {GroundProtos, registryJson} from '@ground/proto';
-import {Constructor} from 'protobufjs';
+import { GroundProtos, registryJson } from '@ground/proto';
+import { Constructor } from 'protobufjs';
 
 /** Path of message or enum type declaration in definition files and registry. */
 export type MessageTypePath = string[];
@@ -35,13 +35,13 @@ export interface FieldDescriptor {
 
 export interface MessageDescriptor {
   // Normal proto fields.
-  fields?: {[fieldName: string]: FieldDescriptor};
+  fields?: { [fieldName: string]: FieldDescriptor };
   // Possible oneof selector values.
-  oneofs?: {[oneofName: string]: OneOfDescriptor};
+  oneofs?: { [oneofName: string]: OneOfDescriptor };
   // Nested message type definition.
-  nested?: {[nestedMessageName: string]: MessageDescriptor};
+  nested?: { [nestedMessageName: string]: MessageDescriptor };
   // Enum definitions, including valid values.
-  values?: {[enumValueName: string]: number};
+  values?: { [enumValueName: string]: number };
 }
 
 export interface OneOfDescriptor {
@@ -50,7 +50,7 @@ export interface OneOfDescriptor {
 
 export interface MessageRegistryJson {
   options?: ProtoOptions;
-  nested: {[messageName: string]: MessageDescriptor};
+  nested: { [messageName: string]: MessageDescriptor };
 }
 
 export class MessageRegistry {
@@ -77,10 +77,10 @@ export class MessageRegistry {
    * Returns a dictionary containing the numbers of all fields in a
    * message definition, keyed by field name. Throws an error if not found.
    */
-  getFieldIds(constructor: any): {[key: string]: string} {
+  getFieldIds(constructor: any): { [key: string]: string } {
     const desc = this.getMessageDescriptor(constructor);
     if (!desc) throw new Error(`Unknown constructor ${constructor.name}`);
-    const map: {[key: string]: string} = {};
+    const map: { [key: string]: string } = {};
     if (desc.fields) {
       Object.keys(desc.fields).forEach(
         name => (map[name] = desc.fields![name].id?.toString())

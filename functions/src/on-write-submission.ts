@@ -15,11 +15,11 @@
  */
 
 // import * as admin from 'firebase-admin';
-import {Change, EventContext} from 'firebase-functions';
-import {DocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {getDatastore} from './common/context';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import { Change, EventContext } from 'firebase-functions';
+import { DocumentSnapshot } from 'firebase-functions/v1/firestore';
+import { getDatastore } from './common/context';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sb = registry.getFieldIds(Pb.Submission);

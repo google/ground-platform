@@ -28,9 +28,9 @@ import {
   MatDialogConfig,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {ColorEvent} from 'ngx-color';
+import { ColorEvent } from 'ngx-color';
 
-import {Job} from 'app/models/job.model';
+import { Job } from 'app/models/job.model';
 
 @Component({
   selector: 'ground-color-picker',
@@ -48,7 +48,7 @@ export class ColorPickerComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     matDialogRef: MatDialogRef<ColorPickerComponent>,
-    @Inject(MAT_DIALOG_DATA) data: {trigger: ElementRef}
+    @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }
   ) {
     this.matDialogRef = matDialogRef;
     this.triggerElementRef = data.trigger;

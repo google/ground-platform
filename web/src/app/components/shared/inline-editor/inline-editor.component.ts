@@ -39,13 +39,13 @@ export class InlineEditorComponent {
   constructor() {}
 
   onFocusOut(event: FocusEvent) {
-    const {target} = event;
+    const { target } = event;
     if (!target || !(target instanceof HTMLInputElement)) return;
     this.focusOut.emit(target.value);
   }
 
   handleKeyPress(event: KeyboardEvent) {
-    const {key, target} = event;
+    const { key, target } = event;
     if (!target || !(target instanceof HTMLInputElement)) return;
     switch (key) {
       case 'Enter':

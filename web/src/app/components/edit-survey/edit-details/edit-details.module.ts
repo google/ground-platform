@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 
-import {SurveyDetailsModule} from 'app/components/create-survey/survey-details/survey-details.module';
-import {EditDetailsComponent} from 'app/components/edit-survey/edit-details/edit-details.component';
+import { SurveyDetailsModule } from 'app/components/create-survey/survey-details/survey-details.module';
+import { EditDetailsComponent } from 'app/components/edit-survey/edit-details/edit-details.component';
 
 @NgModule({
   declarations: [EditDetailsComponent],

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {AutoSizeInputModule} from 'ngx-autosize-input';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { AutoSizeInputModule } from 'ngx-autosize-input';
 
-import {InlineEditorComponent} from './inline-editor.component';
+import { InlineEditorComponent } from './inline-editor.component';
 
 @NgModule({
   declarations: [InlineEditorComponent],
