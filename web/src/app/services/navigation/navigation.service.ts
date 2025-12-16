@@ -33,8 +33,34 @@ import {
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 
+import {
+  ABOUT,
+  ANDROID_SEGMENT,
+  ERROR,
+  JOB_ID_NEW,
+  JOB_SEGMENT,
+  LOI_ID,
+  LOI_SEGMENT,
+  SIGN_IN_SEGMENT,
+  SUBMISSION_ID,
+  SUBMISSION_ID_NEW,
+  SUBMISSION_SEGMENT,
+  SURVEYS_CREATE,
+  SURVEYS_EDIT,
+  SURVEYS_SEGMENT,
+  SURVEYS_SHARE,
+  SURVEY_ID,
+  SURVEY_ID_NEW,
+  SURVEY_SEGMENT,
+  SideNavMode,
+  TASK_ID,
+  TASK_SEGMENT,
+  TERMS,
+} from './navigation.constants';
 import {UrlParams} from './url-params';
 import {DataStoreService} from '../data-store/data-store.service';
+
+export {SideNavMode} from './navigation.constants';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -44,28 +70,6 @@ import {DataStoreService} from '../data-store/data-store.service';
   providedIn: 'root',
 })
 export class NavigationService implements OnDestroy {
-  static readonly LOI_SEGMENT = 'site';
-  static readonly LOI_ID = 'siteId';
-  static readonly JOB_ID_NEW = 'new';
-  static readonly SUBMISSION_SEGMENT = 'submission';
-  static readonly SUBMISSION_ID = 'submissionId';
-  static readonly SUBMISSION_ID_NEW = 'new';
-  static readonly SURVEY_ID_NEW = 'new';
-  static readonly SURVEY_ID = 'surveyId';
-  static readonly SURVEY_SEGMENT = 'survey';
-  static readonly SIGN_IN_SEGMENT = 'signin';
-  static readonly SURVEYS_SEGMENT = 'surveys';
-  static readonly SURVEYS_CREATE = 'create';
-  static readonly SURVEYS_EDIT = 'edit';
-  static readonly SURVEYS_SHARE = 'share';
-  static readonly TASK_SEGMENT = 'task';
-  static readonly TASK_ID = 'taskId';
-  static readonly JOB_SEGMENT = 'job';
-  static readonly ERROR = 'error';
-  static readonly ABOUT = 'about';
-  static readonly TERMS = 'terms';
-  static readonly ANDROID_SEGMENT = 'android';
-
   private sidePanelExpanded = true;
 
   private urlSignal = signal<string>('');
@@ -371,30 +375,3 @@ export class NavigationService implements OnDestroy {
     this.subscription.unsubscribe();
   }
 }
-
-export enum SideNavMode {
-  JOB_LIST = 1,
-  SUBMISSION = 2,
-}
-
-const {
-  ABOUT,
-  ERROR,
-  LOI_ID,
-  LOI_SEGMENT,
-  JOB_SEGMENT,
-  SIGN_IN_SEGMENT,
-  SUBMISSION_ID,
-  SUBMISSION_SEGMENT,
-  SURVEY_ID,
-  SURVEY_ID_NEW,
-  SURVEY_SEGMENT,
-  SURVEYS_CREATE,
-  SURVEYS_EDIT,
-  SURVEYS_SHARE,
-  SURVEYS_SEGMENT,
-  TASK_ID,
-  TASK_SEGMENT,
-  TERMS,
-  ANDROID_SEGMENT,
-} = NavigationService;

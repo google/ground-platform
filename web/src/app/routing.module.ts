@@ -17,43 +17,47 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {SignInPageComponent} from 'app/components/sign-in-page/sign-in-page.component';
-import {SignInPageModule} from 'app/components/sign-in-page/sign-in-page.module';
-import {SurveyListComponent} from 'app/components/survey-list/survey-list.component';
-import {SurveyListModule} from 'app/components/survey-list/survey-list.module';
-import {CreateSurveyComponent} from 'app/pages/create-survey/create-survey.component';
-import {CreateSurveyModule} from 'app/pages/create-survey/create-survey.module';
-import {MainPageContainerComponent} from 'app/pages/main-page-container/main-page-container.component';
-import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
+import {CreateSurveyComponent} from 'app/components/create-survey/create-survey.component';
+import {CreateSurveyModule} from 'app/components/create-survey/create-survey.module';
+import {MainPageContainerComponent} from 'app/components/main-page-container/main-page-container.component';
+import {MainPageContainerModule} from 'app/components/main-page-container/main-page-container.module';
+import {SignInPageComponent} from 'app/components/shared/sign-in-page/sign-in-page.component';
+import {SignInPageModule} from 'app/components/shared/sign-in-page/sign-in-page.module';
+import {SurveyListComponent} from 'app/components/shared/survey-list/survey-list.component';
+import {SurveyListModule} from 'app/components/shared/survey-list/survey-list.module';
 import {AuthGuard} from 'app/services/auth/auth.guard';
 import {passlistGuard} from 'app/services/auth/passlist.guard';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-
-import {ShareSurveyComponent} from './components/share-survey/share-survey.component';
-import {AboutComponent} from './pages/about/about.component';
-import {AndroidIntentLandingPageComponent} from './pages/android-intent-landing-page/android-intent-landing-page.component';
-import {EditDetailsComponent} from './pages/edit-survey/edit-details/edit-details.component';
-import {EditJobComponent} from './pages/edit-survey/edit-job/edit-job.component';
-import {EditSurveyComponent} from './pages/edit-survey/edit-survey.component';
-import {EditSurveyModule} from './pages/edit-survey/edit-survey.module';
-import {SurveyJsonComponent} from './pages/edit-survey/survey-json/survey-json.component';
-import {ErrorComponent} from './pages/error/error.component';
-import {ErrorModule} from './pages/error/error.module';
-import {TermsComponent} from './pages/terms/terms.component';
-
-const {
+import {
+  ABOUT,
+  ANDROID_SEGMENT,
+  ERROR,
   LOI_ID,
   LOI_SEGMENT,
   SIGN_IN_SEGMENT,
   SUBMISSION_ID,
   SUBMISSION_SEGMENT,
-  SURVEY_ID,
   SURVEYS_CREATE,
   SURVEYS_EDIT,
   SURVEYS_SEGMENT,
+  SURVEY_ID,
+  SURVEY_SEGMENT,
   TASK_ID,
   TASK_SEGMENT,
-} = NavigationService;
+  TERMS,
+} from 'app/services/navigation/navigation.constants';
+import {NavigationService} from 'app/services/navigation/navigation.service';
+
+import {AboutComponent} from './components/about/about.component';
+import {AndroidIntentLandingPageComponent} from './components/android-intent-landing-page/android-intent-landing-page.component';
+import {EditDetailsComponent} from './components/edit-survey/edit-details/edit-details.component';
+import {EditJobComponent} from './components/edit-survey/edit-job/edit-job.component';
+import {EditSurveyComponent} from './components/edit-survey/edit-survey.component';
+import {EditSurveyModule} from './components/edit-survey/edit-survey.module';
+import {SurveyJsonComponent} from './components/edit-survey/survey-json/survey-json.component';
+import {ErrorComponent} from './components/error/error.component';
+import {ErrorModule} from './components/error/error.module';
+import {ShareSurveyComponent} from './components/shared/share-survey/share-survey.component';
+import {TermsComponent} from './components/terms/terms.component';
 
 const routes: Routes = [
   {
@@ -82,7 +86,7 @@ const routes: Routes = [
     canActivate: [AuthGuard, passlistGuard],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
+    path: `${SURVEY_SEGMENT}/:${SURVEY_ID}/${SURVEYS_EDIT}`,
     component: EditSurveyComponent,
     canActivate: [AuthGuard],
     children: [
@@ -93,7 +97,7 @@ const routes: Routes = [
     ],
   },
   {
-    path: `${NavigationService.SURVEY_SEGMENT}/:${SURVEY_ID}`,
+    path: `${SURVEY_SEGMENT}/:${SURVEY_ID}`,
     component: MainPageContainerComponent,
     canActivate: [AuthGuard],
     children: [
@@ -116,26 +120,26 @@ const routes: Routes = [
     ],
   },
   {
-    path: NavigationService.ERROR,
+    path: ERROR,
     component: ErrorComponent,
     canActivate: [AuthGuard],
   },
   {
-    path: NavigationService.ABOUT,
+    path: ABOUT,
     component: AboutComponent,
   },
   {
-    path: `${NavigationService.ANDROID_SEGMENT}`,
+    path: `${ANDROID_SEGMENT}`,
     component: AndroidIntentLandingPageComponent,
     children: [{path: '**', component: AndroidIntentLandingPageComponent}],
   },
   {
-    path: NavigationService.TERMS,
+    path: TERMS,
     component: TermsComponent,
     canActivate: [AuthGuard],
   },
 ];
-const config = RouterModule.forRoot(routes, {});
+const config = RouterModule.forRoot(routes, {bindToComponentInputs: true});
 
 @NgModule({
   imports: [config],

@@ -41,7 +41,7 @@ import {GoogleAuthProvider} from 'firebase/auth';
 import {FirebaseUIModule, firebaseui} from 'firebaseui-angular';
 
 import {AppComponent} from 'app/app.component';
-import {MainPageContainerModule} from 'app/pages/main-page-container/main-page-container.module';
+import {MainPageContainerModule} from 'app/components/main-page-container/main-page-container.module';
 import {AppRoutingModule} from 'app/routing.module';
 import {environment} from 'environments/environment';
 
