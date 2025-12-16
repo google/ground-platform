@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { SideNavMode } from './navigation.constants';
+export enum SideNavMode {
+  JOB_LIST = 1,
+  SUBMISSION = 2,
+}
 
 export class UrlParams {
   public sideNavMode: SideNavMode | null;

@@ -20,8 +20,8 @@ import { Observable } from 'rxjs';
 import { Survey } from 'app/models/survey.model';
 import {
   NavigationService,
-  SideNavMode,
 } from 'app/services/navigation/navigation.service';
+import { SideNavMode } from 'app/services/navigation/url-params';
 
 @Component({
   selector: 'ground-side-panel',

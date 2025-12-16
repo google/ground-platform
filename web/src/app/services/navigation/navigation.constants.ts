@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-export enum SideNavMode {
-  JOB_LIST = 1,
-  SUBMISSION = 2,
-}
+
 
 export const LOI_SEGMENT = 'site';
 export const LOI_ID = 'siteId';

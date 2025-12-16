@@ -51,12 +51,12 @@ import {
   SURVEY_ID,
   SURVEY_ID_NEW,
   SURVEY_SEGMENT,
-  SideNavMode,
+
   TASK_ID,
   TASK_SEGMENT,
   TERMS,
 } from './navigation.constants';
-import { UrlParams } from './url-params';
+import { SideNavMode, UrlParams } from './url-params';
 import { DataStoreService } from '../data-store/data-store.service';
 
 /**
