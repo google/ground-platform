@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, effect} from '@angular/core';
+import {Component, OnInit, effect, input} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 
 import {Survey} from 'app/models/survey.model';
 import {AuthService} from 'app/services/auth/auth.service';
 import {LocationOfInterestService} from 'app/services/loi/loi.service';
+import {JOB_ID_NEW} from 'app/services/navigation/navigation.constants';
 import {NavigationService} from 'app/services/navigation/navigation.service';
 import {SubmissionService} from 'app/services/submission/submission.service';
 import {SurveyService} from 'app/services/survey/survey.service';
@@ -39,11 +40,10 @@ import {TitleDialogComponent} from './title-dialog/title-dialog.component';
   styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit {
+  activeSurvey = input.required<Survey>();
   private urlParamsSignal = this.navigationService.getUrlParams();
 
-  activeSurvey$: Observable<Survey>;
   subscription: Subscription = new Subscription();
-  shouldEnableDrawingTools = false;
   showSubmissionPanel: Boolean = false;
 
   constructor(
@@ -54,8 +54,6 @@ export class MainPageComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog
   ) {
-    this.activeSurvey$ = this.surveyService.getActiveSurvey$();
-
     effect(() => {
       const {loiId, submissionId} = this.urlParamsSignal();
       if (loiId) this.loiService.selectLocationOfInterest(loiId);
@@ -68,9 +66,7 @@ export class MainPageComponent implements OnInit {
     this.subscription.add(
       this.navigationService
         .getSurveyId$()
-        .subscribe(
-          id => id === NavigationService.JOB_ID_NEW && this.showTitleDialog()
-        )
+        .subscribe(id => id === JOB_ID_NEW && this.showTitleDialog())
     );
     // Redirect to sign in page if user is not authenticated.
     this.subscription.add(

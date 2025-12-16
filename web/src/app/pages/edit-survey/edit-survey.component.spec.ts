@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-import {WritableSignal, signal} from '@angular/core';
+import {NO_ERRORS_SCHEMA, WritableSignal, signal} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
+  discardPeriodicTasks,
   fakeAsync,
+  flush,
   tick,
   waitForAsync,
 } from '@angular/core/testing';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {By} from '@angular/platform-browser';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {Map} from 'immutable';
@@ -106,10 +112,13 @@ describe('EditSurveyComponent', () => {
         'getEditSurveyPageSignal',
         'getSurveyId$',
         'getSurveyId',
+        'navigateToEditJob',
+        'navigateToEditSurvey',
       ]
     );
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
     navigationServiceSpy.getSurveyId.and.returnValue(surveyIdSignal);
+    navigationServiceSpy.getEditSurveyPageSignal.and.returnValue(signal(''));
 
     route = new ActivatedRouteStub();
     surveyServiceSpy = jasmine.createSpyObj<SurveyService>('SurveyService', [
@@ -121,11 +130,12 @@ describe('EditSurveyComponent', () => {
 
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
-      ['init', 'getSurvey$', 'addOrUpdateJob', 'deleteJob']
+      ['init', 'getSurvey$', 'addOrUpdateJob', 'deleteJob', 'getSurvey']
     );
     draftSurveyServiceSpy.getSurvey$.and.returnValue(
       new BehaviorSubject<Survey>(survey)
     );
+    draftSurveyServiceSpy.getSurvey.and.returnValue(survey);
 
     jobServiceSpy = jasmine.createSpyObj<JobService>('JobService', [
       'createNewJob',
@@ -133,6 +143,7 @@ describe('EditSurveyComponent', () => {
       'getNextColor',
     ]);
     jobServiceSpy.createNewJob.and.returnValue(newJob);
+    jobServiceSpy.duplicateJob.and.returnValue(newJob);
     jobServiceSpy.getNextColor.and.returnValue(undefined);
 
     dataStoreServiceSpy = jasmine.createSpyObj<DataStoreService>(
@@ -148,8 +159,15 @@ describe('EditSurveyComponent', () => {
     dialogSpy.open.and.returnValue(dialogRefSpy);
 
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [
+        RouterTestingModule,
+        MatDividerModule,
+        MatMenuModule,
+        MatProgressSpinnerModule,
+        NoopAnimationsModule,
+      ],
       declarations: [EditSurveyComponent],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {provide: NavigationService, useValue: navigationServiceSpy},
         {provide: SurveyService, useValue: surveyServiceSpy},
@@ -193,6 +211,9 @@ describe('EditSurveyComponent', () => {
       surveyIdSignal.set(surveyId);
       surveyId$.next(surveyId);
       activeSurvey$.next(survey);
+      // Manually set survey to ensure it's available for template rendering
+      // bypassing potential async effect timing issues in tests.
+      fixture.componentInstance.survey = survey;
       tick();
       fixture.detectChanges();
     }));
@@ -233,7 +254,7 @@ describe('EditSurveyComponent', () => {
     });
 
     describe('add/rename/duplicate/delete a job', () => {
-      it('add a job', () => {
+      it('add a job', fakeAsync(() => {
         const addButton = fixture.debugElement.query(By.css('#add-button'))
           .nativeElement as HTMLElement;
         const newJobName = 'new job name';
@@ -246,35 +267,45 @@ describe('EditSurveyComponent', () => {
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           newJob.copyWith({name: newJobName})
         );
-      });
+        flush();
+        discardPeriodicTasks();
+      }));
 
-      it('rename a job', () => {
+      it('rename a job', fakeAsync(() => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
-        const renameButton = fixture.debugElement.query(
-          By.css('#rename-button-0')
-        ).nativeElement as HTMLElement;
         const newJobName = 'new job name';
         dialogRefSpy.afterClosed.and.returnValue(
           of({dialogType: DialogType.RenameJob, jobName: newJobName})
         );
 
         menuButton.click();
+        fixture.detectChanges();
+        tick();
+
+        const renameButton = document.querySelector(
+          '#rename-button-0'
+        ) as HTMLElement;
         renameButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
           job1.copyWith({name: newJobName})
         );
-      });
+        flush();
+        discardPeriodicTasks();
+      }));
 
-      it('duplicate a job', () => {
+      it('duplicate a job', fakeAsync(() => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
-        const duplicateButton = fixture.debugElement.query(
-          By.css('#duplicate-button-0')
-        ).nativeElement as HTMLElement;
 
         menuButton.click();
+        fixture.detectChanges();
+        tick();
+
+        const duplicateButton = document.querySelector(
+          '#duplicate-button-0'
+        ) as HTMLElement;
         duplicateButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
@@ -284,23 +315,30 @@ describe('EditSurveyComponent', () => {
           ),
           true
         );
-      });
+        flush();
+        discardPeriodicTasks();
+      }));
 
-      it('delete a job', () => {
+      it('delete a job', fakeAsync(() => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
-        const deleteButton = fixture.debugElement.query(
-          By.css('#delete-button-0')
-        ).nativeElement as HTMLElement;
         dialogRefSpy.afterClosed.and.returnValue(
           of({dialogType: DialogType.DeleteJob, jobName: ''})
         );
 
         menuButton.click();
+        fixture.detectChanges();
+        tick();
+
+        const deleteButton = document.querySelector(
+          '#delete-button-0'
+        ) as HTMLElement;
         deleteButton.click();
 
         expect(draftSurveyServiceSpy.deleteJob).toHaveBeenCalledOnceWith(job1);
-      });
+        flush();
+        discardPeriodicTasks();
+      }));
     });
   });
 });

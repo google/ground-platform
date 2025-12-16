@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, computed, input} from '@angular/core';
 import {List} from 'immutable';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/internal/operators/map';
 
 import {Job} from 'app/models/job.model';
+import {Survey} from 'app/models/survey.model';
 import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
 
 @Component({
   selector: 'ground-job-list',
@@ -29,19 +27,18 @@ import {SurveyService} from 'app/services/survey/survey.service';
   styleUrls: ['./job-list.component.scss'],
 })
 export class JobListComponent {
-  readonly jobs$: Observable<List<Job>>;
+  activeSurvey = input<Survey>();
+  readonly jobs = computed(() => {
+    const survey = this.activeSurvey();
+    return survey
+      ? List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)
+      : List<Job>();
+  });
 
-  constructor(
-    readonly surveyService: SurveyService,
-    readonly navigationService: NavigationService
-  ) {
-    this.jobs$ = surveyService
-      .getActiveSurvey$()
-      .pipe(
-        map(survey =>
-          List(survey.jobs.valueSeq().toArray()).sortBy(l => l.index)
-        )
-      );
+  constructor(readonly navigationService: NavigationService) {}
+
+  trackById(index: number, job: Job): string {
+    return job.id;
   }
 
   isSidePanelExpanded() {

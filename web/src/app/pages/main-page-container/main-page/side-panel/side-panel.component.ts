@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {Observable} from 'rxjs';
 
+import {Survey} from 'app/models/survey.model';
 import {
   NavigationService,
   SideNavMode,
@@ -28,8 +29,9 @@ import {
   styleUrls: ['./side-panel.component.css'],
 })
 export class SidePanelComponent {
+  activeSurvey = input<Survey>();
   readonly sideNavMode = SideNavMode;
-  readonly sideNavMode$: Observable<SideNavMode>;
+  readonly sideNavMode$: Observable<SideNavMode | null>;
 
   constructor(private navigationService: NavigationService) {
     this.sideNavMode$ = this.navigationService.getSideNavMode$();

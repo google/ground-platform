@@ -30,7 +30,7 @@ Set up your environment by following instructions in "[first-time setup](https:/
 ### 1. Install deps
 
 ```bash 
-npm run ci-all
+npm install
 ```
 
 ### 2. Build and run locally

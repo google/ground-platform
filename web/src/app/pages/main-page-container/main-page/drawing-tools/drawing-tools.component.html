@@ -21,7 +21,7 @@
   [(value)]="selectedValue"
 >
   <mat-button-toggle
-    *ngIf="!(jobs$ | async)?.isEmpty()"
+    *ngIf="!jobs().isEmpty()"
     id="add-point-button"
     class="add-point-button"
     value="{{ pointValue }}"
@@ -53,7 +53,7 @@
       (selectionChange)="onJobIdChange()"
     >
       <mat-option
-        *ngFor="let job of jobs$ | async"
+        *ngFor="let job of jobs()"
         id="job-selector-item-{{ job.id }}"
         [value]="job.id"
       >
