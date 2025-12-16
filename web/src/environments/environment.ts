@@ -23,7 +23,7 @@ import { Env } from './environment-enums';
 export const environment: {
   cloudFunctionsUrl?: string;
   env?: Env;
-  firebase?: {[key: string]: string};
+  firebase?: { [key: string]: string };
   googleMapsApiKey?: string;
   production?: boolean;
   useEmulators?: boolean;

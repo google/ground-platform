@@ -32,7 +32,6 @@ import {
 } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-
 import {
   ABOUT,
   ANDROID_SEGMENT,
@@ -59,8 +58,6 @@ import {
 } from './navigation.constants';
 import { UrlParams } from './url-params';
 import { DataStoreService } from '../data-store/data-store.service';
-
-export {SideNavMode} from './navigation.constants';
 
 /**
  * Exposes application state in the URL as streams to other services
