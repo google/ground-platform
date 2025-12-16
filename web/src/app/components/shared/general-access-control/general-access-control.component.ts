@@ -24,7 +24,10 @@ import { Survey, SurveyGeneralAccess } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
-const generalAccessLabels = Map<SurveyGeneralAccess, any>([
+const generalAccessLabels = Map<
+  SurveyGeneralAccess,
+  {description: string; icon: string; label: string}
+>([
   [
     SurveyGeneralAccess.RESTRICTED,
     {

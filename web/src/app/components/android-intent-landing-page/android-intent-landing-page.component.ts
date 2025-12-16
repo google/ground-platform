@@ -73,7 +73,7 @@ export class AndroidIntentLandingPageComponent implements OnInit {
     const userAgent =
       window.navigator.userAgent || window.navigator.vendor || 'unknown';
 
-    return /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream;
+    return /iPad|iPhone|iPod/.test(userAgent) && !('MSStream' in window);
   }
 
   async ngOnInit(): Promise<void> {

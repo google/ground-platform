@@ -57,7 +57,7 @@ export function loiDocToModel(
       pb.customTag,
       pb.source === Pb.LocationOfInterest.Source.IMPORTED
     );
-  } catch (e: any) {
+  } catch (e) {
     return Error(`Error converting LOI with ID ${id}`, {
       cause: e,
     });
