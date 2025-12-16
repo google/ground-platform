@@ -7,6 +7,7 @@
   "env": {
     "jasmine": true
   },
+  "root": true,
   "rules": {
     "eqeqeq": ["error", "always", {"null": "ignore"}],
     "node/no-unpublished-import": "off",

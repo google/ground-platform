@@ -8,6 +8,8 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node"],
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
   }
 }
