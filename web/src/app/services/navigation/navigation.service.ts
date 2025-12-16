@@ -60,7 +60,7 @@ import {
 import { UrlParams } from './url-params';
 import { DataStoreService } from '../data-store/data-store.service';
 
-export { SideNavMode } from './navigation.constants';
+export {SideNavMode} from './navigation.constants';
 
 /**
  * Exposes application state in the URL as streams to other services
