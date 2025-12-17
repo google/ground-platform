@@ -16,17 +16,17 @@
 
 import * as functions from 'firebase-functions';
 import * as csv from '@fast-csv/format';
-import {canExport, hasOrganizerRole} from './common/auth';
-import {isAccessibleLoi} from './common/utils';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {getDatastore} from './common/context';
+import { canExport, hasOrganizerRole } from './common/auth';
+import { isAccessibleLoi } from './common/utils';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { getDatastore } from './common/context';
 import * as HttpStatus from 'http-status-codes';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {List} from 'immutable';
-import {QuerySnapshot} from 'firebase-admin/firestore';
-import {timestampToInt, toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {toGeoJsonGeometry} from '@ground/lib';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { List } from 'immutable';
+import { QuerySnapshot } from 'firebase-admin/firestore';
+import { timestampToInt, toMessage } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { toGeoJsonGeometry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -40,7 +40,7 @@ export async function exportCsvHandler(
   user: DecodedIdToken
 ) {
   const db = getDatastore();
-  const {uid: userId} = user;
+  const { uid: userId } = user;
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
 
@@ -73,7 +73,7 @@ export async function exportCsvHandler(
       .send('Unsupported or corrupt job');
     return;
   }
-  const {name: jobName} = job;
+  const { name: jobName } = job;
 
   const isOrganizer = hasOrganizerRole(user, surveyDoc);
 
@@ -164,11 +164,11 @@ function writeRow(
   // Header: One column for each loi property (merged over all properties across all LOIs)
   getPropertiesByName(loi, loiProperties).forEach(v => row.push(quote(v)));
   if (submission) {
-    const {taskData: data} = submission;
+    const { taskData: data } = submission;
     // Header: One column for each task
     tasks.forEach(task => row.push(quote(getValue(task, data))));
     // Header: contributor_username, contributor_email, created_client_timestamp, created_server_timestamp
-    const {created} = submission;
+    const { created } = submission;
     row.push(quote(created?.displayName));
     row.push(quote(created?.emailAddress));
     row.push(

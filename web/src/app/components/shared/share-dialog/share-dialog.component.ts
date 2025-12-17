@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -22,16 +22,16 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
-import {MatSelectChange} from '@angular/material/select';
-import {Map} from 'immutable';
-import {Subscription} from 'rxjs';
+import { MatDialogRef } from '@angular/material/dialog';
+import { MatSelectChange } from '@angular/material/select';
+import { Map } from 'immutable';
+import { Subscription } from 'rxjs';
 
-import {AclEntry} from 'app/models/acl-entry.model';
-import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
-import {ROLE_OPTIONS} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import { AclEntry } from 'app/models/acl-entry.model';
+import { Role } from 'app/models/role.model';
+import { Survey } from 'app/models/survey.model';
+import { ROLE_OPTIONS } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-dialog',
@@ -85,7 +85,7 @@ export class ShareDialogComponent {
     if (!this.survey || !this.acl) {
       return;
     }
-    const {email, role} = this.addUserForm.value;
+    const { email, role } = this.addUserForm.value;
 
     // Add new email/role and update change state. Validation rules prevent
     // the same email from being added twice.
@@ -93,7 +93,7 @@ export class ShareDialogComponent {
     this.updateChangeState();
 
     // Clear "Add data collector" field.
-    this.addUserForm.setValue({email: '', role: Role.DATA_COLLECTOR});
+    this.addUserForm.setValue({ email: '', role: Role.DATA_COLLECTOR });
 
     this.onSaveClicked();
   }
@@ -163,11 +163,11 @@ export class ShareDialogComponent {
 
   private notInListValidator(): ValidatorFn {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (control: AbstractControl): {[key: string]: any} | null => {
+    return (control: AbstractControl): { [key: string]: any } | null => {
       const emailsInAcl = this.acl?.map(entry => entry.email) || [];
       const newEmail = control.value;
       return emailsInAcl.includes(newEmail)
-        ? {forbiddenName: {value: control.value}}
+        ? { forbiddenName: { value: control.value } }
         : null;
     };
   }

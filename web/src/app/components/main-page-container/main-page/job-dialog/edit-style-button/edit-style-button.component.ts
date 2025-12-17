@@ -22,12 +22,12 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
+import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 
-import {ColorPickerComponent} from './color-picker/color-picker.component';
+import { ColorPickerComponent } from './color-picker/color-picker.component';
 
 @Component({
   selector: 'ground-edit-style-button',
@@ -58,7 +58,7 @@ export class EditStyleButtonComponent implements OnInit {
     const target = new ElementRef(evt.currentTarget);
     this.dialog
       .open(ColorPickerComponent, {
-        data: {trigger: target},
+        data: { trigger: target },
       })
       .componentInstance.onColorPicked.subscribe((color: string) => {
         this.markerColor = color;

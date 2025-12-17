@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'ground-loi-properties-dialog',
@@ -26,7 +26,7 @@ export class LoiPropertiesDialogComponent {
   iconColor: string;
   iconName: string;
   loiDisplayName: string;
-  properties: {[key: string]: string | number};
+  properties: { [key: string]: string | number };
 
   constructor(
     private dialogRef: MatDialogRef<LoiPropertiesDialogComponent>,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   AngularFirestore,
   CollectionReference,
@@ -28,36 +28,36 @@ import {
   getDocs,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import {registry} from '@ground/lib/dist/message-registry';
-import {GroundProtos} from '@ground/proto';
-import {getDownloadURL, getStorage, ref} from 'firebase/storage';
-import {List, Map, OrderedMap} from 'immutable';
-import {Observable, combineLatest, firstValueFrom} from 'rxjs';
-import {map} from 'rxjs/operators';
+import { registry } from '@ground/lib/dist/message-registry';
+import { GroundProtos } from '@ground/proto';
+import { getDownloadURL, getStorage, ref } from 'firebase/storage';
+import { List, Map, OrderedMap } from 'immutable';
+import { Observable, combineLatest, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-import {FirebaseDataConverter} from 'app/converters/firebase-data-converter';
-import {loiDocToModel} from 'app/converters/loi-data-converter';
+import { FirebaseDataConverter } from 'app/converters/firebase-data-converter';
+import { loiDocToModel } from 'app/converters/loi-data-converter';
 import {
   jobToDocument,
   surveyToDocument,
 } from 'app/converters/proto-model-converter';
-import {submissionDocToModel} from 'app/converters/submission-data-converter';
+import { submissionDocToModel } from 'app/converters/submission-data-converter';
 import {
   jobDocToModel,
   jobDocsToModel,
   surveyDocToModel,
 } from 'app/converters/survey-data-converter';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Role} from 'app/models/role.model';
-import {Submission} from 'app/models/submission/submission.model';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Role } from 'app/models/role.model';
+import { Submission } from 'app/models/submission/submission.model';
 import {
   Survey,
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
-import {Task} from 'app/models/task/task.model';
-import {User} from 'app/models/user.model';
+import { Task } from 'app/models/task/task.model';
+import { User } from 'app/models/user.model';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -73,7 +73,7 @@ const SURVEYS_COLLECTION_NAME = 'surveys';
 const JOBS_COLLECTION_NAME = 'jobs';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type JsonBlob = {[field: string]: any};
+export type JsonBlob = { [field: string]: any };
 
 // TODO: Make DataStoreService and interface and turn this into concrete
 // implementation (e.g., CloudFirestoreService).
@@ -222,7 +222,7 @@ export class DataStoreService {
     survey: Survey,
     jobIdsToDelete?: List<string>
   ): Promise<void> {
-    const {id: surveyId, jobs} = survey;
+    const { id: surveyId, jobs } = survey;
 
     await this.db.firestore.runTransaction(async transaction => {
       if (jobIdsToDelete) {
@@ -231,7 +231,9 @@ export class DataStoreService {
         }
       }
 
-      const jobsToUpdate = jobs.filter(({id}) => !jobIdsToDelete?.includes(id));
+      const jobsToUpdate = jobs.filter(
+        ({ id }) => !jobIdsToDelete?.includes(id)
+      );
       for (const job of jobsToUpdate.values()) {
         await this._addOrUpdateJobInTransaction(transaction, surveyId, job);
       }
@@ -253,7 +255,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(surveyToDocument(surveyId, {title: name}), {merge: true});
+      .set(surveyToDocument(surveyId, { title: name }), { merge: true });
   }
 
   /**
@@ -271,7 +273,7 @@ export class DataStoreService {
     return this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
-      .set(surveyToDocument(surveyId, {title: name, description}), {
+      .set(surveyToDocument(surveyId, { title: name, description }), {
         merge: true,
       });
   }
@@ -348,10 +350,10 @@ export class DataStoreService {
   }
 
   async deleteSurvey(survey: Survey): Promise<void> {
-    const {id: surveyId, jobs} = survey;
+    const { id: surveyId, jobs } = survey;
 
     await this.db.firestore.runTransaction(async transaction => {
-      for (const {id: jobId} of jobs.values()) {
+      for (const { id: jobId } of jobs.values()) {
         await this._deleteJobAndRelatedData(transaction, surveyId, jobId);
       }
 
@@ -441,7 +443,9 @@ export class DataStoreService {
     );
 
     if (regexpSnapshot.exists) {
-      const regexpData = regexpSnapshot.data() as {regexp?: string} | undefined;
+      const regexpData = regexpSnapshot.data() as
+        | { regexp?: string }
+        | undefined;
 
       const regexpString = regexpData?.regexp;
 
@@ -456,7 +460,7 @@ export class DataStoreService {
   }
 
   private toLocationsOfInterest(
-    loiIds: {id: string}[]
+    loiIds: { id: string }[]
   ): List<LocationOfInterest> {
     return List(
       loiIds
@@ -475,14 +479,14 @@ export class DataStoreService {
    * @param canViewAll a flag indicating whether the user has permission to view all LOIs for this survey.
    */
   getAccessibleLois$(
-    {id: surveyId}: Survey,
+    { id: surveyId }: Survey,
     userId: string,
     canViewAll: boolean
   ): Observable<List<LocationOfInterest>> {
     if (canViewAll) {
       return this.db
         .collection(`${SURVEYS_COLLECTION_NAME}/${surveyId}/lois`)
-        .valueChanges({idField: 'id'})
+        .valueChanges({ idField: 'id' })
         .pipe(map(this.toLocationsOfInterest));
     }
 
@@ -500,8 +504,8 @@ export class DataStoreService {
     );
 
     return combineLatest([
-      importedLois.valueChanges({idField: 'id'}),
-      fieldDataLois.valueChanges({idField: 'id'}),
+      importedLois.valueChanges({ idField: 'id' }),
+      fieldDataLois.valueChanges({ idField: 'id' }),
     ]).pipe(
       map(([predefinedLois, fieldDataLois]) =>
         this.toLocationsOfInterest(predefinedLois.concat(fieldDataLois))
@@ -528,7 +532,7 @@ export class DataStoreService {
       .collection(`${SURVEYS_COLLECTION_NAME}/${survey.id}/submissions`, ref =>
         this.canViewSubmissions(ref, loi.id, userId, canViewAll)
       )
-      .valueChanges({idField: 'id'})
+      .valueChanges({ idField: 'id' })
       .pipe(
         map(array =>
           List(
@@ -593,8 +597,8 @@ export class DataStoreService {
     user: User
   ): Promise<string> {
     const surveyId = this.generateId();
-    const {email: ownerEmail, id: ownerId} = user;
-    const acl = Map<string, Role>({[ownerEmail]: Role.SURVEY_ORGANIZER});
+    const { email: ownerEmail, id: ownerId } = user;
+    const acl = Map<string, Role>({ [ownerEmail]: Role.SURVEY_ORGANIZER });
     await this.db
       .collection(SURVEYS_COLLECTION_NAME)
       .doc(surveyId)
@@ -671,7 +675,7 @@ export class DataStoreService {
     return tos.get('text');
   }
 
-  async getAccessDeniedMessage(): Promise<{message?: string; link?: string}> {
+  async getAccessDeniedMessage(): Promise<{ message?: string; link?: string }> {
     const accessDeniedMessage = await this.db
       .collection('config')
       .doc('accessDenied')

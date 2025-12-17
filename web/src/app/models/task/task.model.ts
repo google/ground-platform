@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {MultipleChoice} from './multiple-choice.model';
-import {Option} from './option.model';
-import {TaskCondition} from './task-condition.model';
-import {Copiable} from '../copiable';
+import { MultipleChoice } from './multiple-choice.model';
+import { Option } from './option.model';
+import { TaskCondition } from './task-condition.model';
+import { Copiable } from '../copiable';
 
 /**
  *

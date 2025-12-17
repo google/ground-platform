@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {firstValueFrom} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { firstValueFrom } from 'rxjs';
 
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {MultipleChoice} from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
-import {TaskCondition} from 'app/models/task/task-condition.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { MultipleChoice } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
+import { TaskCondition } from 'app/models/task/task-condition.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {TaskService} from '../task/task.service';
+import { TaskService } from '../task/task.service';
 
 enum JobDefaultColors {
   ORANGE = '#F37C22',
@@ -122,7 +122,7 @@ export class JobService {
   async addOrUpdateJob(surveyId: string, job: Job): Promise<void> {
     if (job.index === -1) {
       const index = await this.getJobCount();
-      job = job.copyWith({index});
+      job = job.copyWith({ index });
     }
     return this.dataStoreService.addOrUpdateJob(surveyId, job);
   }

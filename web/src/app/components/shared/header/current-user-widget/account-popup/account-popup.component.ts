@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, Inject, OnInit} from '@angular/core';
+import { Component, ElementRef, Inject, OnInit } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogConfig,
   MatDialogRef,
 } from '@angular/material/dialog';
 
-import {AuthService} from 'app/services/auth/auth.service';
+import { AuthService } from 'app/services/auth/auth.service';
 
 @Component({
   selector: 'ground-account-popup',
@@ -35,7 +35,7 @@ export class AccountPopupComponent implements OnInit {
   constructor(
     matDialogRef: MatDialogRef<AccountPopupComponent>,
     public auth: AuthService,
-    @Inject(MAT_DIALOG_DATA) data: {trigger: ElementRef}
+    @Inject(MAT_DIALOG_DATA) data: { trigger: ElementRef }
   ) {
     this.matDialogRef = matDialogRef;
     this.triggerElementRef = data.trigger;

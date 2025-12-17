@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Datastore} from './datastore';
-import {MailService} from './mail-service';
-import {initializeApp, getApp} from 'firebase-admin/app';
-import {getFirestore} from 'firebase-admin/firestore';
+import { Datastore } from './datastore';
+import { MailService } from './mail-service';
+import { initializeApp, getApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
 let datastore: Datastore | undefined;
 let mailService: MailService | undefined;

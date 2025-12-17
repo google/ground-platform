@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getDatastore} from './common/context';
-import {CallableRequest, HttpsError} from 'firebase-functions/v2/https';
-import {getAuth} from 'firebase-admin/auth';
+import { getDatastore } from './common/context';
+import { CallableRequest, HttpsError } from 'firebase-functions/v2/https';
+import { getAuth } from 'firebase-admin/auth';
 
 type ProfileRefreshResponse = String | HttpsError;
 type ProfileRefreshRequest = CallableRequest<ProfileRefreshResponse>;

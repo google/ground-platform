@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
-import {List, Map} from 'immutable';
-import {Observable, ReplaySubject, of} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { List, Map } from 'immutable';
+import { Observable, ReplaySubject, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
-import {AuditInfo} from 'app/models/audit-info.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Result} from 'app/models/submission/result.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {Survey, SurveyDataVisibility} from 'app/models/survey.model';
-import {User} from 'app/models/user.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LoadingState} from 'app/services/loading-state.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Result } from 'app/models/submission/result.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { Survey, SurveyDataVisibility } from 'app/models/survey.model';
+import { User } from 'app/models/user.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LoadingState } from 'app/services/loading-state.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 @Injectable({
   providedIn: 'root',
@@ -77,7 +77,7 @@ export class SubmissionService {
     this.selectedSubmission$ = this.selectedSubmissionId$.pipe(
       switchMap(submissionId =>
         this.submissions$.pipe(
-          map(submissions => submissions.find(({id}) => id === submissionId)!)
+          map(submissions => submissions.find(({ id }) => id === submissionId)!)
         )
       )
     );

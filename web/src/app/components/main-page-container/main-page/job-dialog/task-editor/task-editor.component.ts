@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectorRef,
   Component,
@@ -39,19 +39,19 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import {List} from 'immutable';
-import {Subscription, firstValueFrom} from 'rxjs';
+import { List } from 'immutable';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 import {
   Cardinality,
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
-import {TaskType} from 'app/models/task/task.model';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {JobService} from 'app/services/job/job.service';
+import { Option } from 'app/models/task/option.model';
+import { TaskType } from 'app/models/task/task.model';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { JobService } from 'app/services/job/job.service';
 
-import {OptionEditorComponent} from './option-editor/option-editor.component';
+import { OptionEditorComponent } from './option-editor/option-editor.component';
 
 export interface TaskTypeSelectOption {
   icon: string;
@@ -86,7 +86,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
   subscription: Subscription = new Subscription();
 
   taskGroup: FormGroup;
-  @ViewChild('questionInput', {static: true}) questionInput?: ElementRef;
+  @ViewChild('questionInput', { static: true }) questionInput?: ElementRef;
 
   @HostListener('click')
   onTaskFocus() {
@@ -242,7 +242,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
         this.taskOptions.options
       );
     }
-    this.taskGroup.patchValue({selectTaskOption: event});
+    this.taskGroup.patchValue({ selectTaskOption: event });
     if (event.type === TaskType.MULTIPLE_CHOICE) {
       if (!this.taskOptions?.options?.size) {
         this.onAddOption();
@@ -266,7 +266,7 @@ export class TaskEditorComponent implements OnInit, OnChanges, OnDestroy {
    * @param index: index of the option to be updated.
    * @returns void
    */
-  onOptionUpdate(event: {label: string; code: string}, index: number): void {
+  onOptionUpdate(event: { label: string; code: string }, index: number): void {
     const option = this.jobService.createOption(event.code, event.label, index);
     const options = this.setTaskOptions(index, option);
     this.emitTaskOptions(options);

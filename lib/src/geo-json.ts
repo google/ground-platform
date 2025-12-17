@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {GroundProtos} from '@ground/proto';
-import {Geometry, MultiPolygon, Point, Polygon, Position} from 'geojson';
+import { GroundProtos } from '@ground/proto';
+import { Geometry, MultiPolygon, Point, Polygon, Position } from 'geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -93,15 +93,15 @@ export function toGeometryPb(geometry: Geometry): Pb.Geometry {
 
 function toPointGeometryPb(position: Position): Pb.Geometry {
   const coordinates = toCoordinatesPb(position);
-  const point = new Pb.Point({coordinates});
-  return new Pb.Geometry({point});
+  const point = new Pb.Point({ coordinates });
+  return new Pb.Geometry({ point });
 }
 
 function toCoordinatesPb(position: Position): Pb.Coordinates {
   const [longitude, latitude] = position;
   if (longitude === undefined || latitude === undefined)
     throw new Error('Missing coordinate(s)');
-  return new Pb.Coordinates({longitude, latitude});
+  return new Pb.Coordinates({ longitude, latitude });
 }
 
 function toPolygonPb(positions: Position[][]): Pb.Polygon {
@@ -111,25 +111,25 @@ function toPolygonPb(positions: Position[][]): Pb.Polygon {
     throw new Error('Missing required polygon shell coordinates');
   const shell = toLinearRingPb(shellCoords);
   const holes = holeCoords?.map(h => toLinearRingPb(h));
-  return new Pb.Polygon({shell, holes});
+  return new Pb.Polygon({ shell, holes });
 }
 
 function toPolygonGeometryPb(positions: Position[][]): Pb.Geometry {
   const polygon = toPolygonPb(positions);
-  return new Pb.Geometry({polygon});
+  return new Pb.Geometry({ polygon });
 }
 
 function toLinearRingPb(positions: Position[]): Pb.LinearRing {
   const coordinates = positions.map(p => toCoordinatesPb(p));
-  return new Pb.LinearRing({coordinates});
+  return new Pb.LinearRing({ coordinates });
 }
 
 function toMultiPolygonGeometryPb(positions: Position[][][]): Pb.Geometry {
   // Skip invalid polygons.
   const polygons = positions.map(p => toPolygonPb(p));
   if (polygons.length === 0) throw new Error('Empty multi-polygon');
-  const multiPolygon = new Pb.MultiPolygon({polygons});
-  return new Pb.Geometry({multiPolygon});
+  const multiPolygon = new Pb.MultiPolygon({ polygons });
+  return new Pb.Geometry({ multiPolygon });
 }
 
 export function isGeometryValid(geometry: Geometry): boolean {

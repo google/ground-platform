@@ -25,7 +25,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {By} from '@angular/platform-browser';
+import { By } from '@angular/platform-browser';
 
 import {
   DialogData,
@@ -50,8 +50,8 @@ describe('JobDialogComponent', () => {
       declarations: [JobDialogComponent],
       imports: [MatDialogModule],
       providers: [
-        {provide: MatDialogRef, useValue: dialogRefSpy},
-        {provide: MAT_DIALOG_DATA, useValue: mockDialogData},
+        { provide: MatDialogRef, useValue: dialogRefSpy },
+        { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
       ],
     }).compileComponents();
   });

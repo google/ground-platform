@@ -274,7 +274,7 @@ export class WebDriverHelper {
   }
 
   private delay(timeout = SHORT_TIMEOUT) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(resolve, timeout);
     });
   }

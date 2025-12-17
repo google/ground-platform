@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Firestore} from '@google-cloud/firestore';
+import { Firestore } from '@google-cloud/firestore';
 
 const MockFirebase = require('mock-cloud-firestore');
 

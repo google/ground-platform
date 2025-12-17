@@ -22,16 +22,16 @@ import {
   createPostRequestSpy,
   createResponseSpy,
 } from './testing/http-test-helpers';
-import {importGeoJsonCallback} from './import-geojson';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {Blob, FormData} from 'formdata-node';
+import { importGeoJsonCallback } from './import-geojson';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { Blob, FormData } from 'formdata-node';
 import HttpStatus from 'http-status-codes';
-import {invokeCallbackAsync} from './handlers';
-import {SURVEY_ORGANIZER_ROLE} from './common/auth';
-import {resetDatastore} from './common/context';
-import {Firestore} from 'firebase-admin/firestore';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
+import { invokeCallbackAsync } from './handlers';
+import { SURVEY_ORGANIZER_ROLE } from './common/auth';
+import { resetDatastore } from './common/context';
+import { Firestore } from 'firebase-admin/firestore';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
 
 import Pb = GroundProtos.ground.v1beta1;
 const sv = registry.getFieldIds(Pb.Survey);
@@ -75,13 +75,15 @@ describe('importGeoJson()', () => {
   const pointLoi = {
     [l.jobId]: 'job123',
     [l.geometry]: {
-      [g.point]: {[p.coordinates]: {[c.latitude]: 10.1, [c.longitude]: 125.6}},
+      [g.point]: {
+        [p.coordinates]: { [c.latitude]: 10.1, [c.longitude]: 125.6 },
+      },
     },
     [l.submissionCount]: 0,
     [l.source]: 1, // IMPORTED
     [l.properties]: {
-      name: {[pr.stringValue]: 'Dinagat Islands'},
-      area: {[pr.numericValue]: 3.08},
+      name: { [pr.stringValue]: 'Dinagat Islands' },
+      area: { [pr.numericValue]: 3.08 },
     },
   };
   const geoJsonWithPolygon = {
@@ -109,10 +111,10 @@ describe('importGeoJson()', () => {
       [g.polygon]: {
         [pg.shell]: {
           [lr.coordinates]: [
-            {[c.latitude]: 0, [c.longitude]: 100},
-            {[c.latitude]: 0, [c.longitude]: 101},
-            {[c.latitude]: 1, [c.longitude]: 101},
-            {[c.latitude]: 0, [c.longitude]: 100},
+            { [c.latitude]: 0, [c.longitude]: 100 },
+            { [c.latitude]: 0, [c.longitude]: 101 },
+            { [c.latitude]: 1, [c.longitude]: 101 },
+            { [c.latitude]: 0, [c.longitude]: 100 },
           ],
         },
       },
@@ -158,10 +160,10 @@ describe('importGeoJson()', () => {
           {
             [pg.shell]: {
               [lr.coordinates]: [
-                {[c.latitude]: 0, [c.longitude]: 100},
-                {[c.latitude]: 0, [c.longitude]: 101},
-                {[c.latitude]: 1, [c.longitude]: 101},
-                {[c.latitude]: 0, [c.longitude]: 100},
+                { [c.latitude]: 0, [c.longitude]: 100 },
+                { [c.latitude]: 0, [c.longitude]: 101 },
+                { [c.latitude]: 1, [c.longitude]: 101 },
+                { [c.latitude]: 0, [c.longitude]: 100 },
               ],
             },
           },
@@ -169,10 +171,10 @@ describe('importGeoJson()', () => {
           {
             [pg.shell]: {
               [lr.coordinates]: [
-                {[c.latitude]: 1, [c.longitude]: 120},
-                {[c.latitude]: 1, [c.longitude]: 121},
-                {[c.latitude]: 2, [c.longitude]: 121},
-                {[c.latitude]: 1, [c.longitude]: 120},
+                { [c.latitude]: 1, [c.longitude]: 120 },
+                { [c.latitude]: 1, [c.longitude]: 121 },
+                { [c.latitude]: 2, [c.longitude]: 121 },
+                { [c.latitude]: 1, [c.longitude]: 120 },
               ],
             },
           },
@@ -217,7 +219,7 @@ describe('importGeoJson()', () => {
     },
     {
       desc: 'imports unsupported feature type',
-      input: {...geoJsonWithPoint, type: 'UnsupportedFeature'},
+      input: { ...geoJsonWithPoint, type: 'UnsupportedFeature' },
       expectedStatus: HttpStatus.BAD_REQUEST,
       expected: [],
     },
@@ -253,14 +255,14 @@ describe('importGeoJson()', () => {
     return form;
   }
 
-  testCases.forEach(({desc, input, expectedStatus, expected}) =>
+  testCases.forEach(({ desc, input, expectedStatus, expected }) =>
     it(desc, async () => {
       // Add survey.
       mockFirestore.doc(`surveys/${surveyId}`).set(survey);
 
       // Build mock request and response.
       const req = await createPostRequestSpy(
-        {url: '/importGeoJson'},
+        { url: '/importGeoJson' },
         createPostData(surveyId, jobId, input)
       );
       const res = createResponseSpy();

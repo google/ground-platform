@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {HttpClientModule} from '@angular/common/http';
-import {NgModule} from '@angular/core';
-import {AngularFireModule} from '@angular/fire/compat';
-import {AngularFireAuthModule} from '@angular/fire/compat/auth';
-import {USE_EMULATOR as USE_DATABASE_EMULATOR} from '@angular/fire/compat/database';
+import { HttpClientModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
 import {
   AngularFirestoreModule,
   SETTINGS as FIRESTORE_SETTINGS,
@@ -33,17 +33,17 @@ import {
   DEFAULTS as RC_DEFAULTS,
   SETTINGS as RC_SETTINGS,
 } from '@angular/fire/compat/remote-config';
-import {AngularFireStorageModule} from '@angular/fire/compat/storage';
-import {BrowserModule} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {initializeApp} from 'firebase/app';
-import {GoogleAuthProvider} from 'firebase/auth';
-import {FirebaseUIModule, firebaseui} from 'firebaseui-angular';
+import { AngularFireStorageModule } from '@angular/fire/compat/storage';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { initializeApp } from 'firebase/app';
+import { GoogleAuthProvider } from 'firebase/auth';
+import { FirebaseUIModule, firebaseui } from 'firebaseui-angular';
 
-import {AppComponent} from 'app/app.component';
-import {MainPageContainerModule} from 'app/components/main-page-container/main-page-container.module';
-import {AppRoutingModule} from 'app/routing.module';
-import {environment} from 'environments/environment';
+import { AppComponent } from 'app/app.component';
+import { MainPageContainerModule } from 'app/components/main-page-container/main-page-container.module';
+import { AppRoutingModule } from 'app/routing.module';
+import { environment } from 'environments/environment';
 
 const firebaseUiAuthConfig: firebaseui.auth.Config = {
   // Popup is required to prevent some browsers and Chrome incognito for getting
@@ -62,15 +62,15 @@ initializeApp(environment.firebase);
   providers: [
     {
       provide: FIRESTORE_SETTINGS,
-      useValue: {ignoreUndefinedProperties: true},
+      useValue: { ignoreUndefinedProperties: true },
     },
     {
       provide: RC_SETTINGS,
-      useValue: {minimumFetchIntervalMillis: 3600000},
+      useValue: { minimumFetchIntervalMillis: 3600000 },
     },
     {
       provide: RC_DEFAULTS,
-      useValue: {google_play_id: ''},
+      useValue: { google_play_id: '' },
     },
     // Emulator ports defined in ../firebase.local.json
     // TODO(#979): Set up auth emulator and enable rules.

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {EventContext} from 'firebase-functions';
-import {QueryDocumentSnapshot} from 'firebase-functions/v1/firestore';
-import {getDatastore} from './common/context';
-import {Datastore} from './common/datastore';
-import {broadcastSurveyUpdate} from './common/broadcast-survey-update';
-import {GroundProtos} from '@ground/proto';
-import {toDocumentData, toGeoJsonGeometry, toMessage} from '@ground/lib';
-import {geojsonToWKT} from '@terraformer/wkt';
-import {toLoiPbProperties} from './import-geojson';
+import { EventContext } from 'firebase-functions';
+import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
+import { getDatastore } from './common/context';
+import { Datastore } from './common/datastore';
+import { broadcastSurveyUpdate } from './common/broadcast-survey-update';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData, toGeoJsonGeometry, toMessage } from '@ground/lib';
+import { geojsonToWKT } from '@terraformer/wkt';
+import { toLoiPbProperties } from './import-geojson';
 
 import Pb = GroundProtos.ground.v1beta1;
 
-type Properties = {[key: string]: string | number};
+type Properties = { [key: string]: string | number };
 
-type Headers = {[key: string]: string};
+type Headers = { [key: string]: string };
 
-type Body = {[key: string]: any};
+type Body = { [key: string]: any };
 
 type PropertyGenerator = {
   headers?: Headers;
@@ -40,7 +40,7 @@ type PropertyGenerator = {
   url: string;
 };
 
-const defaultHeaders = {'Content-Type': 'application/json'};
+const defaultHeaders = { 'Content-Type': 'application/json' };
 
 /**
  * Handles the creation of a Location of Interest (LOI) document in Firestore.
@@ -73,14 +73,14 @@ export async function onCreateLoiHandler(
     const propertyGenerator = propertyGeneratorDoc.data() as PropertyGenerator;
 
     if (propertyGeneratorDoc.id === 'whisp') {
-      const {body, headers, prefix, url} = propertyGenerator;
+      const { body, headers, prefix, url } = propertyGenerator;
 
       const wkt = geojsonToWKT(Datastore.fromFirestoreMap(geometry));
 
       const newProperties = await fetchWhispProperties(
         url,
-        {...defaultHeaders, ...headers},
-        {wkt, ...body}
+        { ...defaultHeaders, ...headers },
+        { wkt, ...body }
       );
 
       properties = await updateProperties(properties, newProperties, prefix);
@@ -95,7 +95,7 @@ export async function onCreateLoiHandler(
     surveyId,
     loiId,
     toDocumentData(
-      new Pb.LocationOfInterest({properties: toLoiPbProperties(properties)})
+      new Pb.LocationOfInterest({ properties: toLoiPbProperties(properties) })
     )
   );
 
@@ -158,7 +158,7 @@ function removePrefixedKeys(obj: Properties, prefix: string): Properties {
 function propertiesPbToObject(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
 }): Properties {
-  const properties: {[k: string]: string | number} = {};
+  const properties: { [k: string]: string | number } = {};
   for (const k of Object.keys(pb)) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {

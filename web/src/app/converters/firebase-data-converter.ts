@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {DocumentData, Timestamp} from '@angular/fire/firestore';
-import {Map} from 'immutable';
+import { DocumentData, Timestamp } from '@angular/fire/firestore';
+import { Map } from 'immutable';
 
-import {AuditInfo} from 'app/models/audit-info.model';
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
-import {MultipleSelection} from 'app/models/submission/multiple-selection';
-import {Result} from 'app/models/submission/result.model';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
+import { Result } from 'app/models/submission/result.model';
 import {
   Submission,
   SubmissionData,
 } from 'app/models/submission/submission.model';
-import {Cardinality} from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
+import { Cardinality } from 'app/models/task/multiple-choice.model';
+import { Option } from 'app/models/task/option.model';
 import {
   TaskCondition,
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {User} from 'app/models/user.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { User } from 'app/models/user.model';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],
@@ -63,12 +63,12 @@ export class FirebaseDataConverter {
   }
 
   static jobToJS(job: Job): {} {
-    const {name, tasks, color, strategy, ...jobDoc} = job;
+    const { name, tasks, color, strategy, ...jobDoc } = job;
     return {
       strategy,
       name,
       tasks: this.tasksToJS(tasks),
-      defaultStyle: {color},
+      defaultStyle: { color },
       ...jobDoc,
     };
   }
@@ -81,7 +81,7 @@ export class FirebaseDataConverter {
   }
 
   private static taskToJS(task: Task): {} {
-    const {type, multipleChoice, condition, id, ...taskDoc} = task;
+    const { type, multipleChoice, condition, id, ...taskDoc } = task;
 
     if (multipleChoice === undefined) {
       return {
@@ -142,7 +142,7 @@ export class FirebaseDataConverter {
   }
 
   private static optionToJS(option: Option): {} {
-    const {id, ...optionDoc} = option;
+    const { id, ...optionDoc } = option;
     return optionDoc;
   }
 

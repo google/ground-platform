@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
-import {List} from 'immutable';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { List } from 'immutable';
 
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
-import {DataCollectionStrategy, Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { DataCollectionStrategy, Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { Survey } from 'app/models/survey.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {ImportDialogComponent} from '../import-dialog/import-dialog.component';
+import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
 
 @Component({
   selector: 'loi-editor',
@@ -54,7 +54,7 @@ export class LoiEditorComponent {
 
   importLois() {
     this.dialog.open(ImportDialogComponent, {
-      data: {surveyId: this.survey.id, jobId: this.job.id},
+      data: { surveyId: this.survey.id, jobId: this.job.id },
       width: '350px',
       maxHeight: '800px',
     });

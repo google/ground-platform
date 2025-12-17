@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
-import {DataVisibilityControlComponent} from './data-visibility-control.component';
+import { DataVisibilityControlComponent } from './data-visibility-control.component';
 
 @NgModule({
   declarations: [DataVisibilityControlComponent],

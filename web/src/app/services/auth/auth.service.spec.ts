@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import {TestBed} from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {AngularFireFunctions} from '@angular/fire/compat/functions';
-import {Router} from '@angular/router';
-import {NEVER, of} from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Router } from '@angular/router';
+import { NEVER, of } from 'rxjs';
 
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {HttpClientService} from '../http-client/http-client.service';
+import { HttpClientService } from '../http-client/http-client.service';
 
 describe('AuthService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [],
       providers: [
-        {provide: AngularFirestore, useValue: {}},
-        {provide: AngularFireFunctions, useValue: {}},
+        { provide: AngularFirestore, useValue: {} },
+        { provide: AngularFireFunctions, useValue: {} },
         {
           provide: AngularFireAuth,
           useValue: {
@@ -40,9 +40,9 @@ describe('AuthService', () => {
             onIdTokenChanged: (callback: Function) => callback(null),
           },
         },
-        {provide: DataStoreService, useValue: {user$: () => of()}},
-        {provide: Router, useValue: {events: of()}},
-        {provide: HttpClientService, useValue: {}},
+        { provide: DataStoreService, useValue: { user$: () => of() } },
+        { provide: Router, useValue: { events: of() } },
+        { provide: HttpClientService, useValue: {} },
       ],
     });
   });

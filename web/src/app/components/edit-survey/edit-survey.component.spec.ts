@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA, WritableSignal, signal} from '@angular/core';
+import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -24,26 +24,26 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MatDividerModule} from '@angular/material/divider';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {By} from '@angular/platform-browser';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
-import {Map} from 'immutable';
-import {BehaviorSubject, Subject, of} from 'rxjs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { By } from '@angular/platform-browser';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { Map } from 'immutable';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 
-import {EditSurveyComponent} from 'app/components/edit-survey/edit-survey.component';
-import {Job} from 'app/models/job.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {JobService} from 'app/services/job/job.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
-import {ActivatedRouteStub} from 'testing/activated-route-stub';
+import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
+import { Job } from 'app/models/job.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { JobService } from 'app/services/job/job.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
+import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 import {
   DialogData,
@@ -98,7 +98,7 @@ describe('EditSurveyComponent', () => {
     ]),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   beforeEach(waitForAsync(() => {
@@ -169,13 +169,13 @@ describe('EditSurveyComponent', () => {
       declarations: [EditSurveyComponent],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: SurveyService, useValue: surveyServiceSpy},
-        {provide: DraftSurveyService, useValue: draftSurveyServiceSpy},
-        {provide: JobService, useValue: jobServiceSpy},
-        {provide: DataStoreService, useValue: dataStoreServiceSpy},
-        {provide: ActivatedRoute, useValue: route},
-        {provide: MatDialog, useValue: dialogSpy},
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: DraftSurveyService, useValue: draftSurveyServiceSpy },
+        { provide: JobService, useValue: jobServiceSpy },
+        { provide: DataStoreService, useValue: dataStoreServiceSpy },
+        { provide: ActivatedRoute, useValue: route },
+        { provide: MatDialog, useValue: dialogSpy },
       ],
     }).compileComponents();
   }));
@@ -240,7 +240,7 @@ describe('EditSurveyComponent', () => {
           expectedLabel: jobName2,
           expectedRouterLink: `./job/${jobId2}`,
         },
-      ].forEach(({buttonSelector, expectedLabel, expectedRouterLink}) => {
+      ].forEach(({ buttonSelector, expectedLabel, expectedRouterLink }) => {
         it('displays button with correct label and router link', () => {
           const button = fixture.debugElement.query(By.css(buttonSelector))
             .nativeElement as HTMLElement;
@@ -259,13 +259,13 @@ describe('EditSurveyComponent', () => {
           .nativeElement as HTMLElement;
         const newJobName = 'new job name';
         dialogRefSpy.afterClosed.and.returnValue(
-          of({dialogType: DialogType.AddJob, jobName: newJobName})
+          of({ dialogType: DialogType.AddJob, jobName: newJobName })
         );
 
         addButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          newJob.copyWith({name: newJobName})
+          newJob.copyWith({ name: newJobName })
         );
         flush();
         discardPeriodicTasks();
@@ -276,7 +276,7 @@ describe('EditSurveyComponent', () => {
           .nativeElement as HTMLElement;
         const newJobName = 'new job name';
         dialogRefSpy.afterClosed.and.returnValue(
-          of({dialogType: DialogType.RenameJob, jobName: newJobName})
+          of({ dialogType: DialogType.RenameJob, jobName: newJobName })
         );
 
         menuButton.click();
@@ -289,7 +289,7 @@ describe('EditSurveyComponent', () => {
         renameButton.click();
 
         expect(draftSurveyServiceSpy.addOrUpdateJob).toHaveBeenCalledOnceWith(
-          job1.copyWith({name: newJobName})
+          job1.copyWith({ name: newJobName })
         );
         flush();
         discardPeriodicTasks();
@@ -323,7 +323,7 @@ describe('EditSurveyComponent', () => {
         const menuButton = fixture.debugElement.query(By.css('#menu-button-0'))
           .nativeElement as HTMLElement;
         dialogRefSpy.afterClosed.and.returnValue(
-          of({dialogType: DialogType.DeleteJob, jobName: ''})
+          of({ dialogType: DialogType.DeleteJob, jobName: '' })
         );
 
         menuButton.click();

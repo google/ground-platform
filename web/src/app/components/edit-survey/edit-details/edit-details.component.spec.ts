@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {NO_ERRORS_SCHEMA} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
   fakeAsync,
   flushMicrotasks,
 } from '@angular/core/testing';
-import {MatCardModule} from '@angular/material/card';
+import { MatCardModule } from '@angular/material/card';
 import {
   MatDialog,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {MatIconModule} from '@angular/material/icon';
-import {By} from '@angular/platform-browser';
-import {Map} from 'immutable';
-import {of} from 'rxjs';
+import { MatIconModule } from '@angular/material/icon';
+import { By } from '@angular/platform-browser';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
 
-import {EditDetailsComponent} from 'app/components/edit-survey/edit-details/edit-details.component';
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { EditDetailsComponent } from 'app/components/edit-survey/edit-details/edit-details.component';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
 import {
   DialogData,
@@ -57,7 +57,7 @@ describe('EditDetailsComponent', () => {
     Map<string, Job>(),
     Map<string, Role>(),
     '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
   const newSurveyId = 'newSurveyId';
   let dialogRefSpy: jasmine.SpyObj<
@@ -88,23 +88,23 @@ describe('EditDetailsComponent', () => {
       imports: [CommonModule, MatDialogModule, MatCardModule, MatIconModule],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
-        {provide: MatDialog, useValue: dialogSpy},
+        { provide: MatDialog, useValue: dialogSpy },
         {
           provide: DraftSurveyService,
-          useValue: {getSurvey$: () => of(survey)},
+          useValue: { getSurvey$: () => of(survey) },
         },
         {
           provide: NavigationService,
           useValue: navigationServiceSpy,
         },
-        {provide: SurveyService, useValue: surveyServiceSpy},
+        { provide: SurveyService, useValue: surveyServiceSpy },
       ],
     }).compileComponents();
   });
 
   beforeEach(() => {
     dialogRefSpy.afterClosed.and.returnValue(
-      of({dialogType: DialogType.CopySurvey} as DialogData)
+      of({ dialogType: DialogType.CopySurvey } as DialogData)
     );
 
     fixture = TestBed.createComponent(EditDetailsComponent);

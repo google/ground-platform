@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {EventContext} from 'firebase-functions';
+import { EventContext } from 'firebase-functions';
 
 export class TestEventContext {
   constructor(public readonly params: Record<string, any>) {}

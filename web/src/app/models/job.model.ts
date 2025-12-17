@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {List, OrderedMap} from 'immutable';
+import { List, OrderedMap } from 'immutable';
 
-import {Copiable} from './copiable';
-import {Task} from './task/task.model';
+import { Copiable } from './copiable';
+import { Task } from './task/task.model';
 
 export enum DataCollectionStrategy {
   PREDEFINED = 'PREDEFINED',

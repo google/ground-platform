@@ -19,14 +19,14 @@ import {
   DataSource,
   SelectionChange,
 } from '@angular/cdk/collections';
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {List} from 'immutable';
-import {BehaviorSubject, Observable, Subscription, merge} from 'rxjs';
-import {map, shareReplay} from 'rxjs/operators';
+import { FlatTreeControl } from '@angular/cdk/tree';
+import { List } from 'immutable';
+import { BehaviorSubject, Observable, Subscription, merge } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 
-import {LocationOfInterest} from 'app/models/loi.model';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {getLoiIcon} from 'app/utils/utils';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { getLoiIcon } from 'app/utils/utils';
 
 /** Flat node with with information on name, level, and if it is expandable.
  * Loi specific nodes have additional fields for loi info and number of
