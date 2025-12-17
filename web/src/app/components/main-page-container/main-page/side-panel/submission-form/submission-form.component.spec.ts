@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
-import {MatListModule} from '@angular/material/list';
-import {MatRadioModule} from '@angular/material/radio';
-import {By} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {Router} from '@angular/router';
-import {List, Map} from 'immutable';
-import {NEVER, of} from 'rxjs';
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatListModule } from '@angular/material/list';
+import { MatRadioModule } from '@angular/material/radio';
+import { By } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Router } from '@angular/router';
+import { List, Map } from 'immutable';
+import { NEVER, of } from 'rxjs';
 
-import {JobListItemModule} from 'app/components/shared/job-list-item/job-list-item.module';
-import {AuditInfo} from 'app/models/audit-info.model';
-import {Coordinate} from 'app/models/geometry/coordinate';
-import {Point} from 'app/models/geometry/point';
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {MultipleSelection} from 'app/models/submission/multiple-selection';
-import {Result} from 'app/models/submission/result.model';
-import {Submission} from 'app/models/submission/submission.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
+import { JobListItemModule } from 'app/components/shared/job-list-item/job-list-item.module';
+import { AuditInfo } from 'app/models/audit-info.model';
+import { Coordinate } from 'app/models/geometry/coordinate';
+import { Point } from 'app/models/geometry/point';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { MultipleSelection } from 'app/models/submission/multiple-selection';
+import { Result } from 'app/models/submission/result.model';
+import { Submission } from 'app/models/submission/submission.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
 import {
   Cardinality,
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {UrlParams} from 'app/services/navigation/url-params';
-import {SubmissionService} from 'app/services/submission/submission.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { Option } from 'app/models/task/option.model';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { UrlParams } from 'app/services/navigation/url-params';
+import { SubmissionService } from 'app/services/submission/submission.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {SubmissionFormComponent} from './submission-form.component';
+import { SubmissionFormComponent } from './submission-form.component';
 
 class MockModel {
   static task001: Task = new Task(
@@ -105,10 +105,10 @@ class MockModel {
     'survey001',
     'title',
     'description',
-    Map({job001: MockModel.job001}),
+    Map({ job001: MockModel.job001 }),
     /*acl=*/ Map({}),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   static loi001 = new LocationOfInterest(
@@ -195,16 +195,16 @@ describe('SubmissionFormComponent', () => {
         JobListItemModule,
       ],
       providers: [
-        {provide: DataStoreService, useValue: {}},
+        { provide: DataStoreService, useValue: {} },
         {
           provide: LocationOfInterestService,
           useValue: loiService,
         },
-        {provide: SurveyService, useValue: surveyService},
-        {provide: SubmissionService, useValue: submissionService},
-        {provide: Router, useValue: routerSpy},
-        {provide: NavigationService, useValue: navigationService},
-        {provide: AuthService, useValue: {getUser$: () => NEVER}},
+        { provide: SurveyService, useValue: surveyService },
+        { provide: SubmissionService, useValue: submissionService },
+        { provide: Router, useValue: routerSpy },
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AuthService, useValue: { getUser$: () => NEVER } },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {HttpErrorResponse} from '@angular/common/http';
-import {Component, Inject, NgZone} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, Inject, NgZone } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import {DataImportService} from 'app/services/data-import/data-import.service';
-import {NotificationService} from 'app/services/notification/notification.service';
+import { DataImportService } from 'app/services/data-import/data-import.service';
+import { NotificationService } from 'app/services/notification/notification.service';
 
 @Component({
   selector: 'ground-import-dialog',
@@ -37,7 +37,7 @@ export class ImportDialogComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: {surveyId: string; jobId: string},
+    public data: { surveyId: string; jobId: string },
     private formBuilder: FormBuilder,
     private dataImportService: DataImportService,
     private readonly dialogRef: MatDialogRef<ImportDialogComponent>,

@@ -27,5 +27,5 @@ import * as admin from 'firebase-admin';
 export async function broadcastSurveyUpdate(topic: string): Promise<string> {
   console.debug(`Sending message to ${topic}`);
 
-  return admin.messaging().send({topic});
+  return admin.messaging().send({ topic });
 }

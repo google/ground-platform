@@ -1,7 +1,7 @@
-import {Component} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
-import {ShareDialogComponent} from 'app/components/shared/share-dialog/share-dialog.component';
+import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-dialog.component';
 
 @Component({
   selector: 'share-survey',

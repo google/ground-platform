@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatIconModule} from '@angular/material/icon';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatIconModule } from '@angular/material/icon';
 
-import {AddTaskButtonComponent} from './add-task-button.component';
+import { AddTaskButtonComponent } from './add-task-button.component';
 
 describe('TaskButtonComponent', () => {
   let component: AddTaskButtonComponent;

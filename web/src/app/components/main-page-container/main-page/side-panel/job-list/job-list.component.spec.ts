@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatListModule} from '@angular/material/list';
-import {Router} from '@angular/router';
-import {Map} from 'immutable';
-import {of} from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { MatListModule } from '@angular/material/list';
+import { Router } from '@angular/router';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
 
-import {Job} from 'app/models/job.model';
-import {DataSharingType, Survey} from 'app/models/survey.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { Job } from 'app/models/job.model';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {JobListComponent} from './job-list.component';
+import { JobListComponent } from './job-list.component';
 
 const mockSurvey = new Survey(
   'survey001',
@@ -46,7 +46,7 @@ const mockSurvey = new Survey(
   }),
   /* acl= */ Map(),
   /* ownerId= */ '',
-  {type: DataSharingType.PRIVATE}
+  { type: DataSharingType.PRIVATE }
 );
 
 const authState = {
@@ -78,13 +78,13 @@ describe('JobListComponent', () => {
           provide: Router,
           useValue: routerSpy,
         },
-        {provide: NavigationService, useValue: navigationService},
-        {provide: AngularFirestore, useValue: {}},
+        { provide: NavigationService, useValue: navigationService },
+        { provide: AngularFirestore, useValue: {} },
         {
           provide: AngularFireAuth,
           useValue: mockAngularFireAuth,
         },
-        {provide: DataStoreService, useValue: {user$: () => of()}},
+        { provide: DataStoreService, useValue: { user$: () => of() } },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

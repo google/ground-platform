@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {List} from 'immutable';
+import { List } from 'immutable';
 
 export enum TaskConditionMatchType {
   MATCH_ALL = 'MATCH_ALL',

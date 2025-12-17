@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -23,23 +23,23 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import {List} from 'immutable';
+import { List } from 'immutable';
 
 import {
   Cardinality,
   MultipleChoice,
 } from 'app/models/task/multiple-choice.model';
-import {Option} from 'app/models/task/option.model';
+import { Option } from 'app/models/task/option.model';
 import {
   TaskCondition,
   TaskConditionExpression,
   TaskConditionExpressionType,
 } from 'app/models/task/task-condition.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DialogService} from 'app/services/dialog/dialog.service';
-import {TaskService} from 'app/services/task/task.service';
-import {moveItemInFormArray} from 'app/utils/utils';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DialogService } from 'app/services/dialog/dialog.service';
+import { TaskService } from 'app/services/task/task.service';
+import { moveItemInFormArray } from 'app/utils/utils';
 
 export enum TaskGroup {
   QUESTION = 1,

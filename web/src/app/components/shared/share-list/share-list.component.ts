@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {MatSelectChange} from '@angular/material/select';
-import {Map} from 'immutable';
-import {Subscription} from 'rxjs';
+import { Component } from '@angular/core';
+import { MatSelectChange } from '@angular/material/select';
+import { Map } from 'immutable';
+import { Subscription } from 'rxjs';
 
-import {AclEntry} from 'app/models/acl-entry.model';
-import {Role} from 'app/models/role.model';
-import {Survey} from 'app/models/survey.model';
-import {AuthService, ROLE_OPTIONS} from 'app/services/auth/auth.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
+import { AclEntry } from 'app/models/acl-entry.model';
+import { Role } from 'app/models/role.model';
+import { Survey } from 'app/models/survey.model';
+import { AuthService, ROLE_OPTIONS } from 'app/services/auth/auth.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
   selector: 'ground-share-list',

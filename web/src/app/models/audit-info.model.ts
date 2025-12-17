@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {FieldValue} from '@angular/fire/firestore';
+import { FieldValue } from '@angular/fire/firestore';
 
-import {User} from './user.model';
+import { User } from './user.model';
 
 export class AuditInfo {
   constructor(

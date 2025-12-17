@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -22,40 +22,40 @@ import {
   tick,
   waitForAsync,
 } from '@angular/core/testing';
-import {AngularFireAuth} from '@angular/fire/compat/auth';
-import {AngularFirestore} from '@angular/fire/compat/firestore';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
-import {MatChipsModule} from '@angular/material/chips';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MatGridListModule} from '@angular/material/grid-list';
-import {MatIconModule} from '@angular/material/icon';
-import {By} from '@angular/platform-browser';
-import {List, Map} from 'immutable';
-import {of} from 'rxjs';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatIconModule } from '@angular/material/icon';
+import { By } from '@angular/platform-browser';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
 
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
-import {AclEntry} from 'app/models/acl-entry.model';
-import {Job} from 'app/models/job.model';
-import {Role} from 'app/models/role.model';
+import { AclEntry } from 'app/models/acl-entry.model';
+import { Job } from 'app/models/job.model';
+import { Role } from 'app/models/role.model';
 import {
   DataSharingType,
   Survey,
   SurveyGeneralAccess,
   SurveyState,
 } from 'app/models/survey.model';
-import {Task, TaskType} from 'app/models/task/task.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { Task, TaskType } from 'app/models/task/task.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {SurveyListComponent} from './survey-list.component';
+import { SurveyListComponent } from './survey-list.component';
 
-@Component({selector: 'ground-header', template: ''})
+@Component({ selector: 'ground-header', template: '' })
 class HeaderComponent {}
 
 describe('SurveyListComponent', () => {
@@ -84,7 +84,7 @@ describe('SurveyListComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE}
+    { type: DataSharingType.PRIVATE }
   );
 
   // A survey that has gone through creation flow
@@ -111,7 +111,7 @@ describe('SurveyListComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE},
+    { type: DataSharingType.PRIVATE },
     SurveyState.READY
   );
 
@@ -139,7 +139,7 @@ describe('SurveyListComponent', () => {
     }),
     /* acl= */ Map(),
     /* ownerId= */ '',
-    {type: DataSharingType.PRIVATE},
+    { type: DataSharingType.PRIVATE },
     SurveyState.READY,
     SurveyGeneralAccess.PUBLIC
   );
@@ -181,12 +181,12 @@ describe('SurveyListComponent', () => {
       ],
       declarations: [SurveyListComponent, HeaderComponent],
       providers: [
-        {provide: MatDialog, useValue: dialogSpy},
-        {provide: SurveyService, useValue: surveyServiceSpy},
-        {provide: NavigationService, useValue: navigationServiceSpy},
-        {provide: AngularFirestore, useValue: {}},
-        {provide: AngularFireAuth, useValue: {}},
-        {provide: AuthService, useValue: authServiceSpy},
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: SurveyService, useValue: surveyServiceSpy },
+        { provide: NavigationService, useValue: navigationServiceSpy },
+        { provide: AngularFirestore, useValue: {} },
+        { provide: AngularFireAuth, useValue: {} },
+        { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
   }));
@@ -201,7 +201,7 @@ describe('SurveyListComponent', () => {
     authServiceSpy.canManageSurvey.and.returnValue(true);
     authServiceSpy.isPasslisted.and.returnValue(Promise.resolve(true));
     dialogRefSpy.afterClosed.and.returnValue(
-      of({dialogType: DialogType.SurveyCreationDenied} as DialogData)
+      of({ dialogType: DialogType.SurveyCreationDenied } as DialogData)
     );
     fixture = TestBed.createComponent(SurveyListComponent);
     component = fixture.componentInstance;

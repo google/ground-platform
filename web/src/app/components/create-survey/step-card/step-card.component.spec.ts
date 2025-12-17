@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {BrowserModule} from '@angular/platform-browser';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserModule } from '@angular/platform-browser';
 
-import {StepCardComponent} from './step-card.component';
+import { StepCardComponent } from './step-card.component';
 
 describe('StepCardComponent', () => {
   let component: StepCardComponent;

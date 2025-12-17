@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@angular/fire/firestore';
-import {registry} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {Map} from 'immutable';
+import { DocumentData } from '@angular/fire/firestore';
+import { registry } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { Map } from 'immutable';
 
-import {toGeometry} from 'app/converters/geometry-converter';
-import {Geometry} from 'app/models/geometry/geometry';
-import {LocationOfInterest} from 'app/models/loi.model';
+import { toGeometry } from 'app/converters/geometry-converter';
+import { Geometry } from 'app/models/geometry/geometry';
+import { LocationOfInterest } from 'app/models/loi.model';
 
-import {geometryPbToModel} from './geometry-data-converter';
-import {loiDocToModel} from './loi-data-converter';
+import { geometryPbToModel } from './geometry-data-converter';
+import { loiDocToModel } from './loi-data-converter';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -39,10 +39,10 @@ const y = 28.482;
 
 const geoPointData = {
   point: {
-    coordinates: {latitude: x, longitude: y},
+    coordinates: { latitude: x, longitude: y },
   },
   [ge.point]: {
-    [po.coordinates]: {[co.latitude]: x, [co.longitude]: y},
+    [po.coordinates]: { [co.latitude]: x, [co.longitude]: y },
   },
 };
 
@@ -85,9 +85,9 @@ describe('loiDocToModel', () => {
         [lo.jobId]: 'jobId0',
         [lo.geometry]: geoPointData,
         [lo.properties]: {
-          prop0: {[pr.stringValue]: 'value0'},
-          prop1: {[pr.numericValue]: 1},
-          prop2: {[pr.stringValue]: ''},
+          prop0: { [pr.stringValue]: 'value0' },
+          prop1: { [pr.numericValue]: 1 },
+          prop2: { [pr.stringValue]: '' },
         },
         [lo.source]: Pb.LocationOfInterest.Source.IMPORTED,
       },

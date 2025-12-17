@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
-import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {Router} from '@angular/router';
-import {NEVER, of} from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Router } from '@angular/router';
+import { NEVER, of } from 'rxjs';
 
-import {InlineEditorModule} from 'app/components/shared/inline-editor/inline-editor.module';
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
+import { InlineEditorModule } from 'app/components/shared/inline-editor/inline-editor.module';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
 
-import {EditStyleButtonModule} from './edit-style-button/edit-style-button.module';
-import {JobDialogComponent} from './job-dialog.component';
-import {TaskEditorModule} from './task-editor/task-editor.module';
+import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
+import { JobDialogComponent } from './job-dialog.component';
+import { TaskEditorModule } from './task-editor/task-editor.module';
 
-@Component({selector: 'mat-dialog-content', template: ''})
+@Component({ selector: 'mat-dialog-content', template: '' })
 class MatDialogContent {}
 
-@Component({selector: 'mat-dialog-actions', template: ''})
+@Component({ selector: 'mat-dialog-actions', template: '' })
 class MatDialogActions {}
 
 describe('JobDialogComponent', () => {
@@ -69,13 +69,13 @@ describe('JobDialogComponent', () => {
         MatCheckboxModule,
       ],
       providers: [
-        {provide: DataStoreService, useValue: {generateId: () => '123'}},
-        {provide: MAT_DIALOG_DATA, useValue: {createJob: true}},
-        {provide: MatDialogRef, useValue: dialogRef},
-        {provide: Router, useValue: routerSpy},
+        { provide: DataStoreService, useValue: { generateId: () => '123' } },
+        { provide: MAT_DIALOG_DATA, useValue: { createJob: true } },
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: Router, useValue: routerSpy },
         {
           provide: AuthService,
-          useValue: {getUser$: () => NEVER},
+          useValue: { getUser$: () => NEVER },
         },
       ],
     }).compileComponents();
@@ -93,5 +93,5 @@ describe('JobDialogComponent', () => {
 });
 
 function createRouterSpy() {
-  return jasmine.createSpyObj('Router', ['navigate'], {events: of()});
+  return jasmine.createSpyObj('Router', ['navigate'], { events: of() });
 }

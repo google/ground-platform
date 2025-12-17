@@ -15,14 +15,14 @@
  */
 
 import * as functions from 'firebase-functions';
-import {canExport, hasOrganizerRole} from './common/auth';
-import {getDatastore} from './common/context';
-import {isAccessibleLoi} from './common/utils';
+import { canExport, hasOrganizerRole } from './common/auth';
+import { getDatastore } from './common/context';
+import { isAccessibleLoi } from './common/utils';
 import * as HttpStatus from 'http-status-codes';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {toMessage} from '@ground/lib';
-import {GroundProtos} from '@ground/proto';
-import {toGeoJsonGeometry} from '@ground/lib';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { toMessage } from '@ground/lib';
+import { GroundProtos } from '@ground/proto';
+import { toGeoJsonGeometry } from '@ground/lib';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -35,7 +35,7 @@ export async function exportGeojsonHandler(
   user: DecodedIdToken
 ) {
   const db = getDatastore();
-  const {uid: userId} = user;
+  const { uid: userId } = user;
   const surveyId = req.query.survey as string;
   const jobId = req.query.job as string;
 
@@ -68,7 +68,7 @@ export async function exportGeojsonHandler(
       .send('Unsupported or corrupt job');
     return;
   }
-  const {name: jobName} = job;
+  const { name: jobName } = job;
 
   const isOrganizer = hasOrganizerRole(user, surveyDoc);
 
@@ -143,8 +143,8 @@ function getFileName(jobName: string | null) {
 
 function propertiesPbToObject(pb: {
   [k: string]: Pb.LocationOfInterest.IProperty;
-}): {[k: string]: string | number} {
-  const properties: {[k: string]: string | number} = {};
+}): { [k: string]: string | number } {
+  const properties: { [k: string]: string | number } = {};
   for (const k of Object.keys(pb).sort()) {
     const v = pb[k].stringValue || pb[k].numericValue;
     if (v !== null && v !== undefined) {

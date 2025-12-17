@@ -16,7 +16,7 @@
 
 import '@angular/localize/init';
 
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import {
   Component,
   EventEmitter,
@@ -31,22 +31,22 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import {MatDialog} from '@angular/material/dialog';
-import {List} from 'immutable';
+import { MatDialog } from '@angular/material/dialog';
+import { List } from 'immutable';
 
 import {
   DialogData,
   DialogType,
   JobDialogComponent,
 } from 'app/components/edit-survey/job-dialog/job-dialog.component';
-import {Cardinality} from 'app/models/task/multiple-choice.model';
+import { Cardinality } from 'app/models/task/multiple-choice.model';
 import {
   TaskConditionExpressionType,
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
-import {TaskType} from 'app/models/task/task.model';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {moveItemInFormArray} from 'app/utils/utils';
+import { TaskType } from 'app/models/task/task.model';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { moveItemInFormArray } from 'app/utils/utils';
 
 import {
   TaskGroup,
@@ -298,12 +298,12 @@ export class TaskFormComponent {
   onTaskTypeSelect(taskTypeOption: TaskTypeOption): void {
     this.taskTypeOption = taskTypeOption;
 
-    const {type, cardinality} = this.taskTypeOption;
+    const { type, cardinality } = this.taskTypeOption;
 
     this.typeControl.setValue(type);
     this.cardinalityControl.setValue(cardinality);
 
-    if (!cardinality) this.optionsControl.clear({emitEvent: false});
+    if (!cardinality) this.optionsControl.clear({ emitEvent: false });
 
     if (cardinality && this.optionsControl.length === 0) this.onAddOption();
   }
@@ -326,7 +326,7 @@ export class TaskFormComponent {
 
   onAddOtherOption(): void {
     this.otherOption = this.formBuilder.group({
-      label: {value: 'Other...', disabled: true},
+      label: { value: 'Other...', disabled: true },
     });
 
     this.hasOtherOptionControl.setValue(true);
@@ -335,7 +335,7 @@ export class TaskFormComponent {
   openDeleteOptionDialog(index?: number) {
     this.dialog
       .open(JobDialogComponent, {
-        data: {dialogType: DialogType.DeleteOption},
+        data: { dialogType: DialogType.DeleteOption },
         panelClass: 'small-width-dialog',
       })
       .afterClosed()

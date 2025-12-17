@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {MultipleSelection} from './multiple-selection';
-import {Geometry} from '../geometry/geometry';
+import { MultipleSelection } from './multiple-selection';
+import { Geometry } from '../geometry/geometry';
 
 export class Result {
   constructor(

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialog} from '@angular/material/dialog';
-import {MatMenuModule} from '@angular/material/menu';
-import {Router} from '@angular/router';
-import {of} from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { Router } from '@angular/router';
+import { of } from 'rxjs';
 
-import {AuthService} from 'app/services/auth/auth.service';
-import {DataStoreService} from 'app/services/data-store/data-store.service';
-import {DraftSurveyService} from 'app/services/draft-survey/draft-survey.service';
-import {SurveyService} from 'app/services/survey/survey.service';
+import { AuthService } from 'app/services/auth/auth.service';
+import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
+import { SurveyService } from 'app/services/survey/survey.service';
 
-import {HeaderComponent} from './header.component';
+import { HeaderComponent } from './header.component';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -39,13 +39,13 @@ describe('HeaderComponent', () => {
       providers: [
         {
           provide: DataStoreService,
-          useValue: {getAccessDeniedMessage: () => ''},
+          useValue: { getAccessDeniedMessage: () => '' },
         },
-        {provide: MatDialog, useValue: {}},
-        {provide: AuthService, useValue: {getUser$: () => of()}},
-        {provide: DraftSurveyService, useValue: {}},
-        {provide: Router, useValue: {events: of()}},
-        {provide: SurveyService, useValue: {canManageSurvey: () => false}},
+        { provide: MatDialog, useValue: {} },
+        { provide: AuthService, useValue: { getUser$: () => of() } },
+        { provide: DraftSurveyService, useValue: {} },
+        { provide: Router, useValue: { events: of() } },
+        { provide: SurveyService, useValue: { canManageSurvey: () => false } },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

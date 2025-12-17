@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {Component, Input, OnDestroy, OnInit, effect} from '@angular/core';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
-import {List} from 'immutable';
-import {Subscription} from 'rxjs';
+import { FlatTreeControl } from '@angular/cdk/tree';
+import { Component, Input, OnDestroy, OnInit, effect } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { List } from 'immutable';
+import { Subscription } from 'rxjs';
 
-import {Job} from 'app/models/job.model';
-import {LocationOfInterest} from 'app/models/loi.model';
-import {AuthService} from 'app/services/auth/auth.service';
-import {GroundPinService} from 'app/services/ground-pin/ground-pin.service';
-import {LocationOfInterestService} from 'app/services/loi/loi.service';
-import {NavigationService} from 'app/services/navigation/navigation.service';
-import {environment} from 'environments/environment';
+import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
+import { AuthService } from 'app/services/auth/auth.service';
+import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
+import { NavigationService } from 'app/services/navigation/navigation.service';
+import { environment } from 'environments/environment';
 
-import {DynamicDataSource, DynamicFlatNode} from './tree-data-source';
+import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
 
 @Component({
   selector: 'ground-job-list-item',
@@ -71,7 +71,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     this.dataSource = new DynamicDataSource(this.treeControl, this.loiService);
 
     effect(() => {
-      const {surveyId, loiId} = this.urlParamsSignal();
+      const { surveyId, loiId } = this.urlParamsSignal();
       this.surveyId = surveyId;
       this.loiId = loiId;
     });

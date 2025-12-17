@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ParamMap, Params, convertToParamMap} from '@angular/router';
-import {ReplaySubject} from 'rxjs';
+import { ParamMap, Params, convertToParamMap } from '@angular/router';
+import { ReplaySubject } from 'rxjs';
 
 /**
  * An ActivateRoute test double with `paramMap` and `fragment` observables.

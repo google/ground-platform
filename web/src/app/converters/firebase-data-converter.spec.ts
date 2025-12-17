@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Role} from 'app/models/role.model';
+import { Role } from 'app/models/role.model';
 
-import {FirebaseDataConverter} from './firebase-data-converter';
+import { FirebaseDataConverter } from './firebase-data-converter';
 
 describe('FirebaseDataConverter', () => {
   describe('toRoleId()', () => {

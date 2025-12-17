@@ -16,15 +16,15 @@
 
 import functions from 'firebase-functions';
 import HttpStatus from 'http-status-codes';
-import {getDatastore} from './common/context';
+import { getDatastore } from './common/context';
 import Busboy from 'busboy';
 import JSONStream from 'jsonstream-ts';
-import {canImport} from './common/auth';
-import {DecodedIdToken} from 'firebase-admin/auth';
-import {GroundProtos} from '@ground/proto';
-import {toDocumentData, toGeometryPb, isGeometryValid} from '@ground/lib';
-import {Feature, GeoJsonProperties} from 'geojson';
-import {ErrorHandler} from './handlers';
+import { canImport } from './common/auth';
+import { DecodedIdToken } from 'firebase-admin/auth';
+import { GroundProtos } from '@ground/proto';
+import { toDocumentData, toGeometryPb, isGeometryValid } from '@ground/lib';
+import { Feature, GeoJsonProperties } from 'geojson';
+import { ErrorHandler } from './handlers';
 
 import Pb = GroundProtos.ground.v1beta1;
 
@@ -50,12 +50,12 @@ export function importGeoJsonCallback(
     );
   }
 
-  const busboy = Busboy({headers: req.headers});
+  const busboy = Busboy({ headers: req.headers });
 
   let hasError = false;
 
   // Dictionary used to accumulate task step values, keyed by step name.
-  const params: {[name: string]: string} = {};
+  const params: { [name: string]: string } = {};
 
   // Accumulate Promises for insert operations, so we don't finalize the res
   // stream before operations are complete.
@@ -67,7 +67,7 @@ export function importGeoJsonCallback(
 
   // This code will process each file uploaded.
   busboy.on('file', async (_fieldname, fileStream) => {
-    const {survey: surveyId, job: jobId} = params;
+    const { survey: surveyId, job: jobId } = params;
     if (!surveyId || !jobId) {
       return error(HttpStatus.BAD_REQUEST, 'Missing survey and/or job ID');
     }
@@ -117,7 +117,7 @@ export function importGeoJsonCallback(
       await Promise.all(inserts);
       const count = inserts.length;
       console.debug(`${count} LOIs imported`);
-      res.send(JSON.stringify({count}));
+      res.send(JSON.stringify({ count }));
       done();
     } catch (err) {
       console.debug(err);
@@ -158,11 +158,11 @@ export function importGeoJsonCallback(
    * data uses the 'CRS84' coordinate reference system.
    */
   function onGeoJsonCrs(
-    geoJsonCrs: {type: string; properties: {name?: string}} | undefined
+    geoJsonCrs: { type: string; properties: { name?: string } } | undefined
   ) {
     let crs = 'CRS84';
     if (geoJsonCrs) {
-      const {type, properties} = geoJsonCrs;
+      const { type, properties } = geoJsonCrs;
       switch (type) {
         case 'name':
           crs = properties?.name ?? 'CRS84';
@@ -222,7 +222,7 @@ function toLoiPb(
   ownerId: string
 ): Pb.LocationOfInterest {
   // TODO: Add created/modified metadata.
-  const {id, geometry, properties} = feature;
+  const { id, geometry, properties } = feature;
   const geometryPb = toGeometryPb(geometry);
   return new Pb.LocationOfInterest({
     jobId,
@@ -245,7 +245,7 @@ export function toLoiPbProperties(properties: GeoJsonProperties): {
 function toLoiPbProperty(value: any): Pb.LocationOfInterest.Property {
   return new Pb.LocationOfInterest.Property(
     typeof value === 'number'
-      ? {numericValue: value}
-      : {stringValue: value?.toString() || ''}
+      ? { numericValue: value }
+      : { stringValue: value?.toString() || '' }
   );
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DOCUMENT} from '@angular/common';
+import { DOCUMENT } from '@angular/common';
 import {
   Inject,
   Injectable,
@@ -30,8 +30,8 @@ import {
   Params,
   Router,
 } from '@angular/router';
-import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import {
   ABOUT,
@@ -52,15 +52,12 @@ import {
   SURVEY_ID,
   SURVEY_ID_NEW,
   SURVEY_SEGMENT,
-  SideNavMode,
   TASK_ID,
   TASK_SEGMENT,
   TERMS,
 } from './navigation.constants';
-import {UrlParams} from './url-params';
-import {DataStoreService} from '../data-store/data-store.service';
-
-export {SideNavMode} from './navigation.constants';
+import { SideNavMode, UrlParams } from './url-params';
+import { DataStoreService } from '../data-store/data-store.service';
 
 /**
  * Exposes application state in the URL as streams to other services
@@ -134,7 +131,7 @@ export class NavigationService implements OnDestroy {
 
     // TODO remove this effect when everything will be migrated to Signals
     effect(() => {
-      const {surveyId, loiId, submissionId, taskId, sideNavMode} =
+      const { surveyId, loiId, submissionId, taskId, sideNavMode } =
         this.urlParamsSignal();
       this.surveyId$.next(surveyId);
       this.loiId$.next(loiId);
@@ -276,7 +273,7 @@ export class NavigationService implements OnDestroy {
     const url = `${SURVEYS_SEGMENT}${
       surveyId ? `/${surveyId}` : ''
     }/${SURVEYS_CREATE}`;
-    this.router.navigateByUrl(url, {replaceUrl});
+    this.router.navigateByUrl(url, { replaceUrl });
   }
 
   navigateToEditSurvey(surveyId: string): void {
@@ -316,7 +313,7 @@ export class NavigationService implements OnDestroy {
    * Navigate to the URL for error.
    */
   error(error: Error) {
-    this.router.navigate([ERROR, {error}]);
+    this.router.navigate([ERROR, { error }]);
   }
 
   isSurveyPage(surveyId: string): boolean {

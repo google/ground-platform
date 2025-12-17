@@ -16,12 +16,12 @@
 
 import '@angular/localize/init';
 
-import {Map as ImmutableMap, List} from 'immutable';
+import { Map as ImmutableMap, List } from 'immutable';
 
-import {AclEntry} from './acl-entry.model';
-import {Copiable} from './copiable';
-import {Job} from './job.model';
-import {Role} from './role.model';
+import { AclEntry } from './acl-entry.model';
+import { Copiable } from './copiable';
+import { Job } from './job.model';
+import { Role } from './role.model';
 
 /** Enum for type of data sharing terms. */
 export enum DataSharingType {
@@ -80,7 +80,7 @@ export class Survey extends Copiable {
     /* ownerId= */
     '',
     /* dataSharingTerms= */
-    {type: DataSharingType.PRIVATE},
+    { type: DataSharingType.PRIVATE },
     SurveyState.UNSAVED,
     SurveyGeneralAccess.RESTRICTED,
     SurveyDataVisibility.CONTRIBUTOR_AND_ORGANIZERS
@@ -93,7 +93,7 @@ export class Survey extends Copiable {
     readonly jobs: ImmutableMap<string, Job>,
     readonly acl: ImmutableMap<string, Role>,
     readonly ownerId: string,
-    readonly dataSharingTerms: {type: DataSharingType; customText?: string},
+    readonly dataSharingTerms: { type: DataSharingType; customText?: string },
     readonly state?: SurveyState,
     readonly generalAccess?: SurveyGeneralAccess,
     readonly dataVisibility?: SurveyDataVisibility

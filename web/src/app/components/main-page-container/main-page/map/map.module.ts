@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {NgModule} from '@angular/core';
-import {GoogleMapsModule} from '@angular/google-maps';
-import {MatButtonModule} from '@angular/material/button';
-import {BrowserModule} from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { GoogleMapsModule } from '@angular/google-maps';
+import { MatButtonModule } from '@angular/material/button';
+import { BrowserModule } from '@angular/platform-browser';
 
-import {MapComponent} from './map.component';
+import { MapComponent } from './map.component';
 
 @NgModule({
   imports: [BrowserModule, GoogleMapsModule, MatButtonModule],

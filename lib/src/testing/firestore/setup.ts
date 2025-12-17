@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Firestore} from '@google-cloud/firestore';
+import { Firestore } from '@google-cloud/firestore';
 
 export function stubAdminApi(mockFirestore: Firestore) {
   spyOn(require('firebase-admin'), 'initializeApp').and.returnValue({
