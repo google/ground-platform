@@ -1,0 +1,15 @@
+
+{
+  "extends": "../node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "outDir": "build",
+    "lib": ["es2022", "dom"],
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+  }
+}
