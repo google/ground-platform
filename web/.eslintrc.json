@@ -1,6 +1,6 @@
 {
   "extends": [
-    "../node_modules/gts",
+    "./node_modules/gts",
     "plugin:import/recommended",
     "plugin:import/typescript"
   ],
