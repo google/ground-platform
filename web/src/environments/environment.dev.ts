@@ -18,13 +18,13 @@ import { Env } from 'environments/environment-enums';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDFMmOycj7L1Mqw_KYfn_IlFt4KgmYuO6k",
-  authDomain: "ground-dev-sig.firebaseapp.com",
-  projectId: "ground-dev-sig",
-  storageBucket: "ground-dev-sig.appspot.com",
-  messagingSenderId: "429183886479",
-  appId: "1:429183886479:web:96481f53f1202bc2293cfa",
-  measurementId: "G-7CZYYG7L4D"
+  apiKey: 'AIzaSyDFMmOycj7L1Mqw_KYfn_IlFt4KgmYuO6k',
+  authDomain: 'ground-dev-sig.firebaseapp.com',
+  projectId: 'ground-dev-sig',
+  storageBucket: 'ground-dev-sig.appspot.com',
+  messagingSenderId: '429183886479',
+  appId: '1:429183886479:web:96481f53f1202bc2293cfa',
+  measurementId: 'G-7CZYYG7L4D',
 };
 
 export const environment = {
