@@ -43,7 +43,7 @@ jobs:
         run: npm ci
 
       - name: Build web and local deps
-        run: npm run build-all --config=test
+        run: npm run build-all --config=local
 
       - name: Run tests
         run: npm run test-with-coverage
