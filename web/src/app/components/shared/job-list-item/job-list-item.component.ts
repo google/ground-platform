@@ -15,10 +15,9 @@
  */
 
 import { FlatTreeControl } from '@angular/cdk/tree';
-import { Component, Input, OnDestroy, OnInit, effect } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges, effect } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { List } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
@@ -35,8 +34,9 @@ import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
   templateUrl: './job-list-item.component.html',
   styleUrls: ['./job-list-item.component.scss'],
 })
-export class JobListItemComponent implements OnInit, OnDestroy {
+export class JobListItemComponent implements OnInit {
   @Input() job?: Job;
+  @Input() lois: List<LocationOfInterest> = List();
   @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
 
   private urlParamsSignal = this.navigationService.getUrlParams();
@@ -45,7 +45,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   loiId?: string | null;
   jobPinUrl: SafeUrl;
   readonly jobListItemActionsType = JobListItemActionsType;
-  subscription: Subscription = new Subscription();
   treeControl: FlatTreeControl<DynamicFlatNode>;
   dataSource: DynamicDataSource;
 
@@ -61,13 +60,15 @@ export class JobListItemComponent implements OnInit, OnDestroy {
     private groundPinService: GroundPinService,
     private authService: AuthService
   ) {
-    this.jobPinUrl = sanitizer.bypassSecurityTrustUrl(
-      groundPinService.getPinImageSource()
+    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
+      this.groundPinService.getPinImageSource()
     );
+
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(
       this.getLevel,
       this.isExpandable
     );
+
     this.dataSource = new DynamicDataSource(this.treeControl, this.loiService);
 
     effect(() => {
@@ -78,19 +79,30 @@ export class JobListItemComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
-      this.groundPinService.getPinImageSource(this.job?.color)
-    );
-    this.subscription.add(
-      this.loiService.getLocationsOfInterest$().subscribe(lois => {
-        this.dataSource.data = this.dataSource.data.concat([
-          this.createJobNode(this.job!, lois),
-        ]);
-      })
-    );
+    this.updatePinUrl();
   }
 
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['job']) {
+      this.updatePinUrl();
+    }
+
+    if (this.job && this.lois) {
+      const expandedNodes = this.treeControl.expansionModel.selected;
+
+      const wasExpanded = expandedNodes.some(
+        node => node.jobId === this.job?.id
+      );
+
+      this.dataSource.data = [this.createJobNode(this.job, this.lois)];
+
+      if (wasExpanded) {
+        this.treeControl.expand(this.dataSource.data[0]);
+      }
+    }
+  }
+
+  private updatePinUrl() {
     this.jobPinUrl = this.sanitizer.bypassSecurityTrustUrl(
       this.groundPinService.getPinImageSource(this.job?.color)
     );
@@ -133,7 +145,7 @@ export class JobListItemComponent implements OnInit, OnDestroy {
       /* iconColo= */ job!.color!,
       /* jobId= */ job!.id,
       /* isJob= */ true,
-      /* childCount= */ lois.filter(loi => loi.jobId === this.job?.id).size
+      /* childCount= */ lois.size
     );
   }
 
@@ -148,10 +160,6 @@ export class JobListItemComponent implements OnInit, OnDestroy {
         node.loi!.id
       );
     }
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
   }
 
   isSidePanelExpanded() {
