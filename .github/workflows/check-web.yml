@@ -39,14 +39,11 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Create empty key files
-        run: ./precheck.sh
-
       - name: Build and install dependencies
         run: npm ci
 
       - name: Build web and local deps
-        run: npm run build-all --config=local
+        run: npm run build-all --config=test
 
       - name: Run tests
         run: npm run test-with-coverage
