@@ -108,7 +108,8 @@
             "vi": {
               "localize": ["vi"]
             }
-          }
+          },
+          "defaultConfiguration": "local"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
