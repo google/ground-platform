@@ -84,7 +84,7 @@ runs:
 
     - name: Build project and local deps
       shell: bash
-      run: npm run build-all --config=local
+      run: npm run build-all --config=test
 
     - name: Copy Firebase emulator data
       uses: actions/download-artifact@v4
