@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "description": "Root package for Ground hosted components",
   "scripts": {
-    "clean": "nx run-many -t clean",
+    "clean": "nx run-many -t clean --exclude=root",
     "build": "nx run-many -t build",
+    "start": "firebase experiments:enable webframeworks && firebase emulators:start --project demo-local --config firebase.local.json --import data/local",
     "deploy": "firebase login && firebase deploy --project $npm_config_project",
     "build-all-and-deploy": "nx run-many -t build && npm run deploy",
     "build-all-and-start-local": "nx run-many -t build --config=local --project=local && npm run start:local",

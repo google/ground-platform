@@ -3,7 +3,7 @@
     "indexes": "firestore/firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/dist/web",
+    "source": "web",
     "redirects": [
       {
         "source": "/",
@@ -31,9 +31,6 @@
     ]
   },
   "emulators": {
-    "auth": {
-      "port": 9099
-    },
     "functions": {
       "port": 5001
     },

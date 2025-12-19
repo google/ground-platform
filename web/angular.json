@@ -43,7 +43,7 @@
             "scripts": []
           },
           "configurations": {
-            "local": {
+            "development": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -109,7 +109,7 @@
               "localize": ["vi"]
             }
           },
-          "defaultConfiguration": "local"
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -117,8 +117,8 @@
             "buildTarget": "web:build"
           },
           "configurations": {
-            "local": {
-              "buildTarget": "web:build:local,en"
+            "development": {
+              "buildTarget": "web:build:development,en"
             },
             "dev": {
               "buildTarget": "web:build:dev,en"
@@ -176,7 +176,9 @@
         },
         "deploy": {
           "builder": "@angular/fire:deploy",
-          "options": {}
+          "options": {
+            "buildTarget": "web:build"
+          }
         }
       }
     }
