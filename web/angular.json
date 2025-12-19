@@ -57,11 +57,11 @@
               "sourceMap": true,
               "namedChunks": true
             },
-            "dev": {
+            "staging": {
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
+                  "with": "src/environments/environment.staging.ts"
                 }
               ],
               "buildOptimizer": false,
@@ -120,17 +120,17 @@
             "development": {
               "buildTarget": "web:build:development,en"
             },
-            "dev": {
-              "buildTarget": "web:build:dev,en"
+            "staging": {
+              "buildTarget": "web:build:staging,en"
             },
             "prod": {
               "buildTarget": "web:build:prod,en"
             },
             "fr": {
-              "buildTarget": "web:build:dev,fr"
+              "buildTarget": "web:build:staging,fr"
             },
             "vi": {
-              "buildTarget": "web:build:dev,vi"
+              "buildTarget": "web:build:staging,vi"
             }
           }
         },
