@@ -34,7 +34,7 @@ import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
   styleUrls: ['./job-list-item.component.scss'],
 })
 export class JobListItemComponent implements OnInit {
-  @Input() job?: Job;
+  @Input() job!: Job;
   @Input() lois: List<LocationOfInterest> = List();
   @Input() actionsType: JobListItemActionsType = JobListItemActionsType.MENU;
 
@@ -79,9 +79,7 @@ export class JobListItemComponent implements OnInit {
   ngOnInit() {
     this.updatePinUrl();
 
-    if (this.job) {
-      this.dataSource.setJobAndLois(this.job, this.lois);
-    }
+    this.dataSource.setJobAndLois(this.job, this.lois);
 
     this.treeControl.expansionModel.changed.subscribe(change => {
       if (change.added)
