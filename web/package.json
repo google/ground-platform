@@ -4,8 +4,9 @@
   "scripts": {
     "clean": "rm -rf dist coverage *.log",
     "build": "ng build",
-    "//watch": "npm run build -- --watch",
-    "serve": "ng serve -c local",
+    "serve": "ng serve",
+    "serve:staging": "nx serve -c staging",
+    "serve:production": "nx serve -c production",
     "pretest": "./pretest.sh",
     "test": "ng test",
     "test-headless": "npm run test -- --browsers ChromeHeadlessNoSandbox --watch=false",
