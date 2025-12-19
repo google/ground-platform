@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import {
-  CollectionViewer,
-  DataSource,
-  SelectionChange,
-} from '@angular/cdk/collections';
+import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { List } from 'immutable';
-import { BehaviorSubject, Observable, Subscription, merge } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, merge } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { getLoiIcon } from 'app/utils/utils';
@@ -49,7 +46,6 @@ export class DynamicFlatNode {
 
 export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   dataChange = new BehaviorSubject<DynamicFlatNode[]>([]);
-  private loiSubscription: Subscription | undefined;
 
   // Data represents just the rendered data, only when lois are expanded is when
   // submissions get added to this and to the DOM.
@@ -61,99 +57,90 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     this.dataChange.next(value);
   }
 
-  constructor(
-    private _treeControl: FlatTreeControl<DynamicFlatNode>,
-    private loiService: LocationOfInterestService
-  ) {}
+  private job?: Job;
+  private lois: List<LocationOfInterest> = List();
+
+  constructor(private _treeControl: FlatTreeControl<DynamicFlatNode>) {}
+
+  setJobAndLois(job: Job, lois: List<LocationOfInterest>) {
+    this.job = job;
+    this.lois = lois;
+
+    const existingJobNode = this.data.find(n => n.isJob && n.jobId === job.id);
+
+    let jobNode = this.data.find(n => n.isJob && n.jobId === job.id);
+
+    if (!jobNode) {
+      jobNode = this.createJobNode(job, lois);
+    } else {
+      jobNode.name = job.name!;
+      jobNode.iconColor = job.color!;
+      jobNode.childCount = lois.size;
+    }
+
+    if (this._treeControl.isExpanded(jobNode)) {
+      const loiNodes = this.createLoiNodes(lois);
+
+      this.data = [jobNode, ...loiNodes];
+    } else {
+      this.data = [jobNode];
+    }
+  }
+
+  expandJob(node: DynamicFlatNode) {
+    if (!node.isJob) return;
+
+    const loiNodes = this.createLoiNodes(this.lois);
+
+    this.data = [node, ...loiNodes];
+  }
+
+  collapseJob(node: DynamicFlatNode) {
+    if (!node.isJob) return;
+
+    this.data = [node];
+  }
+
+  private createJobNode(
+    job: Job,
+    lois: List<LocationOfInterest>
+  ): DynamicFlatNode {
+    return new DynamicFlatNode(
+      /* name= */ job!.name!,
+      /* level= */ 0,
+      /* expandable= */ true,
+      /* iconName= */ 'label',
+      /* iconColo= */ job!.color!,
+      /* jobId= */ job!.id,
+      /* isJob= */ true,
+      /* childCount= */ lois.size
+    );
+  }
+
+  private createLoiNodes(lois: List<LocationOfInterest>): DynamicFlatNode[] {
+    return lois
+      .map(
+        loi =>
+          new DynamicFlatNode(
+            LocationOfInterestService.getDisplayName(loi),
+            1,
+            false,
+            getLoiIcon(loi),
+            this.job!.color!,
+            this.job!.id,
+            false,
+            0,
+            loi
+          )
+      )
+      .toArray();
+  }
 
   connect(collectionViewer: CollectionViewer): Observable<DynamicFlatNode[]> {
-    this._treeControl.expansionModel.changed.subscribe(change => {
-      if (
-        (change as SelectionChange<DynamicFlatNode>).added ||
-        (change as SelectionChange<DynamicFlatNode>).removed
-      ) {
-        this.handleTreeControl(change as SelectionChange<DynamicFlatNode>);
-      }
-    });
-
     return merge(collectionViewer.viewChange, this.dataChange).pipe(
       map(() => this.data)
     );
   }
 
   disconnect(_: CollectionViewer): void {}
-
-  /** Handle expand/collapse behaviors */
-  handleTreeControl(change: SelectionChange<DynamicFlatNode>) {
-    if (change.added) {
-      change.added.forEach(node => this.toggleNode(node, true));
-    }
-    if (change.removed) {
-      change.removed
-        .slice()
-        .reverse()
-        .forEach(node => this.toggleNode(node, false));
-    }
-  }
-
-  /**
-   * Toggle the node, remove from display list.
-   */
-  toggleNode(node: DynamicFlatNode, expand: boolean) {
-    const index = this.data.indexOf(node);
-    if (index < 0) {
-      // If cannot find the node, no op.
-      return;
-    }
-
-    if (expand) {
-      // Subscribe to the lois while expanded to dynamically update if needed.
-      this.loiSubscription = this.getLois$().subscribe(
-        (lois: List<LocationOfInterest>) => {
-          // Delete all previously loaded nodes since the new value comes from
-          // a subscription change and we don't know the new value.
-          this.removeLoiNodes();
-
-          // Get lois that for specific job
-          const jobLois = lois.filter(loi => {
-            return loi.jobId === node.jobId;
-          });
-
-          // Create loi nodes for job tree
-          const loiNodes: DynamicFlatNode[] = [];
-
-          for (const loi of jobLois) {
-            const loiNode = new DynamicFlatNode(
-              /* name= */ LocationOfInterestService.getDisplayName(loi),
-              /* level= */ 1,
-              /* expandable= */ false,
-              /* iconName= */ getLoiIcon(loi),
-              /* iconColor= */ node.iconColor,
-              /* jobId= */ 'undefined',
-              /* isJob= */ false,
-              /* childCount= */ 0,
-              /* loi= */ loi
-            );
-            loiNodes.push(loiNode);
-          }
-          // Add loi nodes to the tree, needs to be reassigned to force
-          // mat-tree to rerender
-          this.data = this.data.concat(loiNodes);
-        }
-      );
-    } else {
-      // Remove the loi nodes and unsubscribe when closing the dropdown.
-      this.removeLoiNodes();
-      this.loiSubscription?.unsubscribe();
-    }
-  }
-
-  getLois$(): Observable<List<LocationOfInterest>> {
-    return this.loiService.getLocationsOfInterest$().pipe(shareReplay());
-  }
-
-  removeLoiNodes() {
-    // First node is always job node, the rest are the loi nodes.
-    this.data = [this.data[0]];
-  }
 }

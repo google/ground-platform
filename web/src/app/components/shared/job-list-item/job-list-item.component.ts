@@ -23,7 +23,6 @@ import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
-import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { environment } from 'environments/environment';
 
@@ -55,7 +54,6 @@ export class JobListItemComponent implements OnInit {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private loiService: LocationOfInterestService,
     private navigationService: NavigationService,
     private groundPinService: GroundPinService,
     private authService: AuthService
@@ -69,7 +67,7 @@ export class JobListItemComponent implements OnInit {
       this.isExpandable
     );
 
-    this.dataSource = new DynamicDataSource(this.treeControl, this.loiService);
+    this.dataSource = new DynamicDataSource(this.treeControl);
 
     effect(() => {
       const { surveyId, loiId } = this.urlParamsSignal();
@@ -80,6 +78,17 @@ export class JobListItemComponent implements OnInit {
 
   ngOnInit() {
     this.updatePinUrl();
+
+    if (this.job) {
+      this.dataSource.setJobAndLois(this.job, this.lois);
+    }
+
+    this.treeControl.expansionModel.changed.subscribe(change => {
+      if (change.added)
+        change.added.forEach(node => this.dataSource.expandJob(node));
+      if (change.removed)
+        change.removed.forEach(node => this.dataSource.collapseJob(node));
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -87,17 +96,9 @@ export class JobListItemComponent implements OnInit {
       this.updatePinUrl();
     }
 
-    if (this.job && this.lois) {
-      const expandedNodes = this.treeControl.expansionModel.selected;
-
-      const wasExpanded = expandedNodes.some(
-        node => node.jobId === this.job?.id
-      );
-
-      this.dataSource.data = [this.createJobNode(this.job, this.lois)];
-
-      if (wasExpanded) {
-        this.treeControl.expand(this.dataSource.data[0]);
+    if (changes['job'] || changes['lois']) {
+      if (this.job) {
+        this.dataSource.setJobAndLois(this.job, this.lois);
       }
     }
   }
@@ -133,19 +134,6 @@ export class JobListItemComponent implements OnInit {
       `${environment.cloudFunctionsUrl}/exportGeojson?` +
         `survey=${this.surveyId}&job=${this.job?.id}`,
       '_blank'
-    );
-  }
-
-  createJobNode(job: Job, lois: List<LocationOfInterest>): DynamicFlatNode {
-    return new DynamicFlatNode(
-      /* name= */ job!.name!,
-      /* level= */ 0,
-      /* expandable= */ true,
-      /* iconName= */ 'label',
-      /* iconColo= */ job!.color!,
-      /* jobId= */ job!.id,
-      /* isJob= */ true,
-      /* childCount= */ lois.size
     );
   }
 
