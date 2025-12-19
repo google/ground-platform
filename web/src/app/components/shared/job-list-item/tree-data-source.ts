@@ -65,8 +65,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     this.job = job;
     this.lois = lois;
 
-    const existingJobNode = this.data.find(n => n.isJob && n.jobId === job.id);
-
     let jobNode = this.data.find(n => n.isJob && n.jobId === job.id);
 
     if (!jobNode) {
