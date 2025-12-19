@@ -39,16 +39,15 @@ export class DynamicFlatNode {
     public jobId: string,
     public isJob: boolean,
     public childCount: number,
-    // Specific for nodes that represent lois.
     public loi?: LocationOfInterest
   ) {}
 }
 
 export class DynamicDataSource implements DataSource<DynamicFlatNode> {
+  /** Stream that emits the latest array of nodes to be rendered by the tree. */
   dataChange = new BehaviorSubject<DynamicFlatNode[]>([]);
 
-  // Data represents just the rendered data, only when lois are expanded is when
-  // submissions get added to this and to the DOM.
+  /** The current set of nodes displayed in the tree. */
   get data(): DynamicFlatNode[] {
     return this.dataChange.value;
   }
@@ -101,6 +100,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     this.data = [node];
   }
 
+  /** Creates a top-level node representing the Job. */
   private createJobNode(
     job: Job,
     lois: List<LocationOfInterest>
@@ -117,6 +117,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     );
   }
 
+  /** Maps a list of LOIs into flat tree nodes. */
   private createLoiNodes(lois: List<LocationOfInterest>): DynamicFlatNode[] {
     return lois
       .map(
@@ -136,11 +137,13 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
       .toArray();
   }
 
+  /** Used by the CDK Tree to connect to the data source. */
   connect(collectionViewer: CollectionViewer): Observable<DynamicFlatNode[]> {
     return merge(collectionViewer.viewChange, this.dataChange).pipe(
       map(() => this.data)
     );
   }
 
+  /** Used by the CDK Tree to disconnect from the data source. */
   disconnect(_: CollectionViewer): void {}
 }
