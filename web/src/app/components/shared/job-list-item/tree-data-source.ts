@@ -122,15 +122,15 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
       .map(
         loi =>
           new DynamicFlatNode(
-            LocationOfInterestService.getDisplayName(loi),
-            1,
-            false,
-            getLoiIcon(loi),
-            this.job!.color!,
-            this.job!.id,
-            false,
-            0,
-            loi
+            /* name= */ LocationOfInterestService.getDisplayName(loi),
+            /* level= */ 1,
+            /* expandable= */ false,
+            /* iconName= */ getLoiIcon(loi),
+            /* iconColo= */ this.job!.color!,
+            /* jobId= */ this.job!.id,
+            /* isJob= */ false,
+            /* childCount= */ 0,
+            /* loi */ loi
           )
       )
       .toArray();
