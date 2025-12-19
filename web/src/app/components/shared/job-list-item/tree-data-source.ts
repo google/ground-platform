@@ -135,13 +135,19 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
       .toArray();
   }
 
-  /** Used by the CDK Tree to connect to the data source. */
+  /** Used by the CDK Tree to connect to the data source.
+   * This is called once by the tree when it is initialized.
+   */
   connect(collectionViewer: CollectionViewer): Observable<DynamicFlatNode[]> {
     return merge(collectionViewer.viewChange, this.dataChange).pipe(
       map(() => this.data)
     );
   }
 
-  /** Used by the CDK Tree to disconnect from the data source. */
-  disconnect(_: CollectionViewer): void {}
+  /** Used by the CDK Tree to disconnect from the data source.
+   * This is called when the tree is destroyed.
+   */
+  disconnect(_: CollectionViewer): void {
+    // Currently no cleanup needed as dataChange is handled by the tree subscription.
+  }
 }
