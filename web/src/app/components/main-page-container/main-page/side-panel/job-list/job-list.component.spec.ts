@@ -26,8 +26,8 @@ import { of } from 'rxjs';
 import { Job } from 'app/models/job.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { SurveyService } from 'app/services/survey/survey.service';
 
 import { JobListComponent } from './job-list.component';
 
@@ -85,6 +85,10 @@ describe('JobListComponent', () => {
           useValue: mockAngularFireAuth,
         },
         { provide: DataStoreService, useValue: { user$: () => of() } },
+        {
+          provide: LocationOfInterestService,
+          useValue: { getLocationsOfInterest$: () => of() },
+        },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
