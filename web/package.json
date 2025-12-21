@@ -3,10 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "clean": "rm -rf dist coverage *.log",
-    "build": "ng build",
     "serve": "ng serve",
-    "serve:staging": "nx serve -- -c staging",
-    "serve:production": "nx serve -- -c production",
     "pretest": "./pretest.sh",
     "test": "ng test",
     "test-headless": "npm run test -- --browsers ChromeHeadlessNoSandbox --watch=false",
@@ -18,13 +15,7 @@
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
   },
-  "nx": {
-    "targets": {
-      "serve": {
-        "dependsOn": ["^build"]
-      }
-    }
-  },
+
   "dependencies": {
     "@angular/animations": "^17.3.12",
     "@angular/cdk": "^17.3.8",

@@ -4,9 +4,11 @@
   "description": "Root package for Ground hosted components",
   "scripts": {
     "clean": "nx run-many -t clean --exclude=root",
+    "lint": "nx run-many -t lint --exclude=root",
     "build": "nx run-many -t build --exclude=root",
     "start": "firebase experiments:enable webframeworks && firebase emulators:start --project demo-local --config firebase.local.json --import data/local",
-    "deploy": "firebase login && firebase deploy --project $npm_config_project",
+    "deploy:staging": "firebase login && firebase deploy --project ground-dev-sig",
+    "deploy:production": "firebase login && firebase deploy --project YOUR-PROD-PROJECT",
     "build-all-and-deploy": "nx run-many -t build && npm run deploy",
     "build-all-and-start-local": "nx run-many -t build --config=local --project=local && npm run start:local",
     "watch:local": "nx run functions:watch > functions.log 2>&1 & nx run web:watch --config=local --project=local > web.log 2>&1",
@@ -18,11 +20,13 @@
     "test:e2e:verify": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:verify --prefix=e2e-tests'",
     "test:e2e:verify:debug": "WAIT_ON_INTERVAL=30000 start-server-and-test start-and-export:test '5000|http://localhost:4000/firestore' 'npm run test:verify:debug --prefix=e2e-tests'"
   },
-  "nx": { 
+  "nx": {
     "defaultProject": "@ground/root",
     "targets": {
       "start": {
-        "dependsOn": ["build"]
+        "dependsOn": [
+          "build"
+        ]
       }
     }
   },
@@ -36,12 +40,22 @@
   },
   "homepage": "https://groundplatform.org",
   "devDependencies": {
+    "@angular-devkit/build-angular": "^17.3.17",
+    "@angular-devkit/core": "^17.3.17",
+    "@angular/cli": "^17.3.17",
+    "@angular/compiler": "^17.3.12",
+    "@angular/compiler-cli": "^17.3.12",
+    "@angular/localize": "^17.3.12",
+    "@angular/platform-browser": "^17.3.12",
+    "@angular/platform-browser-dynamic": "^17.3.12",
+    "@nx/angular": "^22.3.1",
     "firebase-tools": "^13.24.2",
     "isolate-package": "^1.18.0",
     "nx": "22.3.1",
     "start-server-and-test": "^2.0.3",
     "ts-node": "^10.9.2",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.2",
+    "typescript": "~5.4.5"
   },
   "engines": {
     "node": "20"
