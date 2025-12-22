@@ -1,3 +1,4 @@
+@use '@angular/material' as mat;
 /**
  * Copyright 2024 The Ground Authors.
  *
@@ -151,7 +152,7 @@ $_rest: (
 $_primary: map.merge(map.get($_palettes, primary), $_rest);
 $_tertiary: map.merge(map.get($_palettes, tertiary), $_rest);
 
-$light-theme: matx.define-theme((
+$light-theme: mat.define-theme((
   color: (
     theme-type: light,
     primary: $_primary,
