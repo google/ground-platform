@@ -17,6 +17,10 @@
     ],
     "rewrites": [
       {
+        "source": "/.well-known/assetLinks.json",
+        "destination": "/en/assets/.well-known/assetLinks.json"
+      },
+      {
         "source": "/importGeoJson",
         "function": "importGeoJson"
       },
