@@ -31,10 +31,16 @@ Ground uses [Nx](https://nx.dev) to manage the build. To install, run:
 npm install -g nx
 ```
 
-Then, to build and run against a local emulator:
+While we wait for the Nx Cloud GitHub app to be approved in our org, you also need to run:
 
 ```bash
-nx start
+export NX_NO_CLOUD=true
+```
+
+Finally, to build and run the Angular app and Cloud Functions in a local emulator:
+
+```bash
+nx serve
 ```
 
 Once the local server is ready, access the web app at [http://localhost:5000](http://localhost:5000). For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
