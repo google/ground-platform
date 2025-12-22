@@ -5,6 +5,7 @@
   "scripts": {
     "clean-all": "nx run-many -t clean",
     "build-all": "nx run-many -t build",
+    "build-all-and-test": "nx run-many -t build --config=local && npm run test",
     "deploy": "firebase login && firebase deploy --project $npm_config_project",
     "build-all-and-deploy": "nx run-many -t build && npm run deploy",
     "build-all-and-start-local": "nx run-many -t build --config=local --project=local && npm run start:local",
