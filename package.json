@@ -27,6 +27,16 @@
         "dependsOn": [
           "build"
         ]
+      },
+      "serve": {
+        "executor": "nx:run-commands",
+        "options": {
+          "commands": [
+            "nx serve web",
+            "firebase experiments:enable webframeworks && firebase emulators:start --project demo-local --config firebase.local.json --import data/local"
+          ],
+          "parallel": true
+        }
       }
     }
   },
@@ -48,10 +58,10 @@
     "@angular/localize": "^17.3.12",
     "@angular/platform-browser": "^17.3.12",
     "@angular/platform-browser-dynamic": "^17.3.12",
-    "@nx/angular": "^22.3.1",
+    "@nx/angular": "^21.1.0",
     "firebase-tools": "^13.24.2",
     "isolate-package": "^1.18.0",
-    "nx": "22.3.1",
+    "nx": "21.1.0",
     "start-server-and-test": "^2.0.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
