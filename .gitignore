@@ -5,6 +5,7 @@
 !.eslintrc.json
 !.prettierrc.js
 !.github/
+!.well-known/
 **/isolate
 **/keys/
 **/dist/
