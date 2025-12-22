@@ -41,9 +41,10 @@ import { TaskEditorComponent } from './task-editor/task-editor.component';
 /*global alert*/
 
 @Component({
-  selector: 'ground-job-dialog',
-  templateUrl: './job-dialog.component.html',
-  styleUrls: ['./job-dialog.component.scss'],
+    selector: 'ground-job-dialog',
+    templateUrl: './job-dialog.component.html',
+    styleUrls: ['./job-dialog.component.scss'],
+    standalone: false
 })
 export class JobDialogComponent implements OnDestroy {
   job?: Job;

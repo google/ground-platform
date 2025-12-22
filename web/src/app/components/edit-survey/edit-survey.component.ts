@@ -39,9 +39,10 @@ import {
 } from './job-dialog/job-dialog.component';
 
 @Component({
-  selector: 'edit-survey',
-  templateUrl: './edit-survey.component.html',
-  styleUrls: ['./edit-survey.component.scss'],
+    selector: 'edit-survey',
+    templateUrl: './edit-survey.component.html',
+    styleUrls: ['./edit-survey.component.scss'],
+    standalone: false
 })
 export class EditSurveyComponent {
   private editSurveyPageSignal =

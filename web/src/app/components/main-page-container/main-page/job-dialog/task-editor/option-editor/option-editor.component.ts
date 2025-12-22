@@ -32,9 +32,10 @@ import {
 } from '@angular/forms';
 
 @Component({
-  selector: 'ground-option-editor',
-  templateUrl: './option-editor.component.html',
-  styleUrls: ['./option-editor.component.scss'],
+    selector: 'ground-option-editor',
+    templateUrl: './option-editor.component.html',
+    styleUrls: ['./option-editor.component.scss'],
+    standalone: false
 })
 export class OptionEditorComponent implements OnInit, OnChanges {
   @Input() code?: string;

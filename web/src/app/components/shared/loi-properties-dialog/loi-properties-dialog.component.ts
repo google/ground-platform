@@ -18,9 +18,10 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'ground-loi-properties-dialog',
-  templateUrl: './loi-properties-dialog.component.html',
-  styleUrls: ['./loi-properties-dialog.component.scss'],
+    selector: 'ground-loi-properties-dialog',
+    templateUrl: './loi-properties-dialog.component.html',
+    styleUrls: ['./loi-properties-dialog.component.scss'],
+    standalone: false
 })
 export class LoiPropertiesDialogComponent {
   iconColor: string;

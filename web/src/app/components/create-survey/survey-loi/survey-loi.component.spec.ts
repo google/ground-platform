@@ -76,6 +76,13 @@ describe('SurveyLoiComponent', () => {
       'canManageSurvey',
     ]);
 
+    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+      'LocationOfInterestService',
+      ['getPredefinedLoisByJobId$']
+    );
+
+    loiServiceSpy.getPredefinedLoisByJobId$.and.returnValue(mockLois$);
+
     navigationServiceSpy.getSubmissionId$.and.returnValue(
       of<string | null>(null)
     );

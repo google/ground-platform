@@ -18,9 +18,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'survey-details',
-  templateUrl: './survey-details.component.html',
-  styleUrls: ['./survey-details.component.scss'],
+    selector: 'survey-details',
+    templateUrl: './survey-details.component.html',
+    styleUrls: ['./survey-details.component.scss'],
+    standalone: false
 })
 export class SurveyDetailsComponent implements OnInit {
   readonly titleControlKey = 'title';

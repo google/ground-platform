@@ -36,19 +36,14 @@
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
     "diff": "^5.2.0",
-    "eslint": "^8.26.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.29.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "gts": "^5.3.0",
+
     "jasmine": "^5.1.0",
     "jasmine-spec-reporter": "^7.0.0",
     "mock-cloud-firestore": "^0.12.0",
     "picocolors": "^1.1.1",
-    "prettier": "^2.8.1",
+
     "source-map-support": "^0.5.21",
-    "ts-mocha": "^10.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "ts-mocha": "^10.0.0"
+
   }
 }

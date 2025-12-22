@@ -30,9 +30,10 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 import { getLoiIcon } from 'app/utils/utils';
 
 @Component({
-  selector: 'ground-loi-panel',
-  templateUrl: './loi-panel.component.html',
-  styleUrls: ['./loi-panel.component.scss'],
+    selector: 'ground-loi-panel',
+    templateUrl: './loi-panel.component.html',
+    styleUrls: ['./loi-panel.component.scss'],
+    standalone: false
 })
 export class LocationOfInterestPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();

@@ -21,9 +21,10 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SideNavMode } from 'app/services/navigation/url-params';
 
 @Component({
-  selector: 'ground-secondary-side-panel',
-  templateUrl: './secondary-side-panel.component.html',
-  styleUrls: ['./secondary-side-panel.component.css'],
+    selector: 'ground-secondary-side-panel',
+    templateUrl: './secondary-side-panel.component.html',
+    styleUrls: ['./secondary-side-panel.component.css'],
+    standalone: false
 })
 export class SecondarySidePanelComponent {
   activeSurvey = input<Survey>();

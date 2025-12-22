@@ -20,9 +20,10 @@ import { AbstractControl, FormGroup } from '@angular/forms';
 import { Cardinality } from 'app/models/task/multiple-choice.model';
 
 @Component({
-  selector: 'ground-edit-option',
-  templateUrl: './edit-option.component.html',
-  styleUrls: ['./edit-option.component.scss'],
+    selector: 'ground-edit-option',
+    templateUrl: './edit-option.component.html',
+    styleUrls: ['./edit-option.component.scss'],
+    standalone: false
 })
 export class EditOptionComponent {
   @Input() formGroup!: FormGroup;

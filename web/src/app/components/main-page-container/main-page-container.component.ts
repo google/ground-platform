@@ -21,9 +21,10 @@ import { switchMap } from 'rxjs/operators';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
-  selector: 'ground-main-page-container',
-  templateUrl: './main-page-container.component.html',
-  styleUrls: ['./main-page-container.component.css'],
+    selector: 'ground-main-page-container',
+    templateUrl: './main-page-container.component.html',
+    styleUrls: ['./main-page-container.component.css'],
+    standalone: false
 })
 export class MainPageContainerComponent {
   surveyId = input<string>();

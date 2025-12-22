@@ -40,10 +40,11 @@ import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
-  selector: 'ground-drawing-tools',
-  templateUrl: './drawing-tools.component.html',
-  styleUrls: ['./drawing-tools.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'ground-drawing-tools',
+    templateUrl: './drawing-tools.component.html',
+    styleUrls: ['./drawing-tools.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class DrawingToolsComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();

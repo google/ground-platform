@@ -57,7 +57,8 @@ $theme: m3-theme.$light-theme;
 
 // Include the common styles for Angular Material. This allows us to only
 // have to load a single css file for Angular Material in your app.
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 html {
   @include mat.all-component-themes($theme);

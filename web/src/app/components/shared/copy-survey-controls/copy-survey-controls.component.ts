@@ -26,9 +26,10 @@ import { NotificationService } from 'app/services/notification/notification.serv
  * view, enabling users to quickly share the survey.
  */
 @Component({
-  selector: 'ground-copy-survey-controls',
-  templateUrl: './copy-survey-controls.component.html',
-  styleUrls: ['./copy-survey-controls.component.scss'],
+    selector: 'ground-copy-survey-controls',
+    templateUrl: './copy-survey-controls.component.html',
+    styleUrls: ['./copy-survey-controls.component.scss'],
+    standalone: false
 })
 export class CopySurveyControlsComponent implements OnInit {
   @Input() surveyId = '';

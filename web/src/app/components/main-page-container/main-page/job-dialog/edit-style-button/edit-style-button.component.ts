@@ -30,8 +30,9 @@ import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 import { ColorPickerComponent } from './color-picker/color-picker.component';
 
 @Component({
-  selector: 'ground-edit-style-button',
-  templateUrl: './edit-style-button.component.html',
+    selector: 'ground-edit-style-button',
+    templateUrl: './edit-style-button.component.html',
+    standalone: false
 })
 export class EditStyleButtonComponent implements OnInit {
   @Input() markerColor = 'black';

@@ -30,9 +30,10 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
 @Component({
-  selector: 'submission-panel',
-  templateUrl: './submission-panel.component.html',
-  styleUrls: ['./submission-panel.component.scss'],
+    selector: 'submission-panel',
+    templateUrl: './submission-panel.component.html',
+    styleUrls: ['./submission-panel.component.scss'],
+    standalone: false
 })
 export class SubmissionPanelComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();

@@ -32,10 +32,16 @@ import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 import { MainPageComponent } from './main-page.component';
 
-@Component({ selector: 'ground-map', template: '' })
+@Component({
+    selector: 'ground-map', template: '',
+    standalone: false
+})
 class MapComponent {}
 
-@Component({ selector: 'mat-sidenav', template: '' })
+@Component({
+    selector: 'mat-sidenav', template: '',
+    standalone: false
+})
 class MatSideNavComponent {
   opened = false;
 }

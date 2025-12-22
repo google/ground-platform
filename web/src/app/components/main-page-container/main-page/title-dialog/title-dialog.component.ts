@@ -22,9 +22,10 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
-  selector: 'ground-title-dialog',
-  templateUrl: './title-dialog.component.html',
-  styleUrls: ['./title-dialog.component.scss'],
+    selector: 'ground-title-dialog',
+    templateUrl: './title-dialog.component.html',
+    styleUrls: ['./title-dialog.component.scss'],
+    standalone: false
 })
 export class TitleDialogComponent {
   surveyTitleForm: FormGroup;

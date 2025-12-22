@@ -32,9 +32,10 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { ImportDialogComponent } from '../import-dialog/import-dialog.component';
 
 @Component({
-  selector: 'loi-editor',
-  templateUrl: './loi-editor.component.html',
-  styleUrls: ['./loi-editor.component.scss'],
+    selector: 'loi-editor',
+    templateUrl: './loi-editor.component.html',
+    styleUrls: ['./loi-editor.component.scss'],
+    standalone: false
 })
 export class LoiEditorComponent {
   @Input() canImport!: boolean;

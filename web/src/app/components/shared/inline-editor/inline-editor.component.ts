@@ -24,9 +24,10 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'inline-editor',
-  templateUrl: './inline-editor.component.html',
-  styleUrls: ['./inline-editor.component.scss'],
+    selector: 'inline-editor',
+    templateUrl: './inline-editor.component.html',
+    styleUrls: ['./inline-editor.component.scss'],
+    standalone: false
 })
 export class InlineEditorComponent {
   @Input() data = '';

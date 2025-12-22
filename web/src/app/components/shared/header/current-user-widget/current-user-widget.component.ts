@@ -21,9 +21,10 @@ import { AccountPopupComponent } from 'app/components/shared/header/current-user
 import { AuthService } from 'app/services/auth/auth.service';
 
 @Component({
-  selector: 'ground-current-user-widget',
-  templateUrl: './current-user-widget.component.html',
-  styleUrls: ['./current-user-widget.component.scss'],
+    selector: 'ground-current-user-widget',
+    templateUrl: './current-user-widget.component.html',
+    styleUrls: ['./current-user-widget.component.scss'],
+    standalone: false
 })
 export class CurrentUserWidgetComponent {
   constructor(public auth: AuthService, private dialog: MatDialog) {}

@@ -197,6 +197,7 @@ describe('EditSurveyComponent', () => {
       surveyIdSignal.set(surveyId);
       surveyId$.next(surveyId);
       tick();
+      fixture.detectChanges();
     }));
 
     it('activates survey ID', () => {

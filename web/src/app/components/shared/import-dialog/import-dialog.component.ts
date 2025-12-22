@@ -23,9 +23,10 @@ import { DataImportService } from 'app/services/data-import/data-import.service'
 import { NotificationService } from 'app/services/notification/notification.service';
 
 @Component({
-  selector: 'ground-import-dialog',
-  templateUrl: './import-dialog.component.html',
-  styleUrls: ['./import-dialog.component.scss'],
+    selector: 'ground-import-dialog',
+    templateUrl: './import-dialog.component.html',
+    styleUrls: ['./import-dialog.component.scss'],
+    standalone: false
 })
 export class ImportDialogComponent {
   private surveyId: string;

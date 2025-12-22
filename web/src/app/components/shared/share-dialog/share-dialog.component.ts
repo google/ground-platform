@@ -34,9 +34,10 @@ import { ROLE_OPTIONS } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
-  selector: 'ground-share-dialog',
-  templateUrl: './share-dialog.component.html',
-  styleUrls: ['./share-dialog.component.scss'],
+    selector: 'ground-share-dialog',
+    templateUrl: './share-dialog.component.html',
+    styleUrls: ['./share-dialog.component.scss'],
+    standalone: false
 })
 export class ShareDialogComponent {
   readonly roleOptions = ROLE_OPTIONS;

@@ -41,9 +41,10 @@ export enum SurveyListFilter {
 }
 
 @Component({
-  selector: 'ground-survey-list',
-  templateUrl: './survey-list.component.html',
-  styleUrls: ['./survey-list.component.scss'],
+    selector: 'ground-survey-list',
+    templateUrl: './survey-list.component.html',
+    styleUrls: ['./survey-list.component.scss'],
+    standalone: false
 })
 export class SurveyListComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
