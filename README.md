@@ -2,7 +2,7 @@
 
 [![Open Source Helpers](https://www.codetriage.com/google/ground-platform/badges/users.svg)](https://www.codetriage.com/google/ground-platform)
 
-Ground is a map-first data collection platform aiming to seamlessly connect the offline world with cloud-based storage and computation. It addresses the needs of non-technical local community members, smallholder farmers, and professionals and researchers working in the areas of climate, sustainability, and humanitarian aid. It consists of a web app for survey management, and an Android app for offline data collection backed by Firebase. 
+Ground is a map-first data collection platform which to seamlessly connect the offline world with cloud-based storage and computation. It addresses the needs of non-technical local community members, smallholder farmers, and professionals and researchers working in the areas of climate, sustainability, and humanitarian aid. It consists of a web app for survey management, and an Android app for offline data collection backed by Firebase. 
 
 **Note:** Ground is not an officially supported product; it is being developed and maintained on a best-effort basis.
 
@@ -23,28 +23,18 @@ Read through our [contributing guidelines](CONTRIBUTING.md) to learn about our s
 
 ## Quick start
 
-### 1. Configure
+First, install Node.js 20. The easiest way is to use [nvm](https://github.com/nvm-sh/nvm). To do this, after installing nvm, run `nvm install 20`.
 
-Set up your environment by following instructions in "[first-time setup](https://github.com/google/ground-platform/wiki/Ground-Developer's-Guide#first-time-setup)" before you begin.
-
-### 1. Install deps
-
-```bash 
-npm install
-```
-
-### 2. Build and run locally
-
-Build with:
-
-```bash 
-npm run build-all --config=local
-```
-
-Run against a local Firebase emulator:
+Ground uses [Nx](https://nx.dev) to manage the build. To install, run:
 
 ```bash
-npm run start:local
+npm install -g nx
+```
+
+Then, to build and run against a local emulator:
+
+```bash
+nx start
 ```
 
 Once the local server is ready, access the web app at [http://localhost:5000](http://localhost:5000). For development, and testing, the Firebase Emulator Suite UI is accessible at http://localhost:4000. Changes to the web app in `web/` and to Cloud Functions in `functions/` are automatically rebuilt and reloaded on save.
