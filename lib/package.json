@@ -18,7 +18,7 @@
     "build-all-and-test": "npm run build-all && npm run test"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "private": true,
   "dependencies": {
