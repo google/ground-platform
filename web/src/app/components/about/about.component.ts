@@ -18,10 +18,10 @@ import { Location } from '@angular/common';
 import { Component } from '@angular/core';
 
 @Component({
-    selector: 'ground-about-page',
-    templateUrl: './about.component.html',
-    styleUrls: ['./about.component.scss'],
-    standalone: false
+  selector: 'ground-about-page',
+  templateUrl: './about.component.html',
+  styleUrls: ['./about.component.scss'],
+  standalone: false,
 })
 export class AboutComponent {
   constructor(private location: Location) {}

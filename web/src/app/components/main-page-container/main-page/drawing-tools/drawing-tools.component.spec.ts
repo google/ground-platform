@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -138,10 +135,10 @@ describe('DrawingToolsComponent', () => {
 
   describe('button group', () => {
     it('is enabled by default', () => {
-      const buttonGroup = fixture.debugElement.query(
-        By.css('#button-group')
+      const buttonGroup = fixture.debugElement.query(By.css('#button-group'));
+      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(
+        false
       );
-      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(false);
     });
 
     it('is disabled when an submission is selected', async () => {
@@ -150,10 +147,10 @@ describe('DrawingToolsComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      const buttonGroup = fixture.debugElement.query(
-        By.css('#button-group')
+      const buttonGroup = fixture.debugElement.query(By.css('#button-group'));
+      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(
+        true
       );
-      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(true);
     });
 
     it('is disabled when drawing tools service disables it', async () => {
@@ -162,10 +159,10 @@ describe('DrawingToolsComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      const buttonGroup = fixture.debugElement.query(
-        By.css('#button-group')
+      const buttonGroup = fixture.debugElement.query(By.css('#button-group'));
+      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(
+        true
       );
-      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(true);
     });
   });
 

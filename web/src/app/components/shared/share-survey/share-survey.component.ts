@@ -4,10 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-dialog.component';
 
 @Component({
-    selector: 'share-survey',
-    templateUrl: './share-survey.component.html',
-    styleUrls: ['./share-survey.component.scss'],
-    standalone: false
+  selector: 'share-survey',
+  templateUrl: './share-survey.component.html',
+  styleUrls: ['./share-survey.component.scss'],
+  standalone: false,
 })
 export class ShareSurveyComponent {
   constructor(private dialog: MatDialog) {}

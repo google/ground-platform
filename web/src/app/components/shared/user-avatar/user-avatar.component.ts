@@ -17,10 +17,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
-    selector: 'user-avatar',
-    templateUrl: './user-avatar.component.html',
-    styleUrls: ['./user-avatar.component.scss'],
-    standalone: false
+  selector: 'user-avatar',
+  templateUrl: './user-avatar.component.html',
+  styleUrls: ['./user-avatar.component.scss'],
+  standalone: false,
 })
 export class UserAvatarComponent implements OnInit {
   @Input() displayText?: string;

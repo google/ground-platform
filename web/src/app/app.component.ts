@@ -25,10 +25,10 @@ import { Env } from 'environments/environment-enums';
  * in routing.module.ts.
  */
 @Component({
-    selector: 'ground-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.css'],
-    standalone: false
+  selector: 'ground-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.css'],
+  standalone: false,
 })
 export class AppComponent {
   public constructor(@Inject(DOCUMENT) private doc: Document) {

@@ -24,10 +24,10 @@ import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { getLoiIcon } from 'app/utils/utils';
 
 @Component({
-    selector: 'loi-selection',
-    templateUrl: './loi-selection.component.html',
-    styleUrls: ['./loi-selection.component.scss'],
-    standalone: false
+  selector: 'loi-selection',
+  templateUrl: './loi-selection.component.html',
+  styleUrls: ['./loi-selection.component.scss'],
+  standalone: false,
 })
 export class LoiSelectionComponent {
   @Input() lois!: List<LocationOfInterest>;

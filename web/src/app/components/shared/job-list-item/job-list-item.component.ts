@@ -29,10 +29,10 @@ import { environment } from 'environments/environment';
 import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
 
 @Component({
-    selector: 'ground-job-list-item',
-    templateUrl: './job-list-item.component.html',
-    styleUrls: ['./job-list-item.component.scss'],
-    standalone: false
+  selector: 'ground-job-list-item',
+  templateUrl: './job-list-item.component.html',
+  styleUrls: ['./job-list-item.component.scss'],
+  standalone: false,
 })
 export class JobListItemComponent implements OnInit {
   @Input() job!: Job;

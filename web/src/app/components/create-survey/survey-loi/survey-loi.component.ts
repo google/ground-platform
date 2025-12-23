@@ -25,10 +25,10 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import { TaskService } from 'app/services/task/task.service';
 
 @Component({
-    selector: 'survey-loi',
-    templateUrl: './survey-loi.component.html',
-    styleUrls: ['./survey-loi.component.scss'],
-    standalone: false
+  selector: 'survey-loi',
+  templateUrl: './survey-loi.component.html',
+  styleUrls: ['./survey-loi.component.scss'],
+  standalone: false,
 })
 export class SurveyLoiComponent {
   lois!: List<LocationOfInterest>;

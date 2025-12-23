@@ -39,10 +39,10 @@ import {
 } from './job-dialog/job-dialog.component';
 
 @Component({
-    selector: 'edit-survey',
-    templateUrl: './edit-survey.component.html',
-    styleUrls: ['./edit-survey.component.scss'],
-    standalone: false
+  selector: 'edit-survey',
+  templateUrl: './edit-survey.component.html',
+  styleUrls: ['./edit-survey.component.scss'],
+  standalone: false,
 })
 export class EditSurveyComponent {
   private editSurveyPageSignal =
@@ -70,12 +70,10 @@ export class EditSurveyComponent {
         this.surveyId = surveyId;
         this.surveyService.activateSurvey(surveyId);
         await this.draftSurveyService.init(surveyId);
-        this.draftSurveyService
-          .getSurvey$()
-          .subscribe(survey => {
-            this.survey = survey;
-            this.sortedJobs = this.survey.getJobsSorted();
-          });
+        this.draftSurveyService.getSurvey$().subscribe(survey => {
+          this.survey = survey;
+          this.sortedJobs = this.survey.getJobsSorted();
+        });
       }
     });
 

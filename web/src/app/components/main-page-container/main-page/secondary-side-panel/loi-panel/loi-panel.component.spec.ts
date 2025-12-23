@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
@@ -27,10 +30,6 @@ import { DataSharingType, Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
-
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
 
@@ -85,9 +84,13 @@ describe('LocationOfInterestPanelComponent', () => {
 
     loiServiceSpy.getLocationsOfInterest$.and.returnValue(of(List([mockLoi])));
     loiServiceSpy.getSelectedLocationOfInterest$.and.returnValue(of(mockLoi));
-    submissionServiceSpy.getSubmissions$.and.returnValue(of(List<Submission>([])));
+    submissionServiceSpy.getSubmissions$.and.returnValue(
+      of(List<Submission>([]))
+    );
     navigationServiceSpy.getSurveyId$.and.returnValue(of(mockSurvey.id));
-    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(of(mockLoi.id));
+    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
+      of(mockLoi.id)
+    );
 
     await TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelComponent],

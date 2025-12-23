@@ -84,10 +84,10 @@ export const taskTypeToGroup = new Map([
 ]);
 
 @Component({
-    selector: 'tasks-editor',
-    templateUrl: './tasks-editor.component.html',
-    styleUrls: ['./tasks-editor.component.scss'],
-    standalone: false
+  selector: 'tasks-editor',
+  templateUrl: './tasks-editor.component.html',
+  styleUrls: ['./tasks-editor.component.scss'],
+  standalone: false,
 })
 export class TasksEditorComponent {
   formGroup!: FormGroup;

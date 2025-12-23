@@ -50,10 +50,10 @@ import { SurveyService } from 'app/services/survey/survey.service';
 /*global alert*/
 
 @Component({
-    selector: 'ground-submission-form',
-    templateUrl: './submission-form.component.html',
-    styleUrls: ['./submission-form.component.scss'],
-    standalone: false
+  selector: 'ground-submission-form',
+  templateUrl: './submission-form.component.html',
+  styleUrls: ['./submission-form.component.scss'],
+  standalone: false,
 })
 export class SubmissionFormComponent {
   readonly taskTypes = TaskType;

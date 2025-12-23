@@ -25,10 +25,10 @@ import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
-    selector: 'ground-job-list',
-    templateUrl: './job-list.component.html',
-    styleUrls: ['./job-list.component.scss'],
-    standalone: false
+  selector: 'ground-job-list',
+  templateUrl: './job-list.component.html',
+  styleUrls: ['./job-list.component.scss'],
+  standalone: false,
 })
 export class JobListComponent {
   activeSurvey = input<Survey>();

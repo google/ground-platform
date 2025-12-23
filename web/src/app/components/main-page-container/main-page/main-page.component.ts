@@ -35,10 +35,10 @@ import { TitleDialogComponent } from './title-dialog/title-dialog.component';
  * various services.
  */
 @Component({
-    selector: 'ground-main-page',
-    templateUrl: './main-page.component.html',
-    styleUrls: ['./main-page.component.scss'],
-    standalone: false
+  selector: 'ground-main-page',
+  templateUrl: './main-page.component.html',
+  styleUrls: ['./main-page.component.scss'],
+  standalone: false,
 })
 export class MainPageComponent implements OnInit {
   activeSurvey = input.required<Survey>();

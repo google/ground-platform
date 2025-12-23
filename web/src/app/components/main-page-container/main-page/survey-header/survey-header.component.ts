@@ -24,10 +24,10 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
-    selector: 'ground-survey-header',
-    templateUrl: './survey-header.component.html',
-    styleUrls: ['./survey-header.component.scss'],
-    standalone: false
+  selector: 'ground-survey-header',
+  templateUrl: './survey-header.component.html',
+  styleUrls: ['./survey-header.component.scss'],
+  standalone: false,
 })
 export class SurveyHeaderComponent {
   activeSurvey = input<Survey>();

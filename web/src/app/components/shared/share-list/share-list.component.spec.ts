@@ -16,13 +16,23 @@
 
 import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+  waitForAsync,
+} from '@angular/core/testing';
 import { MatListModule } from '@angular/material/list';
 import { MatListHarness } from '@angular/material/list/testing';
-import { MatSelect, MatSelectChange, MatSelectModule } from '@angular/material/select';
+import {
+  MatSelect,
+  MatSelectChange,
+  MatSelectModule,
+} from '@angular/material/select';
 import { Map } from 'immutable';
-import { map, delay } from 'rxjs/operators';
 import { Subject, firstValueFrom, of } from 'rxjs';
+import { delay, map } from 'rxjs/operators';
 
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -116,7 +126,10 @@ describe('ShareListComponent', () => {
     fixture.detectChanges();
 
     expect(component.acl.length).toBeGreaterThan(0);
-    component.onRoleChange({ value: Role.SURVEY_ORGANIZER } as MatSelectChange, 0);
+    component.onRoleChange(
+      { value: Role.SURVEY_ORGANIZER } as MatSelectChange,
+      0
+    );
     await fixture.whenStable();
     fixture.detectChanges();
 

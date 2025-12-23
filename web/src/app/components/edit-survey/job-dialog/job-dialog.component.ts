@@ -112,10 +112,10 @@ export interface DialogData {
 }
 
 @Component({
-    selector: 'job-dialog',
-    templateUrl: './job-dialog.component.html',
-    styleUrls: ['./job-dialog.component.scss'],
-    standalone: false
+  selector: 'job-dialog',
+  templateUrl: './job-dialog.component.html',
+  styleUrls: ['./job-dialog.component.scss'],
+  standalone: false,
 })
 export class JobDialogComponent {
   public static readonly JOB_NAME_FIELD_ID = 'job-name';

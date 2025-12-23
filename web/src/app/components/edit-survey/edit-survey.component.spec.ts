@@ -15,10 +15,7 @@
  */
 
 import { NO_ERRORS_SCHEMA, WritableSignal, signal } from '@angular/core';
-import {
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
@@ -260,14 +257,14 @@ describe('EditSurveyComponent', () => {
           const button = fixture.debugElement.query(By.css(buttonSelector));
 
           expect(button.nativeElement.textContent).toContain(expectedLabel);
-          
+
           const href = button.nativeElement.getAttribute('href');
           // RouterLink handles array/string inputs differently in href generation.
           // We just check if it contains the main path segment.
-          const expectedPath = Array.isArray(expectedRouterLink) 
-            ? expectedRouterLink[0].replace('./', '') 
+          const expectedPath = Array.isArray(expectedRouterLink)
+            ? expectedRouterLink[0].replace('./', '')
             : expectedRouterLink.replace('./', '');
-            
+
           expect(href).toContain(expectedPath);
         });
       });

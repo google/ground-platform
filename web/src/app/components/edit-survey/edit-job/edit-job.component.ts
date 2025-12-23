@@ -36,10 +36,10 @@ enum EditJobSection {
 }
 
 @Component({
-    selector: 'edit-job',
-    templateUrl: './edit-job.component.html',
-    styleUrls: ['./edit-job.component.scss'],
-    standalone: false
+  selector: 'edit-job',
+  templateUrl: './edit-job.component.html',
+  styleUrls: ['./edit-job.component.scss'],
+  standalone: false,
 })
 export class EditJobComponent {
   subscription: Subscription = new Subscription();

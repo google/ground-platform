@@ -59,10 +59,10 @@ const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
 
 @Component({
-    selector: 'ground-map',
-    templateUrl: './map.component.html',
-    styleUrls: ['./map.component.scss'],
-    standalone: false
+  selector: 'ground-map',
+  templateUrl: './map.component.html',
+  styleUrls: ['./map.component.scss'],
+  standalone: false,
 })
 export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private subscription: Subscription = new Subscription();

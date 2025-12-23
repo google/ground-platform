@@ -18,10 +18,10 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-    selector: 'app-job-details',
-    templateUrl: './job-details.component.html',
-    styleUrls: ['./job-details.component.scss'],
-    standalone: false
+  selector: 'app-job-details',
+  templateUrl: './job-details.component.html',
+  styleUrls: ['./job-details.component.scss'],
+  standalone: false,
 })
 export class JobDetailsComponent implements OnInit {
   readonly nameControlKey = 'name';

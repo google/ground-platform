@@ -43,15 +43,15 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
-    selector: 'loi-editor',
-    template: '',
-    providers: [
-        {
-            provide: LoiEditorComponent,
-            useExisting: MockLoiEditorComponent,
-        },
-    ],
-    standalone: false
+  selector: 'loi-editor',
+  template: '',
+  providers: [
+    {
+      provide: LoiEditorComponent,
+      useExisting: MockLoiEditorComponent,
+    },
+  ],
+  standalone: false,
 })
 class MockLoiEditorComponent {
   @Input() canImport!: boolean;

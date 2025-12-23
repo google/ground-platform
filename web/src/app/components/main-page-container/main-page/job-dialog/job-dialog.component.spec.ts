@@ -39,14 +39,16 @@ import { JobDialogComponent } from './job-dialog.component';
 import { TaskEditorModule } from './task-editor/task-editor.module';
 
 @Component({
-    selector: 'mat-dialog-content', template: '',
-    standalone: false
+  selector: 'mat-dialog-content',
+  template: '',
+  standalone: false,
 })
 class MatDialogContent {}
 
 @Component({
-    selector: 'mat-dialog-actions', template: '',
-    standalone: false
+  selector: 'mat-dialog-actions',
+  template: '',
+  standalone: false,
 })
 class MatDialogActions {}
 

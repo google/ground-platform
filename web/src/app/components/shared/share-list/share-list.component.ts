@@ -26,15 +26,15 @@ import { AuthService, ROLE_OPTIONS } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
-    selector: 'ground-share-list',
-    templateUrl: './share-list.component.html',
-    styleUrls: ['./share-list.component.scss'],
-    standalone: false
+  selector: 'ground-share-list',
+  templateUrl: './share-list.component.html',
+  styleUrls: ['./share-list.component.scss'],
+  standalone: false,
 })
 export class ShareListComponent {
   acl: Array<AclEntry> = [];
   survey?: Survey;
-  surveyOwnerEmail: string = '';
+  surveyOwnerEmail = '';
 
   private subscription = new Subscription();
 

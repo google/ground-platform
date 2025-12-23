@@ -23,9 +23,9 @@ import { Task } from 'app/models/task/task.model';
 import { TaskService } from 'app/services/task/task.service';
 
 @Component({
-    selector: 'task-details',
-    templateUrl: './task-details.component.html',
-    standalone: false
+  selector: 'task-details',
+  templateUrl: './task-details.component.html',
+  standalone: false,
 })
 export class TaskDetailsComponent {
   @Output() onValidationChange: EventEmitter<boolean> =

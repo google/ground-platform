@@ -56,8 +56,9 @@ import { SurveyService } from 'app/services/survey/survey.service';
 import { SurveyListComponent } from './survey-list.component';
 
 @Component({
-    selector: 'ground-header', template: '',
-    standalone: false
+  selector: 'ground-header',
+  template: '',
+  standalone: false,
 })
 class HeaderComponent {}
 

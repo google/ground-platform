@@ -48,7 +48,13 @@ describe('TaskDetailsComponent', () => {
       declarations: [TaskDetailsComponent],
       imports: [MatDialogModule],
       providers: [
-        { provide: DataStoreService, useValue: { generateId: () => '123', tasks$: () => of(List<Task>([])) } },
+        {
+          provide: DataStoreService,
+          useValue: {
+            generateId: () => '123',
+            tasks$: () => of(List<Task>([])),
+          },
+        },
         { provide: DialogService, useValue: {} },
         {
           provide: SurveyService,

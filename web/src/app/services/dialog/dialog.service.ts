@@ -32,8 +32,8 @@ export interface DialogData {
 }
 
 @Component({
-    selector: 'ground-confirmation-dialog',
-    template: `
+  selector: 'ground-confirmation-dialog',
+  template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions>
@@ -41,14 +41,14 @@ export interface DialogData {
       <button mat-button (click)="onConfirm()">Yes</button>
     </mat-dialog-actions>
   `,
-    imports: [
-        MatDialogTitle,
-        MatDialogContent,
-        MatDialogActions,
-        MatDialogClose,
-        MatButtonModule,
-    ],
-    standalone: true
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatDialogClose,
+    MatButtonModule,
+  ],
+  standalone: true,
 })
 export class ConfirmationDialogComponent {
   constructor(

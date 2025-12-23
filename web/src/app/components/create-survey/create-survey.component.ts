@@ -107,10 +107,10 @@ const createSurveyPhaseMetadata = new Map<
 ]);
 
 @Component({
-    selector: 'create-survey',
-    templateUrl: './create-survey.component.html',
-    styleUrls: ['./create-survey.component.scss'],
-    standalone: false
+  selector: 'create-survey',
+  templateUrl: './create-survey.component.html',
+  styleUrls: ['./create-survey.component.scss'],
+  standalone: false,
 })
 export class CreateSurveyComponent implements OnInit {
   subscription: Subscription = new Subscription();
@@ -149,8 +149,6 @@ export class CreateSurveyComponent implements OnInit {
     private loiService: LocationOfInterestService,
     private cdr: ChangeDetectorRef
   ) {}
-
-
 
   ngOnInit(): void {
     this.subscription.add(

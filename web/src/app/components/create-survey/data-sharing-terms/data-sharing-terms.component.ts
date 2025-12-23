@@ -31,10 +31,10 @@ type DataSharingTermsOption = {
 };
 
 @Component({
-    selector: 'data-sharing-terms',
-    templateUrl: './data-sharing-terms.component.html',
-    styleUrls: ['./data-sharing-terms.component.scss'],
-    standalone: false
+  selector: 'data-sharing-terms',
+  templateUrl: './data-sharing-terms.component.html',
+  styleUrls: ['./data-sharing-terms.component.scss'],
+  standalone: false,
 })
 export class DataSharingTermsComponent implements OnInit {
   @Input() type!: DataSharingType;

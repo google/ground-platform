@@ -26,7 +26,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatRadioModule } from '@angular/material/radio';
 import { By } from '@angular/platform-browser';
-import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {
+  BrowserAnimationsModule,
+  NoopAnimationsModule,
+} from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { List, Map } from 'immutable';
 import { NEVER, of } from 'rxjs';
@@ -162,8 +165,6 @@ class MockSubmissionService {
     return of<Submission>(MockModel.submission001);
   }
 }
-
-
 
 const surveyService = new MockSurveyService();
 const loiService = new MockLocationOfInterestService();

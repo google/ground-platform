@@ -23,10 +23,10 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
-    selector: 'ground-terms-page',
-    templateUrl: './terms.component.html',
-    styleUrls: ['./terms.component.scss'],
-    standalone: false
+  selector: 'ground-terms-page',
+  templateUrl: './terms.component.html',
+  styleUrls: ['./terms.component.scss'],
+  standalone: false,
 })
 export class TermsComponent implements OnInit {
   hasAcceptedTos: boolean;

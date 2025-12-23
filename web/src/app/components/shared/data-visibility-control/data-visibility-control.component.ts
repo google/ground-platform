@@ -23,9 +23,9 @@ import { AuthService } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 @Component({
-    selector: 'ground-data-visibility-control',
-    templateUrl: './data-visibility-control.component.html',
-    standalone: false
+  selector: 'ground-data-visibility-control',
+  templateUrl: './data-visibility-control.component.html',
+  standalone: false,
 })
 export class DataVisibilityControlComponent {
   private subscription = new Subscription();

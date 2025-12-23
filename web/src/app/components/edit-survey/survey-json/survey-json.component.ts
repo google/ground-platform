@@ -20,10 +20,10 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 
 @Component({
-    selector: 'survey-json',
-    templateUrl: './survey-json.component.html',
-    styleUrls: ['./survey-json.component.scss'],
-    standalone: false
+  selector: 'survey-json',
+  templateUrl: './survey-json.component.html',
+  styleUrls: ['./survey-json.component.scss'],
+  standalone: false,
 })
 export class SurveyJsonComponent {
   surveyId?: string;

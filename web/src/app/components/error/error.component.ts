@@ -25,10 +25,10 @@ enum ErrorType {
 }
 
 @Component({
-    selector: 'error',
-    templateUrl: './error.component.html',
-    styleUrls: ['./error.component.scss'],
-    standalone: false
+  selector: 'error',
+  templateUrl: './error.component.html',
+  styleUrls: ['./error.component.scss'],
+  standalone: false,
 })
 export class ErrorComponent implements OnInit {
   isLoading = true;

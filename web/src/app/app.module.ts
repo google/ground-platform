@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
@@ -57,49 +60,54 @@ const firebaseUiAuthConfig: firebaseui.auth.Config = {
 
 initializeApp(environment.firebase);
 
-@NgModule({ declarations: [AppComponent],
-    bootstrap: [AppComponent], imports: [
-        // TODO(#967): Replace compat libs with new AngularFire APIs:
-        //   provideFirebaseApp(() => initializeApp(environment.firebase)),
-        //   provideFirestore(() => getFirestore()),
-        AngularFireModule.initializeApp(environment.firebase),
-        AngularFireModule,
-        AngularFireAuthModule,
-        AngularFirestoreModule,
-        AngularFireFunctionsModule,
-        AngularFireRemoteConfigModule,
-        AngularFireStorageModule,
-        BrowserAnimationsModule,
-        BrowserModule,
-        AppRoutingModule,
-        FirebaseUIModule.forRoot(firebaseUiAuthConfig),
-        MainPageContainerModule], providers: [
-        {
-            provide: FIRESTORE_SETTINGS,
-            useValue: { ignoreUndefinedProperties: true },
-        },
-        {
-            provide: RC_SETTINGS,
-            useValue: { minimumFetchIntervalMillis: 3600000 },
-        },
-        {
-            provide: RC_DEFAULTS,
-            useValue: { google_play_id: '' },
-        },
-        // Emulator ports defined in ../firebase.local.json
-        // TODO(#979): Set up auth emulator and enable rules.
-        {
-            provide: USE_DATABASE_EMULATOR,
-            useValue: environment.useEmulators ? ['localhost', 9000] : undefined,
-        },
-        {
-            provide: USE_FIRESTORE_EMULATOR,
-            useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
-        },
-        {
-            provide: USE_FUNCTIONS_EMULATOR,
-            useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-    ] })
+@NgModule({
+  declarations: [AppComponent],
+  bootstrap: [AppComponent],
+  imports: [
+    // TODO(#967): Replace compat libs with new AngularFire APIs:
+    //   provideFirebaseApp(() => initializeApp(environment.firebase)),
+    //   provideFirestore(() => getFirestore()),
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireModule,
+    AngularFireAuthModule,
+    AngularFirestoreModule,
+    AngularFireFunctionsModule,
+    AngularFireRemoteConfigModule,
+    AngularFireStorageModule,
+    BrowserAnimationsModule,
+    BrowserModule,
+    AppRoutingModule,
+    FirebaseUIModule.forRoot(firebaseUiAuthConfig),
+    MainPageContainerModule,
+  ],
+  providers: [
+    {
+      provide: FIRESTORE_SETTINGS,
+      useValue: { ignoreUndefinedProperties: true },
+    },
+    {
+      provide: RC_SETTINGS,
+      useValue: { minimumFetchIntervalMillis: 3600000 },
+    },
+    {
+      provide: RC_DEFAULTS,
+      useValue: { google_play_id: '' },
+    },
+    // Emulator ports defined in ../firebase.local.json
+    // TODO(#979): Set up auth emulator and enable rules.
+    {
+      provide: USE_DATABASE_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 9000] : undefined,
+    },
+    {
+      provide: USE_FIRESTORE_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 8080] : undefined,
+    },
+    {
+      provide: USE_FUNCTIONS_EMULATOR,
+      useValue: environment.useEmulators ? ['localhost', 5001] : undefined,
+    },
+    provideHttpClient(withInterceptorsFromDi()),
+  ],
+})
 export class AppModule {}

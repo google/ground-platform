@@ -20,9 +20,9 @@ import {
   ComponentFixtureAutoDetect,
   TestBed,
 } from '@angular/core/testing';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -89,15 +89,9 @@ describe('CreateSurveyComponent', () => {
     /* ownerId= */ '',
     { type: DataSharingType.PRIVATE }
   );
-  const unsavedSurvey = new Survey(
-    SURVEY_ID_NEW,
-    '',
-    '',
-    Map(),
-    Map(),
-    '',
-    { type: DataSharingType.PRIVATE }
-  );
+  const unsavedSurvey = new Survey(SURVEY_ID_NEW, '', '', Map(), Map(), '', {
+    type: DataSharingType.PRIVATE,
+  });
   const job = new Job(jobId, /* index */ 0, 'red', name, /* tasks= */ Map());
   const newJob = new Job(jobId, -1);
   const surveyWithJob = new Survey(
@@ -344,7 +338,7 @@ describe('CreateSurveyComponent', () => {
       beforeEach(async () => {
         createComponent(false);
         spyOn(component, 'ngOnInit').and.stub();
-        
+
         component.createSurveyPhase = CreateSurveyPhase.SURVEY_DETAILS;
         component.survey = unsavedSurvey;
         // Mock surveyId to match
@@ -355,7 +349,7 @@ describe('CreateSurveyComponent', () => {
         component.lois = lois;
         component.createSurveyPhase = CreateSurveyPhase.SURVEY_DETAILS;
         component.canContinue = false;
-        
+
         fixture.detectChanges();
         await fixture.whenStable();
       });
@@ -374,7 +368,7 @@ describe('CreateSurveyComponent', () => {
         await fixture.whenStable();
         fixture.detectChanges();
         await component.continue();
-        
+
         expect(surveyServiceSpy.createSurvey).toHaveBeenCalledOnceWith(
           newName,
           newDescription
@@ -423,7 +417,7 @@ describe('CreateSurveyComponent', () => {
         expect(
           surveyServiceSpy.updateTitleAndDescription
         ).toHaveBeenCalledOnceWith(surveyId, newTitle, newDescription);
-    });
+      });
 
       it('navigates to survey list page after back button is clicked', () => {
         clickBackButton(fixture);
@@ -464,7 +458,7 @@ describe('CreateSurveyComponent', () => {
           surveyId,
           newJob.copyWith({ name })
         );
-    });
+      });
     });
 
     describe('when active survey has a job', () => {
@@ -487,11 +481,11 @@ describe('CreateSurveyComponent', () => {
         // Actually, SurveyWithJob -> DEFINE_LOIS. The test forcefully goes back?
         // Let's hydrate as DEFINE_LOIS first if that's what natural flow does, then back.
         // Or just hydrate as JOB_DETAILS directly since we want to test JOB_DETAILS.
-        
+
         surveyServiceSpy.getActiveSurvey.and.returnValue(surveyWithJob);
         // We simulate the "Back" action manually or just start there.
         // Let's stick to the original test intent but hydrate.
-    });
+      });
 
       it('updates the first job after clicking continue', async () => {
         const name = 'new job name';
@@ -509,7 +503,7 @@ describe('CreateSurveyComponent', () => {
           surveyId,
           job.copyWith({ name })
         );
-    });
+      });
 
       it('goes back to survey details component after back button is clicked', () => {
         clickBackButton(fixture);
@@ -529,7 +523,7 @@ describe('CreateSurveyComponent', () => {
 
       // Identity Hydration
       spyOn(component, 'ngOnInit').and.stub();
-      
+
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
 
@@ -564,7 +558,7 @@ describe('CreateSurveyComponent', () => {
 
       // Identity Hydration
       spyOn(component, 'ngOnInit').and.stub();
-      
+
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
 
@@ -577,7 +571,7 @@ describe('CreateSurveyComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
       // Forcibly set phase to DEFINE_DATA_SHARING_TERMS
-      
+
       fixture.detectChanges();
     });
 
@@ -607,7 +601,7 @@ describe('CreateSurveyComponent', () => {
 
       // Identity Hydration
       spyOn(component, 'ngOnInit').and.stub();
-      
+
       createComponent(false);
       spyOn(component, 'ngOnInit').and.stub();
 

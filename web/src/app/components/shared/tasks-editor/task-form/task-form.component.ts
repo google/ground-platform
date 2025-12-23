@@ -151,10 +151,10 @@ const GeometryTasks = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 const AddLoiTaskGroups = List([TaskGroup.DROP_PIN, TaskGroup.DRAW_AREA]);
 
 @Component({
-    selector: 'task-form',
-    templateUrl: './task-form.component.html',
-    styleUrls: ['./task-form.component.scss'],
-    standalone: false
+  selector: 'task-form',
+  templateUrl: './task-form.component.html',
+  styleUrls: ['./task-form.component.scss'],
+  standalone: false,
 })
 export class TaskFormComponent {
   @Input() formGroup!: FormGroup;
