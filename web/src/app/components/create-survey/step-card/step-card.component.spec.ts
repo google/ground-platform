@@ -36,15 +36,18 @@ describe('StepCardComponent', () => {
   });
 
   it('loads card header', () => {
-    expect(
-      fixture.debugElement.nativeElement.querySelector('.title').textContent
-    ).toBeNonEmptyString();
+    const title =
+      fixture.debugElement.nativeElement.querySelector('.title').textContent;
+    expect(typeof title).toBe('string');
+    expect(title.trim().length).toBeGreaterThan(0);
   });
 
   it('loads card description', () => {
-    expect(
-      fixture.debugElement.nativeElement.querySelector('.description')
-        .textContent
-    ).toBeNonEmptyString();
+    const description =
+      fixture.debugElement.nativeElement.querySelector(
+        '.description'
+      ).textContent;
+    expect(typeof description).toBe('string');
+    expect(description.trim().length).toBeGreaterThan(0);
   });
 });
