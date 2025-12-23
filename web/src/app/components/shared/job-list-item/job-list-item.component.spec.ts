@@ -17,8 +17,14 @@
 import { HarnessLoader } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { CdkTreeModule } from '@angular/cdk/tree';
-import { Signal, WritableSignal, signal } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { WritableSignal, signal } from '@angular/core';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+  waitForAsync,
+} from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { MatButtonHarness } from '@angular/material/button/testing';
@@ -67,7 +73,6 @@ describe('JobListItemComponent', () => {
   let submissionServiceSpy: jasmine.SpyObj<SubmissionService>;
   let loiServiceSpy: jasmine.SpyObj<LocationOfInterestService>;
   let navigationServiceSpy: jasmine.SpyObj<NavigationService>;
-  let lois$: Subject<List<LocationOfInterest>>;
   let submissions$: Subject<List<Submission>>;
   let surveyId$: Subject<string | null>;
   let locationOfInterestId$: Subject<string | null>;
@@ -164,7 +169,6 @@ describe('JobListItemComponent', () => {
       ]
     );
 
-    lois$ = new Subject<List<LocationOfInterest>>();
     submissions$ = new Subject<List<Submission>>();
     surveyId$ = new Subject<string | null>();
     locationOfInterestId$ = new Subject<string | null>();
@@ -172,7 +176,6 @@ describe('JobListItemComponent', () => {
 
     surveyServiceSpy.getActiveSurvey$.and.returnValue(of(survey));
     spyOn(LocationOfInterestService, 'getDisplayName').and.returnValue('');
-    loiServiceSpy.getLocationsOfInterest$.and.returnValue(lois$);
     submissionServiceSpy.getSubmissions$.and.returnValue(submissions$);
     navigationServiceSpy.getSurveyId$.and.returnValue(surveyId$);
     navigationServiceSpy.getLocationOfInterestId$.and.returnValue(
@@ -211,12 +214,12 @@ describe('JobListItemComponent', () => {
     fixture = TestBed.createComponent(JobListItemComponent);
     component = fixture.componentInstance;
     component.job = job;
+    component.lois = List();
     fixture.detectChanges();
     loader = TestbedHarnessEnvironment.loader(fixture);
 
     surveyId$.next(surveyId);
     urlParamsSignal.set(new UrlParams(surveyId, null, null, null));
-    lois$.next(List([]));
   });
 
   it('should create', () => {
@@ -229,11 +232,12 @@ describe('JobListItemComponent', () => {
   });
 
   it('should render lois for a job', async () => {
+    fixture.componentRef.setInput('lois', createLois(2));
+    fixture.detectChanges();
+
     const jobTree = await loader.getHarness(MatTreeHarness);
     const jobNode = (await jobTree.getNodes())[0];
     await jobNode.expand();
-
-    lois$.next(createLois(2));
 
     // One node for the job, 2 nodes for the lois
     expect((await jobTree.getNodes()).length).toBe(3);
@@ -244,11 +248,11 @@ describe('JobListItemComponent', () => {
     const jobNode = (await jobTree.getNodes())[0];
     await jobNode.expand();
 
-    lois$.next(createLois(2));
-    lois$.next(createLois(1));
+    fixture.componentRef.setInput('lois', createLois(3));
+    fixture.detectChanges();
 
-    // One node for the job, one node for the loi
-    expect((await jobTree.getNodes()).length).toBe(2);
+    // One node for the job, three nodes for the loi
+    expect((await jobTree.getNodes()).length).toBe(4);
   });
 
   it('should select LOI when LOI is clicked', async () => {
@@ -257,8 +261,10 @@ describe('JobListItemComponent', () => {
     await jobNode.expand();
 
     const lois = createLois(1);
-    lois$.next(lois);
     const loiId = lois.first()!.id;
+
+    fixture.componentRef.setInput('lois', lois);
+    fixture.detectChanges();
 
     const selectLoiButton = await loader.getHarness(
       MatButtonHarness.with({ selector: '.loi-tree-node' })

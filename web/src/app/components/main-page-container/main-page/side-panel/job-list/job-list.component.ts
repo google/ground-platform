@@ -15,10 +15,13 @@
  */
 
 import { Component, computed, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { List } from 'immutable';
 
 import { Job } from 'app/models/job.model';
+import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
+import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 
 @Component({
@@ -28,6 +31,7 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 })
 export class JobListComponent {
   activeSurvey = input<Survey>();
+
   readonly jobs = computed(() => {
     const survey = this.activeSurvey();
     return survey
@@ -35,11 +39,20 @@ export class JobListComponent {
       : List<Job>();
   });
 
-  constructor(readonly navigationService: NavigationService) {}
+  readonly defaultLois = List<LocationOfInterest>();
 
-  trackById(index: number, job: Job): string {
-    return job.id;
-  }
+  readonly lois = toSignal(this.loiService.getLocationsOfInterest$(), {
+    initialValue: List<LocationOfInterest>(),
+  });
+
+  readonly loisByJob = computed(() => {
+    return this.lois().groupBy(loi => loi.jobId);
+  });
+
+  constructor(
+    readonly navigationService: NavigationService,
+    private loiService: LocationOfInterestService
+  ) {}
 
   isSidePanelExpanded() {
     return this.navigationService.getSidePanelExpanded();
