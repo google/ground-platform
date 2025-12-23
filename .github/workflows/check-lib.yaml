@@ -40,7 +40,7 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: npm i
+        run: npm i --workspace=..
 
       - name: Build lib and local deps
         run: npm run build-all
