@@ -41,7 +41,7 @@ runs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: "20"
+        node-version: "22"
 
     - name: Load cached Node modules
       id: cache-npm
