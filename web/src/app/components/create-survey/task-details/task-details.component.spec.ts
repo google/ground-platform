@@ -17,12 +17,13 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
+import { Task } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { SurveyService } from 'app/services/survey/survey.service';
@@ -47,7 +48,7 @@ describe('TaskDetailsComponent', () => {
       declarations: [TaskDetailsComponent],
       imports: [MatDialogModule],
       providers: [
-        { provide: DataStoreService, useValue: { generateId: () => '123' } },
+        { provide: DataStoreService, useValue: { generateId: () => '123', tasks$: () => of(List<Task>([])) } },
         { provide: DialogService, useValue: {} },
         {
           provide: SurveyService,

@@ -32,6 +32,7 @@ import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
+import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import {
@@ -191,6 +192,9 @@ describe('MapComponent', () => {
     submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
       'SubmissionService',
       ['getSelectedSubmission$']
+    );
+    submissionServiceSpy.getSelectedSubmission$.and.returnValue(
+      of(null as unknown as Submission)
     );
 
     mockEditMode$ = new BehaviorSubject<EditMode>(EditMode.None);

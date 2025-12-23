@@ -45,6 +45,10 @@ export class SurveyLoiComponent {
   async ngOnInit() {
     this.job = this.surveyService.getActiveSurvey().jobs.first();
 
+    if (!this.job) {
+      return;
+    }
+
     this.loiService
       .getPredefinedLoisByJobId$(this.job.id)
       .subscribe(lois => (this.lois = lois));

@@ -53,7 +53,7 @@ describe('ShareDialogComponent', () => {
         {
           provide: DraftSurveyService,
           useValue: {
-            getSurvey$: () => of({ acl: Map() }),
+            getSurvey$: () => of({ acl: Map(), getAclEntriesSorted: () => [] }),
             updateAcl: () => null,
           },
         },

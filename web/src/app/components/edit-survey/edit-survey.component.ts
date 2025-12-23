@@ -54,6 +54,7 @@ export class EditSurveyComponent {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   production = !!(environment as any)['production'];
   sectionTitle?: string = '';
+  sortedJobs = List<Job>();
 
   constructor(
     public dialog: MatDialog,
@@ -71,7 +72,10 @@ export class EditSurveyComponent {
         await this.draftSurveyService.init(surveyId);
         this.draftSurveyService
           .getSurvey$()
-          .subscribe(survey => (this.survey = survey));
+          .subscribe(survey => {
+            this.survey = survey;
+            this.sortedJobs = this.survey.getJobsSorted();
+          });
       }
     });
 
@@ -90,10 +94,6 @@ export class EditSurveyComponent {
           break;
       }
     });
-  }
-
-  jobs(): List<Job> {
-    return this.survey!.getJobsSorted();
   }
 
   addJob(): void {

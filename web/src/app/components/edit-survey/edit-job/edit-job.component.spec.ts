@@ -100,6 +100,7 @@ describe('EditJobComponent', () => {
           provide: DraftSurveyService,
           useValue: {
             getSurvey$: () => of(survey),
+            getSurvey: () => survey,
           },
         },
         {

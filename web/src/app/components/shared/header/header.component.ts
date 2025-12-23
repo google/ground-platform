@@ -56,6 +56,11 @@ export class HeaderComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.surveyService.getActiveSurvey$().subscribe(survey => {
+      if (!survey) {
+        this.surveyId = '';
+        this.state = HeaderState.DEFAULT;
+        return;
+      }
       const { id: surveyId } = survey;
 
       this.surveyId = surveyId;

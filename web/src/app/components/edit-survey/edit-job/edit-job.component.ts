@@ -97,6 +97,8 @@ export class EditJobComponent {
 
     this.job = this.draftSurveyService.getSurvey().getJob(this.jobId!);
 
+    if (!this.job) return;
+
     this.loisSubscription.add(
       this.loiService
         .getPredefinedLoisByJobId$(this.job!.id)

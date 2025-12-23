@@ -29,6 +29,7 @@ import { List, Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { LoiSelectionModule } from 'app/components/shared/loi-selection/loi-selection.module';
+import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
@@ -56,7 +57,7 @@ describe('SurveyLoiComponent', () => {
     'id1',
     'title1',
     'description1',
-    Map(),
+    Map([['job1', new Job('job1', 0, '#000')]]),
     Map(),
     '',
     { type: DataSharingType.PRIVATE }

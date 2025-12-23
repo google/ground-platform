@@ -15,17 +15,22 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { Geometry } from 'app/models/geometry/geometry';
+import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
+
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
 
@@ -41,7 +46,7 @@ describe('LocationOfInterestPanelComponent', () => {
     'survey1',
     'Survey Title',
     'Description',
-    Map(),
+    Map([['job1', new Job('job1', 0, '#000')]]),
     Map(),
     'owner1',
     { type: DataSharingType.PRIVATE }
@@ -55,31 +60,45 @@ describe('LocationOfInterestPanelComponent', () => {
   );
 
   beforeEach(waitForAsync(() => {
-    loiServiceSpy = jasmine.createSpyObj('LocationOfInterestService', [
-      'getSelectedLocationOfInterest$',
-    ]);
-    submissionServiceSpy = jasmine.createSpyObj('SubmissionService', [
-      'getSubmissions$',
-    ]);
-    navigationServiceSpy = jasmine.createSpyObj('NavigationService', [
-      'showSubmissionDetail',
-      'clearLocationOfInterestId',
-    ]);
-    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-
-    loiServiceSpy.getSelectedLocationOfInterest$.and.returnValue(of(mockLoi));
-    submissionServiceSpy.getSubmissions$.and.returnValue(
-      of(List<Submission>())
+    loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
+      'LocationOfInterestService',
+      [
+        'getLocationsOfInterest$',
+        'selectLocationOfInterest',
+        'getSelectedLocationOfInterest$',
+      ]
     );
+    submissionServiceSpy = jasmine.createSpyObj<SubmissionService>(
+      'SubmissionService',
+      ['getSubmissions$']
+    );
+    navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
+      'NavigationService',
+      [
+        'getSurveyId$',
+        'getLocationOfInterestId$',
+        'showSubmissionDetail',
+        'clearLocationOfInterestId',
+      ]
+    );
+    dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+
+    loiServiceSpy.getLocationsOfInterest$.and.returnValue(of(List([mockLoi])));
+    loiServiceSpy.getSelectedLocationOfInterest$.and.returnValue(of(mockLoi));
+    submissionServiceSpy.getSubmissions$.and.returnValue(of(List<Submission>([])));
+    navigationServiceSpy.getSurveyId$.and.returnValue(of(mockSurvey.id));
+    navigationServiceSpy.getLocationOfInterestId$.and.returnValue(of(mockLoi.id));
 
     TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelComponent],
+      imports: [MatDialogModule, MatListModule, MatIconModule],
       providers: [
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: SubmissionService, useValue: submissionServiceSpy },
         { provide: NavigationService, useValue: navigationServiceSpy },
         { provide: MatDialog, useValue: dialogSpy },
       ],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   }));
 

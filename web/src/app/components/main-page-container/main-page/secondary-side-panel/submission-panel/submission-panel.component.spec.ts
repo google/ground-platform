@@ -18,13 +18,14 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
+import { Task } from 'app/models/task/task.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 
@@ -59,7 +60,7 @@ describe('SubmissionPanelComponent', () => {
   const mockSubmission = new Submission(
     'sub1',
     'loi1',
-    { id: 'job1' } as Job,
+    { id: 'job1', getTasksSorted: () => List<Task>() } as unknown as Job,
     mockAuditInfo,
     mockAuditInfo,
     Map()

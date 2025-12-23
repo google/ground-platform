@@ -45,7 +45,7 @@ describe('HeaderComponent', () => {
         { provide: AuthService, useValue: { getUser$: () => of() } },
         { provide: DraftSurveyService, useValue: {} },
         { provide: Router, useValue: { events: of() } },
-        { provide: SurveyService, useValue: { canManageSurvey: () => false } },
+        { provide: SurveyService, useValue: { canManageSurvey: () => false, getActiveSurvey$: () => of(null) } },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
