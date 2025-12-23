@@ -683,8 +683,8 @@ describe('MapComponent', () => {
     marker: google.maps.marker.AdvancedMarkerElement,
     latLng: google.maps.LatLng
   ): void {
-    expect(marker.position?.lat).toEqual(latLng.lat());
-    expect(marker.position?.lng).toEqual(latLng.lng());
+    expect((marker.position as any).lat()).toEqual(latLng.lat());
+    expect((marker.position as any).lng()).toEqual(latLng.lng());
   }
 
   function assertPolygonPaths(

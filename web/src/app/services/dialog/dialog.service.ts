@@ -47,7 +47,8 @@ export interface DialogData {
         MatDialogActions,
         MatDialogClose,
         MatButtonModule,
-    ]
+    ],
+    standalone: true
 })
 export class ConfirmationDialogComponent {
   constructor(

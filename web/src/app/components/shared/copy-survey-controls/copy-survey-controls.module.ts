@@ -19,13 +19,13 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
-import { QRCodeComponent } from 'angularx-qrcode';
+import { QRCodeModule } from 'angularx-qrcode';
 
 import { CopySurveyControlsComponent } from './copy-survey-controls.component';
 
 @NgModule({
   declarations: [CopySurveyControlsComponent],
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, QRCodeComponent],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, QRCodeModule],
   exports: [CopySurveyControlsComponent],
 })
 export class CopySurveyControlsModule {}
