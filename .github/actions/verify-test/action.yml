@@ -80,7 +80,7 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm ci
+      run: npm i
 
     - name: Build project and local deps
       shell: bash

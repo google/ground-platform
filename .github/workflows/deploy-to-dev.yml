@@ -37,7 +37,7 @@ jobs:
           FILE_DATA: ${{ secrets.FIREBASE_CONFIG_V2 }}
 
       - name: Install deps
-        run: npm ci
+        run: npm i
 
       - name: Build Ground
         run: npm run build-all --config=dev --project=ground-dev-sig
