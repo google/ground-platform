@@ -23,30 +23,29 @@ process.env.CHROME_BIN = require('puppeteer').executablePath();
 module.exports = function (config) {
   config.set({
     basePath: '',
-    frameworks: [
-      'jasmine',
-      'jasmine-matchers',
-      '@angular-devkit/build-angular',
-    ],
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
       'karma-jasmine',
       'karma-chrome-launcher',
-      'karma-coverage',
-      'karma-jasmine-matchers',
       'karma-jasmine-html-reporter',
-      'karma-coverage-istanbul-reporter',
-      require(path.join(
-        __dirname,
-        'node_modules/@angular-devkit/build-angular/plugins/karma'
-      )),
+      'karma-coverage', // Use this instead of istanbul-reporter
+      require('@angular-devkit/build-angular/plugins/karma'),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
-    coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, './coverage/web'),
-      reports: ['html', 'lcovonly', 'text-summary', 'json-summary'],
-      fixWebpackSourcePaths: true,
+    jasmineHtmlReporter: {
+      suppressAll: true, // removes the duplicated traces
+    },
+    coverageReporter: {
+      dir: path.join(__dirname, './coverage/web'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'lcovonly' },
+        { type: 'text-summary' },
+        { type: 'json-summary' },
+      ],
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
