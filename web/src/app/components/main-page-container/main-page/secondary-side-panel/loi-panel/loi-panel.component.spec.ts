@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
@@ -59,7 +59,7 @@ describe('LocationOfInterestPanelComponent', () => {
     Map()
   );
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     loiServiceSpy = jasmine.createSpyObj<LocationOfInterestService>(
       'LocationOfInterestService',
       [
@@ -89,7 +89,7 @@ describe('LocationOfInterestPanelComponent', () => {
     navigationServiceSpy.getSurveyId$.and.returnValue(of(mockSurvey.id));
     navigationServiceSpy.getLocationOfInterestId$.and.returnValue(of(mockLoi.id));
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelComponent],
       imports: [MatDialogModule, MatListModule, MatIconModule],
       providers: [
@@ -100,7 +100,7 @@ describe('LocationOfInterestPanelComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(LocationOfInterestPanelComponent);

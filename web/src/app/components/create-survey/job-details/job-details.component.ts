@@ -18,7 +18,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-    selector: 'job-details',
+    selector: 'app-job-details',
     templateUrl: './job-details.component.html',
     styleUrls: ['./job-details.component.scss'],
     standalone: false

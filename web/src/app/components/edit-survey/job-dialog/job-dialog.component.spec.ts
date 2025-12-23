@@ -17,8 +17,6 @@
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  tick,
 } from '@angular/core/testing';
 import {
   MAT_DIALOG_DATA,

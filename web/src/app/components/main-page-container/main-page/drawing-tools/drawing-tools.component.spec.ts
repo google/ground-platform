@@ -17,13 +17,10 @@
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  flush,
-  tick,
-  waitForAsync,
 } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Map } from 'immutable';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -81,7 +78,7 @@ describe('DrawingToolsComponent', () => {
     { type: DataSharingType.PRIVATE }
   );
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
       'canUserAddPointsToJob',
     ]);
@@ -103,7 +100,7 @@ describe('DrawingToolsComponent', () => {
     mockSubmissionId$ = new BehaviorSubject<string | null>(null);
     navigationServiceSpy.getSubmissionId$.and.returnValue(mockSubmissionId$);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [DrawingToolsModule, BrowserAnimationsModule],
       declarations: [DrawingToolsComponent],
       providers: [
@@ -112,7 +109,7 @@ describe('DrawingToolsComponent', () => {
         { provide: NavigationService, useValue: navigationServiceSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
   function resetFixture() {
     if (fixture) {
@@ -143,33 +140,33 @@ describe('DrawingToolsComponent', () => {
     it('is enabled by default', () => {
       const buttonGroup = fixture.debugElement.query(
         By.css('#button-group')
-      ).nativeElement;
-      expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('false');
+      );
+      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(false);
     });
 
-    it('is disabled when an submission is selected', fakeAsync(() => {
+    it('is disabled when an submission is selected', async () => {
       mockSubmissionId$.next('oid1');
-      tick();
       // wait for async pipe to reflect
       fixture.detectChanges();
+      await fixture.whenStable();
 
       const buttonGroup = fixture.debugElement.query(
         By.css('#button-group')
-      ).nativeElement;
-      expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
-    }));
+      );
+      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(true);
+    });
 
-    it('is disabled when drawing tools service disables it', fakeAsync(() => {
+    it('is disabled when drawing tools service disables it', async () => {
       mockDisabled$.next(true);
-      tick();
       // wait for async pipe to reflect
       fixture.detectChanges();
+      await fixture.whenStable();
 
       const buttonGroup = fixture.debugElement.query(
         By.css('#button-group')
-      ).nativeElement;
-      expect(buttonGroup.getAttribute('ng-reflect-disabled')).toEqual('true');
-    }));
+      );
+      expect(buttonGroup.injector.get(MatButtonToggleGroup).disabled).toBe(true);
+    });
   });
 
   describe('add point button', () => {
@@ -221,25 +218,27 @@ describe('DrawingToolsComponent', () => {
       );
     });
 
-    it('turns icon in button green when edit mode set to "add point"', fakeAsync(() => {
+    it('turns icon in button green when edit mode set to "add point"', async () => {
       mockEditMode$.next(EditMode.AddPoint);
-      tick();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       const greenColor = '#3d7d40';
       const addPointIcon = fixture.debugElement.query(By.css('#add-point-icon'))
         .nativeElement as Element;
       assertElementSrcColor(addPointIcon, greenColor);
-    }));
+    });
 
-    it('turns icon in button black when edit mode set to "none"', fakeAsync(() => {
+    it('turns icon in button black when edit mode set to "none"', async () => {
       mockEditMode$.next(EditMode.None);
-      tick();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       const blackColor = '#202225';
       const addPointIcon = fixture.debugElement.query(By.css('#add-point-icon'))
         .nativeElement as Element;
       assertElementSrcColor(addPointIcon, blackColor);
-    }));
+    });
   });
 
   describe('job selector section', () => {
@@ -250,9 +249,10 @@ describe('DrawingToolsComponent', () => {
       expect(jobSelectorSection).toBeNull();
     });
 
-    it('displays job selector section when edit mode set to "add point"', fakeAsync(() => {
+    it('displays job selector section when edit mode set to "add point"', async () => {
       mockEditMode$.next(EditMode.AddPoint);
-      tick();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       const jobSelectorSection = fixture.debugElement.query(
         By.css('#job-selector-section')
@@ -262,7 +262,7 @@ describe('DrawingToolsComponent', () => {
         By.css('#job-selector-label')
       ).nativeElement;
       expect(jobSelectorLabel.innerText).toEqual('Adding point for');
-    }));
+    });
 
     it('selects first job id by default', () => {
       expect(drawingToolsServiceSpy.setSelectedJobId).toHaveBeenCalledWith(
@@ -270,9 +270,10 @@ describe('DrawingToolsComponent', () => {
       );
     });
 
-    it('selects job id when job selected', fakeAsync(() => {
+    it('selects job id when job selected', async () => {
       mockEditMode$.next(EditMode.AddPoint);
-      tick();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       const jobSelector = fixture.debugElement.query(
         By.css('#job-selector')
@@ -280,20 +281,23 @@ describe('DrawingToolsComponent', () => {
       jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();
+      await fixture.whenStable();
       const job2Item = fixture.debugElement.query(
         By.css(`#job-selector-item-${jobId2}`)
       ).nativeElement;
       job2Item.click();
-      flush();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       expect(drawingToolsServiceSpy.setSelectedJobId).toHaveBeenCalledWith(
         jobId2
       );
-    }));
+    });
 
-    it('sets edit mode to "none" when cancel button clicked', fakeAsync(() => {
+    it('sets edit mode to "none" when cancel button clicked', async () => {
       mockEditMode$.next(EditMode.AddPoint);
-      tick();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       const cancelButton = fixture.debugElement.query(
         By.css('#cancel-button')
@@ -303,11 +307,12 @@ describe('DrawingToolsComponent', () => {
       expect(drawingToolsServiceSpy.setEditMode).toHaveBeenCalledWith(
         EditMode.None
       );
-    }));
+    });
 
-    it('displays icons with job color and name in job selector items', fakeAsync(() => {
+    it('displays icons with job color and name in job selector items', async () => {
       mockEditMode$.next(EditMode.AddPoint);
-      tick();
+      fixture.detectChanges();
+      await fixture.whenStable();
 
       const jobSelector = fixture.debugElement.query(
         By.css('#job-selector')
@@ -315,7 +320,7 @@ describe('DrawingToolsComponent', () => {
       jobSelector.click();
       // wait for dropdown menu to reflect
       fixture.detectChanges();
-      flush();
+      await fixture.whenStable();
 
       const job1Item = fixture.debugElement.query(
         By.css(`#job-selector-item-${jobId1}`)
@@ -333,6 +338,6 @@ describe('DrawingToolsComponent', () => {
       );
       expect(job1Item.innerText).toContain(jobName1);
       expect(job2Item.innerText).toContain(jobName2);
-    }));
+    });
   });
 });

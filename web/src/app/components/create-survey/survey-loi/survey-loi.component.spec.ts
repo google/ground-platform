@@ -19,8 +19,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
-  fakeAsync,
-  waitForAsync,
 } from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
@@ -65,7 +63,7 @@ describe('SurveyLoiComponent', () => {
 
   const mockSurvey$ = of(mockSurvey);
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     navigationServiceSpy = jasmine.createSpyObj<NavigationService>(
       'NavigationService',
       ['getLocationOfInterestId$', 'getSubmissionId$', 'getSidePanelExpanded']
@@ -92,7 +90,7 @@ describe('SurveyLoiComponent', () => {
     surveyServiceSpy.getActiveSurvey.and.returnValue(mockSurvey);
     surveyServiceSpy.getActiveSurvey$.and.returnValue(mockSurvey$);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [SurveyLoiComponent],
       imports: [LoiSelectionModule, CommonModule],
       providers: [
@@ -106,7 +104,7 @@ describe('SurveyLoiComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyLoiComponent);

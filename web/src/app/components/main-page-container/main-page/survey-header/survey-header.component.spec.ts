@@ -15,7 +15,7 @@
  */
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
@@ -30,8 +30,8 @@ describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
   let fixture: ComponentFixture<SurveyHeaderComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [MatIconModule, MatDialogModule],
       declarations: [SurveyHeaderComponent],
       providers: [
@@ -57,7 +57,7 @@ describe('SurveyHeaderComponent', () => {
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyHeaderComponent);

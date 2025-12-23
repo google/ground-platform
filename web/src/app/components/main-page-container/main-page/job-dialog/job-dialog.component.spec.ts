@@ -15,7 +15,7 @@
  */
 
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {
@@ -57,9 +57,9 @@ describe('JobDialogComponent', () => {
     keydownEvents: () => NEVER,
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [JobDialogComponent, MatDialogContent, MatDialogActions],
       imports: [
         EditStyleButtonModule,
@@ -85,7 +85,7 @@ describe('JobDialogComponent', () => {
         },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobDialogComponent);

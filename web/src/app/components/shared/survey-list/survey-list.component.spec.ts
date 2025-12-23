@@ -152,7 +152,7 @@ describe('SurveyListComponent', () => {
     'getSurveyAcl',
   ]);
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', [
       'canManageSurvey',
       'isPasslisted',
@@ -174,7 +174,7 @@ describe('SurveyListComponent', () => {
     dialogSpy = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     dialogSpy.open.and.returnValue(dialogRefSpy);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [
         MatButtonModule,
         MatCardModule,
@@ -192,7 +192,7 @@ describe('SurveyListComponent', () => {
         { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     surveyServiceSpy.getAccessibleSurveys$.and.returnValue(
@@ -232,20 +232,20 @@ describe('SurveyListComponent', () => {
     expect(surveyCards.length).toBe(4, 'Should display 2 survey cards');
   });
 
-  it('should go to create survey page when add card is clicked and user is passlisted', fakeAsync(() => {
+  it('should go to create survey page when add card is clicked and user is passlisted', async () => {
     const addCard = fixture.debugElement.query(By.css('#add-card'))
       .nativeElement as HTMLElement;
 
     addCard.click();
 
-    tick();
+    await fixture.whenStable();
 
     expect(navigationServiceSpy.navigateToCreateSurvey).toHaveBeenCalledWith(
       null
     );
-  }));
+  });
 
-  it('should go to supscription form when add card is clicked and user is not passlisted', fakeAsync(() => {
+  it('should go to supscription form when add card is clicked and user is not passlisted', async () => {
     authServiceSpy.isPasslisted.and.returnValue(Promise.resolve(false));
 
     const addCard = fixture.debugElement.query(By.css('#add-card'))
@@ -253,12 +253,12 @@ describe('SurveyListComponent', () => {
 
     addCard.click();
 
-    tick();
+    await fixture.whenStable();
 
     expect(
       navigationServiceSpy.navigateToSubscriptionForm
     ).toHaveBeenCalledWith();
-  }));
+  });
 
   it('should go to create survey page with id when a incomplete survey card is clicked', () => {
     clickCard(fixture, 'survey-card-0');

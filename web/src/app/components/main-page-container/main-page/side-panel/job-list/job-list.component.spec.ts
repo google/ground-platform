@@ -15,10 +15,13 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { Map } from 'immutable';
 import { of } from 'rxjs';
@@ -63,16 +66,19 @@ describe('JobListComponent', () => {
   let component: JobListComponent;
   let fixture: ComponentFixture<JobListComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     const navigationService = {
       getSurveyId$: () => of(''),
       getLocationOfInterestId$: () => of(''),
       getSidePanelExpanded: () => true,
     };
     const routerSpy = createRouterSpy();
-    TestBed.configureTestingModule({
+    const surveyService = {
+      getActiveSurvey$: () => of(mockSurvey),
+    };
+    await TestBed.configureTestingModule({
       declarations: [JobListComponent],
-      imports: [MatListModule],
+      imports: [MatIconModule, MatListModule, MatMenuModule, MatButtonModule],
       providers: [
         {
           provide: Router,
@@ -92,7 +98,7 @@ describe('JobListComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(JobListComponent);

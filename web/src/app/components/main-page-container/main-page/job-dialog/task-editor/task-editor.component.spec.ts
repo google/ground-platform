@@ -15,9 +15,10 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -35,20 +36,18 @@ describe('TaskFieldEditorComponent', () => {
   let component: TaskEditorComponent;
   let fixture: ComponentFixture<TaskEditorComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       declarations: [TaskEditorComponent],
       imports: [
-        FormsModule,
         ReactiveFormsModule,
-        BrowserModule,
-        MatDialogModule,
-        MatIconModule,
+        MatFormFieldModule,
         MatSelectModule,
         MatSlideToggleModule,
-        MatFormFieldModule,
+        MatIconModule,
         MatInputModule,
         NoopAnimationsModule,
+        MatCheckboxModule,
       ],
       providers: [
         { provide: Router, useValue: {} },
@@ -56,7 +55,7 @@ describe('TaskFieldEditorComponent', () => {
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TaskEditorComponent);

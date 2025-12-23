@@ -59,7 +59,7 @@ describe('ShareListComponent', () => {
 
   const user = new User('user1', 'user1@gmail.com', true);
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     draftSurveyServiceSpy = jasmine.createSpyObj<DraftSurveyService>(
       'DraftSurveyService',
       ['getSurvey$', 'updateAcl']
@@ -79,7 +79,7 @@ describe('ShareListComponent', () => {
       return Promise.resolve(user);
     });
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       declarations: [ShareListComponent],
       imports: [MatListModule, MatSelectModule],
       providers: [
@@ -87,7 +87,7 @@ describe('ShareListComponent', () => {
         { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ShareListComponent);
@@ -100,7 +100,7 @@ describe('ShareListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('updates itself when acl changes', fakeAsync(() => {
+  it('updates itself when acl changes', async () => {
     activeSurvey$.next(
       new Survey(
         'id',
@@ -112,17 +112,17 @@ describe('ShareListComponent', () => {
         { type: DataSharingType.PRIVATE }
       )
     );
-    tick(); // Process microtasks (await)
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component.acl.length).toBeGreaterThan(0);
     component.onRoleChange({ value: Role.SURVEY_ORGANIZER } as MatSelectChange, 0);
-    tick(); // Process microtasks
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(component.acl.length).toBe(1);
     expect(component.acl[0].email).toBe(user.email);
     expect(component.acl[0].role).toBe(Role.SURVEY_ORGANIZER);
     expect(authServiceSpy.getUser).toHaveBeenCalled();
-  }));
+  });
 });
