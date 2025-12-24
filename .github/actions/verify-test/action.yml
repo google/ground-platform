@@ -76,11 +76,11 @@ runs:
 
     - name: Install nx-linux-x64-gnu
       shell: bash
-      run: npm install --workspaces=. --include-workspace-rootnstall @nx/nx-linux-x64-gnu
+      run: npm install @nx/nx-linux-x64-gnu
 
     - name: Install dependencies
       shell: bash
-      run: npm install --workspaces=. --include-workspace-root
+      run: npm run --prefix=.. ci-all
 
     - name: Build project and local deps
       shell: bash

@@ -40,7 +40,7 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: npm install --workspaces=. --include-workspace-root
+        run: npm run --prefix=.. ci-all
 
       - name: Build protos
         run: npm run build
