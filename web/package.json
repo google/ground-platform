@@ -15,7 +15,7 @@
     "build-and-start": "npm run build && npm run start",
     "build-all-and-start": "npm run build-all && npm run start",
     "pretest": "./pretest.sh",
-    "test": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
+    "test": "ng test",
     "test-headless": "ng test --browsers ChromeHeadlessNoSandbox --watch=false",
     "test-with-coverage": "npm run test -- --browsers ChromeHeadlessNoSandbox --watch=false --code-coverage",
     "lint": "ng lint",
