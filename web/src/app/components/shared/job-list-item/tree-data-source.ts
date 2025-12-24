@@ -16,13 +16,14 @@
 
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
+import { List } from 'immutable';
+import { BehaviorSubject, Observable, merge } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { getLoiIcon } from 'app/utils/utils';
-import { List } from 'immutable';
-import { BehaviorSubject, Observable, merge } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 /** Flat node with with information on name, level, and if it is expandable.
  * Loi specific nodes have additional fields for loi info and number of

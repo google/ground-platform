@@ -16,12 +16,13 @@
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
+
 import { SurveyDetailsComponent } from 'app/components/create-survey/survey-details/survey-details.component';
 import { DATA_SHARING_TYPE_DESCRIPTION, Survey } from 'app/models/survey.model';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { Subscription } from 'rxjs';
 
 import {
   DialogData,

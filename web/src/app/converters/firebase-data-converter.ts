@@ -15,6 +15,8 @@
  */
 
 import { DocumentData, Timestamp } from '@angular/fire/firestore';
+import { Map } from 'immutable';
+
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
@@ -32,7 +34,6 @@ import {
 } from 'app/models/task/task-condition.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { User } from 'app/models/user.model';
-import { Map } from 'immutable';
 
 const TASK_TYPE_ENUMS_BY_STRING = Map([
   [TaskType.TEXT, 'text_field'],

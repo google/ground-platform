@@ -17,6 +17,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+
 import { CurrentUserWidgetComponent } from 'app/components/shared/header/current-user-widget/current-user-widget.component';
 import { UserAvatarModule } from 'app/components/shared/user-avatar/user-avatar.module';
 

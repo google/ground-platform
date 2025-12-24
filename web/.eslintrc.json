@@ -10,7 +10,7 @@
   "rules": {
     "eqeqeq": ["error", "always", {"null": "ignore"}],
     "node/no-unpublished-import": "off",
-    "node/no-unpublished-require": "off",
+    "node/no-unpublished-require": "off", "import/namespace": "off",
     "@typescript-eslint/no-unused-vars": ["off", { "varsIgnorePattern": "_.*" }],
     "object-curly-spacing": ["error", "always"],
     "sort-imports": [
@@ -66,7 +66,7 @@
   "settings": {
     "import/resolver": {
       "typescript": {
-        "project": "./web/tsconfig.json"
+        "project": "./tsconfig.json"
       }
     }
   }

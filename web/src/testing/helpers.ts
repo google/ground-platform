@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import { Collection, List, is, isValueObject } from 'immutable';
+
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { LinearRing } from 'app/models/geometry/linear-ring';
 import { Polygon } from 'app/models/geometry/polygon';
-import { Collection, List, is, isValueObject } from 'immutable';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function deepEqualityTester(a: any, b: any): boolean | undefined {

@@ -19,9 +19,10 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
+import { NEVER, of } from 'rxjs';
+
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { NEVER, of } from 'rxjs';
 
 import { HttpClientService } from '../http-client/http-client.service';
 

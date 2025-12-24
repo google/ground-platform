@@ -24,14 +24,15 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { List } from 'immutable';
+import { Subscription } from 'rxjs';
+
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { JobService } from 'app/services/job/job.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { List } from 'immutable';
-import { Subscription } from 'rxjs';
 
 import { MarkerColorEvent } from './edit-style-button/edit-style-button.component';
 import { TaskEditorComponent } from './task-editor/task-editor.component';

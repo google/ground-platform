@@ -20,8 +20,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { BrowserModule } from '@angular/platform-browser';
-import { HeaderModule } from 'app/components/shared/header/header.module';
 import { FirebaseUIModule } from 'firebaseui-angular';
+
+import { HeaderModule } from 'app/components/shared/header/header.module';
 
 import { SignInPageComponent } from './sign-in-page.component';
 

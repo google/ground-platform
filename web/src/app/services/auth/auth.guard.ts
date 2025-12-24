@@ -15,6 +15,9 @@
  */
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+
 import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import {
@@ -23,8 +26,6 @@ import {
 } from 'app/services/navigation/navigation.constants';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { environment } from 'environments/environment';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',

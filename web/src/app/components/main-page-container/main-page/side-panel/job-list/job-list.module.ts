@@ -18,6 +18,7 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { BrowserModule } from '@angular/platform-browser';
+
 import { JobListItemModule } from 'app/components/shared/job-list-item/job-list-item.module';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 

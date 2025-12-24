@@ -16,11 +16,12 @@
 
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
+
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SideNavMode } from 'app/services/navigation/url-params';
-import { Map } from 'immutable';
-import { of } from 'rxjs';
 
 import { SecondarySidePanelComponent } from './secondary-side-panel.component';
 

@@ -19,6 +19,7 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { BrowserModule } from '@angular/platform-browser';
+
 import { MapModule } from 'app/components/main-page-container/main-page/map/map.module';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 

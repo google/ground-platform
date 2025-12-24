@@ -74,6 +74,8 @@
     "@types/jasminewd2": "^2.0.8",
     "@types/webpack-env": "^1.15.3",
     "cpx": "^1.5.0",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-import": "^2.29.0",
     "inquirer": "^6.2.2",
     "inquirer-autocomplete-prompt": "^1.3.0",
     "istanbul": "^0.4.5",

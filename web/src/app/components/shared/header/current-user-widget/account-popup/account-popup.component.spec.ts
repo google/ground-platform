@@ -21,9 +21,10 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+
 import { AccountPopupComponent } from 'app/components/shared/header/current-user-widget/account-popup/account-popup.component';
 import { AuthService } from 'app/services/auth/auth.service';
-import { of } from 'rxjs';
 
 describe('AccountPopupComponent', () => {
   let component: AccountPopupComponent;

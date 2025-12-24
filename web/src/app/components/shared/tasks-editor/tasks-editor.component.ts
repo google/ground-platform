@@ -23,6 +23,8 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { List } from 'immutable';
+
 import {
   Cardinality,
   MultipleChoice,
@@ -38,7 +40,6 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { TaskService } from 'app/services/task/task.service';
 import { moveItemInFormArray } from 'app/utils/utils';
-import { List } from 'immutable';
 
 export enum TaskGroup {
   QUESTION = 1,

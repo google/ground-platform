@@ -17,9 +17,10 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router } from '@angular/router';
+import { BehaviorSubject, NEVER, of } from 'rxjs';
+
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { BehaviorSubject, NEVER, of } from 'rxjs';
 
 import { SignInPageComponent } from './sign-in-page.component';
 

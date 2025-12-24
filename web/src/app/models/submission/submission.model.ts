@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { Map } from 'immutable';
+
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
-import { Map } from 'immutable';
 
 import { Result } from './result.model';
 

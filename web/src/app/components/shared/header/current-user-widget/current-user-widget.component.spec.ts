@@ -16,10 +16,11 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+
 import { CurrentUserWidgetComponent } from 'app/components/shared/header/current-user-widget/current-user-widget.component';
 import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
-import { Subject } from 'rxjs';
 
 describe('CurrentUserWidgetComponent', () => {
   let component: CurrentUserWidgetComponent;

@@ -21,6 +21,10 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { List, Map } from 'immutable';
+import { Observable } from 'rxjs';
+import { first, map, switchMap } from 'rxjs/operators';
+
 import { JobListItemActionsType } from 'app/components/shared/job-list-item/job-list-item.component';
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
@@ -41,9 +45,6 @@ import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { List, Map } from 'immutable';
-import { Observable } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global alert*/

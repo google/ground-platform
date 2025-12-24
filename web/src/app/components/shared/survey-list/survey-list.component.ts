@@ -16,6 +16,9 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { List, Map } from 'immutable';
+import { Subscription } from 'rxjs';
+
 import {
   DialogData,
   DialogType,
@@ -29,8 +32,6 @@ import {
 import { AuthService } from 'app/services/auth/auth.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { List, Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 export enum SurveyListFilter {
   ALL,

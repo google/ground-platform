@@ -15,13 +15,14 @@
  */
 
 import { Component } from '@angular/core';
+import { List } from 'immutable';
+
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { JobService } from 'app/services/job/job.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { TaskService } from 'app/services/task/task.service';
-import { List } from 'immutable';
 
 @Component({
   selector: 'survey-loi',

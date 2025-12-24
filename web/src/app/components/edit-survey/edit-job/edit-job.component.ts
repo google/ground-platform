@@ -16,6 +16,9 @@
 
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
+import { List } from 'immutable';
+import { Subscription } from 'rxjs';
+
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
@@ -26,8 +29,6 @@ import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { TaskService } from 'app/services/task/task.service';
-import { List } from 'immutable';
-import { Subscription } from 'rxjs';
 
 enum EditJobSection {
   TASKS,

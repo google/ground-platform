@@ -17,8 +17,9 @@
 import { DocumentData } from '@angular/fire/firestore';
 import { toMessage } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
-import { LocationOfInterest } from 'app/models/loi.model';
 import { Map } from 'immutable';
+
+import { LocationOfInterest } from 'app/models/loi.model';
 
 import { geometryPbToModel } from './geometry-data-converter';
 

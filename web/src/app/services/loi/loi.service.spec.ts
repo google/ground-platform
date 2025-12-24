@@ -15,6 +15,9 @@
  */
 
 import { TestBed } from '@angular/core/testing';
+import { Map as ImmutableMap, List, Map } from 'immutable';
+import { Subject, of } from 'rxjs';
+
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 import { Point } from 'app/models/geometry/point';
@@ -26,8 +29,6 @@ import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { Map as ImmutableMap, List, Map } from 'immutable';
-import { Subject, of } from 'rxjs';
 import { polygonShellCoordsToPolygon } from 'testing/helpers';
 
 describe('LocationOfInterestService', () => {

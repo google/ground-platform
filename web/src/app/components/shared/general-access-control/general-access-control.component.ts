@@ -17,11 +17,12 @@
 import '@angular/localize/init';
 
 import { Component } from '@angular/core';
+import { Map } from 'immutable';
+import { Subscription } from 'rxjs';
+
 import { Survey, SurveyGeneralAccess } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
-import { Map } from 'immutable';
-import { Subscription } from 'rxjs';
 
 const generalAccessLabels = Map<
   SurveyGeneralAccess,

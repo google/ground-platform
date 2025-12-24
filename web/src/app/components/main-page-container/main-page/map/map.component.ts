@@ -27,6 +27,10 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { GoogleMap } from '@angular/google-maps';
+import { Map as ImmutableMap, List } from 'immutable';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Geometry, GeometryType } from 'app/models/geometry/geometry';
 import { MultiPolygon } from 'app/models/geometry/multi-polygon';
@@ -45,9 +49,6 @@ import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
-import { Map as ImmutableMap, List } from 'immutable';
-import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
 
 // To make ESLint happy:
 /*global google*/

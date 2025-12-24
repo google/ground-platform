@@ -15,10 +15,11 @@
  */
 
 import { Component, input } from '@angular/core';
+import { Observable } from 'rxjs';
+
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SideNavMode } from 'app/services/navigation/url-params';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'ground-side-panel',

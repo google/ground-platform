@@ -39,6 +39,9 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { List } from 'immutable';
+import { Subscription, firstValueFrom } from 'rxjs';
+
 import {
   Cardinality,
   MultipleChoice,
@@ -47,8 +50,6 @@ import { Option } from 'app/models/task/option.model';
 import { TaskType } from 'app/models/task/task.model';
 import { DialogService } from 'app/services/dialog/dialog.service';
 import { JobService } from 'app/services/job/job.service';
-import { List } from 'immutable';
-import { Subscription, firstValueFrom } from 'rxjs';
 
 import { OptionEditorComponent } from './option-editor/option-editor.component';
 

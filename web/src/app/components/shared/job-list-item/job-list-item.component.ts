@@ -17,13 +17,14 @@
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { Component, Input, OnInit, SimpleChanges, effect } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { List } from 'immutable';
+
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { environment } from 'environments/environment';
-import { List } from 'immutable';
 
 import { DynamicDataSource, DynamicFlatNode } from './tree-data-source';
 

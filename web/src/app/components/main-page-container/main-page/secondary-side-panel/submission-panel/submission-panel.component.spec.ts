@@ -23,6 +23,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
+
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
@@ -31,8 +34,6 @@ import { Task } from 'app/models/task/task.model';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
 
 import { SubmissionPanelComponent } from './submission-panel.component';
 

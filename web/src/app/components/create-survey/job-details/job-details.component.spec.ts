@@ -15,6 +15,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { JobDetailsComponent } from 'app/components/create-survey/job-details/job-details.component';
 
 describe('JobDetailsComponent', () => {

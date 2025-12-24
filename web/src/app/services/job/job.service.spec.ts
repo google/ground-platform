@@ -16,11 +16,12 @@
 
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { NEVER, Subject } from 'rxjs';
+
 import { Survey } from 'app/models/survey.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { JobService } from 'app/services/job/job.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { NEVER, Subject } from 'rxjs';
 
 describe('JobService', () => {
   const dataStoreServiceStub: Partial<DataStoreService> = {};

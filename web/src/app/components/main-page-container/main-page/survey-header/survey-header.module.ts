@@ -19,6 +19,7 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+
 import { HeaderModule } from 'app/components/shared/header/header.module';
 import { ShareDialogModule } from 'app/components/shared/share-dialog/share-dialog.module';
 

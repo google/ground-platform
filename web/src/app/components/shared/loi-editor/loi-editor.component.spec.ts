@@ -20,6 +20,9 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
+
 import { ImportDialogComponent } from 'app/components/shared/import-dialog/import-dialog.component';
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
@@ -28,8 +31,6 @@ import { LocationOfInterest } from 'app/models/loi.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
 
 import { LoiEditorComponent } from './loi-editor.component';
 

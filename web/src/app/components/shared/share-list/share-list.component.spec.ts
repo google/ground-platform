@@ -30,14 +30,15 @@ import {
   MatSelectChange,
   MatSelectModule,
 } from '@angular/material/select';
+import { Map } from 'immutable';
+import { Subject, firstValueFrom, of } from 'rxjs';
+import { delay, map } from 'rxjs/operators';
+
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { User } from 'app/models/user.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
-import { Map } from 'immutable';
-import { Subject, firstValueFrom, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
 
 import { ShareListComponent } from './share-list.component';
 

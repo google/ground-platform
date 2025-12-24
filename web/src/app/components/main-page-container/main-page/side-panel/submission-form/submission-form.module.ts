@@ -24,6 +24,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatRadioModule } from '@angular/material/radio';
 import { BrowserModule } from '@angular/platform-browser';
+
 import { JobListItemModule } from 'app/components/shared/job-list-item/job-list-item.module';
 
 import { SubmissionFormComponent } from './submission-form.component';

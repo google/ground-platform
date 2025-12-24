@@ -16,12 +16,13 @@
 
 import { Component, computed, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { List } from 'immutable';
+
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { List } from 'immutable';
 
 @Component({
   selector: 'ground-job-list',

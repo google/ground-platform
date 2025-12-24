@@ -23,13 +23,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
+import { Map } from 'immutable';
+import { of } from 'rxjs';
+
 import { Job } from 'app/models/job.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { Map } from 'immutable';
-import { of } from 'rxjs';
 
 import { JobListComponent } from './job-list.component';
 

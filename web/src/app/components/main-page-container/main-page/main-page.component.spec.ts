@@ -20,13 +20,14 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NEVER, of } from 'rxjs';
+
 import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { SurveyService } from 'app/services/survey/survey.service';
-import { NEVER, of } from 'rxjs';
 import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 import { MainPageComponent } from './main-page.component';

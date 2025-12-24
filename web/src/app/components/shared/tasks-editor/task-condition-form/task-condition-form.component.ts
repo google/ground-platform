@@ -16,9 +16,10 @@
 
 import { Component, Input, Pipe, PipeTransform } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
+import { List } from 'immutable';
+
 import { Option } from 'app/models/task/option.model';
 import { Task } from 'app/models/task/task.model';
-import { List } from 'immutable';
 
 @Pipe({
   name: 'getTaskOptions',

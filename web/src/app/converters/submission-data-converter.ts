@@ -17,6 +17,8 @@
 import { DocumentData } from '@angular/fire/firestore';
 import { timestampToInt, toMessage } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
+import { List, Map } from 'immutable';
+
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Geometry } from 'app/models/geometry/geometry';
 import { Point } from 'app/models/geometry/point';
@@ -29,7 +31,6 @@ import {
   SubmissionData,
 } from 'app/models/submission/submission.model';
 import { User } from 'app/models/user.model';
-import { List, Map } from 'immutable';
 
 import {
   coordinatesPbToModel,

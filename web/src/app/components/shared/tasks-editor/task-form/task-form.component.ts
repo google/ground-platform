@@ -32,6 +32,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { List } from 'immutable';
+
 import {
   DialogData,
   DialogType,
@@ -45,7 +47,6 @@ import {
 import { TaskType } from 'app/models/task/task.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { moveItemInFormArray } from 'app/utils/utils';
-import { List } from 'immutable';
 
 import {
   TaskGroup,

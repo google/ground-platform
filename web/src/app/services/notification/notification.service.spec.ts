@@ -16,6 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { NotificationService } from 'app/services/notification/notification.service';
 
 describe('NotificationService', () => {

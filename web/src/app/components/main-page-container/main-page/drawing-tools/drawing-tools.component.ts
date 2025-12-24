@@ -25,6 +25,10 @@ import {
   input,
 } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { List } from 'immutable';
+import { Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 import { Job } from 'app/models/job.model';
 import { Survey } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
@@ -34,9 +38,6 @@ import {
 } from 'app/services/drawing-tools/drawing-tools.service';
 import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
-import { List } from 'immutable';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'ground-drawing-tools',

@@ -17,6 +17,8 @@
 import { DocumentData } from '@angular/fire/firestore';
 import { toMessage } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
+import { List, Map, OrderedMap } from 'immutable';
+
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
 import {
@@ -38,7 +40,6 @@ import {
   TaskConditionMatchType,
 } from 'app/models/task/task-condition.model';
 import { Task, TaskType } from 'app/models/task/task.model';
-import { List, Map, OrderedMap } from 'immutable';
 
 import Pb = GroundProtos.ground.v1beta1;
 

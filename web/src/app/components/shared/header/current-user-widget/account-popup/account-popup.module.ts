@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+
 import { AccountPopupComponent } from 'app/components/shared/header/current-user-widget/account-popup/account-popup.component';
 import { UserAvatarModule } from 'app/components/shared/user-avatar/user-avatar.module';
 
