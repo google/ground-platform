@@ -5,16 +5,7 @@ const path = require('path');
 let karmaServerPath;
 try {
   // Try resolving from the script's location (web/scripts)
-  // We want to find the karma installed for this project
-  // Since we are in web/scripts, we might be in a monorepo
-  // checking ../node_modules first
-  
-  // Best bet: use require.resolve if possible, but we don't want to load it, just find it.
-  // We can assume standard locations if require.resolve fails or returns unexpected.
-  
-  // require.resolve might point to main, which is lib/index.js usually.
-  // server.js is in lib/server.js
-  const karmaMain = require.resolve('karma'); // path to karma/lib/index.js or similar
+  const karmaMain = require.resolve('karma');
   const karmaDir = path.dirname(karmaMain);
   karmaServerPath = path.join(karmaDir, 'server.js');
 } catch (e) {
@@ -47,19 +38,6 @@ if (content.includes('Force exiting Karma')) {
   process.exit(0);
 }
 
-// target string to replace
-// using regex to be robust against formatting changes if any
-const regex = /webServer\.close\(function\s*\((?:err)?\)\s*\{\s*if\s*\(err\)\s*\{\s*log\.error\('Error stopping web-server: '\s*\+\s*err\.message\)\s*\}\s*disconnectBrowsers\(code\)\s*\}\)/;
-
-// Simple string match fallback if regex feels risky (but regex handles spaces better)
-// The original code in karma 6.4.4 lib/server.js:
-//     webServer.close(function (err) {
-//       if (err) {
-//         log.error('Error stopping web-server: ' + err.message)
-//       }
-//       disconnectBrowsers(code)
-//     })
-
 const replacement = `webServer.close((err) => {
            // FORCE EXIT to avoid ERR_SERVER_NOT_RUNNING crash during cleanup
            const exitCode = code || 0;
@@ -67,32 +45,60 @@ const replacement = `webServer.close((err) => {
            process.exit(exitCode);
         })`;
 
-const newContent = content.replace(regex, replacement);
+// 1. Try matching the arrow function version (seen in CI)
+// Matches: webServer.close(() => { ... })
+// It needs to match strictly enough to be safe but flexible on whitespace
+const arrowRegex = /webServer\.close\(\(\)\s*=>\s*\{[\s\S]*?removeAllListeners\(\)\s*\}\)\s*\}/;
+
+// 2. Try matching the function version (seen locally/older versions)
+// Matches: webServer.close(function (err) { ... })
+const functionRegex = /webServer\.close\(function\s*\((?:err)?\)\s*\{[\s\S]*?disconnectBrowsers\(code\)\s*\}\)/;
+
+let newContent = content;
+
+if (arrowRegex.test(content)) {
+    console.log('Detected arrow function syntax in Karma server.js');
+    // We need to be careful with replace because the regex might match more or less than we want to replace.
+    // The arrow regex targets the whole block ending with `}) }` or similar.
+    // Let's rely on a slightly strict string match for the arrow version if possible, or use the regex carefully.
+    
+    // The snippet from CI:
+    // webServer.close(() => {
+    //   clearTimeout(closeTimeout)
+    //   removeAllListeners()
+    // })
+    
+    // We can try to match the start of the block and replace the whole `webServer.close(...)` call.
+    newContent = content.replace(arrowRegex, replacement + '\n  }');
+} else if (functionRegex.test(content)) {
+    console.log('Detected function syntax in Karma server.js');
+    newContent = content.replace(functionRegex, replacement);
+} else {
+    // Fallback: try simple string matching for known patterns
+    const arrowTarget = `webServer.close(() => {
+        clearTimeout(closeTimeout)
+        removeAllListeners()
+      })`;
+      
+    if (content.includes('webServer.close(() => {')) {
+         // It definitely has the arrow function, but maybe whitespace differs.
+         // Let's try to replace just the call logic.
+         // We can't easily rely on exact string match for multi-line if whitespace varies.
+         // But let's try a best-effort simpler regex if the above failed.
+         const looseArrowRegex = /webServer\.close\(\(\)\s*=>\s*\{[^}]*\}\)/;
+         if (looseArrowRegex.test(content)) {
+             newContent = content.replace(looseArrowRegex, replacement);
+         }
+    }
+}
 
 if (newContent === content) {
-    // Try stricter replacement if regex failed (maybe different formatting)
-    console.log('Regex match failed, trying simple replacement...');
-    // We can try to match just the webServer.close part if we are careful
-    const simpleTarget = `webServer.close(function (err) {
-      if (err) {
-        log.error('Error stopping web-server: ' + err.message)
-      }
-      disconnectBrowsers(code)
-    })`;
-    
-    if (content.includes(simpleTarget)) {
-       content = content.replace(simpleTarget, replacement);
-       fs.writeFileSync(karmaServerPath, content, 'utf8');
-       console.log('Karma patched successfully (simple match).');
-    } else {
-       console.error('ERROR: Could not find target code in Karma server.js to patch.');
-       // Dump a snippet for debugging in logs
-       console.log('Snippet of file around line 400:');
-       const lines = content.split('\n');
-       const start = Math.max(0, lines.findIndex(l => l.includes('webServer.close')) - 5);
-       console.log(lines.slice(start, start + 15).join('\n'));
-       process.exit(1);
-    }
+    console.error('ERROR: Could not find target code in Karma server.js to patch.');
+    console.log('Snippet of file around line 400:');
+    const lines = content.split('\n');
+    const start = Math.max(0, lines.findIndex(l => l.includes('webServer.close')) - 5);
+    console.log(lines.slice(start, start + 15).join('\n'));
+    process.exit(1);
 } else {
     fs.writeFileSync(karmaServerPath, newContent, 'utf8');
     console.log('Karma patched successfully.');
