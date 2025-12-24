@@ -21,6 +21,7 @@
     "lint": "ng lint",
     "lint:fix": "npm run lint -- --fix",
     "posttest": "./posttest.sh",
+    "postinstall": "node scripts/patch-karma.cjs",
     "login": "npx firebase login",
     "deploy": "npm run login && npx firebase deploy --only hosting --project $npm_config_project",
     "extract-i18n": "ng extract-i18n"
