@@ -24,13 +24,13 @@ import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
-import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
 
 describe('LocationOfInterestPanelComponent', () => {
@@ -94,7 +94,12 @@ describe('LocationOfInterestPanelComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelComponent],
-      imports: [GroundIconModule, MatDialogModule, MatListModule, MatIconModule],
+      imports: [
+        GroundIconModule,
+        MatDialogModule,
+        MatListModule,
+        MatIconModule,
+      ],
       providers: [
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: SubmissionService, useValue: submissionServiceSpy },

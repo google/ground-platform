@@ -19,15 +19,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { Map } from 'immutable';
 import { NEVER, of } from 'rxjs';
 
 import { SurveyHeaderComponent } from './survey-header.component';
-
-import { Map } from 'immutable';
-import { DataSharingType, Survey } from 'app/models/survey.model';
-import { GroundIconModule } from 'app/modules/ground-icon.module';
 
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
