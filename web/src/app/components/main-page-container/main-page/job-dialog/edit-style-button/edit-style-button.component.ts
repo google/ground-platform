@@ -24,7 +24,6 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-
 import { GroundPinService } from 'app/services/ground-pin/ground-pin.service';
 
 import { ColorPickerComponent } from './color-picker/color-picker.component';

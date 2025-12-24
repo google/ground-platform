@@ -34,9 +34,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatTreeHarness } from '@angular/material/tree/testing';
 import { Router } from '@angular/router';
-import { List, Map } from 'immutable';
-import { Subject, of } from 'rxjs';
-
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
@@ -52,6 +49,8 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { UrlParams } from 'app/services/navigation/url-params';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { List, Map } from 'immutable';
+import { Subject, of } from 'rxjs';
 
 import { JobListItemComponent } from './job-list-item.component';
 

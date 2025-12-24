@@ -20,9 +20,6 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
-
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Point } from 'app/models/geometry/point';
 import { Job } from 'app/models/job.model';
@@ -31,6 +28,8 @@ import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
 import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
 
 import { LoiSelectionComponent } from './loi-selection.component';
 

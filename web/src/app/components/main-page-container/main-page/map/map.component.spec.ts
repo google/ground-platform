@@ -18,9 +18,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { GoogleMapsModule } from '@angular/google-maps';
-import { List, Map } from 'immutable';
-import { BehaviorSubject, of } from 'rxjs';
-
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 import { Point } from 'app/models/geometry/point';
@@ -36,6 +33,8 @@ import {
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, of } from 'rxjs';
 import { polygonShellCoordsToPolygon } from 'testing/helpers';
 
 import { MapComponent } from './map.component';

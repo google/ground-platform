@@ -15,7 +15,6 @@
  */
 
 import { GroundProtos } from '@ground/proto';
-
 import { Role } from 'app/models/role.model';
 
 import { MODEL_ROLES } from './survey-data-converter';

@@ -17,10 +17,9 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { NEVER } from 'rxjs';
-
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { NEVER } from 'rxjs';
 import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 import { MainPageComponent } from './main-page/main-page.component';

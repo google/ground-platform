@@ -24,10 +24,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { User } from 'firebase/auth';
-import { List, Map } from 'immutable';
-import { Subject, from, of } from 'rxjs';
-
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
 import { LoiEditorComponent } from 'app/components/shared/loi-editor/loi-editor.component';
 import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
@@ -41,6 +37,9 @@ import { DialogService } from 'app/services/dialog/dialog.service';
 import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { User } from 'firebase/auth';
+import { List, Map } from 'immutable';
+import { Subject, from, of } from 'rxjs';
 
 @Component({
   selector: 'loi-editor',

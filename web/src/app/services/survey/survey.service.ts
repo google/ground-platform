@@ -15,16 +15,15 @@
  */
 
 import { Injectable } from '@angular/core';
-import { List, Map } from 'immutable';
-import { Observable, ReplaySubject, firstValueFrom, of } from 'rxjs';
-import { shareReplay, switchMap } from 'rxjs/operators';
-
 import { Role } from 'app/models/role.model';
 import { DataSharingType, Survey, SurveyState } from 'app/models/survey.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
 import { NavigationService } from 'app/services/navigation/navigation.service';
+import { List, Map } from 'immutable';
+import { Observable, ReplaySubject, firstValueFrom, of } from 'rxjs';
+import { shareReplay, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',

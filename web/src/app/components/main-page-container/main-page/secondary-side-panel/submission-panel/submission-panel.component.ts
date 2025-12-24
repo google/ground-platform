@@ -16,9 +16,6 @@
 
 import { Component, Input, OnDestroy, OnInit, input } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { List } from 'immutable';
-import { Subscription, firstValueFrom } from 'rxjs';
-
 import { Point } from 'app/models/geometry/point';
 import { MultipleSelection } from 'app/models/submission/multiple-selection';
 import { Result } from 'app/models/submission/result.model';
@@ -28,6 +25,8 @@ import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
+import { List } from 'immutable';
+import { Subscription, firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'submission-panel',

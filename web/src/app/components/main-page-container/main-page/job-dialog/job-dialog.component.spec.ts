@@ -28,11 +28,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
-import { NEVER, of } from 'rxjs';
-
 import { InlineEditorModule } from 'app/components/shared/inline-editor/inline-editor.module';
 import { AuthService } from 'app/services/auth/auth.service';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
+import { NEVER, of } from 'rxjs';
 
 import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';
 import { JobDialogComponent } from './job-dialog.component';

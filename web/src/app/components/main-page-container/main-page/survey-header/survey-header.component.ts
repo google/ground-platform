@@ -16,12 +16,11 @@
 
 import { Component, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
-
 import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-dialog.component';
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'ground-survey-header',

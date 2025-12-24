@@ -16,7 +16,6 @@
 
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-
 import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';
 
 import { TaskDetailsComponent } from './task-details.component';

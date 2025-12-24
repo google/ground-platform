@@ -19,10 +19,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { NEVER, of } from 'rxjs';
-
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { NEVER, of } from 'rxjs';
 
 import { SurveyHeaderComponent } from './survey-header.component';
 

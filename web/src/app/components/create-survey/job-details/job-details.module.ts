@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-
 import { JobDetailsComponent } from 'app/components/create-survey/job-details/job-details.component';
 
 @NgModule({

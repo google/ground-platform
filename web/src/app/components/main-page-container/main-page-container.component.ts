@@ -16,9 +16,8 @@
 
 import { Component, effect, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs/operators';
-
 import { SurveyService } from 'app/services/survey/survey.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'ground-main-page-container',

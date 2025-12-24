@@ -18,7 +18,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
-
 import { ErrorComponent } from 'app/components/error/error.component';
 import { HeaderModule } from 'app/components/shared/header/header.module';
 

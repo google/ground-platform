@@ -31,9 +31,6 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { By } from '@angular/platform-browser';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
-
 import {
   DialogData,
   DialogType,
@@ -52,6 +49,8 @@ import { Task, TaskType } from 'app/models/task/task.model';
 import { AuthService } from 'app/services/auth/auth.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
 
 import { SurveyListComponent } from './survey-list.component';
 

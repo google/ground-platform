@@ -28,9 +28,8 @@ import {
   MatDialogConfig,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { ColorEvent } from 'ngx-color';
-
 import { Job } from 'app/models/job.model';
+import { ColorEvent } from 'ngx-color';
 
 @Component({
   selector: 'ground-color-picker',

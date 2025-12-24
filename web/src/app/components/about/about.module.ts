@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-
 import { AboutComponent } from 'app/components/about/about.component';
 import { HeaderModule } from 'app/components/shared/header/header.module';
 

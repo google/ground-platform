@@ -24,10 +24,6 @@ import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterLink } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { List, Map } from 'immutable';
-import { BehaviorSubject, ReplaySubject, Subject, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-
 import { EditSurveyComponent } from 'app/components/edit-survey/edit-survey.component';
 import { Job } from 'app/models/job.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
@@ -37,6 +33,9 @@ import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.servi
 import { JobService } from 'app/services/job/job.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, ReplaySubject, Subject, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 import {

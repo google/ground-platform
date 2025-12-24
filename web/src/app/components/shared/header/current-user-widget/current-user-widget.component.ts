@@ -16,7 +16,6 @@
 
 import { Component, ElementRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-
 import { AccountPopupComponent } from 'app/components/shared/header/current-user-widget/account-popup/account-popup.component';
 import { AuthService } from 'app/services/auth/auth.service';
 

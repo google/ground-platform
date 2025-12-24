@@ -15,7 +15,6 @@
  */
 
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { NotificationService } from 'app/services/notification/notification.service';
 

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-
 import { ShareDialogComponent } from 'app/components/shared/share-dialog/share-dialog.component';
 
 @Component({

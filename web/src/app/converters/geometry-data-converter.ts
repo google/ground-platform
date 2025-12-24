@@ -15,14 +15,13 @@
  */
 
 import { GroundProtos } from '@ground/proto';
-import { List } from 'immutable';
-
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { Geometry } from 'app/models/geometry/geometry';
 import { LinearRing } from 'app/models/geometry/linear-ring';
 import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 import { Point } from 'app/models/geometry/point';
 import { Polygon } from 'app/models/geometry/polygon';
+import { List } from 'immutable';
 
 import Pb = GroundProtos.ground.v1beta1;
 

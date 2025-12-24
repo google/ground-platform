@@ -19,11 +19,6 @@ import '@angular/localize/init';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { GoogleAuthProvider } from 'firebase/auth';
-import firebase from 'firebase/compat/app';
-import { Observable, Subject, firstValueFrom, from } from 'rxjs';
-import { map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
-
 import { AclEntry } from 'app/models/acl-entry.model';
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
@@ -32,6 +27,10 @@ import { User } from 'app/models/user.model';
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { environment } from 'environments/environment';
+import { GoogleAuthProvider } from 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import { Observable, Subject, firstValueFrom, from } from 'rxjs';
+import { map, mergeWith, shareReplay, switchMap } from 'rxjs/operators';
 
 import { HttpClientService } from '../http-client/http-client.service';
 

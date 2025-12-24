@@ -21,7 +21,6 @@ import {
   MatButtonToggleGroup,
 } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
-
 import { EditJobComponent } from 'app/components/edit-survey/edit-job/edit-job.component';
 import { LoiEditorModule } from 'app/components/shared/loi-editor/loi-editor.module';
 import { TasksEditorModule } from 'app/components/shared/tasks-editor/tasks-editor.module';

@@ -20,9 +20,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { MatDialog } from '@angular/material/dialog';
-import { List, Map } from 'immutable';
-import { BehaviorSubject, of } from 'rxjs';
-
 import { LoiSelectionModule } from 'app/components/shared/loi-selection/loi-selection.module';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
@@ -31,6 +28,8 @@ import { AuthService } from 'app/services/auth/auth.service';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { SurveyLoiComponent } from './survey-loi.component';
 

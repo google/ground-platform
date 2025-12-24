@@ -20,7 +20,6 @@ import {
   MatDialogConfig,
   MatDialogRef,
 } from '@angular/material/dialog';
-
 import { AuthService } from 'app/services/auth/auth.service';
 
 @Component({

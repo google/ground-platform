@@ -17,8 +17,6 @@
 import { Timestamp } from '@angular/fire/firestore';
 import { registry } from '@ground/lib';
 import { GroundProtos } from '@ground/proto';
-import { List, Map } from 'immutable';
-
 import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import {
@@ -27,6 +25,7 @@ import {
 } from 'app/models/task/multiple-choice.model';
 import { Option } from 'app/models/task/option.model';
 import { Task, TaskType } from 'app/models/task/task.model';
+import { List, Map } from 'immutable';
 
 import { FirebaseDataConverter } from './firebase-data-converter';
 import { submissionDocToModel } from './submission-data-converter';

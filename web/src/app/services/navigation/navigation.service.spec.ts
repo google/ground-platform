@@ -16,9 +16,8 @@
 
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
-
 import { NavigationService } from 'app/services/navigation/navigation.service';
+import { of } from 'rxjs';
 
 import { DataStoreService } from '../data-store/data-store.service';
 

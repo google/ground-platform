@@ -15,12 +15,11 @@
  */
 
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import { List } from 'immutable';
-import { Subscription } from 'rxjs';
-
 import { TasksEditorComponent } from 'app/components/shared/tasks-editor/tasks-editor.component';
 import { Task } from 'app/models/task/task.model';
 import { TaskService } from 'app/services/task/task.service';
+import { List } from 'immutable';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'task-details',

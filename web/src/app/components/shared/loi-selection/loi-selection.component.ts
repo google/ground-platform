@@ -15,13 +15,12 @@
  */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { List } from 'immutable';
-
 import { DataCollectionStrategy, Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
 import { Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { getLoiIcon } from 'app/utils/utils';
+import { List } from 'immutable';
 
 @Component({
   selector: 'loi-selection',

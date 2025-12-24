@@ -24,7 +24,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-
 import { InlineEditorModule } from 'app/components/shared/inline-editor/inline-editor.module';
 
 import { EditStyleButtonModule } from './edit-style-button/edit-style-button.module';

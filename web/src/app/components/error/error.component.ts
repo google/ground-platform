@@ -16,7 +16,6 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
 import { DataStoreService } from 'app/services/data-store/data-store.service';
 
 enum ErrorType {

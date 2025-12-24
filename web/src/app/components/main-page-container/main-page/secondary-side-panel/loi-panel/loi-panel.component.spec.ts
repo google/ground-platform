@@ -19,9 +19,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { List, Map } from 'immutable';
-import { of } from 'rxjs';
-
 import { Geometry } from 'app/models/geometry/geometry';
 import { Job } from 'app/models/job.model';
 import { LocationOfInterest } from 'app/models/loi.model';
@@ -30,6 +27,8 @@ import { DataSharingType, Survey } from 'app/models/survey.model';
 import { LocationOfInterestService } from 'app/services/loi/loi.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
+import { List, Map } from 'immutable';
+import { of } from 'rxjs';
 
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
 

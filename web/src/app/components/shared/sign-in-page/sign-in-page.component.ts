@@ -15,12 +15,11 @@
  */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FirebaseUISignInFailure } from 'firebaseui-angular';
-import { Observable, Subscription, filter } from 'rxjs';
-
 import { AuthService } from 'app/services/auth/auth.service';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { environment } from 'environments/environment';
+import { FirebaseUISignInFailure } from 'firebaseui-angular';
+import { Observable, Subscription, filter } from 'rxjs';
 
 @Component({
   templateUrl: './sign-in-page.component.html',

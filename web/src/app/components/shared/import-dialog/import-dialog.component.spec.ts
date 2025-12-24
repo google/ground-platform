@@ -24,10 +24,9 @@ import {
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
-import { NEVER } from 'rxjs';
-
 import { ImportDialogComponent } from 'app/components/shared/import-dialog/import-dialog.component';
 import { DataImportService } from 'app/services/data-import/data-import.service';
+import { NEVER } from 'rxjs';
 
 describe('ImportDialogComponent', () => {
   let component: ImportDialogComponent;

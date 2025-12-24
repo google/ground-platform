@@ -15,9 +15,6 @@
  */
 
 import { Injectable } from '@angular/core';
-import { List, Map } from 'immutable';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-
 import { Job } from 'app/models/job.model';
 import { Role } from 'app/models/role.model';
 import {
@@ -28,6 +25,8 @@ import {
   SurveyState,
 } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 import { DataStoreService } from '../data-store/data-store.service';
 

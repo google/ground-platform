@@ -15,7 +15,6 @@
  */
 
 import { Component, input } from '@angular/core';
-
 import { Survey } from 'app/models/survey.model';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SideNavMode } from 'app/services/navigation/url-params';

@@ -23,10 +23,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatSelectModule } from '@angular/material/select';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 import { Map } from 'immutable';
 import { of } from 'rxjs';
-
-import { DraftSurveyService } from 'app/services/draft-survey/draft-survey.service';
 
 import { ShareDialogComponent } from './share-dialog.component';
 

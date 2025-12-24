@@ -31,9 +31,6 @@ import {
   NoopAnimationsModule,
 } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
-import { List, Map } from 'immutable';
-import { NEVER, of } from 'rxjs';
-
 import { JobListItemModule } from 'app/components/shared/job-list-item/job-list-item.module';
 import { AuditInfo } from 'app/models/audit-info.model';
 import { Coordinate } from 'app/models/geometry/coordinate';
@@ -57,6 +54,8 @@ import { NavigationService } from 'app/services/navigation/navigation.service';
 import { UrlParams } from 'app/services/navigation/url-params';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { SurveyService } from 'app/services/survey/survey.service';
+import { List, Map } from 'immutable';
+import { NEVER, of } from 'rxjs';
 
 import { SubmissionFormComponent } from './submission-form.component';
 

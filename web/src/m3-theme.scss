@@ -19,7 +19,7 @@
 // Proceed with caution if making changes to this file.
 
 @use 'sass:map';
-@use '@angular/material-experimental' as matx;
+
 
 // Note: Color palettes are generated from primary: #008A3A
 $_palettes: (
@@ -152,7 +152,7 @@ $_rest: (
 $_primary: map.merge(map.get($_palettes, primary), $_rest);
 $_tertiary: map.merge(map.get($_palettes, tertiary), $_rest);
 
-$light-theme: matx.define-theme((
+$light-theme: mat.define-theme((
   color: (
     theme-type: light,
     primary: $_primary,

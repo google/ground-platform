@@ -26,9 +26,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { List, Map } from 'immutable';
-import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
-
 import {
   CreateSurveyComponent,
   CreateSurveyPhase,
@@ -48,6 +45,8 @@ import { SURVEY_ID_NEW } from 'app/services/navigation/navigation.constants';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SurveyService } from 'app/services/survey/survey.service';
 import { TaskService } from 'app/services/task/task.service';
+import { List, Map } from 'immutable';
+import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { ActivatedRouteStub } from 'testing/activated-route-stub';
 
 describe('CreateSurveyComponent', () => {

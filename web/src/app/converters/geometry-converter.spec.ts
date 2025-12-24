@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { GeoPoint } from 'firebase/firestore';
-import { List } from 'immutable';
-
 import { Coordinate } from 'app/models/geometry/coordinate';
 import { GeometryType } from 'app/models/geometry/geometry';
 import { LinearRing } from 'app/models/geometry/linear-ring';
 import { MultiPolygon } from 'app/models/geometry/multi-polygon';
 import { Point } from 'app/models/geometry/point';
 import { Polygon } from 'app/models/geometry/polygon';
+import { GeoPoint } from 'firebase/firestore';
+import { List } from 'immutable';
 import { deepEqualityTester, formatImmutableCollection } from 'testing/helpers';
 
 import { GEOMETRY_TYPES, toGeometry } from './geometry-converter';
