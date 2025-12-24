@@ -30,6 +30,7 @@ import { SubmissionService } from 'app/services/submission/submission.service';
 import { List, Map } from 'immutable';
 import { of } from 'rxjs';
 
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { LocationOfInterestPanelComponent } from './loi-panel.component';
 
 describe('LocationOfInterestPanelComponent', () => {
@@ -93,7 +94,7 @@ describe('LocationOfInterestPanelComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [LocationOfInterestPanelComponent],
-      imports: [MatDialogModule, MatListModule, MatIconModule],
+      imports: [GroundIconModule, MatDialogModule, MatListModule, MatIconModule],
       providers: [
         { provide: LocationOfInterestService, useValue: loiServiceSpy },
         { provide: SubmissionService, useValue: submissionServiceSpy },

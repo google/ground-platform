@@ -28,6 +28,7 @@ import { Job } from 'app/models/job.model';
 import { Submission } from 'app/models/submission/submission.model';
 import { DataSharingType, Survey } from 'app/models/survey.model';
 import { Task } from 'app/models/task/task.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
 import { NavigationService } from 'app/services/navigation/navigation.service';
 import { SubmissionService } from 'app/services/submission/submission.service';
 import { List, Map } from 'immutable';
@@ -94,6 +95,7 @@ describe('SubmissionPanelComponent', () => {
         MatListModule,
         MatMenuModule,
         BrowserAnimationsModule,
+        GroundIconModule,
       ],
       providers: [
         { provide: NavigationService, useValue: navigationService },

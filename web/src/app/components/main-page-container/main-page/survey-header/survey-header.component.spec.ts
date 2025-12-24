@@ -25,13 +25,27 @@ import { NEVER, of } from 'rxjs';
 
 import { SurveyHeaderComponent } from './survey-header.component';
 
+import { Map } from 'immutable';
+import { DataSharingType, Survey } from 'app/models/survey.model';
+import { GroundIconModule } from 'app/modules/ground-icon.module';
+
 describe('SurveyHeaderComponent', () => {
   let component: SurveyHeaderComponent;
   let fixture: ComponentFixture<SurveyHeaderComponent>;
 
+  const mockSurvey = new Survey(
+    'survey1',
+    'Survey Title',
+    'Description',
+    Map(),
+    Map(),
+    'owner1',
+    { type: DataSharingType.PRIVATE }
+  );
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MatIconModule, MatDialogModule],
+      imports: [MatIconModule, MatDialogModule, GroundIconModule],
       declarations: [SurveyHeaderComponent],
       providers: [
         {
@@ -44,6 +58,7 @@ describe('SurveyHeaderComponent', () => {
             getActiveSurvey$: () => NEVER,
             getCurrentSurvey: () => {},
             canManageSurvey: () => {},
+            updateTitle: () => Promise.resolve(),
           },
         },
         {
@@ -61,6 +76,7 @@ describe('SurveyHeaderComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SurveyHeaderComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('activeSurvey', mockSurvey);
     fixture.detectChanges();
   });
 
